@@ -46,6 +46,8 @@ def vesselSegmentation(data, segmentation, threshold=1185, dataFiltering=False, 
 if __name__ == "__main__":
     logger = logging.getLogger()
     logger.setLevel(logging.WARNING)
+# při vývoji si necháme vypisovat všechny hlášky
+    logger.setLevel(logging.DEBUG)
 
     ch = logging.StreamHandler()
 #   output configureation
@@ -71,16 +73,22 @@ if __name__ == "__main__":
 
     if args.debug:
         logger.setLevel(logging.DEBUG)
-    logger.debug('input params')
-    print args
 
 
     #pdb.set_trace();
     #mat = scipy.io.loadmat(args.filename)
-    mat = scipy.io.loadmat(args.filename, variable_names=['threshold'])
+#   load all 
+    mat = scipy.io.loadmat(args.filename)
+    logger.debug( mat.keys())
 
-    print mat['threshold'][0][0]
+    # load specific variable
+    matthreshold = scipy.io.loadmat(args.filename, variable_names=['threshold'])
+
+    logger.debug(matthreshold['threshold'][0][0])
 
 
     # zastavení chodu programu pro potřeby debugu
     pdb.set_trace();
+
+    vesselSegmentation(mat['data'],mat['segmentation'], mat['threshold'] )
+
