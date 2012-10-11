@@ -21,6 +21,26 @@ defaultdatatraindir = 'medical/data_orig/jatra-kma/jatra_5mm'
 defaultdatatraindir = 'medical/data_orig/51314913'
 
 
+def vesselSegmentation(data, segmentation, threshold=1185, dataFiltering=False, nObj=1):
+    """ Volumetric vessel segmentation from liver.
+    data: CT (or MRI) 3D data
+    segmentation: labeled image with same size as data where label: 
+    1 mean liver pixels,
+    -1 interesting tissuse (bones)
+    0 othrewise
+    """
+#   Funkce pracuje z počátku na principu jednoduchého prahování. Nalezne se 
+#   největší souvislý objekt nad stanoveným prahem, Průběžně bude segmentace 
+#   zpřesňována. Bude nutné hledat cévy, které se spojují mimo játra, ale 
+#   ignorovat žebra. 
+#   Proměnné threshold, dataFiltering a nObj se postupně pokusíme eliminovat a 
+#   navrhnout je automaticky. 
+#   threshold: ručně určený práh
+#   dataFiltering: označuje, jestli budou data filtrována uvnitř funkce, nebo 
+#   již vstupují filtovaná. False znamená, že vstupují filtrovaná.
+#   nObj: označuje kolik největších objektů budeme hledat
+    return segmentation
+
 
 # TODO vyrobit nevim co
 if __name__ == "__main__":
