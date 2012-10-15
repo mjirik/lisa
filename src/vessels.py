@@ -1,6 +1,7 @@
-#! /usr/bin/python
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import unittest
 import sys
 sys.path.append("./src/")
 import pdb
@@ -11,14 +12,10 @@ import scipy.io
 import logging
 logger = logging.getLogger(__name__)
 
-#import unittest
 
 import argparse
+import numpy as np
 
-# coputer dependent constant
-defaultdatabasedir = '/home/mjirik/data/'
-defaultdatatraindir = 'medical/data_orig/jatra-kma/jatra_5mm'
-defaultdatatraindir = 'medical/data_orig/51314913'
 
 
 def vesselSegmentation(data, segmentation, threshold=1185, dataFiltering=False, nObj=1):
@@ -39,10 +36,39 @@ def vesselSegmentation(data, segmentation, threshold=1185, dataFiltering=False, 
 #   dataFiltering: označuje, jestli budou data filtrována uvnitř funkce, nebo 
 #   již vstupují filtovaná. False znamená, že vstupují filtrovaná.
 #   nObj: označuje kolik největších objektů budeme hledat
+    if data.shape != segmentation.shape:
+        raise Exception('Input size error','Shape if input data and segmentation must be same')
+
     return segmentation
 
+# --------------------------tests-----------------------------
+class Tests(unittest.TestCase):
+    def test_t(self):
+        pass
+    def setUp(self):
+        """ Nastavení společných proměnných pro testy  """
+        datashape = [220,115,30]
+        self.datashape = datashape
+        self.rnddata = np.random.rand(datashape[0], datashape[1], datashape[2])
+        self.segmcube = np.zeros(datashape)
+        self.segmcube[130:190, 40:90,5:15] = 1
 
-# TODO vyrobit nevim co
+    def test_same_size_input_and_output(self):
+        """Funkce testuje stejnost vstupních a výstupních dat"""
+        outputdata = vesselSegmentation(self.rnddata,self.segmcube)
+        self.assertEqual(outputdata.shape, self.rnddata.shape)
+
+
+#
+#    def test_different_data_and_segmentation_size(self):
+#        """ Funkce ověřuje vyhození výjimky při různém velikosti vstpních
+#        dat a segmentace """
+#        pdb.set_trace();
+#        self.assertRaises(Exception, vesselSegmentation, (self.rnddata, self.segmcube[2:,:,:]) )
+#
+        
+        
+# --------------------------main------------------------------
 if __name__ == "__main__":
     logger = logging.getLogger()
     logger.setLevel(logging.WARNING)
@@ -64,9 +90,12 @@ if __name__ == "__main__":
     # input parser
     parser = argparse.ArgumentParser(description='Segment vessels from liver')
     parser.add_argument('filename', type=str,
-            help='Base dir with data')
-    parser.add_argument('-d', '--debug', action='store_true')
-    parser.add_argument('--outputfile', type=str,
+            help='*.mat file with variables "data", "segmentation" and "threshod"')
+    parser.add_argument('-d', '--debug', action='store_true',
+            help='run in debug mode')
+    parser.add_argument('-t', '--tests', action='store_true', 
+            help='run unittest')
+    parser.add_argument('-o', '--outputfile', type=str,
         default='output.mat',help='output file name')
     args = parser.parse_args()
 
@@ -74,9 +103,12 @@ if __name__ == "__main__":
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
+    if args.tests:
+        # hack for use argparse and unittest in one module
+        sys.argv[1:]=[]
+        unittest.main()
 
-    #pdb.set_trace();
-    #mat = scipy.io.loadmat(args.filename)
+
 #   load all 
     mat = scipy.io.loadmat(args.filename)
     logger.debug( mat.keys())
