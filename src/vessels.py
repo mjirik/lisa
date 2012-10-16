@@ -119,8 +119,11 @@ if __name__ == "__main__":
     logger.debug(matthreshold['threshold'][0][0])
 
 
-    # zastavení chodu programu pro potřeby debugu
+    # zastavení chodu programu pro potřeby debugu, 
+    # ovládá se klávesou's','c',... 
+    # zakomentovat
     pdb.set_trace();
 
-    vesselSegmentation(mat['data'],mat['segmentation'], mat['threshold'] )
+    output = vesselSegmentation(mat['data'],mat['segmentation'], mat['threshold'] )
+    scipy.io.savemat(args.outputfile,{'vesselSegm':output})
 
