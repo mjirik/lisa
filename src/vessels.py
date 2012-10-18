@@ -1,4 +1,4 @@
-#!/usr/bin/python
+﻿#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 import unittest
@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 import argparse
 import numpy as np
 
+#Ahooooooj
 
 
 def vesselSegmentation(data, segmentation, threshold=1185, dataFiltering=False, nObj=1, voxelsizemm=[[1],[1],[1]]):
