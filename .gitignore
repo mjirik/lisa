@@ -25,3 +25,12 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+src/test-pavel.py
+src/.spyderproject
+src/m3DSeedEditor.fig
+src/m3DSeedEditor.m
+src/markSeeds.m
+.spyderworkspace
+src/README.md
+src/step.mat
+src/test-pavel.py
