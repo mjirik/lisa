@@ -12,12 +12,8 @@ import scipy.io
 import logging
 logger = logging.getLogger(__name__)
 
-
 import argparse
 import numpy as np
-
-#Ahooooooj
-
 
 def vesselSegmentation(data, segmentation, threshold=1185, dataFiltering=False, nObj=1, voxelsizemm=[[1],[1],[1]]):
     """ Volumetric vessel segmentation from liver.
@@ -25,7 +21,7 @@ def vesselSegmentation(data, segmentation, threshold=1185, dataFiltering=False, 
     segmentation: labeled image with same size as data where label: 
     1 mean liver pixels,
     -1 interesting tissuse (bones)
-    0 othrewise
+    0 otherwise
     """
 #   Funkce pracuje z počátku na principu jednoduchého prahování. Nalezne se 
 #   největší souvislý objekt nad stanoveným prahem, Průběžně bude segmentace 
@@ -77,7 +73,7 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
 
     ch = logging.StreamHandler()
-#   output configureation
+#   output configuration
     #logging.basicConfig(format='%(asctime)s %(message)s')
     logging.basicConfig(format='%(message)s')
 
@@ -86,7 +82,6 @@ if __name__ == "__main__":
     ch.setFormatter(formatter)
 
     logger.addHandler(ch)
-
 
     # input parser
     parser = argparse.ArgumentParser(description='Segment vessels from liver')
@@ -100,25 +95,22 @@ if __name__ == "__main__":
         default='output.mat',help='output file name')
     args = parser.parse_args()
 
-
-    if args.debug:
-        logger.setLevel(logging.DEBUG)
+    #if args.debug:
+        #logger.setLevel(logging.DEBUG)
 
     if args.tests:
         # hack for use argparse and unittest in one module
         sys.argv[1:]=[]
         unittest.main()
 
-
-#   load all 
+    #load all 
     mat = scipy.io.loadmat(args.filename)
     logger.debug( mat.keys())
-
+	
     # load specific variable
     matthreshold = scipy.io.loadmat(args.filename, variable_names=['threshold'])
 
     logger.debug(matthreshold['threshold'][0][0])
-
 
     # zastavení chodu programu pro potřeby debugu, 
     # ovládá se klávesou's','c',... 
@@ -126,8 +118,6 @@ if __name__ == "__main__":
     pdb.set_trace();
 
     # zde by byl prostor pro ruční (interaktivní) zvolení prahu z klávesnice 
-    #tě ebo jinak
-
     output = vesselSegmentation(mat['data'],mat['segmentation'], mat['threshold'], mat['voxelsizemm'] )
     scipy.io.savemat(args.outputfile,{'vesselSegm':output})
 
