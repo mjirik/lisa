@@ -9,13 +9,4 @@ Instalace Windows
 
 http://www.lfd.uci.edu/~gohlke/pythonlibs/
 
-0*) Python
-1*) Numpy (musi byt nainstalovan drive nez Scipy)
-2*) Scipy (musi byt nainstalovan po Numpy)
 
-*) Poznamky:
-	Je potreba pozorne volit 64/32 bit knihovny a nezamenovat je. Python, i knihovny museji byt jen 64 bit nebo jen 32 bit. Doporucujeme uzivat Numpy MKL. Jsou to vypocetni optimalizace, ktere pozdeji pozadujici navazujici baliky.
-
-Errory:
-	1) V pripade zavaznejsich problemu (tzn. nefunkcnost) 	vymazat dane verze Pythonu, Numpy a Scipy a preinstalovat 	je.
-	2) Resit na strankach vyrobce softwaru.
