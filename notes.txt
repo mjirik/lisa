@@ -1,0 +1,12 @@
+Instalace Ubuntu 12.04
+======================
+
+sudo apt-get install python-numpy python-scipy python-matplotlib
+
+
+Instalace Windows
+=================
+
+http://www.lfd.uci.edu/~gohlke/pythonlibs/
+
+
