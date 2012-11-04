@@ -1,9 +1,15 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+"""
+run with this command line parameter inside "":
+"-f ..\src\step.mat"
+"""
+
 import unittest
 import sys
-sys.path.append("./src/")
+sys.path.append("../src/")
+sys.path.append("../extern/")
 import pdb
 #  pdb.set_trace();
 
@@ -19,12 +25,8 @@ import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib.widgets import Slider, Button, RadioButtons
 
-
-#Ahooooooj
-
-
 class py3DSeedEditor:
-    """ Viewer and seed editor for 2D and 3D data. 
+    """ Viewer and seed editor for 2D and 3D data.
 
     py3DSeedEditor(img, ...)
 
@@ -57,7 +59,7 @@ class py3DSeedEditor:
         self.img = img
         self.actual_slice = initslice
         self.colorbar = colorbar
-        self.cmap = cmap 
+        self.cmap = cmap
         self.seeds = np.zeros(self.imgshape, np.int8)
         self.imgmax = np.max(img)
         self.imgmin = np.min(img)
@@ -78,9 +80,9 @@ class py3DSeedEditor:
 
         axcolor = 'lightgoldenrodyellow'
         ax_actual_slice = self.fig.add_axes([0.2, 0.2, 0.5, 0.03], axisbg=axcolor)
-        self.actual_slice_slider = Slider(ax_actual_slice, 'Slice', 0, 
+        self.actual_slice_slider = Slider(ax_actual_slice, 'Slice', 0,
                 self.imgshape[2], valinit=initslice)
-        
+
         # conenction to wheel events
         self.fig.canvas.mpl_connect('scroll_event', self.on_scroll)
         self.actual_slice_slider.on_changed(self.sliceslider_update)
@@ -204,7 +206,7 @@ class py3DSeedEditor:
 
 #self.rect.figure.canvas.draw()
 
-    #return data 
+    #return data
 
 # --------------------------tests-----------------------------
 class Tests(unittest.TestCase):
@@ -247,8 +249,8 @@ class Tests(unittest.TestCase):
 #        pdb.set_trace();
 #        self.assertRaises(Exception, vesselSegmentation, (self.rnddata, self.segmcube[2:,:,:]) )
 #
-        
-        
+
+
 # --------------------------main------------------------------
 if __name__ == "__main__":
     logger = logging.getLogger()
@@ -270,13 +272,13 @@ if __name__ == "__main__":
 
     # input parser
     parser = argparse.ArgumentParser(description='Segment vessels from liver')
-    parser.add_argument('-f','--filename',  
+    parser.add_argument('-f','--filename',
             #default = '../jatra/main/step.mat',
             default = 'lena',
             help='*.mat file with variables "data", "segmentation" and "threshod"')
     parser.add_argument('-d', '--debug', action='store_true',
             help='run in debug mode')
-    parser.add_argument('-t', '--tests', action='store_true', 
+    parser.add_argument('-t', '--tests', action='store_true',
             help='run unittest')
     parser.add_argument('-o', '--outputfile', type=str,
         default='output.mat',help='output file name')
@@ -295,7 +297,7 @@ if __name__ == "__main__":
         from scipy import misc
         data = misc.lena()
     else:
-    #   load all 
+    #   load all
         mat = scipy.io.loadmat(args.filename)
         logger.debug( mat.keys())
 
@@ -306,12 +308,12 @@ if __name__ == "__main__":
         #logger.debug(matthreshold['threshold'][0][0])
 
 
-        # zastavení chodu programu pro potřeby debugu, 
-        # ovládá se klávesou's','c',... 
+        # zastavení chodu programu pro potřeby debugu,
+        # ovládá se klávesou's','c',...
         # zakomentovat
         #pdb.set_trace();
 
-        # zde by byl prostor pro ruční (interaktivní) zvolení prahu z klávesnice 
+        # zde by byl prostor pro ruční (interaktivní) zvolení prahu z klávesnice
         #tě ebo jinak
 
     pyed = py3DSeedEditor(data)

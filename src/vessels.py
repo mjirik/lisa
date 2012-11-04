@@ -3,7 +3,8 @@
 
 import unittest
 import sys
-sys.path.append("./src/")
+sys.path.append("../src/")
+sys.path.append("../extern/")
 import pdb
 #  pdb.set_trace();
 
@@ -16,25 +17,27 @@ logger = logging.getLogger(__name__)
 import argparse
 import numpy as np
 
-#Ahooooooj
-
-
+"""
+================================================================================
+vessel segmentation
+================================================================================
+"""
 def vesselSegmentation(data, segmentation, threshold=1185, dataFiltering=False, nObj=1, voxelsizemm=[[1],[1],[1]]):
     """ Volumetric vessel segmentation from liver.
     data: CT (or MRI) 3D data
-    segmentation: labeled image with same size as data where label: 
+    segmentation: labeled image with same size as data where label:
     1 mean liver pixels,
     -1 interesting tissuse (bones)
     0 othrewise
     """
-#   Funkce pracuje z počátku na principu jednoduchého prahování. Nalezne se 
-#   největší souvislý objekt nad stanoveným prahem, Průběžně bude segmentace 
-#   zpřesňována. Bude nutné hledat cévy, které se spojují mimo játra, ale 
-#   ignorovat žebra. 
-#   Proměnné threshold, dataFiltering a nObj se postupně pokusíme eliminovat a 
-#   navrhnout je automaticky. 
+#   Funkce pracuje z počátku na principu jednoduchého prahování. Nalezne se
+#   největší souvislý objekt nad stanoveným prahem, Průběžně bude segmentace
+#   zpřesňována. Bude nutné hledat cévy, které se spojují mimo játra, ale
+#   ignorovat žebra.
+#   Proměnné threshold, dataFiltering a nObj se postupně pokusíme eliminovat a
+#   navrhnout je automaticky.
 #   threshold: ručně určený práh
-#   dataFiltering: označuje, jestli budou data filtrována uvnitř funkce, nebo 
+#   dataFiltering: označuje, jestli budou data filtrována uvnitř funkce, nebo
 #   již vstupují filtovaná. False znamená, že vstupují filtrovaná.
 #   nObj: označuje kolik největších objektů budeme hledat
     if data.shape != segmentation.shape:
@@ -42,7 +45,11 @@ def vesselSegmentation(data, segmentation, threshold=1185, dataFiltering=False, 
 
     return segmentation
 
-# --------------------------tests-----------------------------
+"""
+================================================================================
+tests
+================================================================================
+"""
 class Tests(unittest.TestCase):
     def test_t(self):
         pass
@@ -67,9 +74,12 @@ class Tests(unittest.TestCase):
 #        pdb.set_trace();
 #        self.assertRaises(Exception, vesselSegmentation, (self.rnddata, self.segmcube[2:,:,:]) )
 #
-        
-        
-# --------------------------main------------------------------
+
+"""
+================================================================================
+main
+================================================================================
+"""
 if __name__ == "__main__":
     logger = logging.getLogger()
     logger.setLevel(logging.WARNING)
@@ -94,7 +104,7 @@ if __name__ == "__main__":
             help='*.mat file with variables "data", "segmentation" and "threshod"')
     parser.add_argument('-d', '--debug', action='store_true',
             help='run in debug mode')
-    parser.add_argument('-t', '--tests', action='store_true', 
+    parser.add_argument('-t', '--tests', action='store_true',
             help='run unittest')
     parser.add_argument('-o', '--outputfile', type=str,
         default='output.mat',help='output file name')
@@ -110,7 +120,7 @@ if __name__ == "__main__":
         unittest.main()
 
 
-#   load all 
+#   load all
     mat = scipy.io.loadmat(args.filename)
     logger.debug( mat.keys())
 
@@ -120,12 +130,12 @@ if __name__ == "__main__":
     logger.debug(matthreshold['threshold'][0][0])
 
 
-    # zastavení chodu programu pro potřeby debugu, 
-    # ovládá se klávesou's','c',... 
+    # zastavení chodu programu pro potřeby debugu,
+    # ovládá se klávesou's','c',...
     # zakomentovat
     pdb.set_trace();
 
-    # zde by byl prostor pro ruční (interaktivní) zvolení prahu z klávesnice 
+    # zde by byl prostor pro ruční (interaktivní) zvolení prahu z klávesnice
     #tě ebo jinak
 
     output = vesselSegmentation(mat['data'],mat['segmentation'], mat['threshold'], mat['voxelsizemm'] )

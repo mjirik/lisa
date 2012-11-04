@@ -5,6 +5,9 @@ Created on Mon Oct 22 19:09:40 2012
 @author: Pavel Volkovinsky
 """
 
+sys.path.append("../src/")
+sys.path.append("../extern/")
+
 #=========
 # 1
 #=========
@@ -12,11 +15,11 @@ Created on Mon Oct 22 19:09:40 2012
 """
 """
 
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as matpyplot
 import numpy as np
 from matplotlib.widgets import Slider, Button, RadioButtons
 
-fig = plt.figure()
+fig = matpyplot.figure()
 ax = fig.add_subplot(111)
 fig.subplots_adjust(left=0.25, bottom=0.25)
 min0 = 0
@@ -39,7 +42,7 @@ def update(val):
 smin.on_changed(update)
 smax.on_changed(update)
 
-plt.show()
+matpyplot.show()
 
 """
 """
@@ -92,5 +95,4 @@ def colorfunc(label):
 radio.on_clicked(colorfunc)
 
 show()
-
 """
