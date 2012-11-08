@@ -31,3 +31,5 @@ src/markSeeds.m
 src/README.md
 src/step.mat
 extern/output.mat
+src/morpho.png
+src/lena.png

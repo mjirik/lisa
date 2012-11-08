@@ -5,15 +5,36 @@ Created on Mon Oct 22 19:09:40 2012
 @author: Pavel Volkovinsky
 """
 
+import sys
 sys.path.append("../src/")
 sys.path.append("../extern/")
+
+#=========
+# 0
+#=========
+
+"""
+"""
 
 #=========
 # 1
 #=========
 
-"""
-"""
+import pylab as pylab
+
+# Vyzve uzivatele k zadani jmena souboru.
+info = raw_input("Give me an order: ")
+if(info == 'x'):
+    fileName = 'morpho.png'
+else:
+    fileName = info
+
+imgA = pylab.imread(fileName)
+#generates a RGB image, so do
+#pylab.imshow(imgA)
+imgB = pylab.mean(imgA, 2) # to get a 2-D array
+#pylab.imshow(imgB)
+pylab.gray()
 
 import matplotlib.pyplot as matpyplot
 import numpy as np
@@ -23,20 +44,21 @@ fig = matpyplot.figure()
 ax = fig.add_subplot(111)
 fig.subplots_adjust(left=0.25, bottom=0.25)
 min0 = 0
-max0 = 25000
+max0 = 20000
 
-im = max0 * np.random.random((10,10))
-im1 = ax.imshow(im)
+#im = max0 * np.random.random((10,10))
+im1 = ax.imshow(imgB) # tady byl 'im' (o radek vyse)
 fig.colorbar(im1)
 
 axcolor = 'lightgoldenrodyellow'
-axmin = fig.add_axes([0.25, 0.1, 0.65, 0.03], axisbg=axcolor)
-axmax  = fig.add_axes([0.25, 0.15, 0.65, 0.03], axisbg=axcolor)
+axmin = fig.add_axes([0.15, 0.1, 0.65, 0.03], axisbg=axcolor)
+axmax  = fig.add_axes([0.15, 0.15, 0.65, 0.03], axisbg=axcolor)
 
-smin = Slider(axmin, 'Min', 0, 30000, valinit=min0)
-smax = Slider(axmax, 'Max', 0, 30000, valinit=max0)
+smin = Slider(axmin, 'Min', 0, 20000, valinit=min0)
+smax = Slider(axmax, 'Max', 0, 20000, valinit=max0)
 
 def update(val):
+    pass
     im1.set_clim([smin.val,smax.val])
     fig.canvas.draw()
 smin.on_changed(update)
@@ -95,4 +117,5 @@ def colorfunc(label):
 radio.on_clicked(colorfunc)
 
 show()
+
 """
