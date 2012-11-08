@@ -1,0 +1,3 @@
+[submodule "extern/pycat"]
+	path = extern/pycat
+	url = git@github.com:mjirik/pycat.git
