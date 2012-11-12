@@ -118,10 +118,9 @@ if __name__ == "__main__":
         sys.argv[1:]=[]
         unittest.main()
 
-
 #   load all
     mat = scipy.io.loadmat(args.filename)
-    logger.debug( mat.keys())
+    logger.debug(mat.keys())
 
     # load specific variable
     matthreshold = scipy.io.loadmat(args.filename, variable_names=['threshold'])
