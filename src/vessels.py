@@ -97,7 +97,6 @@ if __name__ == "__main__":
 
     logger.addHandler(ch)
 
-
     # input parser
     parser = argparse.ArgumentParser(description='Segment vessels from liver')
     parser.add_argument('filename', type=str,
