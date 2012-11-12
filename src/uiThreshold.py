@@ -70,7 +70,7 @@ main
 ================================================================================
 """
 
-def mainGauss():
+def mainGauss(imgLoaded):
 
     from scipy import ndimage
     import numpy as np
@@ -116,7 +116,7 @@ def mainGauss():
     matpyplot.subplots_adjust(wspace=0.02, hspace=0.3, top=1, bottom=0.1, left=0, right=1)
     matpyplot.show()
 
-def mainHist():
+def mainHist(imgLoaded):
 
     from scipy import ndimage
     import numpy as np
@@ -157,7 +157,75 @@ def mainHist():
     matpyplot.subplots_adjust(wspace=0.02, hspace=0.3, top=1, bottom=0.1, left=0, right=1)
     matpyplot.show()
 
-def mainHistPlus():
+def mainHistPlusModif(imgInput):
+
+    img = imgInput
+    """
+    img = pylab.mean(img, 2) # to get a 2-D array
+    #pylab.imshow(img)
+    pylab.gray()
+    """
+
+    from scipy import ndimage
+    import numpy as np
+
+    hist, bin_edges = np.histogram(img, bins=60)
+    bin_centers = 0.5*(bin_edges[:-1] + bin_edges[1:])
+
+    print 'Image dtype: %s' % (img.dtype)
+    print 'Image size: %6d' % (img.size)
+    print 'Image shape: %3dx%3d' % (img.shape[0], img.shape[1])
+    print 'Max value %1.2f at pixel %6d' % (img.max(), img.argmax())
+    print 'Min value %1.2f at pixel %6d' % (img.min(), img.argmin())
+    print 'Variance: %1.5f' % (img.var())
+    print 'Standard deviation: %1.5f' % (img.std())
+
+    binary_img = img > 0.5
+
+    # Remove small white regions
+    open_img = ndimage.binary_opening(binary_img)
+    # Remove small black hole
+    close_img = ndimage.binary_closing(open_img)
+
+    matpyplot.figure(figsize=(12, 9))
+    l = img.size
+    mask = (img > img.mean()).astype(np.float)
+    mask += 0.1 * img
+
+    matpyplot.subplot(231)
+    matpyplot.imshow(img)
+    matpyplot.axis('off')
+
+    matpyplot.subplot(232)
+    matpyplot.plot(bin_centers, hist, lw = 2)
+    matpyplot.axvline(img.std(), color='r', ls = '--', lw = 2)
+    matpyplot.text(0.57, 0.8, 'histogram', fontsize = 20,
+        transform = matpyplot.gca().transAxes)
+    matpyplot.yticks([])
+
+    matpyplot.subplot(233)
+    matpyplot.imshow(binary_img[:l, :l], cmap = matpyplot.cm.gray)
+    matpyplot.axis('off')
+
+    matpyplot.subplot(234)
+    matpyplot.imshow(open_img[:l, :l], cmap = matpyplot.cm.gray)
+    matpyplot.axis('off')
+
+    matpyplot.subplot(235)
+    matpyplot.imshow(close_img[:l, :l], cmap = matpyplot.cm.gray)
+    matpyplot.axis('off')
+
+    matpyplot.subplot(236)
+    matpyplot.imshow(mask[:l, :l], cmap = matpyplot.cm.gray)
+    matpyplot.contour(close_img[:l, :l], [0.5], linewidths = 2, colors = 'r')
+    matpyplot.axis('off')
+
+    matpyplot.subplots_adjust(wspace = 0.02, hspace = 0.3, top = 0.9,
+        bottom = 0.1, left = 0, right = 0.975)
+
+    matpyplot.show()
+
+def mainHistPlus(imgLoaded):
 
     from scipy import ndimage
     import numpy as np
@@ -231,16 +299,8 @@ def mainHistPlus():
 
     matpyplot.show()
 
-def main():
+def main(imgLoaded):
 
-    # Vyzve uzivatele k zadani jmena souboru.
-    info = raw_input("Give me a filename: ")
-    if(info == '='):
-        fileName = 'morpho.png'
-    else:
-        fileName = info
-
-    imgLoaded = matplotlib.image.imread(fileName)
     print 'Image dtype: %s' % (imgLoaded.dtype)
     print 'Image size: %6d' % (imgLoaded.size)
     print 'Image shape: %3dx%3d' % (imgLoaded.shape[0], imgLoaded.shape[1])
@@ -314,17 +374,31 @@ def setupInput():
         unittest.main()
 
 if __name__ == '__main__':
+
     #setupInput()
     number = raw_input("1: uiThreshold\n2: histogram based\n3: "
-        +"histogram (plus) based\n4: Gaussian mixture")
+        +"histogram (plus) based\n4: Gaussian mixture\n5: "
+        +"histogram (plus modif) based")
+
+    # Vyzve uzivatele k zadani jmena souboru.
+    info = raw_input("Give me a filename: ")
+    if(info == '='):
+        fileName = 'morpho.png'
+    else:
+        fileName = info
+
+    imgLoaded = matplotlib.image.imread(fileName)
+
     if(number == '1'):
-        main()
+        main(imgLoaded)
     elif(number == '2'):
-        mainHist()
+        mainHist(imgLoaded)
     elif(number == '3'):
-        mainHistPlus()
+        mainHistPlus(imgLoaded)
     elif(number == '4'):
-        mainGauss()
+        mainGauss(imgLoaded)
+    elif(number == '5'):
+        mainHistPlusModif(imgLoaded)
 
     #raise Exception('Input size error','Shape if inumput data and segmentation must be same')
 
