@@ -35,8 +35,10 @@ def dcm_read_from_dir(dirpath=None, initialdir = os.path.expanduser("~")):
     
     dcmdir = getdicomdir(dirpath)
     counts, bins = dcmdirstats(dcmdir)
-    logger.debug(counts)
-    logger.debug(bins)
+    print counts
+    print bins
+    #logger.info(counts)
+    #logger.info(bins)
 
     snstring = raw_input ('Select Serie: ')
     sn = int(snstring)
@@ -46,7 +48,8 @@ def dcm_read_from_dir(dirpath=None, initialdir = os.path.expanduser("~")):
 # dcmdir has just filenamse (no full path), 
     dcmlist = dcmsortedlist(dirpath, dcmdir = dcmdir, SeriesNumber = sn)
 
-    dcmlist_to_3D_data(dcmlist)
+    data3d = dcmlist_to_3D_data(dcmlist)
+    return data3d
     
 
 def dcmlist_to_3D_data(dcmlist):
@@ -378,14 +381,16 @@ def sort_dcmdir(dcmdir, SeriesNumber = None):
 if __name__ == "__main__":
 
     #logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.WARNING)
     ch = logging.StreamHandler()
     logger.addHandler(ch)
 
-    logger.debug('input params')
+    #logger.debug('input params')
 
-    dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
-    dcm_read_from_dir()
+    #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
+    data3d = dcm_read_from_dir()
+
+    print ("Data size: " + str(data3d.nbytes) + ', shape: ' + str(data3d.shape) )
    # for arg in sys.argv:
    #     logger.debug(''+arg)
 
