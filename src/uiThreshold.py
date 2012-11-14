@@ -13,25 +13,25 @@ Licence:     <your licence>
 """
 #VERSION = "0.0.2"
 
-try:
+#try:
     #import unittest
-    import sys
-    import argparse
-    sys.path.append("../src/")
-    sys.path.append("../extern/")
+import sys
+#import argparse
+sys.path.append("../src/")
+sys.path.append("../extern/")
 
-    import logging
-    logger = logging.getLogger(__name__)
+import logging
+logger = logging.getLogger(__name__)
 
-    import pylab as pylab
-    import matplotlib.pyplot as matpyplot
-    import numpy as nump
-    import matplotlib
-    from matplotlib.widgets import Slider, Button, RadioButtons
+#import pylab as pylab
+import matplotlib.pyplot as matpyplot
+#import numpy as nump
+import matplotlib
+from matplotlib.widgets import Slider#, Button, RadioButtons
 
-except ImportError, err:
-    print "Critical error! Couldn't load module! %s" % (err)
-    sys.exit(2)
+#except ImportError, err:
+#    print "Critical error! Couldn't load module! %s" % (err)
+#    sys.exit(2)
 
 """
 ================================================================================
@@ -45,15 +45,15 @@ class uiThreshold:
 
         self.imgUsed = imgUsed
         self.imgChanged = self.imgUsed
-
-        print 'Image dtype: %s' % (imgUsed.dtype)
-        print 'Image size: %6d' % (imgUsed.size)
-        print 'Image shape: %3dx%3d' % (imgUsed.shape[0], imgUsed.shape[1])
-        print 'Max value %1.2f at pixel %6d' % (imgUsed.max(), imgUsed.argmax())
-        print 'Min value %1.2f at pixel %6d' % (imgUsed.min(), imgUsed.argmin())
-        print 'Variance: %1.5f' % (imgUsed.var())
-        print 'Standard deviation: %1.5f' % (imgUsed.std())
-
+        """
+        print('Image dtype: %s') % (imgUsed.dtype)
+        print('Image size: %6d') % (imgUsed.size)
+        print('Image shape: %3dx%3d') % (imgUsed.shape[0], imgUsed.shape[1])
+        print('Max value %1.2f at pixel %6d') % (imgUsed.max(), imgUsed.argmax())
+        print('Min value %1.2f at pixel %6d') % (imgUsed.min(), imgUsed.argmin())
+        print('Variance: %1.5f') % (imgUsed.var())
+        print('Standard deviation: %1.5f') % (imgUsed.std())
+        """
         # Ziskani okna (figure)
         self.fig = matpyplot.figure()
         # Pridani subplotu do okna (do figure)
@@ -112,8 +112,21 @@ main
 if __name__ == '__main__':
 
     # Vyzve uzivatele k zadani jmena souboru.
-    fileName = raw_input("Give me a filename: ")
+    """
+    py v<3.x:
+        fileName = raw_input('Give me a filename: ')
+    py v>3.x:
+        fileName = input('Give me a filename: ')
+    """
+    fileName = input('Give me a filename: ')
     # Precteni souboru (obrazku)
     imgLoaded = matplotlib.image.imread(fileName)
     # Vytvoreni uiThreshold
     ui = uiThreshold(imgLoaded)
+
+
+
+
+
+
+

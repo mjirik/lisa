@@ -33,3 +33,7 @@ src/step.mat
 extern/output.mat
 src/morpho.png
 src/lena.png
+src/IM-0001-0019.dcm
+src/IM-0001-0200.dcm
+src/IM-0001-0220.dcm
+src/IM-0001-0240.dcm
