@@ -1,4 +1,4 @@
-#! /usr/bin/ipython
+#! /usr/bin/python
 # -*- coding: utf-8 -*-
 
 
@@ -21,6 +21,10 @@ import pdb;
 #print mat
 import Tkinter, tkFileDialog
 
+import dicom
+
+import numpy as np
+
 
 def dcm_read_from_dir(dirpath=None, initialdir = os.path.expanduser("~")):
     
@@ -37,8 +41,45 @@ def dcm_read_from_dir(dirpath=None, initialdir = os.path.expanduser("~")):
     snstring = raw_input ('Select Serie: ')
     sn = int(snstring)
 
-    filelist = dcmsortedlist(dcmdir = dcmdir, SeriesNumber = sn)
+    #dcmdir = sort_dcmdir(dcmdir, SeriesNumber = sn)
+# Now we need list of files with specific SeriesNumer
+# dcmdir has just filenamse (no full path), 
+    dcmlist = dcmsortedlist(dirpath, dcmdir = dcmdir, SeriesNumber = sn)
+
+    dcmlist_to_3D_data(dcmlist)
     
+
+def dcmlist_to_3D_data(dcmlist):
+    """
+    Function make 3D data from dicom file slices
+    """
+    data3d = []
+    #for onefile in dcmlist:
+    for i  in range(len(dcmlist)):
+        onefile = dcmlist[i]
+        #filelist.append(os.path.join(startpath, dirpath,onefile['filename']))
+        #head, tail = os.path.split(onefile['filename'])
+        logger.info(onefile)#['filepath']
+        data = dicom.read_file(onefile)#['filepath'])
+        data2d = data.pixel_array
+        #pdb.set_trace();
+        if len(data3d) == 0:
+            shp2 = data2d.shape
+            data3d = np.zeros([shp2[0],shp2[1], len(dcmlist)], dtype=np.int16)
+            #data3d = np.zeros([shp2[0],shp2[1], len(dcmlist)])
+            # data3d = data2d[:,:,np.newaxis]
+        else:
+            #data3d = np.concatenate((data3d,data2d[...,np.newaxis]), axis = 2)
+            data3d [:,:,i] = data2d
+
+    logger.debug("Data size: " + str(data3d.nbytes) + ', shape: ' + str(shp2) +'x'+ str(len(dcmlist)) )
+    #logger.debug(data3d.nbytes)
+
+    #pdb.set_trace();
+    return data3d
+
+
+
 
 def obj_from_file(filename = 'annotation.yaml', filetype = 'yaml'):
     ''' Read object from file '''
@@ -215,7 +256,7 @@ def dcmdirstats(dcmdir):
     #binslist.insert(0,-1)
     counts, binsvyhodit = np.histogram(dcmdirseries, bins = binslist)
 
-    pdb.set_trace();
+    #pdb.set_trace();
     return counts, bins
 
 def dcmsortedlist(dirpath=None, wildcard='*.*', startpath="", 
@@ -238,13 +279,15 @@ def dcmsortedlist(dirpath=None, wildcard='*.*', startpath="",
     if dcmdir == None:
         if dirpath != None:
 # TODO doplnit prevod dcmdir na filelist
+
+            pdb.set_trace();
             dcmdir = getdicomdir(os.path.join(startpath,dirpath), 
                     writedicomdirfile)
 
             #filelist = filesindir(dirpath, wildcard, startpath)
         else:
             logger.error('Wrong input params')
-    # else:
+    #else:
     #    logger.error('Deprecated call with filellist')
 
 #    files=[]
@@ -296,16 +339,7 @@ def dcmsortedlist(dirpath=None, wildcard='*.*', startpath="",
 #    #filelist.sort(lambda:files)
 #    dcmdirfile = []
 
-    # sort (again) just for sure
-    dcmdir.sort(key=lambda x: x['InstanceNumber'])
-    dcmdir.sort(key=lambda x: x['SeriesNumber'])
-    dcmdir.sort(key=lambda x: x['AcquisitionNumber'])
-
-    # select sublist with SeriesNumber
-    #SeriesNumber = 5
-    if SeriesNumber != None:
-        dcmdir = [line for line in dcmdir if line['SeriesNumber']==SeriesNumber]
-
+    dcmdir = sort_dcmdir(dcmdir, SeriesNumber)
 
     logger.debug('SeriesNumber: ' +str(SeriesNumber))
 
@@ -324,9 +358,21 @@ def dcmsortedlist(dirpath=None, wildcard='*.*', startpath="",
     return filelist
 
 
+def sort_dcmdir(dcmdir, SeriesNumber = None):
+    """ 
+    Returns sorted dcmdir. You can extract specific serie.
+    """
+    # sort (again) just for sure
+    dcmdir.sort(key=lambda x: x['InstanceNumber'])
+    dcmdir.sort(key=lambda x: x['SeriesNumber'])
+    dcmdir.sort(key=lambda x: x['AcquisitionNumber'])
 
+    # select sublist with SeriesNumber
+    #SeriesNumber = 5
+    if SeriesNumber != None:
+        dcmdir = [line for line in dcmdir if line['SeriesNumber']==SeriesNumber]
 
-
+    return dcmdir
 
 
 if __name__ == "__main__":
@@ -338,6 +384,7 @@ if __name__ == "__main__":
 
     logger.debug('input params')
 
+    dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
     dcm_read_from_dir()
    # for arg in sys.argv:
    #     logger.debug(''+arg)
