@@ -31,6 +31,7 @@ def dcm_read_from_dir(dirpath=None, initialdir = os.path.expanduser("~")):
     if dirpath == None:
         root = Tkinter.Tk()
         dirpath = tkFileDialog.askdirectory(parent=root, initialdir = initialdir, title = "Please select a directory")
+        root.destroy()
     pass
     
     dcmdir = getdicomdir(dirpath)
