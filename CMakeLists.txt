@@ -5,7 +5,7 @@ PROJECT(liver-surgery)
 
 
 ADD_CUSTOM_TARGET(git_recursive_pull ALL
-    COMMAND "git submodule update --init --recursive"
+    COMMAND git submodule update --init --recursive
 
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     )
