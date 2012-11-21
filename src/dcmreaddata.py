@@ -36,13 +36,16 @@ def dcm_read_from_dir(dirpath=None, initialdir = os.path.expanduser("~")):
     
     dcmdir = getdicomdir(dirpath)
     counts, bins = dcmdirstats(dcmdir)
-    print counts
-    print bins
-    #logger.info(counts)
-    #logger.info(bins)
+    if len (bins) > 1:
+        print counts
+        print bins
+        #logger.info(counts)
+        #logger.info(bins)
 
-    snstring = raw_input ('Select Serie: ')
-    sn = int(snstring)
+        snstring = raw_input ('Select Serie: ')
+        sn = int(snstring)
+    else:
+        sn = bins[0]
 
     #dcmdir = sort_dcmdir(dcmdir, SeriesNumber = sn)
 # Now we need list of files with specific SeriesNumer
