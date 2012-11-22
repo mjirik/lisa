@@ -15,7 +15,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-import pdb
+#import pdb
 #  pdb.set_trace();
 #import scipy.io
 import numpy as np
@@ -25,14 +25,31 @@ import dcmreaddata
 import pycat
 import argparse
 
+
+class organ_segmentation():
+
+    def open(self):
+        pass
+
+
+
 class Tests(unittest.TestCase):
     def setUp(self):
         """ Nastavení společných proměnných pro testy  """
+        self.assertTrue(True)
+    def test_whole_organ_segmentation(self):
+        """
+        Function uses organ_segmentation object for segmentation
+        """
+        #os = organ_segmentation(dcmdir, voxelsizemm=1)
         pass
 
-    def test_readdir_and_segment(self):
+    def test_dicomread_and_graphcut(self):
+        """
+        Test dicomread module and graphcut module
+        """
         #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
-        data3d = dcmreaddata.dcm_read_from_dir('./../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
+        data3d, metadata = dcmreaddata.dcm_read_from_dir('./../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
 
         print ("Data size: " + str(data3d.nbytes) + ', shape: ' + str(data3d.shape) )
 
@@ -81,7 +98,7 @@ if __name__ == "__main__":
         unittest.main()
         sys.exit() 
     #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
-    data3d = dcmreaddata.dcm_read_from_dir()
+    data3d, metadata = dcmreaddata.dcm_read_from_dir()
 
     print ("Data size: " + str(data3d.nbytes) + ', shape: ' + str(data3d.shape) )
 
