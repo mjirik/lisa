@@ -27,9 +27,18 @@ import argparse
 
 
 class organ_segmentation():
+    def __init__(self, datadir, workingvoxelsizemm = 1):
+        self.datadir = datadir
+        self.workingvoxelsizemm = workingvoxelsizemm
 
-    def open(self):
+
+    def interactivity(self):
         pass
+
+    def noninteractivity(self, seeds):
+        pass
+        
+
 
 
 
@@ -41,7 +50,10 @@ class Tests(unittest.TestCase):
         """
         Function uses organ_segmentation object for segmentation
         """
-        #os = organ_segmentation(dcmdir, voxelsizemm=1)
+        dcmdir = './../sample_data/matlab/examples/sample_data/DICOM/digest_article/'
+        oseg = organ_segmentation(dcmdir, workingvoxelsizemm = 1)
+        #oseg.noninteractivity()
+        #oseg.set_roi()
         pass
 
     def test_dicomread_and_graphcut(self):
