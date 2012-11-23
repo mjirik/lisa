@@ -52,8 +52,8 @@ def dcm_read_from_dir(dirpath=None, initialdir = os.path.expanduser("~")):
 # dcmdir has just filenamse (no full path), 
     dcmlist = dcmsortedlist(dirpath, dcmdir = dcmdir, SeriesNumber = sn)
 
-    data3d = dcmlist_to_3D_data(dcmlist)
-    return data3d
+    data3d, metadata = dcmlist_to_3D_data(dcmlist)
+    return data3d, metadata
     
 
 def dcmlist_to_3D_data(dcmlist):
@@ -75,6 +75,7 @@ def dcmlist_to_3D_data(dcmlist):
             data3d = np.zeros([shp2[0],shp2[1], len(dcmlist)], dtype=np.int16)
             #data3d = np.zeros([shp2[0],shp2[1], len(dcmlist)])
             # data3d = data2d[:,:,np.newaxis]
+            metadata = get_metadata(data)
         else:
             #data3d = np.concatenate((data3d,data2d[...,np.newaxis]), axis = 2)
             data3d [:,:,i] = data2d
@@ -83,10 +84,17 @@ def dcmlist_to_3D_data(dcmlist):
     #logger.debug(data3d.nbytes)
 
     #pdb.set_trace();
-    return data3d
+    return data3d, metadata
 
 
 
+def get_metadata(data):
+    #import pdb; pdb.set_trace()
+    pixelsizemm = data.PixelSpacing
+    voxelsizemm = [pixelsizemm[0], pixelsizemm[1], data.SliceThickness]
+
+    metadata = {'voxelsizemm':voxelsizemm, 'Modality':data.Modality}
+    return metadata
 
 def obj_from_file(filename = 'annotation.yaml', filetype = 'yaml'):
     ''' Read object from file '''
