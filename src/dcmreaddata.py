@@ -89,7 +89,7 @@ def dcmlist_to_3D_data(dcmlist):
 
 
 def get_metadata(data):
-    import pdb; pdb.set_trace()
+    #import pdb; pdb.set_trace()
     pixelsizemm = data.PixelSpacing
     voxelsizemm = [pixelsizemm[0], pixelsizemm[1], data.SliceThickness]
 

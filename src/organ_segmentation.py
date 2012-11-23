@@ -15,8 +15,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-#import pdb
-#  pdb.set_trace();
+#import apdb
+#  apdb.set_trace();
 #import scipy.io
 import numpy as np
 
@@ -27,16 +27,51 @@ import argparse
 
 
 class organ_segmentation():
-    def __init__(self, datadir, workingvoxelsizemm = 1):
+    def __init__(self, datadir, working_voxelsize_mm = 1, SeriesNumber = None):
+        
         self.datadir = datadir
-        self.workingvoxelsizemm = workingvoxelsizemm
+        self.working_voxelsize_mm = working_voxelsize_mm
+
+        # TODO uninteractive Serie selection
+        self.data3d, self.metadata = dcmreaddata.dcm_read_from_dir(datadir)
+        voxelsize_mm = self.metadata['voxelsizemm']
+        
+        if np.isscalar(working_voxelsize_mm):
+            working_voxelsize_mm = np.ones([3]) * working_voxelsize_mm
+
+
+        self.zoom = working_voxelsize_mm/voxelsize_mm
+
+        import pdb; pdb.set_trace()
 
 
     def interactivity(self):
+        igc = pycat.ImageGraphCut(self.data3d, zoom = self.zoom)
+        igc.interactivity()
         pass
 
-    def noninteractivity(self, seeds):
+
+
+    def make_segmentation(self):
         pass
+
+
+    def ni_set_roi(self, roi_mm):
+        pass
+
+
+    def ni_set_seeds(self, coordinates_mm, label, radius):
+        pass
+
+    def im_crop(self, im,  roi_start, roi_stop):
+        im_out = im[ \
+                roi_start[0]:roi_stop[0],\
+                roi_start[1]:roi_stop[1],\
+                roi_start[2]:roi_stop[2],\
+                ]
+        return  im_out
+
+
         
 
 
@@ -51,9 +86,20 @@ class Tests(unittest.TestCase):
         Function uses organ_segmentation object for segmentation
         """
         dcmdir = './../sample_data/matlab/examples/sample_data/DICOM/digest_article/'
-        oseg = organ_segmentation(dcmdir, workingvoxelsizemm = 1)
+        oseg = organ_segmentation(dcmdir, working_voxelsize_mm = 1)
+
+        oseg.interactivity()
+
+        roi_mm = [[3,3,3],[150,150,50]]
+        oseg.ni_set_roi()
+        coordinates_mm = [[110,50,30], [10,10,10]]
+        label = [1,2]
+        radius = [5,5]
+        oseg.ni_set_seeds(coordinates_mm, label, radius)
+
+        oseg.make_segmentation()
+
         #oseg.noninteractivity()
-        #oseg.set_roi()
         pass
 
     def test_dicomread_and_graphcut(self):
