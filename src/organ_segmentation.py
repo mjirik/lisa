@@ -24,10 +24,18 @@ import numpy as np
 import dcmreaddata
 import pycat
 import argparse
+import py3DSeedEditor
+
+
+def interactive_imcrop(im):
+
+    pass
+
+
 
 
 class organ_segmentation():
-    def __init__(self, datadir, working_voxelsize_mm = 1, SeriesNumber = None):
+    def __init__(self, datadir, working_voxelsize_mm = 0.25, SeriesNumber = None):
         
         self.datadir = datadir
         self.working_voxelsize_mm = working_voxelsize_mm
@@ -40,14 +48,16 @@ class organ_segmentation():
             working_voxelsize_mm = np.ones([3]) * working_voxelsize_mm
 
 
-        self.zoom = working_voxelsize_mm/voxelsize_mm
+        self.zoom = voxelsize_mm/working_voxelsize_mm
 
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
 
 
     def interactivity(self):
         igc = pycat.ImageGraphCut(self.data3d, zoom = self.zoom)
         igc.interactivity()
+        igc.make_gc()
+        igc.show_segmentation()
         pass
 
 
@@ -144,6 +154,8 @@ if __name__ == "__main__":
             help='run in debug mode')
     parser.add_argument('-t', '--tests', action='store_true', 
             help='run unittest')
+    parser.add_argument('-ed', '--exampledata', action='store_true', 
+            help='run unittest')
     args = parser.parse_args()
 
 
@@ -155,12 +167,18 @@ if __name__ == "__main__":
         sys.argv[1:]=[]
         unittest.main()
         sys.exit() 
+
+    if args.exampledata:
+
+        data3d, metadata = dcmreaddata.dcm_read_from_dir('../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
+    else:
     #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
-    data3d, metadata = dcmreaddata.dcm_read_from_dir()
+        data3d, metadata = dcmreaddata.dcm_read_from_dir()
+
 
     print ("Data size: " + str(data3d.nbytes) + ', shape: ' + str(data3d.shape) )
 
-    igc = pycat.ImageGraphCut(data3d, zoom = 0.25)
+    igc = pycat.ImageGraphCut(data3d, zoom = 0.5)
     igc.interactivity()
 
 
