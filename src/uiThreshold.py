@@ -161,6 +161,8 @@ if __name__ == '__main__':
 #    fileName = input('Give me a filename: ')
     # Precteni souboru (obrazku)
 #    imgLoaded = matplotlib.image.imread(fileName)
+    from scipy import misc
+    imgLoaded = misc.lena()
     imgLoaded = matplotlib.image.imread('morpho.png')
     # Vytvoreni uiThreshold
     ui = uiThreshold(imgLoaded)
