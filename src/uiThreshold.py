@@ -11,38 +11,25 @@ Copyright:   (c) Pavel Volkovinsky 2012
 Licence:     <your licence>
 ================================================================================
 """
-#VERSION = "0.0.2"
+#VERSION = 'XXX'
 
-#try:
-    #import unittest
 import sys
 #import argparse
 sys.path.append("../src/")
 sys.path.append("../extern/")
-
 import logging
 logger = logging.getLogger(__name__)
-
-#import pylab as pylab
+#import pylab
 import matplotlib.pyplot as matpyplot
-#import numpy as nump
+#import numpy
 import matplotlib
 from matplotlib.widgets import Slider#, Button, RadioButtons
-
 from scipy import ndimage
 
-#except ImportError, err:
-#    print "Critical error! Couldn't load module! %s" % (err)
-#    sys.exit(2)
-
 """
 ================================================================================
-class uiThreshold
+uiThreshold
 ================================================================================
-"""
-"""
->>> description:
-
 """
 class uiThreshold:
 
@@ -50,7 +37,7 @@ class uiThreshold:
 
         self.imgUsed = imgUsed
         self.imgChanged1 = self.imgUsed
-        self.imgChanged2= self.imgUsed
+        self.imgChanged2 = self.imgUsed
         self.imgChanged3 = self.imgUsed
         
         # Zakladni informace o obrazku (+ statisticke)
@@ -147,9 +134,8 @@ class uiThreshold:
     
     def updateBinOpening(self, val):
 
-        number = int(round(val, 0))
         # Prahovani
-        self.imgChanged2 = ndimage.binary_opening(self.imgChanged1, None, number)
+        self.imgChanged2 = ndimage.binary_opening(self.imgChanged1, None, int(round(val, 0)))
         # Predani obrazku k vykresleni
         self.im2 = self.ax2.imshow(self.imgChanged2)
         # Prekresleni
@@ -157,21 +143,18 @@ class uiThreshold:
         
     def updateBinClosing(self, val):
 
-        number = int(round(val, 0))
         # Prahovani
-        self.imgChanged3 = ndimage.binary_closing(self.imgChanged2, None, number)
+        self.imgChanged3 = ndimage.binary_closing(self.imgChanged2, None, int(round(val, 0)))
         # Predani obrazku k vykresleni
         self.im3 = self.ax3.imshow(self.imgChanged3)
         # Prekresleni
         self.fig.canvas.draw()
-    
 
 """
 ================================================================================
 main
 ================================================================================
 """
-
 if __name__ == '__main__':
 
     # Vyzve uzivatele k zadani jmena souboru.

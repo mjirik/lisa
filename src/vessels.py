@@ -28,7 +28,7 @@ def vesselSegmentation(data, segmentation, threshold=1185, dataFiltering=False, 
     segmentation: labeled image with same size as data where label:
     1 mean liver pixels,
     -1 interesting tissuse (bones)
-    0 othrewise
+    0 otherwise
     """
 #   Funkce pracuje z počátku na principu jednoduchého prahování. Nalezne se
 #   největší souvislý objekt nad stanoveným prahem, Průběžně bude segmentace
@@ -81,6 +81,7 @@ main
 ================================================================================
 """
 if __name__ == "__main__":
+    
     logger = logging.getLogger()
     logger.setLevel(logging.WARNING)
 # při vývoji si necháme vypisovat všechny hlášky
