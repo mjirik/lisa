@@ -2,7 +2,7 @@
 """
 ================================================================================
 Name:        uiThreshold
-Purpose:     (CZE-ZCU-FAV-KY) Liver medical project
+Purpose:     (CZE-ZCU-FAV-KKY) Liver medical project
 
 Author:      Pavel Volkovinsky (volkovinsky.pavel@gmail.com)
 
@@ -11,7 +11,6 @@ Copyright:   (c) Pavel Volkovinsky 2012
 Licence:     <your licence>
 ================================================================================
 """
-#VERSION = 'XXX'
 
 import sys
 #import argparse

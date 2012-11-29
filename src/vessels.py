@@ -1,5 +1,16 @@
-﻿#!/usr/bin/python
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
+"""
+================================================================================
+Name:        uiThreshold
+Purpose:     (CZE-ZCU-FAV-KKY) Liver medical project
+
+Author:      Pavel Volkovinsky (volkovinsky.pavel@gmail.com)
+
+Created:     08.11.2012
+Copyright:   (c) Pavel Volkovinsky 2012
+Licence:     <your licence>
+================================================================================
+"""
 
 import unittest
 import sys
