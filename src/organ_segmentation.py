@@ -34,7 +34,7 @@ def interactive_imcrop(im):
 
 
 
-class organ_segmentation():
+class OrganSegmentation():
     def __init__(self, datadir, working_voxelsize_mm = 0.25, SeriesNumber = None):
         
         self.datadir = datadir
@@ -42,19 +42,22 @@ class organ_segmentation():
 
         # TODO uninteractive Serie selection
         self.data3d, self.metadata = dcmreaddata.dcm_read_from_dir(datadir)
-        voxelsize_mm = self.metadata['voxelsizemm']
+        self.voxelsize_mm = self.metadata['voxelsizemm']
         
         if np.isscalar(working_voxelsize_mm):
             working_voxelsize_mm = np.ones([3]) * working_voxelsize_mm
 
 
-        self.zoom = voxelsize_mm/working_voxelsize_mm
+        self.zoom = self.voxelsize_mm/working_voxelsize_mm
 
         #import pdb; pdb.set_trace()
 
 
     def interactivity(self):
+        
+        import pdb; pdb.set_trace()
         igc = pycat.ImageGraphCut(self.data3d, zoom = self.zoom)
+        igc.modelparams = {'type':'gmmsame','params':{'cvtype':'full', 'n_components':2}}
         igc.interactivity()
         igc.make_gc()
         igc.show_segmentation()
@@ -96,7 +99,7 @@ class Tests(unittest.TestCase):
         Function uses organ_segmentation object for segmentation
         """
         dcmdir = './../sample_data/matlab/examples/sample_data/DICOM/digest_article/'
-        oseg = organ_segmentation(dcmdir, working_voxelsize_mm = 1)
+        oseg = OrganSegmentation(dcmdir, working_voxelsize_mm = 4)
 
         oseg.interactivity()
 
