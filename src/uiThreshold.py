@@ -18,6 +18,9 @@ sys.path.append("../src/")
 sys.path.append("../extern/")
 import logging
 logger = logging.getLogger(__name__)
+import scipy.io
+import unittest
+import argparse
 #import pylab
 import matplotlib.pyplot as matpyplot
 #import numpy
@@ -42,10 +45,6 @@ class uiThreshold:
         inputDimension = numpy.ndim(imgUsed)
         print('Dimension of input: ',  inputDimension)
         if(inputDimension == 2):
-            
-            print('Sorry! Not yet implemented!\nExiting.')
-        
-        elif(inputDimension == 3):
             
             """
             self.imgChanged1 = self.imgUsed
@@ -123,6 +122,11 @@ class uiThreshold:
             # Zobrazeni plot (figure)
             matpyplot.show() 
             
+        
+        elif(inputDimension == 3):
+            
+            print('Sorry! Not yet implemented for 3 dimensions!\nExiting.')
+            
         else:
             print('Wrong input.\nDimension of input is not 2 or 3.\nExiting.')
 
@@ -184,6 +188,7 @@ class uiThreshold:
 main
 ================================================================================
 """
+"""
 if __name__ == '__main__':
 
     # Vyzve uzivatele k zadani jmena souboru.
@@ -193,8 +198,53 @@ if __name__ == '__main__':
     imgLoaded = misc.lena()
     # Vytvoreni uiThreshold
     ui = uiThreshold(imgLoaded)
+"""
 
+if __name__ == "__main__":
+    logger = logging.getLogger()
+    logger.setLevel(logging.WARNING)
 
+    ch = logging.StreamHandler()
+    logging.basicConfig(format='%(message)s')
+
+    formatter = logging.Formatter("%(levelname)-5s [%(module)s:%(funcName)s:%(lineno)d] %(message)s")
+    ch.setFormatter(formatter)
+
+    logger.addHandler(ch)
+
+    parser = argparse.ArgumentParser(description='Segment vessels from liver')
+    parser.add_argument('-f','--filename',
+            default = 'lena',
+            help='*.mat file with variables "data", "segmentation" and "threshod"')
+    parser.add_argument('-d', '--debug', action='store_true',
+            help='run in debug mode')
+    parser.add_argument('-t', '--tests', action='store_true',
+            help='run unittest')
+    parser.add_argument('-o', '--outputfile', type=str,
+        default='output.mat',help='output file name')
+    args = parser.parse_args()
+
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
+
+    if args.tests:
+        sys.argv[1:]=[]
+        unittest.main()
+
+    if args.filename == 'lena':
+        data = misc.lena()
+    else:
+    #   load all
+        mat = scipy.io.loadmat(args.filename)
+        logger.debug(mat.keys())
+
+        dataraw = scipy.io.loadmat(args.filename, variable_names=['data'])
+        data = dataraw['data']
+
+    ui = uiThreshold(data)
+    output = ui.show()
+
+    scipy.io.savemat(args.outputfile, {'data':output})
 
 
 
