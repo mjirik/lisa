@@ -37,7 +37,7 @@ uiThreshold
 """
 class uiThreshold:
 
-    def __init__(self, imgUsed):
+    def __init__(self, imgUsed, initslice = 0):
 
         self.imgUsed = imgUsed
         self.imgChanged = imgUsed
@@ -118,10 +118,6 @@ class uiThreshold:
             self.sopen.on_changed(self.updateImg)
             self.sclose.on_changed(self.updateImg)
             """
-            
-            # Zobrazeni plot (figure)
-            matpyplot.show() 
-            
         
         elif(inputDimension == 3):
             
@@ -130,67 +126,28 @@ class uiThreshold:
         else:
             print('Wrong input.\nDimension of input is not 2 or 3.\nExiting.')
 
+    def showPlot(self):
+        # Zobrazeni plot (figure)
+        matpyplot.show() 
+        return self.newData
+
     def updateImg(self, val):
         
         # Prahovani (smin, smax)
         img1 = self.imgUsed > self.smin.val
         self.imgChanged = img1# < self.smax.val
         
-        """
-        # Binary opening a binary closing
-        img3 = ndimage.binary_opening(img2)
-        self.imgChanged = ndimage.binary_closing(img3)
-        """
-        
         # Predani obrazku k vykresleni
         self.im1 = self.ax1.imshow(self.imgChanged)
         # Prekresleni
         self.fig.canvas.draw()
-    """
-    def updateMinThreshold(self, val):
-
-        # Prahovani
-        self.imgChanged1 = self.imgUsed > val
-        # Predani obrazku k vykresleni
-        self.im1 = self.ax1.imshow(self.imgChanged1)
-        # Prekresleni
-        self.fig.canvas.draw()
     
-    def updateMaxThreshold(self, val):
-
-        # Prahovani
-        self.imgChanged1 = self.imgUsed < val
-        # Predani obrazku k vykresleni
-        self.im1 = self.ax1.imshow(self.imgChanged1)
-        # Prekresleni
-        self.fig.canvas.draw()
-    
-    def updateBinOpening(self, val):
-
-        # Prahovani
-        self.imgChanged2 = ndimage.binary_opening(self.imgChanged1, None, int(round(val, 0)))
-        # Predani obrazku k vykresleni
-        self.im2 = self.ax2.imshow(self.imgChanged2)
-        # Prekresleni
-        self.fig.canvas.draw()
-        
-    def updateBinClosing(self, val):
-
-        # Prahovani
-        self.imgChanged3 = ndimage.binary_closing(self.imgChanged2, None, int(round(val, 0)))
-        # Predani obrazku k vykresleni
-        self.im3 = self.ax3.imshow(self.imgChanged3)
-        # Prekresleni
-        self.fig.canvas.draw()
-    """
 """
 ================================================================================
 main
 ================================================================================
 """
 """
-if __name__ == '__main__':
-
     # Vyzve uzivatele k zadani jmena souboru.
 #    fileName = input('Give me a filename: ')
     # Precteni souboru (obrazku)
@@ -199,7 +156,6 @@ if __name__ == '__main__':
     # Vytvoreni uiThreshold
     ui = uiThreshold(imgLoaded)
 """
-
 if __name__ == "__main__":
     logger = logging.getLogger()
     logger.setLevel(logging.WARNING)
@@ -241,7 +197,7 @@ if __name__ == "__main__":
         data = dataraw['data']
 
     ui = uiThreshold(data)
-    output = ui.show()
+    output = ui.showPlot()
 
     scipy.io.savemat(args.outputfile, {'data':output})
 
