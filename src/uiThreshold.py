@@ -234,7 +234,6 @@ if __name__ == "__main__":
     if args.filename == 'lena':
         data = misc.lena()
     else:
-    #   load all
         mat = scipy.io.loadmat(args.filename)
         logger.debug(mat.keys())
 
