@@ -20,14 +20,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 import numpy
-
-from scipy import ndimage
-from scipy import misc
+import scipy.misc
 import scipy.io
 
 import unittest
 import argparse
-#import pylab
 
 import matplotlib.pyplot as matpyplot
 import matplotlib
@@ -82,7 +79,7 @@ class uiThreshold:
             self.fig.subplots_adjust(left = 0.1, bottom = 0.25)
             # Vykresli obrazek
     #        self.im0 = self.ax0.imshow(imgUsed)
-            self.im1 = self.ax1.imshow(self.imgUsed, self.cmap)
+            self.im1 = self.ax1.imshow(self.imgChanged, self.cmap)
             """
             self.im2 = self.ax2.imshow(imgUsed)
             self.im3 = self.ax3.imshow(imgUsed)
@@ -140,15 +137,12 @@ class uiThreshold:
             """
             
             self.imgUsed = imgUsed
-            self.imgOutput = self.imgUsed
+            self.imgChanged = self.imgUsed
             
             #self.imgMin = numpy.min(self.imgUsed)
             #self.imgMax = numpy.max(self.imgUsed)
             
             self.imgShape = list(self.imgUsed.shape)
-            
-            imgShowPlace = numpy.round(self.imgShape[2] / 2).astype(int)
-            self.imgShow = self.imgUsed[:, :, imgShowPlace]
             
             self.fig = matpyplot.figure()
             # Pridani subplotu do okna (do figure)
@@ -156,11 +150,14 @@ class uiThreshold:
             
             # Upraveni subplotu
             self.fig.subplots_adjust(left = 0.1, bottom = 0.25)
-            # Vykresli obrazek
-    #        self.im0 = self.ax0.imshow(imgUsed)
+            
+            # Nalezeni a pripraveni obrazku k vykresleni
+     #       imgShowPlace = numpy.round(self.imgShape[2] / 2).astype(int)
+     #       self.imgShow = self.imgUsed[:, :, imgShowPlace]
+            self.imgShow = numpy.amax(self.imgUsed, 2)
+            
+            # Vykreslit obrazek
             self.im1 = self.ax1.imshow(self.imgShow, self.cmap)
-
-     #       self.fig.colorbar(self.im1)
     
             # Zakladni informace o slideru
             axcolor = 'white' # lightgoldenrodyellow
@@ -187,13 +184,14 @@ class uiThreshold:
     def showPlot(self):
         
         # Zobrazeni plot (figure)
-        matpyplot.show() 
-        return self.imgOutput
+        matpyplot.show()
+        imgOutput = self.imgChanged 
+        return imgOutput
 
     def updateImg2D(self, val):
         
         # Prahovani (smin, smax)
-        img1 = self.imgUsed > self.smin.val
+        img1 = self.imgUsed.copy() > self.smin.val
         self.imgChanged = img1 #< self.smax.val
         
         # Predani obrazku k vykresleni
@@ -206,11 +204,12 @@ class uiThreshold:
         # Prahovani (smin, smax)
         round = 0
         for round in range(self.imgShape[2]):
-            im1 = self.imgUsed[:, :, round] > self.smin.val
-            self.imgOutput[:, :, round] = (im1) #< self.smax.val
+            img1 = self.imgUsed[:, :, round].copy()
+            self.imgChanged[:, :, round] = img1 > self.smin.val
+            #self.imgChanged[:, :, round] = (im1) #< self.smax.val
         
         # Predani obrazku k vykresleni
-        self.imgShow = numpy.amax(self.imgOutput, 2) # self.imgOutput[:, :, self.imgShowPlace]
+        self.imgShow = numpy.amax(self.imgChanged, 2) # self.imgOutput[:, :, self.imgShowPlace]
         self.im1 = self.ax1.imshow(self.imgShow, self.cmap)
         
         # Prekresleni
@@ -262,7 +261,7 @@ if __name__ == "__main__":
         unittest.main()
 
     if args.filename == 'lena':
-        data = misc.lena()
+        data = scipy.misc.lena()
     else:
         mat = scipy.io.loadmat(args.filename)
         logger.debug(mat.keys())
