@@ -204,9 +204,9 @@ class uiThreshold:
         # Prahovani (smin, smax)
         round = 0
         for round in range(self.imgShape[2]):
-            img1 = self.imgUsed[:, :, round].copy()
-            self.imgChanged[:, :, round] = img1 > self.smin.val
-            #self.imgChanged[:, :, round] = (im1) #< self.smax.val
+            img1 = self.imgUsed[:, :, round]
+            self.imgChanged[:, :, round] = (img1 > self.smin.val) #< self.smax.val
+            #self.imgChanged[:, :, round] = (im1) 
         
         # Predani obrazku k vykresleni
         self.imgShow = numpy.amax(self.imgChanged, 2) # self.imgOutput[:, :, self.imgShowPlace]
