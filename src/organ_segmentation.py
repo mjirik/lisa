@@ -183,7 +183,7 @@ if __name__ == "__main__":
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
 
 
-    oseg = organ_segmentation(args.dcmdir, working_voxelsize_mm = 5)
+    oseg = OrganSegmentation(args.dcmdir, working_voxelsize_mm = 5)
 
     oseg.interactivity()
 
