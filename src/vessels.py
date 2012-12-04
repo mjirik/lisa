@@ -1,5 +1,16 @@
-﻿#!/usr/bin/python
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
+"""
+================================================================================
+Name:        uiThreshold
+Purpose:     (CZE-ZCU-FAV-KKY) Liver medical project
+
+Author:      Pavel Volkovinsky (volkovinsky.pavel@gmail.com)
+
+Created:     08.11.2012
+Copyright:   (c) Pavel Volkovinsky 2012
+Licence:     <your licence>
+================================================================================
+"""
 
 import unittest
 import sys
@@ -28,7 +39,7 @@ def vesselSegmentation(data, segmentation, threshold=1185, dataFiltering=False, 
     segmentation: labeled image with same size as data where label:
     1 mean liver pixels,
     -1 interesting tissuse (bones)
-    0 othrewise
+    0 otherwise
     """
 #   Funkce pracuje z počátku na principu jednoduchého prahování. Nalezne se
 #   největší souvislý objekt nad stanoveným prahem, Průběžně bude segmentace
@@ -81,6 +92,7 @@ main
 ================================================================================
 """
 if __name__ == "__main__":
+    
     logger = logging.getLogger()
     logger.setLevel(logging.WARNING)
 # při vývoji si necháme vypisovat všechny hlášky
