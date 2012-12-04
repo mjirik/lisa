@@ -150,6 +150,9 @@ if __name__ == "__main__":
 
     # input parser
     parser = argparse.ArgumentParser(description='Segment vessels from liver')
+    parser.add_argument('-dd','--dcmdir',
+            default=None,
+            help='path to data dir')
     parser.add_argument('-d', '--debug', action='store_true',
             help='run in debug mode')
     parser.add_argument('-t', '--tests', action='store_true', 
@@ -170,11 +173,16 @@ if __name__ == "__main__":
 
     if args.exampledata:
 
-        data3d, metadata = dcmreaddata.dcm_read_from_dir('../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
-    else:
+        args.dcmdir = '../sample_data/matlab/examples/sample_data/DICOM/digest_article/'
+        
+    #else:
     #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
-        data3d, metadata = dcmreaddata.dcm_read_from_dir()
+        #data3d, metadata = dcmreaddata.dcm_read_from_dir()
 
+
+    oseg = organ_segmentation(args.dcmdir, working_voxelsize_mm = 5)
+
+    oseg.interactivity()
 
     print ("Data size: " + str(data3d.nbytes) + ', shape: ' + str(data3d.shape) )
 
