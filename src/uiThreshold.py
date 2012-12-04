@@ -202,11 +202,13 @@ class uiThreshold:
     def updateImg3D(self, val):
         
         # Prahovani (smin, smax)
-        round = 0
-        for round in range(self.imgShape[2]):
-            img1 = self.imgUsed[:, :, round].copy()
-            self.imgChanged[:, :, round] = img1 > self.smin.val
-            #self.imgChanged[:, :, round] = (im1) #< self.smax.val
+       # round = 0
+       # for round in range(self.imgShape[2]):
+       #     img1 = self.imgUsed[:, :, round].copy()
+       #     self.imgChanged[:, :, round] = img1 > self.smin.val
+       #     #self.imgChanged[:, :, round] = (im1) #< self.smax.val
+
+        self.imgChanged = (self.imgUsed > self.smin.val) & (self.imgUsed < self.smax.val)
         
         # Predani obrazku k vykresleni
         self.imgShow = numpy.amax(self.imgChanged, 2) # self.imgOutput[:, :, self.imgShowPlace]
@@ -266,8 +268,10 @@ if __name__ == "__main__":
         mat = scipy.io.loadmat(args.filename)
         logger.debug(mat.keys())
 
-        dataraw = scipy.io.loadmat(args.filename, variable_names=['data'])
-        data = dataraw['data']
+        #dataraw = scipy.io.loadmat(args.filename, variable_names=['data'])
+        dataraw = scipy.io.loadmat(args.filename)
+        data = dataraw['data'] * (dataraw['segmentation'] == 1)
+        #import pdb; pdb.set_trace()
 
     ui = uiThreshold(data)
     output = ui.showPlot()
