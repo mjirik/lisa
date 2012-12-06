@@ -270,6 +270,7 @@ if __name__ == "__main__":
 
         #dataraw = scipy.io.loadmat(args.filename, variable_names=['data'])
         dataraw = scipy.io.loadmat(args.filename)
+        
         data = dataraw['data'] * (dataraw['segmentation'] == 1)
         #import pdb; pdb.set_trace()
 

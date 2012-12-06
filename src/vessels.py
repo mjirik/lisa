@@ -17,13 +17,11 @@ import sys
 sys.path.append("../src/")
 sys.path.append("../extern/")
 import pdb
-#  pdb.set_trace();
 
 import scipy.io
 
 import logging
 logger = logging.getLogger(__name__)
-
 
 import argparse
 import numpy as np
@@ -41,16 +39,25 @@ def vesselSegmentation(data, segmentation, threshold=1185, dataFiltering=False, 
     -1 interesting tissuse (bones)
     0 otherwise
     """
-#   Funkce pracuje z počátku na principu jednoduchého prahování. Nalezne se
-#   největší souvislý objekt nad stanoveným prahem, Průběžně bude segmentace
-#   zpřesňována. Bude nutné hledat cévy, které se spojují mimo játra, ale
-#   ignorovat žebra.
-#   Proměnné threshold, dataFiltering a nObj se postupně pokusíme eliminovat a
-#   navrhnout je automaticky.
-#   threshold: ručně určený práh
-#   dataFiltering: označuje, jestli budou data filtrována uvnitř funkce, nebo
-#   již vstupují filtovaná. False znamená, že vstupují filtrovaná.
-#   nObj: označuje kolik největších objektů budeme hledat
+    """
+    Funkce pracuje z počátku na principu jednoduchého prahování. Nalezne se
+    největší souvislý objekt nad stanoveným prahem, Průběžně bude segmentace
+    zpřesňována. Bude nutné hledat cévy, které se spojují mimo játra, ale
+    ignorovat žebra.
+    Proměnné threshold, dataFiltering a nObj se postupně pokusíme eliminovat a
+    navrhnout je automaticky.
+    threshold: ručně určený práh
+    dataFiltering: označuje, jestli budou data filtrována uvnitř funkce, nebo
+    již vstupují filtovaná. False znamená, že vstupují filtrovaná.
+    nObj: označuje kolik největších objektů budeme hledat
+    """
+    
+# 1> data rozmazat gaussian filtrem
+# 2> data upravit prahovanim (uiThreshold)
+# 3> data upravit binary closing a opening
+
+    # bla bla bla
+
     if data.shape != segmentation.shape:
         raise Exception('Input size error','Shape if input data and segmentation must be same')
 
