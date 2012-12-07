@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 import numpy
 import scipy.misc
 import scipy.io
+import scipy.ndimage.filters
 
 import unittest
 import argparse
@@ -40,7 +41,7 @@ class uiThreshold:
     def __init__(self, imgUsed, initslice = 0, cmap = matplotlib.cm.Greys_r):
 
         inputDimension = numpy.ndim(imgUsed)
-        print('Dimension of input: ',  inputDimension)
+        print('Dimenze vstupu: ',  inputDimension)
         self.cmap = cmap
         
         if(inputDimension == 2):
@@ -179,7 +180,7 @@ class uiThreshold:
             
         else:
             
-            print('Wrong input.\nDimension of input is not 2 or 3.\nExiting.')
+            print('Spatny vstup.\nDimenze vstupu neni 2 ani 3.\nUkoncuji prahovani.')
 
     def showPlot(self):
         
@@ -207,7 +208,6 @@ class uiThreshold:
        #     img1 = self.imgUsed[:, :, round].copy()
        #     self.imgChanged[:, :, round] = img1 > self.smin.val
        #     #self.imgChanged[:, :, round] = (im1) #< self.smax.val
-
         self.imgChanged = (self.imgUsed > self.smin.val) & (self.imgUsed < self.smax.val)
         
         # Predani obrazku k vykresleni
@@ -222,16 +222,8 @@ class uiThreshold:
 main
 ================================================================================
 """
-"""
-    # Vyzve uzivatele k zadani jmena souboru.
-#    fileName = input('Give me a filename: ')
-    # Precteni souboru (obrazku)
-#    imgLoaded = matplotlib.image.imread(fileName)
-    imgLoaded = misc.lena()
-    # Vytvoreni uiThreshold
-    ui = uiThreshold(imgLoaded)
-"""
 if __name__ == "__main__":
+    
     logger = logging.getLogger()
     logger.setLevel(logging.WARNING)
 
@@ -273,8 +265,11 @@ if __name__ == "__main__":
         
         data = dataraw['data'] * (dataraw['segmentation'] == 1)
         #import pdb; pdb.set_trace()
+        
+    preparedData = data
+    scipy.ndimage.filters.gaussian_filter(data, sigma = 0.1, order = 0, output = preparedData, mode='reflect', cval=0.0)
 
-    ui = uiThreshold(data)
+    ui = uiThreshold(preparedData)
     output = ui.showPlot()
 
     scipy.io.savemat(args.outputfile, {'data':output})
