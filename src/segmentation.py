@@ -20,6 +20,7 @@ import uiThreshold
 
 import scipy.io
 import scipy.misc
+import scipy.ndimage
 
 import logging
 logger = logging.getLogger(__name__)
@@ -56,23 +57,25 @@ def vesselSegmentation(data, segmentation, threshold=1185, dataFiltering=False, 
     # 2> data upravit prahovanim (uiThreshold)
     # 3> data upravit binary closing a opening
     
-    sigma = float(input('Zvolte prosim smerodatnou odchylku gaussianskeho filtru (doporuceny interval je mezi 0.0 do 2.0): '))
+    sigma = float(input('Zvolte prosim smerodatnou odchylku gaussianskeho filtru (doporuceny interval je mezi 0.0+ a 2.0) (nezdavat mensi nez 0.0) (0.0 pro preskoceni filtrace): '))
     print('Zvoleno: ', sigma)
-
+    
     preparedData = data * (segmentation == 1)
     filteredData = preparedData
     
-    print('Filtruji...')
-    scipy.ndimage.filters.gaussian_filter(preparedData, sigma, order = 0, output = filteredData, mode='reflect', cval=0.0)
-    print('Filtrovani OK.')
-    
-    print('Nasleduje prahovani dat.')
-    ui = uiThreshold.uiThreshold(filteredData)
-    output = ui.showPlot()
-    
-    print('Nasleduje binarni otevreni a uzavreni.')
-    print('Ktere prozatim neni implementovano :-P Paja se musi ucit ;-)')
-    print('!! DODELAT !!')
+    if(sigma < 0.0):
+        print('Chybny udaj!')    
+    else:
+        if(sigma != 0.0):
+            print('Filtruji...')
+            scipy.ndimage.filters.gaussian_filter(preparedData, sigma, 0, filteredData, 'reflect', 0.0)
+            print('Filtrovani OK.')
+        else:
+            print('Preskakuji filtrovani.')
+            
+        print('Nasleduje prahovani dat a binarni otevreni a uzavreni.')
+        ui = uiThreshold.uiThreshold(filteredData)
+        output = ui.showPlot()
 
     if data.shape != output.shape:
         raise Exception('Input size error','Shape of input data and segmentation must be same')

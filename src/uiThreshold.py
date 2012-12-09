@@ -20,12 +20,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 import numpy
-import scipy.misc
-import scipy.io
-import scipy.ndimage.filters
+#import scipy.misc
+#import scipy.io
+import scipy.ndimage
 
-import unittest
-import argparse
+#import unittest
+#import argparse
 
 import matplotlib.pyplot as matpyplot
 import matplotlib
@@ -110,19 +110,8 @@ class uiThreshold:
             """
             
             # Udalost pri zmene hodnot slideru - volani updatu
-            """
-            self.smin.on_changed(self.updateMinThreshold)
-            self.smax.on_changed(self.updateMaxThreshold)
-            self.sopen.on_changed(self.updateBinOpening)
-            self.sclose.on_changed(self.updateBinClosing)
-            """
-            """"""
             self.smin.on_changed(self.updateImg2D)
             self.smax.on_changed(self.updateImg2D)
-            """
-            self.sopen.on_changed(self.updateImg)
-            self.sclose.on_changed(self.updateImg)
-            """
         
         elif(inputDimension == 3):
             
@@ -147,10 +136,12 @@ class uiThreshold:
             
             self.fig = matpyplot.figure()
             # Pridani subplotu do okna (do figure)
-            self.ax1 = self.fig.add_subplot(111)
+            self.ax1 = self.fig.add_subplot(131)
+            self.ax2 = self.fig.add_subplot(132)
+            self.ax3 = self.fig.add_subplot(133)
             
             # Upraveni subplotu
-            self.fig.subplots_adjust(left = 0.1, bottom = 0.25)
+            self.fig.subplots_adjust(left = 0.1, bottom = 0.4)
             
             # Nalezeni a pripraveni obrazku k vykresleni
      #       imgShowPlace = numpy.round(self.imgShape[2] / 2).astype(int)
@@ -159,11 +150,17 @@ class uiThreshold:
             
             # Vykreslit obrazek
             self.im1 = self.ax1.imshow(self.imgShow, self.cmap)
+            self.im2 = self.ax2.imshow(self.imgShow, self.cmap)
+            self.im3 = self.ax3.imshow(self.imgShow, self.cmap)
     
             # Zakladni informace o slideru
             axcolor = 'white' # lightgoldenrodyellow
-            axmin = self.fig.add_axes([0.25, 0.16, 0.495, 0.03], axisbg = axcolor)
-            axmax  = self.fig.add_axes([0.25, 0.12, 0.495, 0.03], axisbg = axcolor)
+            axmin = self.fig.add_axes([0.20, 0.24, 0.55, 0.03], axisbg = axcolor)
+            axmax  = self.fig.add_axes([0.20, 0.20, 0.55, 0.03], axisbg = axcolor)
+            axopening2 = self.fig.add_axes([0.30, 0.16, 0.40, 0.03], axisbg = axcolor)
+            axclosing2 = self.fig.add_axes([0.30, 0.12, 0.40, 0.03], axisbg = axcolor)
+            axopening3 = self.fig.add_axes([0.30, 0.04, 0.40, 0.03], axisbg = axcolor)
+            axclosing3 = self.fig.add_axes([0.30, 0.08, 0.40, 0.03], axisbg = axcolor)
             
             # Vytvoreni slideru
                 # Minimalni pouzita hodnota v obrazku
@@ -174,9 +171,17 @@ class uiThreshold:
                 
             self.smin = Slider(axmin, 'Minimal threshold', min0, max0, valinit = min0)
             self.smax = Slider(axmax, 'Maximal threshold', min0, max0, valinit = max0)
+            self.sopen2 = Slider(axopening2, 'Binary opening 1', 0, 10, valinit = 1)
+            self.sclose2 = Slider(axclosing2, 'Binary closing 1', 0, 10, valinit = 1)
+            self.sopen3 = Slider(axopening3, 'Binary opening 2', 0, 10, valinit = 1)
+            self.sclose3 = Slider(axclosing3, 'Binary closing 2', 0, 10, valinit = 1)
             
-            self.smin.on_changed(self.updateImg3D)
-            self.smax.on_changed(self.updateImg3D)
+            self.smin.on_changed(self.updateImg1Threshold3D)
+            self.smax.on_changed(self.updateImg1Threshold3D)
+            self.sopen2.on_changed(self.updateImg2Binary3D)
+            self.sclose2.on_changed(self.updateImg2Binary3D)
+            self.sopen3.on_changed(self.updateImg3Binary3D)
+            self.sclose3.on_changed(self.updateImg3Binary3D)
             
         else:
             
@@ -186,8 +191,7 @@ class uiThreshold:
         
         # Zobrazeni plot (figure)
         matpyplot.show()
-        imgOutput = self.imgChanged 
-        return imgOutput
+        return self.imgChanged 
 
     def updateImg2D(self, val):
         
@@ -200,19 +204,56 @@ class uiThreshold:
         # Prekresleni
         self.fig.canvas.draw()
         
-    def updateImg3D(self, val):
+    def updateImg1Threshold3D(self, val):
         
         # Prahovani (smin, smax)
-       # round = 0
-       # for round in range(self.imgShape[2]):
-       #     img1 = self.imgUsed[:, :, round].copy()
-       #     self.imgChanged[:, :, round] = img1 > self.smin.val
-       #     #self.imgChanged[:, :, round] = (im1) #< self.smax.val
         self.imgChanged = (self.imgUsed > self.smin.val) & (self.imgUsed < self.smax.val)
         
         # Predani obrazku k vykresleni
-        self.imgShow = numpy.amax(self.imgChanged, 2) # self.imgOutput[:, :, self.imgShowPlace]
+        self.imgShow = numpy.amax(self.imgChanged, 2)
         self.im1 = self.ax1.imshow(self.imgShow, self.cmap)
+        
+        # Prekresleni
+        self.fig.canvas.draw()
+        
+    def updateImg2Binary3D(self, val):
+        
+        imgChanged2 = self.imgChanged
+        
+        if(self.sopen2.val >= 0.5):
+            imgChanged2 = scipy.ndimage.binary_opening(self.imgChanged, structure = None, iterations = int(numpy.round(self.sopen2.val, 0)))
+        else:
+            imgChanged2 = self.imgChanged2
+            
+        if(self.sclose2.val >= 0.5):
+            self.imgChanged2 = scipy.ndimage.binary_closing(imgChanged2, structure = None, iterations = int(numpy.round(self.sclose2.val, 0)))
+        else:
+            self.imgChanged2 = imgChanged2
+            
+        # Predani obrazku k vykresleni
+        self.imgShow2 = numpy.amax(self.imgChanged2, 2)
+        self.im2 = self.ax2.imshow(self.imgShow2, self.cmap)
+        
+        # Prekresleni
+        self.fig.canvas.draw()
+        
+    def updateImg3Binary3D(self, val):
+        
+        imgChanged3 = self.imgChanged
+        
+        if(self.sclose3.val >= 0.5):
+            imgChanged3 = scipy.ndimage.binary_closing(self.imgChanged, structure = None, iterations = int(numpy.round(self.sclose3.val, 0)))
+        else:
+            imgChanged3 = self.imgChanged
+        
+        if(self.sopen3.val >= 0.5):
+            self.imgChanged3 = scipy.ndimage.binary_opening(imgChanged3, structure = None, iterations = int(numpy.round(self.sopen3.val, 0)))
+        else:
+            self.imgChanged3 = imgChanged3
+            
+        # Predani obrazku k vykresleni
+        self.imgShow3 = numpy.amax(self.imgChanged3, 2)
+        self.im3 = self.ax3.imshow(self.imgShow3, self.cmap)
         
         # Prekresleni
         self.fig.canvas.draw()
@@ -221,6 +262,7 @@ class uiThreshold:
 ================================================================================
 main
 ================================================================================
+"""
 """
 if __name__ == "__main__":
     
@@ -260,19 +302,15 @@ if __name__ == "__main__":
         mat = scipy.io.loadmat(args.filename)
         logger.debug(mat.keys())
 
-        #dataraw = scipy.io.loadmat(args.filename, variable_names=['data'])
         dataraw = scipy.io.loadmat(args.filename)
         
         data = dataraw['data'] * (dataraw['segmentation'] == 1)
-        #import pdb; pdb.set_trace()
-        
-    preparedData = data
-    scipy.ndimage.filters.gaussian_filter(data, sigma = 0.1, order = 0, output = preparedData, mode='reflect', cval=0.0)
 
-    ui = uiThreshold(preparedData)
+    ui = uiThreshold(data)
     output = ui.showPlot()
 
     scipy.io.savemat(args.outputfile, {'data':output})
+"""
 
 
 
