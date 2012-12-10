@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 ================================================================================
-Name:        uiThreshold
+Name:        uiBinaryClosingAndOpening
 Purpose:     (CZE-ZCU-FAV-KKY) Liver medical project
 
 Author:      Pavel Volkovinsky (volkovinsky.pavel@gmail.com)
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 import numpy
 #import scipy.misc
 #import scipy.io
-#import scipy.ndimage
+import scipy.ndimage
 
 #import unittest
 #import argparse
@@ -33,16 +33,18 @@ from matplotlib.widgets import Slider#, Button, RadioButtons
 
 """
 ================================================================================
-uiThreshold
+uiBinaryClosingAndOpening
 ================================================================================
 """
-class uiThreshold:
+class uiBinaryClosingAndOpening:
 
     def __init__(self, imgUsed, initslice = 0, cmap = matplotlib.cm.Greys_r):
 
         inputDimension = numpy.ndim(imgUsed)
         #print('Dimenze vstupu: ',  inputDimension)
         self.cmap = cmap
+        self.imgChanged1 = imgUsed
+        self.imgChanged2 = imgUsed
         
         if(inputDimension == 2):
             
@@ -128,6 +130,8 @@ class uiThreshold:
             
             self.imgUsed = imgUsed
             self.imgChanged = self.imgUsed
+            self.imgChanged1 = self.imgChanged
+            self.imgChanged2 = self.imgChanged
             
             #self.imgMin = numpy.min(self.imgUsed)
             #self.imgMax = numpy.max(self.imgUsed)
@@ -136,35 +140,38 @@ class uiThreshold:
             
             self.fig = matpyplot.figure()
             # Pridani subplotu do okna (do figure)
-            self.ax1 = self.fig.add_subplot(131)
-            self.ax2 = self.fig.add_subplot(132)
-            self.ax3 = self.fig.add_subplot(133)
+            self.ax1 = self.fig.add_subplot(121)
+            self.ax2 = self.fig.add_subplot(122)
             
             # Upraveni subplotu
-            self.fig.subplots_adjust(left = 0.1, bottom = 0.4)
+            self.fig.subplots_adjust(left = 0.1, bottom = 0.3)
+            
+            # Nalezeni a pripraveni obrazku k vykresleni
+     #       imgShowPlace = numpy.round(self.imgShape[2] / 2).astype(int)
+     #       self.imgShow = self.imgUsed[:, :, imgShowPlace]
+            self.imgShow = numpy.amax(self.imgChanged, 2)
             
             # Vykreslit obrazek
-            self.im1 = self.ax1.imshow(numpy.amax(self.imgUsed, 0), self.cmap)
-            self.im2 = self.ax2.imshow(numpy.amax(self.imgUsed, 1), self.cmap)
-            self.im3 = self.ax3.imshow(numpy.amax(self.imgUsed, 2), self.cmap)
+            self.im1 = self.ax1.imshow(self.imgShow, self.cmap)
+            self.im2 = self.ax2.imshow(self.imgShow, self.cmap)
     
             # Zakladni informace o slideru
             axcolor = 'white' # lightgoldenrodyellow
-            axmin = self.fig.add_axes([0.20, 0.24, 0.55, 0.03], axisbg = axcolor)
-            axmax  = self.fig.add_axes([0.20, 0.20, 0.55, 0.03], axisbg = axcolor)
+            axopening1 = self.fig.add_axes([0.25, 0.16, 0.495, 0.03], axisbg = axcolor)
+            axclosing1 = self.fig.add_axes([0.25, 0.12, 0.495, 0.03], axisbg = axcolor)
+            axopening2 = self.fig.add_axes([0.25, 0.04, 0.495, 0.03], axisbg = axcolor)
+            axclosing2 = self.fig.add_axes([0.25, 0.08, 0.495, 0.03], axisbg = axcolor)
             
             # Vytvoreni slideru
-                # Minimalni pouzita hodnota v obrazku
-            min0 = numpy.amin(self.imgUsed)
-                # Maximalni pouzita hodnota v obrazku
-            max0 = numpy.amax(self.imgUsed)
-                # Vlastni vytvoreni slideru
-                
-            self.smin = Slider(axmin, 'Minimal threshold', min0, max0, valinit = min0)
-            self.smax = Slider(axmax, 'Maximal threshold', min0, max0, valinit = max0)
+            self.sopen1 = Slider(axopening1, 'Binary opening 1', 0, 100, valinit = 0)
+            self.sclose1 = Slider(axclosing1, 'Binary closing 1', 0, 100, valinit = 0)
+            self.sopen2 = Slider(axopening2, 'Binary opening 2', 0, 100, valinit = 0)
+            self.sclose2 = Slider(axclosing2, 'Binary closing 2', 0, 100, valinit = 0)
             
-            self.smin.on_changed(self.updateImg1Threshold3D)
-            self.smax.on_changed(self.updateImg1Threshold3D)
+            self.sopen1.on_changed(self.updateImg1Binary3D)
+            self.sclose1.on_changed(self.updateImg1Binary3D)
+            self.sopen2.on_changed(self.updateImg2Binary3D)
+            self.sclose2.on_changed(self.updateImg2Binary3D)
             
         else:
             
@@ -175,7 +182,7 @@ class uiThreshold:
         # Zobrazeni plot (figure)
         matpyplot.show()
         
-        return self.imgChanged 
+        return (self.imgChanged1, self.imgChanged2)
 
     def updateImg2D(self, val):
         
@@ -188,15 +195,54 @@ class uiThreshold:
         # Prekresleni
         self.fig.canvas.draw()
         
-    def updateImg1Threshold3D(self, val):
+    def updateImg1Binary3D(self, val):
         
-        # Prahovani (smin, smax)
-        self.imgChanged = (self.imgUsed > self.smin.val) & (self.imgUsed < self.smax.val)
+        self.sopen1.valtext.set_text('{}'.format(int(self.sopen1.val)))
+        self.sclose1.valtext.set_text('{}'.format(int(self.sclose1.val)))
         
+        self.fig.canvas.draw()
+        
+        imgChanged1 = self.imgChanged
+        
+        if(self.sopen1.val >= 0.5):
+            imgChanged1 = scipy.ndimage.binary_opening(self.imgChanged, structure = None, iterations = int(numpy.round(self.sopen1.val, 0)))
+        else:
+            imgChanged1 = self.imgChanged1
+            
+        if(self.sclose1.val >= 0.5):
+            self.imgChanged1 = scipy.ndimage.binary_closing(imgChanged1, structure = None, iterations = int(numpy.round(self.sclose1.val, 0)))
+        else:
+            self.imgChanged1 = imgChanged1
+            
         # Predani obrazku k vykresleni
-        self.im1 = self.ax1.imshow(numpy.amax(self.imgChanged, 0), self.cmap)
-        self.im2 = self.ax2.imshow(numpy.amax(self.imgChanged, 1), self.cmap)
-        self.im3 = self.ax3.imshow(numpy.amax(self.imgChanged, 2), self.cmap)
+        self.imgShow1 = numpy.amax(self.imgChanged1, 2)
+        self.im1 = self.ax1.imshow(self.imgShow1, self.cmap)
+        
+        # Prekresleni
+        self.fig.canvas.draw()
+        
+    def updateImg2Binary3D(self, val):
+        
+        self.sclose2.valtext.set_text('{}'.format(int(self.sclose2.val)))
+        self.sopen2.valtext.set_text('{}'.format(int(self.sopen2.val)))
+        
+        self.fig.canvas.draw()
+        
+        imgChanged2 = self.imgChanged
+        
+        if(self.sclose2.val >= 0.5):
+            imgChanged2 = scipy.ndimage.binary_closing(self.imgChanged, structure = None, iterations = int(numpy.round(self.sclose2.val, 0)))
+        else:
+            imgChanged2 = self.imgChanged
+        
+        if(self.sopen2.val >= 0.5):
+            self.imgChanged2 = scipy.ndimage.binary_opening(imgChanged2, structure = None, iterations = int(numpy.round(self.sopen2.val, 0)))
+        else:
+            self.imgChanged2 = imgChanged2
+            
+        # Predani obrazku k vykresleni
+        self.imgShow2 = numpy.amax(self.imgChanged2, 2)
+        self.im2 = self.ax2.imshow(self.imgShow2, self.cmap)
         
         # Prekresleni
         self.fig.canvas.draw()
@@ -254,7 +300,6 @@ if __name__ == "__main__":
 
     scipy.io.savemat(args.outputfile, {'data':output})
 """
-
 
 
 

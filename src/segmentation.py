@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 ================================================================================
-Name:        uiThreshold
+Name:        segmentation
 Purpose:     (CZE-ZCU-FAV-KKY) Liver medical project
 
 Author:      Pavel Volkovinsky (volkovinsky.pavel@gmail.com)
@@ -16,8 +16,11 @@ import unittest
 import sys
 sys.path.append("../src/")
 sys.path.append("../extern/")
-import uiThreshold
 
+import uiThreshold
+import uiBinaryClosingAndOpening
+
+import numpy
 import scipy.io
 import scipy.misc
 import scipy.ndimage
@@ -52,19 +55,16 @@ def vesselSegmentation(data, segmentation, threshold=1185, dataFiltering=False, 
     již vstupují filtovaná. False znamená, že vstupují filtrovaná.
     nObj: označuje kolik největších objektů budeme hledat
     """
-    
-    # 1> data rozmazat gaussian filtrem
-    # 2> data upravit prahovanim (uiThreshold)
-    # 3> data upravit binary closing a opening
-    
-    sigma = float(input('Zvolte prosim smerodatnou odchylku gaussianskeho filtru (doporuceny interval je mezi 0.0+ a 2.0) (nezdavat mensi nez 0.0) (0.0 pro preskoceni filtrace): '))
+    print('Dimenze vstupu: ', numpy.ndim(data))
+    sigma = float(input('Zvolte prosim smerodatnou odchylku gaussianskeho filtru (doporuceny interval je mezi 0.0+ a 3.0) (nezadavat mensi nez 0.0) (0.0 pro preskoceni filtrace): '))
     print('Zvoleno: ', sigma)
     
     preparedData = data * (segmentation == 1)
     filteredData = preparedData
+    filteredData2 = filteredData
     
     if(sigma < 0.0):
-        print('Chybny udaj!')    
+        print('Chybny udaj! Nefiltruji!')    
     else:
         if(sigma != 0.0):
             print('Filtruji...')
@@ -73,12 +73,16 @@ def vesselSegmentation(data, segmentation, threshold=1185, dataFiltering=False, 
         else:
             print('Preskakuji filtrovani.')
             
-        print('Nasleduje prahovani dat a binarni otevreni a uzavreni.')
-        ui = uiThreshold.uiThreshold(filteredData)
-        output = ui.showPlot()
+    print('Nasleduje prahovani dat.')
+    uiT = uiThreshold.uiThreshold(filteredData)
+    filteredData2 = uiT.showPlot()
+        
+    print('Nasleduje binarni otevreni a uzavreni.')
+    uiB = uiBinaryClosingAndOpening.uiBinaryClosingAndOpening(filteredData2)
+    output = uiB.showPlot()
 
-    if data.shape != output.shape:
-        raise Exception('Input size error','Shape of input data and segmentation must be same')
+    #if data.shape != output.shape:
+        #raise Exception('Input size error', 'Shape of input data and segmentation must be same')
     
     return output
 
@@ -118,6 +122,9 @@ main
 ================================================================================
 """
 if __name__ == "__main__":
+    
+    print('Byl spusten skript.')
+    print('Probiha nastavovani...')
     
     logger = logging.getLogger()
     logger.setLevel(logging.WARNING)
@@ -162,11 +169,16 @@ if __name__ == "__main__":
     #import pdb; pdb.set_trace()
     output = vesselSegmentation(mat['data'], mat['segmentation'], mat['threshold'], mat['voxelsizemm'] )
     
-    print('Ukladam vystup...')
+    try:
+        str = input('Chcete ulozit vystup?\n   ano/ne\n')
+        if(str == 'ano'):
+            scipy.io.savemat(args.outputfile, {'data':output})
+            print('Vystup ulozen.')
     
-    scipy.io.savemat(args.outputfile, {'data':output})
+    except Exception:
+        print('Stala se chyba!')
+        raise Exception
         
-    print('Vystup ulozen.')
     print('Vypinam skript.')    
     
     sys.exit()
