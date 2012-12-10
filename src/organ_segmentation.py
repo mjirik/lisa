@@ -57,7 +57,7 @@ class OrganSegmentation():
         
         import pdb; pdb.set_trace()
         igc = pycat.ImageGraphCut(self.data3d, zoom = self.zoom)
-        igc.modelparams = {'type':'gmmsame','params':{'cvtype':'full', 'n_components':2}}
+        igc.modelparams = {'type':'gmmsame','params':{'cvtype':'full', 'n_components':3}}
         igc.interactivity()
         igc.make_gc()
         igc.show_segmentation()

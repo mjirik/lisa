@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 ================================================================================
 Name:        uiThreshold
@@ -16,17 +16,16 @@ import unittest
 import sys
 sys.path.append("../src/")
 sys.path.append("../extern/")
-import pdb
-#  pdb.set_trace();
+import uiThreshold
 
 import scipy.io
+import scipy.misc
+import scipy.ndimage
 
 import logging
 logger = logging.getLogger(__name__)
 
-
 import argparse
-import numpy as np
 
 """
 ================================================================================
@@ -41,31 +40,58 @@ def vesselSegmentation(data, segmentation, threshold=1185, dataFiltering=False, 
     -1 interesting tissuse (bones)
     0 otherwise
     """
-#   Funkce pracuje z počátku na principu jednoduchého prahování. Nalezne se
-#   největší souvislý objekt nad stanoveným prahem, Průběžně bude segmentace
-#   zpřesňována. Bude nutné hledat cévy, které se spojují mimo játra, ale
-#   ignorovat žebra.
-#   Proměnné threshold, dataFiltering a nObj se postupně pokusíme eliminovat a
-#   navrhnout je automaticky.
-#   threshold: ručně určený práh
-#   dataFiltering: označuje, jestli budou data filtrována uvnitř funkce, nebo
-#   již vstupují filtovaná. False znamená, že vstupují filtrovaná.
-#   nObj: označuje kolik největších objektů budeme hledat
-    if data.shape != segmentation.shape:
-        raise Exception('Input size error','Shape if input data and segmentation must be same')
+    """
+    Funkce pracuje z počátku na principu jednoduchého prahování. Nalezne se
+    největší souvislý objekt nad stanoveným prahem, Průběžně bude segmentace
+    zpřesňována. Bude nutné hledat cévy, které se spojují mimo játra, ale
+    ignorovat žebra.
+    Proměnné threshold, dataFiltering a nObj se postupně pokusíme eliminovat a
+    navrhnout je automaticky.
+    threshold: ručně určený práh
+    dataFiltering: označuje, jestli budou data filtrována uvnitř funkce, nebo
+    již vstupují filtovaná. False znamená, že vstupují filtrovaná.
+    nObj: označuje kolik největších objektů budeme hledat
+    """
+    
+    # 1> data rozmazat gaussian filtrem
+    # 2> data upravit prahovanim (uiThreshold)
+    # 3> data upravit binary closing a opening
+    
+    sigma = float(input('Zvolte prosim smerodatnou odchylku gaussianskeho filtru (doporuceny interval je mezi 0.0+ a 2.0) (nezdavat mensi nez 0.0) (0.0 pro preskoceni filtrace): '))
+    print('Zvoleno: ', sigma)
+    
+    preparedData = data * (segmentation == 1)
+    filteredData = preparedData
+    
+    if(sigma < 0.0):
+        print('Chybny udaj!')    
+    else:
+        if(sigma != 0.0):
+            print('Filtruji...')
+            scipy.ndimage.filters.gaussian_filter(preparedData, sigma, 0, filteredData, 'reflect', 0.0)
+            print('Filtrovani OK.')
+        else:
+            print('Preskakuji filtrovani.')
+            
+        print('Nasleduje prahovani dat a binarni otevreni a uzavreni.')
+        ui = uiThreshold.uiThreshold(filteredData)
+        output = ui.showPlot()
 
-    return segmentation
+    if data.shape != output.shape:
+        raise Exception('Input size error','Shape of input data and segmentation must be same')
+    
+    return output
 
 """
 ================================================================================
 tests
 ================================================================================
-"""
+
 class Tests(unittest.TestCase):
     def test_t(self):
         pass
     def setUp(self):
-        """ Nastavení společných proměnných pro testy  """
+        #Nastavení společných proměnných pro testy
         datashape = [220,115,30]
         self.datashape = datashape
         self.rnddata = np.random.rand(datashape[0], datashape[1], datashape[2])
@@ -73,11 +99,11 @@ class Tests(unittest.TestCase):
         self.segmcube[130:190, 40:90,5:15] = 1
 
     def test_same_size_input_and_output(self):
-        """Funkce testuje stejnost vstupních a výstupních dat"""
+        #Funkce testuje stejnost vstupních a výstupních dat
         outputdata = vesselSegmentation(self.rnddata,self.segmcube)
         self.assertEqual(outputdata.shape, self.rnddata.shape)
 
-
+"""
 #
 #    def test_different_data_and_segmentation_size(self):
 #        """ Funkce ověřuje vyhození výjimky při různém velikosti vstpních
@@ -95,23 +121,18 @@ if __name__ == "__main__":
     
     logger = logging.getLogger()
     logger.setLevel(logging.WARNING)
-# při vývoji si necháme vypisovat všechny hlášky
-    logger.setLevel(logging.DEBUG)
 
     ch = logging.StreamHandler()
-#   output configureation
-    #logging.basicConfig(format='%(asctime)s %(message)s')
     logging.basicConfig(format='%(message)s')
 
     formatter = logging.Formatter("%(levelname)-5s [%(module)s:%(funcName)s:%(lineno)d] %(message)s")
-    # add formatter to ch
     ch.setFormatter(formatter)
 
     logger.addHandler(ch)
 
-    # input parser
     parser = argparse.ArgumentParser(description='Segment vessels from liver')
-    parser.add_argument('filename', type=str,
+    parser.add_argument('-f','--filename', type=str,
+            default = 'lena',
             help='*.mat file with variables "data", "segmentation" and "threshod"')
     parser.add_argument('-d', '--debug', action='store_true',
             help='run in debug mode')
@@ -121,33 +142,32 @@ if __name__ == "__main__":
         default='output.mat',help='output file name')
     args = parser.parse_args()
 
-
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
     if args.tests:
-        # hack for use argparse and unittest in one module
         sys.argv[1:]=[]
         unittest.main()
 
-#   load all
-    mat = scipy.io.loadmat(args.filename)
-    logger.debug(mat.keys())
-
-    # load specific variable
-    matthreshold = scipy.io.loadmat(args.filename, variable_names=['threshold'])
-
-    logger.debug(matthreshold['threshold'][0][0])
-
-
-    # zastavení chodu programu pro potřeby debugu,
-    # ovládá se klávesou's','c',...
-    # zakomentovat
-    pdb.set_trace();
-
-    # zde by byl prostor pro ruční (interaktivní) zvolení prahu z klávesnice
-    #tě ebo jinak
-
-    output = vesselSegmentation(mat['data'],mat['segmentation'], mat['threshold'], mat['voxelsizemm'] )
-    scipy.io.savemat(args.outputfile,{'vesselSegm':output})
-
+    print('Nacitam vstup...')
+    
+    if args.filename == 'lena':
+        data = scipy.misc.lena()
+    else:
+        mat = scipy.io.loadmat(args.filename)
+        logger.debug(mat.keys())        
+        
+    print('Hotovo.')
+        
+    #import pdb; pdb.set_trace()
+    output = vesselSegmentation(mat['data'], mat['segmentation'], mat['threshold'], mat['voxelsizemm'] )
+    
+    print('Ukladam vystup...')
+    
+    scipy.io.savemat(args.outputfile, {'data':output})
+        
+    print('Vystup ulozen.')
+    print('Vypinam skript.')    
+    
+    sys.exit()
+    
