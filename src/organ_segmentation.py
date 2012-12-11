@@ -67,9 +67,25 @@ class OrganSegmentation():
         pass
 
     def prepare_output(self):
-        import pdb; pdb.set_trace()
+        pass
         
 
+    def get_segmented_volume_size_mm3(self):
+        """
+        Compute segmented volume in mm3, based on subsampeled data 
+        """
+        # neumim napsat typ lip
+        if type(self.working_voxelsize_mm) == type(3):
+            voxelvolume_mm3 = np.power(self.working_voxelsize_mm,3)
+            #print 'jedna D'
+            
+        elif np.prod(self.working_voxelsize_mm.shape) == 3:
+            voxelvolume_mm3 = np.prod(self.working_voxelsize_mm)
+        volume_mm3 = np.sum(self.segmentation > 0) * voxelvolume_mm3
+        #print voxelvolume_mm3 
+        #print volume_mm3
+        #import pdb; pdb.set_trace()
+        return volume_mm3
 
     def make_segmentation(self):
         pass
@@ -189,7 +205,7 @@ if __name__ == "__main__":
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
 
 
-    oseg = OrganSegmentation(args.dcmdir, working_voxelsize_mm = 5)
+    oseg = OrganSegmentation(args.dcmdir, working_voxelsize_mm = 8)
 
     oseg.interactivity()
 
@@ -203,5 +219,6 @@ if __name__ == "__main__":
     #igc.show_segmentation()
 
     # volume 
-    volume_mm3 = np.sum(oseg.segmentation > 0) * np.prod(oseg.voxelsize_mm)
-    print "Volume ", volume_mm3
+    #volume_mm3 = np.sum(oseg.segmentation > 0) * np.prod(oseg.voxelsize_mm)
+
+    print "Volume ", oseg.get_segmented_volume_size_mm3()
