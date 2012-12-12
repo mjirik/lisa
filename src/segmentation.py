@@ -35,7 +35,7 @@ import argparse
 vessel segmentation
 ================================================================================
 """
-def vesselSegmentation(data, segmentation, threshold=1185, dataFiltering=False, nObj=1, voxelsizemm=[[1],[1],[1]]):
+def vesselSegmentation(data, segmentation, threshold=1185, voxelsizemm=[[1],[1],[1]], dataFiltering=False, nObj=1):
     """ Volumetric vessel segmentation from liver.
     data: CT (or MRI) 3D data
     segmentation: labeled image with same size as data where label:
@@ -55,9 +55,17 @@ def vesselSegmentation(data, segmentation, threshold=1185, dataFiltering=False, 
     již vstupují filtovaná. False znamená, že vstupují filtrovaná.
     nObj: označuje kolik největších objektů budeme hledat
     """
+    # kalkulace objemove jednotky (voxel) (V = a*b*c)
+    voxel1 = voxelsizemm[0][0]
+    voxel2 = voxelsizemm[1][0]
+    voxel3 = voxelsizemm[2][0]
+    voxelV = voxel1 * voxel2 * voxel3
+    print('Voxel size: ',  voxelV)
+    
     print('Dimenze vstupu: ', numpy.ndim(data))
-    sigma = float(input('Zvolte prosim smerodatnou odchylku gaussianskeho filtru (doporuceny interval je mezi 0.0+ a 3.0) (nezadavat mensi nez 0.0) (0.0 pro preskoceni filtrace): '))
-    print('Zvoleno: ', sigma)
+    number = (numpy.round((1.5 * voxelV), 2))
+    sigma = float(input('Zvolte prosim smerodatnou odchylku gaussianskeho filtru (doporuceny interval je mezi 0.0+ a ' + str(number) + ') (nezadavat mensi nez 0.0) (0.0 pro preskoceni filtrace): '))
+    print('Zadano: ', sigma)
     
     preparedData = data * (segmentation == 1)
     filteredData = preparedData
@@ -67,8 +75,10 @@ def vesselSegmentation(data, segmentation, threshold=1185, dataFiltering=False, 
         print('Chybny udaj! Nefiltruji!')    
     else:
         if(sigma != 0.0):
+            sigma2 = float(sigma) / voxelV
+            print('Sigma pro gauss. filtr: ', sigma2)
             print('Filtruji...')
-            scipy.ndimage.filters.gaussian_filter(preparedData, sigma, 0, filteredData, 'reflect', 0.0)
+            scipy.ndimage.filters.gaussian_filter(preparedData, sigma2, 0, filteredData, 'reflect', 0.0)
             print('Filtrovani OK.')
         else:
             print('Preskakuji filtrovani.')

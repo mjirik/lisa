@@ -140,8 +140,8 @@ class uiBinaryClosingAndOpening:
             
             self.fig = matpyplot.figure()
             # Pridani subplotu do okna (do figure)
-            self.ax1 = self.fig.add_subplot(121)
-            self.ax2 = self.fig.add_subplot(122)
+            self.ax1 = self.fig.add_subplot(111)
+            #self.ax2 = self.fig.add_subplot(122)
             
             # Upraveni subplotu
             self.fig.subplots_adjust(left = 0.1, bottom = 0.3)
@@ -153,25 +153,28 @@ class uiBinaryClosingAndOpening:
             
             # Vykreslit obrazek
             self.im1 = self.ax1.imshow(self.imgShow, self.cmap)
-            self.im2 = self.ax2.imshow(self.imgShow, self.cmap)
+            #self.im2 = self.ax2.imshow(self.imgShow, self.cmap)
     
             # Zakladni informace o slideru
             axcolor = 'white' # lightgoldenrodyellow
             axopening1 = self.fig.add_axes([0.25, 0.16, 0.495, 0.03], axisbg = axcolor)
             axclosing1 = self.fig.add_axes([0.25, 0.12, 0.495, 0.03], axisbg = axcolor)
-            axopening2 = self.fig.add_axes([0.25, 0.04, 0.495, 0.03], axisbg = axcolor)
-            axclosing2 = self.fig.add_axes([0.25, 0.08, 0.495, 0.03], axisbg = axcolor)
+            #axopening2 = self.fig.add_axes([0.25, 0.04, 0.495, 0.03], axisbg = axcolor)
+            #axclosing2 = self.fig.add_axes([0.25, 0.08, 0.495, 0.03], axisbg = axcolor)
             
             # Vytvoreni slideru
             self.sopen1 = Slider(axopening1, 'Binary opening 1', 0, 100, valinit = 0)
             self.sclose1 = Slider(axclosing1, 'Binary closing 1', 0, 100, valinit = 0)
-            self.sopen2 = Slider(axopening2, 'Binary opening 2', 0, 100, valinit = 0)
-            self.sclose2 = Slider(axclosing2, 'Binary closing 2', 0, 100, valinit = 0)
+            #self.sopen2 = Slider(axopening2, 'Binary opening 2', 0, 100, valinit = 0)
+            #self.sclose2 = Slider(axclosing2, 'Binary closing 2', 0, 100, valinit = 0)
             
             self.sopen1.on_changed(self.updateImg1Binary3D)
             self.sclose1.on_changed(self.updateImg1Binary3D)
-            self.sopen2.on_changed(self.updateImg2Binary3D)
-            self.sclose2.on_changed(self.updateImg2Binary3D)
+            #self.sopen2.on_changed(self.updateImg2Binary3D)
+            #self.sclose2.on_changed(self.updateImg2Binary3D)
+            
+            self.sopen1.valtext.set_text('{}'.format(int(self.sopen1.val)))
+            self.sclose1.valtext.set_text('{}'.format(int(self.sclose1.val)))
             
         else:
             
