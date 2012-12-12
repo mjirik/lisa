@@ -20,16 +20,19 @@ import logging
 logger = logging.getLogger(__name__)
 
 import numpy
-#import scipy.misc
-#import scipy.io
-#import scipy.ndimage
 
-#import unittest
-#import argparse
+"""
+import scipy.misc
+import scipy.io
+import scipy.ndimage
+
+import unittest
+import argparse
+"""
 
 import matplotlib.pyplot as matpyplot
 import matplotlib
-from matplotlib.widgets import Slider#, Button, RadioButtons
+from matplotlib.widgets import Slider, Button#, RadioButtons
 
 """
 ================================================================================
@@ -166,6 +169,15 @@ class uiThreshold:
             self.smin.on_changed(self.updateImg1Threshold3D)
             self.smax.on_changed(self.updateImg1Threshold3D)
             
+            self.axbuttnext = self.fig.add_axes([0.81, 0.24, 0.05, 0.03], axisbg = axcolor)
+            self.axbuttprev = self.fig.add_axes([0.87, 0.24, 0.05, 0.03], axisbg = axcolor)
+            
+            self.bnext = Button(self.axbuttnext, 'Next')
+            self.bprev = Button(self.axbuttprev, 'Previous')
+            
+            self.bnext.on_clicked(self.button3DNext)
+            self.bprev.on_clicked(self.button3DPrev)
+            
         else:
             
             print('Spatny vstup.\nDimenze vstupu neni 2 ani 3.\nUkoncuji prahovani.')
@@ -176,6 +188,20 @@ class uiThreshold:
         matpyplot.show()
         
         return self.imgChanged 
+        
+    def button3DNext(self, event):
+        
+        self.smin.val += 1.0
+        self.smin.valtext.set_text('{}'.format(self.smin.val))
+        self.fig.canvas.draw()
+        self.updateImg1Threshold3D(self, self.smin.val)
+        
+    def button3DPrev(self, event):
+        
+        self.smin.val -= 1.0
+        self.smin.valtext.set_text('{}'.format(self.smin.val))
+        self.fig.canvas.draw()
+        self.updateImg1Threshold3D(self, self.smin.val)
 
     def updateImg2D(self, val):
         
@@ -244,15 +270,15 @@ if __name__ == "__main__":
     else:
         mat = scipy.io.loadmat(args.filename)
         logger.debug(mat.keys())
-
-        dataraw = scipy.io.loadmat(args.filename)
         
-        data = dataraw['data'] * (dataraw['segmentation'] == 1)
+        data = mat['data'] * (mat['segmentation'] == 1)
 
     ui = uiThreshold(data)
     output = ui.showPlot()
 
     scipy.io.savemat(args.outputfile, {'data':output})
+    sys.exit()
+    
 """
 
 
