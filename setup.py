@@ -5,5 +5,8 @@ setup(
         name = " ",
         version = "0.1",
         description = " ",
-        executables = [Executable("./src/organ_segmentation.py")]
+        options = {"build_exe": {"packages": ["numpy.lib.format"]}},
+        executables = [Executable("./src/cxpokus.py")]
+        #executables = [Executable("./src/organ_segmentation.py")]
         )
+        #executables = [Executable("./src/organ_segmentation.py")]
