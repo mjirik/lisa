@@ -55,40 +55,27 @@ def vesselSegmentation(data, segmentation, threshold=1185, voxelsizemm=[[1],[1],
     již vstupují filtovaná. False znamená, že vstupují filtrovaná.
     nObj: označuje kolik největších objektů budeme hledat
     """
-    # kalkulace objemove jednotky (voxel) (V = a*b*c)
+    ## kalkulace objemove jednotky (voxel) (V = a*b*c)
     voxel1 = voxelsizemm[0][0]
     voxel2 = voxelsizemm[1][0]
     voxel3 = voxelsizemm[2][0]
     voxelV = voxel1 * voxel2 * voxel3
-    print('Voxel size: ',  voxelV)
+    print('Voxel size: ', voxelV)
     
     print('Dimenze vstupu: ', numpy.ndim(data))
+    ## number je zaokrohleny 1,5 nasobek objemove jednotky na 2 desetinna mista
     number = (numpy.round((1.5 * voxelV), 2))
-    sigma = float(input('Zvolte prosim smerodatnou odchylku gaussianskeho filtru (doporuceny interval je mezi 0.0+ a ' + str(number) + ') (nezadavat mensi nez 0.0) (0.0 pro preskoceni filtrace): '))
-    print('Zadano: ', sigma)
+    ## number stanovuje doporucenou horni hranici parametru gauss. filtru
+    print('Doporucena horni hranice gaussianskeho filtru: ', number)
     
-    preparedData = data * (segmentation == 1)
-    filteredData = preparedData
-    filteredData2 = filteredData
-    
-    if(sigma < 0.0):
-        print('Chybny udaj! Nefiltruji!')    
-    else:
-        if(sigma != 0.0):
-            sigma2 = float(sigma) / voxelV
-            print('Sigma pro gauss. filtr: ', sigma2)
-            print('Filtruji...')
-            scipy.ndimage.filters.gaussian_filter(preparedData, sigma2, 0, filteredData, 'reflect', 0.0)
-            print('Filtrovani OK.')
-        else:
-            print('Preskakuji filtrovani.')
+    preparedData = data * (segmentation == 1)    
             
-    print('Nasleduje prahovani dat.')
-    uiT = uiThreshold.uiThreshold(filteredData)
-    filteredData2 = uiT.showPlot()
+    print('Nasleduje filtrovani (rozmazani) a prahovani dat.')
+    uiT = uiThreshold.uiThreshold(preparedData, number, voxelV)
+    filteredData = uiT.showPlot()
         
     print('Nasleduje binarni otevreni a uzavreni.')
-    uiB = uiBinaryClosingAndOpening.uiBinaryClosingAndOpening(filteredData2)
+    uiB = uiBinaryClosingAndOpening.uiBinaryClosingAndOpening(filteredData)
     output = uiB.showPlot()
 
     #if data.shape != output.shape:
