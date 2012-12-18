@@ -30,8 +30,23 @@ Dodatecne instalace:
 		a Scipy.
 
 
+Testování funkčnosti windows pomocí wine
+========================================
 
+    sudo apt-get install wine
+    mkdir ~/tmp/winṕython
+    wget -P ~/tmp/winpython/ http://www.python.org/ftp/python/2.7.3/python-2.7.3.msi
+    wine msiexec /i /home/mjirik/tmp/winpython/python-2.7.3.msi
 
+Next, Next, Next, Finish
+
+Balíky lze získad z následujících stránek, 
+
+http://www.lfd.uci.edu/~gohlke/pythonlibs/
+
+    
+
+win
 
 
 
