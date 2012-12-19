@@ -26,6 +26,8 @@ import pycat
 import argparse
 import py3DSeedEditor
 
+import segmentation
+
 
 def interactive_imcrop(im):
 
@@ -64,6 +66,7 @@ class OrganSegmentation():
         #igc.show_segmentation()
         self.segmentation = igc.segmentation
         self.prepare_output()
+        self.orig_segmentation = igc.get_orig_shape_segmentation()
         pass
 
     def prepare_output(self):
@@ -205,7 +208,7 @@ if __name__ == "__main__":
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
 
 
-    oseg = OrganSegmentation(args.dcmdir, working_voxelsize_mm = 8)
+    oseg = OrganSegmentation(args.dcmdir, working_voxelsize_mm = 6)
 
     oseg.interactivity()
 
@@ -222,3 +225,6 @@ if __name__ == "__main__":
     #volume_mm3 = np.sum(oseg.segmentation > 0) * np.prod(oseg.voxelsize_mm)
 
     print "Volume ", oseg.get_segmented_volume_size_mm3()
+
+    output = segmentation.vesselSegmentation(oseg.data3d, oseg.orig_segmentation)
+    

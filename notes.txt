@@ -34,7 +34,7 @@ Testování funkčnosti windows pomocí wine
 ========================================
 
     sudo apt-get install wine
-    mkdir ~/tmp/winṕython
+    mkdir ~/tmp/winpython
     wget -P ~/tmp/winpython/ http://www.python.org/ftp/python/2.7.3/python-2.7.3.msi
     wine msiexec /i /home/mjirik/tmp/winpython/python-2.7.3.msi
 
@@ -45,9 +45,23 @@ Balíky lze získad z následujících stránek,
 http://www.lfd.uci.edu/~gohlke/pythonlibs/
 
     
+Teoreticky by mohlo jít stáhnout soubory přes wget, ale občas se změní 
+název souboru (za něj se přidá znak '$'), nebo se soubor nestáhne celý
 
-win
+    wget -P ~/tmp/winpython/ http://www.lfd.uci.edu/~gohlke/pythonlibs/z86mtkth/numpy-MKL-1.6.2.win32-py2.7.exe
+    wget -P ~/tmp/winpython/ http://www.lfd.uci.edu/~gohlke/pythonlibs/z86mtkth/scipy-0.11.0.win32-py2.7.exe
 
 
+instalace pomocí pip
+
+Nejprve potřebujeme distribute a pip
+
+    wget -P ~/tmp/winpython/ http://python-distribute.org/distribute_setup.pyp
+    wine c:\\python27\\python /home/mjirik/tmp/winpython/distribute_setup.py
+
+
+
+wget -P ~/tmp/winpython/ https://raw.github.com/pypa/pip/master/contrib/get-pip.py
+wine c:\\python27\\python /home/mjirik/tmp/winpython/get-pip.py
 
 
