@@ -176,17 +176,23 @@ class uiBinaryClosingAndOpening:
             self.axbuttnext = self.fig.add_axes([0.83, 0.18, 0.04, 0.03], axisbg = self.axcolor)
             self.axbuttprev = self.fig.add_axes([0.88, 0.18, 0.04, 0.03], axisbg = self.axcolor)
             self.axbuttreset = self.fig.add_axes([0.83, 0.08, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttcontinue = self.fig.add_axes([0.90, 0.04, 0.06, 0.03], axisbg = self.axcolor)
+            self.axbuttcontinue = self.fig.add_axes([0.88, 0.08, 0.06, 0.03], axisbg = self.axcolor)
+            self.axbuttswap = self.fig.add_axes([0.05, 0.18, 0.09, 0.03], axisbg = self.axcolor)
             
             self.bnext = Button(self.axbuttnext, '+1.0')
             self.bprev = Button(self.axbuttprev, '-1.0')
             self.breset = Button(self.axbuttreset, 'Reset')
             self.bcontinue = Button(self.axbuttcontinue, 'End editing')
+            self.bswap = Button(self.axbuttswap, 'Swap operations')
             
             self.bnext.on_clicked(self.button3DNext)
             self.bprev.on_clicked(self.button3DPrev)
             self.breset.on_clicked(self.button3DReset)
             self.bcontinue.on_clicked(self.button3DContinue)
+            self.bswap.on_clicked(self.buttonSwap)
+            
+            self.state = 'firstOpening'
+            self.text = matpyplot.figtext(0.05, 0.15, 'First: opening')
             
         else:
             
@@ -198,6 +204,17 @@ class uiBinaryClosingAndOpening:
         matpyplot.show()
         
         return self.imgChanged1
+        
+    def buttonSwap(self, event):
+        
+        if(self.state == 'firstOpening'):
+            self.state = 'firstClosing'
+            matpyplot.figtext(0.05, 0.15, 'First: closing')
+        elif(self.state == 'firstClosing'):
+            self.state = 'firstOpening'
+            matpyplot.figtext(0.05, 0.15, 'First: opening')
+        
+        self.fig.canvas.draw()
         
     def button3DReset(self, event):
         
@@ -240,6 +257,7 @@ class uiBinaryClosingAndOpening:
         
     def updateImg1Binary3D(self, val):
         
+        
         self.sopen1.valtext.set_text('{}'.format(int(numpy.round(self.sopen1.val, 0))))
         self.sclose1.valtext.set_text('{}'.format(int(numpy.round(self.sclose1.val, 0))))
         
@@ -247,15 +265,29 @@ class uiBinaryClosingAndOpening:
         
         imgChanged1 = self.imgChanged
         
-        if(self.sopen1.val >= 0.1):
-            imgChanged1 = scipy.ndimage.binary_opening(self.imgChanged, structure = None, iterations = int(numpy.round(self.sopen1.val, 0)))
-        else:
-            imgChanged1 = self.imgChanged1
+        if(self.state == 'firstOpening'):
             
-        if(self.sclose1.val >= 0.1):
-            self.imgChanged1 = scipy.ndimage.binary_closing(imgChanged1, structure = None, iterations = int(numpy.round(self.sclose1.val, 0)))
-        else:
-            self.imgChanged1 = imgChanged1
+            if(self.sopen1.val >= 0.1):
+                imgChanged1 = scipy.ndimage.binary_opening(self.imgChanged, structure = None, iterations = int(numpy.round(self.sopen1.val, 0)))
+            else:
+                imgChanged1 = self.imgChanged
+                
+            if(self.sclose1.val >= 0.1):
+                self.imgChanged1 = scipy.ndimage.binary_closing(imgChanged1, structure = None, iterations = int(numpy.round(self.sclose1.val, 0)))
+            else:
+                self.imgChanged1 = imgChanged1
+            
+        elif(self.state == 'firstClosing'):
+            
+            if(self.sclose1.val >= 0.1):
+                imgChanged1 = scipy.ndimage.binary_closing(self.imgChanged, structure = None, iterations = int(numpy.round(self.sclose1.val, 0)))
+            else:
+                imgChanged1 = self.imgChanged
+            
+            if(self.sopen1.val >= 0.1):
+                self.imgChanged1 = scipy.ndimage.binary_opening(imgChanged1, structure = None, iterations = int(numpy.round(self.sopen1.val, 0)))
+            else:
+                self.imgChanged1 = imgChanged1
             
         ## Predani obrazku k vykresleni
         self.imgShow1 = numpy.amax(self.imgChanged1, 2)

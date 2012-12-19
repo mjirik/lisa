@@ -185,7 +185,7 @@ class uiThreshold:
             self.axbuttnext = self.fig.add_axes([0.81, 0.20, 0.04, 0.03], axisbg = self.axcolor)
             self.axbuttprev = self.fig.add_axes([0.86, 0.20, 0.04, 0.03], axisbg = self.axcolor)
             self.axbuttreset = self.fig.add_axes([0.81, 0.08, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttcontinue = self.fig.add_axes([0.90, 0.04, 0.04, 0.03], axisbg = self.axcolor)
+            self.axbuttcontinue = self.fig.add_axes([0.86, 0.08, 0.04, 0.03], axisbg = self.axcolor)
             
             self.bnext = Button(self.axbuttnext, '+1.0')
             self.bprev = Button(self.axbuttprev, '-1.0')
