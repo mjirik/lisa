@@ -1,0 +1,21 @@
+cmake_minimum_required (VERSION 2.6) 
+
+# from 
+# http://peekaboo-vision.blogspot.cz/2012/05/graphcuts-for-python-pygco.html
+# author: spk593
+
+PROJECT(gco)
+
+SET( gcoSources
+    GCoptimization.h GCoptimization.cpp
+    graph.h graph.cpp
+    LinkedBlockList.h LinkedBlockList.cpp
+    energy.h
+    block.h
+    maxflow.cpp )
+
+SET( LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/lib CACHE PATH
+    "Output for libraries" )
+
+ADD_LIBRARY(gco SHARED ${gcoSources})
+
