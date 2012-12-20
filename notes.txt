@@ -33,6 +33,8 @@ Dodatecne instalace:
 Testování funkčnosti windows pomocí wine
 ========================================
 
+wget by šlo nahradit ve windows pomocí příkazu xcopy
+
     sudo apt-get install wine
     mkdir ~/tmp/winpython
     wget -P ~/tmp/winpython/ http://www.python.org/ftp/python/2.7.3/python-2.7.3.msi
@@ -40,7 +42,7 @@ Testování funkčnosti windows pomocí wine
 
 Next, Next, Next, Finish
 
-Balíky lze získad z následujících stránek, 
+Balíky (numpy a scipy) lze získad z následujících stránek, 
 
 http://www.lfd.uci.edu/~gohlke/pythonlibs/
 
@@ -61,7 +63,17 @@ Nejprve potřebujeme distribute a pip
 
 
 
-wget -P ~/tmp/winpython/ https://raw.github.com/pypa/pip/master/contrib/get-pip.py
-wine c:\\python27\\python /home/mjirik/tmp/winpython/get-pip.py
+    wget -P ~/tmp/winpython/ https://raw.github.com/pypa/pip/master/contrib/get-pip.py
+    wine c:\\python27\\python /home/mjirik/tmp/winpython/get-pip.py
+
+
+cython nainstalujeme pomocí pip, možná by tak šlo instalovat i numpy a scipy
+    wine cmd
+    c:\\python27\\scripts\\pip install cython
+    c:\\python27\\scripts\\pip install matplotlib
+    exit
+
+    wget -P ~/tmp/winpython/ http://vision.csd.uwo.ca/code/gco-v3.0.zip
+    unzip /home/mjirik/tmp/winpython/gco-v3.0.zip -d/home/mjirik/tmp/winpython/gco/
 
 
