@@ -33,12 +33,20 @@ Dodatecne instalace:
 Testování funkčnosti windows pomocí wine
 ========================================
 
-wget by šlo nahradit ve windows pomocí příkazu xcopy
 
     sudo apt-get install wine
     mkdir ~/tmp/winpython
     wget -P ~/tmp/winpython/ http://www.python.org/ftp/python/2.7.3/python-2.7.3.msi
     wine msiexec /i /home/mjirik/tmp/winpython/python-2.7.3.msi
+
+    wget -P ~/tmp/winpython/  http://www.cmake.org/files/v2.8/cmake-2.8.10.2-win32-x86.exe
+    wine ~/tmp/winpython/cmake-2.8.10.2-win32-x86.exe
+
+Add CMake to system PATH for all users
+
+    wget -P ~/tmp/winpython/ http://msysgit.googlecode.com/files/Git-1.8.0-preview20121022.exe
+    wine ~/tmp/winpython/Git-1.8.0-preview20121022.exe
+
 
 Next, Next, Next, Finish
 
@@ -73,7 +81,18 @@ cython nainstalujeme pomocí pip, možná by tak šlo instalovat i numpy a scipy
     c:\\python27\\scripts\\pip install matplotlib
     exit
 
+instalace gco
+
     wget -P ~/tmp/winpython/ http://vision.csd.uwo.ca/code/gco-v3.0.zip
     unzip /home/mjirik/tmp/winpython/gco-v3.0.zip -d/home/mjirik/tmp/winpython/gco/
+
+    cd ~/tmp/winpython/
+    wine cmd
+
+git clone pycat
+
+
+
+
 
 
