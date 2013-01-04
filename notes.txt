@@ -35,7 +35,16 @@ Testování funkčnosti windows pomocí wine
 
 
     sudo apt-get install wine
+
     mkdir ~/tmp/winpython
+
+    wget -P ~/tmp/winpython/ http://msysgit.googlecode.com/files/Git-1.8.0-preview20121022.exe
+
+# Install with linux tools
+    wine ~/tmp/winpython/Git-1.8.0-preview20121022.exe
+
+
+Next, Next, Next, Finish
     wget -P ~/tmp/winpython/ http://www.python.org/ftp/python/2.7.3/python-2.7.3.msi
     wine msiexec /i /home/mjirik/tmp/winpython/python-2.7.3.msi
 
@@ -44,11 +53,6 @@ Testování funkčnosti windows pomocí wine
 
 Add CMake to system PATH for all users
 
-    wget -P ~/tmp/winpython/ http://msysgit.googlecode.com/files/Git-1.8.0-preview20121022.exe
-    wine ~/tmp/winpython/Git-1.8.0-preview20121022.exe
-
-
-Next, Next, Next, Finish
 
 Balíky (numpy a scipy) lze získad z následujících stránek, 
 
