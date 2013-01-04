@@ -74,6 +74,8 @@ def vesselSegmentation(data, segmentation, threshold=1185, voxelsizemm=[[1],[1],
     print('Nasleduje filtrovani (rozmazani) a prahovani dat.')
     if(inputSigma == -1):
         inputSigma = number
+    if(inputSigma > 2 * number):
+        inputSigma = 2 * number
     uiT = uiThreshold.uiThreshold(preparedData, number, inputSigma, voxelV)
     filteredData = uiT.showPlot()
         
