@@ -35,7 +35,7 @@ import argparse
 vessel segmentation
 ================================================================================
 """
-def vesselSegmentation(data, segmentation, threshold=1185, voxelsizemm=[[1],[1],[1]], dataFiltering=False, nObj=1):
+def vesselSegmentation(data, segmentation, threshold=1185, voxelsizemm=[[1],[1],[1]], inputSigma = -1, dataFiltering=False, nObj=1):
     """ Volumetric vessel segmentation from liver.
     data: CT (or MRI) 3D data
     segmentation: labeled image with same size as data where label:
@@ -65,13 +65,18 @@ def vesselSegmentation(data, segmentation, threshold=1185, voxelsizemm=[[1],[1],
     print('Dimenze vstupu: ', numpy.ndim(data))
     ## number je zaokrohleny 1,5 nasobek objemove jednotky na 2 desetinna mista
     number = (numpy.round((1.5 * voxelV), 2))
+
     ## number stanovuje doporucenou horni hranici parametru gauss. filtru
     print('Doporucena horni hranice gaussianskeho filtru: ', number)
     
     preparedData = data * (segmentation == 1)    
             
     print('Nasleduje filtrovani (rozmazani) a prahovani dat.')
-    uiT = uiThreshold.uiThreshold(preparedData, number, voxelV)
+    if(inputSigma == -1):
+        inputSigma = number
+    if(inputSigma > 2 * number):
+        inputSigma = 2 * number
+    uiT = uiThreshold.uiThreshold(preparedData, number, inputSigma, voxelV)
     filteredData = uiT.showPlot()
         
     print('Nasleduje binarni otevreni a uzavreni.')
@@ -164,11 +169,12 @@ if __name__ == "__main__":
     print('Hotovo.')
         
     #import pdb; pdb.set_trace()
-    output = vesselSegmentation(mat['data'], mat['segmentation'], mat['threshold'], mat['voxelsizemm'] )
+    output = vesselSegmentation(mat['data'], mat['segmentation'], mat['threshold'], mat['voxelsizemm'])
     
     try:
-        str = input('Chcete ulozit vystup?\n   ano/ne\n')
-        if(str == 'ano'):
+        cislo = input('Chcete ulozit vystup?\n1 jako ano\n0 jako ne\n')
+        if(cislo == '1'):
+            print('Ukladam vystup...')
             scipy.io.savemat(args.outputfile, {'data':output})
             print('Vystup ulozen.')
     

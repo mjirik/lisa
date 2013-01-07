@@ -41,12 +41,13 @@ uiThreshold
 """
 class uiThreshold:
 
-    def __init__(self, data, number = 100.0, voxelV = 1.0, initslice = 0, cmap = matplotlib.cm.Greys_r):
+    def __init__(self, data, number = 100.0, inputSigma = -1, voxelV = 1.0, initslice = 0, cmap = matplotlib.cm.Greys_r):
 
         inputDimension = numpy.ndim(data)
         #print('Dimenze vstupu: ',  inputDimension)
         self.cmap = cmap
         self.number = number
+        self.inputSigma = inputSigma
         self.data = data
         
         if(inputDimension == 2):
@@ -176,7 +177,7 @@ class uiThreshold:
                 
             self.smin = Slider(self.axmin, 'Minimal threshold', self.min0, self.max0, valinit = self.min0)
             self.smax = Slider(self.axmax, 'Maximal threshold', self.min0, self.max0, valinit = self.max0)
-            self.ssigma = Slider(self.axsigma, 'Sigma', 0.00, self.number * 2, valinit = self.number)
+            self.ssigma = Slider(self.axsigma, 'Sigma', 0.00, self.number * 2, valinit = self.inputSigma)
             
             self.smin.on_changed(self.updateImg1Threshold3D)
             self.smax.on_changed(self.updateImg1Threshold3D)
@@ -243,9 +244,9 @@ class uiThreshold:
         self.imgUsed = self.data
         
         ## Vykresleni novych pohledu
-        self.im1 = self.ax1.imshow(numpy.amax(self.imgUsed, 0), self.cmap)
-        self.im2 = self.ax2.imshow(numpy.amax(self.imgUsed, 1), self.cmap)
-        self.im3 = self.ax3.imshow(numpy.amax(self.imgUsed, 2), self.cmap)
+        self.im1 = self.ax1.imshow(numpy.amax(self.data, 0), self.cmap)
+        self.im2 = self.ax2.imshow(numpy.amax(self.data, 1), self.cmap)
+        self.im3 = self.ax3.imshow(numpy.amax(self.data, 2), self.cmap)
         
 #        ## Zmena maximalnich a minimalnich hodnot os prahovani
 #            ## Minimalni pouzita hodnota prahovani v obrazku
