@@ -226,5 +226,5 @@ if __name__ == "__main__":
 
     print "Volume ", oseg.get_segmented_volume_size_mm3()
 
-    output = segmentation.vesselSegmentation(oseg.data3d, oseg.orig_segmentation)
+    #output = segmentation.vesselSegmentation(oseg.data3d, oseg.orig_segmentation)
     
