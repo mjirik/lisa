@@ -7,7 +7,7 @@ tmpd=~/tmp/livertmp
 directoryx="$(dirname -- $(readlink -fn -- "$0"; echo x))"
 directory="${directoryx%x}"
 
-sudo apt-get install python-numpy python-scipy python-matplotlib python-sklearn python-dicom
+sudo apt-get install python-numpy python-scipy python-matplotlib python-sklearn python-dicom python-yaml
 # gco_python install
 # -------------------
 # 
