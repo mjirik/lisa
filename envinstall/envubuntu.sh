@@ -1,14 +1,13 @@
 #!/bin/bash 
 
-tmpdir=~/tmp/winpython
+tmpd=~/tmp/livertmp
 
 
 # get path to this script
 directoryx="$(dirname -- $(readlink -fn -- "$0"; echo x))"
 directory="${directoryx%x}"
 
-sudo apt-get install python-numpy python-scipy python-matplotlib python-sklearn
-
+sudo apt-get install python-numpy python-scipy python-matplotlib python-sklearn python-dicom
 # gco_python install
 # -------------------
 # 
@@ -18,8 +17,8 @@ sudo apt-get install python-numpy python-scipy python-matplotlib python-sklearn
 echo 'Install gco_python'
 
 sudo apt-get install cython
-mkdir $tmpdir
-cd $tmpdir
+mkdir $tmpd
+cd $tmpd
 
 git clone https://github.com/amueller/gco_python.git
 cd gco_python
