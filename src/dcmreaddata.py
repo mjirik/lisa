@@ -261,7 +261,11 @@ def dcmdirstats(dcmdir):
     """ input is dcmdir, not dirpath """
     import numpy as np
     # get series number
-    dcmdirseries = [line['SeriesNumber'] for line in dcmdir ]
+    #import pdb; pdb.set_trace()
+    try:
+        dcmdirseries = [line['SeriesNumber'] for line in dcmdir ]
+    except:
+        return 0,0
 
     bins = np.unique(dcmdirseries)
     binslist = bins.tolist()
