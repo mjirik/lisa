@@ -265,7 +265,7 @@ def dcmdirstats(dcmdir):
     try:
         dcmdirseries = [line['SeriesNumber'] for line in dcmdir ]
     except:
-        return 0,0
+        return [0],[0]
 
     bins = np.unique(dcmdirseries)
     binslist = bins.tolist()
