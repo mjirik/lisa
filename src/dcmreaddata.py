@@ -295,11 +295,12 @@ def dcmsortedlist(dirpath=None, wildcard='*.*', startpath="",
     #import dicom
     #import operator
     #import copy
+    #pdb.set_trace();
     if dcmdir == None:
         if dirpath != None:
 # TODO doplnit prevod dcmdir na filelist
 
-            pdb.set_trace();
+            #pdb.set_trace();
             dcmdir = getdicomdir(os.path.join(startpath,dirpath), 
                     writedicomdirfile)
 
