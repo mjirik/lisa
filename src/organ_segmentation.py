@@ -65,7 +65,6 @@ class OrganSegmentation():
         import sklearn
         if parse_version(sklearn.__version__) > parse_version('0.10'):
             #new versions
-            print ('hohohoh')
             cvtype_name=  'covariance_type'
         else:
             cvtype_name=  'cvtype'
