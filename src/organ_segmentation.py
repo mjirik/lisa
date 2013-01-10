@@ -59,15 +59,24 @@ class OrganSegmentation():
         
         #import pdb; pdb.set_trace()
         igc = pycat.ImageGraphCut(self.data3d, zoom = self.zoom)
-        igc.modelparams = {'type':'gmmsame','params':{'cvtype':'full', 'n_components':3}}
         igc.gcparams['pairwiseAlpha'] = 30
+# version comparison
+        from pkg_resources import parse_version
+        import sklearn
+        if parse_version(sklearn.__version__) > parse_version('0.10'):
+            #new versions
+            print ('hohohoh')
+            cvtype_name=  'covariance_type'
+        else:
+            cvtype_name=  'cvtype'
+
+        igc.modelparams = {'type':'gmmsame','params':{cvtype_name:'full', 'n_components':3}}
         igc.interactivity()
         #igc.make_gc()
         #igc.show_segmentation()
         self.segmentation = igc.segmentation
         self.prepare_output()
         self.orig_segmentation = igc.get_orig_shape_segmentation()
-        pass
 
     def prepare_output(self):
         pass
