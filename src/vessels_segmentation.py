@@ -73,7 +73,7 @@ if __name__ == "__main__":
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
 
 
-    oseg = organ_segmentation.OrganSegmentation(args.dcmdir, working_voxelsize_mm = 6)
+    oseg = organ_segmentation.OrganSegmentation(args.dcmdir, working_voxelsize_mm = 6, autocrop = True, autocrop_margin = [5,5,5])
 
     oseg.interactivity()
 
@@ -89,7 +89,17 @@ if __name__ == "__main__":
     # volume 
     #volume_mm3 = np.sum(oseg.segmentation > 0) * np.prod(oseg.voxelsize_mm)
 
-    print "Volume ", oseg.get_segmented_volume_size_mm3()
+    print ( "Volume " + str(oseg.get_segmented_volume_size_mm3()/1000000.0) + ' [l]' )
+    import py3DSeedEditor
+    import pdb; pdb.set_trace()
+    pyed = py3DSeedEditor.py3DSeedEditor(oseg.orig_scale_segmentation)
+    pyed.show()
+# information about crop
+    cri = oseg.crinfo
+    oseg.data3d = oseg.data3d[cri[0][0]:cri[0][1],cri[1][0]:cri[1][1],cri[2][0]:cri[2][1]]
+    pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d)
+    pyed.show()
+    # oseg.orig_scale_segmentation
 
-    output = segmentation.vesselSegmentation(oseg.data3d, oseg.orig_segmentation)
+    output = segmentation.vesselSegmentation(oseg.data3d, oseg.orig_scale_segmentation)
     

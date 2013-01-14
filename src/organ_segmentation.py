@@ -37,7 +37,7 @@ def interactive_imcrop(im):
 
 
 class OrganSegmentation():
-    def __init__(self, datadir, working_voxelsize_mm = 0.25, SeriesNumber = None):
+    def __init__(self, datadir, working_voxelsize_mm = 0.25, SeriesNumber = None, autocrop = True, autocrop_margin = [0,0,0], ):
         
         self.datadir = datadir
         self.working_voxelsize_mm = working_voxelsize_mm
@@ -45,6 +45,9 @@ class OrganSegmentation():
         # TODO uninteractive Serie selection
         self.data3d, self.metadata = dcmreaddata.dcm_read_from_dir(datadir)
         self.voxelsize_mm = self.metadata['voxelsizemm']
+        self.autocrop = autocrop
+        self.autocrop_margin = autocrop_margin
+        self.crinfo = [[0,-1],[0,-1],[0,-1]]
         
         if np.isscalar(working_voxelsize_mm):
             working_voxelsize_mm = np.ones([3]) * working_voxelsize_mm
@@ -74,8 +77,12 @@ class OrganSegmentation():
         #igc.make_gc()
         #igc.show_segmentation()
         self.segmentation = igc.segmentation
-        self.prepare_output()
-        self.orig_segmentation = igc.get_orig_shape_segmentation()
+        if self.autocrop == None:
+            self.orig_scale_segmentation = igc.get_orig_shape_segmentation()
+        else:
+            self.orig_scale_segmentation, self.crinfo = igc.get_orig_shape_cropped_segmentation(self.autocrop_margin)
+        #self.prepare_output()
+        #self.orig_segmentation = igc.get_orig_shape_segmentation()
 
     def prepare_output(self):
         pass
@@ -191,6 +198,8 @@ if __name__ == "__main__":
             help='path to data dir')
     parser.add_argument('-d', '--debug', action='store_true',
             help='run in debug mode')
+    parser.add_argument('-vs', '--voxelsizemm',default = 6,
+            help='Insert working voxelsize ')
     parser.add_argument('-t', '--tests', action='store_true', 
             help='run unittest')
     parser.add_argument('-ed', '--exampledata', action='store_true', 
@@ -216,9 +225,10 @@ if __name__ == "__main__":
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
 
 
-    oseg = OrganSegmentation(args.dcmdir, working_voxelsize_mm = 6)
+    oseg = OrganSegmentation(args.dcmdir, working_voxelsize_mm = args.voxelsizemm)
 
     oseg.interactivity()
+
 
     #print ("Data size: " + str(data3d.nbytes) + ', shape: ' + str(data3d.shape) )
 
@@ -232,7 +242,7 @@ if __name__ == "__main__":
     # volume 
     #volume_mm3 = np.sum(oseg.segmentation > 0) * np.prod(oseg.voxelsize_mm)
 
-    print "Volume ", oseg.get_segmented_volume_size_mm3()
+    print ( "Volume " + str(oseg.get_segmented_volume_size_mm3()/1000000.0) + ' [l]' )
 
     #output = segmentation.vesselSegmentation(oseg.data3d, oseg.orig_segmentation)
     
