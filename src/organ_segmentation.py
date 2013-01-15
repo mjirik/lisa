@@ -27,6 +27,7 @@ import argparse
 import py3DSeedEditor
 
 import segmentation
+import qmisc
 
 
 def interactive_imcrop(im):
@@ -37,10 +38,18 @@ def interactive_imcrop(im):
 
 
 class OrganSegmentation():
-    def __init__(self, datadir, working_voxelsize_mm = 0.25, SeriesNumber = None, autocrop = True, autocrop_margin = [0,0,0], ):
+    def __init__(self, datadir, working_voxelsize_mm = 0.25, SeriesNumber = None, autocrop = True, autocrop_margin = [0,0,0], manualroi = True ):
+        """
+        manualroi: manual set of ROI before data processing, there is a 
+             problem with correct coordinates
+        """
         
         self.datadir = datadir
-        self.working_voxelsize_mm = working_voxelsize_mm
+        if np.isscalar(working_voxelsize_mm):
+            self.working_voxelsize_mm = [working_voxelsize_mm] * 3
+        else:
+            self.working_voxelsize_mm = working_voxelsize_mm
+
 
         # TODO uninteractive Serie selection
         self.data3d, self.metadata = dcmreaddata.dcm_read_from_dir(datadir)
@@ -48,6 +57,12 @@ class OrganSegmentation():
         self.autocrop = autocrop
         self.autocrop_margin = autocrop_margin
         self.crinfo = [[0,-1],[0,-1],[0,-1]]
+
+# manualcrop
+        if manualroi:
+# @todo opravit souřadný systém v součinnosti s autocrop
+            self.data3d, self.crinfo = qmisc.manualcrop(self.data3d)
+
         
         if np.isscalar(working_voxelsize_mm):
             working_voxelsize_mm = np.ones([3]) * working_voxelsize_mm
@@ -93,12 +108,14 @@ class OrganSegmentation():
         Compute segmented volume in mm3, based on subsampeled data 
         """
         # neumim napsat typ lip
-        if type(self.working_voxelsize_mm) == type(3):
-            voxelvolume_mm3 = np.power(self.working_voxelsize_mm,3)
-            #print 'jedna D'
-            
-        elif np.prod(self.working_voxelsize_mm.shape) == 3:
-            voxelvolume_mm3 = np.prod(self.working_voxelsize_mm)
+#        if nptype(self.working_voxelsize_mm) == type(3):
+#        #np.isscalar()
+#            voxelvolume_mm3 = np.power(self.working_voxelsize_mm,3)
+#            #print 'jedna D'
+#            
+#        elif np.prod(self.working_voxelsize_mm.shape) == 3:
+#            voxelvolume_mm3 = np.prod(self.working_voxelsize_mm)
+        voxelvolume_mm3 = np.prod(self.working_voxelsize_mm)
         volume_mm3 = np.sum(self.segmentation > 0) * voxelvolume_mm3
         #print voxelvolume_mm3 
         #print volume_mm3
@@ -192,14 +209,17 @@ if __name__ == "__main__":
     #logger.debug('input params')
 
     # input parser
-    parser = argparse.ArgumentParser(description='Segment vessels from liver')
+    parser = argparse.ArgumentParser(description=
+            'Segment vessels from liver \n \npython organ_segmentation.py\n \n python organ_segmentation.py -mroi -vs 0.6')
     parser.add_argument('-dd','--dcmdir',
             default=None,
             help='path to data dir')
     parser.add_argument('-d', '--debug', action='store_true',
             help='run in debug mode')
-    parser.add_argument('-vs', '--voxelsizemm',default = 6,
+    parser.add_argument('-vs', '--voxelsizemm',default = 6, type = float,
             help='Insert working voxelsize ')
+    parser.add_argument('-mroi', '--manualroi', action='store_true',
+            help='manual crop before data processing')
     parser.add_argument('-t', '--tests', action='store_true', 
             help='run unittest')
     parser.add_argument('-ed', '--exampledata', action='store_true', 
@@ -225,7 +245,7 @@ if __name__ == "__main__":
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
 
 
-    oseg = OrganSegmentation(args.dcmdir, working_voxelsize_mm = args.voxelsizemm)
+    oseg = OrganSegmentation(args.dcmdir, working_voxelsize_mm = args.voxelsizemm, manualroi = args.manualroi)
 
     oseg.interactivity()
 

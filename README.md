@@ -34,4 +34,10 @@ You can find more install notes in file 'notes.txt'
 Run
 ---
 
-    python ./src/organ_segmentation.py 
+    cd src 
+
+    python organ_segmentation.py 
+
+for tumor volume measurement use:
+
+    python organ_segmentation.py -mroi -vs 0.8
