@@ -132,7 +132,7 @@ def obj_to_file(obj, filename = 'annotation.yaml', filetype = 'yaml'):
         logger.error('Unknown filetype')
     f.close
 
-def filesindir(dirpath, wildcard="*.*", startpath=None):
+def filesindir(dirpath, wildcard="*", startpath=None):
     """ Function generates list of files from specific dir
 
     filesindir(dirpath, wildcard="*.*", startpath=None)
@@ -278,7 +278,7 @@ def dcmdirstats(dcmdir):
     #pdb.set_trace();
     return counts, bins
 
-def dcmsortedlist(dirpath=None, wildcard='*.*', startpath="", 
+def dcmsortedlist(dirpath=None, wildcard='*', startpath="", 
         dcmdir=None, writedicomdirfile = True , SeriesNumber = None):
     """ Function returns sorted list of dicom files. File paths are organized by
     SeriesUID, StudyUID and FrameUID
