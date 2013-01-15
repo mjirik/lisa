@@ -216,7 +216,7 @@ if __name__ == "__main__":
             help='path to data dir')
     parser.add_argument('-d', '--debug', action='store_true',
             help='run in debug mode')
-    parser.add_argument('-vs', '--voxelsizemm',default = 6, type = float,
+    parser.add_argument('-vs', '--voxelsizemm',default = 5, type = float,
             help='Insert working voxelsize ')
     parser.add_argument('-mroi', '--manualroi', action='store_true',
             help='manual crop before data processing')
