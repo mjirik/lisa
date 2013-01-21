@@ -38,7 +38,7 @@ def interactive_imcrop(im):
 
 
 class OrganSegmentation():
-    def __init__(self, datadir, working_voxelsize_mm = 0.25, SeriesNumber = None, autocrop = True, autocrop_margin = [0,0,0], manualroi = False):
+    def __init__(self, datadir, working_voxelsize_mm = 0.25, SeriesNumber = None, autocrop = True, autocrop_margin = [0,0,0], manualroi = False, texture_analysis=None):
         """
         manualroi: manual set of ROI before data processing, there is a 
              problem with correct coordinates
@@ -57,6 +57,7 @@ class OrganSegmentation():
         self.autocrop = autocrop
         self.autocrop_margin = autocrop_margin
         self.crinfo = [[0,-1],[0,-1],[0,-1]]
+        self.texture_analysis = texture_analysis
 
 # manualcrop
         if manualroi:
@@ -96,6 +97,13 @@ class OrganSegmentation():
             self.orig_scale_segmentation = igc.get_orig_shape_segmentation()
         else:
             self.orig_scale_segmentation, self.crinfo = igc.get_orig_shape_cropped_segmentation(self.autocrop_margin)
+
+        if not self.texture_analysis == None:
+            import texture_analysis
+            # doplnit nějaký kód, parametry atd
+            self.orig_scale_segmentation = texture_analysis.segmentation(self.data3d, self.orig_scale_segmentation, params = self.texture_analysis)
+#
+            pass
         #self.prepare_output()
         #self.orig_segmentation = igc.get_orig_shape_segmentation()
 
@@ -222,6 +230,8 @@ if __name__ == "__main__":
             help='manual crop before data processing')
     parser.add_argument('-t', '--tests', action='store_true', 
             help='run unittest')
+    parser.add_argument('-tx', '--textureanalysis', action='store_true', 
+            help='run with texture analysis')
     parser.add_argument('-ed', '--exampledata', action='store_true', 
             help='run unittest')
     args = parser.parse_args()
@@ -245,7 +255,7 @@ if __name__ == "__main__":
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
 
 
-    oseg = OrganSegmentation(args.dcmdir, working_voxelsize_mm = args.voxelsizemm, manualroi = args.manualroi)
+    oseg = OrganSegmentation(args.dcmdir, working_voxelsize_mm = args.voxelsizemm, manualroi = args.manualroi, texture_analysis = args.textureanalysis)
 
     oseg.interactivity()
 
