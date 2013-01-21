@@ -173,20 +173,26 @@ class uiBinaryClosingAndOpening:
             self.sopen1.valtext.set_text('{}'.format(int(self.sopen1.val)))
             self.sclose1.valtext.set_text('{}'.format(int(self.sclose1.val)))
             
-            self.axbuttnext = self.fig.add_axes([0.83, 0.18, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttprev = self.fig.add_axes([0.88, 0.18, 0.04, 0.03], axisbg = self.axcolor)
+            self.axbuttnextopening = self.fig.add_axes([0.83, 0.18, 0.04, 0.03], axisbg = self.axcolor)
+            self.axbuttprevopening = self.fig.add_axes([0.88, 0.18, 0.04, 0.03], axisbg = self.axcolor)
+            self.axbuttnextclosing = self.fig.add_axes([0.83, 0.14, 0.04, 0.03], axisbg = self.axcolor)
+            self.axbuttprevclosing = self.fig.add_axes([0.88, 0.14, 0.04, 0.03], axisbg = self.axcolor)
             self.axbuttreset = self.fig.add_axes([0.83, 0.08, 0.04, 0.03], axisbg = self.axcolor)
             self.axbuttcontinue = self.fig.add_axes([0.88, 0.08, 0.06, 0.03], axisbg = self.axcolor)
             self.axbuttswap = self.fig.add_axes([0.05, 0.18, 0.09, 0.03], axisbg = self.axcolor)
             
-            self.bnext = Button(self.axbuttnext, '+1.0')
-            self.bprev = Button(self.axbuttprev, '-1.0')
+            self.bnextopening = Button(self.axbuttnextopening, '+1.0')
+            self.bprevopening = Button(self.axbuttprevopening, '-1.0')
+            self.bnextclosing = Button(self.axbuttnextclosing, '+1.0')
+            self.bprevclosing = Button(self.axbuttprevclosing, '-1.0')
             self.breset = Button(self.axbuttreset, 'Reset')
             self.bcontinue = Button(self.axbuttcontinue, 'End editing')
             self.bswap = Button(self.axbuttswap, 'Swap operations')
             
-            self.bnext.on_clicked(self.button3DNext)
-            self.bprev.on_clicked(self.button3DPrev)
+            self.bnextopening.on_clicked(self.button3DNextOpening)
+            self.bprevopening.on_clicked(self.button3DPrevOpening)
+            self.bnextclosing.on_clicked(self.button3DNextClosing)
+            self.bprevclosing.on_clicked(self.button3DPrevClosing)
             self.breset.on_clicked(self.button3DReset)
             self.bcontinue.on_clicked(self.button3DContinue)
             self.bswap.on_clicked(self.buttonSwap)
@@ -209,10 +215,10 @@ class uiBinaryClosingAndOpening:
         
         if(self.state == 'firstOpening'):
             self.state = 'firstClosing'
-            matpyplot.figtext(0.05, 0.15, 'First: closing')
+            #matpyplot.figtext(0.05, 0.15, 'First: closing')
         elif(self.state == 'firstClosing'):
             self.state = 'firstOpening'
-            matpyplot.figtext(0.05, 0.15, 'First: opening')
+            #matpyplot.figtext(0.05, 0.15, 'First: opening')
         
         self.fig.canvas.draw()
         
@@ -235,14 +241,40 @@ class uiBinaryClosingAndOpening:
         
         matpyplot.clf()
         matpyplot.close()
+         
+    def button3DNextOpening(self, event):
         
-    def button3DNext(self, event):
+        self.sopen1.val += 1.0
+        self.sopen1.val = (numpy.round(self.sopen1.val, 2))
+        self.sopen1.valtext.set_text('{}'.format(self.sopen1.val))
+        self.fig.canvas.draw()
+        self.updateImg1Binary3D(self)
         
-        pass
+    def button3DPrevOpening(self, event):
         
-    def button3DPrev(self, event):
+        if(self.sopen1.val >= 1.0):
+            self.sopen1.val -= 1.0
+            self.sopen1.val = (numpy.round(self.sopen1.val, 2))
+            self.sopen1.valtext.set_text('{}'.format(self.sopen1.val))
+            self.fig.canvas.draw()
+            self.updateImg1Binary3D(self)        
         
-        pass
+    def button3DNextClosing(self, event):
+        
+        self.sclose1.val += 1.0
+        self.sclose1.val = (numpy.round(self.sclose1.val, 2))
+        self.sclose1.valtext.set_text('{}'.format(self.sclose1.val))
+        self.fig.canvas.draw()
+        self.updateImg1Binary3D(self)
+        
+    def button3DPrevClosing(self, event):
+        
+        if(self.sclose1.val >= 1.0):
+            self.sclose1.val -= 1.0
+            self.sclose1.val = (numpy.round(self.sclose1.val, 2))
+            self.sclose1.valtext.set_text('{}'.format(self.sclose1.val))
+            self.fig.canvas.draw()
+            self.updateImg1Binary3D(self)
 
     def updateImg2D(self, val):
         

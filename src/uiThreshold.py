@@ -8,7 +8,6 @@ Author:      Pavel Volkovinsky (volkovinsky.pavel@gmail.com)
 
 Created:     08.11.2012
 Copyright:   (c) Pavel Volkovinsky 2012
-Licence:     <your licence>
 ================================================================================
 """
 
@@ -122,8 +121,12 @@ class uiThreshold:
         elif(inputDimension == 3):
             
             self.voxelV = voxelV
+            self.imgUsed = data
+            self.imgChanged = self.imgUsed
+            self.originalData = data
+            self.lastSigma = -1.0
             
-            ## Zakladni informace o obrazcich (+ statisticke)
+            ## Zakladni informace o datech
             """
             print('Image dtype: ', imgUsed.dtype)
             print('Image size: ', imgUsed.size)
@@ -133,9 +136,6 @@ class uiThreshold:
             print('Variance: ', imgUsed.var())
             print('Standard deviation: ', imgUsed.std())
             """
-            
-            self.imgUsed = data
-            self.imgChanged = self.imgUsed
             
             #self.imgMin = numpy.min(self.imgUsed)
             #self.imgMax = numpy.max(self.imgUsed)
@@ -215,10 +215,13 @@ class uiThreshold:
         sigma = float(self.ssigma.val) / self.voxelV
         
         ## Filtrovani
-        images = self.data
-        imgUsed = images
-        scipy.ndimage.filters.gaussian_filter(images, sigma, 0, imgUsed, 'reflect', 0.0)
-        self.imgUsed = imgUsed
+        if(self.lastSigma != sigma):
+            images = self.data
+            imgUsed = images
+            scipy.ndimage.filters.gaussian_filter(images, sigma, 0, imgUsed, 'reflect', 0.0)
+            self.imgUsed = imgUsed
+            ## Ulozeni posledni hodnoty sigma pro neopakovani stejne operace
+            self.lastSigma = sigma
             
         ## Vykresleni novych pohledu
         self.im1 = self.ax1.imshow(numpy.amax(self.imgUsed, 0), self.cmap)
@@ -241,12 +244,12 @@ class uiThreshold:
         
     def button3DReset(self, event):
         
-        self.imgUsed = self.data
-        
         ## Vykresleni novych pohledu
-        self.im1 = self.ax1.imshow(numpy.amax(self.data, 0), self.cmap)
-        self.im2 = self.ax2.imshow(numpy.amax(self.data, 1), self.cmap)
-        self.im3 = self.ax3.imshow(numpy.amax(self.data, 2), self.cmap)
+        self.im1 = self.ax1.imshow(numpy.amax(self.originalData, 0), self.cmap)
+        self.im2 = self.ax2.imshow(numpy.amax(self.originalData, 1), self.cmap)
+        self.im3 = self.ax3.imshow(numpy.amax(self.originalData, 2), self.cmap)
+        
+        self.imgUsed = self.originalData
         
 #        ## Zmena maximalnich a minimalnich hodnot os prahovani
 #            ## Minimalni pouzita hodnota prahovani v obrazku

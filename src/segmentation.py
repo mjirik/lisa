@@ -8,7 +8,6 @@ Author:      Pavel Volkovinsky (volkovinsky.pavel@gmail.com)
 
 Created:     08.11.2012
 Copyright:   (c) Pavel Volkovinsky 2012
-Licence:     <your licence>
 ================================================================================
 """
 
