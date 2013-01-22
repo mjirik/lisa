@@ -60,7 +60,7 @@ elif sys.platform.startswith('win'):
 
     import pdb; pdb.set_trace()
 
-    subprocess.call('./envinstall/envwindows.bat')
+    subprocess.call('envinstall\envwindows.bat')
 
 
 # update submodules codes
