@@ -1,9 +1,13 @@
-#import urllib.request
-import urllib
 import os
 import zipfile
 import subprocess
 import sys
+
+if sys.version_info < (3,0):
+    import urllib as urllibr
+else:
+    import urllib.request as urllibr
+
 
 
 
@@ -20,7 +24,7 @@ url =  "http://www.mathworks.com/matlabcentral/fileexchange/2762-dicom-example-f
 
 local_file_name = './sample_data/head.zip'
 
-urllib.urlretrieve(url, local_file_name)
+urllibr.urlretrieve(url, local_file_name)
 
 datafile = zipfile.ZipFile(local_file_name)
 datafile.extractall('./sample_data/')
@@ -39,13 +43,16 @@ elif sys.platform.startswith('win'):
         pass
             
     local_file_name = './tmp/git-1.8.0.exe'
-    urllib.urlretrieve(url, local_file_name)
+    urllibr.urlretrieve(url, local_file_name)
     subprocess.call(local_file_name)
 
     # install MinGW
+    # pomoci mingw-get tohle moc nefunguje
+    """
     url = "http://downloads.sourceforge.net/project/mingw/Installer/mingw-get/mingw-get-0.5-beta-20120426-1/mingw-get-0.5-mingw32-beta-20120426-1-bin.zip?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fmingw%2Ffiles%2FInstaller%2Fmingw-get%2Fmingw-get-0.5-beta-20120426-1%2Fmingw-get-0.5-mingw32-beta-20120426-1-bin.zip%2Fdownload%3Fuse_mirror%3Dgarr%26r%3D%26use_mirror%3Dgarr&ts=1358892903&use_mirror=switch"
     local_file_name = './tmp/mingw-get.zip'
-    urllib.urlretrieve(url, local_file_name)
+    urllibr.urlretrieve(url, local_file_name)
+
 
     try:
         os.mkdir("./tmp/mingw-get")
@@ -57,6 +64,13 @@ elif sys.platform.startswith('win'):
     subprocess.call("./tmp/mingw-get/bin/mingw-get.exe install mingw-get")
     subprocess.call("./tmp/mingw-get/bin/mingw-get.exe install gcc")
     subprocess.call("./tmp/mingw-get/bin/mingw-get.exe install g++")
+    """
+    # pomoci mingw-get-inst
+    #print("C Compiler, maybe C++ Compiler, MSYS Basic System, MinGW Developer ToolKit")
+    #url = "http://downloads.sourceforge.net/project/mingw/Installer/mingw-get-inst/mingw-get-inst-20120426/mingw-get-inst-20120426.exe?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fmingw%2Ffiles%2Flatest%2Fdownload%3Fsource%3Dfiles&ts=1358934475&use_mirror=freefr"
+    #local_file_name = './tmp/mingw-get-inst.exe'
+    #urllibr.urlretrieve(url, local_file_name)
+    #subprocess.call(local_file_name)
 
     import pdb; pdb.set_trace()
 
