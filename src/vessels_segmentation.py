@@ -91,15 +91,28 @@ if __name__ == "__main__":
 
     print ( "Volume " + str(oseg.get_segmented_volume_size_mm3()/1000000.0) + ' [l]' )
     import py3DSeedEditor
-    import pdb; pdb.set_trace()
     pyed = py3DSeedEditor.py3DSeedEditor(oseg.orig_scale_segmentation)
     pyed.show()
 # information about crop
     cri = oseg.crinfo
     oseg.data3d = oseg.data3d[cri[0][0]:cri[0][1],cri[1][0]:cri[1][1],cri[2][0]:cri[2][1]]
-    pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d)
+    pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour = oseg.orig_scale_segmentation)
     pyed.show()
     # oseg.orig_scale_segmentation
 
-    output = segmentation.vesselSegmentation(oseg.data3d, oseg.orig_scale_segmentation, inputSigma = 6)
+    output = segmentation.vesselSegmentation(oseg.data3d, oseg.orig_scale_segmentation, inputSigma = 6, dilationIterations = 2)
     
+
+    alldata = {}
+    alldata['data3d'] = oseg.data3d
+    alldata['crinfo'] = oseg.crinfo
+    alldata['segmentation'] = oseg.orig_scale_segmentation
+    alldata['segmentation'][output==1] = 3
+
+    import pdb; pdb.set_trace()
+    pyed = py3DSeedEditor.py3DSeedEditor(alldata['data3d'],  contour=alldata['segmentation'])
+    pyed.show()
+
+    import misc
+
+    misc.obj_to_file(alldata, "out", filetype = 'pickle')
