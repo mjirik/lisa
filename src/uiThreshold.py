@@ -40,6 +40,12 @@ uiThreshold
 """
 class uiThreshold:
 
+    ## data - data pro prahovani, se kterymi se pracuje
+    ## number - maximalni hodnota slideru pro gauss. filtrovani (max sigma)
+    ## inputSigma - pocatecni hodnota pro gauss. filtr
+    ## voxelV - objemova jednotka jednoho voxelu
+    ## initslice - PROZATIM NEPOUZITO
+    ## cmap - grey
     def __init__(self, data, number = 100.0, inputSigma = -1, voxelV = 1.0, initslice = 0, cmap = matplotlib.cm.Greys_r):
 
         inputDimension = numpy.ndim(data)
@@ -168,31 +174,34 @@ class uiThreshold:
             self.axmax  = self.fig.add_axes([0.20, 0.16, 0.55, 0.03], axisbg = self.axcolor)
             self.axsigma = self.fig.add_axes([0.20, 0.08, 0.55, 0.03], axisbg = self.axcolor)
             
-            ## Vytvoreni slideru
-                ## Minimalni pouzita hodnota prahovani v obrazku
+            ## Minimalni pouzita hodnota prahovani v obrazku
             self.min0 = numpy.amin(self.imgUsed)
-                ## Maximalni pouzita hodnota prahovani v obrazku
+            ## Maximalni pouzita hodnota prahovani v obrazku
             self.max0 = numpy.amax(self.imgUsed)
-                ## Vlastni vytvoreni slideru
                 
+            ## Vlastni vytvoreni slideru
             self.smin = Slider(self.axmin, 'Minimal threshold', self.min0, self.max0, valinit = self.min0)
             self.smax = Slider(self.axmax, 'Maximal threshold', self.min0, self.max0, valinit = self.max0)
             self.ssigma = Slider(self.axsigma, 'Sigma', 0.00, self.number * 2, valinit = self.inputSigma)
             
+            ## Funkce slideru pri zmene jeho hodnoty
             self.smin.on_changed(self.updateImg1Threshold3D)
             self.smax.on_changed(self.updateImg1Threshold3D)
             self.ssigma.on_changed(self.updateImgFilter)
             
+            ## Zalozeni mist pro tlacitka
             self.axbuttnext = self.fig.add_axes([0.81, 0.20, 0.04, 0.03], axisbg = self.axcolor)
             self.axbuttprev = self.fig.add_axes([0.86, 0.20, 0.04, 0.03], axisbg = self.axcolor)
             self.axbuttreset = self.fig.add_axes([0.81, 0.08, 0.04, 0.03], axisbg = self.axcolor)
             self.axbuttcontinue = self.fig.add_axes([0.86, 0.08, 0.04, 0.03], axisbg = self.axcolor)
             
+            ## Zalozeni tlacitek
             self.bnext = Button(self.axbuttnext, '+1.0')
             self.bprev = Button(self.axbuttprev, '-1.0')
             self.breset = Button(self.axbuttreset, 'Reset')
             self.bcontinue = Button(self.axbuttcontinue, 'Next UI')
             
+            ## Funkce tlacitek pri jejich aktivaci
             self.bnext.on_clicked(self.button3DNext)
             self.bprev.on_clicked(self.button3DPrev)
             self.breset.on_clicked(self.button3DReset)
@@ -203,6 +212,9 @@ class uiThreshold:
             print('Spatny vstup.\nDimenze vstupu neni 2 ani 3.\nUkoncuji prahovani.')
 
     def showPlot(self):
+        
+        ## Provedeni pocatecniho gauss. filtrovani
+        self.updateImgFilter(self)
         
         ## Zobrazeni plot (figure)
         matpyplot.show()
@@ -223,17 +235,17 @@ class uiThreshold:
             ## Ulozeni posledni hodnoty sigma pro neopakovani stejne operace
             self.lastSigma = sigma
             
-        ## Vykresleni novych pohledu
+        ## Vykresleni novych pohledu z filtrovani
         self.im1 = self.ax1.imshow(numpy.amax(self.imgUsed, 0), self.cmap)
         self.im2 = self.ax2.imshow(numpy.amax(self.imgUsed, 1), self.cmap)
         self.im3 = self.ax3.imshow(numpy.amax(self.imgUsed, 2), self.cmap)
         
 #        ## Zmena maximalnich a minimalnich hodnot os prahovani
-#            ## Minimalni pouzita hodnota prahovani v obrazku
+#        ## Minimalni pouzita hodnota prahovani v obrazku
 #        min0 = numpy.amin(self.imgUsed)
-#            ## Maximalni pouzita hodnota prahovani v obrazku
+#        ## Maximalni pouzita hodnota prahovani v obrazku
 #        max0 = numpy.amax(self.imgUsed)
-#            ## Vlastni vytvoreni slideru 
+#        ## Vlastni vytvoreni slideru 
 #        self.smin = Slider(self.axmin, 'Minimal threshold', min0, max0, valinit = min0)
 #        self.smax = Slider(self.axmax, 'Maximal threshold', min0, max0, valinit = max0)
 #        self.smin.on_changed(self.updateImg1Threshold3D)
@@ -244,11 +256,12 @@ class uiThreshold:
         
     def button3DReset(self, event):
         
-        ## Vykresleni novych pohledu
+        ## Vykresleni novych pohledu z originalnich dat
         self.im1 = self.ax1.imshow(numpy.amax(self.originalData, 0), self.cmap)
         self.im2 = self.ax2.imshow(numpy.amax(self.originalData, 1), self.cmap)
         self.im3 = self.ax3.imshow(numpy.amax(self.originalData, 2), self.cmap)
         
+        ## Prevzeti originalnich dat
         self.imgUsed = self.originalData
         
 #        ## Zmena maximalnich a minimalnich hodnot os prahovani
@@ -264,6 +277,7 @@ class uiThreshold:
 #        self.smax.on_changed(self.updateImg1Threshold3D)
 #        self.ssigma.on_changed(self.updateImgFilter)
 
+        ## Nastaveni hodnot slideru
         self.smin.val = (numpy.round(self.min0, 2))
         self.smin.valtext.set_text('{}'.format(self.smin.val))
         self.smax.val = (numpy.round(self.max0, 2))
@@ -294,17 +308,6 @@ class uiThreshold:
         self.smin.valtext.set_text('{}'.format(self.smin.val))
         self.fig.canvas.draw()
         self.updateImg1Threshold3D(self) #self, self.smin.val
-
-    def updateImg2D(self, val):
-        
-        ## Prahovani (smin, smax)
-        img1 = self.imgUsed.copy() > self.smin.val
-        self.imgChanged = img1 #< self.smax.val
-        
-        ## Predani obrazku k vykresleni
-        self.im1 = self.ax1.imshow(self.imgChanged, self.cmap)
-        ## Prekresleni
-        self.fig.canvas.draw()
         
     def updateImg1Threshold3D(self, val):
         
@@ -316,6 +319,17 @@ class uiThreshold:
         self.im2 = self.ax2.imshow(numpy.amax(self.imgChanged, 1), self.cmap)
         self.im3 = self.ax3.imshow(numpy.amax(self.imgChanged, 2), self.cmap)
         
+        ## Prekresleni
+        self.fig.canvas.draw()
+        
+    def updateImg2D(self, val):
+        
+        ## Prahovani (smin, smax)
+        img1 = self.imgUsed.copy() > self.smin.val
+        self.imgChanged = img1 #< self.smax.val
+        
+        ## Predani obrazku k vykresleni
+        self.im1 = self.ax1.imshow(self.imgChanged, self.cmap)
         ## Prekresleni
         self.fig.canvas.draw()
     

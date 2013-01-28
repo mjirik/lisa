@@ -38,6 +38,9 @@ uiBinaryClosingAndOpening
 """
 class uiBinaryClosingAndOpening:
 
+    ## data - data pro operace binary closing a opening, se kterymi se pracuje
+    ## initslice - PROZATIM NEPOUZITO
+    ## cmap - grey
     def __init__(self, data, initslice = 0, cmap = matplotlib.cm.Greys_r):
 
         inputDimension = numpy.ndim(data)
@@ -289,14 +292,16 @@ class uiBinaryClosingAndOpening:
         
     def updateImg1Binary3D(self, val):
         
-        
+        ## Nastaveni hodnot slideru
         self.sopen1.valtext.set_text('{}'.format(int(numpy.round(self.sopen1.val, 0))))
         self.sclose1.valtext.set_text('{}'.format(int(numpy.round(self.sclose1.val, 0))))
         
+        ## Prekresleni
         self.fig.canvas.draw()
         
         imgChanged1 = self.imgChanged
         
+        ## Prvni operace opening, pote closing
         if(self.state == 'firstOpening'):
             
             if(self.sopen1.val >= 0.1):
@@ -309,6 +314,7 @@ class uiBinaryClosingAndOpening:
             else:
                 self.imgChanged1 = imgChanged1
             
+        ## Prvni operace closing, pote opening
         elif(self.state == 'firstClosing'):
             
             if(self.sclose1.val >= 0.1):

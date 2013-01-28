@@ -68,6 +68,10 @@ def vesselSegmentation(data, segmentation, threshold=1185, voxelsizemm=[[1],[1],
     ## number stanovuje doporucenou horni hranici parametru gauss. filtru
     print('Doporucena horni hranice gaussianskeho filtru: ', number)
     
+    ## operace eroze nad samotnymi jatry
+    segmentation = scipy.ndimage.binary_erosion(segmentation)
+    
+    ## ziskani dat (jater)
     preparedData = data * (segmentation == 1)    
             
     print('Nasleduje filtrovani (rozmazani) a prahovani dat.')
