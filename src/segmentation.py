@@ -34,7 +34,16 @@ import argparse
 vessel segmentation
 ================================================================================
 """
-def vesselSegmentation(data, segmentation, threshold=1185, voxelsizemm=[[1],[1],[1]], inputSigma = -1, dataFiltering=False, nObj=1):
+
+## data - cela data
+## segmentation - zakladni oblast pro segmentaci
+## threshold - prah
+## voxelsizemm - (vektor o hodnote 3) rozmery jednoho voxelu
+## inputSigma - pocatecni hodnota pro prahovani
+## dilationIterations - pocet operaci dilation nad zakladni oblasti pro segmentaci ("segmantation")
+## dataFiltering - PROZATIM NEPOUZITO - oznacuje, jestli maji data byt filtrovana nebo zda uz jsou filtrovana
+## nObj - PROZATIM NEPOUZITO - oznacuje, kolik nejvetsich objektu se ma vyhledat
+def vesselSegmentation(data, segmentation, threshold=1185, voxelsizemm=[[1],[1],[1]], inputSigma = -1, dilationIterations = 20, dataFiltering=False, nObj=1):
     """ Volumetric vessel segmentation from liver.
     data: CT (or MRI) 3D data
     segmentation: labeled image with same size as data where label:
@@ -49,12 +58,8 @@ def vesselSegmentation(data, segmentation, threshold=1185, voxelsizemm=[[1],[1],
     ignorovat žebra.
     Proměnné threshold, dataFiltering a nObj se postupně pokusíme eliminovat a
     navrhnout je automaticky.
-    threshold: ručně určený práh
-    dataFiltering: označuje, jestli budou data filtrována uvnitř funkce, nebo
-    již vstupují filtovaná. False znamená, že vstupují filtrovaná.
-    nObj: označuje kolik největších objektů budeme hledat
     """
-    ## kalkulace objemove jednotky (voxel) (V = a*b*c)
+    ## Kalkulace objemove jednotky (voxel) (V = a*b*c)
     voxel1 = voxelsizemm[0][0]
     voxel2 = voxelsizemm[1][0]
     voxel3 = voxelsizemm[2][0]
@@ -65,13 +70,14 @@ def vesselSegmentation(data, segmentation, threshold=1185, voxelsizemm=[[1],[1],
     ## number je zaokrohleny 1,5 nasobek objemove jednotky na 2 desetinna mista
     number = (numpy.round((1.5 * voxelV), 2))
 
-    ## number stanovuje doporucenou horni hranici parametru gauss. filtru
+    ## number stanovi doporucenou horni hranici parametru gauss. filtru
     print('Doporucena horni hranice gaussianskeho filtru: ', number)
     
     ## operace eroze nad samotnymi jatry
-    segmentation = scipy.ndimage.binary_erosion(segmentation)
+    if(dilationIterations >= 0.0):
+        segmentation = scipy.ndimage.binary_dilation(input = segmentation, iterations = dilationIterations)
     
-    ## ziskani dat (jater)
+    ## Ziskani dat (jater)
     preparedData = data * (segmentation == 1)    
             
     print('Nasleduje filtrovani (rozmazani) a prahovani dat.')
@@ -85,9 +91,6 @@ def vesselSegmentation(data, segmentation, threshold=1185, voxelsizemm=[[1],[1],
     print('Nasleduje binarni otevreni a uzavreni.')
     uiB = uiBinaryClosingAndOpening.uiBinaryClosingAndOpening(filteredData)
     output = uiB.showPlot()
-
-    #if data.shape != output.shape:
-        #raise Exception('Input size error', 'Shape of input data and segmentation must be same')
     
     return output
 
