@@ -43,7 +43,7 @@ vessel segmentation
 ## dilationIterations - pocet operaci dilation nad zakladni oblasti pro segmentaci ("segmantation")
 ## dataFiltering - PROZATIM NEPOUZITO - oznacuje, jestli maji data byt filtrovana nebo zda uz jsou filtrovana
 ## nObj - PROZATIM NEPOUZITO - oznacuje, kolik nejvetsich objektu se ma vyhledat
-def vesselSegmentation(data, segmentation, threshold=1185, voxelsizemm=[[1],[1],[1]], inputSigma = -1, dilationIterations = 20, dataFiltering=False, nObj=1):
+def vesselSegmentation(data, segmentation, threshold=1185, voxelsizemm=[[1],[1],[1]], inputSigma = -1, dilationIterations = 0, dataFiltering=False, nObj=1):
     """ Volumetric vessel segmentation from liver.
     data: CT (or MRI) 3D data
     segmentation: labeled image with same size as data where label:
@@ -175,7 +175,7 @@ if __name__ == "__main__":
     print('Hotovo.')
         
     #import pdb; pdb.set_trace()
-    output = vesselSegmentation(mat['data'], mat['segmentation'], mat['threshold'], mat['voxelsizemm'])
+    output = vesselSegmentation(mat['data'], mat['segmentation'], mat['threshold'], mat['voxelsizemm'], dilationIterations = 25)
     
     try:
         cislo = input('Chcete ulozit vystup?\n1 jako ano\n0 jako ne\n')
