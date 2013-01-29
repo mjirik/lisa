@@ -28,6 +28,7 @@ import argparse
 
 import segmentation
 import organ_segmentation
+import misc
 
 
 if __name__ == "__main__":
@@ -113,6 +114,8 @@ if __name__ == "__main__":
     pyed = py3DSeedEditor.py3DSeedEditor(alldata['data3d'],  contour=alldata['segmentation'])
     pyed.show()
 
-    import misc
+    savestring = raw_input ('Save output data? (y/n): ')
+    #sn = int(snstring)
+    if savestring in ['Y','y']:
 
-    misc.obj_to_file(alldata, "out", filetype = 'pickle')
+        misc.obj_to_file(alldata, "out", filetype = 'pickle')
