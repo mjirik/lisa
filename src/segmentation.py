@@ -41,9 +41,11 @@ vessel segmentation
 ## voxelsizemm - (vektor o hodnote 3) rozmery jednoho voxelu
 ## inputSigma - pocatecni hodnota pro prahovani
 ## dilationIterations - pocet operaci dilation nad zakladni oblasti pro segmentaci ("segmantation")
+## dilationStructure - struktura pro operaci dilation
 ## dataFiltering - PROZATIM NEPOUZITO - oznacuje, jestli maji data byt filtrovana nebo zda uz jsou filtrovana
 ## nObj - PROZATIM NEPOUZITO - oznacuje, kolik nejvetsich objektu se ma vyhledat
-def vesselSegmentation(data, segmentation, threshold=1185, voxelsizemm=[[1],[1],[1]], inputSigma = -1, dilationIterations = 0, dataFiltering=False, nObj=1):
+def vesselSegmentation(data, segmentation, threshold=1185, voxelsizemm=[[1],[1],[1]], inputSigma = -1, 
+dilationIterations = 0, dilationStructure = None, dataFiltering=False, nObj=1):
     """ Volumetric vessel segmentation from liver.
     data: CT (or MRI) 3D data
     segmentation: labeled image with same size as data where label:
@@ -73,9 +75,34 @@ def vesselSegmentation(data, segmentation, threshold=1185, voxelsizemm=[[1],[1],
     ## number stanovi doporucenou horni hranici parametru gauss. filtru
     print('Doporucena horni hranice gaussianskeho filtru: ', number)
     
-    ## operace eroze nad samotnymi jatry
+    ## operace dilatace (dilation) nad samotnymi jatry ("segmentation")
     if(dilationIterations >= 0.0):
-        segmentation = scipy.ndimage.binary_dilation(input = segmentation, iterations = dilationIterations)
+        segmentation = scipy.ndimage.binary_dilation(input = segmentation, structure = dilationStructure, 
+                                                                      iterations = dilationIterations)
+    
+    ## Dilation commentary
+    """
+    scipy.ndimage.morphology.binary_dilation(input, structure=None, iterations=1, mask=None, 
+        output=None, border_value=0, origin=0, brute_force=False)
+    ================================================================================
+    input : array_like
+        Binary array_like to be dilated. Non-zero (True) elements form the subset to be dilated.
+    structure : array_like, optional
+        Structuring element used for the dilation. Non-zero elements are considered True. 
+        If no structuring element is provided an element is generated with a square connectivity equal to one.
+    iterations : {int, float}, optional
+        The dilation is repeated iterations times (one, by default). If iterations is less than 1, the dilation 
+        is repeated until the result does not change anymore.
+    mask : array_like, optional
+        If a mask is given, only those elements with a True value at the corresponding mask element are 
+        modified at each iteration.
+    output : ndarray, optional
+        Array of the same shape as input, into which the output is placed. By default, a new array is created.
+    origin : int or tuple of ints, optional
+        Placement of the filter, by default 0.
+    border_value : int (cast to 0 or 1)
+        Value at the border in the output array.
+    """
     
     ## Ziskani dat (jater)
     preparedData = data * (segmentation == 1)    
@@ -174,8 +201,18 @@ if __name__ == "__main__":
         
     print('Hotovo.')
         
+    """
+    structure = mat['segmentation']
+    structure[structure <= 0.0] = False    
+    structure[structure > 0.0] = True
+    print(structure)
+    """
+    structure = None
+    
     #import pdb; pdb.set_trace()
-    output = vesselSegmentation(mat['data'], mat['segmentation'], mat['threshold'], mat['voxelsizemm'], dilationIterations = 25)
+    output = vesselSegmentation(mat['data'], mat['segmentation'], mat['threshold'], 
+                                             mat['voxelsizemm'], inputSigma = 0.25, dilationIterations = 1, 
+                                             dilationStructure = structure) 
     
     try:
         cislo = input('Chcete ulozit vystup?\n1 jako ano\n0 jako ne\n')
