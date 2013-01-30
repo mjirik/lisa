@@ -53,7 +53,7 @@ class uiThreshold:
         self.cmap = cmap
         self.number = number
         self.inputSigma = inputSigma
-        self.data = data
+        self.data = data.copy()
         
         if(inputDimension == 2):
             
@@ -127,9 +127,8 @@ class uiThreshold:
         elif(inputDimension == 3):
             
             self.voxelV = voxelV
-            self.imgUsed = data
-            self.imgChanged = self.imgUsed
-            self.originalData = data
+            self.imgUsed = data.copy()
+            self.imgChanged = self.imgUsed.copy()
             self.lastSigma = -1.0
             
             ## Zakladni informace o datech
@@ -228,10 +227,8 @@ class uiThreshold:
         
         ## Filtrovani
         if(self.lastSigma != sigma):
-            images = self.data
-            imgUsed = images
-            scipy.ndimage.filters.gaussian_filter(images, sigma, 0, imgUsed, 'reflect', 0.0)
-            self.imgUsed = imgUsed
+            images = self.data.copy()
+            scipy.ndimage.filters.gaussian_filter(images, sigma, 0, self.imgUsed, 'reflect', 0.0)
             ## Ulozeni posledni hodnoty sigma pro neopakovani stejne operace
             self.lastSigma = sigma
             
@@ -257,12 +254,12 @@ class uiThreshold:
     def button3DReset(self, event):
         
         ## Vykresleni novych pohledu z originalnich dat
-        self.im1 = self.ax1.imshow(numpy.amax(self.originalData, 0), self.cmap)
-        self.im2 = self.ax2.imshow(numpy.amax(self.originalData, 1), self.cmap)
-        self.im3 = self.ax3.imshow(numpy.amax(self.originalData, 2), self.cmap)
+        self.im1 = self.ax1.imshow(numpy.amax(self.data, 0), self.cmap)
+        self.im2 = self.ax2.imshow(numpy.amax(self.data, 1), self.cmap)
+        self.im3 = self.ax3.imshow(numpy.amax(self.data, 2), self.cmap)
         
         ## Prevzeti originalnich dat
-        self.imgUsed = self.originalData
+        self.imgUsed = self.data.copy()
         
 #        ## Zmena maximalnich a minimalnich hodnot os prahovani
 #            ## Minimalni pouzita hodnota prahovani v obrazku
