@@ -1,3 +1,4 @@
+#
 # -*- coding: utf-8 -*-
 """
 ================================================================================
@@ -142,16 +143,10 @@ class uiThreshold:
             print('Standard deviation: ', imgUsed.std())
             """
             
-            #self.imgMin = numpy.min(self.imgUsed)
-            #self.imgMax = numpy.max(self.imgUsed)
-            
             self.imgShape = list(self.imgUsed.shape)
             
             self.fig = matpyplot.figure()
             ## Pridani subplotu do okna (do figure)
-#            self.ax1n = self.fig.add_subplot(231)
-#            self.ax2n = self.fig.add_subplot(232)
-#            self.ax3n = self.fig.add_subplot(233)
             self.ax1 = self.fig.add_subplot(131)
             self.ax2 = self.fig.add_subplot(132)
             self.ax3 = self.fig.add_subplot(133)
@@ -160,14 +155,11 @@ class uiThreshold:
             self.fig.subplots_adjust(left = 0.1, bottom = 0.3)
             
             ## Vykreslit obrazek
-#            self.im1n = self.ax1n.imshow(numpy.amax(self.data, 0), self.cmap)
-#            self.im2n = self.ax2n.imshow(numpy.amax(self.data, 1), self.cmap)
-#            self.im3n = self.ax3n.imshow(numpy.amax(self.data, 2), self.cmap)
             self.im1 = self.ax1.imshow(numpy.amax(self.imgUsed, 0), self.cmap)
             self.im2 = self.ax2.imshow(numpy.amax(self.imgUsed, 1), self.cmap)
             self.im3 = self.ax3.imshow(numpy.amax(self.imgUsed, 2), self.cmap)
     
-            ## Zakladni informace o slideru
+            ## Zalozeni mist pro slidery
             self.axcolor = 'white' # lightgoldenrodyellow
             self.axmin = self.fig.add_axes([0.20, 0.20, 0.55, 0.03], axisbg = self.axcolor)
             self.axmax  = self.fig.add_axes([0.20, 0.16, 0.55, 0.03], axisbg = self.axcolor)
@@ -189,23 +181,29 @@ class uiThreshold:
             self.ssigma.on_changed(self.updateImgFilter)
             
             ## Zalozeni mist pro tlacitka
-            self.axbuttnext = self.fig.add_axes([0.81, 0.20, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttprev = self.fig.add_axes([0.86, 0.20, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttreset = self.fig.add_axes([0.81, 0.08, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttcontinue = self.fig.add_axes([0.86, 0.08, 0.04, 0.03], axisbg = self.axcolor)
+            self.axbuttnext1 = self.fig.add_axes([0.81, 0.20, 0.04, 0.03], axisbg = self.axcolor)
+            self.axbuttprev1 = self.fig.add_axes([0.86, 0.20, 0.04, 0.03], axisbg = self.axcolor)
+            self.axbuttnext2 = self.fig.add_axes([0.81, 0.16, 0.04, 0.03], axisbg = self.axcolor)
+            self.axbuttprev2 = self.fig.add_axes([0.86, 0.16, 0.04, 0.03], axisbg = self.axcolor)
+            self.axbuttreset = self.fig.add_axes([0.79, 0.08, 0.06, 0.03], axisbg = self.axcolor)
+            self.axbuttcontinue = self.fig.add_axes([0.86, 0.08, 0.06, 0.03], axisbg = self.axcolor)
             
             ## Zalozeni tlacitek
-            self.bnext = Button(self.axbuttnext, '+1.0')
-            self.bprev = Button(self.axbuttprev, '-1.0')
+            self.bnext1 = Button(self.axbuttnext1, '+1.0')
+            self.bprev1 = Button(self.axbuttprev1, '-1.0')
+            self.bnext2 = Button(self.axbuttnext2, '+1.0')
+            self.bprev2 = Button(self.axbuttprev2, '-1.0')
             self.breset = Button(self.axbuttreset, 'Reset')
             self.bcontinue = Button(self.axbuttcontinue, 'Next UI')
             
             ## Funkce tlacitek pri jejich aktivaci
-            self.bnext.on_clicked(self.button3DNext)
-            self.bprev.on_clicked(self.button3DPrev)
+            self.bnext1.on_clicked(self.button3DNext1)
+            self.bprev1.on_clicked(self.button3DPrev1)
+            self.bnext2.on_clicked(self.button3DNext2)
+            self.bprev2.on_clicked(self.button3DPrev2)
             self.breset.on_clicked(self.button3DReset)
             self.bcontinue.on_clicked(self.button3DContinue)
-
+            
         else:
             
             print('Spatny vstup.\nDimenze vstupu neni 2 ani 3.\nUkoncuji prahovani.')
@@ -214,9 +212,9 @@ class uiThreshold:
         
         ## Provedeni pocatecniho gauss. filtrovani
         self.updateImgFilter(self)
-        
+
         ## Zobrazeni plot (figure)
-        matpyplot.show()
+        matpyplot.show() 
         
         return self.imgChanged 
         
@@ -247,6 +245,11 @@ class uiThreshold:
 #        self.smax = Slider(self.axmax, 'Maximal threshold', min0, max0, valinit = max0)
 #        self.smin.on_changed(self.updateImg1Threshold3D)
 #        self.smax.on_changed(self.updateImg1Threshold3D)
+
+        ## Minimalni pouzita hodnota prahovani v obrazku
+        self.min0 = numpy.amin(self.imgUsed)
+        ## Maximalni pouzita hodnota prahovani v obrazku
+        self.max0 = numpy.amax(self.imgUsed)
         
         ## Prekresleni
         self.fig.canvas.draw()
@@ -282,6 +285,11 @@ class uiThreshold:
         self.ssigma.val = (numpy.round(0.00, 2))
         self.ssigma.valtext.set_text('{}'.format(self.ssigma.val))
         
+        ## Minimalni pouzita hodnota prahovani v obrazku
+        self.min0 = numpy.amin(self.imgUsed)
+        ## Maximalni pouzita hodnota prahovani v obrazku
+        self.max0 = numpy.amax(self.imgUsed)
+        
         ## Prekresleni
         self.fig.canvas.draw()
         
@@ -290,21 +298,41 @@ class uiThreshold:
         matpyplot.clf()
         matpyplot.close()
         
-    def button3DNext(self, event):
+    def button3DNext1(self, event):
         
-        self.smin.val += 1.0
-        self.smin.val = (numpy.round(self.smin.val, 2))
-        self.smin.valtext.set_text('{}'.format(self.smin.val))
-        self.fig.canvas.draw()
-        self.updateImg1Threshold3D(self) #self, self.smin.val
+        if(self.smin.val + 1.0 <= self.max0):
+            self.smin.val += 1.0
+            self.smin.val = (numpy.round(self.smin.val, 2))
+            self.smin.valtext.set_text('{}'.format(self.smin.val))
+            self.fig.canvas.draw()
+            self.updateImg1Threshold3D(self)
         
-    def button3DPrev(self, event):
+    def button3DPrev1(self, event):
         
-        self.smin.val -= 1.0
-        self.smin.val = (numpy.round(self.smin.val, 2))
-        self.smin.valtext.set_text('{}'.format(self.smin.val))
-        self.fig.canvas.draw()
-        self.updateImg1Threshold3D(self) #self, self.smin.val
+        if(self.smin.val - 1.0 >= self.min0):
+            self.smin.val -= 1.0
+            self.smin.val = (numpy.round(self.smin.val, 2))
+            self.smin.valtext.set_text('{}'.format(self.smin.val))
+            self.fig.canvas.draw()
+            self.updateImg1Threshold3D(self)
+        
+    def button3DNext2(self, event):
+        
+        if(self.smax.val + 1.0 <= self.max0):
+            self.smax.val += 1.0
+            self.smax.val = (numpy.round(self.smax.val, 2))
+            self.smax.valtext.set_text('{}'.format(self.smax.val))
+            self.fig.canvas.draw()
+            self.updateImg1Threshold3D(self)
+        
+    def button3DPrev2(self, event):
+        
+        if(self.smax.val - 1.0 >= self.min0):
+            self.smax.val -= 1.0
+            self.smax.val = (numpy.round(self.smax.val, 2))
+            self.smax.valtext.set_text('{}'.format(self.smax.val))
+            self.fig.canvas.draw()
+            self.updateImg1Threshold3D(self)
         
     def updateImg1Threshold3D(self, val):
         
@@ -315,6 +343,11 @@ class uiThreshold:
         self.im1 = self.ax1.imshow(numpy.amax(self.imgChanged, 0), self.cmap)
         self.im2 = self.ax2.imshow(numpy.amax(self.imgChanged, 1), self.cmap)
         self.im3 = self.ax3.imshow(numpy.amax(self.imgChanged, 2), self.cmap)
+        
+        ## Minimalni pouzita hodnota prahovani v obrazku
+        self.min0 = numpy.amin(self.imgUsed)
+        ## Maximalni pouzita hodnota prahovani v obrazku
+        self.max0 = numpy.amax(self.imgUsed)
         
         ## Prekresleni
         self.fig.canvas.draw()

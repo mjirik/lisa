@@ -1,3 +1,4 @@
+#
 # -*- coding: utf-8 -*-
 """
 ================================================================================
@@ -37,15 +38,15 @@ vessel segmentation
 
 ## data - cela data
 ## segmentation - zakladni oblast pro segmentaci
-## threshold - prah
+## threshold - PROZATIM NEPOUZITO - prah
 ## voxelsizemm - (vektor o hodnote 3) rozmery jednoho voxelu
 ## inputSigma - pocatecni hodnota pro prahovani
 ## dilationIterations - pocet operaci dilation nad zakladni oblasti pro segmentaci ("segmantation")
 ## dilationStructure - struktura pro operaci dilation
 ## dataFiltering - PROZATIM NEPOUZITO - oznacuje, jestli maji data byt filtrovana nebo zda uz jsou filtrovana
 ## nObj - PROZATIM NEPOUZITO - oznacuje, kolik nejvetsich objektu se ma vyhledat
-def vesselSegmentation(data, segmentation, threshold=1185, voxelsizemm=[[1],[1],[1]], inputSigma = -1, 
-dilationIterations = 0, dilationStructure = None, dataFiltering=False, nObj=1):
+def vesselSegmentation(data, segmentation, threshold = 1185, voxelsizemm = [[1],[1],[1]], inputSigma = -1, 
+dilationIterations = 0, dilationStructure = None, dataFiltering = False, nObj = 1):
     """ Volumetric vessel segmentation from liver.
     data: CT (or MRI) 3D data
     segmentation: labeled image with same size as data where label:
@@ -66,14 +67,14 @@ dilationIterations = 0, dilationStructure = None, dataFiltering=False, nObj=1):
     voxel2 = voxelsizemm[1][0]
     voxel3 = voxelsizemm[2][0]
     voxelV = voxel1 * voxel2 * voxel3
-    print('Voxel size: ', voxelV)
+    #print('Voxel size: ', voxelV)
     
-    print('Dimenze vstupu: ', numpy.ndim(data))
+    #print('Dimenze vstupu: ', numpy.ndim(data))
     ## number je zaokrohleny 1,5 nasobek objemove jednotky na 2 desetinna mista
     number = (numpy.round((1.5 * voxelV), 2))
 
     ## number stanovi doporucenou horni hranici parametru gauss. filtru
-    print('Doporucena horni hranice gaussianskeho filtru: ', number)
+    #print('Doporucena horni hranice gaussianskeho filtru: ', number)
     
     ## operace dilatace (dilation) nad samotnymi jatry ("segmentation")
     if(dilationIterations >= 0.0):
@@ -107,7 +108,7 @@ dilationIterations = 0, dilationStructure = None, dataFiltering=False, nObj=1):
     ## Ziskani dat (jater)
     preparedData = data * (segmentation == 1)    
             
-    print('Nasleduje filtrovani (rozmazani) a prahovani dat.')
+    #print('Nasleduje filtrovani (rozmazani) a prahovani dat.')
     if(inputSigma == -1):
         inputSigma = number
     if(inputSigma > 2 * number):
@@ -115,7 +116,7 @@ dilationIterations = 0, dilationStructure = None, dataFiltering=False, nObj=1):
     uiT = uiThreshold.uiThreshold(preparedData, number, inputSigma, voxelV)
     filteredData = uiT.showPlot()
         
-    print('Nasleduje binarni otevreni a uzavreni.')
+    #print('Nasleduje binarni otevreni a uzavreni.')
     uiB = uiBinaryClosingAndOpening.uiBinaryClosingAndOpening(filteredData)
     output = uiB.showPlot()
     
@@ -158,8 +159,8 @@ main
 """
 if __name__ == "__main__":
     
-    print('Byl spusten skript.')
-    print('Probiha nastavovani...')
+    #print('Byl spusten skript.')
+    #print('Probiha nastavovani...')
     
     logger = logging.getLogger()
     logger.setLevel(logging.WARNING)
@@ -191,15 +192,18 @@ if __name__ == "__main__":
         sys.argv[1:]=[]
         unittest.main()
 
-    print('Nacitam vstup...')
+    #print('Nacitam vstup...')
+    
+    op3D = True
     
     if args.filename == 'lena':
-        data = scipy.misc.lena()
+        op3D = False
+        mat = scipy.misc.lena()
     else:
         mat = scipy.io.loadmat(args.filename)
         logger.debug(mat.keys())        
         
-    print('Hotovo.')
+    #print('Hotovo.')
         
     """
     structure = mat['segmentation']
@@ -207,12 +211,15 @@ if __name__ == "__main__":
     structure[structure > 0.0] = True
     print(structure)
     """
-    structure = None
     
     #import pdb; pdb.set_trace()
-    output = vesselSegmentation(mat['data'], mat['segmentation'], mat['threshold'], 
-                                             mat['voxelsizemm'], inputSigma = 0.25, dilationIterations = 1, 
-                                             dilationStructure = structure) 
+    if(op3D):
+        structure = None
+        output = vesselSegmentation(mat['data'], mat['segmentation'], mat['threshold'], 
+                                                 mat['voxelsizemm'], inputSigma = 0.25, dilationIterations = 1, 
+                                                 dilationStructure = structure) 
+    else:
+        output = vesselSegmentation(data = mat, segmentation = mat) 
     
     try:
         cislo = input('Chcete ulozit vystup?\n1 jako ano\n0 jako ne\n')
@@ -225,7 +232,7 @@ if __name__ == "__main__":
         print('Stala se chyba!')
         raise Exception
         
-    print('Vypinam skript.')    
+    #print('Vypinam skript.')    
     
     sys.exit()
     
