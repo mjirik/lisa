@@ -15,7 +15,7 @@ import logging
 logger = logging.getLogger(__name__)
 # ----------------- my scripts --------
 import misc
-
+import py3DSeedEditor
 
 def resection():
 
@@ -23,4 +23,6 @@ def resection():
 
 if __name__ == "__main__":
     data = misc.obj_from_file("out", filetype = 'pickle')
+    ds = data['segmentation'] == 3
+    ped = py3DSeedEditor.py3DSeedEditor(ds)
     import pdb; pdb.set_trace()
