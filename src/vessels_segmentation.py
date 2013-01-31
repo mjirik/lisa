@@ -101,7 +101,7 @@ if __name__ == "__main__":
     pyed.show()
     # oseg.orig_scale_segmentation
 
-    output = segmentation.vesselSegmentation(oseg.data3d, oseg.orig_scale_segmentation, inputSigma = 6, dilationIterations = 2)
+    output = segmentation.vesselSegmentation(oseg.data3d, oseg.orig_scale_segmentation, inputSigma = 0.3, dilationIterations = 2)
     
 
     alldata = {}

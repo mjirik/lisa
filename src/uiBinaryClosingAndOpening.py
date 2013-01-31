@@ -1,3 +1,4 @@
+#
 # -*- coding: utf-8 -*-
 """
 ================================================================================
@@ -155,35 +156,32 @@ class uiBinaryClosingAndOpening:
             self.im1 = self.ax1.imshow(self.imgShow, self.cmap)
             #self.im2 = self.ax2.imshow(self.imgShow, self.cmap)
     
-            # Zakladni informace o slideru
+           ## Zalozeni mist pro slidery
             self.axcolor = 'white' # lightgoldenrodyellow
             axopening1 = self.fig.add_axes([0.25, 0.18, 0.55, 0.03], axisbg = self.axcolor)
             axclosing1 = self.fig.add_axes([0.25, 0.14, 0.55, 0.03], axisbg = self.axcolor)
-            #axopening2 = self.fig.add_axes([0.25, 0.04, 0.495, 0.03], axisbg = self.axcolor)
-            #axclosing2 = self.fig.add_axes([0.25, 0.08, 0.495, 0.03], axisbg = self.axcolor)
             
-            # Vytvoreni slideru
+            ## Vlastni vytvoreni slideru
             self.sopen1 = Slider(axopening1, 'Binary opening 1', 0, 100, valinit = 0)
             self.sclose1 = Slider(axclosing1, 'Binary closing 1', 0, 100, valinit = 0)
-            #self.sopen2 = Slider(axopening2, 'Binary opening 2', 0, 100, valinit = 0)
-            #self.sclose2 = Slider(axclosing2, 'Binary closing 2', 0, 100, valinit = 0)
             
+            ## Funkce slideru pri zmene jeho hodnoty
             self.sopen1.on_changed(self.updateImg1Binary3D)
             self.sclose1.on_changed(self.updateImg1Binary3D)
-            #self.sopen2.on_changed(self.updateImg2Binary3D)
-            #self.sclose2.on_changed(self.updateImg2Binary3D)
             
             self.sopen1.valtext.set_text('{}'.format(int(self.sopen1.val)))
             self.sclose1.valtext.set_text('{}'.format(int(self.sclose1.val)))
             
+            ## Zalozeni mist pro tlacitka
             self.axbuttnextopening = self.fig.add_axes([0.83, 0.18, 0.04, 0.03], axisbg = self.axcolor)
             self.axbuttprevopening = self.fig.add_axes([0.88, 0.18, 0.04, 0.03], axisbg = self.axcolor)
             self.axbuttnextclosing = self.fig.add_axes([0.83, 0.14, 0.04, 0.03], axisbg = self.axcolor)
             self.axbuttprevclosing = self.fig.add_axes([0.88, 0.14, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttreset = self.fig.add_axes([0.83, 0.08, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttcontinue = self.fig.add_axes([0.88, 0.08, 0.06, 0.03], axisbg = self.axcolor)
+            self.axbuttreset = self.fig.add_axes([0.80, 0.08, 0.07, 0.03], axisbg = self.axcolor)
+            self.axbuttcontinue = self.fig.add_axes([0.88, 0.08, 0.07, 0.03], axisbg = self.axcolor)
             self.axbuttswap = self.fig.add_axes([0.05, 0.18, 0.09, 0.03], axisbg = self.axcolor)
             
+            ## Zalozeni tlacitek
             self.bnextopening = Button(self.axbuttnextopening, '+1.0')
             self.bprevopening = Button(self.axbuttprevopening, '-1.0')
             self.bnextclosing = Button(self.axbuttnextclosing, '+1.0')
@@ -192,6 +190,7 @@ class uiBinaryClosingAndOpening:
             self.bcontinue = Button(self.axbuttcontinue, 'End editing')
             self.bswap = Button(self.axbuttswap, 'Swap operations')
             
+            ## Funkce tlacitek pri jejich aktivaci
             self.bnextopening.on_clicked(self.button3DNextOpening)
             self.bprevopening.on_clicked(self.button3DPrevOpening)
             self.bnextclosing.on_clicked(self.button3DNextClosing)
