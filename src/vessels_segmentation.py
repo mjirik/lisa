@@ -31,6 +31,8 @@ import organ_segmentation
 import misc
 
 
+
+
 if __name__ == "__main__":
 
     #logger = logging.getLogger(__name__)
@@ -92,8 +94,8 @@ if __name__ == "__main__":
 
     print ( "Volume " + str(oseg.get_segmented_volume_size_mm3()/1000000.0) + ' [l]' )
     import py3DSeedEditor
-    pyed = py3DSeedEditor.py3DSeedEditor(oseg.orig_scale_segmentation)
-    pyed.show()
+    # pyed = py3DSeedEditor.py3DSeedEditor(oseg.orig_scale_segmentation)
+    #pyed.show()
 # information about crop
     cri = oseg.crinfo
     oseg.data3d = oseg.data3d[cri[0][0]:cri[0][1],cri[1][0]:cri[1][1],cri[2][0]:cri[2][1]]
@@ -103,19 +105,26 @@ if __name__ == "__main__":
 
     output = segmentation.vesselSegmentation(oseg.data3d, oseg.orig_scale_segmentation, inputSigma = 0.3, dilationIterations = 2)
     
+    
+# segmentation labeling
+    slab={}
+    slab['none'] = 0
+    slab['liver'] = 1
+    slab['porta'] = 2
 
-    alldata = {}
-    alldata['data3d'] = oseg.data3d
-    alldata['crinfo'] = oseg.crinfo
-    alldata['segmentation'] = oseg.orig_scale_segmentation
-    alldata['segmentation'][output==1] = 3
+    data = {}
+    data['data3d'] = oseg.data3d
+    data['crinfo'] = oseg.crinfo
+    data['segmentation'] = oseg.orig_scale_segmentation
+    data['segmentation'][output==1] = slab['porta']
+    data['slab'] = slab
 
-    import pdb; pdb.set_trace()
-    pyed = py3DSeedEditor.py3DSeedEditor(alldata['data3d'],  contour=alldata['segmentation'])
+#    import pdb; pdb.set_trace()
+    pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'],  contour=data['segmentation']==slab['porta'])
     pyed.show()
 
     savestring = raw_input ('Save output data? (y/n): ')
     #sn = int(snstring)
     if savestring in ['Y','y']:
 
-        misc.obj_to_file(alldata, "out", filetype = 'pickle')
+        misc.obj_to_file(data, "out", filetype = 'pickle')

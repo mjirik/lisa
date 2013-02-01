@@ -24,5 +24,6 @@ def resection():
 if __name__ == "__main__":
     data = misc.obj_from_file("out", filetype = 'pickle')
     ds = data['segmentation'] == 3
-    ped = py3DSeedEditor.py3DSeedEditor(ds)
+    pyed = py3DSeedEditor.py3DSeedEditor(ds)
+    pyed.show()
     import pdb; pdb.set_trace()
