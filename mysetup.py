@@ -88,7 +88,7 @@ def windows_install():
     else:
         print ("You have python " + str (pythonversion))
 
-        
+    
     
 
     # instalace msys gitu
@@ -100,6 +100,23 @@ def windows_install():
     print ("MinGW install")
     download_and_run(url = urlmingw, local_file_name = './tmp/mingw.exe')
 
+
+    # install distribute and pip
+    # this is not necessary for numpy, scipy etc., because we have binaries
+    # but we need it for pydicom
+    urldistribute = "http://python-distribute.org/distribute_setup.py"
+    local_file_name = "./tmp/distribute_setup.py"
+    urllibr.urlretrieve(urldistribute, local_file_name)
+    subprocess.call(pythondir + "python.exe distribute_setup.py", cwd="./tmp/")
+
+    urlpip = "https://raw.github.com/pypa/pip/master/contrib/get-pip.py"
+    local_file_name = "./tmp/get-pip.py"
+    urllibr.urlretrieve(urlpip, local_file_name)
+    subprocess.call(pythondir + "python.exe get-pip.py", cwd="./tmp/")
+
+
+
+
     # numpy, scipy, matplotlib, scikit-learn, cython
     print ("numpy, scipy, matplotlib, scikit-learn, cython install")
     #import pdb; pdb.set_trace()
@@ -109,6 +126,10 @@ def windows_install():
     download_and_run(urlmatplotlib, "./tmp/matplotlib.exe")
     download_and_run(urlcython, "./tmp/cython.exe")
 
+    
+    # install pydicom
+    subprocess.call(pythondir + "Scripts/pip.exe pydicom", cwd="./tmp/")
+    subprocess.call(pythondir + "Scripts/pip.exe pyyaml", cwd="./tmp/")
     
 
     # install gco_python
@@ -143,10 +164,10 @@ def windows_install():
     local_file_name = pythondir + "Lib\distutils\cygwinccompiler.py"
     urllibr.urlretrieve(urlcompiler, local_file_name)
     
-	# compilation with mingw
+    # compilation with mingw
     subprocess.call(pythondir + "python.exe setup.py build_ext -i --compiler=mingw32", cwd="./tmp/gco_python-master/")
     # parametr -i by to mel nainstalovat sam, ale nedala to
-	subprocess.call(pythondir + "python.exe setup.py build --compiler=mingw32", cwd="./tmp/gco_python-master/")    
+    subprocess.call(pythondir + "python.exe setup.py build --compiler=mingw32", cwd="./tmp/gco_python-master/")    
     subprocess.call(pythondir + "python.exe setup.py install --skip-build", cwd="./tmp/gco_python-master/")    
 
     
