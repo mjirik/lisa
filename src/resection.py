@@ -25,21 +25,58 @@ import show3
 
 
 def resection(data):
-    #vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
+    vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
+# ostranění porty z více kusů, nastaví se jim hodnota liver
+    data['segmentation'][data['segmentation'] == data['slab']['porta']] = data['slab']['liver']
 
-    #pyed = py3DSeedEditor.py3DSeedEditor(vessels)
-    #pyed.show()
-    show3.show3(data['segmentation'])
+    data['segmentation'][vessels == 1] = data['slab']['porta']
+    pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
+    pyed.show()
+    split_obj = pyed.seeds
+    vesselstmp = vessels
+
+    split_obj = scipy.ndimage.binary_dilation(split_obj, iterations = 3 )
+    vesselstmp = vessels * (1 - split_obj)
+
+    lab, n_obj = scipy.ndimage.label(vesselstmp)
+
+    while n_obj < 2 :
+        split_obj = scipy.ndimage.binary_dilation(split_obj, iterations = 3 )
+        vesselstmp = vessels * (1 - split_obj)
     
-
+        lab, n_obj = scipy.ndimage.label(vesselstmp)
+    print (str(n_obj))
+    l1 = 1
+    l2 = 2
     import pdb; pdb.set_trace()
+
+    # dist se tady počítá od nul jenom v jedničkách
+    dist1 = scipy.ndimage.distance_transform_edt(lab != l1)
+    dist2 = scipy.ndimage.distance_transform_edt(lab != l2)
+
+
+    #segm = (dist1 < dist2) * (data['segmentation'] != data['slab']['none'])
+    segm = (((data['segmentation'] != 0) * (dist1 < dist2)).astype('int8') + (data['segmentation'] != 0).astype('int8'))
+
+    pyed = py3DSeedEditor.py3DSeedEditor(segm)
+    pyed.show()
+    import pdb; pdb.set_trace()
+    pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], contour=segm)
+    pyed.show()
+    import pdb; pdb.set_trace()
+
+    #show3.show3(data['segmentation'])
     
+
+    
+
 
 
 
 def get_biggest_object(data):
     """ Return biggest object """
     lab, num = scipy.ndimage.label(data)
+    print ("bum = "+str(num))
     
     maxlab = max_area_index(lab, num)
 
