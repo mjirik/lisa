@@ -47,7 +47,7 @@ class uiThreshold:
     ## voxelV - objemova jednotka jednoho voxelu
     ## initslice - PROZATIM NEPOUZITO
     ## cmap - grey
-    def __init__(self, data, number = 100.0, inputSigma = -1, voxelV = 1.0, initslice = 0, cmap = matplotlib.cm.Greys_r):
+    def __init__(self, data, voxel, number = 100.0, inputSigma = -1, initslice = 0, cmap = matplotlib.cm.Greys_r):
 
         inputDimension = numpy.ndim(data)
         #print('Dimenze vstupu: ',  inputDimension)
@@ -58,6 +58,7 @@ class uiThreshold:
         
         if(inputDimension == 2):
             
+            self.voxel = voxel
             self.imgUsed = data
             self.imgChanged = data
                 
@@ -127,7 +128,7 @@ class uiThreshold:
         
         elif(inputDimension == 3):
             
-            self.voxelV = voxelV
+            self.voxel = voxel
             self.imgUsed = data.copy()
             self.imgChanged = self.imgUsed.copy()
             self.lastSigma = -1.0
@@ -223,6 +224,8 @@ class uiThreshold:
         ## Vypocet sigma pro gauss. filtr
         sigma = float(self.ssigma.val) / self.voxelV
         
+        sigma = self.calculateSigma(sigma)
+        
         ## Filtrovani
         if(self.lastSigma != sigma):
             images = self.data.copy()
@@ -253,6 +256,13 @@ class uiThreshold:
         
         ## Prekresleni
         self.fig.canvas.draw()
+        
+    def calculateSigma(self, input):
+        
+        voxel = self.voxel
+        sigma = voxel
+        
+        return sigma
         
     def button3DReset(self, event):
         
