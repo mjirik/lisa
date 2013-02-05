@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 import numpy
 
 import scipy.ndimage
+import sys
 """
 import scipy.misc
 import scipy.io
@@ -127,10 +128,16 @@ class uiThreshold:
             self.smax.on_changed(self.updateImg2D)
         
         elif(inputDimension == 3):
-            
-            self.voxel = voxel.copy()
-            self.imgUsed = data.copy()
-            self.imgChanged = self.imgUsed.copy()
+            if sys.version_info[0] < 3:
+                import copy
+                self.voxel = copy.copy(voxel)
+                self.imgUsed = copy.copy(data)
+                self.imgChanged = copy.copy(self.imgUsed)
+
+            else:
+                self.voxel = voxel.copy()
+                self.imgUsed = data.copy()
+                self.imgChanged = self.imgUsed.copy()
             self.lastSigma = -1.0
             
             ## Kalkulace objemove jednotky (voxel) (V = a*b*c)
