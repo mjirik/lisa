@@ -30,22 +30,30 @@ def resection(data):
     data['segmentation'][data['segmentation'] == data['slab']['porta']] = data['slab']['liver']
 
     data['segmentation'][vessels == 1] = data['slab']['porta']
+    print ("Select cut")
     pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
     pyed.show()
     split_obj = pyed.seeds
     vesselstmp = vessels
 
-    split_obj = scipy.ndimage.binary_dilation(split_obj, iterations = 3 )
+    sumall = np.sum(vessels==1)
+
+    split_obj = scipy.ndimage.binary_dilation(split_obj, iterations = 5 )
     vesselstmp = vessels * (1 - split_obj)
 
     lab, n_obj = scipy.ndimage.label(vesselstmp)
 
-    while n_obj < 2 :
-        split_obj = scipy.ndimage.binary_dilation(split_obj, iterations = 3 )
+    #while n_obj < 2 :
+# dokud neni z celkoveho objektu ustipnuto alespon 80 procent
+    while np.sum(lab == max_area_index(lab,n_obj)) > (0.8*sumall) :
+
+        split_obj = scipy.ndimage.binary_dilation(split_obj, iterations = 5 )
         vesselstmp = vessels * (1 - split_obj)
     
         lab, n_obj = scipy.ndimage.label(vesselstmp)
     print (str(n_obj))
+    print ("np.sum(lab==3)")
+
     l1 = 1
     l2 = 2
     import pdb; pdb.set_trace()
@@ -69,6 +77,7 @@ def resection(data):
     
 
     
+
 
 
 
