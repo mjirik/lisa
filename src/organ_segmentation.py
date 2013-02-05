@@ -276,5 +276,20 @@ if __name__ == "__main__":
 
     print ( "Volume " + str(oseg.get_segmented_volume_size_mm3()/1000000.0) + ' [l]' )
 
+    savestring = raw_input ('Save output data? (y/n): ')
+    #sn = int(snstring)
+    if savestring in ['Y','y']:
+        import misc
+
+        slab={}
+        slab['none'] = 0
+        slab['liver'] = 1
+
+        data = {}
+        data['data3d'] = oseg.data3d
+        data['crinfo'] = oseg.crinfo
+        data['segmentation'] = oseg.orig_scale_segmentation
+        data['slab'] = slab
+        misc.obj_to_file(data, "out", filetype = 'pickle')
     #output = segmentation.vesselSegmentation(oseg.data3d, oseg.orig_segmentation)
     
