@@ -28,6 +28,7 @@ def resection(data):
     vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
 # ostranění porty z více kusů, nastaví se jim hodnota liver
     data['segmentation'][data['segmentation'] == data['slab']['porta']] = data['slab']['liver']
+    show3.show3(data['segmentation'])
 
     data['segmentation'][vessels == 1] = data['slab']['porta']
     pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])

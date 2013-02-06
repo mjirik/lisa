@@ -4,19 +4,21 @@ import vtk
 from numpy import *
  
 
-def show3(data_matrix):
+def show3(data_matrix = None):
 
 # We begin by creating the data we want to render.
 # For this tutorial, we create a 3D-image containing three overlaping cubes.
 # This data can of course easily be replaced by data from a medical CT-scan or anything else three dimensional.
 # The only limit is that the data must be reduced to unsigned 8 bit or 16 bit integers.
-    #data_matrix = zeros([75, 75, 75], dtype=uint8)
-    #data_matrix[0:35, 0:35, 0:35] = 50
-    #data_matrix[25:55, 25:55, 25:55] = 100
-    #data_matrix[45:74, 45:74, 45:74] = 150
-
-    data_matrix[data_matrix==1] = 50
-    data_matrix[data_matrix==2] = 100
+    import pdb; pdb.set_trace()
+    if data_matrix == None:
+        data_matrix = zeros([75, 75, 75], dtype=uint8)
+        data_matrix[0:35, 0:35, 0:35] = 50
+        data_matrix[25:55, 25:55, 25:55] = 100
+        data_matrix[45:74, 45:74, 45:74] = 150
+    else:
+        data_matrix[data_matrix==1] = 50
+        data_matrix[data_matrix==2] = 100
     val0 = 0
     val1 = 50
     val2 = 100
@@ -105,5 +107,6 @@ def show3(data_matrix):
 
 
 
+if __name__ == "__main__":
 
-#show3(1)
+    show3()
