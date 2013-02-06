@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 import numpy
 
 import scipy.ndimage
+import sys
 """
 import scipy.misc
 import scipy.io
@@ -47,7 +48,7 @@ class uiThreshold:
     ## voxelV - objemova jednotka jednoho voxelu
     ## initslice - PROZATIM NEPOUZITO
     ## cmap - grey
-    def __init__(self, data, number = 100.0, inputSigma = -1, voxelV = 1.0, initslice = 0, cmap = matplotlib.cm.Greys_r):
+    def __init__(self, data, voxel, number = 100.0, inputSigma = -1, initslice = 0, cmap = matplotlib.cm.Greys_r):
 
         inputDimension = numpy.ndim(data)
         #print('Dimenze vstupu: ',  inputDimension)
@@ -58,6 +59,7 @@ class uiThreshold:
         
         if(inputDimension == 2):
             
+            self.voxel = voxel
             self.imgUsed = data
             self.imgChanged = data
                 
@@ -126,11 +128,23 @@ class uiThreshold:
             self.smax.on_changed(self.updateImg2D)
         
         elif(inputDimension == 3):
-            
-            self.voxelV = voxelV
-            self.imgUsed = data.copy()
-            self.imgChanged = self.imgUsed.copy()
+            if sys.version_info[0] < 3:
+                import copy
+                self.voxel = copy.copy(voxel)
+                self.imgUsed = copy.copy(data)
+                self.imgChanged = copy.copy(self.imgUsed)
+
+            else:
+                self.voxel = voxel.copy()
+                self.imgUsed = data.copy()
+                self.imgChanged = self.imgUsed.copy()
             self.lastSigma = -1.0
+            
+            ## Kalkulace objemove jednotky (voxel) (V = a*b*c)
+            voxel1 = self.voxel[0][0]
+            voxel2 = self.voxel[1][0]
+            voxel3 = self.voxel[2][0]
+            self.voxelV = voxel1 * voxel2 * voxel3
             
             ## Zakladni informace o datech
             """
@@ -143,7 +157,7 @@ class uiThreshold:
             print('Standard deviation: ', imgUsed.std())
             """
             
-            self.imgShape = list(self.imgUsed.shape)
+            #self.imgShape = list(self.imgUsed.shape)
             
             self.fig = matpyplot.figure()
             ## Pridani subplotu do okna (do figure)
@@ -222,11 +236,11 @@ class uiThreshold:
         
         ## Vypocet sigma pro gauss. filtr
         sigma = float(self.ssigma.val) / self.voxelV
-        
+
         ## Filtrovani
         if(self.lastSigma != sigma):
             images = self.data.copy()
-            scipy.ndimage.filters.gaussian_filter(images, sigma, 0, self.imgUsed, 'reflect', 0.0)
+            scipy.ndimage.filters.gaussian_filter(images, self.calculateSigma(sigma), 0, self.imgUsed, 'reflect', 0.0)
             ## Ulozeni posledni hodnoty sigma pro neopakovani stejne operace
             self.lastSigma = sigma
             
@@ -253,6 +267,14 @@ class uiThreshold:
         
         ## Prekresleni
         self.fig.canvas.draw()
+        
+    def calculateSigma(self, input):
+        
+        voxel = self.voxel
+        sigma = voxel
+        
+        return input
+        ## LATER ## return sigma
         
     def button3DReset(self, event):
         
@@ -362,61 +384,6 @@ class uiThreshold:
         self.im1 = self.ax1.imshow(self.imgChanged, self.cmap)
         ## Prekresleni
         self.fig.canvas.draw()
-    
-"""
-================================================================================
-main
-================================================================================
-"""
-"""
-if __name__ == "__main__":
-    
-    logger = logging.getLogger()
-    logger.setLevel(logging.WARNING)
-
-    ch = logging.StreamHandler()
-    logging.basicConfig(format='%(message)s')
-
-    formatter = logging.Formatter("%(levelname)-5s [%(module)s:%(funcName)s:%(lineno)d] %(message)s")
-    ch.setFormatter(formatter)
-
-    logger.addHandler(ch)
-
-    parser = argparse.ArgumentParser(description='Segment vessels from liver')
-    parser.add_argument('-f','--filename',
-            default = 'lena',
-            help='*.mat file with variables "data", "segmentation" and "threshod"')
-    parser.add_argument('-d', '--debug', action='store_true',
-            help='run in debug mode')
-    parser.add_argument('-t', '--tests', action='store_true',
-            help='run unittest')
-    parser.add_argument('-o', '--outputfile', type=str,
-        default='output.mat',help='output file name')
-    args = parser.parse_args()
-
-    if args.debug:
-        logger.setLevel(logging.DEBUG)
-
-    if args.tests:
-        sys.argv[1:]=[]
-        unittest.main()
-
-    if args.filename == 'lena':
-        data = scipy.misc.lena()
-    else:
-        mat = scipy.io.loadmat(args.filename)
-        logger.debug(mat.keys())
-        
-        data = mat['data'] * (mat['segmentation'] == 1)
-
-    ui = uiThreshold(data)
-    output = ui.showPlot()
-
-    scipy.io.savemat(args.outputfile, {'data':output})
-    sys.exit()
-    
-"""
-
 
 
 

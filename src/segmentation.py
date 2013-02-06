@@ -62,6 +62,9 @@ dilationIterations = 0, dilationStructure = None, dataFiltering = False, nObj = 
     Proměnné threshold, dataFiltering a nObj se postupně pokusíme eliminovat a
     navrhnout je automaticky.
     """
+    
+    voxel = voxelsizemm
+    
     ## Kalkulace objemove jednotky (voxel) (V = a*b*c)
     voxel1 = voxelsizemm[0][0]
     voxel2 = voxelsizemm[1][0]
@@ -113,7 +116,7 @@ dilationIterations = 0, dilationStructure = None, dataFiltering = False, nObj = 
         inputSigma = number
     if(inputSigma > 2 * number):
         inputSigma = 2 * number
-    uiT = uiThreshold.uiThreshold(preparedData, number, inputSigma, voxelV)
+    uiT = uiThreshold.uiThreshold(preparedData, voxel, number, inputSigma)
     filteredData = uiT.showPlot()
         
     #print('Nasleduje binarni otevreni a uzavreni.')
