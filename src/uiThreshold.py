@@ -187,7 +187,7 @@ class uiThreshold:
             ## Vlastni vytvoreni slideru
             self.smin = Slider(self.axmin, 'Minimal threshold', self.min0, self.max0, valinit = self.min0)
             self.smax = Slider(self.axmax, 'Maximal threshold', self.min0, self.max0, valinit = self.max0)
-            self.ssigma = Slider(self.axsigma, 'Sigma', 0.00, self.number * 2, valinit = self.inputSigma)
+            self.ssigma = Slider(self.axsigma, 'Sigma', 0.00, self.number, valinit = self.inputSigma)
             
             ## Funkce slideru pri zmene jeho hodnoty
             self.smin.on_changed(self.updateImg1Threshold3D)
@@ -233,9 +233,8 @@ class uiThreshold:
         return self.imgChanged 
         
     def updateImgFilter(self, val):
-        
-        ## Vypocet sigma pro gauss. filtr
-        sigma = float(self.ssigma.val) / self.voxelV
+    
+        sigma = float(self.ssigma.val)
 
         ## Filtrovani
         if(self.lastSigma != sigma):
@@ -260,21 +259,38 @@ class uiThreshold:
 #        self.smin.on_changed(self.updateImg1Threshold3D)
 #        self.smax.on_changed(self.updateImg1Threshold3D)
 
-        ## Minimalni pouzita hodnota prahovani v obrazku
-        self.min0 = numpy.amin(self.imgUsed)
-        ## Maximalni pouzita hodnota prahovani v obrazku
-        self.max0 = numpy.amax(self.imgUsed)
+#        ## Minimalni pouzita hodnota prahovani v obrazku
+#        self.min0 = numpy.amin(self.imgUsed)
+#        ## Maximalni pouzita hodnota prahovani v obrazku
+#        self.max0 = numpy.amax(self.imgUsed)
         
         ## Prekresleni
         self.fig.canvas.draw()
-        
+    
     def calculateSigma(self, input):
         
-        voxel = self.voxel
-        sigma = voxel
-        
-        return input
-        ## LATER ## return sigma
+        if ( self.voxel[0][0] == self.voxel[1][0] == self.voxel[2][0] ):
+            return (self.voxel[0][0] * input) / self.voxelV
+        else:
+            sigmaX = self.voxel[0][0] * input 
+            sigmaY = self.voxel[1][0] * input
+            sigmaZ = self.voxel[2][0] * input
+            
+            nummin = min(self.voxel)
+            numsum = sum(self.voxel)
+
+            numsum -= nummin
+            dia = numsum / 2
+            coef = dia / nummin
+            
+            if ( nummin == self.voxel[0][0] ):
+                sigmaX *= coef
+            elif ( nummin == self.voxel[1][0] ):
+                sigmaY *= coef
+            elif( nummin == self.voxel[2][0] ):
+                sigmaZ *= coef
+            
+            return (sigmaX, sigmaY, sigmaZ) / self.voxelV
         
     def button3DReset(self, event):
         

@@ -66,17 +66,17 @@ dilationIterations = 0, dilationStructure = None, dataFiltering = False, nObj = 
     voxel = voxelsizemm
     
     ## Kalkulace objemove jednotky (voxel) (V = a*b*c)
-    voxel1 = voxelsizemm[0][0]
-    voxel2 = voxelsizemm[1][0]
-    voxel3 = voxelsizemm[2][0]
+    voxel1 = voxel[0][0]
+    voxel2 = voxel[1][0]
+    voxel3 = voxel[2][0]
     voxelV = voxel1 * voxel2 * voxel3
     #print('Voxel size: ', voxelV)
     
     #print('Dimenze vstupu: ', numpy.ndim(data))
-    ## number je zaokrohleny 1,5 nasobek objemove jednotky na 2 desetinna mista
-    number = (numpy.round((1.5 * voxelV), 2))
-
+    ## number je zaokrohleny 4x nasobek objemove jednotky na 2 desetinna mista
     ## number stanovi doporucenou horni hranici parametru gauss. filtru
+    number = (numpy.round((4 * voxelV), 2))
+
     #print('Doporucena horni hranice gaussianskeho filtru: ', number)
     
     ## operace dilatace (dilation) nad samotnymi jatry ("segmentation")
@@ -114,8 +114,8 @@ dilationIterations = 0, dilationStructure = None, dataFiltering = False, nObj = 
     #print('Nasleduje filtrovani (rozmazani) a prahovani dat.')
     if(inputSigma == -1):
         inputSigma = number
-    if(inputSigma > 2 * number):
-        inputSigma = 2 * number
+    if(inputSigma > number):
+        inputSigma = number
     uiT = uiThreshold.uiThreshold(preparedData, voxel, number, inputSigma)
     filteredData = uiT.showPlot()
         
@@ -219,7 +219,7 @@ if __name__ == "__main__":
     if(op3D):
         structure = None
         output = vesselSegmentation(mat['data'], mat['segmentation'], mat['threshold'], 
-                                                 mat['voxelsizemm'], inputSigma = 0.25, dilationIterations = 1, 
+                                                 mat['voxelsizemm'], inputSigma = 0.40, dilationIterations = 1, 
                                                  dilationStructure = structure) 
     else:
         output = vesselSegmentation(data = mat, segmentation = mat) 

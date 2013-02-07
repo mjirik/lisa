@@ -162,8 +162,8 @@ class uiBinaryClosingAndOpening:
             axclosing1 = self.fig.add_axes([0.25, 0.14, 0.55, 0.03], axisbg = self.axcolor)
             
             ## Vlastni vytvoreni slideru
-            self.sopen1 = Slider(axopening1, 'Binary opening 1', 0, 100, valinit = 0)
-            self.sclose1 = Slider(axclosing1, 'Binary closing 1', 0, 100, valinit = 0)
+            self.sopen1 = Slider(axopening1, 'Binary opening', 0, 100, valinit = 0)
+            self.sclose1 = Slider(axclosing1, 'Binary closing', 0, 100, valinit = 0)
             
             ## Funkce slideru pri zmene jeho hodnoty
             self.sopen1.on_changed(self.updateImg1Binary3D)
