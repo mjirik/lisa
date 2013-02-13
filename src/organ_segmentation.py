@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 #  apdb.set_trace();
 #import scipy.io
 import numpy as np
+import scipy
 
 # ----------------- my scripts --------
 import dcmreaddata
@@ -40,7 +41,7 @@ def interactive_imcrop(im):
 
 
 class OrganSegmentation():
-    def __init__(self, datadir, working_voxelsize_mm = 0.25, SeriesNumber = None, autocrop = True, autocrop_margin = [0,0,0], manualroi = False, texture_analysis=None):
+    def __init__(self, datadir, working_voxelsize_mm = 0.25, SeriesNumber = None, autocrop = True, autocrop_margin = [0,0,0], manualroi = False, texture_analysis=None, smoothing_mm = 5):
         """
         manualroi: manual set of ROI before data processing, there is a 
              problem with correct coordinates
@@ -60,6 +61,7 @@ class OrganSegmentation():
         self.autocrop_margin = autocrop_margin
         self.crinfo = [[0,-1],[0,-1],[0,-1]]
         self.texture_analysis = texture_analysis
+        self.smoothing_mm = smoothing_mm
 
 # manualcrop
         if manualroi:
@@ -106,6 +108,9 @@ class OrganSegmentation():
             self.orig_scale_segmentation = texture_analysis.segmentation(self.data3d, self.orig_scale_segmentation, params = self.texture_analysis)
 #
             pass
+
+        if not self.smoothing_mm == None:
+            self.segmentation_smoothing(self.smoothing_mm)
         #self.prepare_output()
         #self.orig_segmentation = igc.get_orig_shape_segmentation()
 
@@ -150,6 +155,24 @@ class OrganSegmentation():
                 roi_start[2]:roi_stop[2],\
                 ]
         return  im_out
+    
+    def segmentation_smoothing(self, sigma_mm):
+        """
+        shape of output segmentation is smoothed with gaussian filter. Sigma 
+        is computed in mm
+        """
+        #print "smoothing"
+        sigma = float(sigma_mm)/np.array(self.voxelsize_mm)
+
+        #print sigma
+        #import pdb; pdb.set_trace()
+        self.orig_scale_segmentation = scipy.ndimage.filters.gaussian_filter(\
+                self.orig_scale_segmentation.astype(float), sigma)
+        #import pdb; pdb.set_trace()
+        #pyed = py3DSeedEditor.py3DSeedEditor(self.orig_scale_segmentation)
+        #pyed.show()
+
+        self.orig_scale_segmentation = 1.0 * (self.orig_scale_segmentation> 0.5)
 
 
         
