@@ -105,7 +105,8 @@ def show3(data_matrix = None):
     renderInteractor.Start()
     import pdb; pdb.set_trace()
 
-
+def show3mayavi():
+    return
 
 if __name__ == "__main__":
 
