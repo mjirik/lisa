@@ -100,7 +100,7 @@ class OrganSegmentation():
         if self.autocrop == None:
             self.orig_scale_segmentation = igc.get_orig_shape_segmentation()
         else:
-            self.orig_scale_segmentation, self.crinfo = igc.get_orig_shape_cropped_segmentation(self.autocrop_margin)
+            self.orig_scale_segmentation, self.crinfo = igc.get_orig_scale_cropped_segmentation(self.autocrop_margin)
 
         if not self.texture_analysis == None:
             import texture_analysis
