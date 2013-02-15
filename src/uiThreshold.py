@@ -270,6 +270,33 @@ class uiThreshold:
     def calculateSigma(self, input):
         
         if ( self.voxel[0][0] == self.voxel[1][0] == self.voxel[2][0] ):
+            return ((5 / self.voxel[0][0]) * input) / self.voxelV
+        else:
+#            sigmaX = self.voxel[0][0] * input 
+#            sigmaY = self.voxel[1][0] * input
+#            sigmaZ = self.voxel[2][0] * input
+#            nummin = min(self.voxel)
+#            numsum = sum(self.voxel)
+#
+#            numsum -= nummin
+#            dia = numsum / 2
+#            coef = dia / nummin
+#            
+#            if ( nummin == self.voxel[0][0] ):
+#                sigmaX *= coef
+#            elif ( nummin == self.voxel[1][0] ):
+#                sigmaY *= coef
+#            elif( nummin == self.voxel[2][0] ):
+#                sigmaZ *= coef
+
+            sigmaX = (5.0 / self.voxel[0][0]) * input 
+            sigmaY = (5.0 / self.voxel[1][0]) * input
+            sigmaZ = (5.0 / self.voxel[2][0]) * input
+            
+            return (sigmaX, sigmaY, sigmaZ) / self.voxelV
+        
+        """
+        if ( self.voxel[0][0] == self.voxel[1][0] == self.voxel[2][0] ):
             return (self.voxel[0][0] * input) / self.voxelV
         else:
             sigmaX = self.voxel[0][0] * input 
@@ -291,6 +318,7 @@ class uiThreshold:
                 sigmaZ *= coef
             
             return (sigmaX, sigmaY, sigmaZ) / self.voxelV
+            """
         
     def button3DReset(self, event):
         
