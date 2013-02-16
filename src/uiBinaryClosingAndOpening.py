@@ -47,6 +47,8 @@ class uiBinaryClosingAndOpening:
     """
     def __init__(self, data, initslice = 0, cmap = matplotlib.cm.Greys_r):
 
+        print('Spoustim binarni otevreni a uzavreni dat.')
+
         inputDimension = numpy.ndim(data)
         #print('Dimenze vstupu: ',  inputDimension)
         self.cmap = cmap
@@ -143,19 +145,20 @@ class uiBinaryClosingAndOpening:
             self.imgShape = list(self.imgUsed.shape)
             
             self.fig = matpyplot.figure()
-            # Pridani subplotu do okna (do figure)
+            
+            ## Pridani subplotu do okna (do figure)
             self.ax1 = self.fig.add_subplot(111)
             #self.ax2 = self.fig.add_subplot(122)
             
-            # Upraveni subplotu
+            ## Upraveni subplotu
             self.fig.subplots_adjust(left = 0.1, bottom = 0.3)
             
-            # Nalezeni a pripraveni obrazku k vykresleni
+            ## Nalezeni a pripraveni obrazku k vykresleni
      #       imgShowPlace = numpy.round(self.imgShape[2] / 2).astype(int)
      #       self.imgShow = self.imgUsed[:, :, imgShowPlace]
             self.imgShow = numpy.amax(self.imgChanged, 2)
             
-            # Vykreslit obrazek
+            ## Vykreslit obrazek
             self.im1 = self.ax1.imshow(self.imgShow, self.cmap)
             #self.im2 = self.ax2.imshow(self.imgShow, self.cmap)
     

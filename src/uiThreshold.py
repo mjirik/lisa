@@ -53,6 +53,8 @@ class uiThreshold:
     """
     def __init__(self, data, voxel, number = 100.0, inputSigma = -1, initslice = 0, cmap = matplotlib.cm.Greys_r):
 
+        print('Spoustim prahovani dat.')
+        
         inputDimension = numpy.ndim(data)
         #print('Dimenze vstupu: ',  inputDimension)
         self.cmap = cmap

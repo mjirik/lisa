@@ -63,6 +63,8 @@ dilationIterations = 0, dilationStructure = None, nObj = 0, dataFiltering = True
     navrhnout je automaticky.
     """
     
+    print('Pripravuji data, pockejte prosim...')
+    
     if(dataFiltering):
         voxel = voxelsizemm
         
@@ -148,12 +150,12 @@ Vraceni N nejvetsich objektu.
     N - pocet nejvetsich objektu k vraceni
 """
 def getBiggestObject(data, N):
-    lab, num = scipy.ndimage.label(data)
-
     
-    maxlab = maxAreaIndex(lab, num, N)
-
+    print('Zjistuji nejvetsi objekty...')
+    lab, num = scipy.ndimage.label(data)
+    maxlab = maxAreaIndex(lab, num)
     data = (lab == maxlab)
+    
     return data
     
 """
@@ -163,21 +165,17 @@ Return index of maximum labeled area.
     num - pocet pouzitych oznaceni
     N - pocet nejvetsich objektu k vraceni
 """
-def maxAreaIndex(labels, num, N):
+def maxAreaIndex(labels, num):
     
-    print(num)
     arrayLabels = []
     arrayLabelsSum = []
-    print(len(arrayLabels))
     
     for index in range(0, num):
         arrayLabels.append(index)
         sumOfLabel = numpy.sum(labels == index)
         arrayLabelsSum.append(sumOfLabel)
         
-    print(len(arrayLabels))
-    print(arrayLabels)
-    print(len(arrayLabelsSum))
+    
     
     
     
@@ -284,14 +282,11 @@ if __name__ == "__main__":
     #import pdb; pdb.set_trace()
     if(op3D):
         structure = None
-        output = vesselSegmentation(mat['data'], mat['segmentation'], mat['threshold'], 
+        outputTmp = vesselSegmentation(mat['data'], mat['segmentation'], mat['threshold'], 
                                                  mat['voxelsizemm'], inputSigma = 0.15, dilationIterations = 1, 
                                                  dilationStructure = structure, nObj = 1, dataFiltering = True) 
     else:
-        output = vesselSegmentation(data = mat, segmentation = mat) 
-    
-    uiB = uiBinaryClosingAndOpening.uiBinaryClosingAndOpening(output)
-    outputTmp = uiB.showPlot()
+        outputTmp = vesselSegmentation(data = mat, segmentation = mat) 
     
     import inspector
     inspect = inspector.inspector(outputTmp)
