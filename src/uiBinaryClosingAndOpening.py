@@ -38,10 +38,13 @@ uiBinaryClosingAndOpening
 ================================================================================
 """
 class uiBinaryClosingAndOpening:
-
-    ## data - data pro operace binary closing a opening, se kterymi se pracuje
-    ## initslice - PROZATIM NEPOUZITO
-    ## cmap - grey
+    
+    """
+    Metoda init.
+        data - data pro operace binary closing a opening, se kterymi se pracuje
+        initslice - PROZATIM NEPOUZITO
+        cmap - grey
+    """
     def __init__(self, data, initslice = 0, cmap = matplotlib.cm.Greys_r):
 
         inputDimension = numpy.ndim(data)

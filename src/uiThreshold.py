@@ -42,12 +42,15 @@ uiThreshold
 """
 class uiThreshold:
 
-    ## data - data pro prahovani, se kterymi se pracuje
-    ## number - maximalni hodnota slideru pro gauss. filtrovani (max sigma)
-    ## inputSigma - pocatecni hodnota pro gauss. filtr
-    ## voxelV - objemova jednotka jednoho voxelu
-    ## initslice - PROZATIM NEPOUZITO
-    ## cmap - grey
+    """
+    Metoda init.
+        data - data pro prahovani, se kterymi se pracuje
+        number - maximalni hodnota slideru pro gauss. filtrovani (max sigma)
+        inputSigma - pocatecni hodnota pro gauss. filtr
+        voxelV - objemova jednotka jednoho voxelu
+        initslice - PROZATIM NEPOUZITO
+        cmap - grey
+    """
     def __init__(self, data, voxel, number = 100.0, inputSigma = -1, initslice = 0, cmap = matplotlib.cm.Greys_r):
 
         inputDimension = numpy.ndim(data)
