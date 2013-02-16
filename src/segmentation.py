@@ -172,14 +172,19 @@ def getBiggestObjects(data, N):
         N = len(arrayLabels)
     
     ## Upraveni dat 
-    newData = data.copy()
-    newData = newData * 0
-    search = N + 1
-    for index in range(0, search):
-        print(index)
-        newData == (newData.copy()) | (labels == arrayLabels[index])
+    begin = N + 1
+    for index in range(begin, len(arrayLabels)):
+        data -= (labels == arrayLabels[index])
     
-    return newData
+    return data
+    
+#    newData = data.copy()
+#    newData = newData * 0
+#    search = N + 1
+#    for index in range(0, search):
+#        print(index)
+#        newData = newData | (labels == arrayLabels[index])
+#    return newData
     
 """
 Zjisti cetnosti jednotlivych oznacenych ploch (labeled areas).
@@ -314,7 +319,7 @@ if __name__ == "__main__":
         structure = None
         outputTmp = vesselSegmentation(mat['data'], mat['segmentation'], mat['threshold'], 
                                                  mat['voxelsizemm'], inputSigma = 0.15, dilationIterations = 1, 
-                                                 dilationStructure = structure, nObj = 5, dataFiltering = True) 
+                                                 dilationStructure = structure, nObj = 1, dataFiltering = True) 
     else:
         outputTmp = vesselSegmentation(data = mat, segmentation = mat) 
     
