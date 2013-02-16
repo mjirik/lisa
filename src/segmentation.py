@@ -291,7 +291,11 @@ if __name__ == "__main__":
         output = vesselSegmentation(data = mat, segmentation = mat) 
     
     uiB = uiBinaryClosingAndOpening.uiBinaryClosingAndOpening(output)
-    output = uiB.showPlot()
+    outputTmp = uiB.showPlot()
+    
+    import inspector
+    inspect = inspector.inspector(outputTmp)
+    output = inspect.showPlot()
     
     try:
         cislo = input('Chcete ulozit vystup?\n1 jako ano\n0 jako ne\n')

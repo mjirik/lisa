@@ -107,7 +107,7 @@ if __name__ == "__main__":
 
     outputTmp = segmentation.vesselSegmentation(oseg.data3d, segmentation = oseg.orig_scale_segmentation, inputSigma = 0.15, dilationIterations = 2, dataFiltering = True)
     inspect = inspector.inspector(outputTmp)
-    output = inspect.showPlot(outputTmp)
+    output = inspect.showPlot()
     
 # segmentation labeling
     slab={}
