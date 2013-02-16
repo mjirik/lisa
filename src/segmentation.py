@@ -174,9 +174,10 @@ def getBiggestObjects(data, N):
     ## Upraveni dat 
     newData = data.copy()
     newData = newData * 0
-    newData = (labels == arrayLabels[0])
-    for index in range(1, N):
-        newData = (newData == 0) + (labels == arrayLabels[index])
+    search = N + 1
+    for index in range(0, search):
+        print(index)
+        newData == (newData.copy()) | (labels == arrayLabels[index])
     
     return newData
     
@@ -313,7 +314,7 @@ if __name__ == "__main__":
         structure = None
         outputTmp = vesselSegmentation(mat['data'], mat['segmentation'], mat['threshold'], 
                                                  mat['voxelsizemm'], inputSigma = 0.15, dilationIterations = 1, 
-                                                 dilationStructure = structure, nObj = 3, dataFiltering = True) 
+                                                 dilationStructure = structure, nObj = 5, dataFiltering = True) 
     else:
         outputTmp = vesselSegmentation(data = mat, segmentation = mat) 
     
