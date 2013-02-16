@@ -133,16 +133,17 @@ class uiThreshold:
             self.smax.on_changed(self.updateImg2D)
         
         elif(inputDimension == 3):
-            if sys.version_info[0] < 3:
+            
+            if (sys.version_info[0] < 3):
                 import copy
                 self.voxel = copy.copy(voxel)
                 self.imgUsed = copy.copy(data)
                 self.imgChanged = copy.copy(self.imgUsed)
-
             else:
                 self.voxel = voxel.copy()
                 self.imgUsed = data.copy()
                 self.imgChanged = self.imgUsed.copy()
+                
             self.lastSigma = -1.0
             
             ## Kalkulace objemove jednotky (voxel) (V = a*b*c)

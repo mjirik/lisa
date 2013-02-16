@@ -53,18 +53,18 @@ class inspector:
         self.fig = matpyplot.figure()
         
         ## Pridani subplotu do okna (do figure)
-        self.ax1 = self.fig.add_subplot(111)
-        #self.ax2 = self.fig.add_subplot(122)
+        self.ax1 = self.fig.add_subplot(131)
+        self.ax2 = self.fig.add_subplot(132)
+        self.ax3 = self.fig.add_subplot(133)
         
         ## Upraveni subplotu
         self.fig.subplots_adjust(left = 0.1, bottom = 0.3)
         
-        ## Nalezeni a pripraveni obrazku k vykresleni
-        self.imgShow = numpy.amax(self.data, 2)
-        
         ## Vykreslit obrazek
-        self.im1 = self.ax1.imshow(self.imgShow, self.cmap)
-
+        self.im1 = self.ax1.imshow(numpy.amax(self.data, 0), self.cmap)
+        self.im2 = self.ax2.imshow(numpy.amax(self.data, 1), self.cmap)
+        self.im3 = self.ax3.imshow(numpy.amax(self.data, 2), self.cmap)
+        
        ## Zalozeni mist pro slidery
         # ...
         
@@ -94,14 +94,15 @@ class inspector:
         """!!!!!!!!=POZOR=!!!!!!!!!!"""
         self.output = self.data
         """================="""
+        
         return self.output
         
     def button3DReset(self, event):
-        
-        self.imgShow = numpy.amax(self.data, 2)
             
         ## Vykreslit obrazek
-        self.im1 = self.ax1.imshow(self.imgShow, self.cmap)
+        self.im1 = self.ax1.imshow(numpy.amax(self.data, 0), self.cmap)
+        self.im2 = self.ax2.imshow(numpy.amax(self.data, 1), self.cmap)
+        self.im3 = self.ax3.imshow(numpy.amax(self.data, 2), self.cmap)
         
         ## Prekresleni
         self.fig.canvas.draw()

@@ -141,7 +141,7 @@ dilationIterations = 0, dilationStructure = None, nObj = 0, dataFiltering = True
         return output
     elif(nObj < 0):
         print('Chyba! Chcete vracet zaporny pocet objektu, coz neni mozne!')
-        print('Nasleduje vraceni upravenych dat (vsech objektu)!')
+        print('Nasleduje vraceni vsech vami upravenych dat (vsech objektu)!')
         return output
     
 """
@@ -166,24 +166,40 @@ def getBiggestObjects(data, N):
     ## Pole arrayLabels odpovida prislusnym oznacenim podle pole arrayLabelsSum
     arrayLabelsSum, arrayLabels = selectSort(list1 = arrayLabelsSum, list2 = arrayLabels)
     
+    ## Osetreni neocekavane situace
     if(N > len(arrayLabels)):
         print('Pocet nejvetsich objektu k vraceni chcete vetsi nez je oznacenych oblasti!')
         print('Redukuji pocet nejvetsich objektu k vraceni.')
         N = len(arrayLabels)
     
     ## Upraveni dat 
-    begin = N + 1
-    for index in range(begin, len(arrayLabels)):
-        data -= (labels == arrayLabels[index])
+    if (sys.version_info[0] < 3):
+        import copy
+        newData = copy.copy(data)
+    else:
+        newData = data.copy()
+    newData = newData * 0
+    search = N + 1
+    for index in range(0, search):
+        newData -= (labels == arrayLabels[index])
+        
+    return data - newData
     
-    return data
-    
+# """Odcitaci verze"""
+#    begin = N + 1
+#    for index in range(begin, len(arrayLabels)):
+#        data -= (labels == arrayLabels[index])
+#    
+#    return data
+
+# """Doplnovaci verze"""
 #    newData = data.copy()
 #    newData = newData * 0
 #    search = N + 1
 #    for index in range(0, search):
 #        print(index)
 #        newData = newData | (labels == arrayLabels[index])
+#
 #    return newData
     
 """
