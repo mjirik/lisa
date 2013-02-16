@@ -136,7 +136,7 @@ dilationIterations = 0, dilationStructure = None, nObj = 0, dataFiltering = True
     
     ## Operace zjisteni poctu N nejvetsich objektu a jejich nasledne vraceni
     if(nObj > 0):
-        return getBiggestObject(output, nObj)
+        return getBiggestObjects(data = output, N = nObj)
     elif(nObj == 0):
         return output
     elif(nObj < 0):
@@ -149,23 +149,44 @@ Vraceni N nejvetsich objektu.
     data - data, ve kterych chceme zachovat pouze nejvetsi objekty
     N - pocet nejvetsich objektu k vraceni
 """
-def getBiggestObject(data, N):
+def getBiggestObjects(data, N):
     
     print('Zjistuji nejvetsi objekty...')
-    lab, num = scipy.ndimage.label(data)
-    maxlab = maxAreaIndex(lab, num)
-    data = (lab == maxlab)
     
-    return data
+    ## Oznaceni dat
+    ## labels - oznacena data
+    ## length - pocet rozdilnych oznaceni
+    labels, length = scipy.ndimage.label(data)
+    
+    ## Soucet oznaceni z dat
+    arrayLabelsSum, arrayLabels = areaIndexes(labels, length)
+    
+    ## Serazeni poli pro vyber nejvetsich objektu
+    ## Pole arrayLabelsSum je serazeno od nejvetsi k nejmensi cetnosti
+    ## Pole arrayLabels odpovida prislusnym oznacenim podle pole arrayLabelsSum
+    arrayLabelsSum, arrayLabels = selectSort(list1 = arrayLabelsSum, list2 = arrayLabels)
+    
+    if(N > len(arrayLabels)):
+        print('Pocet nejvetsich objektu k vraceni chcete vetsi nez je oznacenych oblasti!')
+        print('Redukuji pocet nejvetsich objektu k vraceni.')
+        N = len(arrayLabels)
+    
+    ## Upraveni dat 
+    newData = data.copy()
+    newData = newData * 0
+    newData = (labels == arrayLabels[0])
+    for index in range(1, N):
+        newData = (newData == 0) + (labels == arrayLabels[index])
+    
+    return newData
     
 """
 Zjisti cetnosti jednotlivych oznacenych ploch (labeled areas).
-Return index of maximum labeled area.
     labels - data s aplikovanymi oznacenimi
     num - pocet pouzitych oznaceni
     N - pocet nejvetsich objektu k vraceni
 """
-def maxAreaIndex(labels, num):
+def areaIndexes(labels, num):
     
     arrayLabels = []
     arrayLabelsSum = []
@@ -174,20 +195,28 @@ def maxAreaIndex(labels, num):
         arrayLabels.append(index)
         sumOfLabel = numpy.sum(labels == index)
         arrayLabelsSum.append(sumOfLabel)
-        
-    
-    
-    
-    
-    max = 0
-    maxIndex = -1
-    for index in range(1, num):
-        maxtmp = numpy.sum(labels == index)
-        if(maxtmp > max):
-            max = maxtmp
-            maxIndex = index
 
-    return maxIndex
+    return arrayLabelsSum, arrayLabels
+    
+"""
+Razeni 2 poli najednou (list) pomoci metody select sort
+    list1 - prvni pole (hlavni pole pro razeni)
+    list2 - druhe pole (vedlejsi pole) (kopirujici pozice pro razeni podle hlavniho pole list1)
+"""
+def selectSort(list1, list2):
+    
+    length = len(list1)
+    for index in range(0, length):
+        min = index
+        for index2 in range(index + 1, length):
+            if list1[index2] > list1[min]:
+                min = index2
+        ## Prohozeni hodnot hlavniho pole
+        list1[index], list1[min] = list1[min], list1[index]
+        ## Prohozeni hodnot vedlejsiho pole
+        list2[index], list2[min] = list2[min], list2[index]
+        
+    return list1, list2
 
 """
 ================================================================================
@@ -284,7 +313,7 @@ if __name__ == "__main__":
         structure = None
         outputTmp = vesselSegmentation(mat['data'], mat['segmentation'], mat['threshold'], 
                                                  mat['voxelsizemm'], inputSigma = 0.15, dilationIterations = 1, 
-                                                 dilationStructure = structure, nObj = 1, dataFiltering = True) 
+                                                 dilationStructure = structure, nObj = 3, dataFiltering = True) 
     else:
         outputTmp = vesselSegmentation(data = mat, segmentation = mat) 
     
@@ -302,8 +331,6 @@ if __name__ == "__main__":
     except Exception:
         print('Stala se chyba!')
         raise Exception
-        
-    #print('Vypinam skript.')    
     
     sys.exit()
     

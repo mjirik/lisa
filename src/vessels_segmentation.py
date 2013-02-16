@@ -105,7 +105,7 @@ if __name__ == "__main__":
     pyed.show()
     # oseg.orig_scale_segmentation
 
-    outputTmp = segmentation.vesselSegmentation(oseg.data3d, segmentation = oseg.orig_scale_segmentation, inputSigma = 0.15, dilationIterations = 2, dataFiltering = True)
+    outputTmp = segmentation.vesselSegmentation(oseg.data3d, segmentation = oseg.orig_scale_segmentation, inputSigma = 0.15, dilationIterations = 2, nObj = 1, dataFiltering = True)
     inspect = inspector.inspector(outputTmp)
     output = inspect.showPlot()
     

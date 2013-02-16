@@ -85,13 +85,15 @@ class inspector:
         ## Funkce tlacitek pri jejich aktivaci
         self.breset.on_clicked(self.button3DReset)
         self.bcontinue.on_clicked(self.button3DContinue)
-        
-        self.output = self.data
     
     def showPlot(self):
         
         matpyplot.show()
         
+        """================="""
+        """!!!!!!!!=POZOR=!!!!!!!!!!"""
+        self.output = self.data
+        """================="""
         return self.output
         
     def button3DReset(self, event):

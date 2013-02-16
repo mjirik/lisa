@@ -230,6 +230,7 @@ class uiThreshold:
     def showPlot(self):
         
         ## Provedeni pocatecniho gauss. filtrovani
+        self.firstRun = True
         self.updateImgFilter(self)
 
         ## Zobrazeni plot (figure)
@@ -249,9 +250,13 @@ class uiThreshold:
             self.lastSigma = sigma
             
         ## Vykresleni novych pohledu z filtrovani
-        self.im1 = self.ax1.imshow(numpy.amax(self.imgUsed, 0), self.cmap)
-        self.im2 = self.ax2.imshow(numpy.amax(self.imgUsed, 1), self.cmap)
-        self.im3 = self.ax3.imshow(numpy.amax(self.imgUsed, 2), self.cmap)
+        if(self.firstRun == False):
+            self.updateImg1Threshold3D(self)
+        else:
+            self.firstRun = False
+            self.im1 = self.ax1.imshow(numpy.amax(self.imgUsed, 0), self.cmap)
+            self.im2 = self.ax2.imshow(numpy.amax(self.imgUsed, 1), self.cmap)
+            self.im3 = self.ax3.imshow(numpy.amax(self.imgUsed, 2), self.cmap)
         
 #        ## Zmena maximalnich a minimalnich hodnot os prahovani
 #        ## Minimalni pouzita hodnota prahovani v obrazku
