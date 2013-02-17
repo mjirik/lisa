@@ -8,8 +8,7 @@ Purpose:     (CZE-ZCU-FAV-KKY) Liver medical project
 Author:      Pavel Volkovinsky (volkovinsky.pavel@gmail.com)
 
 Created:     08.11.2012
-Copyright:   (c) Pavel Volkovinsky 2012
-Licence:     <your licence>
+Copyright:   (c) Pavel Volkovinsky
 ================================================================================
 """
 
@@ -38,7 +37,7 @@ uiBinaryClosingAndOpening
 ================================================================================
 """
 class uiBinaryClosingAndOpening:
-    
+
     """
     Metoda init.
         data - data pro operace binary closing a opening, se kterymi se pracuje
@@ -56,18 +55,18 @@ class uiBinaryClosingAndOpening:
         self.imgChanged = self.imgUsed
         self.imgChanged1 = self.imgUsed
 #        self.imgChanged2 = imgUsed
-        
+
         if(inputDimension == 2):
-            
+
             self.imgUsed = self.imgUsed
             self.imgChanged = self.imgUsed
-                
+
             """
             self.imgChanged1 = self.imgUsed
             self.imgChanged2 = self.imgUsed
             self.imgChanged3 = self.imgUsed
             """
-            
+
             # Zakladni informace o obrazku (+ statisticke)
             """
             print('Image dtype: ', imgUsed.dtype)
@@ -78,7 +77,7 @@ class uiBinaryClosingAndOpening:
             print('Variance: ', imgUsed.var())
             print('Standard deviation: ', imgUsed.std())
             """
-            
+
             # Ziskani okna (figure)
             self.fig = matpyplot.figure()
             # Pridani subplotu do okna (do figure)
@@ -99,7 +98,7 @@ class uiBinaryClosingAndOpening:
             self.im3 = self.ax3.imshow(imgUsed)
             """
      #       self.fig.colorbar(self.im1)
-    
+
             # Zakladni informace o slideru
             axcolor = 'white' # lightgoldenrodyellow
             axmin = self.fig.add_axes([0.25, 0.16, 0.495, 0.03], axisbg = axcolor)
@@ -108,7 +107,7 @@ class uiBinaryClosingAndOpening:
             axopening = self.fig.add_axes([0.25, 0.08, 0.495, 0.03], axisbg = axcolor)
             axclosing = self.fig.add_axes([0.25, 0.04, 0.495, 0.03], axisbg = axcolor)
             """
-            
+
             # Vytvoreni slideru
                 # Minimalni pouzita hodnota v obrazku
             min0 = self.imgUsed.min()
@@ -121,13 +120,13 @@ class uiBinaryClosingAndOpening:
             self.sopen = Slider(axopening, 'Binary opening', 0, 10, valinit = 0)
             self.sclose = Slider(axclosing, 'Binary closing', 0, 10, valinit = 0)
             """
-            
+
             # Udalost pri zmene hodnot slideru - volani updatu
             self.smin.on_changed(self.updateImg2D)
             self.smax.on_changed(self.updateImg2D)
-        
+
         elif(inputDimension == 3):
-            
+
             # Zakladni informace o obrazcich (+ statisticke)
             """
             print('Image dtype: ', imgUsed.dtype)
@@ -138,46 +137,46 @@ class uiBinaryClosingAndOpening:
             print('Variance: ', imgUsed.var())
             print('Standard deviation: ', imgUsed.std())
             """
-            
+
             #self.imgMin = numpy.min(self.imgUsed)
             #self.imgMax = numpy.max(self.imgUsed)
-            
+
             self.imgShape = list(self.imgUsed.shape)
-            
+
             self.fig = matpyplot.figure()
-            
+
             ## Pridani subplotu do okna (do figure)
             self.ax1 = self.fig.add_subplot(111)
             #self.ax2 = self.fig.add_subplot(122)
-            
+
             ## Upraveni subplotu
             self.fig.subplots_adjust(left = 0.1, bottom = 0.3)
-            
+
             ## Nalezeni a pripraveni obrazku k vykresleni
      #       imgShowPlace = numpy.round(self.imgShape[2] / 2).astype(int)
      #       self.imgShow = self.imgUsed[:, :, imgShowPlace]
             self.imgShow = numpy.amax(self.imgChanged, 2)
-            
+
             ## Vykreslit obrazek
             self.im1 = self.ax1.imshow(self.imgShow, self.cmap)
             #self.im2 = self.ax2.imshow(self.imgShow, self.cmap)
-    
+
            ## Zalozeni mist pro slidery
             self.axcolor = 'white' # lightgoldenrodyellow
             axopening1 = self.fig.add_axes([0.25, 0.14, 0.55, 0.03], axisbg = self.axcolor)
             axclosing1 = self.fig.add_axes([0.25, 0.18, 0.55, 0.03], axisbg = self.axcolor)
-            
+
             ## Vlastni vytvoreni slideru
             self.sopen1 = Slider(axopening1, 'Binary opening', 0, 100, valinit = 0)
             self.sclose1 = Slider(axclosing1, 'Binary closing', 0, 100, valinit = 0)
-            
+
             ## Funkce slideru pri zmene jeho hodnoty
             self.sopen1.on_changed(self.updateImg1Binary3D)
             self.sclose1.on_changed(self.updateImg1Binary3D)
-            
+
             self.sopen1.valtext.set_text('{}'.format(int(self.sopen1.val)))
             self.sclose1.valtext.set_text('{}'.format(int(self.sclose1.val)))
-            
+
             ## Zalozeni mist pro tlacitka
             self.axbuttnextopening = self.fig.add_axes([0.83, 0.14, 0.04, 0.03], axisbg = self.axcolor)
             self.axbuttprevopening = self.fig.add_axes([0.88, 0.14, 0.04, 0.03], axisbg = self.axcolor)
@@ -186,7 +185,7 @@ class uiBinaryClosingAndOpening:
             self.axbuttreset = self.fig.add_axes([0.80, 0.08, 0.07, 0.03], axisbg = self.axcolor)
             self.axbuttcontinue = self.fig.add_axes([0.88, 0.08, 0.07, 0.03], axisbg = self.axcolor)
             #self.axbuttswap = self.fig.add_axes([0.05, 0.18, 0.09, 0.03], axisbg = self.axcolor)
-            
+
             ## Zalozeni tlacitek
             self.bnextopening = Button(self.axbuttnextopening, '+1.0')
             self.bprevopening = Button(self.axbuttprevopening, '-1.0')
@@ -195,7 +194,7 @@ class uiBinaryClosingAndOpening:
             self.breset = Button(self.axbuttreset, 'Reset')
             self.bcontinue = Button(self.axbuttcontinue, 'End editing')
             #self.bswap = Button(self.axbuttswap, 'Swap operations')
-            
+
             ## Funkce tlacitek pri jejich aktivaci
             self.bnextopening.on_clicked(self.button3DNextOpening)
             self.bprevopening.on_clicked(self.button3DPrevOpening)
@@ -204,79 +203,79 @@ class uiBinaryClosingAndOpening:
             self.breset.on_clicked(self.button3DReset)
             self.bcontinue.on_clicked(self.button3DContinue)
             #self.bswap.on_clicked(self.buttonSwap)
-            
+
             #self.state = 'firstClosing'
             #self.text = matpyplot.figtext(0.05, 0.15, 'First: closing')
-            
+
         else:
-            
+
             print('Spatny vstup.\nDimenze vstupu neni 2 ani 3.\nUkoncuji prahovani.')
 
     def showPlot(self):
-        
+
         # Zobrazeni plot (figure)
         matpyplot.show()
-        
+
         return self.imgChanged1
-        
+
 #    def buttonSwap(self, event):
-#        
+#
 #        if(self.state == 'firstOpening'):
 #            self.state = 'firstClosing'
 #            #matpyplot.figtext(0.05, 0.15, 'First: closing')
 #        elif(self.state == 'firstClosing'):
 #            self.state = 'firstOpening'
 #            #matpyplot.figtext(0.05, 0.15, 'First: opening')
-#        
+#
 #        self.fig.canvas.draw()
-        
+
     def button3DReset(self, event):
-        
+
         self.sopen1.val = 0.0
         self.sopen1.valtext.set_text('{}'.format(int(self.sopen1.val)))
         self.sclose1.val = 0.0
         self.sclose1.valtext.set_text('{}'.format(int(self.sclose1.val)))
-        
+
         self.imgShow = numpy.amax(self.imgChanged, 2)
-            
+
         ## Vykreslit obrazek
         self.im1 = self.ax1.imshow(self.imgShow, self.cmap)
-        
+
         ## Prekresleni
         self.fig.canvas.draw()
-        
+
     def button3DContinue(self, event):
-        
+
         matpyplot.clf()
         matpyplot.close()
-         
+
     def button3DNextOpening(self, event):
-        
+
         self.sopen1.val += 1.0
         self.sopen1.val = (numpy.round(self.sopen1.val, 2))
         self.sopen1.valtext.set_text('{}'.format(self.sopen1.val))
         self.fig.canvas.draw()
         self.updateImg1Binary3D(self)
-        
+
     def button3DPrevOpening(self, event):
-        
+
         if(self.sopen1.val >= 1.0):
             self.sopen1.val -= 1.0
             self.sopen1.val = (numpy.round(self.sopen1.val, 2))
             self.sopen1.valtext.set_text('{}'.format(self.sopen1.val))
             self.fig.canvas.draw()
-            self.updateImg1Binary3D(self)        
-        
+            self.updateImg1Binary3D(self)
+
     def button3DNextClosing(self, event):
-        
+
         self.sclose1.val += 1.0
         self.sclose1.val = (numpy.round(self.sclose1.val, 2))
         self.sclose1.valtext.set_text('{}'.format(self.sclose1.val))
         self.fig.canvas.draw()
         self.updateImg1Binary3D(self)
-        
+
     def button3DPrevClosing(self, event):
-        
+
         if(self.sclose1.val >= 1.0):
             self.sclose1.val -= 1.0
             self.sclose1.val = (numpy.round(self.sclose1.val, 2))
@@ -285,66 +284,66 @@ class uiBinaryClosingAndOpening:
             self.updateImg1Binary3D(self)
 
     def updateImg2D(self, val):
-        
+
         ## Prahovani (smin, smax)
         img1 = self.imgUsed.copy() > self.smin.val
         self.imgChanged = img1 #< self.smax.val
-        
+
         ## Predani obrazku k vykresleni
         self.im1 = self.ax1.imshow(self.imgChanged, self.cmap)
         ## Prekresleni
         self.fig.canvas.draw()
-        
+
     def updateImg1Binary3D(self, val):
-        
+
         ## Nastaveni hodnot slideru
         self.sopen1.valtext.set_text('{}'.format(int(numpy.round(self.sopen1.val, 0))))
         self.sclose1.valtext.set_text('{}'.format(int(numpy.round(self.sclose1.val, 0))))
-        
+
         ## Prekresleni
         self.fig.canvas.draw()
-        
+
         imgChanged1 = self.imgChanged
-        
+
         if(self.sclose1.val >= 0.1):
             imgChanged1 = scipy.ndimage.binary_closing(self.imgChanged, structure = None, iterations = int(numpy.round(self.sclose1.val, 0)))
         else:
             imgChanged1 = self.imgChanged
-        
+
         if(self.sopen1.val >= 0.1):
             self.imgChanged1 = scipy.ndimage.binary_opening(imgChanged1, structure = None, iterations = int(numpy.round(self.sopen1.val, 0)))
         else:
             self.imgChanged1 = imgChanged1
-        
+
 #        ## Prvni operace opening, pote closing
 #        if(self.state == 'firstOpening'):
-#            
+#
 #            if(self.sopen1.val >= 0.1):
 #                imgChanged1 = scipy.ndimage.binary_opening(self.imgChanged, structure = None, iterations = int(numpy.round(self.sopen1.val, 0)))
 #            else:
 #                imgChanged1 = self.imgChanged
-#                
+#
 #            if(self.sclose1.val >= 0.1):
 #                self.imgChanged1 = scipy.ndimage.binary_closing(imgChanged1, structure = None, iterations = int(numpy.round(self.sclose1.val, 0)))
 #            else:
 #                self.imgChanged1 = imgChanged1
-#            
+#
 #        ## Prvni operace closing, pote opening
 #        elif(self.state == 'firstClosing'):
-#            
+#
 #            if(self.sclose1.val >= 0.1):
 #                imgChanged1 = scipy.ndimage.binary_closing(self.imgChanged, structure = None, iterations = int(numpy.round(self.sclose1.val, 0)))
 #            else:
 #                imgChanged1 = self.imgChanged
-#            
+#
 #            if(self.sopen1.val >= 0.1):
 #                self.imgChanged1 = scipy.ndimage.binary_opening(imgChanged1, structure = None, iterations = int(numpy.round(self.sopen1.val, 0)))
 #            else:
 #                self.imgChanged1 = imgChanged1
-            
+
         ## Predani obrazku k vykresleni
         self.imgShow1 = numpy.amax(self.imgChanged1, 2)
         self.im1 = self.ax1.imshow(self.imgShow1, self.cmap)
-        
+
         ## Prekresleni
         self.fig.canvas.draw()

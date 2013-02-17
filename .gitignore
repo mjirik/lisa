@@ -39,3 +39,5 @@ src/IM-0001-0220.dcm
 src/IM-0001-0240.dcm
 src/output.mat
 src/uiThreshold.py.orig
+sample_data
+tmp
