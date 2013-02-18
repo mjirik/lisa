@@ -24,9 +24,18 @@ def submodule_update():
     except:
         print ('Probem with git submodules')
 
+def check_python_architecture(pythondir, target_arch_str):
+    """
+    functions check architecture of target python 
+    """
+    pyth_str = subprocess.check_output([pythondir+'python', '-c','import platform; print platform.architecture()[0]'])
+    if pyth_str [:2] != target_arch_str:
+        raise Exception("Wrong architecture of target python. Expected arch is" + target_arch_str)
+
+
 
 def definitions_win64_py32():
-    global urlpython, urlmsysgit, urlmingw, urlnumpy, urlscipy, urlsklearn, urlmatplotlib, urlcython, urlgco_python, urlgco, urlcompiler, pythondir, pythonversion
+    global urlpython, urlmsysgit, urlmingw, urlnumpy, urlscipy, urlsklearn, urlmatplotlib, urlcython, urlgco_python, urlgco, urlcompiler, pythondir, pythonversion, target_arch_str
     urlpython = "http://www.python.org/ftp/python/3.2.3/python-3.2.3.amd64.msi"
     urlmsysgit = "http://msysgit.googlecode.com/files/Git-1.8.0-preview20121022.exe"
     urlmingw = "http://downloads.sourceforge.net/project/mingw/Installer/mingw-get-inst/mingw-get-inst-20120426/mingw-get-inst-20120426.exe?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fmingw%2Ffiles%2Flatest%2Fdownload%3Fsource%3Dfiles&ts=1359726876&use_mirror=ignum",
@@ -40,10 +49,11 @@ def definitions_win64_py32():
     urlcompiler = "http://home.zcu.cz/~mjirik/liver/download/win64_py32/cygwinccompiler.py"
     pythondir = "c:/python32/"
     pythonversion = (3,2)
+    target_arch_str = '64'
     
     
 def definitions_win32_py27():
-    global urlpython, urlmsysgit, urlmingw, urlnumpy, urlscipy, urlsklearn, urlmatplotlib, urlcython, urlgco_python, urlgco, urlcompiler, pythondir, pythonversion
+    global urlpython, urlmsysgit, urlmingw, urlnumpy, urlscipy, urlsklearn, urlmatplotlib, urlcython, urlgco_python, urlgco, urlcompiler, pythondir, pythonversion, target_arch_str
     urlpython = "http://www.python.org/ftp/python/2.7.3/python-2.7.3.msi"
     urlmsysgit = "http://msysgit.googlecode.com/files/Git-1.8.0-preview20121022.exe"
     urlmingw = "http://downloads.sourceforge.net/project/mingw/Installer/mingw-get-inst/mingw-get-inst-20120426/mingw-get-inst-20120426.exe?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fmingw%2Ffiles%2Flatest%2Fdownload%3Fsource%3Dfiles&ts=1359726876&use_mirror=ignum"
@@ -57,6 +67,7 @@ def definitions_win32_py27():
     urlcompiler = "http://home.zcu.cz/~mjirik/liver/download/win32_py27/cygwinccompiler.py"
     pythondir = "c:/python27/"
     pythonversion = (2,7)
+    target_arch_str = '32'
     
     
 def windows_install():
@@ -81,6 +92,8 @@ def windows_install():
         a = "msiexec /i " + local_file_name
         print (a)
         subprocess.call(a)
+
+        check_python_architecture(pythondir, target_arch_str)
 
         print ("Please restart installer with new python")
         subprocess.call(pythondir + "python.exe mysetup.py")
@@ -120,16 +133,22 @@ def windows_install():
     # numpy, scipy, matplotlib, scikit-learn, cython
     print ("numpy, scipy, matplotlib, scikit-learn, cython install")
     #import pdb; pdb.set_trace()
-    download_and_run(urlnumpy, "./tmp/numpy.exe")
-    download_and_run(urlscipy, "./tmp/scipy.exe")
-    download_and_run(urlsklearn, "./tmp/sklearn.exe")
-    download_and_run(urlmatplotlib, "./tmp/matplotlib.exe")
-    download_and_run(urlcython, "./tmp/cython.exe")
+    try:
+
+        subprocess.call(pythondir + "Scripts/pip.exe install numpy scipy scikit-learn matplotlib cython", cwd="./tmp/")
+    except:
+        print ("alternative installation ")
+        download_and_run(urlnumpy, "./tmp/numpy.exe")
+        download_and_run(urlscipy, "./tmp/scipy.exe")
+        download_and_run(urlsklearn, "./tmp/sklearn.exe")
+        download_and_run(urlmatplotlib, "./tmp/matplotlib.exe")
+        download_and_run(urlcython, "./tmp/cython.exe")
+
 
     
     # install pydicom
-    subprocess.call(pythondir + "Scripts/pip.exe pydicom", cwd="./tmp/")
-    subprocess.call(pythondir + "Scripts/pip.exe pyyaml", cwd="./tmp/")
+    subprocess.call(pythondir + "Scripts/pip.exe install pydicom", cwd="./tmp/")
+    subprocess.call(pythondir + "Scripts/pip.exe install pyyaml", cwd="./tmp/")
     
 
     # install gco_python
