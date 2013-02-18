@@ -21,6 +21,7 @@ import uiThreshold
 import uiBinaryClosingAndOpening
 
 import numpy
+import scipy
 import scipy.io
 import scipy.misc
 import scipy.ndimage
@@ -37,20 +38,24 @@ vessel segmentation
 """
 """
 Vessel segmentation z jater.
-    data - CT (nebo MRI) 3D data
-    segmentation - zakladni oblast pro segmentaci, oznacena struktura veliksotne totozna s "data",
-        kde je oznaceni (label) jako:
-            1 jatra,
-            -1 zajimava tkan (kosti, ...)
-            0 jinde
-    ====PROZATIM NEPOUZITO - threshold - prah
-    voxelsizemm - (vektor o hodnote 3) rozmery jednoho voxelu
-    inputSigma - pocatecni hodnota pro prahovani
-    dilationIterations - pocet operaci dilation nad zakladni oblasti pro segmentaci ("segmantation")
-    dilationStructure - struktura pro operaci dilation
-    nObj - oznacuje, kolik nejvetsich objektu se ma vyhledat - pokud je rovno 0 (nule), vraci cela data
-    dataFiltering - oznacuje, jestli maji data byt filtrovana (True) nebo nemaji byt
-        nebo filtrovana (False) (== uz jsou filtrovana)
+    input:
+        data - CT (nebo MRI) 3D data
+        segmentation - zakladni oblast pro segmentaci, oznacena struktura veliksotne totozna s "data",
+            kde je oznaceni (label) jako:
+                1 jatra,
+                -1 zajimava tkan (kosti, ...)
+                0 jinde
+        ====PROZATIM NEPOUZITO - threshold - prah
+        voxelsizemm - (vektor o hodnote 3) rozmery jednoho voxelu
+        inputSigma - pocatecni hodnota pro prahovani
+        dilationIterations - pocet operaci dilation nad zakladni oblasti pro segmentaci ("segmantation")
+        dilationStructure - struktura pro operaci dilation
+        nObj - oznacuje, kolik nejvetsich objektu se ma vyhledat - pokud je rovno 0 (nule), vraci cela data
+        dataFiltering - oznacuje, jestli maji data byt filtrovana (True) nebo nemaji byt
+            nebo filtrovana (False) (== uz jsou filtrovana)
+
+    returns:
+        ---
 """
 def vesselSegmentation(data, segmentation = -1, threshold = 1185, voxelsizemm = [[1],[1],[1]], inputSigma = -1,
 dilationIterations = 0, dilationStructure = None, nObj = 0, dataFiltering = True):
@@ -114,7 +119,7 @@ dilationIterations = 0, dilationStructure = None, nObj = 0, dataFiltering = True
         """
 
         ## Ziskani datove oblasti jater (bud pouze jater nebo i jejich okoli - zalezi,
-        ##jakym zpusobem bylo nalozeno s operaci dilatace dat)
+        ## jakym zpusobem bylo nalozeno s operaci dilatace dat)
         preparedData = data * (segmentation == 1)
 
         ## Filtrovani (rozmazani) a prahovani dat
@@ -146,8 +151,12 @@ dilationIterations = 0, dilationStructure = None, nObj = 0, dataFiltering = True
 
 """
 Vraceni N nejvetsich objektu.
-    data - data, ve kterych chceme zachovat pouze nejvetsi objekty
-    N - pocet nejvetsich objektu k vraceni
+    input:
+        data - data, ve kterych chceme zachovat pouze nejvetsi objekty
+        N - pocet nejvetsich objektu k vraceni
+
+    returns:
+        ---
 """
 def getBiggestObjects(data, N):
 
@@ -172,42 +181,30 @@ def getBiggestObjects(data, N):
         print('Redukuji pocet nejvetsich objektu k vraceni.')
         N = len(arrayLabels)
 
-    ## Upraveni dat
+    ## Upraveni dat (ziskani N nejvetsich objektu)
+    ## Hleda se N+1 objektu, protoze jeden objekt (pravdepodobne nejvetsi) je oblast
+    ## bez dulezitych dat
+    search = N + 1
     if (sys.version_info[0] < 3):
         import copy
         newData = copy.copy(data)
     else:
         newData = data.copy()
     newData = newData * 0
-    search = N + 1
-
     for index in range(0, search):
         newData -= (labels == arrayLabels[index])
 
     return data - newData
 
-# """Odcitaci verze"""
-#    begin = N + 1
-#    for index in range(begin, len(arrayLabels)):
-#        data -= (labels == arrayLabels[index])
-#
-#    return data
-
-# """Doplnovaci verze"""
-#    newData = data.copy()
-#    newData = newData * 0
-#    search = N + 1
-#    for index in range(0, search):
-#        print(index)
-#        newData = newData | (labels == arrayLabels[index])
-#
-#    return newData
-
 """
-Zjisti cetnosti jednotlivych oznacenych ploch (labeled areas).
-    labels - data s aplikovanymi oznacenimi
-    num - pocet pouzitych oznaceni
-    N - pocet nejvetsich objektu k vraceni
+Zjisti cetnosti jednotlivych oznacenych ploch (labeled areas)
+    input:
+        labels - data s aplikovanymi oznacenimi
+        num - pocet pouzitych oznaceni
+        N - pocet nejvetsich objektu k vraceni
+
+    returns:
+        ---
 """
 def areaIndexes(labels, num):
 
@@ -223,8 +220,12 @@ def areaIndexes(labels, num):
 
 """
 Razeni 2 poli najednou (list) pomoci metody select sort
-    list1 - prvni pole (hlavni pole pro razeni)
-    list2 - druhe pole (vedlejsi pole) (kopirujici pozice pro razeni podle hlavniho pole list1)
+    input:
+        list1 - prvni pole (hlavni pole pro razeni)
+        list2 - druhe pole (vedlejsi pole) (kopirujici pozice pro razeni podle hlavniho pole list1)
+
+    returns:
+        ---
 """
 def selectSort(list1, list2):
 
@@ -246,9 +247,12 @@ def selectSort(list1, list2):
 tests
 ================================================================================
 """
+
 """class Tests(unittest.TestCase):
+
     def test_t(self):
         pass
+
     def setUp(self):
         #Nastavení společných proměnných pro testy
         datashape = [220,115,30]
@@ -262,14 +266,12 @@ tests
         outputdata = vesselSegmentation(self.rnddata,self.segmcube)
         self.assertEqual(outputdata.shape, self.rnddata.shape)
 
+    def test_different_data_and_segmentation_size(self):
+        # Funkce ověřuje vyhození výjimky při různém velikosti vstpních
+        # dat a segmentace
+        pdb.set_trace();
+        self.assertRaises(Exception, vesselSegmentation, (self.rnddata, self.segmcube[2:,:,:]) )
 """
-#
-#    def test_different_data_and_segmentation_size(self):
-#        """ Funkce ověřuje vyhození výjimky při různém velikosti vstpních
-#        dat a segmentace """
-#        pdb.set_trace();
-#        self.assertRaises(Exception, vesselSegmentation, (self.rnddata, self.segmcube[2:,:,:]) )
-#
 
 """
 ================================================================================

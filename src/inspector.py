@@ -111,3 +111,16 @@ class inspector:
 
         matpyplot.clf()
         matpyplot.close()
+
+    def graphClick(self):
+
+        pass
+
+    def addVein(self):
+
+        pass
+
+
+
+
+
