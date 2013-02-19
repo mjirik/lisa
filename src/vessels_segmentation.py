@@ -53,9 +53,9 @@ if __name__ == "__main__":
             help='path to data dir')
     parser.add_argument('-d', '--debug', action='store_true',
             help='run in debug mode')
-    parser.add_argument('-t', '--tests', action='store_true', 
+    parser.add_argument('-t', '--tests', action='store_true',
             help='run unittest')
-    parser.add_argument('-ed', '--exampledata', action='store_true', 
+    parser.add_argument('-ed', '--exampledata', action='store_true',
             help='run unittest')
     args = parser.parse_args()
 
@@ -67,12 +67,12 @@ if __name__ == "__main__":
         # hack for use argparse and unittest in one module
         sys.argv[1:]=[]
         unittest.main()
-        sys.exit() 
+        sys.exit()
 
     if args.exampledata:
 
         args.dcmdir = '../sample_data/matlab/examples/sample_data/DICOM/digest_article/'
-        
+
     #else:
     #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
@@ -91,7 +91,7 @@ if __name__ == "__main__":
     #igc.make_gc()
     #igc.show_segmentation()
 
-    # volume 
+    # volume
     #volume_mm3 = np.sum(oseg.segmentation > 0) * np.prod(oseg.voxelsize_mm)
 
     print ( "Volume " + str(oseg.get_segmented_volume_size_mm3()/1000000.0) + ' [l]' )
@@ -105,10 +105,22 @@ if __name__ == "__main__":
     pyed.show()
     # oseg.orig_scale_segmentation
 
-    outputTmp = segmentation.vesselSegmentation(oseg.data3d, segmentation = oseg.orig_scale_segmentation, inputSigma = 0.15, dilationIterations = 2, nObj = 1, dataFiltering = True)
+    outputTmp = segmentation.vesselSegmentation(
+        oseg.data3d,
+        segmentation = oseg.orig_scale_segmentation,
+        threshold = 1161,
+        inputSigma = 0.15,
+        dilationIterations = 2,
+        nObj = 1,
+        dataFiltering = True,
+        interactivity = False,
+        binaryClosingIterations = 1,
+        binaryOpeningIterations = 1)
+
     inspect = inspector.inspector(outputTmp)
-    output = inspect.showPlot()
-    
+    output = inspect.run()
+    del(inspect)
+
 # segmentation labeling
     slab={}
     slab['none'] = 0

@@ -32,11 +32,6 @@ logger = logging.getLogger(__name__)
 import argparse
 
 """
-================================================================================
-vessel segmentation
-================================================================================
-"""
-"""
 Vessel segmentation z jater.
     input:
         data - CT (nebo MRI) 3D data
@@ -45,7 +40,7 @@ Vessel segmentation z jater.
                 1 jatra,
                 -1 zajimava tkan (kosti, ...)
                 0 jinde
-        ====PROZATIM NEPOUZITO - threshold - prah
+        threshold - prah
         voxelsizemm - (vektor o hodnote 3) rozmery jednoho voxelu
         inputSigma - pocatecni hodnota pro prahovani
         dilationIterations - pocet operaci dilation nad zakladni oblasti pro segmentaci ("segmantation")
@@ -57,18 +52,11 @@ Vessel segmentation z jater.
     returns:
         ---
 """
-def vesselSegmentation(data, segmentation = -1, threshold = 1185, voxelsizemm = [[1],[1],[1]], inputSigma = -1,
-dilationIterations = 0, dilationStructure = None, nObj = 0, dataFiltering = True):
-    """
-    Funkce pracuje z počátku na principu jednoduchého prahování. Nalezne se
-    největší souvislý objekt nad stanoveným prahem, Průběžně bude segmentace
-    zpřesňována. Bude nutné hledat cévy, které se spojují mimo játra, ale
-    ignorovat žebra.
-    Proměnné threshold, dataFiltering a nObj se postupně pokusíme eliminovat a
-    navrhnout je automaticky.
-    """
+def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsizemm = [[1],[1],[1]], inputSigma = -1,
+dilationIterations = 0, dilationStructure = None, nObj = 0, dataFiltering = True,
+interactivity = True, binaryClosingIterations = 0, binaryOpeningIterations = 0):
 
-    print('Pripravuji data, pockejte prosim...')
+    print('Pripravuji data...')
 
     if(dataFiltering):
         voxel = voxelsizemm
@@ -92,52 +80,33 @@ dilationIterations = 0, dilationStructure = None, nObj = 0, dataFiltering = True
             segmentation = scipy.ndimage.binary_dilation(input = segmentation,
                 structure = dilationStructure, iterations = dilationIterations)
 
-        ## Dokumentace k dilataci ("dilation")
-        """
-        scipy.ndimage.morphology.binary_dilation:
-
-            scipy.ndimage.morphology.binary_dilation(input, structure=None, iterations=1, mask=None,
-                output=None, border_value=0, origin=0, brute_force=False)
-            ================================================================================
-            input : array_like
-                Binary array_like to be dilated. Non-zero (True) elements form the subset to be dilated.
-            structure : array_like, optional
-                Structuring element used for the dilation. Non-zero elements are considered True.
-                If no structuring element is provided an element is generated with a square connectivity equal to one.
-            iterations : {int, float}, optional
-                The dilation is repeated iterations times (one, by default). If iterations is less than 1, the dilation
-                is repeated until the result does not change anymore.
-            mask : array_like, optional
-                If a mask is given, only those elements with a True value at the corresponding mask element are
-                modified at each iteration.
-            output : ndarray, optional
-                Array of the same shape as input, into which the output is placed. By default, a new array is created.
-            origin : int or tuple of ints, optional
-                Placement of the filter, by default 0.
-            border_value : int (cast to 0 or 1)
-                Value at the border in the output array.
-        """
-
         ## Ziskani datove oblasti jater (bud pouze jater nebo i jejich okoli - zalezi,
         ## jakym zpusobem bylo nalozeno s operaci dilatace dat)
         preparedData = data * (segmentation == 1)
+        del(data)
+        del(segmentation)
 
         ## Filtrovani (rozmazani) a prahovani dat
         if(inputSigma == -1):
             inputSigma = number
         if(inputSigma > number):
             inputSigma = number
-        uiT = uiThreshold.uiThreshold(preparedData, voxel, number, inputSigma)
-        filteredData = uiT.showPlot()
+        uiT = uiThreshold.uiThreshold(preparedData, voxel, threshold, interactivity, number, inputSigma)
+        filteredData = uiT.run()
+        del(uiT)
 
         ## Binarni otevreni a uzavreni
-        uiB = uiBinaryClosingAndOpening.uiBinaryClosingAndOpening(filteredData)
-        output = uiB.showPlot()
+        uiB = uiBinaryClosingAndOpening.uiBinaryClosingAndOpening(filteredData, binaryClosingIterations,
+            binaryOpeningIterations, interactivity)
+        output = uiB.run()
+        del(uiB)
 
     else:
         ## Binarni otevreni a uzavreni
-        uiB = uiBinaryClosingAndOpening.uiBinaryClosingAndOpening(data)
-        output = uiB.showPlot()
+        uiB = uiBinaryClosingAndOpening.uiBinaryClosingAndOpening(filteredData, binaryClosingIterations,
+            binaryOpeningIterations, interactivity)
+        output = uiB.run()
+        del(uiB)
 
     ## Operace zjisteni poctu N nejvetsich objektu a jejich nasledne vraceni
     if(nObj > 0):
@@ -167,6 +136,13 @@ def getBiggestObjects(data, N):
     ## length - pocet rozdilnych oznaceni
     labels, length = scipy.ndimage.label(data)
 
+    ## Podminka mnozstvi objektu
+    if(length > 200):
+        print('Existuje prilis mnoho objektu! (' + str(length) + ')')
+        print('Maximalne povoleno 200 objektu!')
+        print('Prestavam vyhledavat nejvetsi objekty!')
+        return data
+
     ## Soucet oznaceni z dat
     arrayLabelsSum, arrayLabels = areaIndexes(labels, length)
 
@@ -184,32 +160,42 @@ def getBiggestObjects(data, N):
     ## Upraveni dat (ziskani N nejvetsich objektu)
     ## Hleda se N+1 objektu, protoze jeden objekt (pravdepodobne nejvetsi) je oblast
     ## bez dulezitych dat
-    search = N + 1
+    search = N
     if (sys.version_info[0] < 3):
         import copy
         newData = copy.copy(data)
     else:
         newData = data.copy()
     newData = newData * 0
-    for index in range(0, search):
+    for index in range(0, len(arrayLabels)):
         newData -= (labels == arrayLabels[index])
+        if(arrayLabels[index] != 0):
+            search -= 1
+            if search <= 0:
+                break
 
-    return data - newData
+    output = data - newData
+    del(data)
+    del(newData)
+    del(labels)
+    del(arrayLabels)
+    del(arrayLabelsSum)
+
+    return output
 
 """
 Zjisti cetnosti jednotlivych oznacenych ploch (labeled areas)
     input:
         labels - data s aplikovanymi oznacenimi
         num - pocet pouzitych oznaceni
-        N - pocet nejvetsich objektu k vraceni
 
     returns:
         ---
 """
 def areaIndexes(labels, num):
 
-    arrayLabels = []
     arrayLabelsSum = []
+    arrayLabels = []
 
     for index in range(0, num):
         arrayLabels.append(index)
@@ -242,12 +228,6 @@ def selectSort(list1, list2):
 
     return list1, list2
 
-"""
-================================================================================
-tests
-================================================================================
-"""
-
 """class Tests(unittest.TestCase):
 
     def test_t(self):
@@ -274,14 +254,12 @@ tests
 """
 
 """
-================================================================================
-main
-================================================================================
+Main
 """
 if __name__ == "__main__":
 
     #print('Byl spusten skript.')
-    #print('Probiha nastavovani...')
+    print('Probiha nastavovani...')
 
     logger = logging.getLogger()
     logger.setLevel(logging.WARNING)
@@ -313,7 +291,7 @@ if __name__ == "__main__":
         sys.argv[1:]=[]
         unittest.main()
 
-    #print('Nacitam vstup...')
+    print('Nacitam vstup...')
 
     op3D = True
 
@@ -326,26 +304,20 @@ if __name__ == "__main__":
 
     #print('Hotovo.')
 
-    """
-    structure = mat['segmentation']
-    structure[structure <= 0.0] = False
-    structure[structure > 0.0] = True
-    print(structure)
-    """
-
     #import pdb; pdb.set_trace()
     if(op3D):
         structure = None
-        outputTmp = vesselSegmentation(mat['data'], mat['segmentation'],
-            mat['threshold'], mat['voxelsizemm'], inputSigma = 0.15,
-            dilationIterations = 1, dilationStructure = structure, nObj = 1,
-            dataFiltering = True)
+        outputTmp = vesselSegmentation(mat['data'], mat['segmentation'], threshold = 1161,
+            voxelsizemm = mat['voxelsizemm'], inputSigma = 0.15, dilationIterations = 2,
+            nObj = 1, dataFiltering = True,interactivity = False, binaryClosingIterations = 1,
+            binaryOpeningIterations = 1)
     else:
         outputTmp = vesselSegmentation(data = mat, segmentation = mat)
 
     import inspector
     inspect = inspector.inspector(outputTmp)
-    output = inspect.showPlot()
+    output = inspect.run()
+    del(inspect)
 
     try:
         cislo = input('Chcete ulozit vystup?\n1 jako ano\ncokoliv jineho jako ne\n')
@@ -355,7 +327,7 @@ if __name__ == "__main__":
             print('Vystup ulozen.')
 
     except Exception:
-        print('Nastala se chyba!')
+        print('Nastala chyba!')
         raise Exception
 
     sys.exit()
