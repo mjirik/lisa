@@ -86,7 +86,7 @@ class inspector:
         self.breset.on_clicked(self.button3DReset)
         self.bcontinue.on_clicked(self.button3DContinue)
 
-    def showPlot(self):
+    def run(self):
 
         matpyplot.show()
 

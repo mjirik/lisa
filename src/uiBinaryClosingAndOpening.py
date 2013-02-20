@@ -44,70 +44,41 @@ class uiBinaryClosingAndOpening:
         initslice - PROZATIM NEPOUZITO
         cmap - grey
     """
-    def __init__(self, data, initslice = 0, cmap = matplotlib.cm.Greys_r):
+    def __init__(self, data, binaryClosingIterations, binaryOpeningIterations, interactivity,
+    initslice = 0, cmap = matplotlib.cm.Greys_r):
 
         print('Spoustim binarni otevreni a uzavreni dat.')
 
         inputDimension = numpy.ndim(data)
-        #print('Dimenze vstupu: ',  inputDimension)
         self.cmap = cmap
         self.imgUsed = data
         self.imgChanged = self.imgUsed
         self.imgChanged1 = self.imgUsed
-#        self.imgChanged2 = imgUsed
+        self.interactivity = interactivity
+        if(self.interactivity == False):
+            self.binaryClosingIterations = binaryClosingIterations
+            self.binaryOpeningIterations = binaryOpeningIterations
 
         if(inputDimension == 2):
 
             self.imgUsed = self.imgUsed
             self.imgChanged = self.imgUsed
 
-            """
-            self.imgChanged1 = self.imgUsed
-            self.imgChanged2 = self.imgUsed
-            self.imgChanged3 = self.imgUsed
-            """
-
-            # Zakladni informace o obrazku (+ statisticke)
-            """
-            print('Image dtype: ', imgUsed.dtype)
-            print('Image size: ', imgUsed.size)
-            print('Image shape: ', imgUsed.shape[0], ' x ',  imgUsed.shape[1])
-            print('Max value: ', imgUsed.max(), ' at pixel ',  imgUsed.argmax())
-            print('Min value: ', imgUsed.min(), ' at pixel ',  imgUsed.argmin())
-            print('Variance: ', imgUsed.var())
-            print('Standard deviation: ', imgUsed.std())
-            """
-
             # Ziskani okna (figure)
             self.fig = matpyplot.figure()
             # Pridani subplotu do okna (do figure)
             self.ax1 = self.fig.add_subplot(111)
-            """
-    #        self.ax0 = self.fig.add_subplot(232)
-            self.ax1 = self.fig.add_subplot(131)
-            self.ax2 = self.fig.add_subplot(132)
-            self.ax3 = self.fig.add_subplot(133)
-            """
+
             # Upraveni subplotu
             self.fig.subplots_adjust(left = 0.1, bottom = 0.25)
+
             # Vykresli obrazek
-    #        self.im0 = self.ax0.imshow(imgUsed)
             self.im1 = self.ax1.imshow(self.imgChanged, self.cmap)
-            """
-            self.im2 = self.ax2.imshow(imgUsed)
-            self.im3 = self.ax3.imshow(imgUsed)
-            """
-     #       self.fig.colorbar(self.im1)
 
             # Zakladni informace o slideru
             axcolor = 'white' # lightgoldenrodyellow
             axmin = self.fig.add_axes([0.25, 0.16, 0.495, 0.03], axisbg = axcolor)
             axmax  = self.fig.add_axes([0.25, 0.12, 0.495, 0.03], axisbg = axcolor)
-            """
-            axopening = self.fig.add_axes([0.25, 0.08, 0.495, 0.03], axisbg = axcolor)
-            axclosing = self.fig.add_axes([0.25, 0.04, 0.495, 0.03], axisbg = axcolor)
-            """
-
             # Vytvoreni slideru
                 # Minimalni pouzita hodnota v obrazku
             min0 = self.imgUsed.min()
@@ -116,10 +87,6 @@ class uiBinaryClosingAndOpening:
                 # Vlastni vytvoreni slideru
             self.smin = Slider(axmin, 'Minimal threshold', min0, max0, valinit = min0)
             self.smax = Slider(axmax, 'Maximal threshold', min0, max0, valinit = max0)
-            """
-            self.sopen = Slider(axopening, 'Binary opening', 0, 10, valinit = 0)
-            self.sclose = Slider(axclosing, 'Binary closing', 0, 10, valinit = 0)
-            """
 
             # Udalost pri zmene hodnot slideru - volani updatu
             self.smin.on_changed(self.updateImg2D)
@@ -127,107 +94,82 @@ class uiBinaryClosingAndOpening:
 
         elif(inputDimension == 3):
 
-            # Zakladni informace o obrazcich (+ statisticke)
-            """
-            print('Image dtype: ', imgUsed.dtype)
-            print('Image size: ', imgUsed.size)
-            print('Image shape: ', imgUsed.shape[0], ' x ',  imgUsed.shape[1], ' x ',  imgUsed.shape[2])
-            print('Max value: ', imgUsed.max(), ' at pixel ',  imgUsed.argmax())
-            print('Min value: ', imgUsed.min(), ' at pixel ',  imgUsed.argmin())
-            print('Variance: ', imgUsed.var())
-            print('Standard deviation: ', imgUsed.std())
-            """
+            if(self.interactivity == True):
 
-            #self.imgMin = numpy.min(self.imgUsed)
-            #self.imgMax = numpy.max(self.imgUsed)
+                self.fig = matpyplot.figure()
 
-            self.imgShape = list(self.imgUsed.shape)
+                ## Pridani subplotu do okna (do figure)
+                self.ax1 = self.fig.add_subplot(131)
+                self.ax2 = self.fig.add_subplot(132)
+                self.ax3 = self.fig.add_subplot(133)
 
-            self.fig = matpyplot.figure()
+                ## Upraveni subplotu
+                self.fig.subplots_adjust(left = 0.1, bottom = 0.3)
 
-            ## Pridani subplotu do okna (do figure)
-            self.ax1 = self.fig.add_subplot(111)
-            #self.ax2 = self.fig.add_subplot(122)
+                ## Vykreslit obrazek
+                self.im1 = self.ax1.imshow(numpy.amax(self.imgUsed, 0), self.cmap)
+                self.im2 = self.ax2.imshow(numpy.amax(self.imgUsed, 1), self.cmap)
+                self.im3 = self.ax3.imshow(numpy.amax(self.imgUsed, 2), self.cmap)
 
-            ## Upraveni subplotu
-            self.fig.subplots_adjust(left = 0.1, bottom = 0.3)
+                ## Zalozeni mist pro slidery
+                self.axcolor = 'white' # lightgoldenrodyellow
+                axopening1 = self.fig.add_axes([0.25, 0.14, 0.55, 0.03], axisbg = self.axcolor)
+                axclosing1 = self.fig.add_axes([0.25, 0.18, 0.55, 0.03], axisbg = self.axcolor)
 
-            ## Nalezeni a pripraveni obrazku k vykresleni
-     #       imgShowPlace = numpy.round(self.imgShape[2] / 2).astype(int)
-     #       self.imgShow = self.imgUsed[:, :, imgShowPlace]
-            self.imgShow = numpy.amax(self.imgChanged, 2)
+                ## Vlastni vytvoreni slideru
+                self.sopen1 = Slider(axopening1, 'Binary opening', 0, 100, valinit = 0)
+                self.sclose1 = Slider(axclosing1, 'Binary closing', 0, 100, valinit = 0)
 
-            ## Vykreslit obrazek
-            self.im1 = self.ax1.imshow(self.imgShow, self.cmap)
-            #self.im2 = self.ax2.imshow(self.imgShow, self.cmap)
+                ## Funkce slideru pri zmene jeho hodnoty
+                self.sopen1.on_changed(self.updateImg1Binary3D)
+                self.sclose1.on_changed(self.updateImg1Binary3D)
 
-           ## Zalozeni mist pro slidery
-            self.axcolor = 'white' # lightgoldenrodyellow
-            axopening1 = self.fig.add_axes([0.25, 0.14, 0.55, 0.03], axisbg = self.axcolor)
-            axclosing1 = self.fig.add_axes([0.25, 0.18, 0.55, 0.03], axisbg = self.axcolor)
+                self.sopen1.valtext.set_text('{}'.format(int(self.sopen1.val)))
+                self.sclose1.valtext.set_text('{}'.format(int(self.sclose1.val)))
 
-            ## Vlastni vytvoreni slideru
-            self.sopen1 = Slider(axopening1, 'Binary opening', 0, 100, valinit = 0)
-            self.sclose1 = Slider(axclosing1, 'Binary closing', 0, 100, valinit = 0)
+                ## Zalozeni mist pro tlacitka
+                self.axbuttnextopening = self.fig.add_axes([0.83, 0.14, 0.04, 0.03], axisbg = self.axcolor)
+                self.axbuttprevopening = self.fig.add_axes([0.88, 0.14, 0.04, 0.03], axisbg = self.axcolor)
+                self.axbuttnextclosing = self.fig.add_axes([0.83, 0.18, 0.04, 0.03], axisbg = self.axcolor)
+                self.axbuttprevclosing = self.fig.add_axes([0.88, 0.18, 0.04, 0.03], axisbg = self.axcolor)
+                self.axbuttreset = self.fig.add_axes([0.80, 0.08, 0.07, 0.03], axisbg = self.axcolor)
+                self.axbuttcontinue = self.fig.add_axes([0.88, 0.08, 0.07, 0.03], axisbg = self.axcolor)
 
-            ## Funkce slideru pri zmene jeho hodnoty
-            self.sopen1.on_changed(self.updateImg1Binary3D)
-            self.sclose1.on_changed(self.updateImg1Binary3D)
+                ## Zalozeni tlacitek
+                self.bnextopening = Button(self.axbuttnextopening, '+1.0')
+                self.bprevopening = Button(self.axbuttprevopening, '-1.0')
+                self.bnextclosing = Button(self.axbuttnextclosing, '+1.0')
+                self.bprevclosing = Button(self.axbuttprevclosing, '-1.0')
+                self.breset = Button(self.axbuttreset, 'Reset')
+                self.bcontinue = Button(self.axbuttcontinue, 'End editing')
 
-            self.sopen1.valtext.set_text('{}'.format(int(self.sopen1.val)))
-            self.sclose1.valtext.set_text('{}'.format(int(self.sclose1.val)))
-
-            ## Zalozeni mist pro tlacitka
-            self.axbuttnextopening = self.fig.add_axes([0.83, 0.14, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttprevopening = self.fig.add_axes([0.88, 0.14, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttnextclosing = self.fig.add_axes([0.83, 0.18, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttprevclosing = self.fig.add_axes([0.88, 0.18, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttreset = self.fig.add_axes([0.80, 0.08, 0.07, 0.03], axisbg = self.axcolor)
-            self.axbuttcontinue = self.fig.add_axes([0.88, 0.08, 0.07, 0.03], axisbg = self.axcolor)
-            #self.axbuttswap = self.fig.add_axes([0.05, 0.18, 0.09, 0.03], axisbg = self.axcolor)
-
-            ## Zalozeni tlacitek
-            self.bnextopening = Button(self.axbuttnextopening, '+1.0')
-            self.bprevopening = Button(self.axbuttprevopening, '-1.0')
-            self.bnextclosing = Button(self.axbuttnextclosing, '+1.0')
-            self.bprevclosing = Button(self.axbuttprevclosing, '-1.0')
-            self.breset = Button(self.axbuttreset, 'Reset')
-            self.bcontinue = Button(self.axbuttcontinue, 'End editing')
-            #self.bswap = Button(self.axbuttswap, 'Swap operations')
-
-            ## Funkce tlacitek pri jejich aktivaci
-            self.bnextopening.on_clicked(self.button3DNextOpening)
-            self.bprevopening.on_clicked(self.button3DPrevOpening)
-            self.bnextclosing.on_clicked(self.button3DNextClosing)
-            self.bprevclosing.on_clicked(self.button3DPrevClosing)
-            self.breset.on_clicked(self.button3DReset)
-            self.bcontinue.on_clicked(self.button3DContinue)
-            #self.bswap.on_clicked(self.buttonSwap)
-
-            #self.state = 'firstClosing'
-            #self.text = matpyplot.figtext(0.05, 0.15, 'First: closing')
+                ## Funkce tlacitek pri jejich aktivaci
+                self.bnextopening.on_clicked(self.button3DNextOpening)
+                self.bprevopening.on_clicked(self.button3DPrevOpening)
+                self.bnextclosing.on_clicked(self.button3DNextClosing)
+                self.bprevclosing.on_clicked(self.button3DPrevClosing)
+                self.breset.on_clicked(self.button3DReset)
+                self.bcontinue.on_clicked(self.button3DContinue)
 
         else:
-
             print('Spatny vstup.\nDimenze vstupu neni 2 ani 3.\nUkoncuji prahovani.')
 
-    def showPlot(self):
+    def run(self):
 
-        # Zobrazeni plot (figure)
-        matpyplot.show()
+        if(self.interactivity == True):
+            ## Zobrazeni plot (figure)
+            matpyplot.show()
+        else:
+            self.autoWork()
+
+        del(self.imgUsed)
+        del(self.imgChanged)
 
         return self.imgChanged1
 
-#    def buttonSwap(self, event):
-#
-#        if(self.state == 'firstOpening'):
-#            self.state = 'firstClosing'
-#            #matpyplot.figtext(0.05, 0.15, 'First: closing')
-#        elif(self.state == 'firstClosing'):
-#            self.state = 'firstOpening'
-#            #matpyplot.figtext(0.05, 0.15, 'First: opening')
-#
-#        self.fig.canvas.draw()
+    def autoWork(self):
+
+        self.updateImg1Binary3D(self)
 
     def button3DReset(self, event):
 
@@ -236,10 +178,10 @@ class uiBinaryClosingAndOpening:
         self.sclose1.val = 0.0
         self.sclose1.valtext.set_text('{}'.format(int(self.sclose1.val)))
 
-        self.imgShow = numpy.amax(self.imgChanged, 2)
-
         ## Vykreslit obrazek
-        self.im1 = self.ax1.imshow(self.imgShow, self.cmap)
+        self.im1 = self.ax1.imshow(numpy.amax(self.imgChanged, 0), self.cmap)
+        self.im2 = self.ax2.imshow(numpy.amax(self.imgChanged, 1), self.cmap)
+        self.im3 = self.ax3.imshow(numpy.amax(self.imgChanged, 2), self.cmap)
 
         ## Prekresleni
         self.fig.canvas.draw()
@@ -297,53 +239,37 @@ class uiBinaryClosingAndOpening:
     def updateImg1Binary3D(self, val):
 
         ## Nastaveni hodnot slideru
-        self.sopen1.valtext.set_text('{}'.format(int(numpy.round(self.sopen1.val, 0))))
-        self.sclose1.valtext.set_text('{}'.format(int(numpy.round(self.sclose1.val, 0))))
+        if(self.interactivity == True):
+            self.sopen1.valtext.set_text('{}'.format(int(numpy.round(self.sopen1.val, 0))))
+            self.sclose1.valtext.set_text('{}'.format(int(numpy.round(self.sclose1.val, 0))))
+            openDil = int(numpy.round(self.sopen1.val, 0))
+            closeDil = int(numpy.round(self.sclose1.val, 0))
+        else:
+            openDil = int(numpy.round(self.binaryOpeningIterations, 0))
+            closeDil = int(numpy.round(self.binaryClosingIterations, 0))
 
         ## Prekresleni
-        self.fig.canvas.draw()
+        if(self.interactivity == True):
+            self.fig.canvas.draw()
 
         imgChanged1 = self.imgChanged
 
-        if(self.sclose1.val >= 0.1):
-            imgChanged1 = scipy.ndimage.binary_closing(self.imgChanged, structure = None, iterations = int(numpy.round(self.sclose1.val, 0)))
+        if(closeDil >= 0.1):
+            imgChanged1 = scipy.ndimage.binary_closing(self.imgChanged, structure = None, iterations = closeDil)
         else:
             imgChanged1 = self.imgChanged
 
-        if(self.sopen1.val >= 0.1):
-            self.imgChanged1 = scipy.ndimage.binary_opening(imgChanged1, structure = None, iterations = int(numpy.round(self.sopen1.val, 0)))
+        if(openDil >= 0.1):
+            self.imgChanged1 = scipy.ndimage.binary_opening(imgChanged1, structure = None, iterations = openDil)
         else:
             self.imgChanged1 = imgChanged1
 
-#        ## Prvni operace opening, pote closing
-#        if(self.state == 'firstOpening'):
-#
-#            if(self.sopen1.val >= 0.1):
-#                imgChanged1 = scipy.ndimage.binary_opening(self.imgChanged, structure = None, iterations = int(numpy.round(self.sopen1.val, 0)))
-#            else:
-#                imgChanged1 = self.imgChanged
-#
-#            if(self.sclose1.val >= 0.1):
-#                self.imgChanged1 = scipy.ndimage.binary_closing(imgChanged1, structure = None, iterations = int(numpy.round(self.sclose1.val, 0)))
-#            else:
-#                self.imgChanged1 = imgChanged1
-#
-#        ## Prvni operace closing, pote opening
-#        elif(self.state == 'firstClosing'):
-#
-#            if(self.sclose1.val >= 0.1):
-#                imgChanged1 = scipy.ndimage.binary_closing(self.imgChanged, structure = None, iterations = int(numpy.round(self.sclose1.val, 0)))
-#            else:
-#                imgChanged1 = self.imgChanged
-#
-#            if(self.sopen1.val >= 0.1):
-#                self.imgChanged1 = scipy.ndimage.binary_opening(imgChanged1, structure = None, iterations = int(numpy.round(self.sopen1.val, 0)))
-#            else:
-#                self.imgChanged1 = imgChanged1
+        if(self.interactivity == True):
+            ## Predani obrazku k vykresleni
+            ## Vykreslit obrazek
+            self.im1 = self.ax1.imshow(numpy.amax(self.imgChanged1, 0), self.cmap)
+            self.im2 = self.ax2.imshow(numpy.amax(self.imgChanged1, 1), self.cmap)
+            self.im3 = self.ax3.imshow(numpy.amax(self.imgChanged1, 2), self.cmap)
 
-        ## Predani obrazku k vykresleni
-        self.imgShow1 = numpy.amax(self.imgChanged1, 2)
-        self.im1 = self.ax1.imshow(self.imgShow1, self.cmap)
-
-        ## Prekresleni
-        self.fig.canvas.draw()
+            ## Prekresleni
+            self.fig.canvas.draw()
