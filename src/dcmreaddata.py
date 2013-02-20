@@ -36,11 +36,15 @@ def dcm_read_from_dir(dirpath=None, initialdir = os.path.expanduser("~")):
     
     dcmdir = getdicomdir(dirpath)
     counts, bins = dcmdirstats(dcmdir)
+    strcounts = ""
     if len (bins) > 1:
-        print counts
-        print bins
+        for i in range(1,len(counts)):
+            strcounts = strcounts + str(bins[i]) + "(" + str(counts[i]) + ") "
+        #print counts
+        #print bins
         #logger.info(counts)
         #logger.info(bins)
+        print strcounts
 
         snstring = raw_input ('Select Serie: ')
         sn = int(snstring)
@@ -215,19 +219,31 @@ def createdicomdir(dirpath):
         head, teil = os.path.split(fullfilepath)
         try:
             dcmdata=dicom.read_file(fullfilepath)
-            files.append({'filename' : teil, 
+            metadataline = {'filename' : teil, 
                 #copy.copy(dcmdata.FrameofReferenceUID), 
                 #copy.copy(dcmdata.StudyInstanceUID),
                 #copy.copy(dcmdata.SeriesInstanceUID) 
                 'InstanceNumber' : dcmdata.InstanceNumber,
                 'SeriesNumber' : dcmdata.SeriesNumber,
                 'AcquisitionNumber' : dcmdata.AcquisitionNumber
-                })
+                }
+            try:
+                metadataline ['ImageComment'] = dcmdata.ImageComments
+                metadataline ['Modality'] = dcmdata.Modality
+            except:
+                print 'Problem with ImageComments and Modality tags'
+                import pdb; pdb.set_trace()
+                pass
+            
+
+            files.append(metadataline)
             #logger.debug( \
             #    'FrameUID : ' + str(dcmdata.InstanceNumber) + \
             #    ' ' + str(dcmdata.SeriesNumber) + \
             #    ' ' + str(dcmdata.AcquisitionNumber)\
             #    )
+            #import pdb; pdb.set_trace()
+# TODO přdat ImageComment
         except Exception as e:
             print 'Dicom read problem with file ' + fullfilepath
             print e
@@ -275,6 +291,7 @@ def dcmdirstats(dcmdir):
     #binslist.insert(0,-1)
     counts, binsvyhodit = np.histogram(dcmdirseries, bins = binslist)
 
+    #TODO dodělat extrakci komentáře ImageComments a Modality  
     #pdb.set_trace();
     return counts, bins
 
