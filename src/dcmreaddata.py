@@ -35,16 +35,27 @@ def dcm_read_from_dir(dirpath=None, initialdir = os.path.expanduser("~")):
     pass
     
     dcmdir = getdicomdir(dirpath)
-    counts, bins = dcmdirstats(dcmdir)
+    #counts, bins = dcmdirstats(dcmdir)
+    series_info = dcmdirstats(dcmdir)
     strcounts = ""
-    if len (bins) > 1:
-        for i in range(1,len(counts)):
-            strcounts = strcounts + str(bins[i]) + "(" + str(counts[i]) + ") "
+    if len (series_info) > 1:
+        for serie_number in series_info.keys():
+            strl = str(serie_number) + " (" + str(series_info[serie_number]['Count']) 
+            try:
+                strl = strl + ", " + str( series_info[serie_number]['Modality'])
+                strl = strl + ", " + str( series_info[serie_number]['ImageComment'])
+            except:
+                logger.debug('Tag Modlity or ImageComment not found in dcminfo')
+                pass
+
+            strl = strl + ')'
+            print strl
+            #strcounts = strcounts + str(bins[i]) + "(" + str(counts[i]) + ") "
         #print counts
         #print bins
         #logger.info(counts)
         #logger.info(bins)
-        print strcounts
+        #print strcounts
 
         snstring = raw_input ('Select Serie: ')
         sn = int(snstring)
@@ -204,6 +215,7 @@ def createdicomdir(dirpath):
     """
     import dicom
 
+    # TODO přidat informaci o vezri a při kolizi, generovat znova
     filelist = filesindir(dirpath)
     files=[]
 
@@ -232,7 +244,7 @@ def createdicomdir(dirpath):
                 metadataline ['Modality'] = dcmdata.Modality
             except:
                 print 'Problem with ImageComments and Modality tags'
-                import pdb; pdb.set_trace()
+                #import pdb; pdb.set_trace()
                 pass
             
 
@@ -277,7 +289,11 @@ def dcmdirstats(dcmdir):
     """ input is dcmdir, not dirpath """
     import numpy as np
     # get series number
-    #import pdb; pdb.set_trace()
+# vytvoření slovníku, kde je klíčem číslo série a hodnotou jsou všechny 
+# informace z dicomdir
+    series_info = {line['SeriesNumber']:line for line in dcmdir}
+
+# počítání velikosti série
     try:
         dcmdirseries = [line['SeriesNumber'] for line in dcmdir ]
     except:
@@ -291,9 +307,16 @@ def dcmdirstats(dcmdir):
     #binslist.insert(0,-1)
     counts, binsvyhodit = np.histogram(dcmdirseries, bins = binslist)
 
-    #TODO dodělat extrakci komentáře ImageComments a Modality  
     #pdb.set_trace();
-    return counts, bins
+
+    # sestavení informace o velikosti série a slovníku 
+
+    for i in range(0,len(bins)):
+        series_info[bins[i]]['Count']=counts[i]
+
+    return series_info
+
+    #return counts, bins
 
 def dcmsortedlist(dirpath=None, wildcard='*', startpath="", 
         dcmdir=None, writedicomdirfile = True , SeriesNumber = None):
