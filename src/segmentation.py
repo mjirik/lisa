@@ -1,11 +1,12 @@
-#
+﻿#
 # -*- coding: utf-8 -*-
 """
 ================================================================================
 Name:        segmentation
 Purpose:     (CZE-ZCU-FAV-KKY) Liver medical project
 
-Author:      Pavel Volkovinsky (volkovinsky.pavel@gmail.com)
+Author:      Pavel Volkovinsky
+Email:		 volkovinsky.pavel@gmail.com
 
 Created:     08.11.2012
 Copyright:   (c) Pavel Volkovinsky
@@ -228,7 +229,8 @@ def selectSort(list1, list2):
 
     return list1, list2
 
-"""class Tests(unittest.TestCase):
+"""
+class Tests(unittest.TestCase):
 
     def test_t(self):
         pass
@@ -291,13 +293,14 @@ if __name__ == "__main__":
         sys.argv[1:]=[]
         unittest.main()
 
-    print('Nacitam vstup...')
+
+	print('Nacitam vstup...')
 
     op3D = True
 
     if args.filename == 'lena':
-        op3D = False
         mat = scipy.misc.lena()
+        op3D = False
     else:
         mat = scipy.io.loadmat(args.filename)
         logger.debug(mat.keys())
@@ -309,7 +312,7 @@ if __name__ == "__main__":
         structure = None
         outputTmp = vesselSegmentation(mat['data'], mat['segmentation'], threshold = 1161,
             voxelsizemm = mat['voxelsizemm'], inputSigma = 0.15, dilationIterations = 2,
-            nObj = 1, dataFiltering = True,interactivity = False, binaryClosingIterations = 1,
+            nObj = 1, dataFiltering = True, interactivity = False, binaryClosingIterations = 1,
             binaryOpeningIterations = 1)
     else:
         outputTmp = vesselSegmentation(data = mat, segmentation = mat)

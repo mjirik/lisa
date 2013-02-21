@@ -5,7 +5,8 @@
 Name:        inspector
 Purpose:     (CZE-ZCU-FAV-KKY) Liver medical project
 
-Author:      Pavel Volkovinsky (volkovinsky.pavel@gmail.com)
+Author:      Pavel Volkovinsky 
+Email:		 volkovinsky.pavel@gmail.com
 
 Created:     16.02.2013
 Copyright:   (c) Pavel Volkovinsky

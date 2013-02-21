@@ -5,7 +5,8 @@
 Name:        uiThreshold
 Purpose:     (CZE-ZCU-FAV-KKY) Liver medical project
 
-Author:      Pavel Volkovinsky (volkovinsky.pavel@gmail.com)
+Author:      Pavel Volkovinsky 
+Email:		 volkovinsky.pavel@gmail.com
 
 Created:     08.11.2012
 Copyright:   (c) Pavel Volkovinsky
