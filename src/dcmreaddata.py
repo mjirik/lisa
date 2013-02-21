@@ -60,7 +60,7 @@ def dcm_read_from_dir(dirpath=None, initialdir = os.path.expanduser("~")):
         snstring = raw_input ('Select Serie: ')
         sn = int(snstring)
     else:
-        sn = bins[0]
+        sn = series_info.keys()[0]
 
     #dcmdir = sort_dcmdir(dcmdir, SeriesNumber = sn)
 # Now we need list of files with specific SeriesNumer
@@ -197,17 +197,32 @@ def getdicomdir(dirpath, writedicomdirfile = True, forcecreate = False):
 
     dcmdir = getdicomdir(dirpath)
 
-    dcmdir: list with filenames, SeriesNumber, InstanceNumber and 
+    dcmdir: dcmdir = {'version':version_number, 'filesinfo',filesinfo}
+    filesinfo: list with filenames, SeriesNumber, InstanceNumber and 
+
     AcquisitionNumber
     '''
+    
+    createdcmdir = True
 
+    # if exist dicomdir file and is in correct version, use it
     dcmdiryamlpath = os.path.join( dirpath, 'dicomdir.yaml')
     if os.path.exists(dcmdiryamlpath):
         dcmdir = obj_from_file(dcmdiryamlpath)
-    else:
+        try:
+            if dcmdir ['version'] == [1,0]:
+                createdcmdir = False
+        except:
+            logger.debug('Found dicomdir.yaml with wrong version')
+            pass
+
+
+    if createdcmdir:
         dcmdir = createdicomdir(dirpath)
         if (writedicomdirfile):
             obj_to_file(dcmdir, dcmdiryamlpath )
+
+    dcmdir = dcmdir['filesinfo']
     return dcmdir
 
 def createdicomdir(dirpath):
@@ -255,7 +270,6 @@ def createdicomdir(dirpath):
             #    ' ' + str(dcmdata.AcquisitionNumber)\
             #    )
             #import pdb; pdb.set_trace()
-# TODO přdat ImageComment
         except Exception as e:
             print 'Dicom read problem with file ' + fullfilepath
             print e
@@ -276,7 +290,8 @@ def createdicomdir(dirpath):
     files.sort(key=lambda x: x['AcquisitionNumber'])
 
 
-    return files
+    dicomdir = {'version':[1,0],'filesinfo':files}
+    return dicomdir 
 
     #files.sort(key=operator.itemgetter(1))
     #files.sort(key=operator.itemgetter(2))
@@ -297,7 +312,10 @@ def dcmdirstats(dcmdir):
     try:
         dcmdirseries = [line['SeriesNumber'] for line in dcmdir ]
     except:
-        return [0],[0]
+        logger.debug('Dicom tag SeriesNumber not found')
+        series_info = {0:{'Count':0}}
+        return series_info
+        #return [0],[0]
 
     bins = np.unique(dcmdirseries)
     binslist = bins.tolist()
