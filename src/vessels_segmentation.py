@@ -108,7 +108,7 @@ if __name__ == "__main__":
     outputTmp = segmentation.vesselSegmentation(
         oseg.data3d,
         segmentation = oseg.orig_scale_segmentation,
-        threshold = 1161,
+        threshold = -1,
         inputSigma = 0.15,
         dilationIterations = 2,
         nObj = 1,

@@ -138,9 +138,10 @@ def getBiggestObjects(data, N):
     labels, length = scipy.ndimage.label(data)
 
     ## Podminka mnozstvi objektu
-    if(length > 200):
+    maxN = 20
+    if(length > maxN):
         print('Existuje prilis mnoho objektu! (' + str(length) + ')')
-        print('Maximalne povoleno 200 objektu!')
+        print('Maximalne povoleno ' + str(maxN) + ' objektu!')
         print('Prestavam vyhledavat nejvetsi objekty!')
         return data
 
@@ -159,8 +160,6 @@ def getBiggestObjects(data, N):
         N = len(arrayLabels)
 
     ## Upraveni dat (ziskani N nejvetsich objektu)
-    ## Hleda se N+1 objektu, protoze jeden objekt (pravdepodobne nejvetsi) je oblast
-    ## bez dulezitych dat
     search = N
     if (sys.version_info[0] < 3):
         import copy
@@ -175,6 +174,7 @@ def getBiggestObjects(data, N):
             if search <= 0:
                 break
 
+    ## Priprava vystupu a uvolneni
     output = data - newData
     del(data)
     del(newData)
@@ -310,7 +310,7 @@ if __name__ == "__main__":
     #import pdb; pdb.set_trace()
     if(op3D):
         structure = None
-        outputTmp = vesselSegmentation(mat['data'], mat['segmentation'], threshold = 1161,
+        outputTmp = vesselSegmentation(mat['data'], mat['segmentation'], threshold = -1,
             voxelsizemm = mat['voxelsizemm'], inputSigma = 0.15, dilationIterations = 2,
             nObj = 1, dataFiltering = True, interactivity = False, binaryClosingIterations = 1,
             binaryOpeningIterations = 1)
@@ -335,3 +335,8 @@ if __name__ == "__main__":
 
     sys.exit()
 
+# TODO: vraceni nastavenych parametru
+# TODO: memory leaks
+# TODO: priprava na testy
+# TODO: testy
+# TODO: pridani cev (graficke)

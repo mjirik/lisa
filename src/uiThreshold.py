@@ -5,7 +5,7 @@
 Name:        uiThreshold
 Purpose:     (CZE-ZCU-FAV-KKY) Liver medical project
 
-Author:      Pavel Volkovinsky 
+Author:      Pavel Volkovinsky
 Email:		 volkovinsky.pavel@gmail.com
 
 Created:     08.11.2012
@@ -212,21 +212,58 @@ class uiThreshold:
 
     def autoWork(self):
 
-        if(self.threshold == -1 and interactivity == False):
-            self.calculateAutomaticThreshold(self)
+        if(self.threshold == -1 and self.interactivity == False):
+            self.calculateAutomaticThreshold()
         self.firstRun = False
         self.updateImgFilter(self)
 
     def calculateAutomaticThreshold(self):
 
-        self.threshold = -1
+        # TODO: automaticky vypocet prahu
+
+        hist, bin_edges = numpy.histogram(self.data, bins=60)
+        bin_centers = 0.5*(bin_edges[:-1] + bin_edges[1:])
+
+##        print('bin_edges')
+##        print(bin_edges)
+##        print('bin_centers')
+##        print(bin_centers)
+##        print('hist')
+##        print(hist)
+
+        # hist jsou udaje na ose x
+        # bin_centers jsou udaje na ose y (asi pocet zmen)
+        # navrh algoritmu: jit od posledni pozice v hist, najit paralelne
+        #   nejvyssi honotu, dokud hodnoty v bin_centers nezacnou klesat
+        #   nebo hlidat vzrust hodnot - pokud nova hodnota bude vetsi
+        #   nez kvadrat (nutno zvolit mocninu) puvodni hodnoty, tak
+        #   puvodni hodnota je ta spravna
+
+        oldNum = hist[len(bin_centers) - 1]
+        superNum = hist[len(bin_centers) - 1]
+        print('len(hist) == ' + str(len(hist)))
+        for index in range(1, len(hist)):
+            indexBack = len(hist) - 1 - index
+            print(indexBack)
+            newNum = hist[indexBack]
+            print('newNum == ' + str(newNum))
+            print('oldNum == ' + str(oldNum))
+            if(newNum >= (3.5 * oldNum) and oldNum > superNum):
+                print('found: ' + str(bin_centers[indexBack + 1]))
+                self.threshold = bin_centers[indexBack + 1]
+            oldNum = newNum
+
+        matpyplot.figure(figsize=(11,4))
+        matpyplot.plot(bin_centers, hist, lw=2)
+        matpyplot.axvline(self.threshold, color='r', ls='--', lw=2)
+        matpyplot.show()
 
     def updateImgFilter(self, val):
 
         if(self.interactivity == True):
             sigma = float(self.ssigma.val)
         else:
-            sigma = float(self.inputSigma)
+            sigma = float(self.threshold)
 
         ## Filtrovani
         if(self.lastSigma != sigma):
