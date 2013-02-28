@@ -122,16 +122,14 @@ class OrganSegmentation():
         """
         Compute segmented volume in mm3, based on subsampeled data 
         """
-        # neumim napsat typ lip
-#        if nptype(self.working_voxelsize_mm) == type(3):
-#        #np.isscalar()
-#            voxelvolume_mm3 = np.power(self.working_voxelsize_mm,3)
-#            #print 'jedna D'
-#            
-#        elif np.prod(self.working_voxelsize_mm.shape) == 3:
-#            voxelvolume_mm3 = np.prod(self.working_voxelsize_mm)
         voxelvolume_mm3 = np.prod(self.working_voxelsize_mm)
-        volume_mm3 = np.sum(self.segmentation > 0) * voxelvolume_mm3
+        volume_mm3_rough = np.sum(self.segmentation > 0) * voxelvolume_mm3
+
+        voxelvolume_mm3 = np.prod(self.voxelsize_mm)
+        volume_mm3 = np.sum(self.orig_scale_segmentation > 0) * voxelvolume_mm3
+
+
+        print "rough = ", volume_mm3_rough ,  " fine = ", volume_mm3 
         #print voxelvolume_mm3 
         #print volume_mm3
         #import pdb; pdb.set_trace()
