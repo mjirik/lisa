@@ -24,14 +24,22 @@ import py3DSeedEditor
 import show3
 
 
-def viewer3(data):
+def cut_editor(img3d):
+    pass
+
+def cut_editor_old(img3d):
+    pass
+
+def resection(data):
     vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
 # ostranění porty z více kusů, nastaví se jim hodnota liver
     data['segmentation'][data['segmentation'] == data['slab']['porta']] = data['slab']['liver']
     show3.show3(data['segmentation'])
 
     data['segmentation'][vessels == 1] = data['slab']['porta']
+    img3d = data['segmentation']
     print ("Select cut")
+    #cut_editor_old(img3d)
     pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
     pyed.show()
     split_obj = pyed.seeds
@@ -52,8 +60,12 @@ def viewer3(data):
         vesselstmp = vessels * (1 - split_obj)
     
         lab, n_obj = scipy.ndimage.label(vesselstmp)
+    
+    print ("Zjistete si, ktere objekty jsou nejvets a nastavte l1 a l2")
     print (str(n_obj))
+
     print ("np.sum(lab==3)")
+    
 
     l1 = 1
     l2 = 2
@@ -116,31 +128,6 @@ import mpl_toolkits.mplot3d.art3d as art3d
 from matplotlib.figure import Figure 
 from matplotlib.backends.backend_gtkagg import FigureCanvasGTKAgg as FigureCanvas 
         
-class SectorDisplay2__: 
-    def __init__(self): 
-        win = gtk.Window() 
-        win.set_default_size(800,800) 
-        vbox = gtk.VBox() 
-        win.add(vbox) 
-
-        fig = Figure() 
-        canvas = FigureCanvas(fig)  # a gtk.DrawingArea
-        ax = fig.add_subplot(111, projection='3d') 
-
-        a = np.array([[0,0],[10,0],[10,10],[0,10]]) 
-        p = Polygon(a,fill=True) 
-        ax.add_patch(p) 
-        art3d.pathpatch_2d_to_3d(p, z=3) 
-
-        ax.set_xlim3d(0, 20) 
-        ax.set_ylim3d(0, 20) 
-        ax.set_zlim3d(0, 20) 
-
-        vbox.pack_start(canvas) 
-        win.show_all() 
-    
-# Run the Gtk mainloop 
-        gtk.main()
 
 if __name__ == "__main__":
     data = misc.obj_from_file("out", filetype = 'pickle')
