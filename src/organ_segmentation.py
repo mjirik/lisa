@@ -8,7 +8,8 @@ import sys
 import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../extern/pycat/"))
+sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
+#sys.path.append(os.path.join(path_to_script, "../extern/pycat/"))
 sys.path.append(os.path.join(path_to_script, "../extern/pycat/extern/py3DSeedEditor/"))
 #import featurevector
 import unittest
@@ -27,7 +28,7 @@ import scipy
 import dcmreaddata
 import pycat
 import argparse
-import py3DSeedEditor
+#import py3DSeedEditor
 
 import segmentation
 import qmisc
@@ -41,10 +42,13 @@ def interactive_imcrop(im):
 
 
 class OrganSegmentation():
-    def __init__(self, datadir, working_voxelsize_mm = 0.25, SeriesNumber = None, autocrop = True, autocrop_margin = [0,0,0], manualroi = False, texture_analysis=None, smoothing_mm = 5):
+    def __init__(self, datadir, working_voxelsize_mm = 0.25, SeriesNumber = None, autocrop = True, autocrop_margin = [0,0,0], manualroi = False, texture_analysis=None, smoothing_mm = 5, data3d = None, metadata=None, seeds=None):
         """
+        datadir: path to directory with dicom files
         manualroi: manual set of ROI before data processing, there is a 
              problem with correct coordinates
+        data3d, metadata: it can be used for data loading not from directory. 
+            If both are setted, datadir is ignored
         """
         
         self.datadir = datadir
@@ -55,7 +59,14 @@ class OrganSegmentation():
 
 
         # TODO uninteractive Serie selection
-        self.data3d, self.metadata = dcmreaddata.dcm_read_from_dir(datadir)
+        if data3d is None or metadata is None:
+            self.data3d, self.metadata = dcmreaddata.dcm_read_from_dir(datadir)
+        else:
+            self.data3d = data3d
+            self.metadata = metadata
+
+
+        self.seeds = seeds
         self.voxelsize_mm = self.metadata['voxelsizemm']
         self.autocrop = autocrop
         self.autocrop_margin = autocrop_margin
@@ -81,8 +92,11 @@ class OrganSegmentation():
     def interactivity(self):
         
         #import pdb; pdb.set_trace()
-        igc = pycat.ImageGraphCut(self.data3d, zoom = self.zoom)
-        igc.gcparams['pairwiseAlpha'] = 30
+# Staré volání
+        #igc = pycat.ImageGraphCut(self.data3d, zoom = self.zoom)
+        #igc.gcparams['pairwiseAlpha'] = 30
+        igc = pycat.ImageGraphCut(self.data3d, gcparams = {'pairwiseAlpha':30}, voxelsize = self.voxelsize_mm)
+        #igc.gcparams['pairwiseAlpha'] = 30
 # version comparison
         from pkg_resources import parse_version
         import sklearn
