@@ -24,22 +24,16 @@ import py3DSeedEditor
 import show3
 
 
-def cut_editor(img3d):
+def cut_editor(data, voxelsize_mm = np.ones([3,1])):
+    """
+    Funkce vrací trojrozměrné pole s dvojeky tam, kde je jedna polovina cév. trojky pak označují druhou polovinu
+    """
+    labels = []
+
+    return labels
     pass
 
-def cut_editor_old(img3d):
-    pass
-
-def resection(data):
-    vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
-# ostranění porty z více kusů, nastaví se jim hodnota liver
-    data['segmentation'][data['segmentation'] == data['slab']['porta']] = data['slab']['liver']
-    show3.show3(data['segmentation'])
-
-    data['segmentation'][vessels == 1] = data['slab']['porta']
-    img3d = data['segmentation']
-    print ("Select cut")
-    #cut_editor_old(img3d)
+def cut_editor_old(data):
     pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
     pyed.show()
     split_obj = pyed.seeds
@@ -52,6 +46,7 @@ def resection(data):
 
     lab, n_obj = scipy.ndimage.label(vesselstmp)
 
+    return lab
     #while n_obj < 2 :
 # dokud neni z celkoveho objektu ustipnuto alespon 80 procent
     while np.sum(lab == max_area_index(lab,n_obj)) > (0.8*sumall) :
@@ -65,6 +60,19 @@ def resection(data):
     print (str(n_obj))
 
     print ("np.sum(lab==3)")
+    pass
+
+def resection(data):
+    vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
+# ostranění porty z více kusů, nastaví se jim hodnota liver
+    data['segmentation'][data['segmentation'] == data['slab']['porta']] = data['slab']['liver']
+    #show3.show3(data['segmentation'])
+
+    data['segmentation'][vessels == 1] = data['slab']['porta']
+    img3d = data['segmentation']
+    print ("Select cut")
+    # lab = cut_editor_old(img3d)
+    lab = cut_editor(img3d)
     
 
     l1 = 1
