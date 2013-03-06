@@ -89,13 +89,20 @@ class OrganSegmentation():
         #import pdb; pdb.set_trace()
 
 
+#    def 
+
     def interactivity(self):
         
         #import pdb; pdb.set_trace()
 # Staré volání
         #igc = pycat.ImageGraphCut(self.data3d, zoom = self.zoom)
         #igc.gcparams['pairwiseAlpha'] = 30
-        igc = pycat.ImageGraphCut(self.data3d, gcparams = {'pairwiseAlpha':30}, voxelsize = self.voxelsize_mm)
+        #seeds_res = scipy.ndimage.zoom(self.seeds , self.zoom, prefilter=False, mode= 'nearest', order = 1)
+        #seeds = self.seeds.astype(np.int8)
+        data3d_res = scipy.ndimage.zoom(self.data3d , self.zoom, mode= 'nearest', order = 1)
+        data3d_res = data3d_res.astype(np.int16)
+        import pdb; pdb.set_trace();
+        igc = pycat.ImageGraphCut(data3d_res, gcparams = {'pairwiseAlpha':30}, voxelsize = self.working_voxelsize_mm)
         #igc.gcparams['pairwiseAlpha'] = 30
 # version comparison
         from pkg_resources import parse_version
