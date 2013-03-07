@@ -26,7 +26,8 @@ import show3
 
 def cut_editor(data, voxelsize_mm = np.ones([3,1])):
     """
-    Funkce vrací trojrozměrné pole s dvojeky tam, kde je jedna polovina cév. trojky pak označují druhou polovinu
+    Funkce vrací trojrozměrné porobné jako data['segmentation'] 
+    v data['slab'] je popsáno, co která hodnota znamená
     """
     labels = []
 
@@ -129,12 +130,6 @@ def max_area_index(labels, num):
     return mxi
 
 
-import gtk 
-import numpy as np 
-from matplotlib.patches import Polygon, PathPatch 
-import mpl_toolkits.mplot3d.art3d as art3d 
-from matplotlib.figure import Figure 
-from matplotlib.backends.backend_gtkagg import FigureCanvasGTKAgg as FigureCanvas 
         
 
 if __name__ == "__main__":

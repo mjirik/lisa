@@ -8,9 +8,10 @@ import sys
 import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 #sys.path.append(os.path.join(path_to_script, "../extern/pycat/"))
-sys.path.append(os.path.join(path_to_script, "../extern/pycat/extern/py3DSeedEditor/"))
+sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
+#sys.path.append(os.path.join(path_to_script, "../extern/pycat/extern/py3DSeedEditor/"))
+#sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
 import unittest
 
@@ -101,7 +102,6 @@ class OrganSegmentation():
         #seeds = self.seeds.astype(np.int8)
         data3d_res = scipy.ndimage.zoom(self.data3d , self.zoom, mode= 'nearest', order = 1)
         data3d_res = data3d_res.astype(np.int16)
-        import pdb; pdb.set_trace();
         igc = pycat.ImageGraphCut(data3d_res, gcparams = {'pairwiseAlpha':30}, voxelsize = self.working_voxelsize_mm)
         #igc.gcparams['pairwiseAlpha'] = 30
 # version comparison
@@ -115,9 +115,13 @@ class OrganSegmentation():
 
         igc.modelparams = {'type':'gmmsame','params':{cvtype_name:'full', 'n_components':3}}
         igc.interactivity()
+        igc.exec_()
+        print "schlus"
+        import pdb; pdb.set_trace();
         #igc.make_gc()
         #igc.show_segmentation()
-        self.segmentation = igc.segmentation
+        #self.segmentation = igc.segmentation
+        self.segmentation = igc.getContours()
         if self.autocrop == None:
             self.orig_scale_segmentation = igc.get_orig_shape_segmentation()
         else:
