@@ -217,6 +217,7 @@ class uiThreshold:
         self.firstRun = False
         self.updateImgFilter(self)
 
+    ## Automaticky vypocet vhodneho prahu - Otsu´s method
     def calculateAutomaticThreshold(self):
 
         # TODO: automaticky vypocet prahu
@@ -239,24 +240,43 @@ class uiThreshold:
         #   nez kvadrat (nutno zvolit mocninu) puvodni hodnoty, tak
         #   puvodni hodnota je ta spravna
 
+        counter = 1
         oldNum = hist[len(bin_centers) - 1]
-        superNum = hist[len(bin_centers) - 1]
         print('len(hist) == ' + str(len(hist)))
         for index in range(1, len(hist)):
             indexBack = len(hist) - 1 - index
-            print(indexBack)
+            print('========')
+            print('index == ' + str(indexBack))
             newNum = hist[indexBack]
-            print('newNum == ' + str(newNum))
-            print('oldNum == ' + str(oldNum))
-            if(newNum >= (3.5 * oldNum) and oldNum > superNum):
+            print('bin_edge == ' + str(bin_edges[indexBack]))
+            print('hist == ' + str(hist[indexBack]))
+            if(newNum >= oldNum):
                 print('found: ' + str(bin_centers[indexBack + 1]))
                 self.threshold = bin_centers[indexBack + 1]
-            oldNum = newNum
+                oldNum = newNum
+            else:
+                if(counter > 10):
+                    break
+                counter += 1
 
-        matpyplot.figure(figsize=(11,4))
-        matpyplot.plot(bin_centers, hist, lw=2)
-        matpyplot.axvline(self.threshold, color='r', ls='--', lw=2)
-        matpyplot.show()
+##        oldNum = hist[len(bin_centers) - 1]
+##        superNum = hist[len(bin_centers) - 1]
+##        print('len(hist) == ' + str(len(hist)))
+##        for index in range(1, len(hist)):
+##            indexBack = len(hist) - 1 - index
+##            print(indexBack)
+##            newNum = hist[indexBack]
+##            print('newNum == ' + str(newNum))
+##            print('oldNum == ' + str(oldNum))
+##            if(newNum >= (3.5 * oldNum) and oldNum > superNum):
+##                print('found: ' + str(bin_centers[indexBack + 1]))
+##                self.threshold = bin_centers[indexBack + 1]
+##            oldNum = newNum
+
+##        matpyplot.figure(figsize=(11,4))
+##        matpyplot.plot(bin_centers, hist, lw=2)
+##        matpyplot.axvline(self.threshold, color='r', ls='--', lw=2)
+##        matpyplot.show()
 
     def updateImgFilter(self, val):
 
@@ -284,6 +304,7 @@ class uiThreshold:
         if(self.interactivity == True):
             ## Prekresleni
             self.fig.canvas.draw()
+
 
     def calculateSigma(self, input):
 
