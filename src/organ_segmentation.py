@@ -26,7 +26,7 @@ import numpy as np
 import scipy
 
 # ----------------- my scripts --------
-import dcmreaddata
+import dcmreaddata1 as dcmr
 import pycat
 import argparse
 #import py3DSeedEditor
@@ -61,7 +61,7 @@ class OrganSegmentation():
 
         # TODO uninteractive Serie selection
         if data3d is None or metadata is None:
-            self.data3d, self.metadata = dcmreaddata.dcm_read_from_dir(datadir)
+            self.data3d, self.metadata = dcmr.dcm_read_from_dir(datadir)
         else:
             self.data3d = data3d
             self.metadata = metadata
@@ -115,17 +115,17 @@ class OrganSegmentation():
 
         igc.modelparams = {'type':'gmmsame','params':{cvtype_name:'full', 'n_components':3}}
         igc.interactivity()
-        igc.exec_()
-        print "schlus"
-        import pdb; pdb.set_trace();
         #igc.make_gc()
         #igc.show_segmentation()
-        #self.segmentation = igc.segmentation
-        self.segmentation = igc.getContours()
-        if self.autocrop == None:
-            self.orig_scale_segmentation = igc.get_orig_shape_segmentation()
-        else:
-            self.orig_scale_segmentation, self.crinfo = igc.get_orig_scale_cropped_segmentation(self.autocrop_margin)
+# @TODO někde v igc.interactivity() dochází k přehození nul za jedničy, 
+# tady se to řeší hackem
+        sgm = (igc.segmentation == 0)
+        self.segmentation = scipy.ndimage.zoom(sgm , 1.0/self.zoom, mode= 'nearest', order = 0)
+        print  np.sum(self.segmentation)*np.prod(self.voxelsize_mm)
+        #if self.autocrop == None:
+        #    self.orig_scale_segmentation = igc.get_orig_shape_segmentation()
+        #else:
+        #    self.orig_scale_segmentation, self.crinfo = igc.get_orig_scale_cropped_segmentation(self.autocrop_margin)
 
         if not self.texture_analysis == None:
             import texture_analysis
@@ -134,8 +134,8 @@ class OrganSegmentation():
 #
             pass
 
-        if not self.smoothing_mm == None:
-            self.segmentation_smoothing(self.smoothing_mm)
+        #if not self.smoothing_mm == None:
+        #    self.segmentation_smoothing(self.smoothing_mm)
         #self.prepare_output()
         #self.orig_segmentation = igc.get_orig_shape_segmentation()
 
@@ -147,14 +147,15 @@ class OrganSegmentation():
         """
         Compute segmented volume in mm3, based on subsampeled data 
         """
-        voxelvolume_mm3 = np.prod(self.working_voxelsize_mm)
-        volume_mm3_rough = np.sum(self.segmentation > 0) * voxelvolume_mm3
+        #voxelvolume_mm3 = np.prod(self.working_voxelsize_mm)
+        #volume_mm3_rough = np.sum(self.segmentation > 0) * voxelvolume_mm3
 
         voxelvolume_mm3 = np.prod(self.voxelsize_mm)
-        volume_mm3 = np.sum(self.orig_scale_segmentation > 0) * voxelvolume_mm3
+        volume_mm3 = np.sum(self.segmentation > 0) * voxelvolume_mm3
+        import pdb; pdb.set_trace()
 
 
-        print "rough = ", volume_mm3_rough ,  " fine = ", volume_mm3 
+        print " fine = ", volume_mm3 
         #print voxelvolume_mm3 
         #print volume_mm3
         #import pdb; pdb.set_trace()
@@ -233,7 +234,7 @@ class Tests(unittest.TestCase):
         Test dicomread module and graphcut module
         """
         #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
-        data3d, metadata = dcmreaddata.dcm_read_from_dir('./../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
+        data3d, metadata = dcmr.dcm_read_from_dir('./../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
 
         print ("Data size: " + str(data3d.nbytes) + ', shape: ' + str(data3d.shape) )
 
