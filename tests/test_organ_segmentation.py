@@ -99,9 +99,10 @@ class OrganSegmentationTest(unittest.TestCase):
 
 
     #@unittest.skipIf(True,"interactive test")
-    def test_vincentka_interactive(self):
+    def test_vincentka_06_slice_thickness_interactive(self):
         """
-        Interactive test uses dicom data for segmentation
+        Interactive test. SliceThickness is not voxel depth. If it is, this 
+        test will fail.
         """
         #dcmdir = os.path.join(path_to_script,'./../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
         dcmdir = os.path.expanduser('~/data/medical/data_orig/vincentka/13021610/10200000/')
@@ -109,13 +110,13 @@ class OrganSegmentationTest(unittest.TestCase):
         oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4)
         
 # manual seeds setting
-        print ("with left mouse button select some pixels of the brain")
-        print ("with right mouse button select some pixels of other tissues and background")
+        print ("with left mouse button select some pixels of the bottle content")
+        print ("with right mouse button select some pixels of background")
 
         oseg.interactivity()
 
         volume = oseg.get_segmented_volume_size_mm3()
-        print volume
+        #print volume
 
         self.assertGreater(volume,600000)
         self.assertLess(volume,850000)

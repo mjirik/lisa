@@ -127,7 +127,7 @@ def get_metadata(dcmlist, ifile = 0):
         voxeldepth]
     metadata = {'voxelsizemm': voxelsizemm, 'Modality': data.Modality}
 
-    import pdb; pdb.set_trace()
+    #import pdb; pdb.set_trace()
     return metadata
 
 

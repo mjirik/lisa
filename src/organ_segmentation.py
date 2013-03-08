@@ -10,7 +10,7 @@ import os.path
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 #sys.path.append(os.path.join(path_to_script, "../extern/pycat/"))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
-#sys.path.append(os.path.join(path_to_script, "../extern/pycat/extern/py3DSeedEditor/"))
+sys.path.append(os.path.join(path_to_script, "../extern/pycat/extern/py3DSeedEditor/"))
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
 import unittest
@@ -133,7 +133,8 @@ class OrganSegmentation():
         if not self.texture_analysis == None:
             import texture_analysis
             # doplnit nějaký kód, parametry atd
-            self.orig_scale_segmentation = texture_analysis.segmentation(self.data3d, self.orig_scale_segmentation, params = self.texture_analysis)
+            #self.orig_scale_segmentation = texture_analysis.segmentation(self.data3d, self.orig_scale_segmentation, params = self.texture_analysis)
+            self.segmentation = texture_analysis.segmentation(self.data3d, self.segmentation, params = self.texture_analysis)
 #
             pass
 
