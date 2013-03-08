@@ -23,7 +23,7 @@ class OrganSegmentationTest(unittest.TestCase):
 
     def aaatest_whole_organ_segmentation_interactive(self):
         """
-        Function uses organ_segmentation object for segmentation
+        Interactive test uses dicom data for segmentation
         """
         dcmdir = os.path.join(path_to_script,'./../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
         oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4)
@@ -52,38 +52,44 @@ class OrganSegmentationTest(unittest.TestCase):
 
     def test_box_segmentation(self):
         """
-        Function uses organ_segmentation object for segmentation
+        Function uses organ_segmentation  for synthetic box object 
+        segmentation.
         """
         #dcmdir = os.path.join(path_to_script,'./../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
-        img3d = np.random.rand(32,32,16) * 5
-        img3d[12:22,5:15,4:14] = img3d [12:22,5:15,4:14] + 10
-        seeds = np.zeros([32,32,16])
-        seeds [13:20,6:7,10] = 1
-        seeds [8,1:2,5:20] = 2
+# data
+        img3d = np.random.rand(64,64,32) * 5
+        img3d[12:32,5:25,4:24] = img3d [12:32,5:25,4:24] + 10
+
+#seeds
+        seeds = np.zeros([64,64,32], np.int8)
+        seeds [13:31,22:25,9:12] = 1
+        seeds [6:9,3:32,9:12] = 2
 #[mm]  10 x 10 x 10
         #voxelsize_mm = [1,4,3]
-        voxelsize_mm = [10,10,10]
+        voxelsize_mm = [5,5,5]
         metadata = {'voxelsizemm': voxelsize_mm}
 
-        oseg = organ_segmentation.OrganSegmentation(None, data3d=img3d, metadata = metadata, working_voxelsize_mm = 20)
+        oseg = organ_segmentation.OrganSegmentation(None,\
+                data3d=img3d, metadata = metadata, \
+                seeds = seeds, \
+                working_voxelsize_mm = 10)
         
 
-# TODO seeedy
         # oseg.seeds = seeds
         #oseg.make_gc()
 # manual seeds setting
-        print ("with left mouse button select some pixels of the brain")
-        print ("with right mouse button select some pixels of other tissues and background")
+        #print ("with left mouse button select some pixels of the brain")
+        #print ("with right mouse button select some pixels of other tissues and background")
 
-        oseg.interactivity()
+        oseg.ninteractivity()
 
         volume = oseg.get_segmented_volume_size_mm3()
         
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
 
         #mel by to být litr. tedy milion mm3
         self.assertGreater(volume,900000)
-        self.assertLess(volume,110000)
+        self.assertLess(volume,1100000)
 
     def test_volume_resize(self):
 

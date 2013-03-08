@@ -92,18 +92,10 @@ class OrganSegmentation():
 
 #    def 
 
-    def interactivity(self):
-        
-        #import pdb; pdb.set_trace()
-# Staré volání
-        #igc = pycat.ImageGraphCut(self.data3d, zoom = self.zoom)
-        #igc.gcparams['pairwiseAlpha'] = 30
-        #seeds_res = scipy.ndimage.zoom(self.seeds , self.zoom, prefilter=False, mode= 'nearest', order = 1)
-        #seeds = self.seeds.astype(np.int8)
+    def _interactivity_begin(self):
         data3d_res = scipy.ndimage.zoom(self.data3d , self.zoom, mode= 'nearest', order = 1)
         data3d_res = data3d_res.astype(np.int16)
         igc = pycat.ImageGraphCut(data3d_res, gcparams = {'pairwiseAlpha':30}, voxelsize = self.working_voxelsize_mm)
-        #igc.gcparams['pairwiseAlpha'] = 30
 # version comparison
         from pkg_resources import parse_version
         import sklearn
@@ -114,14 +106,25 @@ class OrganSegmentation():
             cvtype_name=  'cvtype'
 
         igc.modelparams = {'type':'gmmsame','params':{cvtype_name:'full', 'n_components':3}}
-        igc.interactivity()
-        #igc.make_gc()
-        #igc.show_segmentation()
+        if not self.seeds == None:
+            #igc.seeds= self.seeds
+            seeds_res = scipy.ndimage.zoom(self.seeds, self.zoom, mode= 'nearest', order = 0)
+            seeds_res = seeds_res.astype(np.int8)
+            igc.set_seeds(seeds_res)
+            #print "nastavujeme seedy"
+            #import py3DSeedEditor
+            #rr=py3DSeedEditor.py3DSeedEditor(data3d_res, seeds = seeds_res); rr.show()
+
+            #import pdb; pdb.set_trace()
+
+        return igc
+
+    def _interactivity_end(self,igc):
 # @TODO někde v igc.interactivity() dochází k přehození nul za jedničy, 
 # tady se to řeší hackem
         sgm = (igc.segmentation == 0)
         self.segmentation = scipy.ndimage.zoom(sgm , 1.0/self.zoom, mode= 'nearest', order = 0)
-        print  np.sum(self.segmentation)*np.prod(self.voxelsize_mm)
+        #print  np.sum(self.segmentation)*np.prod(self.voxelsize_mm)
         #if self.autocrop == None:
         #    self.orig_scale_segmentation = igc.get_orig_shape_segmentation()
         #else:
@@ -134,10 +137,34 @@ class OrganSegmentation():
 #
             pass
 
-        #if not self.smoothing_mm == None:
-        #    self.segmentation_smoothing(self.smoothing_mm)
-        #self.prepare_output()
-        #self.orig_segmentation = igc.get_orig_shape_segmentation()
+
+    def interactivity(self):
+        
+        #import pdb; pdb.set_trace()
+# Staré volání
+        #igc = pycat.ImageGraphCut(self.data3d, zoom = self.zoom)
+        #igc.gcparams['pairwiseAlpha'] = 30
+        #seeds_res = scipy.ndimage.zoom(self.seeds , self.zoom, prefilter=False, mode= 'nearest', order = 1)
+        #seeds = self.seeds.astype(np.int8)
+        igc = self._interactivity_begin()
+        igc.interactivity()
+        self._interactivity_end(igc)
+        #igc.make_gc()
+        #igc.show_segmentation()
+
+    def ninteractivity(self):
+        
+        #import pdb; pdb.set_trace()
+# Staré volání
+        #igc = pycat.ImageGraphCut(self.data3d, zoom = self.zoom)
+        #igc.gcparams['pairwiseAlpha'] = 30
+        #seeds_res = scipy.ndimage.zoom(self.seeds , self.zoom, prefilter=False, mode= 'nearest', order = 1)
+        #seeds = self.seeds.astype(np.int8)
+        igc = self._interactivity_begin()
+        #igc.interactivity()
+        igc.make_gc()
+        self._interactivity_end(igc)
+        #igc.show_segmentation()
 
     def prepare_output(self):
         pass
@@ -152,10 +179,10 @@ class OrganSegmentation():
 
         voxelvolume_mm3 = np.prod(self.voxelsize_mm)
         volume_mm3 = np.sum(self.segmentation > 0) * voxelvolume_mm3
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
 
 
-        print " fine = ", volume_mm3 
+        #print " fine = ", volume_mm3 
         #print voxelvolume_mm3 
         #print volume_mm3
         #import pdb; pdb.set_trace()
