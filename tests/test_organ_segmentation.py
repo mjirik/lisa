@@ -21,7 +21,9 @@ import dcmreaddata1 as dcmr
 
 class OrganSegmentationTest(unittest.TestCase):
 
-    def aaatest_whole_organ_segmentation_interactive(self):
+    #@unittest.skip("demonstrating skipping")
+    @unittest.skipIf(True,"interactive test")
+    def test_whole_organ_segmentation_interactive(self):
         """
         Interactive test uses dicom data for segmentation
         """
@@ -58,7 +60,7 @@ class OrganSegmentationTest(unittest.TestCase):
         #dcmdir = os.path.join(path_to_script,'./../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
 # data
         img3d = np.random.rand(64,64,32) * 5
-        img3d[12:32,5:25,4:24] = img3d [12:32,5:25,4:24] + 10
+        img3d[12:32,5:25,4:24] = img3d [12:32,5:25,4:24] + 15
 
 #seeds
         seeds = np.zeros([64,64,32], np.int8)
@@ -96,6 +98,27 @@ class OrganSegmentationTest(unittest.TestCase):
         pass
 
 
+    #@unittest.skipIf(True,"interactive test")
+    def test_vincentka_interactive(self):
+        """
+        Interactive test uses dicom data for segmentation
+        """
+        #dcmdir = os.path.join(path_to_script,'./../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
+        dcmdir = os.path.expanduser('~/data/medical/data_orig/vincentka/13021610/10200000/')
+        dcmdir = os.path.expanduser('~/data/medical/data_orig/vincentka/13021610/12460000/')
+        oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4)
+        
+# manual seeds setting
+        print ("with left mouse button select some pixels of the brain")
+        print ("with right mouse button select some pixels of other tissues and background")
+
+        oseg.interactivity()
+
+        volume = oseg.get_segmented_volume_size_mm3()
+        print volume
+
+        self.assertGreater(volume,600000)
+        self.assertLess(volume,850000)
 
 
 if __name__ == "__main__":

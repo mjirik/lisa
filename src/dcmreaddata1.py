@@ -90,7 +90,7 @@ def dcmlist_to_3D_data(dcmlist):
             data3d = np.zeros([shp2[0],shp2[1], len(dcmlist)], dtype=np.int16)
             #data3d = np.zeros([shp2[0],shp2[1], len(dcmlist)])
             # data3d = data2d[:,:,np.newaxis]
-            metadata = get_metadata(data)
+            metadata = get_metadata(dcmlist,1)
         else:
             #data3d = np.concatenate((data3d,data2d[...,np.newaxis]), axis = 2)
             data3d [:,:,i] = data2d
@@ -103,13 +103,43 @@ def dcmlist_to_3D_data(dcmlist):
 
 
 
-def get_metadata(data):
-    #import pdb; pdb.set_trace()
-    pixelsizemm = data.PixelSpacing
-    voxelsizemm = [pixelsizemm[0], pixelsizemm[1], data.SliceThickness]
+def get_metadata(dcmlist, ifile = 0):
 
-    metadata = {'voxelsizemm':voxelsizemm, 'Modality':data.Modality}
+
+    """
+    Get metadata.
+    Voxel size is obtained from PixelSpacing and difference of 
+    SliceLocation of two neighboorhoding slices (first have index ifile).
+    """
+
+    data = dicom.read_file(dcmlist[ifile])
+    try:
+        data2 = dicom.read_file(dcmlist[ifile+1])
+        voxeldepth = float(np.abs(data.SliceLocation - data2.SliceLocation ))
+    except:
+        logger.warning('Problem with voxel depth. Using SliceThickness')
+        voxeldepth = float(data.SliceThickness)
+
+
+    pixelsizemm = data.PixelSpacing
+    voxelsizemm = [float(pixelsizemm[0]),\
+        float(pixelsizemm[1]),
+        voxeldepth]
+    metadata = {'voxelsizemm': voxelsizemm, 'Modality': data.Modality}
+
+    import pdb; pdb.set_trace()
     return metadata
+
+
+
+
+
+    #import pdb; pdb.set_trace()
+    #pixelsizemm = data.PixelSpacing
+    #voxelsizemm = [pixelsizemm[0], pixelsizemm[1], data.SliceThickness]
+
+    #metadata = {'voxelsizemm':voxelsizemm, 'Modality':data.Modality}
+    #return metadata
 
 def obj_from_file(filename = 'annotation.yaml', filetype = 'yaml'):
     ''' Read object from file '''
