@@ -363,7 +363,7 @@ if __name__ == "__main__":
         data = {}
         data['data3d'] = oseg.data3d
         data['crinfo'] = oseg.crinfo
-        data['segmentation'] = oseg.orig_scale_segmentation
+        data['segmentation'] = oseg.segmentation
         data['slab'] = slab
         misc.obj_to_file(data, "out", filetype = 'pickle')
     #output = segmentation.vesselSegmentation(oseg.data3d, oseg.orig_segmentation)

@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 def obj_from_file(filename = 'annotation.yaml', filetype = 'yaml'):
     ''' Read object from file '''
 # TODO solution for file extensions
-    f = open(filename, 'r')
+    f = open(filename, 'rb')
     if filetype == 'yaml':
         import yaml
         obj = yaml.load(f)
@@ -30,7 +30,7 @@ def obj_to_file(obj, filename = 'annotation.yaml', filetype = 'yaml'):
 
     # write to yaml
 
-    f = open(filename, 'w')
+    f = open(filename, 'wb')
     if filetype == 'yaml':
         import yaml
         yaml.dump(obj,f)
