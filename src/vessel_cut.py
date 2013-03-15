@@ -133,10 +133,19 @@ def max_area_index(labels, num):
         
 
 if __name__ == "__main__":
-    data = misc.obj_from_file("out", filetype = 'pickle')
-    ds = data['segmentation'] == data['slab']['liver']
-    pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
-    pyed.show()
+    #data = misc.obj_from_file("out", filetype = 'pickle')
+    #ds = data['segmentation'] == data['slab']['liver']
+    #pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
+    #pyed.show()
+    seg = np.zeros([100,100,100])
+    seg [50:80, 50:80, 60:75] = 1
+    seg[58:60, 56:72, 66:68]=2
+    dat = np.random.rand(100,100,100) 
+    dat [50:80, 50:80, 60:75] =  dat [50:80, 50:80, 60:75] + 1 
+    dat [58:60, 56:72, 66:68] =  dat  [58:60, 56:72, 66:68] + 1
+    slab = {'liver':1, 'porta':2, 'portaa':3, 'portab':4}
+    data = {'segmentation':seg, 'data3d':dat, 'slab':slab}
+
     resection(data)
 
 #    SectorDisplay2__()

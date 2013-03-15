@@ -213,9 +213,11 @@ class uiThreshold:
     def autoWork(self):
 
         if(self.threshold == -1 and self.interactivity == False):
+            print('Hledani prahu...')
             self.calculateAutomaticThreshold()
-        self.firstRun = False
-        self.updateImgFilter(self)
+        print('Vlastni rozmazani a prahovani dat...')
+        scipy.ndimage.filters.gaussian_filter(self.data, self.calculateSigma(self.inputSigma), 0, self.imgUsed, 'reflect', 0.0)
+        self.imgChanged = self.imgUsed > self.threshold
 
     ## Automaticky vypocet vhodneho prahu - Otsu´s method
     def calculateAutomaticThreshold(self):
@@ -242,22 +244,63 @@ class uiThreshold:
 
         counter = 1
         oldNum = hist[len(bin_centers) - 1]
+        print('====================================')
+        print('Toto jsou debug vypisy, ktere budou (casem) vymazany ;-)')
         print('len(hist) == ' + str(len(hist)))
-        for index in range(1, len(hist)):
-            indexBack = len(hist) - 1 - index
-            print('========')
-            print('index == ' + str(indexBack))
-            newNum = hist[indexBack]
-            print('bin_edge == ' + str(bin_edges[indexBack]))
-            print('hist == ' + str(hist[indexBack]))
-            if(newNum >= oldNum):
-                print('found: ' + str(bin_centers[indexBack + 1]))
-                self.threshold = bin_centers[indexBack + 1]
-                oldNum = newNum
-            else:
-                if(counter > 10):
-                    break
-                counter += 1
+
+##        print('====================================')
+##        print('Hodnoty hist:')
+##        print('====================================')
+##        for index in range(0, len(hist)):
+##            print('[' + str(index) + '] ' + str(hist[index]))
+##
+##        print('====================================')
+
+        suma_hist = 0
+        start = numpy.round(len(hist) / 10, 0)
+        for index in range(start, len(hist)):
+            suma_hist += hist[index]
+
+        print('moje suma hist == ' + str(suma_hist))
+        print('suma hist == ' + str(sum(hist)))
+
+        mark = -1
+        mark_suma = 0
+        self.threshold_percent = 0.30
+        stop_suma = suma_hist * self.threshold_percent
+        print('Upominka: Threshold se pocita pro ' + str((int)(self.threshold_percent * 100)) + '% dat.')
+        end = start - 1
+        start = len(hist) - 1
+        index = start
+        while(index > end):
+            mark_suma += hist[index]
+            if(mark_suma >= stop_suma):
+                mark = index
+                break
+            index = index - 1
+
+        self.threshold = (bin_centers[mark - 1] + bin_centers[mark]
+                            + bin_centers[mark + 1]) / 3.0
+        print('Zjisten threshold: ' + str(self.threshold))
+
+        print('====================================')
+
+##        for index in range(1, len(hist)):
+
+##            indexBack = len(hist) - 1 - index
+##            print('========')
+##            print('index == ' + str(indexBack))
+##            newNum = hist[indexBack]
+##            print('bin_edge == ' + str(bin_edges[indexBack]))
+##            print('hist == ' + str(hist[indexBack]))
+##            if(newNum >= oldNum):
+##                print('found: ' + str(bin_centers[indexBack + 1]))
+##                self.threshold = bin_centers[indexBack + 1]
+##                oldNum = newNum
+##            else:
+##                if(counter > 10):
+##                    break
+##                counter += 1
 
 ##        oldNum = hist[len(bin_centers) - 1]
 ##        superNum = hist[len(bin_centers) - 1]
@@ -273,9 +316,9 @@ class uiThreshold:
 ##                self.threshold = bin_centers[indexBack + 1]
 ##            oldNum = newNum
 
-##        matpyplot.figure(figsize=(11,4))
-##        matpyplot.plot(bin_centers, hist, lw=2)
-##        matpyplot.axvline(self.threshold, color='r', ls='--', lw=2)
+##        matpyplot.figure(figsize = (11, 4))
+##        matpyplot.plot(bin_centers, hist, lw = 2)
+##        matpyplot.axvline(self.threshold, color = 'r', ls = '--', lw = 2)
 ##        matpyplot.show()
 
     def updateImgFilter(self, val):
@@ -283,11 +326,11 @@ class uiThreshold:
         if(self.interactivity == True):
             sigma = float(self.ssigma.val)
         else:
-            sigma = float(self.threshold)
+            sigma = float(self.inputSigma)
 
         ## Filtrovani
         if(self.lastSigma != sigma):
-            scipy.ndimage.filters.gaussian_filter(self.data.copy(), self.calculateSigma(sigma), 0, self.imgUsed, 'reflect', 0.0)
+            scipy.ndimage.filters.gaussian_filter(self.data, self.calculateSigma(sigma), 0, self.imgUsed, 'reflect', 0.0)
             ## Ulozeni posledni hodnoty sigma pro neopakovani stejne operace
             self.lastSigma = sigma
 
@@ -311,7 +354,6 @@ class uiThreshold:
         if ( self.voxel[0][0] == self.voxel[1][0] == self.voxel[2][0] ):
             return ((5 / self.voxel[0][0]) * input) / self.voxelV
         else:
-
             sigmaX = (5.0 / self.voxel[0][0]) * input
             sigmaY = (5.0 / self.voxel[1][0]) * input
             sigmaZ = (5.0 / self.voxel[2][0]) * input
