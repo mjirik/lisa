@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 #import apdb
 #  apdb.set_trace();
 #import scipy.io
-#import numpy as np
+import numpy as np
 
 # ----------------- my scripts --------
 #import dcmreaddata
@@ -102,13 +102,26 @@ if __name__ == "__main__":
 # information about crop
     cri = oseg.crinfo
     oseg.data3d = oseg.data3d[cri[0][0]:cri[0][1],cri[1][0]:cri[1][1],cri[2][0]:cri[2][1]]
-    pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour = oseg.orig_scale_segmentation)
+    pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour = oseg.segmentation)
+    #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour = oseg.orig_scale_segmentation)
     pyed.show()
+    import pdb; pdb.set_trace()
+    
+# @TODO odstranit hack
+    
+    shp =  [\
+            np.min([oseg.segmentation.shape[0],oseg.data3d.shape[0]]),\
+            np.min([oseg.segmentation.shape[1],oseg.data3d.shape[1]]),\
+            np.min([oseg.segmentation.shape[2],oseg.data3d.shape[2]]),\
+            ]
+    oseg.data3d = oseg.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
+    oseg.segmentation = oseg.segmentation[0:shp[0], 0:shp[1], 0:shp[2]]
     # oseg.orig_scale_segmentation
 
     outputTmp = segmentation.vesselSegmentation(
         oseg.data3d,
-        segmentation = oseg.orig_scale_segmentation,
+        segmentation = oseg.segmentation,
+        #segmentation = oseg.orig_scale_segmentation,
         threshold = -1,
         inputSigma = 0.15,
         dilationIterations = 2,
@@ -131,11 +144,11 @@ if __name__ == "__main__":
     data = {}
     data['data3d'] = oseg.data3d
     data['crinfo'] = oseg.crinfo
-    data['segmentation'] = oseg.orig_scale_segmentation
+    data['segmentation'] = oseg.segmentation
     data['segmentation'][output==1] = slab['porta']
     data['slab'] = slab
 
-#    import pdb; pdb.set_trace()
+    
     pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'],  contour=data['segmentation']==slab['porta'])
     pyed.show()
 
