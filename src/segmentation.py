@@ -32,6 +32,9 @@ logger = logging.getLogger(__name__)
 
 import argparse
 
+# Import garbage collector
+import gc as garbage
+
 """
 Vessel segmentation z jater.
     input:
@@ -67,14 +70,10 @@ interactivity = True, binaryClosingIterations = 0, binaryOpeningIterations = 0):
         voxel2 = voxel[1][0]
         voxel3 = voxel[2][0]
         voxelV = voxel1 * voxel2 * voxel3
-        #print('Voxel size: ', voxelV)
 
-        #print('Dimenze vstupu: ', numpy.ndim(data))
         ## number je zaokrohleny 2x nasobek objemove jednotky na 2 desetinna mista
         ## number stanovi doporucenou horni hranici parametru gauss. filtru
         number = (numpy.round((2 * voxelV), 2))
-
-        #print('Doporucena horni hranice gaussianskeho filtru: ', number)
 
         ## Operace dilatace (dilation) nad samotnymi jatry ("segmentation")
         if(dilationIterations > 0.0):
@@ -95,12 +94,14 @@ interactivity = True, binaryClosingIterations = 0, binaryOpeningIterations = 0):
         uiT = uiThreshold.uiThreshold(preparedData, voxel, threshold, interactivity, number, inputSigma)
         filteredData = uiT.run()
         del(uiT)
+        garbage.collect()
 
         ## Binarni otevreni a uzavreni
         uiB = uiBinaryClosingAndOpening.uiBinaryClosingAndOpening(filteredData, binaryClosingIterations,
             binaryOpeningIterations, interactivity)
         output = uiB.run()
         del(uiB)
+        garbage.collect()
 
     else:
         ## Binarni otevreni a uzavreni
@@ -108,6 +109,7 @@ interactivity = True, binaryClosingIterations = 0, binaryOpeningIterations = 0):
             binaryOpeningIterations, interactivity)
         output = uiB.run()
         del(uiB)
+        garbage.collect()
 
     ## Operace zjisteni poctu N nejvetsich objektu a jejich nasledne vraceni
     if(nObj > 0):
@@ -126,7 +128,7 @@ Vraceni N nejvetsich objektu.
         N - pocet nejvetsich objektu k vraceni
 
     returns:
-        ---
+        data s nejvetsimi objekty
 """
 def getBiggestObjects(data, N):
 
@@ -156,17 +158,17 @@ def getBiggestObjects(data, N):
     ## Osetreni neocekavane situace
     if(N > len(arrayLabels)):
         print('Pocet nejvetsich objektu k vraceni chcete vetsi nez je oznacenych oblasti!')
-        print('Redukuji pocet nejvetsich objektu k vraceni.')
+        print('Redukuji pocet nejvetsich objektu k vraceni...')
         N = len(arrayLabels)
 
     ## Upraveni dat (ziskani N nejvetsich objektu)
     search = N
     if (sys.version_info[0] < 3):
         import copy
-        newData = copy.copy(data)
+        newData = copy.copy(data) * 0 # TODO: udelat lepe vynulovani
     else:
-        newData = data.copy()
-    newData = newData * 0
+        newData = data.copy() * 0
+
     for index in range(0, len(arrayLabels)):
         newData -= (labels == arrayLabels[index])
         if(arrayLabels[index] != 0):
@@ -174,13 +176,16 @@ def getBiggestObjects(data, N):
             if search <= 0:
                 break
 
-    ## Priprava vystupu a uvolneni
+    ## Priprava vystupu
     output = data - newData
+
+    ## Uvolneni pameti
     del(data)
     del(newData)
     del(labels)
     del(arrayLabels)
     del(arrayLabelsSum)
+    garbage.collect()
 
     return output
 
@@ -191,7 +196,7 @@ Zjisti cetnosti jednotlivych oznacenych ploch (labeled areas)
         num - pocet pouzitych oznaceni
 
     returns:
-        ---
+        dve pole - prvni sumy, druhe indexy
 """
 def areaIndexes(labels, num):
 
@@ -212,7 +217,7 @@ Razeni 2 poli najednou (list) pomoci metody select sort
         list2 - druhe pole (vedlejsi pole) (kopirujici pozice pro razeni podle hlavniho pole list1)
 
     returns:
-        ---
+        dve serazena pole - hodnoty se ridi podle prvniho pole, druhe "kopiruje" razeni
 """
 def selectSort(list1, list2):
 
@@ -312,7 +317,7 @@ if __name__ == "__main__":
         structure = None
         outputTmp = vesselSegmentation(mat['data'], mat['segmentation'], threshold = -1,
             voxelsizemm = mat['voxelsizemm'], inputSigma = 0.15, dilationIterations = 2,
-            nObj = 1, dataFiltering = True, interactivity = False, binaryClosingIterations = 1,
+            nObj = 1, dataFiltering = True, interactivity = True, binaryClosingIterations = 1,
             binaryOpeningIterations = 1)
     else:
         outputTmp = vesselSegmentation(data = mat, segmentation = mat)
@@ -321,6 +326,7 @@ if __name__ == "__main__":
     inspect = inspector.inspector(outputTmp)
     output = inspect.run()
     del(inspect)
+    garbage.collect()
 
     try:
         cislo = input('Chcete ulozit vystup?\n1 jako ano\ncokoliv jineho jako ne\n')
@@ -333,10 +339,10 @@ if __name__ == "__main__":
         print('Nastala chyba!')
         raise Exception
 
+    garbage.collect()
     sys.exit()
 
 # TODO: vraceni nastavenych parametru
-# TODO: memory leaks
 # TODO: priprava na testy
 # TODO: testy
 # TODO: pridani cev (graficke)

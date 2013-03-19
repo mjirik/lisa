@@ -5,7 +5,7 @@
 Name:        uiBinaryClosingAndOpening
 Purpose:     (CZE-ZCU-FAV-KKY) Liver medical project
 
-Author:      Pavel Volkovinsky 
+Author:      Pavel Volkovinsky
 Email:		 volkovinsky.pavel@gmail.com
 
 Created:     08.11.2012
@@ -32,6 +32,9 @@ import matplotlib.pyplot as matpyplot
 import matplotlib
 from matplotlib.widgets import Slider, Button#, RadioButtons
 
+# Import garbage collector
+import gc as garbage
+
 """
 ================================================================================
 uiBinaryClosingAndOpening
@@ -48,7 +51,7 @@ class uiBinaryClosingAndOpening:
     def __init__(self, data, binaryClosingIterations, binaryOpeningIterations, interactivity,
     initslice = 0, cmap = matplotlib.cm.Greys_r):
 
-        print('Spoustim binarni otevreni a uzavreni dat.')
+        print('Spoustim binarni otevreni a uzavreni dat...')
 
         inputDimension = numpy.ndim(data)
         self.cmap = cmap
@@ -59,6 +62,9 @@ class uiBinaryClosingAndOpening:
         if(self.interactivity == False):
             self.binaryClosingIterations = binaryClosingIterations
             self.binaryOpeningIterations = binaryOpeningIterations
+
+        if(self.interactivity == False):
+            return
 
         if(inputDimension == 2):
 
@@ -165,6 +171,8 @@ class uiBinaryClosingAndOpening:
 
         del(self.imgUsed)
         del(self.imgChanged)
+
+        garbage.collect()
 
         return self.imgChanged1
 
@@ -274,3 +282,6 @@ class uiBinaryClosingAndOpening:
 
             ## Prekresleni
             self.fig.canvas.draw()
+
+        del(imgChanged1)
+        garbage.collect()

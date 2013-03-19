@@ -36,6 +36,9 @@ import matplotlib
 import matplotlib.pyplot as matpyplot
 from matplotlib.widgets import Slider, Button#, RadioButtons
 
+# Import garbage collector
+import gc as garbage
+
 """
 ================================================================================
 uiThreshold
@@ -55,7 +58,7 @@ class uiThreshold:
     def __init__(self, data, voxel, threshold, interactivity, number = 100.0, inputSigma = -1,
     initslice = 0, cmap = matplotlib.cm.Greys_r):
 
-        print('Spoustim prahovani dat.')
+        print('Spoustim prahovani dat...')
 
         self.interactivity = interactivity
 
@@ -69,8 +72,23 @@ class uiThreshold:
         if (sys.version_info[0] < 3):
             import copy
             self.data = copy.copy(data)
+            self.voxel = copy.copy(voxel)
+            self.imgUsed = copy.copy(data)
+            self.imgChanged = copy.copy(self.imgUsed)
         else:
             self.data = data.copy()
+            self.voxel = voxel.copy()
+            self.imgUsed = data.copy()
+            self.imgChanged = self.imgUsed.copy()
+
+        ## Kalkulace objemove jednotky (voxel) (V = a*b*c)
+        voxel1 = self.voxel[0][0]
+        voxel2 = self.voxel[1][0]
+        voxel3 = self.voxel[2][0]
+        self.voxelV = voxel1 * voxel2 * voxel3
+
+        if(self.interactivity == False):
+            return
 
         if(inputDimension == 2):
 
@@ -110,23 +128,7 @@ class uiThreshold:
 
         elif(inputDimension == 3):
 
-            if (sys.version_info[0] < 3):
-                import copy
-                self.voxel = copy.copy(voxel)
-                self.imgUsed = copy.copy(data)
-                self.imgChanged = copy.copy(self.imgUsed)
-            else:
-                self.voxel = voxel.copy()
-                self.imgUsed = data.copy()
-                self.imgChanged = self.imgUsed.copy()
-
             self.lastSigma = -1.0
-
-            ## Kalkulace objemove jednotky (voxel) (V = a*b*c)
-            voxel1 = self.voxel[0][0]
-            voxel2 = self.voxel[1][0]
-            voxel3 = self.voxel[2][0]
-            self.voxelV = voxel1 * voxel2 * voxel3
 
             ## Minimalni pouzita hodnota prahovani v obrazku
             self.min0 = numpy.amin(self.imgUsed)
@@ -191,7 +193,6 @@ class uiThreshold:
                 self.bcontinue.on_clicked(self.button3DContinue)
 
         else:
-
             print('Spatny vstup.\nDimenze vstupu neni 2 ani 3.\nUkoncuji prahovani.')
 
     def run(self):
@@ -207,12 +208,13 @@ class uiThreshold:
 
         del(self.imgUsed)
         del(self.data)
+        garbage.collect()
 
         return self.imgChanged
 
     def autoWork(self):
 
-        if(self.threshold == -1 and self.interactivity == False):
+        if(self.threshold == -1):
             print('Hledani prahu...')
             self.calculateAutomaticThreshold()
         print('Vlastni rozmazani a prahovani dat...')
@@ -285,41 +287,12 @@ class uiThreshold:
 
         print('====================================')
 
-##        for index in range(1, len(hist)):
+        matpyplot.figure(figsize = (11, 4))
+        matpyplot.plot(bin_centers, hist, lw = 2)
+        matpyplot.axvline(self.threshold, color = 'r', ls = '--', lw = 2)
+        matpyplot.show()
 
-##            indexBack = len(hist) - 1 - index
-##            print('========')
-##            print('index == ' + str(indexBack))
-##            newNum = hist[indexBack]
-##            print('bin_edge == ' + str(bin_edges[indexBack]))
-##            print('hist == ' + str(hist[indexBack]))
-##            if(newNum >= oldNum):
-##                print('found: ' + str(bin_centers[indexBack + 1]))
-##                self.threshold = bin_centers[indexBack + 1]
-##                oldNum = newNum
-##            else:
-##                if(counter > 10):
-##                    break
-##                counter += 1
-
-##        oldNum = hist[len(bin_centers) - 1]
-##        superNum = hist[len(bin_centers) - 1]
-##        print('len(hist) == ' + str(len(hist)))
-##        for index in range(1, len(hist)):
-##            indexBack = len(hist) - 1 - index
-##            print(indexBack)
-##            newNum = hist[indexBack]
-##            print('newNum == ' + str(newNum))
-##            print('oldNum == ' + str(oldNum))
-##            if(newNum >= (3.5 * oldNum) and oldNum > superNum):
-##                print('found: ' + str(bin_centers[indexBack + 1]))
-##                self.threshold = bin_centers[indexBack + 1]
-##            oldNum = newNum
-
-##        matpyplot.figure(figsize = (11, 4))
-##        matpyplot.plot(bin_centers, hist, lw = 2)
-##        matpyplot.axvline(self.threshold, color = 'r', ls = '--', lw = 2)
-##        matpyplot.show()
+        garbage.collect()
 
     def updateImgFilter(self, val):
 

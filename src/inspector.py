@@ -5,7 +5,7 @@
 Name:        inspector
 Purpose:     (CZE-ZCU-FAV-KKY) Liver medical project
 
-Author:      Pavel Volkovinsky 
+Author:      Pavel Volkovinsky
 Email:		 volkovinsky.pavel@gmail.com
 
 Created:     16.02.2013
@@ -36,6 +36,9 @@ import matplotlib.pyplot as matpyplot
 import matplotlib
 from matplotlib.widgets import Slider, Button#, RadioButtons
 
+# Import garbage collector
+import gc as garbage
+
 """
 ================================================================================
 inspector
@@ -45,7 +48,7 @@ class inspector:
 
     def __init__(self, data, cmap = matplotlib.cm.Greys_r):
 
-        print('Spoustim inspektor dat.')
+        print('Spoustim inspektor dat...')
 
         self.data = data
         self.cmap = cmap
@@ -95,6 +98,8 @@ class inspector:
         """!!!!!!!!=POZOR=!!!!!!!!!!"""
         self.output = self.data
         """================="""
+
+        garbage.collect()
 
         return self.output
 

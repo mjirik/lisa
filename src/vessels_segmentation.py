@@ -33,8 +33,8 @@ import inspector
 import organ_segmentation
 import misc
 
-
-
+# Import garbage collector
+import gc as garbage
 
 if __name__ == "__main__":
 
@@ -83,6 +83,9 @@ if __name__ == "__main__":
 
     oseg.interactivity()
 
+    # Uvolneni pameti
+    garbage.collect()
+
     #print ("Data size: " + str(data3d.nbytes) + ', shape: ' + str(data3d.shape) )
 
     #igc = pycat.ImageGraphCut(data3d, zoom = 0.5)
@@ -106,9 +109,9 @@ if __name__ == "__main__":
     #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour = oseg.orig_scale_segmentation)
     pyed.show()
     import pdb; pdb.set_trace()
-    
+
 # @TODO odstranit hack
-    
+
     shp =  [\
             np.min([oseg.segmentation.shape[0],oseg.data3d.shape[0]]),\
             np.min([oseg.segmentation.shape[1],oseg.data3d.shape[1]]),\
@@ -131,9 +134,15 @@ if __name__ == "__main__":
         binaryClosingIterations = 1,
         binaryOpeningIterations = 1)
 
+    # Uvolneni pameti
+    garbage.collect()
+
     inspect = inspector.inspector(outputTmp)
     output = inspect.run()
+
+    # Uvolneni pameti
     del(inspect)
+    garbage.collect()
 
 # segmentation labeling
     slab={}
@@ -148,9 +157,11 @@ if __name__ == "__main__":
     data['segmentation'][output==1] = slab['porta']
     data['slab'] = slab
 
-    
     pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'],  contour=data['segmentation']==slab['porta'])
     pyed.show()
+
+    # Uvolneni pameti
+    garbage.collect()
 
     savestring = raw_input ('Save output data? (y/n): ')
     #sn = int(snstring)
