@@ -58,6 +58,8 @@ if __name__ == "__main__":
             help='run unittest')
     parser.add_argument('-ed', '--exampledata', action='store_true',
             help='run unittest')
+    parser.add_argument('-i', '--inputfile',  default=None,
+            help='input file from organ_segmentation')
     args = parser.parse_args()
 
 
@@ -103,8 +105,8 @@ if __name__ == "__main__":
     # pyed = py3DSeedEditor.py3DSeedEditor(oseg.orig_scale_segmentation)
     #pyed.show()
 # information about crop
-    cri = oseg.crinfo
-    oseg.data3d = oseg.data3d[cri[0][0]:cri[0][1],cri[1][0]:cri[1][1],cri[2][0]:cri[2][1]]
+    #cri = oseg.crinfo
+    #oseg.data3d = oseg.data3d[cri[0][0]:cri[0][1],cri[1][0]:cri[1][1],cri[2][0]:cri[2][1]]
     pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour = oseg.segmentation)
     #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour = oseg.orig_scale_segmentation)
     pyed.show()
@@ -112,13 +114,13 @@ if __name__ == "__main__":
 
 # @TODO odstranit hack
 
-    shp =  [\
-            np.min([oseg.segmentation.shape[0],oseg.data3d.shape[0]]),\
-            np.min([oseg.segmentation.shape[1],oseg.data3d.shape[1]]),\
-            np.min([oseg.segmentation.shape[2],oseg.data3d.shape[2]]),\
-            ]
-    oseg.data3d = oseg.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
-    oseg.segmentation = oseg.segmentation[0:shp[0], 0:shp[1], 0:shp[2]]
+#    shp =  [\
+#            np.min([oseg.segmentation.shape[0],oseg.data3d.shape[0]]),\
+#            np.min([oseg.segmentation.shape[1],oseg.data3d.shape[1]]),\
+#            np.min([oseg.segmentation.shape[2],oseg.data3d.shape[2]]),\
+#            ]
+#    oseg.data3d = oseg.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
+#    oseg.segmentation = oseg.segmentation[0:shp[0], 0:shp[1], 0:shp[2]]
     # oseg.orig_scale_segmentation
 
     outputTmp = segmentation.vesselSegmentation(
@@ -130,7 +132,7 @@ if __name__ == "__main__":
         dilationIterations = 2,
         nObj = 1,
         dataFiltering = True,
-        interactivity = False,
+        interactivity = True,
         binaryClosingIterations = 1,
         binaryOpeningIterations = 1)
 
@@ -160,6 +162,8 @@ if __name__ == "__main__":
     pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'],  contour=data['segmentation']==slab['porta'])
     pyed.show()
 
+    pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
+    pyed.show()
     # Uvolneni pameti
     garbage.collect()
 
@@ -167,4 +171,4 @@ if __name__ == "__main__":
     #sn = int(snstring)
     if savestring in ['Y','y']:
 
-        misc.obj_to_file(data, "out", filetype = 'pickle')
+        misc.obj_to_file(data, "vessels.pickle", filetype = 'pickle')
