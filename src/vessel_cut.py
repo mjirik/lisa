@@ -38,6 +38,7 @@ def cut_editor_old(data):
     pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
     pyed.show()
     split_obj = pyed.seeds
+    vessels = data['segmentation'] == data['slab']['porta']
     vesselstmp = vessels
 
     sumall = np.sum(vessels==1)
@@ -47,7 +48,6 @@ def cut_editor_old(data):
 
     lab, n_obj = scipy.ndimage.label(vesselstmp)
 
-    return lab
     #while n_obj < 2 :
 # dokud neni z celkoveho objektu ustipnuto alespon 80 procent
     while np.sum(lab == max_area_index(lab,n_obj)) > (0.8*sumall) :
@@ -57,10 +57,18 @@ def cut_editor_old(data):
     
         lab, n_obj = scipy.ndimage.label(vesselstmp)
     
-    print ("Zjistete si, ktere objekty jsou nejvets a nastavte l1 a l2")
-    print (str(n_obj))
+#    print ("Zjistete si, ktere objekty jsou nejvets a nastavte l1 a l2")
+#    print (str(n_obj))
 
-    print ("np.sum(lab==3)")
+#    print ("np.sum(lab==3)")
+
+    obj1 = get_biggest_object(lab)
+# vymaz nejvetsiho
+    lab[obj1==1] = 0
+    obj2 = get_biggest_object(lab)
+
+    lab = obj1 + 2*obj2
+    return lab
     pass
 
 def resection(data):
