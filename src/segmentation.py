@@ -140,7 +140,7 @@ def getBiggestObjects(data, N):
     labels, length = scipy.ndimage.label(data)
 
     ## Podminka mnozstvi objektu
-    maxN = 20
+    maxN = 100
     if(length > maxN):
         print('Existuje prilis mnoho objektu! (' + str(length) + ')')
         print('Maximalne povoleno ' + str(maxN) + ' objektu!')
@@ -165,9 +165,11 @@ def getBiggestObjects(data, N):
     search = N
     if (sys.version_info[0] < 3):
         import copy
-        newData = copy.copy(data) * 0 # TODO: udelat lepe vynulovani
+        newData = copy.copy(data) # TODO: udelat lepe vynulovani
+        newData = newData * 0
     else:
-        newData = data.copy() * 0
+        newData = data.copy()
+        newData = newData * 0
 
     for index in range(0, len(arrayLabels)):
         newData -= (labels == arrayLabels[index])
