@@ -22,6 +22,7 @@ import uiThreshold
 import uiBinaryClosingAndOpening
 
 import numpy
+import numpy.matlib
 import scipy
 import scipy.io
 import scipy.misc

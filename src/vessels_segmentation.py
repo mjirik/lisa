@@ -130,8 +130,8 @@ if __name__ == "__main__":
         dilationIterations = 2,
         nObj = 1,
         dataFiltering = True,
-        interactivity = False,
-        binaryClosingIterations = 1,
+        interactivity = True,
+        binaryClosingIterations = 5,
         binaryOpeningIterations = 1)
 
     # Uvolneni pameti
