@@ -26,13 +26,19 @@ import vessel_cut
 
 
 def resection(data):
-    vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
+    #pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
+    #pyed.show()
+    # vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
+    vessels = data['segmentation'] == data['slab']['porta']
 # ostranění porty z více kusů, nastaví se jim hodnota liver
     #data['segmentation'][data['segmentation'] == data['slab']['porta']] = data['slab']['liver']
     #show3.show3(data['segmentation'])
+    import pdb; pdb.set_trace()
 
     #data['segmentation'][vessels == 1] = data['slab']['porta']
     #segm = data['segmentation']
+    #pyed = py3DSeedEditor.py3DSeedEditor(vessels)
+    #pyed.show()
     print ("Select cut")
     lab = vessel_cut.cut_editor_old(data)
     l1 = 1
