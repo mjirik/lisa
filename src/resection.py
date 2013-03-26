@@ -22,57 +22,51 @@ import scipy.ndimage
 import misc
 import py3DSeedEditor
 import show3
+import vessel_cut
 
 
 def resection(data):
-    vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
+    #pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
+    #pyed.show()
+    # vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
+    vessels = data['segmentation'] == data['slab']['porta']
 # ostranění porty z více kusů, nastaví se jim hodnota liver
-    data['segmentation'][data['segmentation'] == data['slab']['porta']] = data['slab']['liver']
-    show3.show3(data['segmentation'])
+    #data['segmentation'][data['segmentation'] == data['slab']['porta']] = data['slab']['liver']
+    #show3.show3(data['segmentation'])
+    import pdb; pdb.set_trace()
 
-    data['segmentation'][vessels == 1] = data['slab']['porta']
+    #data['segmentation'][vessels == 1] = data['slab']['porta']
+    #segm = data['segmentation']
+    #pyed = py3DSeedEditor.py3DSeedEditor(vessels)
+    #pyed.show()
     print ("Select cut")
-    pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
-    pyed.show()
-    split_obj = pyed.seeds
-    vesselstmp = vessels
-
-    sumall = np.sum(vessels==1)
-
-    split_obj = scipy.ndimage.binary_dilation(split_obj, iterations = 5 )
-    vesselstmp = vessels * (1 - split_obj)
-
-    lab, n_obj = scipy.ndimage.label(vesselstmp)
-
-    #while n_obj < 2 :
-# dokud neni z celkoveho objektu ustipnuto alespon 80 procent
-    while np.sum(lab == max_area_index(lab,n_obj)) > (0.8*sumall) :
-
-        split_obj = scipy.ndimage.binary_dilation(split_obj, iterations = 5 )
-        vesselstmp = vessels * (1 - split_obj)
-    
-        lab, n_obj = scipy.ndimage.label(vesselstmp)
-    print (str(n_obj))
-    print ("np.sum(lab==3)")
-
+    lab = vessel_cut.cut_editor_old(data)
     l1 = 1
     l2 = 2
-    import pdb; pdb.set_trace()
+    #import pdb; pdb.set_trace()
 
     # dist se tady počítá od nul jenom v jedničkách
     dist1 = scipy.ndimage.distance_transform_edt(lab != l1)
     dist2 = scipy.ndimage.distance_transform_edt(lab != l2)
 
 
+
+
     #segm = (dist1 < dist2) * (data['segmentation'] != data['slab']['none'])
     segm = (((data['segmentation'] != 0) * (dist1 < dist2)).astype('int8') + (data['segmentation'] != 0).astype('int8'))
 
-    pyed = py3DSeedEditor.py3DSeedEditor(segm)
+# vizualizace 1
+#    pyed = py3DSeedEditor.py3DSeedEditor(segm)
+#    pyed.show()
+#    import pdb; pdb.set_trace()
+#    pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], contour=segm)
+#    pyed.show()
+#    import pdb; pdb.set_trace()
+
+# vizualizace 2
+    linie = np.abs(dist1 - dist2) < 1
+    pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], contour = data['segmentation']==data['slab']['liver'] ,seeds = linie)
     pyed.show()
-    import pdb; pdb.set_trace()
-    pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], contour=segm)
-    pyed.show()
-    import pdb; pdb.set_trace()
 
     #show3.show3(data['segmentation'])
     
@@ -86,7 +80,7 @@ def resection(data):
 def get_biggest_object(data):
     """ Return biggest object """
     lab, num = scipy.ndimage.label(data)
-    print ("bum = "+str(num))
+    #print ("bum = "+str(num))
     
     maxlab = max_area_index(lab, num)
 
@@ -143,10 +137,10 @@ class SectorDisplay2__:
         gtk.main()
 
 if __name__ == "__main__":
-    data = misc.obj_from_file("out", filetype = 'pickle')
-    ds = data['segmentation'] == data['slab']['liver']
-    pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
-    pyed.show()
+    data = misc.obj_from_file("vessels.pickle", filetype = 'pickle')
+    #ds = data['segmentation'] == data['slab']['liver']
+    #pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
+    #pyed.show()
     resection(data)
 
 #    SectorDisplay2__()

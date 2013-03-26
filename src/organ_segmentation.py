@@ -26,6 +26,7 @@ import numpy as np
 import scipy
 
 # ----------------- my scripts --------
+import py3DSeedEditor
 import dcmreaddata1 as dcmr
 import pycat
 import argparse
@@ -43,7 +44,18 @@ def interactive_imcrop(im):
 
 
 class OrganSegmentation():
-    def __init__(self, datadir, working_voxelsize_mm = 0.25, SeriesNumber = None, autocrop = True, autocrop_margin = [0,0,0], manualroi = False, texture_analysis=None, smoothing_mm = 5, data3d = None, metadata=None, seeds=None):
+    def __init__(self, datadir, 
+            working_voxelsize_mm = 0.25, 
+            SeriesNumber = None, 
+            autocrop = True, 
+            autocrop_margin = [0,0,0], 
+            manualroi = False, 
+            texture_analysis=None, 
+            smoothing_mm = 5, 
+            data3d = None, 
+            metadata=None, 
+            seeds=None
+            ):
         """
         datadir: path to directory with dicom files
         manualroi: manual set of ROI before data processing, there is a 
@@ -122,13 +134,29 @@ class OrganSegmentation():
     def _interactivity_end(self,igc):
 # @TODO někde v igc.interactivity() dochází k přehození nul za jedničy, 
 # tady se to řeší hackem
-        sgm = (igc.segmentation == 0)
-        self.segmentation = scipy.ndimage.zoom(sgm , 1.0/self.zoom, mode= 'nearest', order = 0)
+        sgm = (igc.segmentation == 0).astype(np.int8)
+        segm_orig_scale = scipy.ndimage.zoom(sgm , 1.0/self.zoom, mode= 'nearest', order = 0).astype(np.int8)
         #print  np.sum(self.segmentation)*np.prod(self.voxelsize_mm)
-        #if self.autocrop == None:
-        #    self.orig_scale_segmentation = igc.get_orig_shape_segmentation()
-        #else:
-        #    self.orig_scale_segmentation, self.crinfo = igc.get_orig_scale_cropped_segmentation(self.autocrop_margin)
+
+# @TODO odstranit hack pro oříznutí na stejnou velikost
+# v podstatě je to vyřešeno
+        shp =  [\
+                np.min([segm_orig_scale.shape[0],self.data3d.shape[0]]),\
+                np.min([segm_orig_scale.shape[1],self.data3d.shape[1]]),\
+                np.min([segm_orig_scale.shape[2],self.data3d.shape[2]]),\
+                ]
+        #self.data3d = self.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
+
+        self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
+        self.segmentation[0:shp[0], 0:shp[1], 0:shp[2]] = segm_orig_scale[0:shp[0], 0:shp[1], 0:shp[2]]  
+
+
+        if not self.autocrop == None:
+
+            self.crinfo = self._crinfo_from_specific_data(self.segmentation, self.autocrop_margin)
+            self.segmentation = self._crop(self.segmentation, self.crinfo)
+            self.data3d = self._crop(self.data3d, self.crinfo)
+
 
         if not self.texture_analysis == None:
             import texture_analysis
@@ -200,6 +228,47 @@ class OrganSegmentation():
     def ni_set_seeds(self, coordinates_mm, label, radius):
         pass
 
+    def _crop(self, data, crinfo):
+        """
+        Crop data with crinfo
+        """
+        data = data[crinfo[0][0]:crinfo[0][1], crinfo[1][0]:crinfo[1][1], crinfo[2][0]:crinfo[2][1]]
+        return data
+
+
+    def _crinfo_from_specific_data (self, data, margin):
+# hledáme automatický ořez, nonzero dá indexy
+        nzi = np.nonzero(data)
+
+        x1 = np.min(nzi[0]) - margin[0]
+        x2 = np.max(nzi[0]) + margin[0] + 1
+        y1 = np.min(nzi[1]) - margin[0]
+        y2 = np.max(nzi[1]) + margin[0] + 1
+        z1 = np.min(nzi[2]) - margin[0]
+        z2 = np.max(nzi[2]) + margin[0] + 1 
+
+# ošetření mezí polí
+        if x1 < 0:
+            x1 = 0
+        if y1 < 0:
+            y1 = 0
+        if z1 < 0:
+            z1 = 0
+
+        if x2 > data.shape[0]:
+            x2 = data.shape[0]-1
+        if y2 > data.shape[1]:
+            y2 = data.shape[1]-1
+        if z2 > data.shape[2]:
+            z2 = data.shape[2]-1
+
+# ořez
+        crinfo = [[x1, x2],[y1,y2],[z1,z2]]
+        #dataout = self._crop(data,crinfo)
+        #dataout = data[x1:x2, y1:y2, z1:z2]
+        return crinfo
+
+
     def im_crop(self, im,  roi_start, roi_stop):
         im_out = im[ \
                 roi_start[0]:roi_stop[0],\
@@ -225,6 +294,19 @@ class OrganSegmentation():
         #pyed.show()
 
         self.orig_scale_segmentation = 1.0 * (self.orig_scale_segmentation> 0.5)
+
+    def export(self):
+        slab={}
+        slab['none'] = 0
+        slab['liver'] = 1
+
+        data = {}
+        data['data3d'] = self.data3d
+        data['crinfo'] = self.crinfo
+        data['segmentation'] = self.segmentation
+        data['slab'] = slab
+        return data
+
 
 
         
@@ -350,21 +432,18 @@ if __name__ == "__main__":
     #volume_mm3 = np.sum(oseg.segmentation > 0) * np.prod(oseg.voxelsize_mm)
 
     print ( "Volume " + str(oseg.get_segmented_volume_size_mm3()/1000000.0) + ' [l]' )
+    
+    pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour = oseg.segmentation)
+    #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour = oseg.orig_scale_segmentation)
+    pyed.show()
 
     savestring = raw_input ('Save output data? (y/n): ')
     #sn = int(snstring)
     if savestring in ['Y','y']:
         import misc
 
-        slab={}
-        slab['none'] = 0
-        slab['liver'] = 1
+        data = oseg.export()
 
-        data = {}
-        data['data3d'] = oseg.data3d
-        data['crinfo'] = oseg.crinfo
-        data['segmentation'] = oseg.segmentation
-        data['slab'] = slab
-        misc.obj_to_file(data, "out", filetype = 'pickle')
+        misc.obj_to_file(data, "organ.pickle", filetype = 'pickle')
     #output = segmentation.vesselSegmentation(oseg.data3d, oseg.orig_segmentation)
     
