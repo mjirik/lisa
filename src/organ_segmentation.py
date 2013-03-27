@@ -54,7 +54,9 @@ class OrganSegmentation():
             smoothing_mm = 5, 
             data3d = None, 
             metadata=None, 
-            seeds=None
+            seeds=None,
+            edit_data = True
+
             ):
         """
         datadir: path to directory with dicom files
@@ -86,6 +88,7 @@ class OrganSegmentation():
         self.crinfo = [[0,-1],[0,-1],[0,-1]]
         self.texture_analysis = texture_analysis
         self.smoothing_mm = smoothing_mm
+        self.edit_data = edit_data
 
 # manualcrop
         if manualroi:
@@ -175,6 +178,9 @@ class OrganSegmentation():
         #igc.gcparams['pairwiseAlpha'] = 30
         #seeds_res = scipy.ndimage.zoom(self.seeds , self.zoom, prefilter=False, mode= 'nearest', order = 1)
         #seeds = self.seeds.astype(np.int8)
+
+        if self.edit_data:
+            self.data_editor()
         igc = self._interactivity_begin()
         igc.interactivity()
         self._interactivity_end(igc)
@@ -308,6 +314,15 @@ class OrganSegmentation():
         return data
 
 
+    def data_editor(self):
+        """
+        Funkce provádí změnu vstupních dat - data3d
+        """
+        #pyed = py3DSeedEditor.py3DSeedEditor(self.data3d, contour = oseg.segmentation)
+        #pyed.show()
+
+        import seed_editor_qt
+        seed_editor_qt.QTSeedEditor(self.data3d, mode = 'draw')
 
         
 
@@ -391,8 +406,10 @@ if __name__ == "__main__":
             help='run unittest')
     parser.add_argument('-tx', '--textureanalysis', action='store_true', 
             help='run with texture analysis')
-    parser.add_argument('-ed', '--exampledata', action='store_true', 
+    parser.add_argument('-exd', '--exampledata', action='store_true', 
             help='run unittest')
+    parser.add_argument('-ed', '--editdata', action='store_true', 
+            help='Run data editor')
     args = parser.parse_args()
 
 
@@ -414,7 +431,12 @@ if __name__ == "__main__":
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
 
 
-    oseg = OrganSegmentation(args.dcmdir, working_voxelsize_mm = args.voxelsizemm, manualroi = args.manualroi, texture_analysis = args.textureanalysis)
+    oseg = OrganSegmentation(args.dcmdir, 
+            working_voxelsize_mm = args.voxelsizemm, 
+            manualroi = args.manualroi, 
+            texture_analysis = args.textureanalysis,
+            edit_data = args.editdata
+            )
 
     oseg.interactivity()
 
@@ -433,9 +455,8 @@ if __name__ == "__main__":
 
     print ( "Volume " + str(oseg.get_segmented_volume_size_mm3()/1000000.0) + ' [l]' )
     
-    pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour = oseg.segmentation)
-    #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour = oseg.orig_scale_segmentation)
-    pyed.show()
+    #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour = oseg.segmentation)
+    #pyed.show()
 
     savestring = raw_input ('Save output data? (y/n): ')
     #sn = int(snstring)
