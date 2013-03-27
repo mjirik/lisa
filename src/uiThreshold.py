@@ -195,12 +195,35 @@ class uiThreshold:
         else:
             print('Spatny vstup.\nDimenze vstupu neni 2 ani 3.\nUkoncuji prahovani.')
 
+    def Initialization(self):
+
+        self.calculateAutomaticThreshold()
+        self.firstRun = False
+
+        self.smin.val = (numpy.round(self.threshold, 2))
+        self.smin.valtext.set_text('{}'.format(self.smin.val))
+        self.ssigma.val = (numpy.round(self.lastSigma, 2))
+        self.ssigma.valtext.set_text('{}'.format(self.ssigma.val))
+
+        self.imgChanged = (self.imgUsed > self.threshold)
+
+        ## Predani obrazku k vykresleni
+        self.im1 = self.ax1.imshow(numpy.amax(self.imgChanged, 0), self.cmap)
+        self.im2 = self.ax2.imshow(numpy.amax(self.imgChanged, 1), self.cmap)
+        self.im3 = self.ax3.imshow(numpy.amax(self.imgChanged, 2), self.cmap)
+
+        ## Minimalni pouzitelna hodnota prahovani v obrazku
+        self.min0 = numpy.amin(self.imgChanged)
+        ## Maximalni pouzitelna hodnota prahovani v obrazku
+        self.max0 = numpy.amax(self.imgChanged)
+
+        ## Prekresleni
+        self.fig.canvas.draw()
+
     def run(self):
 
         if(self.interactivity == True):
-            ## Provedeni pocatecniho gauss. filtrovani
-            self.firstRun = True
-            self.updateImgFilter(self)
+            self.Initialization()
             ## Zobrazeni plot (figure)
             matpyplot.show()
         else:
@@ -226,7 +249,14 @@ class uiThreshold:
 
         # TODO: automaticky vypocet prahu
 
-        hist, bin_edges = numpy.histogram(self.data, bins=60)
+        self.imgUsed = self.data
+
+        if(self.inputSigma >= 0):
+            sigma = float(self.inputSigma)
+            self.lastSigma = sigma
+            scipy.ndimage.filters.gaussian_filter(self.data, self.calculateSigma(sigma), 0, self.imgUsed, 'reflect', 0.0)
+
+        hist, bin_edges = numpy.histogram(self.imgUsed, bins=60)
         bin_centers = 0.5*(bin_edges[:-1] + bin_edges[1:])
 
 ##        print('bin_edges')
@@ -284,13 +314,14 @@ class uiThreshold:
         self.threshold = (bin_centers[mark - 1] + bin_centers[mark]
                             + bin_centers[mark + 1]) / 3.0
         print('Zjisten threshold: ' + str(self.threshold))
-
         print('====================================')
+        print('!- ANO, jeste to porad nefunguje => pracuje se na tom ;-)')
 
-        matpyplot.figure(figsize = (11, 4))
-        matpyplot.plot(bin_centers, hist, lw = 2)
-        matpyplot.axvline(self.threshold, color = 'r', ls = '--', lw = 2)
-        matpyplot.show()
+        if(self.interactivity == False):
+            matpyplot.figure(figsize = (11, 4))
+            matpyplot.plot(bin_centers, hist, lw = 2)
+            matpyplot.axvline(self.threshold, color = 'r', ls = '--', lw = 2)
+            matpyplot.show()
 
         garbage.collect()
 

@@ -79,7 +79,7 @@ if __name__ == "__main__":
     #else:
     #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
-    
+
     if args.inputfile == None:
         oseg = organ_segmentation.OrganSegmentation(args.dcmdir, working_voxelsize_mm = 6, autocrop = True, autocrop_margin = [5,5,5])
         oseg.interactivity()
@@ -112,7 +112,7 @@ if __name__ == "__main__":
         nObj = 1,
         dataFiltering = True,
         interactivity = True,
-        binaryClosingIterations = 1,
+        binaryClosingIterations = 5,
         binaryOpeningIterations = 1)
 
     # Uvolneni pameti

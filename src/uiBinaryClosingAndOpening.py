@@ -53,12 +53,17 @@ class uiBinaryClosingAndOpening:
 
         print('Spoustim binarni otevreni a uzavreni dat...')
 
+        if(binaryClosingIterations >= 1 or binaryOpeningIterations >= 1):
+            self.interactivity = False
+        else:
+            self.interactivity = interactivity
+
         inputDimension = numpy.ndim(data)
         self.cmap = cmap
         self.imgUsed = data
         self.imgChanged = self.imgUsed
         self.imgChanged1 = self.imgUsed
-        self.interactivity = interactivity
+
         if(self.interactivity == False):
             self.binaryClosingIterations = binaryClosingIterations
             self.binaryOpeningIterations = binaryOpeningIterations
