@@ -180,7 +180,7 @@ class OrganSegmentation():
         #seeds = self.seeds.astype(np.int8)
 
         if self.edit_data:
-            self.data_editor()
+            self.data3d = self.data_editor(self.data3d)
         igc = self._interactivity_begin()
         igc.interactivity()
         self._interactivity_end(igc)
@@ -314,15 +314,46 @@ class OrganSegmentation():
         return data
 
 
-    def data_editor(self):
+    def data_editor(self, im3d, cval = 0):
         """
         Funkce provádí změnu vstupních dat - data3d
+        cval: hodnota, na kterou se nastaví "vymazaná" data
         """
-        #pyed = py3DSeedEditor.py3DSeedEditor(self.data3d, contour = oseg.segmentation)
-        #pyed.show()
 
-        import seed_editor_qt
-        seed_editor_qt.QTSeedEditor(self.data3d, mode = 'draw')
+
+        from seed_editor_qt import QTSeedEditor
+        from PyQt4.QtGui import QApplication
+        import numpy as np
+#, QMainWindow
+        print ("Select voxels for deletion")
+        app = QApplication(sys.argv)
+        pyed = QTSeedEditor(im3d, mode='draw')
+        pyed.exec_()
+
+
+        deletemask = pyed.getSeeds()
+        #import pdb; pdb.set_trace()
+
+        
+        #pyed = QTSeedEditor(deletemask, mode='draw')
+        #pyed.exec_()
+
+        app.exit()
+        #pyed.exit()
+        del app
+        del pyed
+
+        im3d[deletemask != 0] = cval
+        #print ("Check output")
+        # rewrite input data
+        #pyed = QTSeedEditor(im3d)
+        #pyed.exec_()
+
+        #el pyed
+        
+        #import pdb; pdb.set_trace()
+
+        return im3d
 
         
 
@@ -379,7 +410,7 @@ class Tests(unittest.TestCase):
         #igc.show_segmentation()
 
 
-if __name__ == "__main__":
+def main():
 
     #logger = logging.getLogger(__name__)
     logger = logging.getLogger()
@@ -468,3 +499,6 @@ if __name__ == "__main__":
         misc.obj_to_file(data, "organ.pickle", filetype = 'pickle')
     #output = segmentation.vesselSegmentation(oseg.data3d, oseg.orig_segmentation)
     
+
+if __name__ == "__main__":
+    main()
