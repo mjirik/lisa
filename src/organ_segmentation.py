@@ -55,7 +55,7 @@ class OrganSegmentation():
             data3d = None, 
             metadata=None, 
             seeds=None,
-            edit_data = True
+            edit_data = False
 
             ):
         """
@@ -80,8 +80,10 @@ class OrganSegmentation():
             self.data3d = data3d
             self.metadata = metadata
 
-
-        self.seeds = seeds
+        if seeds == None:
+            self.seeds = np.zeros(self.data3d.shape)
+        else:
+            self.seeds = seeds
         self.voxelsize_mm = self.metadata['voxelsizemm']
         self.autocrop = autocrop
         self.autocrop_margin = autocrop_margin
@@ -135,10 +137,7 @@ class OrganSegmentation():
         return igc
 
     def _interactivity_end(self,igc):
-# @TODO někde v igc.interactivity() dochází k přehození nul za jedničy, 
-# tady se to řeší hackem
-        sgm = (igc.segmentation == 0).astype(np.int8)
-        segm_orig_scale = scipy.ndimage.zoom(sgm , 1.0/self.zoom, mode= 'nearest', order = 0).astype(np.int8)
+        segm_orig_scale = scipy.ndimage.zoom(self.segmentation , 1.0/self.zoom, mode= 'nearest', order = 0).astype(np.int8)
         #print  np.sum(self.segmentation)*np.prod(self.voxelsize_mm)
 
 # @TODO odstranit hack pro oříznutí na stejnou velikost
@@ -183,6 +182,10 @@ class OrganSegmentation():
             self.data3d = self.data_editor(self.data3d)
         igc = self._interactivity_begin()
         igc.interactivity()
+# @TODO někde v igc.interactivity() dochází k přehození nul za jedničy, 
+# tady se to řeší hackem
+        self.segmentation = (igc.segmentation == 0).astype(np.int8)
+
         self._interactivity_end(igc)
         #igc.make_gc()
         #igc.show_segmentation()
@@ -201,6 +204,7 @@ class OrganSegmentation():
         igc = self._interactivity_begin()
         #igc.interactivity()
         igc.make_gc()
+        self.segmentation = (igc.segmentation == 0).astype(np.int8)
         self._interactivity_end(igc)
         #igc.show_segmentation()
 
@@ -230,11 +234,53 @@ class OrganSegmentation():
         pass
 
 
-    def ni_set_roi(self, roi_mm):
+    def set_roi_mm(self, roi_mm):
         pass
 
 
-    def ni_set_seeds(self, coordinates_mm, label, radius):
+    def add_seeds_mm(self, x_mm, y_mm, z_mm, label, radius):
+
+        x_mm = np.array(x_mm)
+        y_mm = np.array(y_mm)
+        z_mm = np.array(z_mm)
+
+        for i in range(0,len(x_mm)):
+
+# xx and yy are 200x200 tables containing the x and y coordinates as values
+# mgrid is a mesh creation helper
+            xx, yy = np.mgrid[:self.seeds.shape[0], :self.seeds.shape[1]]
+# circles contains the squared distance to the (100, 100) point
+# we are just using the circle equation learnt at school
+            circle = (
+                    (xx - x_mm[i]/self.voxelsize_mm[0]) ** 2 + 
+                    (yy - y_mm[i]/self.voxelsize_mm[1]) ** 2)**(0.5)
+# donuts contains 1's and 0's organized in a donut shape
+# you apply 2 thresholds on circle to define the shape
+            # slice jen s jednim kruhem
+            slicecircle =  circle < (radius)
+            slicen = int(z_mm/self.voxelsize_mm[2])
+            # slice s tim co už je v něm nastaveno
+            slicetmp = self.seeds[:,:, slicen ]
+            #import pdb; pdb.set_trace()
+
+            slicetmp[slicecircle == 1] = label
+
+            self.seeds[:,:,slicen]  = slicetmp 
+
+#, QMainWindow
+            #import py3DSeedEditor
+            #rr=py3DSeedEditor.py3DSeedEditor(self.seeds); rr.show()
+
+            #from seed_editor_qt import QTSeedEditor
+            #from PyQt4.QtGui import QApplication
+            #app = QApplication(sys.argv)
+            #pyed = QTSeedEditor(circle)
+            #pyed.exec_()
+
+
+
+            #app.exit()
+            #tmpslice = #np.logical_and(circle < (6400 + 60), circle > (6400 - 60))
         pass
 
     def _crop(self, data, crinfo):
@@ -436,7 +482,9 @@ def main():
             help='run in debug mode')
     parser.add_argument('-vs', '--voxelsizemm',default = '3', type = str,
             help='Insert working voxelsize. It can be number or \
-            array of three numbers ')
+            array of three numbers. \n \
+            -vs 3 \n \
+            -vs [3,3,5]')
     parser.add_argument('-mroi', '--manualroi', action='store_true',
             help='manual crop before data processing')
     parser.add_argument('-t', '--tests', action='store_true', 
