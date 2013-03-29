@@ -188,6 +188,9 @@ class OrganSegmentation():
         #igc.show_segmentation()
 
     def ninteractivity(self):
+        """
+        Function for automatic (noninteractiv) mode.
+        """
         
         #import pdb; pdb.set_trace()
 # Staré volání
@@ -305,12 +308,14 @@ class OrganSegmentation():
         slab={}
         slab['none'] = 0
         slab['liver'] = 1
+        slab['lesions'] = 6
 
         data = {}
         data['data3d'] = self.data3d
         data['crinfo'] = self.crinfo
         data['segmentation'] = self.segmentation
         data['slab'] = slab
+        #import pdb; pdb.set_trace()
         return data
 
 
@@ -429,8 +434,9 @@ def main():
             help='path to data dir')
     parser.add_argument('-d', '--debug', action='store_true',
             help='run in debug mode')
-    parser.add_argument('-vs', '--voxelsizemm',default = 5, type = float,
-            help='Insert working voxelsize ')
+    parser.add_argument('-vs', '--voxelsizemm',default = '3', type = str,
+            help='Insert working voxelsize. It can be number or \
+            array of three numbers ')
     parser.add_argument('-mroi', '--manualroi', action='store_true',
             help='manual crop before data processing')
     parser.add_argument('-t', '--tests', action='store_true', 
@@ -442,6 +448,9 @@ def main():
     parser.add_argument('-ed', '--editdata', action='store_true', 
             help='Run data editor')
     args = parser.parse_args()
+
+    # voxelsizemm can be number or array
+    args.voxelsizemm = np.array(eval(args.voxelsizemm))
 
 
     if args.debug:
