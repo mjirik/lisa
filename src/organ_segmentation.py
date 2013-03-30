@@ -51,6 +51,7 @@ class OrganSegmentation():
             autocrop_margin = [0,0,0], 
             manualroi = False, 
             texture_analysis=None, 
+            smoothing = True,
             smoothing_mm = 5, 
             data3d = None, 
             metadata=None, 
@@ -89,6 +90,7 @@ class OrganSegmentation():
         self.autocrop_margin = autocrop_margin
         self.crinfo = [[0,-1],[0,-1],[0,-1]]
         self.texture_analysis = texture_analysis
+        self.smoothing = smoothing
         self.smoothing_mm = smoothing_mm
         self.edit_data = edit_data
 
@@ -151,6 +153,9 @@ class OrganSegmentation():
 
         self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
         self.segmentation[0:shp[0], 0:shp[1], 0:shp[2]] = segm_orig_scale[0:shp[0], 0:shp[1], 0:shp[2]]  
+
+        if self.smoothing:
+            self.segmentation_smoothing(self.smoothing_mm)
 
 
         if not self.autocrop == None:
@@ -340,7 +345,7 @@ class OrganSegmentation():
                 ]
         return  im_out
     
-    def segmentation_smoothing(self, sigma_mm):
+    def segmentation_smoothing(self, sigma_mm ):
         """
         shape of output segmentation is smoothed with gaussian filter. Sigma 
         is computed in mm
@@ -350,13 +355,13 @@ class OrganSegmentation():
 
         #print sigma
         #import pdb; pdb.set_trace()
-        self.orig_scale_segmentation = scipy.ndimage.filters.gaussian_filter(\
-                self.orig_scale_segmentation.astype(float), sigma)
+        self.segmentation = scipy.ndimage.filters.gaussian_filter(\
+                self.segmentation.astype(float), sigma)
         #import pdb; pdb.set_trace()
         #pyed = py3DSeedEditor.py3DSeedEditor(self.orig_scale_segmentation)
         #pyed.show()
 
-        self.orig_scale_segmentation = 1.0 * (self.orig_scale_segmentation> 0.5)
+        self.segmentation = (1.0 * (self.segmentation> 0.5)).astype(np.int8)
 
     def export(self):
         slab={}
@@ -415,6 +420,29 @@ class OrganSegmentation():
 
         return im3d
 
+
+    def show_output(self):
+        """
+        Run viewer with output data3d and segmentation
+        """
+
+        from seed_editor_qt import QTSeedEditor
+        from PyQt4.QtGui import QApplication
+        import numpy as np
+#, QMainWindow
+        print ("Select voxels for deletion")
+        app = QApplication(sys.argv)
+        pyed = QTSeedEditor(self.data3d, contours=self.segmentation)
+        pyed.exec_()
+
+
+        #import pdb; pdb.set_trace()
+
+        
+        #pyed = QTSeedEditor(deletemask, mode='draw')
+        #pyed.exec_()
+
+        app.exit()
         
 
 
@@ -504,6 +532,8 @@ def main():
             help='run unittest')
     parser.add_argument('-ed', '--editdata', action='store_true', 
             help='Run data editor')
+    parser.add_argument('-so', '--show_output', action='store_true', 
+            help='Show output data in viewer')
     args = parser.parse_args()
 
     # voxelsizemm can be number or array
@@ -554,6 +584,9 @@ def main():
     
     #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour = oseg.segmentation)
     #pyed.show()
+
+    if args.show_output:
+        oseg.show_output()
 
     savestring = raw_input ('Save output data? (y/n): ')
     #sn = int(snstring)
