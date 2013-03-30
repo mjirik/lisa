@@ -239,6 +239,14 @@ class OrganSegmentation():
 
 
     def add_seeds_mm(self, x_mm, y_mm, z_mm, label, radius):
+        """
+        Function add circle seeds to one slice with defined radius.
+
+        x_mm, y_mm coordinates of circle in mm. It may be array.
+        z_mm = slice coordinates  in mm. It may be array
+        label: one number. 1 is object seed, 2 is background seed 
+        radius: is radius of circle in mm
+        """
 
         x_mm = np.array(x_mm)
         y_mm = np.array(y_mm)
@@ -357,6 +365,7 @@ class OrganSegmentation():
         slab['lesions'] = 6
 
         data = {}
+        data['version'] = (1,0,0)
         data['data3d'] = self.data3d
         data['crinfo'] = self.crinfo
         data['segmentation'] = self.segmentation
