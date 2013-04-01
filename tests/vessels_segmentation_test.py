@@ -38,7 +38,7 @@ class VesselsSegmentationTest(unittest.TestCase):
         """
         #dcmdir = os.path.join(path_to_script,'./../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
 # data
-        slab = {'None':0, 'liver':1, 'porta':2}
+        slab = {'none':0, 'liver':1, 'porta':2}
         voxelsize_mm = np.array([1.0,1.0,1.2])
 
         segm = np.zeros([256,256,80], dtype=np.int16)
