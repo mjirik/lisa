@@ -356,7 +356,7 @@ class uiThreshold:
     def calculateSigma(self, input):
 
         if ( self.voxel[0] == self.voxel[1] == self.voxel[2] ):
-            return ((5 / self.voxel[0][0]) * input) / self.voxelV
+            return ((5 / self.voxel[0]) * input) / self.voxelV
         else:
             sigmaX = (5.0 / self.voxel[0]) * input
             sigmaY = (5.0 / self.voxel[1]) * input
