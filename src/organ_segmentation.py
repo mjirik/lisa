@@ -376,6 +376,7 @@ class OrganSegmentation():
         data['crinfo'] = self.crinfo
         data['segmentation'] = self.segmentation
         data['slab'] = slab
+        data['voxelsize_mm'] = self.voxelsize_mm
         #import pdb; pdb.set_trace()
         return data
 
