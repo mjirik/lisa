@@ -48,11 +48,11 @@ class OrganSegmentation():
             working_voxelsize_mm = 0.25, 
             SeriesNumber = None, 
             autocrop = True, 
-            autocrop_margin = [0,0,0], 
+            autocrop_margin_mm = [10,10,10], 
             manualroi = False, 
             texture_analysis=None, 
             smoothing = True,
-            smoothing_mm = 5, 
+            smoothing_mm = 4, 
             data3d = None, 
             metadata=None, 
             seeds=None,
@@ -85,9 +85,10 @@ class OrganSegmentation():
             self.seeds = np.zeros(self.data3d.shape)
         else:
             self.seeds = seeds
-        self.voxelsize_mm = self.metadata['voxelsizemm']
+        self.voxelsize_mm = np.array(self.metadata['voxelsizemm'])
         self.autocrop = autocrop
-        self.autocrop_margin = autocrop_margin
+        self.autocrop_margin_mm = np.array(autocrop_margin_mm)
+        self.autocrop_margin = self.autocrop_margin_mm/self.voxelsize_mm
         self.crinfo = [[0,-1],[0,-1],[0,-1]]
         self.texture_analysis = texture_analysis
         self.smoothing = smoothing
