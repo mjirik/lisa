@@ -357,7 +357,7 @@ class OrganSegmentation():
         #print sigma
         #import pdb; pdb.set_trace()
         self.segmentation = scipy.ndimage.filters.gaussian_filter(\
-                self.segmentation.astype(float), sigma)
+                self.segmentation.astype(np.float32), sigma)
         #import pdb; pdb.set_trace()
         #pyed = py3DSeedEditor.py3DSeedEditor(self.orig_scale_segmentation)
         #pyed.show()
@@ -536,6 +536,8 @@ def main():
             help='Run data editor')
     parser.add_argument('-so', '--show_output', action='store_true', 
             help='Show output data in viewer')
+    parser.add_argument('-ss', '--segmentation_smoothing', action='store_true', 
+            help='Smoothing of output segmentation', default=False)
     args = parser.parse_args()
 
     # voxelsizemm can be number or array
@@ -564,7 +566,8 @@ def main():
             working_voxelsize_mm = args.voxelsizemm, 
             manualroi = args.manualroi, 
             texture_analysis = args.textureanalysis,
-            edit_data = args.editdata
+            edit_data = args.editdata,
+            smoothing = args.segmentation_smoothing
             )
 
     oseg.interactivity()
