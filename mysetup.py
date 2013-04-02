@@ -3,6 +3,11 @@ import zipfile
 import subprocess
 import sys
 
+import logging
+logger = logging.getLogger(__name__)
+
+import argparse
+
 if sys.version_info < (3,0):
     import urllib as urllibr
 else:
@@ -104,14 +109,7 @@ def windows_install():
     
     
 
-    # instalace msys gitu
-    print ("MSYS Git install")
-    #import pdb; pdb.set_trace()
-    download_and_run(url = urlmsysgit, local_file_name = './tmp/msysgit.exe' )
 
-    # install MinGW
-    print ("MinGW install")
-    download_and_run(url = urlmingw, local_file_name = './tmp/mingw.exe')
 
 
     # install distribute and pip
@@ -150,6 +148,18 @@ def windows_install():
     subprocess.call(pythondir + "Scripts/pip.exe install pydicom", cwd="./tmp/")
     subprocess.call(pythondir + "Scripts/pip.exe install pyyaml", cwd="./tmp/")
     
+def windows_get_git():
+
+    # instalace msys gitu
+    print ("MSYS Git install")
+    #import pdb; pdb.set_trace()
+    download_and_run(url = urlmsysgit, local_file_name = './tmp/msysgit.exe' )
+
+
+def windows_build_gco():
+    # install MinGW
+    print ("MinGW install")
+    download_and_run(url = urlmingw, local_file_name = './tmp/mingw.exe')
 
     # install gco_python
     print ("gco_python install")
@@ -193,36 +203,92 @@ def windows_install():
 
     #subprocess.call('envinstall\envwindows.bat')
 
+def get_sample_data():
+# download sample data
+    print('Downloading sample data')
+
+    try:
+        os.mkdir('sample_data')
+    except:
+        pass
+
+    url =  "http://www.mathworks.com/matlabcentral/fileexchange/2762-dicom-example-files?download=true"
+
+    local_file_name = './sample_data/head.zip'
+
+    urllibr.urlretrieve(url, local_file_name)
+
+    datafile = zipfile.ZipFile(local_file_name)
+    datafile.setpassword('queetech')
+    datafile.extractall('./sample_data/')
+
+# get jatra_06mm_jenjatra
+
+    url = "http://147.228.240.61/queetech/sample-data/jatra_06mm_jenjatra.zip"
+    local_file_name = './sample_data/jatra_06mm_jenjatra.zip'
+
+    urllibr.urlretrieve(url, local_file_name)
+
+    datafile = zipfile.ZipFile(local_file_name)
+    datafile.extractall('./sample_data/')
+
+def windows_get_gco():
+    url = "http://147.228.240.61/queetech/install/pygco-py27-32bit/pygco.pyd"
+
+    local_file_name = "C:\python27\Lib\site-packages\pygco.pyd"
+    urllibr.urlretrieve(url, local_file_name)
+
+
 def download_and_run(url, local_file_name):
     urllibr.urlretrieve(url, local_file_name)
     subprocess.call(local_file_name)
 
 
 
+def main():
+    logger = logging.getLogger()
 
-# download sample data
-print('Downloading sample data')
+    logger.setLevel(logging.WARNING)
+    ch = logging.StreamHandler()
+    logger.addHandler(ch)
 
-try:
-    os.mkdir('sample_data')
-except:
-    pass
+    #logger.debug('input params')
 
-url =  "http://www.mathworks.com/matlabcentral/fileexchange/2762-dicom-example-files?download=true"
+    # input parser
+    parser = argparse.ArgumentParser(description=
+            'Segment vessels from liver \n \npython organ_segmentation.py\n \n python organ_segmentation.py -mroi -vs 0.6')
+    parser.add_argument('-d','--get_sample_data', action='store_true',
+            default=False,
+            help='Get sample data')
+    parser.add_argument('-i','--install', action='store_true',
+            default=False,
+            help='Install')
+    parser.add_argument('--build_gco', action='store_true',
+            default = False, help='Build gco_python in windows. Problematic step.')
+    args = parser.parse_args()
 
-local_file_name = './sample_data/head.zip'
-
-urllibr.urlretrieve(url, local_file_name)
-
-datafile = zipfile.ZipFile(local_file_name)
-datafile.extractall('./sample_data/')
-
-print('Installing system environment')
-if sys.platform.startswith('linux'):
+    if args.get_sample_data == False and args.install == False and args.build_gco == false:
+# default setup is install and get sample data
+        args.get_sample_data = True
+        args.install == True 
+        args.build_gco = False
     
-    subprocess.call('./envinstall/envubuntu.sh')
-    submodule_update()
-elif sys.platform.startswith('win'):
-    windows_install()
-    submodule_update()
+    if args.get_sample_data:
+        get_sample_data()
+    if args.install:
+        print('Installing system environment')
+        if sys.platform.startswith('linux'):
+            
+            subprocess.call('./envinstall/envubuntu.sh')
+            submodule_update()
+        elif sys.platform.startswith('win'):
+            windows_install()
+            if args.build_gco:
+                windows_build_gco()
+            else:
+                windows_get_gco()
+            windows_get_git()
+            submodule_update()
                         
+if __name__ == "__main__":
+    main()
