@@ -76,7 +76,7 @@ class LesionsTest(unittest.TestCase):
 
         tumory.import_data(data)
         tumory.automatic_localization()
-        tumory.visualization()
+        #tumory.visualization()
          
 
 
