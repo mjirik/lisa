@@ -26,12 +26,11 @@ class ExperimentsTest(unittest.TestCase):
     def test_get_subdirs(self):
         dirlist = experiments.get_subdirs(os.path.join(path_to_script, ".."))
 
+        self.assertTrue('tests' in dirlist)
+        self.assertTrue('extern' in dirlist)
+        self.assertTrue('src' in dirlist)
+        self.assertFalse('README.md' in dirlist)
 
-
-        import pdb; pdb.set_trace()
-        errorrate = 0
-
-        self.assertLess(errorrate,0.1)
 
 
 
