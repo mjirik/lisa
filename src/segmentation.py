@@ -58,68 +58,60 @@ Vessel segmentation z jater.
         ---
 """
 def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsizemm = [[1],[1],[1]], inputSigma = -1,
-dilationIterations = 0, dilationStructure = None, nObj = 0, dataFiltering = True,
+dilationIterations = 0, dilationStructure = None, nObj = 1, dataFiltering = True,
 interactivity = True, binaryClosingIterations = 0, binaryOpeningIterations = 0):
 
     print('Pripravuji data...')
 
+    ## Pokud jsou data nefiltrovana, tak nasleduje filtrovani.
     if(dataFiltering):
         voxel = voxelsizemm
 
-        ## Kalkulace objemove jednotky (voxel) (V = a*b*c)
+        ## Kalkulace objemove jednotky (voxel) (V = a*b*c).
         voxel1 = voxel[0][0]
         voxel2 = voxel[1][0]
         voxel3 = voxel[2][0]
         voxelV = voxel1 * voxel2 * voxel3
 
-        ## number je zaokrohleny 2x nasobek objemove jednotky na 2 desetinna mista
-        ## number stanovi doporucenou horni hranici parametru gauss. filtru
-        number = (numpy.round((2 * voxelV), 2))
+        ## number je zaokrohleny 2x nasobek objemove jednotky na 2 desetinna mista.
+        ## number stanovi doporucenou horni hranici parametru gauss. filtru.
+        number = (numpy.round((2 * voxelV**(1.0/3.0)), 2))
 
-        ## Operace dilatace (dilation) nad samotnymi jatry ("segmentation")
+        ## Operace dilatace (dilation) nad samotnymi jatry ("segmentation").
         if(dilationIterations > 0.0):
             segmentation = scipy.ndimage.binary_dilation(input = segmentation,
                 structure = dilationStructure, iterations = dilationIterations)
 
         ## Ziskani datove oblasti jater (bud pouze jater nebo i jejich okoli - zalezi,
-        ## jakym zpusobem bylo nalozeno s operaci dilatace dat)
+        ## jakym zpusobem bylo nalozeno s operaci dilatace dat).
         preparedData = data * (segmentation == 1)
         del(data)
         del(segmentation)
 
-        ## Filtrovani (rozmazani) a prahovani dat
+        ## Filtrovani (rozmazani) a prahovani dat.
         if(inputSigma == -1):
             inputSigma = number
         if(inputSigma > number):
             inputSigma = number
-        uiT = uiThreshold.uiThreshold(preparedData, voxel, threshold, interactivity, number, inputSigma)
+        uiT = uiThreshold.uiThreshold(preparedData, voxel, threshold, interactivity, number, inputSigma, nObj)
         filteredData = uiT.run()
         del(uiT)
         garbage.collect()
 
-        ## Binarni otevreni a uzavreni
-        uiB = uiBinaryClosingAndOpening.uiBinaryClosingAndOpening(filteredData, binaryClosingIterations,
-            binaryOpeningIterations, interactivity)
-        output = uiB.run()
-        del(uiB)
-        garbage.collect()
+    ## Binarni otevreni a uzavreni.
+    uiB = uiBinaryClosingAndOpening.uiBinaryClosingAndOpening(filteredData, binaryClosingIterations,
+        binaryOpeningIterations, interactivity)
+    output = uiB.run()
+    del(uiB)
+    garbage.collect()
 
-    else:
-        ## Binarni otevreni a uzavreni
-        uiB = uiBinaryClosingAndOpening.uiBinaryClosingAndOpening(filteredData, binaryClosingIterations,
-            binaryOpeningIterations, interactivity)
-        output = uiB.run()
-        del(uiB)
-        garbage.collect()
 
-    ## Operace zjisteni poctu N nejvetsich objektu a jejich nasledne vraceni
-    if(nObj > 0):
+    ## Vraceni matice
+    if(dataFiltering == False):
+        ## Data vstoupila jiz filtrovana, tudiz neprosly nalezenim nejvetsich objektu.
         return getBiggestObjects(data = output, N = nObj)
-    elif(nObj == 0):
-        return output
-    elif(nObj < 0):
-        print('Chyba! Chcete vracet zaporny pocet objektu, coz neni mozne!')
-        print('Nasleduje vraceni vsech vami upravenych dat (vsech objektu)!')
+    else:
+        ## Data vstoupila nefiltrovana, tudiz jiz prosly nalezenim nejvetsich objektu.
         return output
 
 """
@@ -133,36 +125,37 @@ Vraceni N nejvetsich objektu.
 """
 def getBiggestObjects(data, N):
 
-    print('Zjistuji nejvetsi objekty...')
-
-    ## Oznaceni dat
-    ## labels - oznacena data
-    ## length - pocet rozdilnych oznaceni
+    ## Oznaceni dat.
+    ## labels - oznacena data.
+    ## length - pocet rozdilnych oznaceni.
     labels, length = scipy.ndimage.label(data)
 
-    ## Podminka mnozstvi objektu
-    maxN = 100
+    ## Podminka mnozstvi objektu.
+    maxN = 250
     if(length > maxN):
-        print('Existuje prilis mnoho objektu! (' + str(length) + ')')
-        print('Maximalne povoleno ' + str(maxN) + ' objektu!')
-        print('Prestavam vyhledavat nejvetsi objekty!')
-        return data
+        print('Varovani: Existuje prilis mnoho objektu! (' + str(length) + ')')
 
-    ## Soucet oznaceni z dat
+    ## Soucet oznaceni z dat.
     arrayLabelsSum, arrayLabels = areaIndexes(labels, length)
 
-    ## Serazeni poli pro vyber nejvetsich objektu
-    ## Pole arrayLabelsSum je serazeno od nejvetsi k nejmensi cetnosti
-    ## Pole arrayLabels odpovida prislusnym oznacenim podle pole arrayLabelsSum
+    ## Serazeni poli pro vyber nejvetsich objektu.
+    ## Pole arrayLabelsSum je serazeno od nejvetsi k nejmensi cetnosti.
+    ## Pole arrayLabels odpovida prislusnym oznacenim podle pole arrayLabelsSum.
     arrayLabelsSum, arrayLabels = selectSort(list1 = arrayLabelsSum, list2 = arrayLabels)
 
-    ## Osetreni neocekavane situace
+    ## Osetreni neocekavane situace.
     if(N > len(arrayLabels)):
         print('Pocet nejvetsich objektu k vraceni chcete vetsi nez je oznacenych oblasti!')
         print('Redukuji pocet nejvetsich objektu k vraceni...')
         N = len(arrayLabels)
 
-    ## Upraveni dat (ziskani N nejvetsich objektu)
+    for index1 in range(0, len(arrayLabelsSum)):
+        print(str(arrayLabels[index1]) + " " + str(arrayLabelsSum[index1]))
+
+    return data == 1
+
+"""
+    ## Upraveni dat (ziskani N nejvetsich objektu).
     search = N
     if (sys.version_info[0] < 3):
         import copy
@@ -179,18 +172,14 @@ def getBiggestObjects(data, N):
             if search <= 0:
                 break
 
-    ## Priprava vystupu
-    output = data - newData
-
     ## Uvolneni pameti
-    del(data)
-    del(newData)
     del(labels)
     del(arrayLabels)
     del(arrayLabelsSum)
     garbage.collect()
 
-    return output
+    return data - newData - 1
+"""
 
 """
 Zjisti cetnosti jednotlivych oznacenych ploch (labeled areas)
