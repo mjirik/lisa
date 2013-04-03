@@ -48,13 +48,16 @@ class OrganSegmentation():
             working_voxelsize_mm = 0.25, 
             SeriesNumber = None, 
             autocrop = True, 
-            autocrop_margin = [0,0,0], 
+            autocrop_margin_mm = [10,10,10], 
             manualroi = False, 
             texture_analysis=None, 
-            smoothing_mm = 5, 
+            smoothing = True,
+            smoothing_mm = 4, 
             data3d = None, 
             metadata=None, 
-            seeds=None
+            seeds=None,
+            edit_data = False
+
             ):
         """
         datadir: path to directory with dicom files
@@ -78,14 +81,19 @@ class OrganSegmentation():
             self.data3d = data3d
             self.metadata = metadata
 
-
-        self.seeds = seeds
-        self.voxelsize_mm = self.metadata['voxelsizemm']
+        if seeds == None:
+            self.seeds = np.zeros(self.data3d.shape)
+        else:
+            self.seeds = seeds
+        self.voxelsize_mm = np.array(self.metadata['voxelsizemm'])
         self.autocrop = autocrop
-        self.autocrop_margin = autocrop_margin
+        self.autocrop_margin_mm = np.array(autocrop_margin_mm)
+        self.autocrop_margin = self.autocrop_margin_mm/self.voxelsize_mm
         self.crinfo = [[0,-1],[0,-1],[0,-1]]
         self.texture_analysis = texture_analysis
+        self.smoothing = smoothing
         self.smoothing_mm = smoothing_mm
+        self.edit_data = edit_data
 
 # manualcrop
         if manualroi:
@@ -132,10 +140,7 @@ class OrganSegmentation():
         return igc
 
     def _interactivity_end(self,igc):
-# @TODO někde v igc.interactivity() dochází k přehození nul za jedničy, 
-# tady se to řeší hackem
-        sgm = (igc.segmentation == 0).astype(np.int8)
-        segm_orig_scale = scipy.ndimage.zoom(sgm , 1.0/self.zoom, mode= 'nearest', order = 0).astype(np.int8)
+        segm_orig_scale = scipy.ndimage.zoom(self.segmentation , 1.0/self.zoom, mode= 'nearest', order = 0).astype(np.int8)
         #print  np.sum(self.segmentation)*np.prod(self.voxelsize_mm)
 
 # @TODO odstranit hack pro oříznutí na stejnou velikost
@@ -149,6 +154,9 @@ class OrganSegmentation():
 
         self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
         self.segmentation[0:shp[0], 0:shp[1], 0:shp[2]] = segm_orig_scale[0:shp[0], 0:shp[1], 0:shp[2]]  
+
+        if self.smoothing:
+            self.segmentation_smoothing(self.smoothing_mm)
 
 
         if not self.autocrop == None:
@@ -175,13 +183,23 @@ class OrganSegmentation():
         #igc.gcparams['pairwiseAlpha'] = 30
         #seeds_res = scipy.ndimage.zoom(self.seeds , self.zoom, prefilter=False, mode= 'nearest', order = 1)
         #seeds = self.seeds.astype(np.int8)
+
+        if self.edit_data:
+            self.data3d = self.data_editor(self.data3d)
         igc = self._interactivity_begin()
         igc.interactivity()
+# @TODO někde v igc.interactivity() dochází k přehození nul za jedničy, 
+# tady se to řeší hackem
+        self.segmentation = (igc.segmentation == 0).astype(np.int8)
+
         self._interactivity_end(igc)
         #igc.make_gc()
         #igc.show_segmentation()
 
     def ninteractivity(self):
+        """
+        Function for automatic (noninteractiv) mode.
+        """
         
         #import pdb; pdb.set_trace()
 # Staré volání
@@ -192,6 +210,7 @@ class OrganSegmentation():
         igc = self._interactivity_begin()
         #igc.interactivity()
         igc.make_gc()
+        self.segmentation = (igc.segmentation == 0).astype(np.int8)
         self._interactivity_end(igc)
         #igc.show_segmentation()
 
@@ -221,11 +240,61 @@ class OrganSegmentation():
         pass
 
 
-    def ni_set_roi(self, roi_mm):
+    def set_roi_mm(self, roi_mm):
         pass
 
 
-    def ni_set_seeds(self, coordinates_mm, label, radius):
+    def add_seeds_mm(self, x_mm, y_mm, z_mm, label, radius):
+        """
+        Function add circle seeds to one slice with defined radius.
+
+        x_mm, y_mm coordinates of circle in mm. It may be array.
+        z_mm = slice coordinates  in mm. It may be array
+        label: one number. 1 is object seed, 2 is background seed 
+        radius: is radius of circle in mm
+        """
+
+        x_mm = np.array(x_mm)
+        y_mm = np.array(y_mm)
+        z_mm = np.array(z_mm)
+
+        for i in range(0,len(x_mm)):
+
+# xx and yy are 200x200 tables containing the x and y coordinates as values
+# mgrid is a mesh creation helper
+            xx, yy = np.mgrid[:self.seeds.shape[0], :self.seeds.shape[1]]
+# circles contains the squared distance to the (100, 100) point
+# we are just using the circle equation learnt at school
+            circle = (
+                    (xx - x_mm[i]/self.voxelsize_mm[0]) ** 2 + 
+                    (yy - y_mm[i]/self.voxelsize_mm[1]) ** 2)**(0.5)
+# donuts contains 1's and 0's organized in a donut shape
+# you apply 2 thresholds on circle to define the shape
+            # slice jen s jednim kruhem
+            slicecircle =  circle < (radius)
+            slicen = int(z_mm/self.voxelsize_mm[2])
+            # slice s tim co už je v něm nastaveno
+            slicetmp = self.seeds[:,:, slicen ]
+            #import pdb; pdb.set_trace()
+
+            slicetmp[slicecircle == 1] = label
+
+            self.seeds[:,:,slicen]  = slicetmp 
+
+#, QMainWindow
+            #import py3DSeedEditor
+            #rr=py3DSeedEditor.py3DSeedEditor(self.seeds); rr.show()
+
+            #from seed_editor_qt import QTSeedEditor
+            #from PyQt4.QtGui import QApplication
+            #app = QApplication(sys.argv)
+            #pyed = QTSeedEditor(circle)
+            #pyed.exec_()
+
+
+
+            #app.exit()
+            #tmpslice = #np.logical_and(circle < (6400 + 60), circle > (6400 - 60))
         pass
 
     def _crop(self, data, crinfo):
@@ -277,7 +346,7 @@ class OrganSegmentation():
                 ]
         return  im_out
     
-    def segmentation_smoothing(self, sigma_mm):
+    def segmentation_smoothing(self, sigma_mm ):
         """
         shape of output segmentation is smoothed with gaussian filter. Sigma 
         is computed in mm
@@ -287,28 +356,95 @@ class OrganSegmentation():
 
         #print sigma
         #import pdb; pdb.set_trace()
-        self.orig_scale_segmentation = scipy.ndimage.filters.gaussian_filter(\
-                self.orig_scale_segmentation.astype(float), sigma)
+        self.segmentation = scipy.ndimage.filters.gaussian_filter(\
+                self.segmentation.astype(np.float32), sigma)
         #import pdb; pdb.set_trace()
         #pyed = py3DSeedEditor.py3DSeedEditor(self.orig_scale_segmentation)
         #pyed.show()
 
-        self.orig_scale_segmentation = 1.0 * (self.orig_scale_segmentation> 0.5)
+        self.segmentation = (1.0 * (self.segmentation> 0.5)).astype(np.int8)
 
     def export(self):
         slab={}
         slab['none'] = 0
         slab['liver'] = 1
+        slab['lesions'] = 6
 
         data = {}
+        data['version'] = (1,0,0)
         data['data3d'] = self.data3d
         data['crinfo'] = self.crinfo
         data['segmentation'] = self.segmentation
         data['slab'] = slab
+        data['voxelsize_mm'] = self.voxelsize_mm
+        #import pdb; pdb.set_trace()
         return data
 
 
+    def data_editor(self, im3d, cval = 0):
+        """
+        Funkce provádí změnu vstupních dat - data3d
+        cval: hodnota, na kterou se nastaví "vymazaná" data
+        """
 
+
+        from seed_editor_qt import QTSeedEditor
+        from PyQt4.QtGui import QApplication
+        import numpy as np
+#, QMainWindow
+        print ("Select voxels for deletion")
+        app = QApplication(sys.argv)
+        pyed = QTSeedEditor(im3d, mode='draw')
+        pyed.exec_()
+
+
+        deletemask = pyed.getSeeds()
+        #import pdb; pdb.set_trace()
+
+        
+        #pyed = QTSeedEditor(deletemask, mode='draw')
+        #pyed.exec_()
+
+        app.exit()
+        #pyed.exit()
+        del app
+        del pyed
+
+        im3d[deletemask != 0] = cval
+        #print ("Check output")
+        # rewrite input data
+        #pyed = QTSeedEditor(im3d)
+        #pyed.exec_()
+
+        #el pyed
+        
+        #import pdb; pdb.set_trace()
+
+        return im3d
+
+
+    def show_output(self):
+        """
+        Run viewer with output data3d and segmentation
+        """
+
+        from seed_editor_qt import QTSeedEditor
+        from PyQt4.QtGui import QApplication
+        import numpy as np
+#, QMainWindow
+        print ("Select voxels for deletion")
+        app = QApplication(sys.argv)
+        pyed = QTSeedEditor(self.data3d, contours=self.segmentation)
+        pyed.exec_()
+
+
+        #import pdb; pdb.set_trace()
+
+        
+        #pyed = QTSeedEditor(deletemask, mode='draw')
+        #pyed.exec_()
+
+        app.exit()
         
 
 
@@ -364,7 +500,7 @@ class Tests(unittest.TestCase):
         #igc.show_segmentation()
 
 
-if __name__ == "__main__":
+def main():
 
     #logger = logging.getLogger(__name__)
     logger = logging.getLogger()
@@ -383,17 +519,29 @@ if __name__ == "__main__":
             help='path to data dir')
     parser.add_argument('-d', '--debug', action='store_true',
             help='run in debug mode')
-    parser.add_argument('-vs', '--voxelsizemm',default = 5, type = float,
-            help='Insert working voxelsize ')
+    parser.add_argument('-vs', '--voxelsizemm',default = '3', type = str,
+            help='Insert working voxelsize. It can be number or \
+            array of three numbers. \n \
+            -vs 3 \n \
+            -vs [3,3,5]')
     parser.add_argument('-mroi', '--manualroi', action='store_true',
             help='manual crop before data processing')
     parser.add_argument('-t', '--tests', action='store_true', 
             help='run unittest')
     parser.add_argument('-tx', '--textureanalysis', action='store_true', 
             help='run with texture analysis')
-    parser.add_argument('-ed', '--exampledata', action='store_true', 
+    parser.add_argument('-exd', '--exampledata', action='store_true', 
             help='run unittest')
+    parser.add_argument('-ed', '--editdata', action='store_true', 
+            help='Run data editor')
+    parser.add_argument('-so', '--show_output', action='store_true', 
+            help='Show output data in viewer')
+    parser.add_argument('-ss', '--segmentation_smoothing', action='store_true', 
+            help='Smoothing of output segmentation', default=False)
     args = parser.parse_args()
+
+    # voxelsizemm can be number or array
+    args.voxelsizemm = np.array(eval(args.voxelsizemm))
 
 
     if args.debug:
@@ -414,7 +562,13 @@ if __name__ == "__main__":
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
 
 
-    oseg = OrganSegmentation(args.dcmdir, working_voxelsize_mm = args.voxelsizemm, manualroi = args.manualroi, texture_analysis = args.textureanalysis)
+    oseg = OrganSegmentation(args.dcmdir, 
+            working_voxelsize_mm = args.voxelsizemm, 
+            manualroi = args.manualroi, 
+            texture_analysis = args.textureanalysis,
+            edit_data = args.editdata,
+            smoothing = args.segmentation_smoothing
+            )
 
     oseg.interactivity()
 
@@ -433,9 +587,11 @@ if __name__ == "__main__":
 
     print ( "Volume " + str(oseg.get_segmented_volume_size_mm3()/1000000.0) + ' [l]' )
     
-    pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour = oseg.segmentation)
-    #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour = oseg.orig_scale_segmentation)
-    pyed.show()
+    #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour = oseg.segmentation)
+    #pyed.show()
+
+    if args.show_output:
+        oseg.show_output()
 
     savestring = raw_input ('Save output data? (y/n): ')
     #sn = int(snstring)
@@ -447,3 +603,6 @@ if __name__ == "__main__":
         misc.obj_to_file(data, "organ.pickle", filetype = 'pickle')
     #output = segmentation.vesselSegmentation(oseg.data3d, oseg.orig_segmentation)
     
+
+if __name__ == "__main__":
+    main()

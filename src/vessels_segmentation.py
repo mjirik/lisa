@@ -60,17 +60,28 @@ if __name__ == "__main__":
             help='run unittest')
     parser.add_argument('-i', '--inputfile',  default=None,
             help='input file from organ_segmentation')
+    parser.add_argument('-ii', '--defaultinputfile',  action='store_true',
+            help='"organ.pickle" as input file from organ_segmentation')
+    parser.add_argument('-o', '--outputfile',  default=None,
+            help='output file')
+    parser.add_argument('-oo', '--defaultoutputfile',  action='store_true',
+            help='"vessels.pickle" as output file')
     args = parser.parse_args()
 
 
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
+
     if args.tests:
         # hack for use argparse and unittest in one module
         sys.argv[1:]=[]
         unittest.main()
         sys.exit()
+
+    defaultoutputfile =  "vessels.pickle"
+    if args.defaultoutputfile:
+        args.outputfile = defaultoutputfile
 
     if args.exampledata:
 
@@ -79,9 +90,11 @@ if __name__ == "__main__":
     #else:
     #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
+    if args.defaultinputfile:
+        args.inputfile = "organ.pickle"
 
     if args.inputfile == None:
-        oseg = organ_segmentation.OrganSegmentation(args.dcmdir, working_voxelsize_mm = 6, autocrop = True, autocrop_margin = [5,5,5])
+        oseg = organ_segmentation.OrganSegmentation(args.dcmdir, working_voxelsize_mm = 6, autocrop = True, autocrop_margin_mm = [10,10,10])
         oseg.interactivity()
         # Uvolneni pameti
         garbage.collect()
@@ -97,9 +110,10 @@ if __name__ == "__main__":
 # information about crop
     #cri = oseg.crinfo
     #oseg.data3d = oseg.data3d[cri[0][0]:cri[0][1],cri[1][0]:cri[1][1],cri[2][0]:cri[2][1]]
-    pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], contour = data['segmentation'])
     #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour = oseg.orig_scale_segmentation)
-    pyed.show()
+
+    #pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], contour = data['segmentation'])
+    #pyed.show()
     #import pdb; pdb.set_trace()
 
     outputTmp = segmentation.vesselSegmentation(
@@ -125,8 +139,8 @@ if __name__ == "__main__":
     del(inspect)
     garbage.collect()
 
-    pyed = py3DSeedEditor.py3DSeedEditor(outputTmp)
-    pyed.show()
+    #pyed = py3DSeedEditor.py3DSeedEditor(outputTmp)
+    #pyed.show()
 # segmentation labeling
     #slab={}
     data['slab']['none'] = 0
@@ -147,9 +161,14 @@ if __name__ == "__main__":
     pyed.show()
     # Uvolneni pameti
     garbage.collect()
+    
 
-    savestring = raw_input ('Save output data? (y/n): ')
-    #sn = int(snstring)
-    if savestring in ['Y','y']:
+    if args.outputfile == None:
 
-        misc.obj_to_file(data, "vessels.pickle", filetype = 'pickle')
+        savestring = raw_input ('Save output data? (y/n): ')
+        #sn = int(snstring)
+        if savestring in ['Y','y']:
+
+            misc.obj_to_file(data, defaultoutputfile, filetype = 'pickle')
+    else:
+        misc.obj_to_file(data, args.outputfile, filetype = 'pickle')

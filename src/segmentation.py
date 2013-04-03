@@ -57,7 +57,7 @@ Vessel segmentation z jater.
     returns:
         ---
 """
-def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsizemm = [[1],[1],[1]], inputSigma = -1,
+def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsizemm = [1,1,1], inputSigma = -1,
 dilationIterations = 0, dilationStructure = None, nObj = 1, dataFiltering = True,
 interactivity = True, binaryClosingIterations = 0, binaryOpeningIterations = 0):
 
@@ -65,12 +65,12 @@ interactivity = True, binaryClosingIterations = 0, binaryOpeningIterations = 0):
 
     ## Pokud jsou data nefiltrovana, tak nasleduje filtrovani.
     if(dataFiltering):
-        voxel = voxelsizemm
+        voxel = numpy.array(voxelsizemm)
 
         ## Kalkulace objemove jednotky (voxel) (V = a*b*c).
-        voxel1 = voxel[0][0]
-        voxel2 = voxel[1][0]
-        voxel3 = voxel[2][0]
+        voxel1 = voxel[0]#[0]
+        voxel2 = voxel[1]#[0]
+        voxel3 = voxel[2]#[0]
         voxelV = voxel1 * voxel2 * voxel3
 
         ## number je zaokrohleny 2x nasobek objemove jednotky na 2 desetinna mista.

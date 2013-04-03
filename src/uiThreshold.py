@@ -85,9 +85,9 @@ class uiThreshold:
             self.imgChanged = self.imgUsed.copy()
 
         ## Kalkulace objemove jednotky (voxel) (V = a*b*c)
-        voxel1 = self.voxel[0][0]
-        voxel2 = self.voxel[1][0]
-        voxel3 = self.voxel[2][0]
+        voxel1 = self.voxel[0]
+        voxel2 = self.voxel[1]
+        voxel3 = self.voxel[2]
         self.voxelV = voxel1 * voxel2 * voxel3
 
         if(self.interactivity == False):
@@ -325,12 +325,12 @@ class uiThreshold:
 
     def calculateSigma(self, input):
 
-        if ( self.voxel[0][0] == self.voxel[1][0] == self.voxel[2][0] ):
-            return ((5 / self.voxel[0][0]) * input) / (self.voxelV**(1.0/3.0))
+        if ( self.voxel[0] == self.voxel[1] == self.voxel[2] ):
+            return ((5 / self.voxel[0]) * input) / self.voxelV
         else:
-            sigmaX = (5.0 / self.voxel[0][0]) * input
-            sigmaY = (5.0 / self.voxel[1][0]) * input
-            sigmaZ = (5.0 / self.voxel[2][0]) * input
+            sigmaX = (5.0 / self.voxel[0]) * input
+            sigmaY = (5.0 / self.voxel[1]) * input
+            sigmaZ = (5.0 / self.voxel[2]) * input
 
             return (sigmaX, sigmaY, sigmaZ) / self.voxelV
 

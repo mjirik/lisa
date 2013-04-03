@@ -63,11 +63,16 @@ def cut_editor_old(data):
 #    print ("np.sum(lab==3)")
 
     obj1 = get_biggest_object(lab)
+    pyed = py3DSeedEditor.py3DSeedEditor(lab)
+    pyed.show()
 # vymaz nejvetsiho
     lab[obj1==1] = 0
     obj2 = get_biggest_object(lab)
 
     lab = obj1 + 2*obj2
+    print "baf"
+    pyed = py3DSeedEditor.py3DSeedEditor(lab)
+    pyed.show()
     return lab
     pass
 

@@ -41,6 +41,8 @@ def resection(data):
     #pyed.show()
     print ("Select cut")
     lab = vessel_cut.cut_editor_old(data)
+    pyed = py3DSeedEditor.py3DSeedEditor(lab )#, contour=segm)
+    pyed.show()
     l1 = 1
     l2 = 2
     #import pdb; pdb.set_trace()
