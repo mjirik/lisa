@@ -1,11 +1,12 @@
 # An example from scipy cookbook demonstrating the use of numpy arrys in vtk 
  
-import vtk
+
 from numpy import *
  
 
 def show3(data_matrix = None):
 
+    import vtk
 # We begin by creating the data we want to render.
 # For this tutorial, we create a 3D-image containing three overlaping cubes.
 # This data can of course easily be replaced by data from a medical CT-scan or anything else three dimensional.

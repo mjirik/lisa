@@ -133,7 +133,7 @@ def windows_install():
     #import pdb; pdb.set_trace()
     try:
 
-        subprocess.call(pythondir + "Scripts/pip.exe install numpy scipy scikit-learn matplotlib cython", cwd="./tmp/")
+        subprocess.call(pythondir + "Scripts/pip.exe install numpy scipy scikit-learn matplotlib cython nose", cwd="./tmp/")
     except:
         print ("alternative installation ")
         download_and_run(urlnumpy, "./tmp/numpy.exe")
@@ -263,32 +263,39 @@ def main():
     parser.add_argument('-i','--install', action='store_true',
             default=False,
             help='Install')
+    parser.add_argument('-g','--get_git', action='store_true',
+            default=False,
+            help='Get git in windows')
+
     parser.add_argument('--build_gco', action='store_true',
             default = False, help='Build gco_python in windows. Problematic step.')
     args = parser.parse_args()
 
-    if args.get_sample_data == False and args.install == False and args.build_gco == false:
+    if args.get_sample_data == False and args.install == False and args.build_gco == False:
 # default setup is install and get sample data
         args.get_sample_data = True
-        args.install == True 
+        args.install = True 
         args.build_gco = False
     
     if args.get_sample_data:
         get_sample_data()
+    
     if args.install:
         print('Installing system environment')
         if sys.platform.startswith('linux'):
             
             subprocess.call('./envinstall/envubuntu.sh')
-            submodule_update()
+            #submodule_update()
         elif sys.platform.startswith('win'):
             windows_install()
             if args.build_gco:
                 windows_build_gco()
             else:
                 windows_get_gco()
-            windows_get_git()
-            submodule_update()
+            if args.get_git:
+                windows_get_git()
+                #submodule_update()
+        
                         
 if __name__ == "__main__":
     main()
