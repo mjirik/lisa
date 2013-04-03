@@ -4,3 +4,6 @@
 [submodule "extern/pyseg_base"]
 	path = extern/pyseg_base
 	url = git://github.com/mjirik/pyseg_base.git
+[submodule "extern/dicom2fem"]
+	path = extern/dicom2fem
+	url = git://github.com/vlukes/dicom2fem.git
