@@ -46,10 +46,12 @@ class SupportStructureSegmentation():
             voxelsize_mm = None, 
             autocrop = True, 
             autocrop_margin_mm = [10,10,10], 
+            modality = 'CT',
+            slab = {'none':0, 'bone':8,'lungs':9,'heart':10}
             ):
         """
-        data3d, metadata: it can be used for data loading not from directory. 
-            If both are setted, datadir is ignored
+        Segmentaton of support structures for liver segmentatio based on 
+        location prior.
         """
         
 
@@ -61,6 +63,7 @@ class SupportStructureSegmentation():
         self.autocrop_margin = self.autocrop_margin_mm/self.voxelsize_mm
         self.crinfo = [[0,-1],[0,-1],[0,-1]]
         self.segmentation = None
+        self.slab = slab
 
         
 
@@ -79,9 +82,15 @@ class SupportStructureSegmentation():
 
 
     def bone_segmentation(self):
-        self.segmentation = self.data3d > 1300
+        self.segmentation = np.array(self.data3d > 1300).astype(np.int8)*self.slab['bone']
         pass
 
+    def heart_segmentation(self):
+        pass
+
+    def lungs_segmentation(self):
+        self.segmentation = np.zeros(self.data3d.shape)
+        pass
 
 
 
@@ -151,49 +160,9 @@ class SupportStructureSegmentation():
         return data
 
 
-    def data_editor(self, im3d, cval = 0):
-        """
-        Funkce provádí změnu vstupních dat - data3d
-        cval: hodnota, na kterou se nastaví "vymazaná" data
-        """
 
 
-        from seed_editor_qt import QTSeedEditor
-        from PyQt4.QtGui import QApplication
-        import numpy as np
-#, QMainWindow
-        print ("Select voxels for deletion")
-        app = QApplication(sys.argv)
-        pyed = QTSeedEditor(im3d, mode='draw')
-        pyed.exec_()
-
-
-        deletemask = pyed.getSeeds()
-        #import pdb; pdb.set_trace()
-
-        
-        #pyed = QTSeedEditor(deletemask, mode='draw')
-        #pyed.exec_()
-
-        app.exit()
-        #pyed.exit()
-        del app
-        del pyed
-
-        im3d[deletemask != 0] = cval
-        #print ("Check output")
-        # rewrite input data
-        #pyed = QTSeedEditor(im3d)
-        #pyed.exec_()
-
-        #el pyed
-        
-        #import pdb; pdb.set_trace()
-
-        return im3d
-
-
-    def show_output(self):
+    def visualization(self):
         """
         Run viewer with output data3d and segmentation
         """
@@ -202,9 +171,9 @@ class SupportStructureSegmentation():
         from PyQt4.QtGui import QApplication
         import numpy as np
 #, QMainWindow
-        print ("Select voxels for deletion")
         app = QApplication(sys.argv)
-        pyed = QTSeedEditor(self.data3d)#, contours=self.segmentation)
+        #pyed = QTSeedEditor(self.data3d, contours=(self.segmentation>0))
+        pyed = QTSeedEditor(self.segmentation)
         pyed.exec_()
 
 
@@ -234,7 +203,7 @@ def main():
 
     # input parser
     parser = argparse.ArgumentParser(description=
-            'Segment vessels from liver \n \npython organ_segmentation.py\n \n python organ_segmentation.py -mroi -vs 0.6')
+            'Segmentation of bones, lungs and heart.')
     parser.add_argument('-dd','--dcmdir',
             default=None,
             help='path to data dir')

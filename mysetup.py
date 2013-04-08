@@ -224,8 +224,18 @@ def get_sample_data():
 
 # get jatra_06mm_jenjatra
 
+    #url = "http://147.228.240.61/queetech/sample-data/jatra_06mm_jenjatraplus.zip"
+    #local_file_name = './sample_data/jatra_06mm_jenjatraplus.zip'
     url = "http://147.228.240.61/queetech/sample-data/jatra_06mm_jenjatra.zip"
     local_file_name = './sample_data/jatra_06mm_jenjatra.zip'
+
+    urllibr.urlretrieve(url, local_file_name)
+
+    datafile = zipfile.ZipFile(local_file_name)
+    datafile.extractall('./sample_data/')
+# get jatra 5mm
+    url = "http://147.228.240.61/queetech/sample-data/jatra_5mm.zip"
+    local_file_name = './sample_data/jatra_5mm.zip'
 
     urllibr.urlretrieve(url, local_file_name)
 
