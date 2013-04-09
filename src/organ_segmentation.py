@@ -79,6 +79,8 @@ class OrganSegmentation():
         if data3d is None or metadata is None:
 
             #self.data3d, self.metadata = dcmr.dcm_read_from_dir(datadir)
+            if datadir == None:
+                datadir = dcmr.get_dcmdir_qt()
 
             reader = dcmr.DicomReader(datadir)
             self.data3d = reader.get_3Ddata()
