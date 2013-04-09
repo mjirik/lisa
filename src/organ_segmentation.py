@@ -27,7 +27,8 @@ import scipy
 
 # ----------------- my scripts --------
 import py3DSeedEditor
-import dcmreaddata1 as dcmr
+#import dcmreaddata1 as dcmr
+import dcmreaddata as dcmr
 import pycat
 import argparse
 #import py3DSeedEditor
@@ -76,7 +77,12 @@ class OrganSegmentation():
 
         # TODO uninteractive Serie selection
         if data3d is None or metadata is None:
-            self.data3d, self.metadata = dcmr.dcm_read_from_dir(datadir)
+
+            #self.data3d, self.metadata = dcmr.dcm_read_from_dir(datadir)
+
+            reader = dcmr.DicomReader(datadir)
+            self.data3d = reader.get_3Ddata()
+            self.metadata = reader.get_metaData()
         else:
             self.data3d = data3d
             self.metadata = metadata
@@ -480,7 +486,9 @@ class Tests(unittest.TestCase):
         Test dicomread module and graphcut module
         """
         #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
-        data3d, metadata = dcmr.dcm_read_from_dir('./../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
+        reader = dcmr.DicomReader('./../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
+        self.data3d = reader.get_3Ddata()
+        self.metadata = reader.get_metaData()
 
         print ("Data size: " + str(data3d.nbytes) + ', shape: ' + str(data3d.shape) )
 

@@ -27,7 +27,7 @@ import scipy
 
 # ----------------- my scripts --------
 import py3DSeedEditor
-import dcmreaddata1 as dcmr
+import dcmreaddata as dcmr
 import pycat
 import argparse
 #import py3DSeedEditor
@@ -77,7 +77,10 @@ class SupportStructureSegmentation():
         self.voxelsize_mm = data['voxelsize_mm']
     
     def import_dir(self, datadir):
-        self.data3d, self.metadata = dcmr.dcm_read_from_dir(datadir)
+        reader = dcmr.DicomReader(datadir)
+        self.data3d = reader.get_3Ddata()
+        self.metadata = reader.get_metaData()
+        #self.data3d, self.metadata = dcmr.dcm_read_from_dir(datadir)
         self.voxelsize_mm = np.array(self.metadata['voxelsizemm'])
 
 
@@ -229,7 +232,10 @@ def main():
 
     #else:
     #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
-    data3d, metadata = dcmr.dcm_read_from_dir(args.dcmdir)
+    #data3d, metadata = dcmr.dcm_read_from_dir(args.dcmdir)
+    reader = dcmr.DicomReader(args.datadir)
+    self.data3d = reader.get_3Ddata()
+    self.metadata = reader.get_metaData()
 
 
     sseg = SupportStructureSegmentation(data3d = data3d, 
