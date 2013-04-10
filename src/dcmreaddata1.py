@@ -331,7 +331,7 @@ def createdicomdir(dirpath):
 
 
 def dcmdirstats(dcmdir):
-    """ input is dcmdir, not dirpath """
+    """ Dicom series staticstics, input is dcmdir, not dirpath """
     import numpy as np
     # get series number
 # vytvoření slovníku, kde je klíčem číslo série a hodnotou jsou všechny 
