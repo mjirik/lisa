@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 import numpy
 import scipy.ndimage
+from scipy import stats
 import sys
 
 import segmentation
@@ -219,6 +220,8 @@ class uiThreshold:
 
         # TODO: automaticky vypocet prahu
 
+        print("Hledani prahu...")
+
         self.imgUsed = self.data
 
         if(self.inputSigma >= 0):
@@ -226,37 +229,121 @@ class uiThreshold:
             self.lastSigma = sigma
             scipy.ndimage.filters.gaussian_filter(self.data, self.calculateSigma(sigma), 0, self.imgUsed, 'reflect', 0.0)
 
-        hist, bin_edges = numpy.histogram(self.imgUsed, bins=60)
-        bin_centers = 0.5*(bin_edges[:-1] + bin_edges[1:])
+        hist_points = 1300
+        ## hist: funkce(threshold)
+        hist, bin_edges = numpy.histogram(self.imgUsed, bins = hist_points)
+        ## bin_centers: threshold
+        bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
 
-##        print('bin_edges')
-##        print(bin_edges)
-##        print('bin_centers')
-##        print(bin_centers)
-##        print('hist')
-##        print(hist)
+        """
+        start = 0
+        for index in range(0, len(hist)):
+			if(hist[index] > 50):
+				start = index
+				break
 
-        # hist jsou udaje na ose x
-        # bin_centers jsou udaje na ose y (asi pocet zmen)
-        # navrh algoritmu: jit od posledni pozice v hist, najit paralelne
-        #   nejvyssi honotu, dokud hodnoty v bin_centers nezacnou klesat
-        #   nebo hlidat vzrust hodnot - pokud nova hodnota bude vetsi
-        #   nez kvadrat (nutno zvolit mocninu) puvodni hodnoty, tak
-        #   puvodni hodnota je ta spravna
+        suma_hist = 0
+        for index in range(start, len(hist)):
+			suma_hist += hist[index]
 
+        percent_hist = 0.70 ## !!!!!!!!!!!! 70% !!!!!!!!!!!
+        crop_hist = suma_hist * (1 - percent_hist)
+
+        control_suma = 0
+        init_index = 0 ## pocatek
+        for index in range(start, len(hist)):
+			control_suma += hist[index]
+			if(control_suma > crop_hist):
+				init_index = index
+				break
+        """
+
+        ## last je maximum z hist
+        ## init_index je index "last"
+        init_index = 0
+        last = hist[(int)(len(hist) / 10)]
+        for index in range((int)(len(hist) / 10), len(hist)):
+            if(last < hist[index]):
+                last = hist[index]
+                init_index = index
+
+        ## muj_histogram_temp(x+1) = f(x+1) = hist[x+1] + hist[x]
+        muj_histogram_temp = []
+        muj_histogram_temp.insert(0, hist[0])
+        for index in range(1, len(hist)):
+            muj_histogram_temp.insert(index, hist[index] + muj_histogram_temp[index - 1])
+
+        ## reverse muj_histogram_temp do muj_histogram
+        muj_histogram = muj_histogram_temp[::-1]
+
+        ## Pridani bodu to poli x1 a y1
+        ## (klesajici tendence)
+        x1 = []
+        y1 = []
+        place = 0
+        for index in range(init_index, init_index + 20):
+            x1.insert(place, bin_centers[index])
+            y1.insert(place, muj_histogram[index])
+            print("[ " + str(x1[place]) + ", " + str(y1[place]) + " ]")
+            place += 1
+
+        ## Linearni regrese nad x1 a y1
+        ## slope == smernice
+        ## intercept == posuv
+        slope1, intercept1, r_value1, p_value1, std_err1 = stats.linregress(x1, y1)
+
+        print("slope1 = " + str(slope1))
+        print("intercept1 = " + str(intercept1))
+        print("r_value1 = " + str(r_value1))
+        print("p_value1 = " + str(p_value1))
+        print("std_err1 = " + str(std_err1))
+        print(str(slope1) + "x + " + str(intercept1))
+
+        x2 = []
+        y2 = []
+        place = 0
+        for index in range(len(muj_histogram) - 45, len(muj_histogram) - 5):
+            x2.insert(place, bin_centers[index])
+            y2.insert(place, muj_histogram[index])
+            print("[ " + str(x2[place]) + ", " + str(y2[place]) + " ]")
+            place += 1
+
+        slope2, intercept2, r_value2, p_value2, std_err2 = stats.linregress(x2, y2)
+
+        print("slope2 = " + str(slope2))
+        print("intercept2 = " + str(intercept2))
+        print("r_value2 = " + str(r_value2))
+        print("p_value2 = " + str(p_value2))
+        print("std_err2 = " + str(std_err2))
+        print(str(slope2) + "x + " + str(intercept2))
+
+        self.threshold = (intercept2 - intercept1) / (slope1 - slope2)
+
+        print('Zjisten threshold: ' + str(self.threshold))
+        print('====================================')
+        print('!- ANO, jeste to porad nefunguje => pracuje se na tom ;-)')
+
+        muj_histogram_graph = []
+        bin_centers_graph = []
+        place = 0
+        for index in range(len(muj_histogram) / 2, len(muj_histogram)):
+            bin_centers_graph.insert(place, bin_centers[index])
+            muj_histogram_graph.insert(place, muj_histogram[index])
+            place += 1
+
+        matpyplot.figure(figsize = (11, 4))
+        matpyplot.plot(bin_centers_graph, muj_histogram_graph, lw = 2)
+        matpyplot.axvline(self.threshold, color = 'r', ls = '--', lw = 2)
+        matpyplot.show()
+
+        garbage.collect()
+
+        """
         counter = 1
         oldNum = hist[len(bin_centers) - 1]
         print('====================================')
         print('Toto jsou debug vypisy, ktere budou (casem) vymazany ;-)')
         print('len(hist) == ' + str(len(hist)))
-
-##        print('====================================')
-##        print('Hodnoty hist:')
-##        print('====================================')
-##        for index in range(0, len(hist)):
-##            print('[' + str(index) + '] ' + str(hist[index]))
-##
-##        print('====================================')
 
         suma_hist = 0
         start = numpy.round(len(hist) / 10, 0)
@@ -283,17 +370,18 @@ class uiThreshold:
 
         self.threshold = (bin_centers[mark - 1] + bin_centers[mark]
                             + bin_centers[mark + 1]) / 3.0
-        print('Zjisten threshold: ' + str(self.threshold))
+
+		print('Zjisten threshold: ' + str(self.threshold))
         print('====================================')
         print('!- ANO, jeste to porad nefunguje => pracuje se na tom ;-)')
 
-        if(self.interactivity == False):
-            matpyplot.figure(figsize = (11, 4))
-            matpyplot.plot(bin_centers, hist, lw = 2)
-            matpyplot.axvline(self.threshold, color = 'r', ls = '--', lw = 2)
-            matpyplot.show()
+        matpyplot.figure(figsize = (11, 4))
+        matpyplot.plot(bin_centers, hist, lw = 2)
+        matpyplot.axvline(self.threshold, color = 'r', ls = '--', lw = 2)
+        matpyplot.show()
 
         garbage.collect()
+		"""
 
     def updateImgFilter(self, val):
 

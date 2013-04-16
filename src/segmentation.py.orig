@@ -57,8 +57,13 @@ Vessel segmentation z jater.
     returns:
         ---
 """
-def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsizemm = [1,1,1], inputSigma = -1,
+<<<<<<< HEAD
+def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsizemm = [[1],[1],[1]], inputSigma = -1,
 dilationIterations = 0, dilationStructure = None, nObj = 1, dataFiltering = True,
+=======
+def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsizemm = [1,1,1], inputSigma = -1,
+dilationIterations = 0, dilationStructure = None, nObj = 0, dataFiltering = True,
+>>>>>>> 9377b9d596cebdd6dd58e138a0ec4b2fa749570d
 interactivity = True, binaryClosingIterations = 0, binaryOpeningIterations = 0):
 
     print('Pripravuji data...')
@@ -67,10 +72,17 @@ interactivity = True, binaryClosingIterations = 0, binaryOpeningIterations = 0):
     if(dataFiltering):
         voxel = numpy.array(voxelsizemm)
 
+<<<<<<< HEAD
         ## Kalkulace objemove jednotky (voxel) (V = a*b*c).
+        voxel1 = voxel[0][0]
+        voxel2 = voxel[1][0]
+        voxel3 = voxel[2][0]
+=======
+        ## Kalkulace objemove jednotky (voxel) (V = a*b*c)
         voxel1 = voxel[0]#[0]
         voxel2 = voxel[1]#[0]
         voxel3 = voxel[2]#[0]
+>>>>>>> 9377b9d596cebdd6dd58e138a0ec4b2fa749570d
         voxelV = voxel1 * voxel2 * voxel3
 
         ## number je zaokrohleny 2x nasobek objemove jednotky na 2 desetinna mista.
@@ -107,15 +119,12 @@ interactivity = True, binaryClosingIterations = 0, binaryOpeningIterations = 0):
 
 
     ## Vraceni matice
-    return getBiggestObjects(data = output, N = nObj)
-    """
     if(dataFiltering == False):
         ## Data vstoupila jiz filtrovana, tudiz neprosly nalezenim nejvetsich objektu.
         return getBiggestObjects(data = output, N = nObj)
     else:
         ## Data vstoupila nefiltrovana, tudiz jiz prosly nalezenim nejvetsich objektu.
         return output
-    """
 
 """
 Vraceni N nejvetsich objektu.
@@ -152,8 +161,8 @@ def getBiggestObjects(data, N):
         print('Redukuji pocet nejvetsich objektu k vraceni...')
         N = len(arrayLabels)
 
-    ##for index1 in range(0, len(arrayLabelsSum)):
-        ##print(str(arrayLabels[index1]) + " " + str(arrayLabelsSum[index1]))
+    for index1 in range(0, len(arrayLabelsSum)):
+        print(str(arrayLabels[index1]) + " " + str(arrayLabelsSum[index1]))
 
     return data == 1
 
