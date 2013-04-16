@@ -7,6 +7,8 @@ tmpd=~/tmp/livertmp
 directoryx="$(dirname -- $(readlink -fn -- "$0"; echo x))"
 directory="${directoryx%x}"
 
+
+command -v apt-get >/dev/null 2>&1 || { echo >&2 "I require apt-get but it's not installed..";exit;} 
 sudo apt-get install python-numpy python-scipy python-matplotlib python-sklearn python-dicom python-yaml
 # gco_python install
 # -------------------
