@@ -40,21 +40,27 @@ class DicomReaderTest(unittest.TestCase):
         data3d = data.pixel_array
 
         
+        overlay = data[0x6000,0x3000]
+        import pdb; pdb.set_trace()
+        pol = []
+        for i in range(1,len(overlay)):
+            pass
+            #pol[i] = ord(
+
 # 168,168 odpovida v mm cca 130,130, voxelsizemm je 0.7734
         x = 168
         y = 168
 
         # index pixelu
         k = (512*x) + y
-        value1 = data.pixe_array.flat[k]
+        value1 = data.pixel_array.flat[k]
         byte1 = ord(data.PixelData[k*2+1])
         byte2 = ord(data.PixelData[k*2+0])
         value2 = byte2*256+byte1
 
 
-         (168*512)+168;ord(pxdata[(k*2)-1]),ord(pxdata[k*2]), ord(pxdata[(k*2)+1]), data.pixel_array.flat[k]
+        # (168*512)+168;ord(pxdata[(k*2)-1]),ord(pxdata[k*2]), ord(pxdata[(k*2)+1]), data.pixel_array.flat[k]
         
-        import pdb; pdb.set_trace()
 
 
 
