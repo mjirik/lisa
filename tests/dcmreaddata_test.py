@@ -17,7 +17,7 @@ import unittest
 
 from PyQt4.QtGui import QFileDialog, QApplication, QMainWindow
 
-#import numpy as np
+import numpy as np
 
 
 #import dcmreaddata1 as dcmr
@@ -34,32 +34,58 @@ class DicomReaderTest(unittest.TestCase):
 #        self.metadata = reader.get_metaData()
 
     def test_read_volumetry_overlay_with_dicom_module(self):
+        """
+        pydicom module is used for load dicom data. Dicom overlay
+        is saved on (60xx,3000) bit after bit. Data are decoded and 
+        each bit is stored as array element.
+        """
         import dicom
+        # import py3DSeedEditor
+        #import matplotlib.pyplot as plt
         dcmfile = os.path.join(path_to_script, '../sample_data/volumetrie/volumetry_slice.DCM')
         data = dicom.read_file(dcmfile)
-        data3d = data.pixel_array
+
 
         
-        overlay = data[0x6000,0x3000]
-        import pdb; pdb.set_trace()
-        pol = []
-        for i in range(1,len(overlay)):
-            pass
-            #pol[i] = ord(
-
-# 168,168 odpovida v mm cca 130,130, voxelsizemm je 0.7734
-        x = 168
-        y = 168
-
-        # index pixelu
-        k = (512*x) + y
-        value1 = data.pixel_array.flat[k]
-        byte1 = ord(data.PixelData[k*2+1])
-        byte2 = ord(data.PixelData[k*2+0])
-        value2 = byte2*256+byte1
+        # overlay index 
+        i_overlay = 1
+        n_bits = 8
 
 
-        # (168*512)+168;ord(pxdata[(k*2)-1]),ord(pxdata[k*2]), ord(pxdata[(k*2)+1]), data.pixel_array.flat[k]
+        # On (60xx,3000) are stored ovelays. 
+        # First is (6000,3000), second (6002,3000), third (6004,3000),  
+        # and so on.
+        dicom_tag1 = 0x6000 + 2*i_overlay
+
+        overlay_raw = data[dicom_tag1 ,0x3000].value
+
+        # On (60xx,0010) and (60xx,0011) is stored overlay size
+        rows = data[dicom_tag1,0x0010].value # rows = 512
+        cols = data[dicom_tag1,0x0011].value # cols = 512
+
+        decoded_linear = np.zeros(len(overlay_raw)*n_bits)
+
+        # Decoding data. Each bit is stored as array element
+        for i in range(1,len(overlay_raw)):
+            for k in range (0,n_bits):
+                byte_as_int = ord(overlay_raw[i]) 
+                decoded_linear[i*n_bits + k] = (byte_as_int >> k) & 0b1
+
+        #overlay = np.array(pol)
+
+        overlay = np.reshape(decoded_linear,[rows,cols])
+
+        #plt.imshow(overlay)
+        #plt.show()
+
+        self. assertEqual(overlay[200,200],1)
+        self. assertEqual(overlay[100,100],0)
+        #pyed = py3DSeedEditor.py3DSeedEditor(overlay)
+        #pyed.show()
+        #import pdb; pdb.set_trace()
+        
+
+
         
 
 
