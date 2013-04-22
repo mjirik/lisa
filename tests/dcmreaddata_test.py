@@ -33,6 +33,20 @@ class DicomReaderTest(unittest.TestCase):
 #        self.data3d = reader.get_3Ddata()
 #        self.metadata = reader.get_metaData()
 
+    def test_DicomReader_overlay(self):
+        #import matplotlib.pyplot as plt
+
+        dcmdir = os.path.join(path_to_script, '../sample_data/volumetrie/')
+        #dcmdir = '/home/mjirik/data/medical/data_orig/jatra-kma/jatra_5mm/'
+        #self.data3d, self.metadata = dcmr.dcm_read_from_dir(self.dcmdir)
+        reader = dcmr.DicomReader(dcmdir)
+        overlay = reader.get_overlay()
+        #import pdb; pdb.set_trace()
+        #plt.imshow(overlay[1][:,:,0])
+        #plt.show()
+        
+        self. assertEqual(overlay[1][200,200],1)
+        self. assertEqual(overlay[1][100,100],0)
     def test_read_volumetry_overlay_with_dicom_module(self):
         """
         pydicom module is used for load dicom data. Dicom overlay
