@@ -18,6 +18,7 @@ else:
 
 
 
+
 def submodule_update():
     # update submodules codes
     print ('Updating submodules')
@@ -36,6 +37,7 @@ def check_python_architecture(pythondir, target_arch_str):
     pyth_str = subprocess.check_output([pythondir+'python', '-c','import platform; print platform.architecture()[0]'])
     if pyth_str [:2] != target_arch_str:
         raise Exception("Wrong architecture of target python. Expected arch is" + target_arch_str)
+
 
 
 
@@ -212,14 +214,20 @@ def get_sample_data():
     except:
         pass
 
-    url =  "http://www.mathworks.com/matlabcentral/fileexchange/2762-dicom-example-files?download=true"
-
+# Puvodni URL z mathworks
+    #url =  "http://www.mathworks.com/matlabcentral/fileexchange/2762-dicom-example-files?download=true"
+    #url = "http://www.mathworks.com/includes_content/domainRedirect/domainRedirect.html?uri=http%3A%2F%2Fwww.mathworks.com%2Fmatlabcentral%2Ffileexchange%2F2762-dicom-example-files%3Fdownload%3Dtrue%26nocookie%3Dtrue"
+    url = "http://147.228.240.61/queetech/sample-data/head.zip"
     local_file_name = './sample_data/head.zip'
 
+    urlobj = urllibr.urlopen(url)
+    url = urlobj.geturl()
+    print urlobj 
+    print url
     urllibr.urlretrieve(url, local_file_name)
 
     datafile = zipfile.ZipFile(local_file_name)
-    datafile.setpassword('queetech')
+    #datafile.setpassword('queetech')
     datafile.extractall('./sample_data/')
 
 # get jatra_06mm_jenjatra
@@ -242,6 +250,14 @@ def get_sample_data():
     datafile = zipfile.ZipFile(local_file_name)
     datafile.extractall('./sample_data/')
 
+#get volumetry sample
+    url = "http://147.228.240.61/queetech/sample-data/volumetrie.zip"
+    local_file_name = './sample_data/volumetrie.zip'
+
+    urllibr.urlretrieve(url, local_file_name)
+
+    datafile = zipfile.ZipFile(local_file_name)
+    datafile.extractall('./sample_data/')
 def windows_get_gco():
     url = "http://147.228.240.61/queetech/install/pygco-py27-32bit/pygco.pyd"
 

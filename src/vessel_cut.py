@@ -9,6 +9,7 @@ import os.path
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pycat/"))
 sys.path.append(os.path.join(path_to_script, "../extern/pycat/extern/py3DSeedEditor/"))
+sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
 #import featurevector
 import unittest
 
@@ -17,6 +18,13 @@ logger = logging.getLogger(__name__)
 
 import numpy as np
 import scipy.ndimage
+import seg2fem
+import viewer
+
+from PyQt4.QtCore import Qt
+from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
+     QGridLayout, QLabel, QPushButton, QFrame, QFileDialog,\
+     QFont, QInputDialog, QComboBox, QRadioButton, QButtonGroup
 
 # ----------------- my scripts --------
 import misc
@@ -24,15 +32,6 @@ import py3DSeedEditor
 import show3
 
 
-def cut_editor(data, voxelsize_mm = np.ones([3,1])):
-    """
-    Funkce vrací trojrozměrné porobné jako data['segmentation'] 
-    v data['slab'] je popsáno, co která hodnota znamená
-    """
-    labels = []
-
-    return labels
-    pass
 
 def cut_editor_old(data):
     pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
@@ -76,22 +75,50 @@ def cut_editor_old(data):
     return lab
     pass
 
+def cut_editor(segmentation, voxelsize_mm = np.ones([3,1]), degrad = 4):
+    """
+    Funkce vrací trojrozměrné porobné jako data['segmentation'] 
+    v data['slab'] je popsáno, co která hodnota znamená
+    """
+    labels = []
+
+    print segmentation.shape
+    segmentation = segmentation[::degrad,::degrad,::degrad]
+    print segmentation.dtype
+    
+    import pdb; pdb.set_trace()
+    mesh_data = seg2fem.gen_mesh_from_voxels_mc(segmentation, voxelsize_mm*degrad)
+    if True:
+        mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
+    vtk_file = "mesh_geom.vtk"
+    mesh_data.write(vtk_file)
+    app = QApplication(sys.argv)
+    view = viewer.QVTKViewer(vtk_file)
+    view.exec_()
+
+    return labels
+    pass
+
+
 def resection(data):
     vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
 # ostranění porty z více kusů, nastaví se jim hodnota liver
-    data['segmentation'][data['segmentation'] == data['slab']['porta']] = data['slab']['liver']
+    #data['segmentation'][data['segmentation'] == data['slab']['porta']] = data['slab']['liver']
     #show3.show3(data['segmentation'])
 
-    data['segmentation'][vessels == 1] = data['slab']['porta']
-    img3d = data['segmentation']
+    #data['segmentation'][vessels == 1] = data['slab']['porta']
+    segmentation = data['segmentation']
     print ("Select cut")
-    # lab = cut_editor_old(img3d)
-    lab = cut_editor(img3d)
+    
+    print data["slab"]
+    #lab = cut_editor(segmentation > 0)#== data['slab']['porta'])
+
+    lab = cut_editor_old(img3d)
     
 
     l1 = 1
     l2 = 2
-    import pdb; pdb.set_trace()
+    
 
     # dist se tady počítá od nul jenom v jedničkách
     dist1 = scipy.ndimage.distance_transform_edt(lab != l1)
@@ -146,18 +173,18 @@ def max_area_index(labels, num):
         
 
 if __name__ == "__main__":
-    #data = misc.obj_from_file("out", filetype = 'pickle')
-    #ds = data['segmentation'] == data['slab']['liver']
-    #pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
-    #pyed.show()
-    seg = np.zeros([100,100,100])
-    seg [50:80, 50:80, 60:75] = 1
-    seg[58:60, 56:72, 66:68]=2
-    dat = np.random.rand(100,100,100) 
-    dat [50:80, 50:80, 60:75] =  dat [50:80, 50:80, 60:75] + 1 
-    dat [58:60, 56:72, 66:68] =  dat  [58:60, 56:72, 66:68] + 1
-    slab = {'liver':1, 'porta':2, 'portaa':3, 'portab':4}
-    data = {'segmentation':seg, 'data3d':dat, 'slab':slab}
+    data = misc.obj_from_file("out", filetype = 'pickle')
+    ds = data['segmentation'] == data['slab']['liver']
+    pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
+    pyed.show()
+    #seg = np.zeros([100,100,100])
+    #seg [50:80, 50:80, 60:75] = 1
+    #seg[58:60, 56:72, 66:68]=2
+    #dat = np.random.rand(100,100,100) 
+    #dat [50:80, 50:80, 60:75] =  dat [50:80, 50:80, 60:75] + 1 
+    #dat [58:60, 56:72, 66:68] =  dat  [58:60, 56:72, 66:68] + 1
+    #slab = {'liver':1, 'porta':2, 'portaa':3, 'portab':4}
+    #data = {'segmentation':seg, 'data3d':dat, 'slab':slab}
 
     resection(data)
 
