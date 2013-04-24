@@ -67,6 +67,8 @@ class OrganSegmentation():
         data3d, metadata: it can be used for data loading not from directory. 
             If both are setted, datadir is ignored
         """
+        self.parameters = {}
+        self.interactivityParams = {}
         
         self.datadir = datadir
         if np.isscalar(working_voxelsize_mm):
