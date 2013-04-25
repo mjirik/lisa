@@ -66,7 +66,7 @@ class OrganSegmentation():
             If both are setted, datadir is ignored
         """
         self.parameters = {}
-        self.interactivityParams = {}
+        self.interactivity_parameters = {}
 
         self.datadir = datadir
         if np.isscalar(working_voxelsize_mm):
@@ -77,6 +77,10 @@ class OrganSegmentation():
         # TODO uninteractive Serie selection
         if data3d is None or metadata is None:
 
+            if self.interactivity_parameters.has_key('datadir'):
+                datadir = self.interactivity_parameters['datadir']
+
+
             #self.data3d, self.metadata = dcmr.dcm_read_from_dir(datadir)
             if datadir == None:
                 datadir = dcmr.get_dcmdir_qt()
@@ -84,6 +88,7 @@ class OrganSegmentation():
             reader = dcmr.DicomReader(datadir)
             self.data3d = reader.get_3Ddata()
             self.metadata = reader.get_metaData()
+            self.interactivity_parameters['series_number'] = reader.series_number
         else:
             self.data3d = data3d
             self.metadata = metadata
