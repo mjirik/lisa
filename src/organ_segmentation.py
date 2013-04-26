@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 #import scipy.io
 import numpy as np
 import scipy
+#from scipy import sparse
 
 # ----------------- my scripts --------
 import py3DSeedEditor
@@ -66,7 +67,7 @@ class OrganSegmentation():
             If both are setted, datadir is ignored
         """
         self.parameters = {}
-        self.interactivity_parameters = {}
+        self.interactivity_vars= {}
 
         self.datadir = datadir
         if np.isscalar(working_voxelsize_mm):
@@ -88,7 +89,7 @@ class OrganSegmentation():
             reader = dcmr.DicomReader(datadir)
             self.data3d = reader.get_3Ddata()
             self.metadata = reader.get_metaData()
-            self.interactivity_parameters['series_number'] = reader.series_number
+            self.interactivity_vars['series_number'] = reader.series_number
         else:
             self.data3d = data3d
             self.metadata = metadata
@@ -117,7 +118,20 @@ class OrganSegmentation():
 
         self.zoom = self.voxelsize_mm / working_voxelsize_mm
 
-        #import pdb; pdb.set_trace()
+    def set_interactivity_vars(self, interactivity_vars):
+        """
+        Set interactivity variables. Make numpy array from scipy sparse 
+        matrix.
+        """
+
+#        # seeds may be stored in sparse matrix
+#        if qmisc.SparseMatrix.issparse(interactivity_vars['seeds']):
+#            interactivity_vars['seeds'] = \
+#                    interactivity_vars['seeds'].todense()
+#        #import pdb; pdb.set_trace()
+
+        self.interactivity_vars = interactivity_vars
+
     def _interactivity_begin(self):
         data3d_res = scipy.ndimage.zoom(
                 self.data3d,

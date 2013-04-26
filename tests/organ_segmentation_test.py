@@ -65,8 +65,8 @@ class OrganSegmentationTest(unittest.TestCase):
         volume = oseg.get_segmented_volume_size_mm3()
         print volume
 
-        self.assertGreater(volume,50000)
-        self.assertLess(volume,1200000)
+        self.assertGreater(volume, 50000)
+        self.assertLess(volume, 1200000)
 
 
 #        roi_mm = [[3,3,3],[150,150,50]]
@@ -77,6 +77,11 @@ class OrganSegmentationTest(unittest.TestCase):
 #        oseg.ni_set_seeds(coordinates_mm, label, radius)
 #
 #        oseg.make_segmentation()
+    def test_stored_interactivity():
+        self.interactivity_vars = interactivity_vars
+        self.interactivity_vars = interactivity_vars
+
+
 
     def test_box_segmentation(self):
         """
@@ -120,6 +125,7 @@ class OrganSegmentationTest(unittest.TestCase):
         self.assertLess(volume,1100000)
 
     def test_volume_resize(self):
+        #from scipy.sparse.import lil_matrix
 
         pass
 
