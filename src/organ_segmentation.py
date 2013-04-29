@@ -69,7 +69,10 @@ class OrganSegmentation():
             If both are setted, datadir is ignored
         """
         self.parameters = {}
-        self.iparams= {}
+        if iparams is None:
+            self.iparams= {}
+        else:
+            self.set_iparams(iparams)
 
         self.datadir = datadir
         if np.isscalar(working_voxelsize_mm):
@@ -97,9 +100,9 @@ class OrganSegmentation():
             self.metadata = metadata
 
         if seeds == None:
-            self.seeds = np.zeros(self.data3d.shape)
+            self.iparams['seeds'] = np.zeros(self.data3d.shape)
         else:
-            self.seeds = seeds
+            self.iparams['seeds'] = seeds
         self.voxelsize_mm = np.array(self.metadata['voxelsizemm'])
         self.autocrop = autocrop
         self.autocrop_margin_mm = np.array(autocrop_margin_mm)
@@ -175,10 +178,10 @@ class OrganSegmentation():
                 'type': 'gmmsame',
                 'params': {cvtype_name: 'full', 'n_components': 3}
                 }
-        if not self.seeds == None:
+        if not self.iparams['seeds'] == None:
             #igc.seeds= self.seeds
             seeds_res = scipy.ndimage.zoom(
-                    self.seeds,
+                    self.iparams['seeds'],
                     self.zoom,
                     mode='nearest',
                     order=0
@@ -192,46 +195,65 @@ class OrganSegmentation():
 
             #import pdb; pdb.set_trace()
 
+        #print "sh2", self.data3d.shape 
         return igc
 
     def _interactivity_end(self, igc):
-        self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
+        #print "sh3", self.data3d.shape 
+
+
+#        import pdb; pdb.set_trace()
+#        scipy.ndimage.zoom(
+#                self.segmentation,
+#                1.0 / self.zoom,
+#                output=segm_orig_scale,
+#                mode='nearest',
+#                order=0
+#                )
         segm_orig_scale = scipy.ndimage.zoom(
-                self.segmentation_tmp,
+                self.segmentation,
                 1.0 / self.zoom,
                 mode='nearest',
                 order=0
                 ).astype(np.int8)
-        #segm_orig_scale = scipy.ndimage.zoom(
-        #        self.segmentation,
-        #        1.0 / self.zoom,
-        #        mode='nearest',
-        #        order=0
-        #        ).astype(np.int8)
+        seeds = scipy.ndimage.zoom(
+                igc.seeds,
+                1.0 / self.zoom,
+                mode='nearest',
+                order=0
+                )
+
 
 
         #print  np.sum(self.segmentation)*np.prod(self.voxelsize_mm)
 
 # @TODO odstranit hack pro oříznutí na stejnou velikost
-# v podstatě je to vyřešeno
-#        shp = [
-#                np.min([segm_orig_scale.shape[0], self.data3d.shape[0]]),
-#                np.min([segm_orig_scale.shape[1], self.data3d.shape[1]]),
-#                np.min([segm_orig_scale.shape[2], self.data3d.shape[2]]),
-#                ]
-#        #self.data3d = self.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
+# v podstatě je to vyřešeno, ale nechalo by se to dělat elegantněji v zoom
+# tam je bohužel patrně bug
+        shp = [
+                np.min([segm_orig_scale.shape[0], self.data3d.shape[0]]),
+                np.min([segm_orig_scale.shape[1], self.data3d.shape[1]]),
+                np.min([segm_orig_scale.shape[2], self.data3d.shape[2]]),
+                ]
+        #self.data3d = self.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
+
+        self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
+        self.segmentation[
+                0:shp[0],
+                0:shp[1],
+                0:shp[2]] = segm_orig_scale[0:shp[0], 0:shp[1], 0:shp[2]]
+
+        self.iparams['seeds'] = np.zeros(self.data3d.shape, dtype=np.int8)
+        self.iparams['seeds'][
+                0:shp[0],
+                0:shp[1],
+                0:shp[2]] = seeds[0:shp[0], 0:shp[1], 0:shp[2]]
 #
-#        self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
-#        self.segmentation[
-#                0:shp[0],
-#                0:shp[1],
-#                0:shp[2]] = segm_orig_scale[0:shp[0], 0:shp[1], 0:shp[2]]
-#
-        self.segmentation_tmp = None
         if self.smoothing:
             self.segmentation_smoothing(self.smoothing_mm)
 
         if self.autocrop is not None:
+            #import pdb; pdb.set_trace()
 
             self.crinfo = self._crinfo_from_specific_data(
                     self.segmentation,
@@ -267,7 +289,7 @@ class OrganSegmentation():
         igc.interactivity()
 # @TODO někde v igc.interactivity() dochází k přehození nul za jedničy,
 # tady se to řeší hackem
-        self.segmentation_tmp = (igc.segmentation == 0).astype(np.int8)
+        self.segmentation = (igc.segmentation == 0).astype(np.int8)
 
         self._interactivity_end(igc)
         #igc.make_gc()
@@ -287,7 +309,7 @@ class OrganSegmentation():
         igc = self._interactivity_begin()
         #igc.interactivity()
         igc.make_gc()
-        self.segmentation_tmp = (igc.segmentation == 0).astype(np.int8)
+        self.segmentation = (igc.segmentation == 0).astype(np.int8)
         self._interactivity_end(igc)
         #igc.show_segmentation()
 
@@ -335,7 +357,10 @@ class OrganSegmentation():
 
 # xx and yy are 200x200 tables containing the x and y coordinates as values
 # mgrid is a mesh creation helper
-            xx, yy = np.mgrid[:self.seeds.shape[0], :self.seeds.shape[1]]
+            xx, yy = np.mgrid[
+                    :self.iparams['seeds'].shape[0], 
+                    :self.iparams['seeds'].shape[1]
+                    ]
 # circles contains the squared distance to the (100, 100) point
 # we are just using the circle equation learnt at school
             circle = (
@@ -348,12 +373,12 @@ class OrganSegmentation():
             slicecircle = circle < radius
             slicen = int(z_mm / self.voxelsize_mm[2])
             # slice s tim co už je v něm nastaveno
-            slicetmp = self.seeds[:, :, slicen]
+            slicetmp = self.iparams['seeds'][:, :, slicen]
             #import pdb; pdb.set_trace()
 
             slicetmp[slicecircle == 1] = label
 
-            self.seeds[:, :, slicen] = slicetmp
+            self.iparams['seeds'][:, :, slicen] = slicetmp
 
 #, QMainWindow
             #import py3DSeedEditor
@@ -678,7 +703,7 @@ def main():
         data = oseg.export()
 
         misc.obj_to_file(data, "organ.pkl", filetype='pickle')
-        misc.obj_to_file(oseg.get_ipars(), 'ipars.pkl', filename='pickle')
+        misc.obj_to_file(oseg.get_ipars(), 'ipars.pkl', filetype='pickle')
     #output = segmentation.vesselSegmentation(oseg.data3d,
     # oseg.orig_segmentation)
 
