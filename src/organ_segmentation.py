@@ -35,6 +35,7 @@ import argparse
 
 import segmentation
 import qmisc
+import misc
 
 
 def interactive_imcrop(im):
@@ -57,7 +58,8 @@ class OrganSegmentation():
             data3d=None,
             metadata=None,
             seeds=None,
-            edit_data=False
+            edit_data=False,
+            iparams=None
             ):
         """
         datadir: path to directory with dicom files
@@ -67,7 +69,7 @@ class OrganSegmentation():
             If both are setted, datadir is ignored
         """
         self.parameters = {}
-        self.interactivity_vars= {}
+        self.iparams= {}
 
         self.datadir = datadir
         if np.isscalar(working_voxelsize_mm):
@@ -78,8 +80,8 @@ class OrganSegmentation():
         # TODO uninteractive Serie selection
         if data3d is None or metadata is None:
 
-            if self.interactivity_parameters.has_key('datadir'):
-                datadir = self.interactivity_parameters['datadir']
+            if self.iparams.has_key('datadir'):
+                datadir = self.iparams['datadir']
 
 
             #self.data3d, self.metadata = dcmr.dcm_read_from_dir(datadir)
@@ -89,7 +91,7 @@ class OrganSegmentation():
             reader = dcmr.DicomReader(datadir)
             self.data3d = reader.get_3Ddata()
             self.metadata = reader.get_metaData()
-            self.interactivity_vars['series_number'] = reader.series_number
+            self.iparams['series_number'] = reader.series_number
         else:
             self.data3d = data3d
             self.metadata = metadata
@@ -118,19 +120,34 @@ class OrganSegmentation():
 
         self.zoom = self.voxelsize_mm / working_voxelsize_mm
 
-    def set_interactivity_vars(self, interactivity_vars):
+    def set_iparams(self, iparams):
         """
         Set interactivity variables. Make numpy array from scipy sparse 
         matrix.
         """
 
-#        # seeds may be stored in sparse matrix
-#        if qmisc.SparseMatrix.issparse(interactivity_vars['seeds']):
-#            interactivity_vars['seeds'] = \
-#                    interactivity_vars['seeds'].todense()
-#        #import pdb; pdb.set_trace()
+        # seeds may be stored in sparse matrix
+        try:
+            if qmisc.SparseMatrix.issparse(iparams['seeds']):
+                iparams['seeds'] = iparams['seeds'].todense()
+            #import pdb; pdb.set_trace()
+        except:
+            # patrne neni SparseMatrix
+            pass
 
-        self.interactivity_vars = interactivity_vars
+        self.iparams = iparams
+
+    def get_iparams(self):
+        self.iparams['seeds'] = qmisc.SparseMatrix(self.iparams['seeds'])
+
+        return self.iparams
+
+#    def save_ipars(self, filename = 'ipars.pkl'):
+#        import misc
+#        misc.obj_to_file(self.get_ipars(), filename)
+        
+
+
 
     def _interactivity_begin(self):
         data3d_res = scipy.ndimage.zoom(
@@ -178,29 +195,39 @@ class OrganSegmentation():
         return igc
 
     def _interactivity_end(self, igc):
+        self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
         segm_orig_scale = scipy.ndimage.zoom(
-                self.segmentation,
+                self.segmentation_tmp,
                 1.0 / self.zoom,
                 mode='nearest',
                 order=0
                 ).astype(np.int8)
+        #segm_orig_scale = scipy.ndimage.zoom(
+        #        self.segmentation,
+        #        1.0 / self.zoom,
+        #        mode='nearest',
+        #        order=0
+        #        ).astype(np.int8)
+
+
         #print  np.sum(self.segmentation)*np.prod(self.voxelsize_mm)
 
 # @TODO odstranit hack pro oříznutí na stejnou velikost
 # v podstatě je to vyřešeno
-        shp = [
-                np.min([segm_orig_scale.shape[0], self.data3d.shape[0]]),
-                np.min([segm_orig_scale.shape[1], self.data3d.shape[1]]),
-                np.min([segm_orig_scale.shape[2], self.data3d.shape[2]]),
-                ]
-        #self.data3d = self.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
-
-        self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
-        self.segmentation[
-                0:shp[0],
-                0:shp[1],
-                0:shp[2]] = segm_orig_scale[0:shp[0], 0:shp[1], 0:shp[2]]
-
+#        shp = [
+#                np.min([segm_orig_scale.shape[0], self.data3d.shape[0]]),
+#                np.min([segm_orig_scale.shape[1], self.data3d.shape[1]]),
+#                np.min([segm_orig_scale.shape[2], self.data3d.shape[2]]),
+#                ]
+#        #self.data3d = self.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
+#
+#        self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
+#        self.segmentation[
+#                0:shp[0],
+#                0:shp[1],
+#                0:shp[2]] = segm_orig_scale[0:shp[0], 0:shp[1], 0:shp[2]]
+#
+        self.segmentation_tmp = None
         if self.smoothing:
             self.segmentation_smoothing(self.smoothing_mm)
 
@@ -240,7 +267,7 @@ class OrganSegmentation():
         igc.interactivity()
 # @TODO někde v igc.interactivity() dochází k přehození nul za jedničy,
 # tady se to řeší hackem
-        self.segmentation = (igc.segmentation == 0).astype(np.int8)
+        self.segmentation_tmp = (igc.segmentation == 0).astype(np.int8)
 
         self._interactivity_end(igc)
         #igc.make_gc()
@@ -260,7 +287,7 @@ class OrganSegmentation():
         igc = self._interactivity_begin()
         #igc.interactivity()
         igc.make_gc()
-        self.segmentation = (igc.segmentation == 0).astype(np.int8)
+        self.segmentation_tmp = (igc.segmentation == 0).astype(np.int8)
         self._interactivity_end(igc)
         #igc.show_segmentation()
 
@@ -569,6 +596,9 @@ def main():
             -vs [3,3,5]')
     parser.add_argument('-mroi', '--manualroi', action='store_true',
             help='manual crop before data processing')
+    parser.add_argument('-iparams', '--iparams', 
+            default=None, 
+            help='filename of ipars file with stored interactivity')
     parser.add_argument('-t', '--tests', action='store_true',
             help='run unittest')
     parser.add_argument('-tx', '--textureanalysis', action='store_true',
@@ -604,6 +634,9 @@ def main():
 
         args.dcmdir = '../sample_data/\
                 matlab/examples/sample_data/DICOM/digest_article/'
+
+    if args.iparams is not None:
+        args.iparams = misc.obj_from_file(args.iparams)
     #else:
     #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
@@ -613,7 +646,8 @@ def main():
             manualroi=args.manualroi,
             texture_analysis=args.textureanalysis,
             edit_data=args.editdata,
-            smoothing=args.segmentation_smoothing
+            smoothing=args.segmentation_smoothing,
+            iparams=args.iparamss
             )
 
     oseg.interactivity()
@@ -640,11 +674,11 @@ def main():
     savestring = raw_input('Save output data? (y/n): ')
     #sn = int(snstring)
     if savestring in ['Y', 'y']:
-        import misc
 
         data = oseg.export()
 
-        misc.obj_to_file(data, "organ.pickle", filetype='pickle')
+        misc.obj_to_file(data, "organ.pkl", filetype='pickle')
+        misc.obj_to_file(oseg.get_ipars(), 'ipars.pkl', filename='pickle')
     #output = segmentation.vesselSegmentation(oseg.data3d,
     # oseg.orig_segmentation)
 
