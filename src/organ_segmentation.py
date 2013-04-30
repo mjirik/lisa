@@ -672,7 +672,7 @@ def main():
             texture_analysis=args.textureanalysis,
             edit_data=args.editdata,
             smoothing=args.segmentation_smoothing,
-            iparams=args.iparamss
+            iparams=args.iparams
             )
 
     oseg.interactivity()
