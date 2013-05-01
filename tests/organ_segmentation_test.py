@@ -19,6 +19,10 @@ import numpy as np
 import organ_segmentation
 import dcmreaddata1 as dcmr
 
+
+#  nosetests tests/organ_segmentation_test.py:OrganSegmentationTest.test_create_iparams
+
+
 class OrganSegmentationTest(unittest.TestCase):
     interactiveTest = False
 
@@ -65,8 +69,8 @@ class OrganSegmentationTest(unittest.TestCase):
         volume = oseg.get_segmented_volume_size_mm3()
         print volume
 
-        self.assertGreater(volume,50000)
-        self.assertLess(volume,1200000)
+        self.assertGreater(volume, 50000)
+        self.assertLess(volume, 1200000)
 
 
 #        roi_mm = [[3,3,3],[150,150,50]]
@@ -77,6 +81,30 @@ class OrganSegmentationTest(unittest.TestCase):
 #        oseg.ni_set_seeds(coordinates_mm, label, radius)
 #
 #        oseg.make_segmentation()
+
+    #@unittest.skipIf(not interactiveTest, "interactive test")
+    def test_create_iparams(self):
+        """
+        Interactivity is stored to file
+        """
+        import misc
+        dcmdir = os.path.join(path_to_script,'./../sample_data/jatra_5mm')
+        
+        oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4)
+        oseg.interactivity()
+
+        volume = oseg.get_segmented_volume_size_mm3()
+
+        misc.obj_to_file(oseg.get_iparams(),'iparams.pkl',filetype='pickle')
+
+        self.assertGreater(volume,1000000)
+
+
+    @unittest.skipIf(not interactiveTest, "interactive test")
+    def test_stored_interactivity(self):
+        pass
+
+
 
     def test_box_segmentation(self):
         """
@@ -92,8 +120,7 @@ class OrganSegmentationTest(unittest.TestCase):
         seeds = np.zeros([64,64,32], np.int8)
         seeds [13:31,22:25,9:12] = 1
         seeds [6:9,3:32,9:12] = 2
-#[mm]  10 x 10 x 10
-        #voxelsize_mm = [1,4,3]
+#[mm]  10 x 10 x 10        #voxelsize_mm = [1,4,3]
         voxelsize_mm = [5,5,5]
         metadata = {'voxelsizemm': voxelsize_mm}
 
@@ -120,6 +147,7 @@ class OrganSegmentationTest(unittest.TestCase):
         self.assertLess(volume,1100000)
 
     def test_volume_resize(self):
+        #from scipy.sparse.import lil_matrix
 
         pass
 

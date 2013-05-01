@@ -27,7 +27,6 @@ import misc
 
 def get_subdirs(dirpath, wildcard = '*', outputfile = 'experiment_data.yaml'):
 
-    print dirpath
     dirlist = []
     if os.path.exists(dirpath):
         logger.info('dirpath = '  + dirpath )
@@ -36,21 +35,21 @@ def get_subdirs(dirpath, wildcard = '*', outputfile = 'experiment_data.yaml'):
         logger.error('Wrong path: '  + dirpath )
         raise Exception('Wrong path : ' + dirpath )
 
+    dirpath = os.path.abspath(dirpath)
     #print 'copmpletedirpath = ', completedirpath
     #import pdb; pdb.set_trace()
     dirlist = {
             o:{'abspath':os.path.abspath(o)} 
-            for o in os.listdir(dirpath) #if os.path.isdir(os.path.abspath(o))
+            for o in os.listdir(dirpath) if os.path.isdir(os.path.join(dirpath,o))
             }
     #import pdb; pdb.set_trace()
 
-    print [o for o in os.listdir(dirpath) if os.path.isdir(os.path.abspath(o))]
+    #print [o for o in os.listdir(dirpath) if os.path.isdir(os.path.abspath(o))]
             
     #for infile in glob.glob( os.path.join(dirpath, wildcard) ):
     #    dirlist.append(infile)
     #    #print "current file is: " + infile
 
-    print dirlist
     misc.obj_to_file(dirlist, 'experiment_data.yaml','yaml')
     return dirlist
 

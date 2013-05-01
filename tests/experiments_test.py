@@ -24,7 +24,9 @@ import experiments
 class ExperimentsTest(unittest.TestCase):
 
     def test_get_subdirs(self):
-        dirlist = experiments.get_subdirs(os.path.join(path_to_script, ".."))
+        dirpath = os.path.join(path_to_script, "..")
+        dirlist = experiments.get_subdirs(dirpath)
+        #import pdb; pdb.set_trace()
 
         self.assertTrue('tests' in dirlist)
         self.assertTrue('extern' in dirlist)
