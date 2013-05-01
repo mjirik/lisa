@@ -19,7 +19,6 @@ sys.path.append("../src/")
 sys.path.append("../extern/")
 
 import uiThreshold
-import uiBinaryClosingAndOpening
 
 import numpy
 import numpy.matlib
@@ -40,7 +39,7 @@ import gc as garbage
 Vessel segmentation z jater.
     input:
         data - CT (nebo MRI) 3D data
-        segmentation - zakladni oblast pro segmentaci, oznacena struktura veliksotne totozna s "data",
+        segmentation - zakladni oblast pro segmentaci, oznacena struktura se stejnymi rozmery jako "data",
             kde je oznaceni (label) jako:
                 1 jatra,
                 -1 zajimava tkan (kosti, ...)
@@ -51,63 +50,59 @@ Vessel segmentation z jater.
         dilationIterations - pocet operaci dilation nad zakladni oblasti pro segmentaci ("segmantation")
         dilationStructure - struktura pro operaci dilation
         nObj - oznacuje, kolik nejvetsich objektu se ma vyhledat - pokud je rovno 0 (nule), vraci cela data
-        dataFiltering - oznacuje, jestli maji data byt filtrovana (True) nebo nemaji byt
-            nebo filtrovana (False) (== uz jsou filtrovana)
+        interactivity - nastavi, zda ma nebo nema byt pouzit interaktivni mod upravy dat
+        binaryClosingIterations - vstupni binary closing operations
+        binaryOpeningIterations - vstupni binary opening operations
 
     returns:
         ---
 """
 def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsizemm = [1,1,1], inputSigma = -1,
-dilationIterations = 0, dilationStructure = None, nObj = 1, dataFiltering = True,
-interactivity = True, binaryClosingIterations = 0, binaryOpeningIterations = 0):
+dilationIterations = 0, dilationStructure = None, nObj = 1,
+interactivity = True, binaryClosingIterations = 1, binaryOpeningIterations = 1):
 
     print('Pripravuji data...')
 
-    ## Pokud jsou data nefiltrovana, tak nasleduje filtrovani.
-    if(dataFiltering):
-        voxel = numpy.array(voxelsizemm)
+    voxel = numpy.array(voxelsizemm)
 
-        ## Kalkulace objemove jednotky (voxel) (V = a*b*c).
-        voxel1 = voxel[0]#[0]
-        voxel2 = voxel[1]#[0]
-        voxel3 = voxel[2]#[0]
-        voxelV = voxel1 * voxel2 * voxel3
+    ## Kalkulace objemove jednotky (voxel) (V = a*b*c).
+    voxel1 = voxel[0]#[0]
+    voxel2 = voxel[1]#[0]
+    voxel3 = voxel[2]#[0]
+    voxelV = voxel1 * voxel2 * voxel3
 
-        ## number je zaokrohleny 2x nasobek objemove jednotky na 2 desetinna mista.
-        ## number stanovi doporucenou horni hranici parametru gauss. filtru.
-        number = (numpy.round((2 * voxelV**(1.0/3.0)), 2))
+    ## number je zaokrohleny 2x nasobek objemove jednotky na 2 desetinna mista.
+    ## number stanovi doporucenou horni hranici parametru gauss. filtru.
+    number = (numpy.round((2 * voxelV**(1.0/3.0)), 2))
 
-        ## Operace dilatace (dilation) nad samotnymi jatry ("segmentation").
-        if(dilationIterations > 0.0):
-            segmentation = scipy.ndimage.binary_dilation(input = segmentation,
-                structure = dilationStructure, iterations = dilationIterations)
+    ## Operace dilatace (dilation) nad samotnymi jatry ("segmentation").
+    if(dilationIterations > 0.0):
+        segmentation = scipy.ndimage.binary_dilation(input = segmentation,
+            structure = dilationStructure, iterations = dilationIterations)
 
-        ## Ziskani datove oblasti jater (bud pouze jater nebo i jejich okoli - zalezi,
-        ## jakym zpusobem bylo nalozeno s operaci dilatace dat).
-        preparedData = data * (segmentation == 1)
-        del(data)
-        del(segmentation)
+    ## Ziskani datove oblasti jater (bud pouze jater nebo i jejich okoli - zalezi,
+    ## jakym zpusobem bylo nalozeno s operaci dilatace dat).
+    preparedData = data * (segmentation == 1)
+    del(data)
+    del(segmentation)
 
-        ## Filtrovani (rozmazani) a prahovani dat.
-        if(inputSigma == -1):
-            inputSigma = number
-        if(inputSigma > number):
-            inputSigma = number
-        uiT = uiThreshold.uiThreshold(preparedData, voxel, threshold, interactivity, number, inputSigma, nObj)
-        filteredData = uiT.run()
-        del(uiT)
-        garbage.collect()
+    ## Filtrovani (rozmazani) a prahovani dat.
+    if(inputSigma == -1):
+        inputSigma = number
+    if(inputSigma > number):
+        inputSigma = number
 
-    ## Binarni otevreni a uzavreni.
-    uiB = uiBinaryClosingAndOpening.uiBinaryClosingAndOpening(filteredData, binaryClosingIterations,
-        binaryOpeningIterations, interactivity)
-    output = uiB.run()
-    del(uiB)
+    ## Filtrovani.
+    uiT = uiThreshold.uiThreshold(preparedData, voxel, threshold,
+        interactivity, number, inputSigma, nObj, binaryClosingIterations,
+        binaryOpeningIterations)
+    output = uiT.run()
+    del(uiT)
     garbage.collect()
 
-
     ## Vraceni matice
-    return getBiggestObjects(data = output, N = nObj)
+    return output
+
     """
     if(dataFiltering == False):
         ## Data vstoupila jiz filtrovana, tudiz neprosly nalezenim nejvetsich objektu.
@@ -148,16 +143,16 @@ def getBiggestObjects(data, N):
 
     ## Osetreni neocekavane situace.
     if(N > len(arrayLabels)):
-        print('Pocet nejvetsich objektu k vraceni chcete vetsi nez je oznacenych oblasti!')
-        print('Redukuji pocet nejvetsich objektu k vraceni...')
+##        print('Pocet nejvetsich objektu k vraceni chcete vetsi nez je oznacenych oblasti!')
+##        print('Redukuji pocet nejvetsich objektu k vraceni...')
         N = len(arrayLabels)
+        return data
 
     ##for index1 in range(0, len(arrayLabelsSum)):
         ##print(str(arrayLabels[index1]) + " " + str(arrayLabelsSum[index1]))
 
-    return data == 1
+##    return data == 1
 
-"""
     ## Upraveni dat (ziskani N nejvetsich objektu).
     search = N
     if (sys.version_info[0] < 3):
@@ -181,8 +176,7 @@ def getBiggestObjects(data, N):
     del(arrayLabelsSum)
     garbage.collect()
 
-    return data - newData - 1
-"""
+    return data - newData# - 1
 
 """
 Zjisti cetnosti jednotlivych oznacenych ploch (labeled areas)
@@ -308,14 +302,11 @@ if __name__ == "__main__":
     #print('Hotovo.')
 
     #import pdb; pdb.set_trace()
-    if(op3D):
-        structure = None
-        outputTmp = vesselSegmentation(mat['data'], mat['segmentation'], threshold = -1,
-            voxelsizemm = mat['voxelsizemm'], inputSigma = 0.15, dilationIterations = 2,
-            nObj = 1, dataFiltering = True, interactivity = True, binaryClosingIterations = 1,
-            binaryOpeningIterations = 1)
-    else:
-        outputTmp = vesselSegmentation(data = mat, segmentation = mat)
+    structure = None
+    outputTmp = vesselSegmentation(mat['data'], mat['segmentation'], threshold = -1,
+        voxelsizemm = mat['voxelsizemm'], inputSigma = 0.15, dilationIterations = 2,
+        nObj = 1, interactivity = True, binaryClosingIterations = 5,
+        binaryOpeningIterations = 1)
 
     import inspector
     inspect = inspector.inspector(outputTmp)
@@ -337,7 +328,3 @@ if __name__ == "__main__":
     garbage.collect()
     sys.exit()
 
-# TODO: vraceni nastavenych parametru
-# TODO: priprava na testy
-# TODO: testy
-# TODO: pridani cev (graficke)
