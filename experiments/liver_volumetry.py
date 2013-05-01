@@ -1,0 +1,118 @@
+#! /usr/bin/python
+# -*- coding: utf-8 -*-
+
+# import funkcí z jiného adresáře
+import sys
+import os.path
+
+path_to_script = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(path_to_script, "../src/"))
+sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
+sys.path.append(os.path.join(path_to_script,
+                             "../extern/pycat/extern/py3DSeedEditor/"))
+#sys.path.append(os.path.join(path_to_script, "../extern/"))
+#import featurevector
+import unittest
+
+import logging
+logger = logging.getLogger(__name__)
+
+
+#import apdb
+#  apdb.set_trace();
+#import scipy.io
+import numpy as np
+import scipy
+#from scipy import sparse
+
+# ----------------- my scripts --------
+import py3DSeedEditor
+#import dcmreaddata1 as dcmr
+import dcmreaddata as dcmr
+import pycat
+import argparse
+#import py3DSeedEditor
+
+import segmentation
+import qmisc
+import misc
+import organ_segmentation
+import experiments
+
+
+def main():
+
+    #logger = logging.getLogger(__name__)
+    logger = logging.getLogger()
+
+    logger.setLevel(logging.WARNING)
+    ch = logging.StreamHandler()
+    logger.addHandler(ch)
+
+    #logger.debug('input params')
+
+    # input parser
+    params = {'datadir':None, 'working_voxelsize_mm':4}
+
+    dirpath = os.path.join(path_to_script, "../../../data/medical/data_orig/")
+
+    experiment_results = {'params':params,'dirpath':dirpath, 'volume':{}}
+
+    output_dirpath = './'
+    dirlist = experiments.get_subdirs(dirpath)
+
+    for key in dirlist:
+        print key
+
+#        import pdb; pdb.set_trace()
+        dirname = dirlist[key]['abspath']
+        params['datadir'] = dirname
+
+        oseg = organ_segmentation.OrganSegmentation(**params)
+
+        oseg.interactivity()
+        print (
+                "Volume " +
+                str(oseg.get_segmented_volume_size_mm3() / 1000000.0)
+                + ' [l]')
+
+        experiment_results['volume'][key] = oseg.get_segmented_volume_size_mm3()
+
+        head, teil = os.path.split(dirname)
+        filename_organ = os.path.join(output_dirpath, teil)
+
+        data = oseg.export()
+        misc.obj_to_file(data, filename_organ + "-organ.pkl", filetype='pickle')
+        misc.obj_to_file(data, "organ.pkl", filetype='pickle')
+        misc.obj_to_file(oseg.get_iparams(), filename_organ + '-iparams.pkl', filetype='pickle')
+
+    misc.obj_to_file(experiment_results, "results.yaml", filetype='yaml')
+    #igc = pycat.ImageGraphCut(data3d, zoom = 0.5)
+    #igc.interactivity()
+
+    #igc.make_gc()
+    #igc.show_segmentation()
+
+    # volume
+    #volume_mm3 = np.sum(oseg.segmentation > 0) * np.prod(oseg.voxelsize_mm)
+
+    #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour =
+    # oseg.segmentation)
+    #pyed.show()
+
+#    if args.show_output:
+#        oseg.show_output()
+#
+#    savestring = raw_input('Save output data? (y/n): ')
+#    #sn = int(snstring)
+#    if savestring in ['Y', 'y']:
+#
+#        data = oseg.export()
+#
+#        misc.obj_to_file(data, "organ.pkl", filetype='pickle')
+#        misc.obj_to_file(oseg.get_ipars(), 'ipars.pkl', filetype='pickle')
+#    #output = segmentation.vesselSegmentation(oseg.data3d,
+    # oseg.orig_segmentation)
+
+if __name__ == "__main__":
+    main()

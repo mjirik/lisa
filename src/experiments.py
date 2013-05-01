@@ -39,7 +39,7 @@ def get_subdirs(dirpath, wildcard = '*', outputfile = 'experiment_data.yaml'):
     #print 'copmpletedirpath = ', completedirpath
     #import pdb; pdb.set_trace()
     dirlist = {
-            o:{'abspath':os.path.abspath(o)} 
+            o:{'abspath':os.path.abspath(os.path.join(dirpath,o))} 
             for o in os.listdir(dirpath) if os.path.isdir(os.path.join(dirpath,o))
             }
     #import pdb; pdb.set_trace()
