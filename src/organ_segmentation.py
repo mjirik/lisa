@@ -270,7 +270,7 @@ class OrganSegmentation():
             self.segmentation = texture_analysis.segmentation(
                     self.data3d,
                     self.segmentation,
-                    params=self.texture_analysis
+                    self.voxelsize_mm
                     )
 #
 
