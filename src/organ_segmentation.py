@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 import numpy as np
 import scipy
 #from scipy import sparse
+import traceback
 
 # ----------------- my scripts --------
 import py3DSeedEditor
@@ -100,7 +101,7 @@ class OrganSegmentation():
             self.metadata = metadata
 
         if seeds == None:
-            self.iparams['seeds'] = np.zeros(self.data3d.shape)
+            self.iparams['seeds'] = np.zeros(self.data3d.shape, dtype=np.int8)
         else:
             self.iparams['seeds'] = seeds
         self.voxelsize_mm = np.array(self.metadata['voxelsizemm'])
@@ -242,6 +243,8 @@ class OrganSegmentation():
                 0:shp[0],
                 0:shp[1],
                 0:shp[2]] = segm_orig_scale[0:shp[0], 0:shp[1], 0:shp[2]]
+
+        del segm_orig_scale
 
         self.iparams['seeds'] = np.zeros(self.data3d.shape, dtype=np.int8)
         self.iparams['seeds'][

@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 import numpy as np
 import scipy
 #from scipy import sparse
+import traceback
 
 # ----------------- my scripts --------
 import py3DSeedEditor
@@ -54,37 +55,45 @@ def main():
     # input parser
     params = {'datadir':None, 'working_voxelsize_mm':4}
 
-    dirpath = os.path.join(path_to_script, "../../../data/medical/data_orig/")
+    dirpath = os.path.join(path_to_script, "../../../data/medical/data_orig/volumetrie")
 
     experiment_results = {'params':params,'dirpath':dirpath, 'volume':{}}
 
-    output_dirpath = './'
+    output_dirpath = os.path.join(path_to_script, '../../../data/medical')
     dirlist = experiments.get_subdirs(dirpath)
 
     for key in dirlist:
         print key
 
 #        import pdb; pdb.set_trace()
-        dirname = dirlist[key]['abspath']
-        params['datadir'] = dirname
+        try:
+            dirname = dirlist[key]['abspath']
+            params['datadir'] = dirname
 
-        oseg = organ_segmentation.OrganSegmentation(**params)
+            oseg = organ_segmentation.OrganSegmentation(**params)
 
-        oseg.interactivity()
-        print (
-                "Volume " +
-                str(oseg.get_segmented_volume_size_mm3() / 1000000.0)
-                + ' [l]')
+            oseg.interactivity()
+            print (
+                    "Volume " +
+                    str(oseg.get_segmented_volume_size_mm3() / 1000000.0)
+                    + ' [l]')
 
-        experiment_results['volume'][key] = oseg.get_segmented_volume_size_mm3()
+            volume_l = (oseg.get_segmented_volume_size_mm3() / 1000000.0)
 
-        head, teil = os.path.split(dirname)
-        filename_organ = os.path.join(output_dirpath, teil)
+            experiment_results['volume_l'][key] = volume_l
 
-        data = oseg.export()
-        misc.obj_to_file(data, filename_organ + "-organ.pkl", filetype='pickle')
-        misc.obj_to_file(data, "organ.pkl", filetype='pickle')
-        misc.obj_to_file(oseg.get_iparams(), filename_organ + '-iparams.pkl', filetype='pickle')
+            head, teil = os.path.split(dirname)
+            filename_organ = os.path.join(output_dirpath, teil)
+
+            data = oseg.export()
+            misc.obj_to_file(data, filename_organ + "-organ.pkl", filetype='pickle')
+            #misc.obj_to_file(data, "organ.pkl", filetype='pickle')
+            misc.obj_to_file(oseg.get_iparams(), filename_organ + '-iparams.pkl', filetype='pickle')
+            misc.obj_to_file(experiment_results, filename_organ + "-info.yaml", filetype='yaml')
+
+        except:
+            print 'Selhani, pokracujeme dal'
+            print traceback.format_exc()
 
     misc.obj_to_file(experiment_results, "results.yaml", filetype='yaml')
     #igc = pycat.ImageGraphCut(data3d, zoom = 0.5)
