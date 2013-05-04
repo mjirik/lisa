@@ -53,11 +53,11 @@ def main():
     #logger.debug('input params')
 
     # input parser
-    params = {'datadir':None, 'working_voxelsize_mm':4}
+    params = {'datadir':None, 'working_voxelsize_mm':3}
 
     dirpath = os.path.join(path_to_script, "../../../data/medical/data_orig/volumetrie")
 
-    experiment_results = {'params':params,'dirpath':dirpath, 'volume':{}}
+    experiment_results = {'params':params,'dirpath':dirpath, 'volume_l':{}}
 
     output_dirpath = os.path.join(path_to_script, '../../../data/medical')
     dirlist = experiments.get_subdirs(dirpath)
@@ -94,6 +94,7 @@ def main():
         except:
             print 'Selhani, pokracujeme dal'
             print traceback.format_exc()
+            import pdb; pdb.set_trace()
 
     misc.obj_to_file(experiment_results, "results.yaml", filetype='yaml')
     #igc = pycat.ImageGraphCut(data3d, zoom = 0.5)
