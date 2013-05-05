@@ -264,7 +264,7 @@ class OrganSegmentation():
             self.segmentation = self._crop(self.segmentation, self.crinfo)
             self.data3d = self._crop(self.data3d, self.crinfo)
 
-        if self.texture_analysis is not None:
+        if self.texture_analysis not in (None, False):
             import texture_analysis
             # doplnit nějaký kód, parametry atd
             #self.orig_scale_segmentation =
