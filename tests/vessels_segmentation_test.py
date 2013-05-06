@@ -78,7 +78,6 @@ class VesselsSegmentationTest(unittest.TestCase):
             inputSigma = 0.15,
             dilationIterations = 2,
             nObj = 1,
-            dataFiltering = True,
             interactivity = False,
             binaryClosingIterations = 5,
             binaryOpeningIterations = 1)
@@ -107,8 +106,33 @@ class VesselsSegmentationTest(unittest.TestCase):
 
         self.assertLess(errorrate,0.1)
 
+    def test_real_data_segmentation(self):
 
+        import misc
+        dcmdir = os.path.join(path_to_script,'./../sample_data/jatra_5mm')
+        
+        oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4)
+        oseg.add_seeds_mm([120],[120],[80], label=1, radius=30)
+        oseg.add_seeds_mm([170,220,250],[250,250,200],[80], label=2, radius=30)
+        #oseg.interactivity()
+        oseg.ninteractivity()
 
+#
+#
+#        outputTmp = segmentation.vesselSegmentation(
+#            data3d,
+#            segmentation = segm==slab['liver'],
+#            #segmentation = oseg.orig_scale_segmentation,
+#            voxelsizemm = voxelsize_mm,
+#            threshold = 1204,
+#            inputSigma = 0.15,
+#            dilationIterations = 2,
+#            nObj = 1,
+#            interactivity = False,
+#            binaryClosingIterations = 5,
+#            binaryOpeningIterations = 1)
+#
+#
 
 if __name__ == "__main__":
     unittest.main()

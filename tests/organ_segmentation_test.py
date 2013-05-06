@@ -91,7 +91,10 @@ class OrganSegmentationTest(unittest.TestCase):
         dcmdir = os.path.join(path_to_script,'./../sample_data/jatra_5mm')
         
         oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4)
-        oseg.interactivity()
+        oseg.add_seeds_mm([120],[120],[80], label=1, radius=30)
+        oseg.add_seeds_mm([170,220,250],[250,250,200],[80], label=2, radius=30)
+        #oseg.interactivity()
+        oseg.ninteractivity()
 
         volume = oseg.get_segmented_volume_size_mm3()
 

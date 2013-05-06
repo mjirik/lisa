@@ -200,6 +200,7 @@ class OrganSegmentation():
         return igc
 
     def _interactivity_end(self, igc):
+        logger.debug('_interactivity_end')
         #print "sh3", self.data3d.shape 
 
 
@@ -286,12 +287,17 @@ class OrganSegmentation():
         # prefilter=False, mode= 'nearest', order = 1)
         #seeds = self.seeds.astype(np.int8)
 
+        logger.debug('interactivity')
         if self.edit_data:
             self.data3d = self.data_editor(self.data3d)
         igc = self._interactivity_begin()
+        logger.debug('_interactivity_begin()')
         igc.interactivity()
 # @TODO někde v igc.interactivity() dochází k přehození nul za jedničy,
 # tady se to řeší hackem
+        if type (igc.segmentation) is list:
+            raise Exception("Interactive object segmentation failed.\
+                    You must select seeds.")
         self.segmentation = (igc.segmentation == 0).astype(np.int8)
 
         self._interactivity_end(igc)
@@ -345,6 +351,7 @@ class OrganSegmentation():
     def add_seeds_mm(self, x_mm, y_mm, z_mm, label, radius):
         """
         Function add circle seeds to one slice with defined radius.
+        It is possible set more seeds on one slice with one dimension
 
         x_mm, y_mm coordinates of circle in mm. It may be array.
         z_mm = slice coordinates  in mm. It may be array

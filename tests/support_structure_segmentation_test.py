@@ -30,6 +30,7 @@ class SupportStructureSegmentationTest(unittest.TestCase):
         self.data3d = reader.get_3Ddata()
         self.metadata = reader.get_metaData()
 
+    @unittest.skip("comment after implementation")
     def test_bone_segmentation(self):
         """
         Check values in two areas.
@@ -65,6 +66,7 @@ class SupportStructureSegmentationTest(unittest.TestCase):
         #import pdb; pdb.set_trace()
 
 
+    @unittest.skip("comment after implementation")
     def test_lungs_segmentation(self):
         """
         Check values in two areas.
