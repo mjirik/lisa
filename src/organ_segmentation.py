@@ -60,7 +60,8 @@ class OrganSegmentation():
             metadata=None,
             seeds=None,
             edit_data=False,
-            iparams=None
+            iparams=None,
+            qt_app=False
             ):
         """
         datadir: path to directory with dicom files
@@ -90,7 +91,7 @@ class OrganSegmentation():
 
             #self.data3d, self.metadata = dcmr.dcm_read_from_dir(datadir)
             if datadir == None:
-                datadir = dcmr.get_dcmdir_qt()
+                datadir = dcmr.get_dcmdir_qt(qt_app)
 
             reader = dcmr.DicomReader(datadir)
             self.data3d = reader.get_3Ddata()
