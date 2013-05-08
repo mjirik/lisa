@@ -39,6 +39,28 @@ class PycutTest(unittest.TestCase):
         x_noisy = x + np.random.normal(0, 0.6, size=x.shape)
         return x_noisy
 
+
+    def test_boundary_penalty(self):
+        data = self.generate_data([16,16,16])
+# instead of showing just test results
+        #app = QApplication(sys.argv)
+        #pyed = seed_editor_qt.QTSeedEditor(data)
+        #app.exec_()
+
+
+        import scipy.ndimage.filters
+
+        #filtered = scipy.ndimage.filters.prewitt(data,0)
+        #filtered = scipy.ndimage.filters.sobel(data,0)
+        filtered = scipy.ndimage.filters.gaussian_filter1d(data,sigma=0.6,axis=0, order=1)
+
+        from PyQt4.QtGui import QApplication
+        app = QApplication(sys.argv)
+        pyed = seed_editor_qt.QTSeedEditor(filtered)
+        app.exec_()
+
+
+    @unittest.skipIf(not interactivetTest, 'interactiveTest')
     def test_segmentation(self):
         data_shp = [16,16,16]
         data = self.generate_data(data_shp)
