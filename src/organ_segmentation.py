@@ -61,7 +61,7 @@ class OrganSegmentation():
             seeds=None,
             edit_data=False,
             iparams=None,
-            qt_app=False
+            qt_app=None
             ):
         """
         datadir: path to directory with dicom files
@@ -82,6 +82,10 @@ class OrganSegmentation():
         else:
             self.working_voxelsize_mm = working_voxelsize_mm
 
+        if qt_app == None:
+            from PyQt4.QtGui import QApplication
+            qt_app = QApplication(sys.argv)
+        self.qt_app = qt_app
         # TODO uninteractive Serie selection
         if data3d is None or metadata is None:
 
@@ -93,7 +97,8 @@ class OrganSegmentation():
             if datadir == None:
                 datadir = dcmr.get_dcmdir_qt(qt_app)
 
-            reader = dcmr.DicomReader(datadir)
+            # @TODO dialog v qt
+            reader = dcmr.DicomReader(datadir) # , qt_app=qt_app)
             self.data3d = reader.get_3Ddata()
             self.metadata = reader.get_metaData()
             self.iparams['series_number'] = reader.series_number
@@ -114,6 +119,7 @@ class OrganSegmentation():
         self.smoothing = smoothing
         self.smoothing_mm = smoothing_mm
         self.edit_data = edit_data
+        self.qt_app = qt_app
 
 # manualcrop
         if manualroi:
@@ -293,7 +299,7 @@ class OrganSegmentation():
             self.data3d = self.data_editor(self.data3d)
         igc = self._interactivity_begin()
         logger.debug('_interactivity_begin()')
-        igc.interactivity()
+        igc.interactivity(qt_app = self.qt_app, min_val=800, max_val=1300)
 # @TODO někde v igc.interactivity() dochází k přehození nul za jedničy,
 # tady se to řeší hackem
         if type (igc.segmentation) is list:
