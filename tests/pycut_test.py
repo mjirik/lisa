@@ -27,8 +27,10 @@ import pycat
 import dcmreaddata as dcmr
 import seed_editor_qt
 
+print sys.argv
 class PycutTest(unittest.TestCase):
     interactivetTest = False
+    #interactivetTest = True
 
     def generate_data(self, shp=[16,16,16]):
         """ Generating random data with cubic object inside"""
@@ -41,7 +43,7 @@ class PycutTest(unittest.TestCase):
 
 
     def test_boundary_penalty(self):
-        data = self.generate_data([16,16,16])
+        data = self.generate_data([16,16,16])*100
 # instead of showing just test results
         #app = QApplication(sys.argv)
         #pyed = seed_editor_qt.QTSeedEditor(data)
@@ -51,14 +53,33 @@ class PycutTest(unittest.TestCase):
         import scipy.ndimage.filters
 
         #filtered = scipy.ndimage.filters.prewitt(data,0)
-        #filtered = scipy.ndimage.filters.sobel(data,0)
-        filtered = scipy.ndimage.filters.gaussian_filter1d(data,sigma=0.6,axis=0, order=1)
+        filtered = scipy.ndimage.filters.sobel(data,0)
+        #filtered = scipy.ndimage.filters.gaussian_filter1d(data,sigma=0.6,axis=0, order=1)
+
+# Oproti Boykov2001b tady nedělím dvojkou. Ta je tam jen proto, 
+# aby to slušně vycházelo
+        filtered2 = (-np.power(filtered,2)/(16*np.var(data))) 
+# Přičítám tu 1024 což je empiricky zjištěná hodnota - aby to dobře vyšlo
+        filtered2 = filtered2 + 256 # - np.min(filtered2) + 1e-30
+        print 'max '  , np.max(filtered2)
+        print 'min '  , np.min(filtered2)
+        import pdb; pdb.set_trace()
+        #np.exp(-np.random.normal(0
 
         from PyQt4.QtGui import QApplication
         app = QApplication(sys.argv)
-        pyed = seed_editor_qt.QTSeedEditor(filtered)
+        pyed = seed_editor_qt.QTSeedEditor(filtered2)
         app.exec_()
 
+        filtered3 = np.exp(filtered2)
+
+        pyed = seed_editor_qt.QTSeedEditor(filtered3)
+        app.exec_()
+
+        import matplotlib.pyplot as plt
+        plt.imshow(filtered3[:,:,5])
+        plt.colorbar()
+        plt.show()
 
     @unittest.skipIf(not interactivetTest, 'interactiveTest')
     def test_segmentation(self):
