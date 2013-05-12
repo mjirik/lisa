@@ -32,16 +32,69 @@ class PycutTest(unittest.TestCase):
     interactivetTest = False
     #interactivetTest = True
 
-    def generate_data(self, shp=[16,16,16]):
+    def generate_data(self, shp=[16,16,16], object_type='box'):
         """ Generating random data with cubic object inside"""
 
         x = np.ones(shp)
 # inserting box
-        x[4:-4, 6:-2, 1:-6] = -1
+        if object_type == 'box':
+            x[4:-4, 6:-2, 1:-6] = -1
+        elif object_type == 'empty_box':
+            x[4:-4, 6:-2, 1:-6] = -1
+            x[5:-5, 7:-3, 2:-7] = 1
+        elif object_type == 'wall':
+            x[5,:,:] = -3
+
         x_noisy = x + np.random.normal(0, 0.6, size=x.shape)
         return x_noisy
 
+    def test_segmentation_with_boundary_penalties(self):
+        data_shp = [16,16,16]
+        #data = self.generate_data(data_shp, boundary_only=True)
+        data = self.generate_data(data_shp, object_type='wall')
+        seeds = np.zeros(data_shp)
+# setting background seeds
+        seeds[:,0,0] = 1
+        seeds[6,8:-5,2] = 2
+        #x[4:-4, 6:-2, 1:-6] = -1
 
+        gcparams = {'pairwiseAlpha':1, 'use_boundary_penalties':True}
+        igc = pycat.ImageGraphCut(data, gcparams=gcparams)
+        igc.interactivity()
+# instead of interacitivity just set seeeds
+        #igc.set_seeds(seeds)
+        #igc.make_gc()
+
+# instead of showing just test results
+#        from PyQt4.QtGui import QApplication
+#        app = QApplication(sys.argv)
+#        pyed = seed_editor_qt.QTSeedEditor(igc.segmentation,
+#                            modeFun=self.interactivity_loop,
+#                            voxelVolume=self.voxel_volume,
+#                            seeds=self.seeds, minVal=min_val, maxVal=max_val)
+#        app.exec_()
+        #igc.show_segmentation()
+        segmentation = igc.segmentation
+        # Testin some pixels for result
+        self.assertTrue(segmentation[0, 0, -1] == 0)
+        self.assertTrue(segmentation[7, 9, 3] == 1)
+        self.assertTrue(np.sum(segmentation) > 10)
+
+    def test_boundary_penalty_array(self):
+        """
+        Test if on edge are smaller values
+        """
+
+        data = self.generate_data([16,16,16])*100
+        igc = pycat.ImageGraphCut(data)
+        #igc.interactivity()
+
+        penalty_array = igc.boundary_penalties_array(axis=0)
+        edge_area_pattern = np.mean(penalty_array[3:5,8:10,2])
+        flat_area_pattern = np.mean(penalty_array[1:3,3:6,-4:-2])
+        self.assertGreater(flat_area_pattern, edge_area_pattern)
+
+    @unittest.skipIf(not interactivetTest, 'interactiveTest')
     def test_boundary_penalty(self):
         data = self.generate_data([16,16,16])*100
 # instead of showing just test results
@@ -58,9 +111,9 @@ class PycutTest(unittest.TestCase):
 
 # Oproti Boykov2001b tady nedělím dvojkou. Ta je tam jen proto, 
 # aby to slušně vycházelo
-        filtered2 = (-np.power(filtered,2)/(16*np.var(data))) 
+        filtered2 = (-np.power(filtered,2)/(512*np.var(data))) 
 # Přičítám tu 1024 což je empiricky zjištěná hodnota - aby to dobře vyšlo
-        filtered2 = filtered2 + 256 # - np.min(filtered2) + 1e-30
+        filtered2 = filtered2 + 0 # - np.min(filtered2) + 1e-30
         print 'max '  , np.max(filtered2)
         print 'min '  , np.min(filtered2)
         import pdb; pdb.set_trace()
