@@ -61,7 +61,7 @@ if __name__ == "__main__":
     parser.add_argument('-i', '--inputfile',  default=None,
             help='input file from organ_segmentation')
     parser.add_argument('-ii', '--defaultinputfile',  action='store_true',
-            help='"organ.pickle" as input file from organ_segmentation')
+            help='"organ.pkl" as input file from organ_segmentation')
     parser.add_argument('-o', '--outputfile',  default=None,
             help='output file')
     parser.add_argument('-oo', '--defaultoutputfile',  action='store_true',
@@ -79,7 +79,7 @@ if __name__ == "__main__":
         unittest.main()
         sys.exit()
 
-    defaultoutputfile =  "vessels.pickle"
+    defaultoutputfile =  "vessels.pkl"
     if args.defaultoutputfile:
         args.outputfile = defaultoutputfile
 
@@ -112,8 +112,9 @@ if __name__ == "__main__":
     #oseg.data3d = oseg.data3d[cri[0][0]:cri[0][1],cri[1][0]:cri[1][1],cri[2][0]:cri[2][1]]
     #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour = oseg.orig_scale_segmentation)
 
-    #pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], contour = data['segmentation'])
-    #pyed.show()
+    print 'slab', data['slab']
+    pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], contour = data['segmentation'])
+    pyed.show()
     #import pdb; pdb.set_trace()
 
     outputTmp = segmentation.vesselSegmentation(
@@ -124,7 +125,7 @@ if __name__ == "__main__":
         inputSigma = 0.15,
         dilationIterations = 2,
         nObj = 1,
-        dataFiltering = True,
+#        dataFiltering = True,
         interactivity = True,
         binaryClosingIterations = 5,
         binaryOpeningIterations = 1)

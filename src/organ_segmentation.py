@@ -720,7 +720,7 @@ def main():
         data = oseg.export()
 
         misc.obj_to_file(data, "organ.pkl", filetype='pickle')
-        misc.obj_to_file(oseg.get_ipars(), 'ipars.pkl', filetype='pickle')
+        misc.obj_to_file(oseg.get_iparams(), 'ipars.pkl', filetype='pickle')
     #output = segmentation.vesselSegmentation(oseg.data3d,
     # oseg.orig_segmentation)
 

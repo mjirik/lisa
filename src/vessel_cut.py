@@ -55,9 +55,9 @@ def cut_editor_old(data):
         vesselstmp = vessels * (1 - split_obj)
     
         lab, n_obj = scipy.ndimage.label(vesselstmp)
+        print (str(n_obj))
     
 #    print ("Zjistete si, ktere objekty jsou nejvets a nastavte l1 a l2")
-#    print (str(n_obj))
 
 #    print ("np.sum(lab==3)")
 
@@ -113,7 +113,7 @@ def resection(data):
     print data["slab"]
     #lab = cut_editor(segmentation > 0)#== data['slab']['porta'])
 
-    lab = cut_editor_old(img3d)
+    lab = cut_editor_old(data)#['segmentation'] == data['slab']['porta'])
     
 
     l1 = 1
@@ -173,7 +173,7 @@ def max_area_index(labels, num):
         
 
 if __name__ == "__main__":
-    data = misc.obj_from_file("out", filetype = 'pickle')
+    data = misc.obj_from_file("vessels.pkl", filetype = 'pickle')
     ds = data['segmentation'] == data['slab']['liver']
     pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
     pyed.show()
