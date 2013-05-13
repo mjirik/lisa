@@ -222,13 +222,12 @@ def get_sample_data():
 
     urlobj = urllibr.urlopen(url)
     url = urlobj.geturl()
-    print urlobj 
-    print url
     urllibr.urlretrieve(url, local_file_name)
 
     datafile = zipfile.ZipFile(local_file_name)
     #datafile.setpassword('queetech')
     datafile.extractall('./sample_data/')
+    os.remove(local_file_name)
 
 # get jatra_06mm_jenjatra
 
@@ -236,28 +235,41 @@ def get_sample_data():
     #local_file_name = './sample_data/jatra_06mm_jenjatraplus.zip'
     url = "http://147.228.240.61/queetech/sample-data/jatra_06mm_jenjatra.zip"
     local_file_name = './sample_data/jatra_06mm_jenjatra.zip'
-
     urllibr.urlretrieve(url, local_file_name)
-
     datafile = zipfile.ZipFile(local_file_name)
     datafile.extractall('./sample_data/')
+    os.remove(local_file_name)
 # get jatra 5mm
     url = "http://147.228.240.61/queetech/sample-data/jatra_5mm.zip"
     local_file_name = './sample_data/jatra_5mm.zip'
-
     urllibr.urlretrieve(url, local_file_name)
-
     datafile = zipfile.ZipFile(local_file_name)
     datafile.extractall('./sample_data/')
+    os.remove(local_file_name)
 
 #get volumetry sample
     url = "http://147.228.240.61/queetech/sample-data/volumetrie.zip"
     local_file_name = './sample_data/volumetrie.zip'
-
     urllibr.urlretrieve(url, local_file_name)
-
     datafile = zipfile.ZipFile(local_file_name)
     datafile.extractall('./sample_data/')
+    os.remove(local_file_name)
+
+# get organ.pkl and vessels.pkl
+    url = "http://147.228.240.61/queetech/sample-data/organ.pkl.zip"
+    local_file_name = './sample_data/organ.pkl.zip'
+    urllibr.urlretrieve(url, local_file_name)
+    datafile = zipfile.ZipFile(local_file_name)
+    datafile.extractall('./sample_data/')
+    os.remove(local_file_name)
+
+    url = "http://147.228.240.61/queetech/sample-data/vessels.pkl.zip"
+    local_file_name = './sample_data/vessels.pkl.zip'
+    urllibr.urlretrieve(url, local_file_name)
+    datafile = zipfile.ZipFile(local_file_name)
+    datafile.extractall('./sample_data/')
+    os.remove(local_file_name)
+
 def windows_get_gco():
     url = "http://147.228.240.61/queetech/install/pygco-py27-32bit/pygco.pyd"
 
