@@ -58,7 +58,7 @@ class PycutTest(unittest.TestCase):
         seeds[6,8:-5,2] = 2
         #x[4:-4, 6:-2, 1:-6] = -1
 
-        gcparams = {'pairwiseAlpha':1, 'use_boundary_penalties':True}
+        gcparams = {'pairwiseAlpha':10, 'use_boundary_penalties':True}
         igc = pycat.ImageGraphCut(data, gcparams=gcparams)
         igc.interactivity()
 # instead of interacitivity just set seeeds
@@ -74,6 +74,7 @@ class PycutTest(unittest.TestCase):
 #                            seeds=self.seeds, minVal=min_val, maxVal=max_val)
 #        app.exec_()
         #igc.show_segmentation()
+        import pdb; pdb.set_trace()
         segmentation = igc.segmentation
         # Testin some pixels for result
         self.assertTrue(segmentation[0, 0, -1] == 0)

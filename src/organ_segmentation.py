@@ -60,6 +60,7 @@ class OrganSegmentation():
             metadata=None,
             seeds=None,
             edit_data=False,
+            gcparams={},
             iparams=None,
             qt_app=None
             ):
@@ -71,6 +72,10 @@ class OrganSegmentation():
             If both are setted, datadir is ignored
         """
         self.parameters = {}
+
+
+        self.gcparams = {'pairwiseAlpha':20, 'use_boundary_penalties':False,'boundary_penalties_sigma':200}
+        self.gcparams.update(gcparams)
         if iparams is None:
             self.iparams= {}
         else:
@@ -170,7 +175,8 @@ class OrganSegmentation():
         data3d_res = data3d_res.astype(np.int16)
         igc = pycat.ImageGraphCut(
                 data3d_res,
-                gcparams={'pairwiseAlpha': 30},
+#                gcparams={'pairwiseAlpha': 30},
+                gcparams=self.gcparams,
                 voxelsize=self.working_voxelsize_mm
                 )
 # version comparison

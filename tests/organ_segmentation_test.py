@@ -83,6 +83,27 @@ class OrganSegmentationTest(unittest.TestCase):
 #        oseg.make_segmentation()
 
     #@unittest.skipIf(not interactiveTest, "interactive test")
+    def test_organ_segmentation_with_boundary_penalties(self):
+        """
+        Interactivity is stored to file
+        """
+        import misc
+        dcmdir = os.path.join(path_to_script,'./../sample_data/jatra_5mm')
+        
+        #gcparams = {'pairwiseAlpha':10, 'use_boundary_penalties':True}
+        gcparams = {'pairwiseAlpha':3, 'use_boundary_penalties':True,'boundary_penalties_sigma':200}
+        oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4, gcparams=gcparams)
+        oseg.add_seeds_mm([120],[120],[80], label=1, radius=30)
+        oseg.add_seeds_mm([170,220,250],[250,250,200],[80], label=2, radius=30)
+        oseg.interactivity()
+        #oseg.ninteractivity()
+
+        volume = oseg.get_segmented_volume_size_mm3()
+
+        misc.obj_to_file(oseg.get_iparams(),'iparams.pkl',filetype='pickle')
+
+        self.assertGreater(volume,1000000)
+    #@unittest.skipIf(not interactiveTest, "interactive test")
     def test_create_iparams(self):
         """
         Interactivity is stored to file
@@ -93,8 +114,8 @@ class OrganSegmentationTest(unittest.TestCase):
         oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4)
         oseg.add_seeds_mm([120],[120],[80], label=1, radius=30)
         oseg.add_seeds_mm([170,220,250],[250,250,200],[80], label=2, radius=30)
-        #oseg.interactivity()
-        oseg.ninteractivity()
+        oseg.interactivity()
+        #oseg.ninteractivity()
 
         volume = oseg.get_segmented_volume_size_mm3()
 
