@@ -111,6 +111,11 @@ class OrganSegmentation():
             self.data3d = data3d
             self.metadata = metadata
 
+# manualcrop
+        if manualroi:
+# @todo opravit souřadný systém v součinnosti s autocrop
+            self.data3d, self.crinfo = qmisc.manualcrop(self.data3d)
+
         if seeds == None:
             self.iparams['seeds'] = np.zeros(self.data3d.shape, dtype=np.int8)
         else:
@@ -126,10 +131,6 @@ class OrganSegmentation():
         self.edit_data = edit_data
         self.qt_app = qt_app
 
-# manualcrop
-        if manualroi:
-# @todo opravit souřadný systém v součinnosti s autocrop
-            self.data3d, self.crinfo = qmisc.manualcrop(self.data3d)
 
         if np.isscalar(working_voxelsize_mm):
             working_voxelsize_mm = np.ones([3]) * working_voxelsize_mm
