@@ -60,7 +60,7 @@ class OrganSegmentation():
             metadata=None,
             seeds=None,
             edit_data=False,
-            gcparams={},
+            segparams={},
             iparams=None,
             qt_app=None
             ):
@@ -74,8 +74,10 @@ class OrganSegmentation():
         self.parameters = {}
 
 
-        self.gcparams = {'pairwiseAlpha':20, 'use_boundary_penalties':False,'boundary_penalties_sigma':200}
-        self.gcparams.update(gcparams)
+        #self.segparams = {'pairwiseAlpha':2, 'use_boundary_penalties':True,'boundary_penalties_sigma':50}
+        self.segparams = {'pairwise_alpha':20, 'use_boundary_penalties':False,'boundary_penalties_sigma':50}
+        #print segparams
+        self.segparams.update(segparams)
         if iparams is None:
             self.iparams= {}
         else:
@@ -177,7 +179,7 @@ class OrganSegmentation():
         igc = pycat.ImageGraphCut(
                 data3d_res,
 #                gcparams={'pairwiseAlpha': 30},
-                gcparams=self.gcparams,
+                segparams=self.segparams,
                 voxelsize=self.working_voxelsize_mm
                 )
 # version comparison
@@ -648,6 +650,10 @@ def main():
     parser.add_argument('-iparams', '--iparams', 
             default=None, 
             help='filename of ipars file with stored interactivity')
+    parser.add_argument('-sp', '--segparams', 
+            default='{}', 
+            help='params for segmentation,\
+            example -sp "{\'pairwise_alpha\':25}"')
     parser.add_argument('-t', '--tests', action='store_true',
             help='run unittest')
     parser.add_argument('-tx', '--textureanalysis', action='store_true',
@@ -669,6 +675,11 @@ def main():
 
     # voxelsizemm can be number or array
     args.voxelsizemm = np.array(eval(args.voxelsizemm))
+
+    #  
+    args.segparams = eval(args.segparams)
+#    print type(args.segparams)
+#    args.segparams['hu']=1
 
     if args.debug:
         logger.setLevel(logging.DEBUG)
@@ -696,7 +707,8 @@ def main():
             texture_analysis=args.textureanalysis,
             edit_data=args.editdata,
             smoothing=args.segmentation_smoothing,
-            iparams=args.iparams
+            iparams=args.iparams,
+            segparams=args.segparams
             )
 
     oseg.interactivity()
