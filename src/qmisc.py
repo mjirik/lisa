@@ -21,12 +21,14 @@ class SparseMatrix():
     def todense(self):
         dense = np.zeros(self.shape, dtype=self.dtype)
         dense[self.coordinates[:]]= self.values
+        return dense
 
-#    def issparse(self):
-#        if 'sparse' is in dir(self):
-#            return True
-#        else:
-#            return False
+
+def isSparseMatrix(obj):
+    if obj.__class__.__name__ == 'SparseMatrix':
+        return True
+    else:
+        return False
 
 
 import py3DSeedEditor

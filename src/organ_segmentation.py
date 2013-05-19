@@ -49,10 +49,10 @@ class OrganSegmentation():
             self,
             datadir,
             working_voxelsize_mm=0.25,
-            SeriesNumber=None,
+            series_number=None,
             autocrop=True,
             autocrop_margin_mm=[10, 10, 10],
-            manualroi=False,
+            manualroi=None,
             texture_analysis=None,
             smoothing=True,
             smoothing_mm=4,
@@ -61,7 +61,8 @@ class OrganSegmentation():
             seeds=None,
             edit_data=False,
             segparams={},
-            iparams=None,
+            roi=None,
+ #           iparams=None,
             qt_app=None
             ):
         """
@@ -78,16 +79,21 @@ class OrganSegmentation():
         self.segparams = {'pairwise_alpha':20, 'use_boundary_penalties':False,'boundary_penalties_sigma':50}
         #print segparams
         self.segparams.update(segparams)
-        if iparams is None:
-            self.iparams= {}
-        else:
-            self.set_iparams(iparams)
+
+
+        # parameters with same effect as interactivity
+        self.iparams = {}
+        #if iparams is None:
+        #    self.iparams= {}
+        #else:
+        #    self.set_iparams(iparams)
 
         self.datadir = datadir
         if np.isscalar(working_voxelsize_mm):
             self.working_voxelsize_mm = [working_voxelsize_mm] * 3
         else:
             self.working_voxelsize_mm = working_voxelsize_mm
+        self.iparams['working_voxelsize_mm'] = self.working_voxelsize_mm
 
         if qt_app == None:
             from PyQt4.QtGui import QApplication
@@ -109,18 +115,28 @@ class OrganSegmentation():
             self.data3d = reader.get_3Ddata()
             self.metadata = reader.get_metaData()
             self.iparams['series_number'] = reader.series_number
+            self.iparams['datadir'] = datadir
         else:
             self.data3d = data3d
             self.metadata = metadata
 
 # manualcrop
-        if manualroi:
+        if manualroi is not None:
 # @todo opravit souřadný systém v součinnosti s autocrop
             self.data3d, self.crinfo = qmisc.manualcrop(self.data3d)
+        elif roi is not None:
+            self.data3d = qmisc.crop(self.data3d, roi)
+            self.crinfo = roi
+            self.iparams['roi'] = roi
+            self.iparams['manualroi'] = None
 
         if seeds == None:
             self.iparams['seeds'] = np.zeros(self.data3d.shape, dtype=np.int8)
         else:
+
+            if qmisc.isSparseMatrix(seeds):
+                seeds = seeds.todense()
+            print "mx", np.max(seeds)
             self.iparams['seeds'] = seeds
         self.voxelsize_mm = np.array(self.metadata['voxelsizemm'])
         self.autocrop = autocrop
@@ -646,7 +662,8 @@ def main():
             -vs 3 \n \
             -vs [3,3,5]')
     parser.add_argument('-mroi', '--manualroi', action='store_true',
-            help='manual crop before data processing')
+            help='manual crop before data processing',
+            default=None)
     parser.add_argument('-iparams', '--iparams', 
             default=None, 
             help='filename of ipars file with stored interactivity')
@@ -696,20 +713,24 @@ def main():
                 matlab/examples/sample_data/DICOM/digest_article/'
 
     if args.iparams is not None:
-        args.iparams = misc.obj_from_file(args.iparams)
+        iparams = misc.obj_from_file(args.iparams, filetype='pickle')
+        import pdb; pdb.set_trace()
+        oseg = OrganSegmentation(**iparams)
+        
+    else:
     #else:
     #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
 
-    oseg = OrganSegmentation(args.dcmdir,
-            working_voxelsize_mm=args.voxelsizemm,
-            manualroi=args.manualroi,
-            texture_analysis=args.textureanalysis,
-            edit_data=args.editdata,
-            smoothing=args.segmentation_smoothing,
-            iparams=args.iparams,
-            segparams=args.segparams
-            )
+        oseg = OrganSegmentation(args.dcmdir,
+                working_voxelsize_mm=args.voxelsizemm,
+                manualroi=args.manualroi,
+                texture_analysis=args.textureanalysis,
+                edit_data=args.editdata,
+                smoothing=args.segmentation_smoothing,
+#            iparams=args.iparams,
+                segparams=args.segparams
+                )
 
     oseg.interactivity()
 
@@ -739,7 +760,9 @@ def main():
         data = oseg.export()
 
         misc.obj_to_file(data, "organ.pkl", filetype='pickle')
-        misc.obj_to_file(oseg.get_iparams(), 'ipars.pkl', filetype='pickle')
+        iparams=oseg.get_iparams()
+        import pdb; pdb.set_trace()
+        misc.obj_to_file(iparams, 'iparams.pkl', filetype='pickle')
     #output = segmentation.vesselSegmentation(oseg.data3d,
     # oseg.orig_segmentation)
 
