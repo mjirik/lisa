@@ -578,61 +578,6 @@ class OrganSegmentation():
         app.exit()
 
 
-class Tests(unittest.TestCase):
-    def setUp(self):
-        """ Nastavení společných proměnných pro testy  """
-        self.assertTrue(True)
-
-    def test_whole_organ_segmentation(self):
-        """
-        Function uses organ_segmentation object for segmentation
-        """
-        dcmdir = './../sample_data/\
-                matlab/examples/sample_data/DICOM/digest_article/'
-        oseg = OrganSegmentation(dcmdir, working_voxelsize_mm=4)
-
-        oseg.interactivity()
-
-        roi_mm = [[3, 3, 3], [150, 150, 50]]
-        oseg.ni_set_roi()
-        coordinates_mm = [[110, 50, 30], [10, 10, 10]]
-        label = [1, 2]
-        radius = [5, 5]
-        oseg.ni_set_seeds(coordinates_mm, label, radius)
-
-        oseg.make_segmentation()
-
-        #oseg.noninteractivity()
-        pass
-
-    def test_dicomread_and_graphcut(self):
-        """
-        Test dicomread module and graphcut module
-        """
-        #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
-        reader = dcmr.DicomReader(
-                './../sample_data/\
-                        matlab/examples/sample_data/DICOM/digest_article/'
-                )
-        self.data3d = reader.get_3Ddata()
-        self.metadata = reader.get_metaData()
-
-        print ("Data size: " + str(data3d.nbytes) +
-                ', shape: ' + str(data3d.shape))
-
-        igc = pycat.ImageGraphCut(data3d, zoom=0.5)
-        seeds = igc.seeds
-        seeds[0, :, 0] = 1
-        seeds[60:66, 60:66, 5:6] = 2
-        igc.noninteractivity(seeds)
-
-        igc.make_gc()
-        segmentation = igc.segmentation
-        self.assertTrue(segmentation[14, 4, 1] == 0)
-        self.assertTrue(segmentation[127, 120, 10] == 1)
-        self.assertTrue(np.sum(segmentation == 1) > 100)
-        self.assertTrue(np.sum(segmentation == 0) > 100)
-        #igc.show_segmentation()
 
 
 def main():
