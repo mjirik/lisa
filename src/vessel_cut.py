@@ -42,11 +42,12 @@ def cut_editor_old(data):
 
     sumall = np.sum(vessels==1)
 
-    split_obj = scipy.ndimage.binary_dilation(split_obj, iterations = 5 )
-    vesselstmp = vessels * (1 - split_obj)
+    #split_obj = scipy.ndimage.binary_dilation(split_obj, iterations = 5 )
+    #vesselstmp = vessels * (1 - split_obj)
 
     lab, n_obj = scipy.ndimage.label(vesselstmp)
 
+    #print 'sumall ', sumall
     #while n_obj < 2 :
 # dokud neni z celkoveho objektu ustipnuto alespon 80 procent
     while np.sum(lab == max_area_index(lab,n_obj)) > (0.8*sumall) :
@@ -55,7 +56,9 @@ def cut_editor_old(data):
         vesselstmp = vessels * (1 - split_obj)
     
         lab, n_obj = scipy.ndimage.label(vesselstmp)
-        print (str(n_obj))
+        #print "n_obj  ",  n_obj
+        #import pdb; pdb.set_trace()
+        #print 'max ', np.sum(lab == max_area_index(lab,n_obj))
     
 #    print ("Zjistete si, ktere objekty jsou nejvets a nastavte l1 a l2")
 
@@ -69,7 +72,7 @@ def cut_editor_old(data):
     obj2 = get_biggest_object(lab)
 
     lab = obj1 + 2*obj2
-    print "baf"
+    #print "baf"
     pyed = py3DSeedEditor.py3DSeedEditor(lab)
     pyed.show()
     return lab
@@ -130,10 +133,10 @@ def resection(data):
 
     pyed = py3DSeedEditor.py3DSeedEditor(segm)
     pyed.show()
-    import pdb; pdb.set_trace()
+    #import pdb; pdb.set_trace()
     pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], contour=segm)
     pyed.show()
-    import pdb; pdb.set_trace()
+    #import pdb; pdb.set_trace()
 
     #show3.show3(data['segmentation'])
     
@@ -161,7 +164,7 @@ def max_area_index(labels, num):
     """
     mx = 0
     mxi = -1
-    for l in range(1,num):
+    for l in range(1,num+1):
         mxtmp = np.sum(labels == l)
         if mxtmp > mx:
             mx = mxtmp
@@ -175,8 +178,8 @@ def max_area_index(labels, num):
 if __name__ == "__main__":
     data = misc.obj_from_file("vessels.pkl", filetype = 'pickle')
     ds = data['segmentation'] == data['slab']['liver']
-    pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
-    pyed.show()
+    #pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
+    #pyed.show()
     #seg = np.zeros([100,100,100])
     #seg [50:80, 50:80, 60:75] = 1
     #seg[58:60, 56:72, 66:68]=2
