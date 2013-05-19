@@ -124,6 +124,8 @@ class OrganSegmentation():
         if manualroi is not None:
 # @todo opravit souřadný systém v součinnosti s autocrop
             self.data3d, self.crinfo = qmisc.manualcrop(self.data3d)
+            self.iparams['roi'] = self.crinfo
+            self.iparams['manualroi'] = None
         elif roi is not None:
             self.data3d = qmisc.crop(self.data3d, roi)
             self.crinfo = roi
@@ -154,22 +156,22 @@ class OrganSegmentation():
 
         self.zoom = self.voxelsize_mm / working_voxelsize_mm
 
-    def set_iparams(self, iparams):
-        """
-        Set interactivity variables. Make numpy array from scipy sparse 
-        matrix.
-        """
-
-        # seeds may be stored in sparse matrix
-        try:
-            if qmisc.SparseMatrix.issparse(iparams['seeds']):
-                iparams['seeds'] = iparams['seeds'].todense()
-            #import pdb; pdb.set_trace()
-        except:
-            # patrne neni SparseMatrix
-            pass
-
-        self.iparams = iparams
+#    def set_iparams(self, iparams):
+#        """
+#        Set interactivity variables. Make numpy array from scipy sparse 
+#        matrix.
+#        """
+#
+#        # seeds may be stored in sparse matrix
+#        try:
+#            if qmisc.SparseMatrix.issparse(iparams['seeds']):
+#                iparams['seeds'] = iparams['seeds'].todense()
+#            #import pdb; pdb.set_trace()
+#        except:
+#            # patrne neni SparseMatrix
+#            pass
+#
+#        self.iparams = iparams
 
     def get_iparams(self):
         self.iparams['seeds'] = qmisc.SparseMatrix(self.iparams['seeds'])
@@ -309,7 +311,7 @@ class OrganSegmentation():
                     )
 #
 
-    def interactivity(self):
+    def interactivity(self, min_val=800, max_val=1300):
         #import pdb; pdb.set_trace()
 # Staré volání
         #igc = pycat.ImageGraphCut(self.data3d, zoom = self.zoom)
@@ -323,7 +325,7 @@ class OrganSegmentation():
             self.data3d = self.data_editor(self.data3d)
         igc = self._interactivity_begin()
         logger.debug('_interactivity_begin()')
-        igc.interactivity(qt_app = self.qt_app, min_val=800, max_val=1300)
+        igc.interactivity(qt_app = self.qt_app, min_val=min_val, max_val=max_val)
 # @TODO někde v igc.interactivity() dochází k přehození nul za jedničy,
 # tady se to řeší hackem
         if type (igc.segmentation) is list:

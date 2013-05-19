@@ -26,6 +26,19 @@ import dcmreaddata1 as dcmr
 class OrganSegmentationTest(unittest.TestCase):
     interactiveTest = False
 
+    def generate_data(self):
+
+        img3d = (np.random.rand(30,30,30)*10).astype(np.int16)
+        seeds = (np.zeros(img3d.shape)).astype(np.int8)
+        segmentation = (np.zeros(img3d.shape)).astype(np.int8)
+        segmentation [10:25,4:24,2:16] = 1
+        img3d = img3d + segmentation*20
+        seeds[12:18,9:16, 3:6] = 1
+        seeds[19:22,21:27, 19:21] = 2
+
+        voxelsize_mm = [5,5,5]
+        metadata = {'voxelsizemm': voxelsize_mm}
+        return img3d, metadata, seeds, segmentation
 
     @unittest.skipIf(not interactiveTest, "interactive test")
     def test_viewer_seeds(self):
@@ -82,7 +95,9 @@ class OrganSegmentationTest(unittest.TestCase):
 #
 #        oseg.make_segmentation()
 
-    #@unittest.skipIf(not interactiveTest, "interactive test")
+
+# @TODO doladit boundary penalties
+    @unittest.skipIf(not interactiveTest, "interactive test")
     def test_organ_segmentation_with_boundary_penalties(self):
         """
         Interactivity is stored to file
@@ -91,10 +106,12 @@ class OrganSegmentationTest(unittest.TestCase):
         dcmdir = os.path.join(path_to_script,'./../sample_data/jatra_5mm')
         
         #gcparams = {'pairwiseAlpha':10, 'use_boundary_penalties':True}
-        gcparams = {'pairwiseAlpha':3, 'use_boundary_penalties':True,'boundary_penalties_sigma':200}
-        oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4, gcparams=gcparams)
+        segparams = {'pairwiseAlpha':3, 'use_boundary_penalties':True,'boundary_penalties_sigma':200}
+        oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4, segparams=segparams)
         oseg.add_seeds_mm([120],[120],[70], label=1, radius=30)
         oseg.add_seeds_mm([170,220,250],[250,280,200],[70], label=2, radius=30)
+
+        "boundary penalties"
         oseg.interactivity()
         #oseg.ninteractivity()
 
@@ -111,15 +128,20 @@ class OrganSegmentationTest(unittest.TestCase):
         import misc
         dcmdir = os.path.join(path_to_script,'./../sample_data/jatra_5mm')
         
-        gcparams = {'pairwiseAlpha':30, 'use_boundary_penalties':False,'boundary_penalties_sigma':200}
+        segparams = {'pairwiseAlpha':20, 'use_boundary_penalties':False,'boundary_penalties_sigma':200}
         #oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4)
-        oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4, gcparams=gcparams)
-        oseg.add_seeds_mm([120],[120],[70], label=1, radius=30)
-        oseg.add_seeds_mm([170,220,250],[250,280,200],[70], label=2, radius=30)
-        oseg.interactivity()
-        #oseg.ninteractivity()
+        oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4, segparams=segparams)
+        #oseg.add_seeds_mm([120,160],[150,120],[70], label=1, radius=20)
+        oseg.add_seeds_mm([120,160],[150,80],[85], label=1, radius=20)
+        oseg.add_seeds_mm([170,220,250,100],[250,300,200,350],[85], label=2, radius=20)
+        oseg.add_seeds_mm([170],[240],[70], label=2, radius=20)
+        
+        #print "test_ipars"
+        #oseg.interactivity()
+        oseg.ninteractivity()
 
         volume = oseg.get_segmented_volume_size_mm3()
+        #print 'vol %.3g ' %(volume)
 
         misc.obj_to_file(oseg.get_iparams(),'iparams.pkl',filetype='pickle')
 
@@ -130,7 +152,37 @@ class OrganSegmentationTest(unittest.TestCase):
     def test_stored_interactivity(self):
         pass
 
+    def test_roi(self):
+        """
+        Test setting of ROI. It is in pixels, not in mm
+        """
 
+        img3d = (np.random.rand(30,30,30)*10).astype(np.int16)
+        seeds = (np.zeros(img3d.shape)).astype(np.int8)
+        segmentation = (np.zeros(img3d.shape)).astype(np.int8)
+        segmentation [10:25,4:24,2:16] = 1
+        img3d = img3d + segmentation*20
+        seeds[12:18,9:16, 3:6] = 1
+        seeds[19:22,21:27, 19:21] = 2
+
+
+        roi = [[7,27],[2,29],[0,26]]
+        seeds = seeds[7:27, 2:29, 0:26]
+        voxelsize_mm = [5,5,5]
+        metadata = {'voxelsizemm': voxelsize_mm}
+
+        oseg = organ_segmentation.OrganSegmentation(None,
+                data3d=img3d,
+                metadata=metadata,
+                seeds=seeds,
+                roi=roi,
+                working_voxelsize_mm=5)
+
+        #oseg.interactivity(min_val=0, max_val=30)
+        oseg.ninteractivity()
+
+        volume = oseg.get_segmented_volume_size_mm3()
+        self.assertGreater(volume,500000)
 
     def test_box_segmentation(self):
         """

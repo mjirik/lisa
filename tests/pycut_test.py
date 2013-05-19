@@ -48,6 +48,7 @@ class PycutTest(unittest.TestCase):
         x_noisy = x + np.random.normal(0, 0.6, size=x.shape)
         return x_noisy
 
+    @unittest.skipIf(not interactivetTest, 'interactiveTest')
     def test_segmentation_with_boundary_penalties(self):
         data_shp = [16,16,16]
         #data = self.generate_data(data_shp, boundary_only=True)
@@ -58,8 +59,8 @@ class PycutTest(unittest.TestCase):
         seeds[6,8:-5,2] = 2
         #x[4:-4, 6:-2, 1:-6] = -1
 
-        gcparams = {'pairwiseAlpha':10, 'use_boundary_penalties':True}
-        igc = pycat.ImageGraphCut(data, gcparams=gcparams)
+        segparams = {'pairwiseAlpha':10, 'use_boundary_penalties':True}
+        igc = pycat.ImageGraphCut(data, segparams=segparams)
         igc.interactivity()
 # instead of interacitivity just set seeeds
         #igc.set_seeds(seeds)
