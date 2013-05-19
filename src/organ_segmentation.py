@@ -136,7 +136,6 @@ class OrganSegmentation():
 
             if qmisc.isSparseMatrix(seeds):
                 seeds = seeds.todense()
-            print "mx", np.max(seeds)
             self.iparams['seeds'] = seeds
         self.voxelsize_mm = np.array(self.metadata['voxelsizemm'])
         self.autocrop = autocrop
@@ -659,7 +658,6 @@ def main():
 
     if args.iparams is not None:
         iparams = misc.obj_from_file(args.iparams, filetype='pickle')
-        import pdb; pdb.set_trace()
         oseg = OrganSegmentation(**iparams)
         
     else:
@@ -706,7 +704,6 @@ def main():
 
         misc.obj_to_file(data, "organ.pkl", filetype='pickle')
         iparams=oseg.get_iparams()
-        import pdb; pdb.set_trace()
         misc.obj_to_file(iparams, 'iparams.pkl', filetype='pickle')
     #output = segmentation.vesselSegmentation(oseg.data3d,
     # oseg.orig_segmentation)
