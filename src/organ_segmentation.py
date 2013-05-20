@@ -146,7 +146,6 @@ class OrganSegmentation():
         self.smoothing = smoothing
         self.smoothing_mm = smoothing_mm
         self.edit_data = edit_data
-        self.qt_app = qt_app
 
 
         if np.isscalar(working_voxelsize_mm):
@@ -331,12 +330,14 @@ class OrganSegmentation():
         # prefilter=False, mode= 'nearest', order = 1)
         #seeds = self.seeds.astype(np.int8)
 
+
         logger.debug('interactivity')
         if self.edit_data:
             self.data3d = self.data_editor(self.data3d)
         igc = self._interactivity_begin()
         logger.debug('_interactivity_begin()')
         self.process_qt_app()
+        #import pdb; pdb.set_trace()
         igc.interactivity(qt_app = self.qt_app, min_val=min_val, max_val=max_val)
 # @TODO někde v igc.interactivity() dochází k přehození nul za jedničy,
 # tady se to řeší hackem
