@@ -103,10 +103,6 @@ class uiThreshold:
         voxel3 = self.voxel[2]
         self.voxelV = voxel1 * voxel2 * voxel3
 
-        if(self.interactivity == False):
-
-            return
-
         ## Minimalni pouzita hodnota prahovani v obrazku
         self.min0 = numpy.amin(self.data)
         ## Maximalni pouzita hodnota prahovani v obrazku
