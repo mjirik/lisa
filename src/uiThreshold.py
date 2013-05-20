@@ -273,8 +273,8 @@ class uiThreshold:
         del(sigmaNew)
 
         ## Prahovani (smin, smax)
-        if(self.firstRun == True):
-            if self.threshold < 0:
+        if ( self.firstRun == True ) :
+            if ( self.threshold < 0 ) :
                 self.calculateAutomaticThreshold()
             self.imgBeforeBinaryClosing = (self.imgFiltering > self.threshold)
             self.smin.val = (numpy.round(self.threshold, 2))
@@ -326,10 +326,7 @@ class uiThreshold:
         ## Zjisteni nejvetsich objektu
         self.imgChanged = segmentation.getBiggestObjects(self.imgChanged, self.nObj)
 
-        if(self.firstRun == True):
-            self.firstRun = False
-
-        if(self.interactivity == True):
+        if ( self.interactivity == True ) :
             ## Predani obrazku k vykresleni
             self.im1 = self.ax1.imshow(numpy.amax(self.imgChanged, 0), self.cmap)
             self.im2 = self.ax2.imshow(numpy.amax(self.imgChanged, 1), self.cmap)
@@ -343,9 +340,13 @@ class uiThreshold:
             ## Prekresleni
             self.fig.canvas.draw()
 
-        garbage.collect()
+        if ( self.firstRun == True ) :
+            self.firstRun = False
 
-        self.newThreshold = False
+        if ( self.newThreshold == True ) :
+            self.newThreshold = False
+
+        garbage.collect()
 
     """
     ================================================================

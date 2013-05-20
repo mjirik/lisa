@@ -252,7 +252,7 @@ class Tests(unittest.TestCase):
 """
 Main
 """
-if __name__ == "__main__":
+def _main():
 
     #print('Byl spusten skript.')
     print('Probiha nastavovani...')
@@ -305,7 +305,7 @@ if __name__ == "__main__":
     structure = None
     outputTmp = vesselSegmentation(mat['data'], mat['segmentation'], threshold = -1,
         voxelsizemm = mat['voxelsizemm'], inputSigma = 0.15, dilationIterations = 2,
-        nObj = 1, interactivity = True, binaryClosingIterations = 5,
+        nObj = 1, interactivity = False, binaryClosingIterations = 5,
         binaryOpeningIterations = 1)
 
     import inspector
@@ -327,4 +327,12 @@ if __name__ == "__main__":
 
     garbage.collect()
     sys.exit()
+
+if __name__ == "__main__":
+
+    _main()
+
+
+
+
 
