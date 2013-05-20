@@ -25,6 +25,7 @@ import dcmreaddata1 as dcmr
 
 class OrganSegmentationTest(unittest.TestCase):
     interactiveTest = False
+    verbose = False
 
     def generate_data(self):
 
@@ -125,6 +126,8 @@ class OrganSegmentationTest(unittest.TestCase):
         """
         Interactivity is stored to file
         """
+        if self.verbose:
+            print "test_create_iparams"
         import misc
         dcmdir = os.path.join(path_to_script,'./../sample_data/jatra_5mm')
         
@@ -215,6 +218,7 @@ class OrganSegmentationTest(unittest.TestCase):
         #print ("with right mouse button select some pixels of other tissues and background")
 
         oseg.ninteractivity()
+        #oseg.interactivity()
 
         volume = oseg.get_segmented_volume_size_mm3()
         

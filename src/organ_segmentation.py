@@ -95,9 +95,6 @@ class OrganSegmentation():
             self.working_voxelsize_mm = working_voxelsize_mm
         self.iparams['working_voxelsize_mm'] = self.working_voxelsize_mm
 
-        if qt_app == None:
-            from PyQt4.QtGui import QApplication
-            qt_app = QApplication(sys.argv)
         self.qt_app = qt_app
         # TODO uninteractive Serie selection
         if data3d is None or metadata is None:
@@ -108,7 +105,8 @@ class OrganSegmentation():
 
             #self.data3d, self.metadata = dcmr.dcm_read_from_dir(datadir)
             if datadir == None:
-                datadir = dcmr.get_dcmdir_qt(qt_app)
+                self.process_qt_app()
+                datadir = dcmr.get_dcmdir_qt(self.qt_app)
 
             # @TODO dialog v qt
             reader = dcmr.DicomReader(datadir) # , qt_app=qt_app)
@@ -172,6 +170,19 @@ class OrganSegmentation():
 #            pass
 #
 #        self.iparams = iparams
+
+    def process_qt_app(self):
+        """
+        Sometimes repeatedly called QApplication causes SIGSEGV crash.
+        This is why we try call it as few as possible.
+        """
+        if self.qt_app == None:
+            #from PyQt4.QtGui import QApplication
+            #import PyQt4
+            from PyQt4 import QtGui
+#QApplication
+            self.qt_app = QtGui.QApplication(sys.argv)
+
 
     def get_iparams(self):
         self.iparams['seeds'] = qmisc.SparseMatrix(self.iparams['seeds'])
@@ -325,6 +336,7 @@ class OrganSegmentation():
             self.data3d = self.data_editor(self.data3d)
         igc = self._interactivity_begin()
         logger.debug('_interactivity_begin()')
+        self.process_qt_app()
         igc.interactivity(qt_app = self.qt_app, min_val=min_val, max_val=max_val)
 # @TODO někde v igc.interactivity() dochází k přehození nul za jedničy,
 # tady se to řeší hackem
