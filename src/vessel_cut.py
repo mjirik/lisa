@@ -64,9 +64,11 @@ def cut_editor_old(data):
 
 #    print ("np.sum(lab==3)")
 
+    # všechny objekty, na které se to rozpadlo
+    #pyed = py3DSeedEditor.py3DSeedEditor(lab)
+    #pyed.show()
     obj1 = get_biggest_object(lab)
-    pyed = py3DSeedEditor.py3DSeedEditor(lab)
-    pyed.show()
+
 # vymaz nejvetsiho
     lab[obj1==1] = 0
     obj2 = get_biggest_object(lab)
@@ -131,10 +133,16 @@ def resection(data):
     #segm = (dist1 < dist2) * (data['segmentation'] != data['slab']['none'])
     segm = (((data['segmentation'] != 0) * (dist1 < dist2)).astype('int8') + (data['segmentation'] != 0).astype('int8'))
 
-    pyed = py3DSeedEditor.py3DSeedEditor(segm)
-    pyed.show()
+    v1, v2 = liver_spit_volume_mm3(segm, data['voxelsize_mm'])
+    print "Liver volume: %.4g l" % ((v1+v2)*1e-6)
+    print "volume1: %.4g l  (%.3g %%)" % ((v1)*1e-6, 100*v1/(v1+v2))
+    print "volume2: %.4g l  (%.3g %%)" % ((v2)*1e-6, 100*v2/(v1+v2))
+
+    #pyed = py3DSeedEditor.py3DSeedEditor(segm)
+    #pyed.show()
     #import pdb; pdb.set_trace()
-    pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], contour=segm)
+    linie = ((data['segmentation'] != 0) * (np.abs(dist1 - dist2) < 1)).astype(np.int8)
+    pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], seeds=linie, contour=(data['segmentation'] != 0))
     pyed.show()
     #import pdb; pdb.set_trace()
 
@@ -144,6 +152,16 @@ def resection(data):
     
 
 
+
+def liver_spit_volume_mm3(segm, voxelsize_mm):
+    """
+    segm: 0 - nothing, 1 - remaining tissue, 2 - resected tissue
+    """
+    voxelsize_mm3 = np.prod(voxelsize_mm)
+    v1 = np.sum(segm == 1) * voxelsize_mm3
+    v2 = np.sum(segm == 2) * voxelsize_mm3
+
+    return v1, v2
 
 
 
