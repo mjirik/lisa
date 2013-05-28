@@ -36,7 +36,8 @@ import show3
 def cut_editor_old(data):
     pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
     pyed.show()
-    split_obj = pyed.seeds
+    split_obj0 = pyed.seeds
+    split_obj = split_obj0.copy()
     vessels = data['segmentation'] == data['slab']['porta']
     vesselstmp = vessels
 
@@ -50,9 +51,9 @@ def cut_editor_old(data):
     #print 'sumall ', sumall
     #while n_obj < 2 :
 # dokud neni z celkoveho objektu ustipnuto alespon 80 procent
-    while np.sum(lab == max_area_index(lab,n_obj)) > (0.8*sumall) :
+    while np.sum(lab == max_area_index(lab,n_obj)) > (0.95*sumall) :
 
-        split_obj = scipy.ndimage.binary_dilation(split_obj, iterations = 5 )
+        split_obj = scipy.ndimage.binary_dilation(split_obj, iterations=3)
         vesselstmp = vessels * (1 - split_obj)
     
         lab, n_obj = scipy.ndimage.label(vesselstmp)
@@ -75,9 +76,13 @@ def cut_editor_old(data):
 
     lab = obj1 + 2*obj2
     #print "baf"
-    pyed = py3DSeedEditor.py3DSeedEditor(lab)
+    spl_vis = split_obj*2
+    spl_vis[split_obj0] = 1
+    #spl_vis[]
+    pyed = py3DSeedEditor.py3DSeedEditor(lab, seeds=spl_vis)
     pyed.show()
-    return lab
+    cut_by_user = split_obj0
+    return lab, cut_by_user
     pass
 
 def cut_editor(segmentation, voxelsize_mm = np.ones([3,1]), degrad = 4):
@@ -118,7 +123,7 @@ def resection(data):
     print data["slab"]
     #lab = cut_editor(segmentation > 0)#== data['slab']['porta'])
 
-    lab = cut_editor_old(data)#['segmentation'] == data['slab']['porta'])
+    lab, cut = cut_editor_old(data)#['segmentation'] == data['slab']['porta'])
     
 
     l1 = 1
@@ -141,8 +146,11 @@ def resection(data):
     #pyed = py3DSeedEditor.py3DSeedEditor(segm)
     #pyed.show()
     #import pdb; pdb.set_trace()
-    linie = ((data['segmentation'] != 0) * (np.abs(dist1 - dist2) < 1)).astype(np.int8)
-    pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], seeds=linie, contour=(data['segmentation'] != 0))
+    linie = (((data['segmentation'] != 0) * (np.abs(dist1 - dist2) < 1))).astype(np.int8)
+    linie_vis = 2 * linie
+    linie_vis[cut] = 1
+    linie_vis= linie_vis.astype(np.int8)
+    pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], seeds=linie_vis, contour=(data['segmentation'] != 0))
     pyed.show()
     #import pdb; pdb.set_trace()
 

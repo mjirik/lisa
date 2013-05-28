@@ -76,7 +76,7 @@ class OrganSegmentation():
 
 
         #self.segparams = {'pairwiseAlpha':2, 'use_boundary_penalties':True,'boundary_penalties_sigma':50}
-        self.segparams = {'pairwise_alpha':20, 'use_boundary_penalties':False,'boundary_penalties_sigma':50}
+        self.segparams = {'pairwise_alpha':30, 'use_boundary_penalties':False,'boundary_penalties_sigma':50}
         #print segparams
         self.segparams.update(segparams)
 
