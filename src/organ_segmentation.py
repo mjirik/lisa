@@ -72,28 +72,34 @@ class OrganSegmentation():
         data3d, metadata: it can be used for data loading not from directory.
             If both are setted, datadir is ignored
         """
-        self.parameters = {}
-
-
-        #self.segparams = {'pairwiseAlpha':2, 'use_boundary_penalties':True,'boundary_penalties_sigma':50}
-        self.segparams = {'pairwise_alpha':30, 'use_boundary_penalties':False,'boundary_penalties_sigma':50}
-        #print segparams
-        self.segparams.update(segparams)
-
-
-        # parameters with same effect as interactivity
         self.iparams = {}
-        #if iparams is None:
-        #    self.iparams= {}
-        #else:
-        #    self.set_iparams(iparams)
-
         self.datadir = datadir
         if np.isscalar(working_voxelsize_mm):
             self.working_voxelsize_mm = [working_voxelsize_mm] * 3
         else:
             self.working_voxelsize_mm = working_voxelsize_mm
         self.iparams['working_voxelsize_mm'] = self.working_voxelsize_mm
+
+
+
+        self.parameters = {}
+
+
+        #self.segparams = {'pairwiseAlpha':2, 'use_boundary_penalties':True,'boundary_penalties_sigma':50}
+        self.segparams = {'pairwise_alpha_per_mm':10, 'use_boundary_penalties':False,'boundary_penalties_sigma':50}
+        #print segparams
+        self.segparams['pairwise_alpha'] = \
+                self.segparams['pairwise_alpha_per_mm'] * \
+                np.mean(self.iparams['working_voxelsize_mm'])
+        self.segparams.update(segparams)
+
+
+        # parameters with same effect as interactivity
+        #if iparams is None:
+        #    self.iparams= {}
+        #else:
+        #    self.set_iparams(iparams)
+
 
         self.qt_app = qt_app
         # TODO uninteractive Serie selection
