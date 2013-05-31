@@ -75,7 +75,7 @@ class OrganSegmentation():
         self.parameters = {}
 
 
-        #self.segparams = {'pairwiseAlpha':2, 'use_boundary_penalties':True,'boundary_penalties_sigma':50}
+        #self.segparams = {'pairwise_alpha':2, 'use_boundary_penalties':True,'boundary_penalties_sigma':50}
         self.segparams = {'pairwise_alpha':30, 'use_boundary_penalties':False,'boundary_penalties_sigma':50}
         #print segparams
         self.segparams.update(segparams)
@@ -205,7 +205,7 @@ class OrganSegmentation():
         data3d_res = data3d_res.astype(np.int16)
         igc = pycat.ImageGraphCut(
                 data3d_res,
-#                gcparams={'pairwiseAlpha': 30},
+#                gcparams={'pairwise_alpha': 30},
                 segparams=self.segparams,
                 voxelsize=self.working_voxelsize_mm
                 )
@@ -325,7 +325,7 @@ class OrganSegmentation():
         #import pdb; pdb.set_trace()
 # Staré volání
         #igc = pycat.ImageGraphCut(self.data3d, zoom = self.zoom)
-        #igc.gcparams['pairwiseAlpha'] = 30
+        #igc.gcparams['pairwise_alpha'] = 30
         #seeds_res = scipy.ndimage.zoom(self.seeds , self.zoom,
         # prefilter=False, mode= 'nearest', order = 1)
         #seeds = self.seeds.astype(np.int8)
@@ -357,7 +357,7 @@ class OrganSegmentation():
         #import pdb; pdb.set_trace()
 # Staré volání
         #igc = pycat.ImageGraphCut(self.data3d, zoom = self.zoom)
-        #igc.gcparams['pairwiseAlpha'] = 30
+        #igc.gcparams['pairwise_alpha'] = 30
         #seeds_res = scipy.ndimage.zoom(self.seeds , self.zoom,
         # prefilter=False, mode= 'nearest', order = 1)
         #seeds = self.seeds.astype(np.int8)

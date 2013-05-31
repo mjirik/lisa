@@ -107,7 +107,7 @@ class OrganSegmentationTest(unittest.TestCase):
         dcmdir = os.path.join(path_to_script,'./../sample_data/jatra_5mm')
         
         #gcparams = {'pairwiseAlpha':10, 'use_boundary_penalties':True}
-        segparams = {'pairwiseAlpha':3, 'use_boundary_penalties':True,'boundary_penalties_sigma':200}
+        segparams = {'pairwise_alpha_per':3, 'use_boundary_penalties':True,'boundary_penalties_sigma':200}
         oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4, segparams=segparams)
         oseg.add_seeds_mm([120],[120],[70], label=1, radius=30)
         oseg.add_seeds_mm([170,220,250],[250,280,200],[70], label=2, radius=30)
