@@ -47,8 +47,8 @@ def interactive_imcrop(im):
 class OrganSegmentation():
     def __init__(
             self,
-            datadir,
-            working_voxelsize_mm=0.25,
+            datadir=None,
+            working_voxelsize_mm=1,
             series_number=None,
             autocrop=True,
             autocrop_margin_mm=[10, 10, 10],

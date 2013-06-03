@@ -48,11 +48,19 @@ import seed_editor_qt
 
 
 class MainWindow(QMainWindow):
-    def __init__(self,dcmdir=None):
+    def __init__(self):
+        self.inps = {'os_inps':{}}
+        self.pars = {'os_pars':{}}
+
+        pass
+
+    def run(self, qt_app=None):
+        self.qt_app = qt_app
         QMainWindow.__init__(self)
 
 
         self.initUI()
+
 
     def initUI(self):
         cw = QWidget()
@@ -102,16 +110,86 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('liver-surgery')
         self.show()
 
-    def loadDcmDir(self):
+    def getPars(self):
         pass
+
+    def saveDcm(self, event=None, filename=None):
+        if self.dcm_3Ddata is not None:
+            self.statusBar().showMessage('Saving DICOM data...')
+            QApplication.processEvents()
+
+            if filename is None:
+                filename = str(QFileDialog.getSaveFileName(self, 'Save DCM file',
+                                                           filter='Files (*.dcm)'))
+            if len(filename) > 0:
+                savemat(filename, {'data': self.dcm_3Ddata,
+                                   'voxelsizemm': self.voxel_sizemm,
+                                   'offsetmm': self.dcm_offsetmm},
+                                   appendmat=False)
+
+                self.setLabelText(self.text_dcm_out, filename)
+                self.statusBar().showMessage('Ready')
+            
+            else:
+                self.statusBar().showMessage('No output file specified!')
+
+        else:
+            self.statusBar().showMessage('No DICOM data!')      
+
+    def loadDcmDir(self, event=None, filename=None):
+        self.statusBar().showMessage('Loading DICOM data...')
+        QApplication.processEvents()
+
+
+        # TODO uninteractive Serie selection
+
+
+
+        #self.data3d, self.metadata = dcmr.dcm_read_from_dir(datadir)
+        datadir = dcmr.get_dcmdir_qt(self.qt_app)
+
+        # @TODO dialog v qt
+        reader = dcmr.DicomReader(datadir)#, qt_app=self.qt_app)
+        self.data3d = reader.get_3Ddata()
+        self.metadata = reader.get_metaData()
+        self.inps['series_number'] = reader.series_number
+        self.inps['datadir'] = datadir
+
+        self.statusBar().showMessage('DICOM data loaded')
+        
+        #QApplication.processEvents()
+#        if len(filename) > 0:
+#
+#            data = loadmat(filename,
+#                           variable_names=['data', 'voxelsizemm', 'offsetmm'],
+#                           appendmat=False)
+#            
+#            self.dcm_3Ddata = data['data']
+#            self.voxel_sizemm = data['voxelsizemm']
+#            self.dcm_offsetmm = data['offsetmm'] 
+#            self.setVoxelVolume(self.voxel_sizemm.reshape((3,)))
+#            self.setLabelText(self.text_seg_in, filename)
+#            self.statusBar().showMessage('Ready')
+#            
+#        else:
+#            self.statusBar().showMessage('No input file specified!')
+#    def loadDcmDir(self):
+#        pass
     def reduceDcm(self):
         pass
     def cropDcm(self):
         pass
-    def saveDcm(self):
         pass
     def organSegmentation(self):
-        oseg = organ_segmentation.OrganSegmentation(None, qt_app=True)
+        self.inps['os_inps'].update({
+            'data3d':self.data3d,
+            'metadata':self.metadata
+            })
+        os_pars_all = self.pars['os_pars'].copy()
+        os_pars_all.update(self.inps['os_inps'])
+        os_pars_all.update({'qt_app':self.qt_app})
+        print os_pars_all
+        oseg = organ_segmentation.OrganSegmentation(**os_pars_all)
       #  args.dcmdir,
       #          working_voxelsize_mm=args.voxelsizemm,
       #          manualroi=args.manualroi,
@@ -287,7 +365,8 @@ def main():
 
 def main2():
     app = QApplication(sys.argv)
-    mw = MainWindow(dcmdir=None)
+    mw = MainWindow()
+    mw.run(qt_app=app)
 
     sys.exit(app.exec_())
 
