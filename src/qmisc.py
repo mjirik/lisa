@@ -1,4 +1,5 @@
-
+#! /usr/bin/python
+# -*- coding: utf-8 -*-
 
 
 
@@ -7,6 +8,7 @@ sys.path.append("../extern/pycat/")
 sys.path.append("../extern/pycat/extern/py3DSeedEditor/")
 
 import numpy as np
+
 
 
 class SparseMatrix():

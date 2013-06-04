@@ -47,8 +47,8 @@ def interactive_imcrop(im):
 class OrganSegmentation():
     def __init__(
             self,
-            datadir,
-            working_voxelsize_mm=0.25,
+            datadir=None,
+            working_voxelsize_mm=1,
             series_number=None,
             autocrop=True,
             autocrop_margin_mm=[10, 10, 10],
@@ -211,7 +211,7 @@ class OrganSegmentation():
         data3d_res = data3d_res.astype(np.int16)
         igc = pycat.ImageGraphCut(
                 data3d_res,
-#                gcparams={'pairwiseAlpha': 30},
+#                gcparams={'pairwise_alpha': 30},
                 segparams=self.segparams,
                 voxelsize=self.working_voxelsize_mm
                 )
@@ -331,7 +331,7 @@ class OrganSegmentation():
         #import pdb; pdb.set_trace()
 # Staré volání
         #igc = pycat.ImageGraphCut(self.data3d, zoom = self.zoom)
-        #igc.gcparams['pairwiseAlpha'] = 30
+        #igc.gcparams['pairwise_alpha'] = 30
         #seeds_res = scipy.ndimage.zoom(self.seeds , self.zoom,
         # prefilter=False, mode= 'nearest', order = 1)
         #seeds = self.seeds.astype(np.int8)
@@ -363,7 +363,7 @@ class OrganSegmentation():
         #import pdb; pdb.set_trace()
 # Staré volání
         #igc = pycat.ImageGraphCut(self.data3d, zoom = self.zoom)
-        #igc.gcparams['pairwiseAlpha'] = 30
+        #igc.gcparams['pairwise_alpha'] = 30
         #seeds_res = scipy.ndimage.zoom(self.seeds , self.zoom,
         # prefilter=False, mode= 'nearest', order = 1)
         #seeds = self.seeds.astype(np.int8)

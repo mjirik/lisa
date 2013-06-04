@@ -1,3 +1,5 @@
+#! /usr/bin/python
+# -*- coding: utf-8 -*-
 """@package lbpLibrary
 
  verison 0.3.0
