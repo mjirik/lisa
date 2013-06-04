@@ -86,12 +86,20 @@ class OrganSegmentation():
 
 
         #self.segparams = {'pairwiseAlpha':2, 'use_boundary_penalties':True,'boundary_penalties_sigma':50}
-        self.segparams = {'pairwise_alpha_per_mm':10, 'use_boundary_penalties':False,'boundary_penalties_sigma':50}
+
+# for each mm on boundary there will be sum of penalty equal 10
+        self.segparams = {'pairwise_alpha_per_mm2':10, 'use_boundary_penalties':False,'boundary_penalties_sigma':50}
+        self.segparams = {'pairwise_alpha_per_mm2':60, 'use_boundary_penalties':False,'boundary_penalties_sigma':50}
         #print segparams
-        self.segparams['pairwise_alpha'] = \
-                self.segparams['pairwise_alpha_per_mm'] * \
-                np.mean(self.iparams['working_voxelsize_mm'])
+# @TODO each axis independent alpha
         self.segparams.update(segparams)
+
+        self.segparams['pairwise_alpha'] = \
+                self.segparams['pairwise_alpha_per_mm2'] / \
+                np.mean(self.iparams['working_voxelsize_mm'])
+
+        #self.segparams['pairwise_alpha']=25
+        
 
 
         # parameters with same effect as interactivity
@@ -635,7 +643,7 @@ def main():
     parser.add_argument('-sp', '--segparams', 
             default='{}', 
             help='params for segmentation,\
-            example -sp "{\'pairwise_alpha\':25}"')
+            example -sp "{\'pairwise_alpha_per_mm2\':90}"')
     parser.add_argument('-t', '--tests', action='store_true',
             help='run unittest')
     parser.add_argument('-tx', '--textureanalysis', action='store_true',
