@@ -26,16 +26,14 @@ def showSegmentation(segmentation, voxelsize_mm = np.ones([3,1]), degrad = 4, la
     """
     labels = []
 
-    print segmentation.shape
     segmentation = segmentation[::degrad,::degrad,::degrad]
-    print segmentation.dtype
     
     #import pdb; pdb.set_trace()
     mesh_data = seg2fem.gen_mesh_from_voxels_mc(segmentation, voxelsize_mm*degrad)
     if False:
         mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
     else:
-        mesh_data = seg2fem.gen_mesh_from_voxels_mc(segmentation, voxelsize_mm * 1.0e-3)
+        mesh_data = seg2fem.gen_mesh_from_voxels_mc(segmentation, voxelsize_mm * 1.0e-2)
         #mesh_data.coors += 
     vtk_file = "mesh_geom.vtk"
     mesh_data.write(vtk_file)
@@ -62,16 +60,25 @@ if __name__ == "__main__":
     parser.add_argument('-i', '--inputfile',
             default='organ.pkl',
             help='input file')
-    parser.add_argument('-l', '--label', type=int,
-            default=1,
-            help='segmentation label')
     parser.add_argument('-d', '--degrad', type=int,
             default=4,
             help='data degradation, default 4')
+    parser.add_argument('-l', '--label', type=int, metavar='N', nargs='+',
+            default=[4],
+            help='segmentation labels, default 1')
     args = parser.parse_args()
 
     data = misc.obj_from_file(args.inputfile, filetype = 'pickle')
-    ds = data['segmentation'] == args.label
+    #args.label = np.array(eval(args.label))
+    #print args.label
+    #import pdb; pdb.set_trace()
+    ds = np.zeros(data['segmentation'].shape, np.bool)
+    for i in range(0,len(args.label)):
+        ds = ds | (data['segmentation'] == args.label[i])
+
+    #print ds
+    #print "sjdf ", ds.shape
+    #ds = data['segmentation'] == args.label[0]
     #pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
     #pyed.show()
     #seg = np.zeros([100,100,100])
