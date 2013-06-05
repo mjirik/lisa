@@ -36,8 +36,11 @@ def isSparseMatrix(obj):
 import py3DSeedEditor
 def manualcrop(data):
 
-    pyed = py3DSeedEditor.py3DSeedEditor(data)
-    pyed.show()
+    import seed_editor_qt
+    pyed = seed_editor_qt.QTSeedEditor(data, mode='crop')
+    pyed.exec_()
+    #pyed = py3DSeedEditor.py3DSeedEditor(data)
+    #pyed.show()
     nzs =  pyed.seeds.nonzero()
     crinfo = [
             [np.min(nzs[0]), np.max(nzs[0])],
