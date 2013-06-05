@@ -48,7 +48,7 @@ def cut_editor_old(data):
 
     lab, n_obj = scipy.ndimage.label(vesselstmp)
 
-    #print 'sumall ', sumall
+    print 'sumall ', sumall
     #while n_obj < 2 :
 # dokud neni z celkoveho objektu ustipnuto alespon 80 procent
     while np.sum(lab == max_area_index(lab,n_obj)) > (0.95*sumall) :
@@ -57,6 +57,7 @@ def cut_editor_old(data):
         vesselstmp = vessels * (1 - split_obj)
     
         lab, n_obj = scipy.ndimage.label(vesselstmp)
+        print 'sum biggest ', np.sum(lab == max_area_index(lab,n_obj))
         #print "n_obj  ",  n_obj
         #import pdb; pdb.set_trace()
         #print 'max ', np.sum(lab == max_area_index(lab,n_obj))
@@ -152,10 +153,16 @@ def resection(data):
     linie_vis= linie_vis.astype(np.int8)
     pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], seeds=linie_vis, contour=(data['segmentation'] != 0))
     pyed.show()
+
     #import pdb; pdb.set_trace()
 
     #show3.show3(data['segmentation'])
+
+    data['slab']['resected'] = 3
+
+    data['segmentation'][segm==1] = data['slab']['resected']
     
+    return data
 
     
 
@@ -215,7 +222,13 @@ if __name__ == "__main__":
     #slab = {'liver':1, 'porta':2, 'portaa':3, 'portab':4}
     #data = {'segmentation':seg, 'data3d':dat, 'slab':slab}
 
-    resection(data)
+    data = resection(data)
 
+    savestring = raw_input('Save output data? (y/n): ')
+    #sn = int(snstring)
+    if savestring in ['Y', 'y']:
+
+
+        misc.obj_to_file(data, "resection.pkl", filetype='pickle')
 #    SectorDisplay2__()
 
