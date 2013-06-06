@@ -158,9 +158,19 @@ def resection(data):
 
     #show3.show3(data['segmentation'])
 
-    data['slab']['resected'] = 3
+    
+    data['slab']['resected_liver'] = 3
+    data['slab']['resected_porta'] = 4
 
-    data['segmentation'][segm==1] = data['slab']['resected']
+    mask_resected_liver = ((segm == 1) &
+            (data['segmentation'] == data['slab']['liver']))
+    mask_resected_porta = ((segm == 1) &
+            (data['segmentation'] == data['slab']['porta']))
+
+    data['segmentation'][mask_resected_liver] = \
+            data['slab']['resected_liver']
+    data['segmentation'][mask_resected_porta] = \
+            data['slab']['resected_porta']
     
     return data
 

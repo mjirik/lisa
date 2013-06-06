@@ -53,10 +53,10 @@ if __name__ == "__main__":
     #logger.debug('input params')
 
     # input parser
-    parser = argparse.ArgumentParser(
-            description='Segment vessels from liver \n\
-                    \npython organ_segmentation.py\n\
-                    \npython organ_segmentation.py -mroi -vs 0.6')
+    parser = argparse.ArgumentParser(description='\
+            3D visualization of segmentation\n\
+            \npython show_segmentation.py\n\
+            \npython show_segmentation.py -i resection.pkl -l 2 3 4 -d 4')
     parser.add_argument('-i', '--inputfile',
             default='organ.pkl',
             help='input file')
@@ -64,7 +64,7 @@ if __name__ == "__main__":
             default=4,
             help='data degradation, default 4')
     parser.add_argument('-l', '--label', type=int, metavar='N', nargs='+',
-            default=[4],
+            default=[1],
             help='segmentation labels, default 1')
     args = parser.parse_args()
 
