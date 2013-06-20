@@ -388,8 +388,6 @@ class uiThreshold:
     ## Automaticky vypocet vhodneho prahu
     def calculateAutomaticThreshold(self):
 
-        print("Hledani prahu...")
-
         self.imgUsed = self.data
 
         ## Hustota hist

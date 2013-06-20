@@ -86,13 +86,13 @@ interactivity = True, binaryClosingIterations = 1, binaryOpeningIterations = 1):
     del(data)
     del(segmentation)
 
-    ## Filtrovani (rozmazani) a prahovani dat.
+    ## Nastaveni rozmazani a prahovani dat.
     if(inputSigma == -1):
         inputSigma = number
     if(inputSigma > number):
         inputSigma = number
 
-    ## Filtrovani.
+    ## Samotne filtrovani.
     uiT = uiThreshold.uiThreshold(preparedData, voxel, threshold,
         interactivity, number, inputSigma, nObj, binaryClosingIterations,
         binaryOpeningIterations)
@@ -305,7 +305,7 @@ def _main():
     structure = None
     outputTmp = vesselSegmentation(mat['data'], mat['segmentation'], threshold = -1,
         voxelsizemm = mat['voxelsizemm'], inputSigma = 0.15, dilationIterations = 2,
-        nObj = 1, interactivity = False, binaryClosingIterations = 5,
+        nObj = 1, interactivity = True, binaryClosingIterations = 5,
         binaryOpeningIterations = 1)
 
     import inspector
