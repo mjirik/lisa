@@ -58,7 +58,7 @@ Vessel segmentation z jater.
         ---
 """
 def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsizemm = [1,1,1], inputSigma = -1,
-dilationIterations = 0, dilationStructure = None, nObj = 1,
+dilationIterations = 0, dilationStructure = None, nObj = 1, biggestObjects = True,
 interactivity = True, binaryClosingIterations = 1, binaryOpeningIterations = 1):
 
     print('Pripravuji data...')
@@ -94,7 +94,7 @@ interactivity = True, binaryClosingIterations = 1, binaryOpeningIterations = 1):
 
     ## Samotne filtrovani.
     uiT = uiThreshold.uiThreshold(preparedData, voxel, threshold,
-        interactivity, number, inputSigma, nObj, binaryClosingIterations,
+        interactivity, number, inputSigma, nObj, biggestObjects, binaryClosingIterations,
         binaryOpeningIterations)
     output = uiT.run()
     del(uiT)
@@ -305,7 +305,7 @@ def _main():
     structure = None
     outputTmp = vesselSegmentation(mat['data'], mat['segmentation'], threshold = -1,
         voxelsizemm = mat['voxelsizemm'], inputSigma = 0.15, dilationIterations = 2,
-        nObj = 1, interactivity = True, binaryClosingIterations = 5,
+        nObj = 1, biggestObjects = True, interactivity = True, binaryClosingIterations = 5,
         binaryOpeningIterations = 1)
 
     import inspector
