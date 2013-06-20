@@ -125,6 +125,7 @@ if __name__ == "__main__":
         inputSigma = 0.15,
         dilationIterations = 2,
         nObj = 1,
+        biggestObjects = True,
 #        dataFiltering = True,
         interactivity = True,
         binaryClosingIterations = 5,
@@ -162,7 +163,7 @@ if __name__ == "__main__":
     pyed.show()
     # Uvolneni pameti
     garbage.collect()
-    
+
 
     if args.outputfile == None:
 

@@ -50,6 +50,7 @@ Vessel segmentation z jater.
         dilationIterations - pocet operaci dilation nad zakladni oblasti pro segmentaci ("segmantation")
         dilationStructure - struktura pro operaci dilation
         nObj - oznacuje, kolik nejvetsich objektu se ma vyhledat - pokud je rovno 0 (nule), vraci cela data
+        getBiggestObjects - moznost, zda se maji vracet nejvetsi objekty nebo ne
         interactivity - nastavi, zda ma nebo nema byt pouzit interaktivni mod upravy dat
         binaryClosingIterations - vstupni binary closing operations
         binaryOpeningIterations - vstupni binary opening operations
@@ -58,7 +59,7 @@ Vessel segmentation z jater.
         ---
 """
 def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsizemm = [1,1,1], inputSigma = -1,
-dilationIterations = 0, dilationStructure = None, nObj = 1,
+dilationIterations = 0, dilationStructure = None, nObj = 1, biggestObjects = True,
 interactivity = True, binaryClosingIterations = 1, binaryOpeningIterations = 1):
 
     print('Pripravuji data...')
@@ -86,15 +87,15 @@ interactivity = True, binaryClosingIterations = 1, binaryOpeningIterations = 1):
     del(data)
     del(segmentation)
 
-    ## Filtrovani (rozmazani) a prahovani dat.
+    ## Nastaveni rozmazani a prahovani dat.
     if(inputSigma == -1):
         inputSigma = number
     if(inputSigma > number):
         inputSigma = number
 
-    ## Filtrovani.
+    ## Samotne filtrovani.
     uiT = uiThreshold.uiThreshold(preparedData, voxel, threshold,
-        interactivity, number, inputSigma, nObj, binaryClosingIterations,
+        interactivity, number, inputSigma, nObj, biggestObjects, binaryClosingIterations,
         binaryOpeningIterations)
     output = uiT.run()
     del(uiT)
@@ -334,7 +335,7 @@ def _main():
     structure = None
     outputTmp = vesselSegmentation(mat['data'], mat['segmentation'], threshold = -1,
         voxelsizemm = mat['voxelsizemm'], inputSigma = 0.15, dilationIterations = 2,
-        nObj = 1, interactivity = False, binaryClosingIterations = 5,
+        nObj = 1, biggestObjects = True, interactivity = True, binaryClosingIterations = 5,
         binaryOpeningIterations = 1)
 
     import inspector

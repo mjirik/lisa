@@ -59,7 +59,7 @@ class uiThreshold:
         cmap - grey
     """
     def __init__(self, data, voxel, threshold = -1, interactivity = True,
-    number = 100.0, inputSigma = -1, nObj = 10, binaryClosingIterations = 1,
+    number = 100.0, inputSigma = -1, nObj = 10, biggestObjects = True, binaryClosingIterations = 1,
     binaryOpeningIterations = 1, cmap = matplotlib.cm.Greys_r):
 
         print('Spoustim prahovani dat...')
@@ -81,6 +81,7 @@ class uiThreshold:
         self.inputSigma = inputSigma
         self.threshold = threshold
         self.nObj = nObj
+        self.biggestObjects = biggestObjects
         self.ICBinaryClosingIterations = binaryClosingIterations
         self.ICBinaryOpeningIterations = binaryOpeningIterations
 
@@ -339,7 +340,8 @@ class uiThreshold:
         self.lastOpenNum = openNum
 
         ## Zjisteni nejvetsich objektu
-        self.imgChanged = segmentation.getBiggestObjects(self.imgChanged, self.nObj)
+        if (self.biggestObjects == True) :
+           self.imgChanged = segmentation.getBiggestObjects(self.imgChanged, self.nObj)
 
         if ( self.interactivity == True ) :
             ## Predani obrazku k vykresleni
@@ -387,8 +389,6 @@ class uiThreshold:
 
     ## Automaticky vypocet vhodneho prahu
     def calculateAutomaticThreshold(self):
-
-        print("Hledani prahu...")
 
         self.imgUsed = self.data
 
