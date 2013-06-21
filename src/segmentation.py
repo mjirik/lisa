@@ -83,6 +83,7 @@ interactivity = True, binaryClosingIterations = 1, binaryOpeningIterations = 1):
 
     ## Ziskani datove oblasti jater (bud pouze jater nebo i jejich okoli - zalezi,
     ## jakym zpusobem bylo nalozeno s operaci dilatace dat).
+
     preparedData = data * (segmentation == 1)
     del(data)
     del(segmentation)
@@ -92,6 +93,13 @@ interactivity = True, binaryClosingIterations = 1, binaryOpeningIterations = 1):
         inputSigma = number
     if(inputSigma > number):
         inputSigma = number
+
+    """
+    import py3DSeedEditor
+    pyed = py3DSeedEditor.py3DSeedEditor(preparedData)
+    pyed.show()
+    seeds = pyed.seeds
+    """
 
     ## Samotne filtrovani.
     uiT = uiThreshold.uiThreshold(preparedData, voxel, threshold,
@@ -300,9 +308,16 @@ def _main():
         mat = scipy.io.loadmat(args.filename)
         logger.debug(mat.keys())
 
-    #print('Hotovo.')
+    """
+    import py3DSeedEditor
+    pyed = py3DSeedEditor.py3DSeedEditor(mat['data'], mat['segmentation'])
+    pyed.show()
+    seeds = pyed.seeds
+    for i in seeds:
+        if i == 1:
+           print 'hell yeah'
+    """
 
-    #import pdb; pdb.set_trace()
     structure = None
     outputTmp = vesselSegmentation(mat['data'], mat['segmentation'], threshold = -1,
         voxelsizemm = mat['voxelsizemm'], inputSigma = 0.15, dilationIterations = 2,
