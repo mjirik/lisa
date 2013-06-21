@@ -132,6 +132,7 @@ Vraceni N nejvetsich objektu.
 """
 def getBiggestObjects(data, N):
 
+#    import collections
     ## Oznaceni dat.
     ## labels - oznacena data.
     ## length - pocet rozdilnych oznaceni.
@@ -143,12 +144,41 @@ def getBiggestObjects(data, N):
         print('Varovani: Existuje prilis mnoho objektu! (' + str(length) + ')')
 
     ## Soucet oznaceni z dat.
-    arrayLabelsSum, arrayLabels = areaIndexes(labels, length)
+    import time
+    tic = time.clock()
+    # arrayLabelsSum = numpy.bincount(labels)
+    toc = time.clock()-tic
+    print "cas ", toc
+    #import pdb; pdb.set_trace()
+
+    # je-li pocet labelu vetsi nez empiricky zjistena hodnota
+    # uzije se jeden algoritmus, jinak se vyuzije jiny
+    if length > 10:
+#  vracime pocty jednotlivych labelu v datech
+        arrayLabelsSum = numpy.zeros(length+1, dtype=numpy.uint32)
+        for label in numpy.nditer(labels):
+            arrayLabelsSum[label] += 1
+
+        arrayLabels = range(0,length + 1)
+    else:
+
+        arrayLabelsSum, arrayLabels = areaIndexes(labels, length)
+
+    #datainlist = list(labels.reshape(-1,1))
+#    toc = time.clock()-toc
+#    print "cas 2", toc
+    #x = collections.Counter(datainlist)
+
+    #arrayLabels = [elt for elt,count in x.most_common(3)]
+    #toc = time.clock()-toc
+    #print "cas 2", toc
+#    print 'ar1 ', arrayLabelsSum
 
     ## Serazeni poli pro vyber nejvetsich objektu.
     ## Pole arrayLabelsSum je serazeno od nejvetsi k nejmensi cetnosti.
     ## Pole arrayLabels odpovida prislusnym oznacenim podle pole arrayLabelsSum.
     arrayLabelsSum, arrayLabels = selectSort(list1 = arrayLabelsSum, list2 = arrayLabels)
+#    print 'ar2', arrayLabels
 
     ## Osetreni neocekavane situace.
     if(N > len(arrayLabels)):
@@ -200,7 +230,6 @@ def areaIndexes(labels, num):
 
     arrayLabelsSum = []
     arrayLabels = []
-
     for index in range(0, num):
         arrayLabels.append(index)
         sumOfLabel = numpy.sum(labels == index)
