@@ -50,6 +50,7 @@ Vessel segmentation z jater.
         dilationIterations - pocet operaci dilation nad zakladni oblasti pro segmentaci ("segmantation")
         dilationStructure - struktura pro operaci dilation
         nObj - oznacuje, kolik nejvetsich objektu se ma vyhledat - pokud je rovno 0 (nule), vraci cela data
+        getBiggestObjects - moznost, zda se maji vracet nejvetsi objekty nebo ne
         interactivity - nastavi, zda ma nebo nema byt pouzit interaktivni mod upravy dat
         binaryClosingIterations - vstupni binary closing operations
         binaryOpeningIterations - vstupni binary opening operations
@@ -58,7 +59,7 @@ Vessel segmentation z jater.
         ---
 """
 def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsizemm = [1,1,1], inputSigma = -1,
-dilationIterations = 0, dilationStructure = None, nObj = 1,
+dilationIterations = 0, dilationStructure = None, nObj = 1, biggestObjects = True,
 interactivity = True, binaryClosingIterations = 1, binaryOpeningIterations = 1):
 
     print('Pripravuji data...')
@@ -86,15 +87,15 @@ interactivity = True, binaryClosingIterations = 1, binaryOpeningIterations = 1):
     del(data)
     del(segmentation)
 
-    ## Filtrovani (rozmazani) a prahovani dat.
+    ## Nastaveni rozmazani a prahovani dat.
     if(inputSigma == -1):
         inputSigma = number
     if(inputSigma > number):
         inputSigma = number
 
-    ## Filtrovani.
+    ## Samotne filtrovani.
     uiT = uiThreshold.uiThreshold(preparedData, voxel, threshold,
-        interactivity, number, inputSigma, nObj, binaryClosingIterations,
+        interactivity, number, inputSigma, nObj, biggestObjects, binaryClosingIterations,
         binaryOpeningIterations)
     output = uiT.run()
     del(uiT)
@@ -123,6 +124,7 @@ Vraceni N nejvetsich objektu.
 """
 def getBiggestObjects(data, N):
 
+#    import collections
     ## Oznaceni dat.
     ## labels - oznacena data.
     ## length - pocet rozdilnych oznaceni.
@@ -134,12 +136,41 @@ def getBiggestObjects(data, N):
         print('Varovani: Existuje prilis mnoho objektu! (' + str(length) + ')')
 
     ## Soucet oznaceni z dat.
-    arrayLabelsSum, arrayLabels = areaIndexes(labels, length)
+    import time
+    tic = time.clock()
+    # arrayLabelsSum = numpy.bincount(labels)
+    toc = time.clock()-tic
+    print "cas ", toc
+    #import pdb; pdb.set_trace()
+
+    # je-li pocet labelu vetsi nez empiricky zjistena hodnota
+    # uzije se jeden algoritmus, jinak se vyuzije jiny
+    if length > 10:
+#  vracime pocty jednotlivych labelu v datech
+        arrayLabelsSum = numpy.zeros(length+1, dtype=numpy.uint32)
+        for label in numpy.nditer(labels):
+            arrayLabelsSum[label] += 1
+
+        arrayLabels = range(0,length + 1)
+    else:
+
+        arrayLabelsSum, arrayLabels = areaIndexes(labels, length)
+
+    #datainlist = list(labels.reshape(-1,1))
+#    toc = time.clock()-toc
+#    print "cas 2", toc
+    #x = collections.Counter(datainlist)
+
+    #arrayLabels = [elt for elt,count in x.most_common(3)]
+    #toc = time.clock()-toc
+    #print "cas 2", toc
+#    print 'ar1 ', arrayLabelsSum
 
     ## Serazeni poli pro vyber nejvetsich objektu.
     ## Pole arrayLabelsSum je serazeno od nejvetsi k nejmensi cetnosti.
     ## Pole arrayLabels odpovida prislusnym oznacenim podle pole arrayLabelsSum.
     arrayLabelsSum, arrayLabels = selectSort(list1 = arrayLabelsSum, list2 = arrayLabels)
+#    print 'ar2', arrayLabels
 
     ## Osetreni neocekavane situace.
     if(N > len(arrayLabels)):
@@ -191,7 +222,6 @@ def areaIndexes(labels, num):
 
     arrayLabelsSum = []
     arrayLabels = []
-
     for index in range(0, num):
         arrayLabels.append(index)
         sumOfLabel = numpy.sum(labels == index)
@@ -305,7 +335,7 @@ def _main():
     structure = None
     outputTmp = vesselSegmentation(mat['data'], mat['segmentation'], threshold = -1,
         voxelsizemm = mat['voxelsizemm'], inputSigma = 0.15, dilationIterations = 2,
-        nObj = 1, interactivity = False, binaryClosingIterations = 5,
+        nObj = 1, biggestObjects = True, interactivity = True, binaryClosingIterations = 5,
         binaryOpeningIterations = 1)
 
     import inspector
