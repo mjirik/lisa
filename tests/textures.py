@@ -59,15 +59,17 @@ class TexturesTest(unittest.TestCase):
         zoom = voxelsize_mm / working_voxelsize_mm
 
         PATCH_SIZE = 21
+        PATCH_DIST = 15
         shp = data3d.shape
-        vx, vy, vz = np.mgrid[0:shp[0] - PATCH_SIZE:PATCH_SIZE, 
-                0:shp[1] - PATCH_SIZE:PATCH_SIZE,
-                0:shp[2] - PATCH_SIZE:10]
+        vx, vy, vz = np.mgrid[0:shp[0] - PATCH_SIZE:PATCH_DIST, 
+                0:shp[1] - PATCH_SIZE:PATCH_DIST,
+                0:shp[2] - PATCH_SIZE:8]
 
         
         import pdb; pdb.set_trace()
 
         feat = np.zeros(vx.shape)
+        feat2 = np.zeros(vx.shape)
 
         #vx = vx.reshape(-1)
         #vy = vy.reshape(-1)
@@ -98,6 +100,7 @@ class TexturesTest(unittest.TestCase):
                 symmetric=True, normed=True)
             dissimilarity = greycoprops(glcm, 'dissimilarity')
             feat[it.multi_index] = dissimilarity
+            feat2[it.multi_index] = greycomatrix(glcm,'correlation')
             it.iternext()
 
 
@@ -112,7 +115,10 @@ class TexturesTest(unittest.TestCase):
         qt_app = QApplication(sys.argv)
         pyed = QTSeedEditor(feat)
         qt_app.exec_()
+        pyed = QTSeedEditor(feat2)
+        qt_app.exec_()
 
+        pdb
 
 
 if __name__ == "__main__":
