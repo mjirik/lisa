@@ -46,6 +46,8 @@ class TexturesTest(unittest.TestCase):
 
         reader = dcmr.DicomReader(dcmdir) # , qt_app=qt_app)
         data3d = reader.get_3Ddata()
+# normalizace na čísla od nuly do 255
+        data3d = data3d/(2**4)
         metadata = reader.get_metaData()
         iparams = {}
         iparams['series_number'] = reader.series_number
@@ -60,35 +62,43 @@ class TexturesTest(unittest.TestCase):
         shp = data3d.shape
         vx, vy, vz = np.mgrid[0:shp[0] - PATCH_SIZE:PATCH_SIZE, 
                 0:shp[1] - PATCH_SIZE:PATCH_SIZE,
-                0:shp[2] - PATCH_SIZE]
+                0:shp[2] - PATCH_SIZE:10]
 
         
         import pdb; pdb.set_trace()
 
         feat = np.zeros(vx.shape)
 
-        vx = vx.reshape(-1)
-        vy = vy.reshape(-1)
-        vz = vz.reshape(-1)
+        #vx = vx.reshape(-1)
+        #vy = vy.reshape(-1)
+        #vz = vz.reshape(-1)
 
-        import pdb; pdb.set_trace()
 
         
 
-        for i in range(0,len(vx)):
-            print i
+        #for i in range(0,len(vx)):
+        it = np.nditer(vx, flags=['multi_index'])
+        while not it.finished:
+            vxi = vx[it.multi_index]
+            vyi = vy[it.multi_index]
+            vzi = vz[it.multi_index]
+
+            
+
             patch = data3d[
-                vx[i]:vx[i] + PATCH_SIZE,
-                vy[i]:vy[i] + PATCH_SIZE,
-                vz[i]
+                vxi:vxi + PATCH_SIZE,
+                vyi:vyi + PATCH_SIZE,
+                vzi
                 ]
-            patch
             patch = np.squeeze(patch)
-            glcm = greycomatrix(patch
+            print  it.iterindex, ' - ', vxi, ' ',  vyi, ' ',vzi , ' - ',it.multi_index
+            #import pdb; pdb.set_trace()
+            glcm = greycomatrix(patch,
                 [5],[0],256,
                 symmetric=True, normed=True)
             dissimilarity = greycoprops(glcm, 'dissimilarity')
-            feat[vx[i], vy[i], vz[i]] = dissimilarity
+            feat[it.multi_index] = dissimilarity
+            it.iternext()
 
 
 
