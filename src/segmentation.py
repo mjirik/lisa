@@ -13,6 +13,9 @@ Copyright:   (c) Pavel Volkovinsky
 ================================================================================
 """
 
+# TODO: Podpora "seeds" - vraceni specifickych objektu
+# TODO: Bylo by dobre zavest paralelizmus - otazka jak a kde - neda se udelat vsude, casem si to zjistit - urcite pred bakalarskou praci - asi v ramci PRJ5 nebo az mi bude o prazdninach chybet projekt
+
 import unittest
 import sys
 sys.path.append("../src/")
@@ -56,7 +59,7 @@ Vessel segmentation z jater.
         binaryOpeningIterations - vstupni binary opening operations
 
     returns:
-        ---
+        filtrovana data
 """
 def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsizemm = [1,1,1], inputSigma = -1,
 dilationIterations = 0, dilationStructure = None, nObj = 1, biggestObjects = True,
@@ -95,6 +98,7 @@ interactivity = True, binaryClosingIterations = 1, binaryOpeningIterations = 1):
         inputSigma = number
 
     """
+    print('Nyni si levym tlacitkem (klepnutim nebo tazenim) oznacte specificke oblasti k vraceni')
     import py3DSeedEditor
     pyed = py3DSeedEditor.py3DSeedEditor(preparedData)
     pyed.show()
@@ -104,7 +108,7 @@ interactivity = True, binaryClosingIterations = 1, binaryOpeningIterations = 1):
     ## Samotne filtrovani.
     uiT = uiThreshold.uiThreshold(preparedData, voxel, threshold,
         interactivity, number, inputSigma, nObj, biggestObjects, binaryClosingIterations,
-        binaryOpeningIterations)
+        binaryOpeningIterations)#, seeds)
     output = uiT.run()
     del(uiT)
     garbage.collect()
@@ -115,7 +119,7 @@ interactivity = True, binaryClosingIterations = 1, binaryOpeningIterations = 1):
     """
     if(dataFiltering == False):
         ## Data vstoupila jiz filtrovana, tudiz neprosly nalezenim nejvetsich objektu.
-        return getBiggestObjects(data = output, N = nObj)
+        return getPriorityObjects(data = output, N = nObj)
     else:
         ## Data vstoupila nefiltrovana, tudiz jiz prosly nalezenim nejvetsich objektu.
         return output
@@ -130,9 +134,8 @@ Vraceni N nejvetsich objektu.
     returns:
         data s nejvetsimi objekty
 """
-def getBiggestObjects(data, N):
+def getPriorityObjects(data, N, seeds = None):
 
-#    import collections
     ## Oznaceni dat.
     ## labels - oznacena data.
     ## length - pocet rozdilnych oznaceni.
@@ -143,79 +146,100 @@ def getBiggestObjects(data, N):
     if(length > maxN):
         print('Varovani: Existuje prilis mnoho objektu! (' + str(length) + ')')
 
-    ## Soucet oznaceni z dat.
-    import time
-    tic = time.clock()
-    # arrayLabelsSum = numpy.bincount(labels)
-    toc = time.clock()-tic
-    print "cas ", toc
-    #import pdb; pdb.set_trace()
+    ## Nova verze - podpora seeds - jednodussi ( nekdo dostal lepsi napad :-D )
+    if True:
 
-    # je-li pocet labelu vetsi nez empiricky zjistena hodnota
-    # uzije se jeden algoritmus, jinak se vyuzije jiny
-    if length > 10:
-#  vracime pocty jednotlivych labelu v datech
-        arrayLabelsSum = numpy.zeros(length+1, dtype=numpy.uint32)
-        for label in numpy.nditer(labels):
-            arrayLabelsSum[label] += 1
+       if seeds == None:
+          return labels == 1
 
-        arrayLabels = range(0,length + 1)
+       else:
+
+          ## zjistit na zaklade matice seeds (1 - levy klik, 2 - pravy klik, 0 - jindy) objekty k vraceni - ty ktere obsahuji jednicky - muze jich byt vic
+          # je nutno v "labels" zjistit, jaka cisla (oznaceni) odpovidaji tem, ktere jsou na stejne pozici v "seeds" jako jednicky, pote je vycucnout z labels a vratit
+          # treba neco jako:
+            # return labels == 42 + labels == 3
+          return labels == 1
+
+    ## Stara verze - nejak to uprave nefunguje - problem s cyklem "for label in numpy.nditer(labels)"
+    ## Pry trvala dlouho, ale "AMD FX-8350 - 8 Core 4.2GHz" si nestezuje ;-)
+    ## Bylo by dobre zavest paralelizmus - otazka jak a kde - neda se udelat vsude
     else:
 
-        arrayLabelsSum, arrayLabels = areaIndexes(labels, length)
+         #import collections
 
-    #datainlist = list(labels.reshape(-1,1))
-#    toc = time.clock()-toc
-#    print "cas 2", toc
-    #x = collections.Counter(datainlist)
+        ## Soucet oznaceni z dat.
+        import time
+        tic = time.clock()
+        # arrayLabelsSum = numpy.bincount(labels)
+        toc = time.clock()-tic
+        print "cas ", toc
+        #import pdb; pdb.set_trace()
 
-    #arrayLabels = [elt for elt,count in x.most_common(3)]
-    #toc = time.clock()-toc
-    #print "cas 2", toc
-#    print 'ar1 ', arrayLabelsSum
+        # je-li pocet labelu vetsi nez empiricky zjistena hodnota
+        # uzije se jeden algoritmus, jinak se vyuzije jiny
+        if length > 10:
+    #  vracime pocty jednotlivych labelu v datech
+            arrayLabelsSum = numpy.zeros(length+1, dtype=numpy.uint32)
+            for label in numpy.nditer(labels):
+                arrayLabelsSum[label] += 1
 
-    ## Serazeni poli pro vyber nejvetsich objektu.
-    ## Pole arrayLabelsSum je serazeno od nejvetsi k nejmensi cetnosti.
-    ## Pole arrayLabels odpovida prislusnym oznacenim podle pole arrayLabelsSum.
-    arrayLabelsSum, arrayLabels = selectSort(list1 = arrayLabelsSum, list2 = arrayLabels)
-#    print 'ar2', arrayLabels
+            arrayLabels = range(0,length + 1)
+        else:
 
-    ## Osetreni neocekavane situace.
-    if(N > len(arrayLabels)):
-##        print('Pocet nejvetsich objektu k vraceni chcete vetsi nez je oznacenych oblasti!')
-##        print('Redukuji pocet nejvetsich objektu k vraceni...')
-        N = len(arrayLabels)
-        return data
+            arrayLabelsSum, arrayLabels = areaIndexes(labels, length)
 
-    ##for index1 in range(0, len(arrayLabelsSum)):
-        ##print(str(arrayLabels[index1]) + " " + str(arrayLabelsSum[index1]))
+        #datainlist = list(labels.reshape(-1,1))
+    #    toc = time.clock()-toc
+    #    print "cas 2", toc
+        #x = collections.Counter(datainlist)
 
-##    return data == 1
+        #arrayLabels = [elt for elt,count in x.most_common(3)]
+        #toc = time.clock()-toc
+        #print "cas 2", toc
+    #    print 'ar1 ', arrayLabelsSum
 
-    ## Upraveni dat (ziskani N nejvetsich objektu).
-    search = N
-    if (sys.version_info[0] < 3):
-        import copy
-        newData = copy.copy(data) # TODO: udelat lepe vynulovani
-        newData = newData * 0
-    else:
-        newData = data.copy()
-        newData = newData * 0
+        ## Serazeni poli pro vyber nejvetsich objektu.
+        ## Pole arrayLabelsSum je serazeno od nejvetsi k nejmensi cetnosti.
+        ## Pole arrayLabels odpovida prislusnym oznacenim podle pole arrayLabelsSum.
+        arrayLabelsSum, arrayLabels = selectSort(list1 = arrayLabelsSum, list2 = arrayLabels)
+    #    print 'ar2', arrayLabels
 
-    for index in range(0, len(arrayLabels)):
-        newData -= (labels == arrayLabels[index])
-        if(arrayLabels[index] != 0):
-            search -= 1
-            if search <= 0:
-                break
+        ## Osetreni neocekavane situace.
+        if(N > len(arrayLabels)):
+    ##        print('Pocet nejvetsich objektu k vraceni chcete vetsi nez je oznacenych oblasti!')
+    ##        print('Redukuji pocet nejvetsich objektu k vraceni...')
+            N = len(arrayLabels)
+            return data
 
-    ## Uvolneni pameti
-    del(labels)
-    del(arrayLabels)
-    del(arrayLabelsSum)
-    garbage.collect()
+        ##for index1 in range(0, len(arrayLabelsSum)):
+            ##print(str(arrayLabels[index1]) + " " + str(arrayLabelsSum[index1]))
 
-    return data - newData# - 1
+    ##    return data == 1
+
+        ## Upraveni dat (ziskani N nejvetsich objektu).
+        search = N
+        if (sys.version_info[0] < 3):
+            import copy
+            newData = copy.copy(data) # udelat lepe vynulovani (?)
+            newData = newData * 0
+        else:
+            newData = data.copy()
+            newData = newData * 0
+
+        for index in range(0, len(arrayLabels)):
+            newData -= (labels == arrayLabels[index])
+            if(arrayLabels[index] != 0):
+                search -= 1
+                if search <= 0:
+                    break
+
+        ## Uvolneni pameti
+        del(labels)
+        del(arrayLabels)
+        del(arrayLabelsSum)
+        garbage.collect()
+
+        return data - newData# - 1
 
 """
 Zjisti cetnosti jednotlivych oznacenych ploch (labeled areas)

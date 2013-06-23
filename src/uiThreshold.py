@@ -52,15 +52,21 @@ class uiThreshold:
     """
     Metoda init.
         data - data pro prahovani, se kterymi se pracuje
+        voxel - velikost voxelu
+        threshold
+        interactivity - zapnuti / vypnuti gui
         number - maximalni hodnota slideru pro gauss. filtrovani (max sigma)
         inputSigma - pocatecni hodnota pro gauss. filtr
-        voxelV - objemova jednotka jednoho voxelu
-        initslice - PROZATIM NEPOUZITO
+        nObj - pocet nejvetsich objektu k vraceni
+        biggestObjects - oznacuje, zda se maji vracet nejvetsi objekty
+        binaryClosingIterations - iterace binary closing
+        binaryOpeningIterations - iterace binary opening
+        seeds - matice s kliknutim uzivatele- pokud se maji vracet specifikce objekty
         cmap - grey
     """
     def __init__(self, data, voxel, threshold = -1, interactivity = True,
     number = 100.0, inputSigma = -1, nObj = 10, biggestObjects = True, binaryClosingIterations = 1,
-    binaryOpeningIterations = 1, cmap = matplotlib.cm.Greys_r):
+    binaryOpeningIterations = 1, seeds = None, cmap = matplotlib.cm.Greys_r):
 
         print('Spoustim prahovani dat...')
 
@@ -84,6 +90,7 @@ class uiThreshold:
         self.biggestObjects = biggestObjects
         self.ICBinaryClosingIterations = binaryClosingIterations
         self.ICBinaryOpeningIterations = binaryOpeningIterations
+        self.seeds = seeds
 
         if (sys.version_info[0] < 3):
 
@@ -341,7 +348,7 @@ class uiThreshold:
 
         ## Zjisteni nejvetsich objektu
         if (self.biggestObjects == True) :
-           self.imgChanged = segmentation.getBiggestObjects(self.imgChanged, self.nObj)
+           self.imgChanged = segmentation.getPriorityObjects(self.imgChanged, self.nObj, self.seeds)
 
         if ( self.interactivity == True ) :
             ## Predani obrazku k vykresleni
