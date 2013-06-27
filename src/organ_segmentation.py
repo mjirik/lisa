@@ -183,6 +183,7 @@ class OrganSegmentation():
 #            pass
 #
 #        self.iparams = iparams
+        print 'dir ', self.iparams['datadir'],", series_number", self.iparams['series_number']
 
     def process_qt_app(self):
         """
