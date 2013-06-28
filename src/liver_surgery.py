@@ -178,7 +178,8 @@ class MainWindow(QMainWindow):
     def reduceDcm(self):
         pass
     def cropDcm(self):
-        pass
+        pyed = seed_editor_qt.QTSeedEditor(self.data3d, mode='crop')
+        pyed.exec_()
         pass
     def organSegmentation(self):
         self.inps['os_inps'].update({

@@ -183,6 +183,7 @@ class OrganSegmentation():
 #            pass
 #
 #        self.iparams = iparams
+        print 'dir ', self.iparams['datadir'],", series_number", self.iparams['series_number'], 'voxelsize_mm', self.voxelsize_mm
 
     def process_qt_app(self):
         """
@@ -348,6 +349,17 @@ class OrganSegmentation():
         logger.debug('interactivity')
         if self.edit_data:
             self.data3d = self.data_editor(self.data3d)
+
+
+        # set window
+        if min_val == -1:
+            min_val = np.min(self.data3d)
+            #print 'new min'
+
+        if max_val == -1:
+            max_val = np.max(self.data3d)
+            #print 'new max'
+
         igc = self._interactivity_begin()
         logger.debug('_interactivity_begin()')
         self.process_qt_app()
@@ -652,6 +664,12 @@ def main():
             help='run unittest')
     parser.add_argument('-ed', '--editdata', action='store_true',
             help='Run data editor')
+    parser.add_argument('-vmax', '--viewermax', type=int,
+            help='maximum of viewer window',
+            default=1300)
+    parser.add_argument('-vmin', '--viewermin', type=int,
+            help='minimum of viewer window',
+            default=800)
     parser.add_argument('-so', '--show_output', action='store_true',
             help='Show output data in viewer')
     parser.add_argument(
@@ -704,7 +722,7 @@ def main():
                 segparams=args.segparams
                 )
 
-    oseg.interactivity()
+    oseg.interactivity(args.viewermin, args.viewermax)
 
     #igc = pycat.ImageGraphCut(data3d, zoom = 0.5)
     #igc.interactivity()
