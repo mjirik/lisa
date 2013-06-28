@@ -100,7 +100,7 @@ class TexturesTest(unittest.TestCase):
                 symmetric=True, normed=True)
             dissimilarity = greycoprops(glcm, 'dissimilarity')
             feat[it.multi_index] = dissimilarity
-            feat2[it.multi_index] = greycomatrix(glcm,'correlation')
+            feat2[it.multi_index] = greycoprops(glcm,'correlation')
             it.iternext()
 
 
