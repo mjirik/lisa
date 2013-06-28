@@ -183,7 +183,7 @@ class OrganSegmentation():
 #            pass
 #
 #        self.iparams = iparams
-        print 'dir ', self.iparams['datadir'],", series_number", self.iparams['series_number']
+        print 'dir ', self.iparams['datadir'],", series_number", self.iparams['series_number'], 'voxelsize_mm', self.voxelsize_mm
 
     def process_qt_app(self):
         """
