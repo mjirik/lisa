@@ -97,18 +97,23 @@ interactivity = True, binaryClosingIterations = 1, binaryOpeningIterations = 1):
     if(inputSigma > number):
         inputSigma = number
 
-    """
-    print('Nyni si levym tlacitkem (klepnutim nebo tazenim) oznacte specificke oblasti k vraceni')
+
+    print('Nyni si levym tlacitkem (klepnutim nebo tazenim) oznacte specificke oblasti k vraceni.')
     import py3DSeedEditor
     pyed = py3DSeedEditor.py3DSeedEditor(preparedData)
     pyed.show()
     seeds = pyed.seeds
-    """
 
+    ## Zkontrolovat, jestli uzivatel neco vybral - nejaky item musi byt ruzny od nuly
+    if (seeds != 0).any() == False:
+       seeds = None
+    else:
+        seeds = seeds.nonzero() # seeds je n-tice poli indexu nenulovych prvku   =>   item krychle je == krychle[ seeds[0][x], seeds[1][x], seeds[2][x] ]
+    
     ## Samotne filtrovani.
     uiT = uiThreshold.uiThreshold(preparedData, voxel, threshold,
         interactivity, number, inputSigma, nObj, biggestObjects, binaryClosingIterations,
-        binaryOpeningIterations)#, seeds)
+        binaryOpeningIterations, seeds)
     output = uiT.run()
     del(uiT)
     garbage.collect()
@@ -149,16 +154,44 @@ def getPriorityObjects(data, N, seeds = None):
     ## Nova verze - podpora seeds - jednodussi ( nekdo dostal lepsi napad :-D )
     if True:
 
-       if seeds == None:
-          return labels == 1
+        if seeds == None:
 
-       else:
+            ## Doufejme, ze cerna oblast nebude mensi nez nejvetsi objekt jater
+            return labels == 1
 
-          ## zjistit na zaklade matice seeds (1 - levy klik, 2 - pravy klik, 0 - jindy) objekty k vraceni - ty ktere obsahuji jednicky - muze jich byt vic
-          # je nutno v "labels" zjistit, jaka cisla (oznaceni) odpovidaji tem, ktere jsou na stejne pozici v "seeds" jako jednicky, pote je vycucnout z labels a vratit
-          # treba neco jako:
-            # return labels == 42 + labels == 3
-          return labels == 1
+        """ 
+        tmp = seeds != 0
+        intoSeeds = labels * tmp # labels prenasobit misty, kde seeds nejsou nuly => vznik matice ocislovanymi prvky - tyto labely je nutne znat pro vraceni objektu s danym labelem
+              
+        ## Vlozeni labelu do listu
+        seed = []
+        for item in intoSeeds.flat:
+            if item != 0:
+                seed.append(item)
+        """
+          
+        seed = []
+        stop = seeds[0].size
+        for index in range(0, stop):
+            tmp = labels[ seeds[0][index], seeds[1][index], seeds[2][index] ]
+            if tmp != 0:
+                seed.append(tmp)
+            
+        ## Zbaveni se duplikatu
+        seed = list(set(seed))
+
+        ## Vytvoreni vystupu
+        if len(seed) > 0:
+            
+            returning = labels == seed[0]
+            for index in range(1, len(seed)):
+                returning = returning + labels == seed[index]
+
+            return returning
+            
+        else:
+            
+            return data
 
     ## Stara verze - nejak to uprave nefunguje - problem s cyklem "for label in numpy.nditer(labels)"
     ## Pry trvala dlouho, ale "AMD FX-8350 - 8 Core 4.2GHz" si nestezuje ;-)
