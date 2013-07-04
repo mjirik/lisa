@@ -67,6 +67,9 @@ interactivity = True, binaryClosingIterations = 1, binaryOpeningIterations = 1):
 
     print('Pripravuji data...')
 
+    if ( nObj < 1 ) :
+        nObj = 1
+
     voxel = numpy.array(voxelsizemm)
 
     ## Kalkulace objemove jednotky (voxel) (V = a*b*c).
@@ -97,8 +100,7 @@ interactivity = True, binaryClosingIterations = 1, binaryOpeningIterations = 1):
     if(inputSigma > number):
         inputSigma = number
 
-
-    print('Nyni si levym tlacitkem (klepnutim nebo tazenim) oznacte specificke oblasti k vraceni.')
+    print('Nyni si levym nebo pravym tlacitkem mysi (klepnutim nebo tazenim) oznacte specificke oblasti k vraceni.')
     import py3DSeedEditor
     pyed = py3DSeedEditor.py3DSeedEditor(preparedData)
     pyed.show()
@@ -108,8 +110,8 @@ interactivity = True, binaryClosingIterations = 1, binaryOpeningIterations = 1):
     if (seeds != 0).any() == False:
        seeds = None
     else:
-        seeds = seeds.nonzero() # seeds je n-tice poli indexu nenulovych prvku   =>   item krychle je == krychle[ seeds[0][x], seeds[1][x], seeds[2][x] ]
-    
+        seeds = seeds.nonzero() ## seeds je n-tice poli indexu nenulovych prvku   =>   item krychle je == krychle[ seeds[0][x], seeds[1][x], seeds[2][x] ]
+
     ## Samotne filtrovani.
     uiT = uiThreshold.uiThreshold(preparedData, voxel, threshold,
         interactivity, number, inputSigma, nObj, biggestObjects, binaryClosingIterations,
@@ -139,7 +141,7 @@ Vraceni N nejvetsich objektu.
     returns:
         data s nejvetsimi objekty
 """
-def getPriorityObjects(data, N, seeds = None):
+def getPriorityObjects(data, nObj, seeds = None):
 
     ## Oznaceni dat.
     ## labels - oznacena data.
@@ -149,49 +151,46 @@ def getPriorityObjects(data, N, seeds = None):
     ## Podminka mnozstvi objektu.
     maxN = 250
     if(length > maxN):
-        print('Varovani: Existuje prilis mnoho objektu! (' + str(length) + ')')
+        print('Varovani: Existuje prilis mnoho objektu! (' + str ( length ) + ')')
 
-    ## Nova verze - podpora seeds - jednodussi ( nekdo dostal lepsi napad :-D )
-    if True:
+    ## Nova verze - podpora seeds - jednodussi ( nekdo dostal lepsi napad ;-) )
+    if True :
 
-        if seeds == None:
+        if (seeds == None) :
 
-            ## Doufejme, ze cerna oblast nebude mensi nez nejvetsi objekt jater
-            return labels == 1
+            ## Doufejme, ze cerna oblast nebude mensi nez nektere objekty jater
+            ## Nebo-li tady pocitam s tim, ze cerna oblast bude nejvetsi objekt
+            returning = labels == 1
+            for index in range ( 2, nObj + 1 ) :
+                returning = returning + labels == index
 
-        """ 
-        tmp = seeds != 0
-        intoSeeds = labels * tmp # labels prenasobit misty, kde seeds nejsou nuly => vznik matice ocislovanymi prvky - tyto labely je nutne znat pro vraceni objektu s danym labelem
-              
-        ## Vlozeni labelu do listu
+            return returning
+            # Function exit
+
         seed = []
-        for item in intoSeeds.flat:
-            if item != 0:
-                seed.append(item)
-        """
-          
-        seed = []
-        stop = seeds[0].size
+        stop = seeds[0].size ## Zjisteni poctu seedu
         for index in range(0, stop):
             tmp = labels[ seeds[0][index], seeds[1][index], seeds[2][index] ]
-            if tmp != 0:
+            if tmp != 0: ## Tady opet pocitam s tim, ze oznaceni nulou pripada nejvetsimu objektu - cerne oblasti
                 seed.append(tmp)
-            
+
         ## Zbaveni se duplikatu
-        seed = list(set(seed))
+        seed = list( set ( seed ) )
 
         ## Vytvoreni vystupu
-        if len(seed) > 0:
-            
+        if len ( seed ) > 0:
+
             returning = labels == seed[0]
-            for index in range(1, len(seed)):
+            for index in range ( 1, len ( seed ) ) :
                 returning = returning + labels == seed[index]
 
             return returning
-            
+            # Function exit
+
         else:
-            
+
             return data
+            # Function exit
 
     ## Stara verze - nejak to uprave nefunguje - problem s cyklem "for label in numpy.nditer(labels)"
     ## Pry trvala dlouho, ale "AMD FX-8350 - 8 Core 4.2GHz" si nestezuje ;-)
@@ -238,10 +237,10 @@ def getPriorityObjects(data, N, seeds = None):
     #    print 'ar2', arrayLabels
 
         ## Osetreni neocekavane situace.
-        if(N > len(arrayLabels)):
+        if(nObj > len(arrayLabels)):
     ##        print('Pocet nejvetsich objektu k vraceni chcete vetsi nez je oznacenych oblasti!')
     ##        print('Redukuji pocet nejvetsich objektu k vraceni...')
-            N = len(arrayLabels)
+            nObj = len(arrayLabels)
             return data
 
         ##for index1 in range(0, len(arrayLabelsSum)):
@@ -250,7 +249,7 @@ def getPriorityObjects(data, N, seeds = None):
     ##    return data == 1
 
         ## Upraveni dat (ziskani N nejvetsich objektu).
-        search = N
+        search = nObj
         if (sys.version_info[0] < 3):
             import copy
             newData = copy.copy(data) # udelat lepe vynulovani (?)
@@ -407,8 +406,7 @@ def _main():
     structure = None
     outputTmp = vesselSegmentation(mat['data'], mat['segmentation'], threshold = -1,
         voxelsizemm = mat['voxelsizemm'], inputSigma = 0.15, dilationIterations = 2,
-        nObj = 1, biggestObjects = True, interactivity = True, binaryClosingIterations = 5,
-        binaryOpeningIterations = 1)
+        nObj = 2, biggestObjects = True, interactivity = False, binaryClosingIterations = 5, binaryOpeningIterations = 1)
 
     import inspector
     inspect = inspector.inspector(outputTmp)
