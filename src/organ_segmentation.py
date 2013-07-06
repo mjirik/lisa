@@ -122,6 +122,7 @@ class OrganSegmentation():
                 self.process_qt_app()
                 datadir = dcmr.get_dcmdir_qt(self.qt_app)
 
+
             # @TODO dialog v qt
             reader = dcmr.DicomReader(datadir) # , qt_app=qt_app)
             self.data3d = reader.get_3Ddata()
@@ -137,6 +138,7 @@ class OrganSegmentation():
 # manualcrop
         if manualroi is not None:
 # @todo opravit souřadný systém v součinnosti s autocrop
+            self.process_qt_app()
             self.data3d, self.crinfo = qmisc.manualcrop(self.data3d)
             self.iparams['roi'] = self.crinfo
             self.iparams['manualroi'] = None
@@ -167,7 +169,7 @@ class OrganSegmentation():
         if np.isscalar(working_voxelsize_mm):
             working_voxelsize_mm = np.ones([3]) * working_voxelsize_mm
 
-        self.zoom = self.voxelsize_mm / working_voxelsize_mm
+        self.zoom = self.voxelsize_mm /(1.0 * working_voxelsize_mm)
 
 #    def set_iparams(self, iparams):
 #        """
@@ -220,12 +222,17 @@ class OrganSegmentation():
                 order=1
                 )
         data3d_res = data3d_res.astype(np.int16)
+
+        #print 'data shp',  data3d_res.shape
+        #import pdb; pdb.set_trace()
         igc = pycat.ImageGraphCut(
                 data3d_res,
 #                gcparams={'pairwise_alpha': 30},
                 segparams=self.segparams,
                 voxelsize=self.working_voxelsize_mm
                 )
+
+        
 # version comparison
         from pkg_resources import parse_version
         import sklearn
@@ -620,6 +627,49 @@ class OrganSegmentation():
         app.exit()
 
 
+def readData3d(dcmdir):
+    qt_app = None
+    if dcmdir == None:
+        from PyQt4 import QtGui
+#QApplication
+        qt_app = QtGui.QApplication(sys.argv)
+        dcmdir = dcmr.get_dcmdir_qt(qt_app)
+    if os.path.isfile(dcmdir):
+# reading raw file
+        import SimpleITK as sitk
+        image = sitk.ReadImage(dcmdir)
+        #image = sitk.ReadImage('/home/mjirik/data/medical/data_orig/sliver07/01/liver-orig001.mhd')
+        #sz = image.GetSize()
+
+        #data3d = sitk.Image(sz[0],sz[1],sz[2], sitk.sitkInt16)
+
+        #for i in range(0,sz[0]):
+        #    print i
+        #    for j in range(0,sz[1]):
+        #        for k in range(0,sz[2]):
+        #            data3d[i,j,k]=image[i,j,k]
+
+        data3d = sitk.GetArrayFromImage(image) + 1024
+        data3d = np.transpose(data3d)
+        data3d = np.rollaxis(data3d,1)
+        metadata = {}#reader.get_metaData()
+        metadata['series_number'] = 0#reader.series_number
+        metadata['datadir'] = dcmdir
+        metadata['voxelsizemm'] = image.GetSpacing()
+
+        #import pdb; pdb.set_trace()
+
+    else:
+#reading dicom
+
+
+        reader = dcmr.DicomReader(dcmdir) # , qt_app=qt_app)
+        data3d = reader.get_3Ddata()
+        metadata = reader.get_metaData()
+        metadata['series_number'] = reader.series_number
+        metadata['datadir'] = dcmdir
+    return data3d, metadata, qt_app
+
 
 
 def main():
@@ -710,20 +760,10 @@ def main():
         oseg = OrganSegmentation(**iparams)
         
     else:
-        qt_app = None
-        if args.dcmdir == None:
-            from PyQt4 import QtGui
-#QApplication
-            qt_app = QtGui.QApplication(sys.argv)
-            args.dcmdir = dcmr.get_dcmdir_qt(qt_app)
-        reader = dcmr.DicomReader(args.dcmdir) # , qt_app=qt_app)
-        data3d = reader.get_3Ddata()
-        metadata = reader.get_metaData()
-        metadata['series_number'] = reader.series_number
-        metadata['datadir'] = args.dcmdir
     #else:
     #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
+        data3d, metadata, qt_app = readData3d(args.dcmdir)
 
         oseg = OrganSegmentation(None, #args.dcmdir,
                 data3d=data3d,
