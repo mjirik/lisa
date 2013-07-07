@@ -151,7 +151,8 @@ def vesselSegmentation(
 Vraceni N nejvetsich objektu.
     input:
         data - data, ve kterych chceme zachovat pouze nejvetsi objekty
-        N - pocet nejvetsich objektu k vraceni
+        nObj - pocet nejvetsich objektu k vraceni
+        seeds - dvourozmerne pole s umistenim pixelu, ktere chce uzivatel vratit (odpovidaji matici "data")
 
     returns:
         data s nejvetsimi objekty
@@ -161,132 +162,53 @@ def getPriorityObjects(data, nObj, seeds = None):
     ## Oznaceni dat.
     ## labels - oznacena data.
     ## length - pocet rozdilnych oznaceni.
-    labels, length = scipy.ndimage.label(data)
+    dataLabels, length = scipy.ndimage.label(data)
 
-    ## Podminka mnozstvi objektu.
+    ## Podminka maximalniho mnozstvi objektu.
     maxN = 250
-    if(length > maxN):
+    if ( length > maxN ) :
         print('Varovani: Existuje prilis mnoho objektu! (' + str ( length ) + ')')
 
-    ## Nova verze - podpora seeds - jednodussi ( nekdo dostal lepsi napad ;-) )
-    if True :
+    ## Uzivatel si nevybral specificke objekty.
+    if (seeds == None) :
 
-        if (seeds == None) :
+        ## Doufejme, ze cerna oblast nebude mensi nez nektere objekty jater.
+        ## Nebo-li tady pocitam s tim, ze cerna oblast bude nejvetsi objekt.
+        returning = dataLabels == 1
+        for label in range ( 2, nObj + 1 ) :
+            returning = returning + dataLabels == label
 
-            ## Doufejme, ze cerna oblast nebude mensi nez nektere objekty jater
-            ## Nebo-li tady pocitam s tim, ze cerna oblast bude nejvetsi objekt
-            returning = labels == 1
-            for index in range ( 2, nObj + 1 ) :
-                returning = returning + labels == index
+        return returning
+        # Function exit
 
-            return returning
-            # Function exit
+    ## Uzivatel si vybral specificke objekty.
+    seed = []
+    stop = seeds[0].size ## Zjisteni poctu seedu.
+    for index in range(0, stop):
+        ## Tady se ukladaji labely na mistech, ve kterych kliknul uzivatel.
+        tmp = dataLabels[ seeds[0][index], seeds[1][index], seeds[2][index] ]
+        if tmp != 0: ## Tady opet pocitam s tim, ze oznaceni nulou pripada nejvetsimu objektu - cerne oblasti.
+            seed.append(tmp)
 
-        seed = []
-        stop = seeds[0].size ## Zjisteni poctu seedu
-        for index in range(0, stop):
-            tmp = labels[ seeds[0][index], seeds[1][index], seeds[2][index] ]
-            if tmp != 0: ## Tady opet pocitam s tim, ze oznaceni nulou pripada nejvetsimu objektu - cerne oblasti
-                seed.append(tmp)
+    ## Pokud existuji vhodne labely, vytvori se nova data k vraceni.
+    ## Pokud ne, vrati se cela nafiltrovana data, ktera do funkce prisla (nedojde k vraceni specifickych objektu).
+    if len ( seed ) > 0:
 
-        ## Zbaveni se duplikatu
+        ## Zbaveni se duplikatu.
         seed = list( set ( seed ) )
 
-        ## Vytvoreni vystupu
-        if len ( seed ) > 0:
+        ## Vytvoreni vystupu - postupne pricitani dat prislunych specif. labelu.
+        returning = dataLabels == seed[0]
+        for index in range ( 1, len ( seed ) ) :
+            returning = returning + dataLabels == seed[index]
 
-            returning = labels == seed[0]
-            for index in range ( 1, len ( seed ) ) :
-                returning = returning + labels == seed[index]
+        return returning
+        # Function exit
 
-            return returning
-            # Function exit
-
-        else:
-
-            return data
-            # Function exit
-
-    ## Stara verze - nejak to uprave nefunguje - problem s cyklem "for label in numpy.nditer(labels)"
-    ## Pry trvala dlouho, ale "AMD FX-8350 - 8 Core 4.2GHz" si nestezuje ;-)
-    ## Bylo by dobre zavest paralelizmus - otazka jak a kde - neda se udelat vsude
     else:
 
-         #import collections
-
-        ## Soucet oznaceni z dat.
-        import time
-        tic = time.clock()
-        # arrayLabelsSum = numpy.bincount(labels)
-        toc = time.clock()-tic
-        print "cas ", toc
-        #import pdb; pdb.set_trace()
-
-        # je-li pocet labelu vetsi nez empiricky zjistena hodnota
-        # uzije se jeden algoritmus, jinak se vyuzije jiny
-        if length > 10:
-    #  vracime pocty jednotlivych labelu v datech
-            arrayLabelsSum = numpy.zeros(length+1, dtype=numpy.uint32)
-            for label in numpy.nditer(labels):
-                arrayLabelsSum[label] += 1
-
-            arrayLabels = range(0,length + 1)
-        else:
-
-            arrayLabelsSum, arrayLabels = areaIndexes(labels, length)
-
-        #datainlist = list(labels.reshape(-1,1))
-    #    toc = time.clock()-toc
-    #    print "cas 2", toc
-        #x = collections.Counter(datainlist)
-
-        #arrayLabels = [elt for elt,count in x.most_common(3)]
-        #toc = time.clock()-toc
-        #print "cas 2", toc
-    #    print 'ar1 ', arrayLabelsSum
-
-        ## Serazeni poli pro vyber nejvetsich objektu.
-        ## Pole arrayLabelsSum je serazeno od nejvetsi k nejmensi cetnosti.
-        ## Pole arrayLabels odpovida prislusnym oznacenim podle pole arrayLabelsSum.
-        arrayLabelsSum, arrayLabels = selectSort(list1 = arrayLabelsSum, list2 = arrayLabels)
-    #    print 'ar2', arrayLabels
-
-        ## Osetreni neocekavane situace.
-        if(nObj > len(arrayLabels)):
-    ##        print('Pocet nejvetsich objektu k vraceni chcete vetsi nez je oznacenych oblasti!')
-    ##        print('Redukuji pocet nejvetsich objektu k vraceni...')
-            nObj = len(arrayLabels)
-            return data
-
-        ##for index1 in range(0, len(arrayLabelsSum)):
-            ##print(str(arrayLabels[index1]) + " " + str(arrayLabelsSum[index1]))
-
-    ##    return data == 1
-
-        ## Upraveni dat (ziskani N nejvetsich objektu).
-        search = nObj
-        if (sys.version_info[0] < 3):
-            import copy
-            newData = copy.copy(data) # udelat lepe vynulovani (?)
-            newData = newData * 0
-        else:
-            newData = data.copy()
-            newData = newData * 0
-
-        for index in range(0, len(arrayLabels)):
-            newData -= (labels == arrayLabels[index])
-            if(arrayLabels[index] != 0):
-                search -= 1
-                if search <= 0:
-                    break
-
-        ## Uvolneni pameti
-        del(labels)
-        del(arrayLabels)
-        del(arrayLabelsSum)
-        garbage.collect()
-
-        return data - newData# - 1
+        return data
+        # Function exit
 
 """
 Zjisti cetnosti jednotlivych oznacenych ploch (labeled areas)
