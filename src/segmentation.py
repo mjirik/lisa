@@ -14,6 +14,7 @@ Copyright:   (c) Pavel Volkovinsky
 """
 
 # TODO: Podpora "seeds" - vraceni specifickych objektu
+# TODO: Udelat lepe vraceni nejvetsich (nejvetsiho) objektu (muze vzniknout problem s cernou oblasti)
 # TODO: Bylo by dobre zavest paralelizmus - otazka jak a kde - neda se udelat vsude, casem si to zjistit - urcite pred bakalarskou praci - asi v ramci PRJ5 nebo az mi bude o prazdninach chybet projekt
 
 import unittest
