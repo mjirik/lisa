@@ -91,7 +91,7 @@ if __name__ == "__main__":
     #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
     if args.defaultinputfile:
-        args.inputfile = "organ.pickle"
+        args.inputfile = "organ.pkl"
 
     if args.inputfile == None:
         oseg = organ_segmentation.OrganSegmentation(args.dcmdir, working_voxelsize_mm = 6, autocrop = True, autocrop_margin_mm = [10,10,10])
@@ -148,14 +148,18 @@ if __name__ == "__main__":
     data['slab']['none'] = 0
     data['slab']['liver'] = 1
     data['slab']['porta'] = 2
+    
 
+    #print np.max(output)
+    #import pdb; pdb.set_trace()
     #data = {}
     #data['data3d'] = oseg.data3d
     #data['crinfo'] = oseg.crinfo
     #data['segmentation'] = oseg.segmentation
-    data['segmentation'][output==2] = data['slab']['porta']
+    data['segmentation'][output] = data['slab']['porta']
     #data['slab'] = slab
 
+    
     pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'],  contour=data['segmentation']==data['slab']['porta'])
     pyed.show()
 

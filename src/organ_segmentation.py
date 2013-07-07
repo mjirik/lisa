@@ -131,6 +131,8 @@ class OrganSegmentation():
         else:
             self.data3d = data3d
             self.metadata = metadata
+            self.iparams['series_number'] = self.metadata['series_number']
+            self.iparams['datadir'] = self.metadata['datadir']
 
 # manualcrop
         if manualroi is not None:
@@ -708,18 +710,32 @@ def main():
         oseg = OrganSegmentation(**iparams)
         
     else:
+        qt_app = None
+        if args.dcmdir == None:
+            from PyQt4 import QtGui
+#QApplication
+            qt_app = QtGui.QApplication(sys.argv)
+            args.dcmdir = dcmr.get_dcmdir_qt(qt_app)
+        reader = dcmr.DicomReader(args.dcmdir) # , qt_app=qt_app)
+        data3d = reader.get_3Ddata()
+        metadata = reader.get_metaData()
+        metadata['series_number'] = reader.series_number
+        metadata['datadir'] = args.dcmdir
     #else:
     #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
 
-        oseg = OrganSegmentation(args.dcmdir,
+        oseg = OrganSegmentation(None, #args.dcmdir,
+                data3d=data3d,
+                metadata=metadata,
                 working_voxelsize_mm=args.voxelsizemm,
                 manualroi=args.manualroi,
                 texture_analysis=args.textureanalysis,
                 edit_data=args.editdata,
                 smoothing=args.segmentation_smoothing,
 #            iparams=args.iparams,
-                segparams=args.segparams
+                segparams=args.segparams,
+                qt_app=qt_app
                 )
 
     oseg.interactivity(args.viewermin, args.viewermax)
