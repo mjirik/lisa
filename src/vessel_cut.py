@@ -19,7 +19,8 @@ logger = logging.getLogger(__name__)
 import numpy as np
 import scipy.ndimage
 import seg2fem
-import viewer
+import viewer3
+import vtk
 
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
@@ -36,95 +37,88 @@ import show3
 def cut_editor_old(data):
     pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
     pyed.show()
-    split_obj0 = pyed.seeds
-    split_obj = split_obj0.copy()
+    split_obj = pyed.seeds
     vessels = data['segmentation'] == data['slab']['porta']
     vesselstmp = vessels
 
     sumall = np.sum(vessels==1)
 
-    #split_obj = scipy.ndimage.binary_dilation(split_obj, iterations = 5 )
-    #vesselstmp = vessels * (1 - split_obj)
+    split_obj = scipy.ndimage.binary_dilation(split_obj, iterations = 5 )
+    vesselstmp = vessels * (1 - split_obj)
 
     lab, n_obj = scipy.ndimage.label(vesselstmp)
 
-    print 'sumall ', sumall
     #while n_obj < 2 :
 # dokud neni z celkoveho objektu ustipnuto alespon 80 procent
-    while np.sum(lab == max_area_index(lab,n_obj)) > (0.95*sumall) :
+    while np.sum(lab == max_area_index(lab,n_obj)) > (0.8*sumall) :
 
-        split_obj = scipy.ndimage.binary_dilation(split_obj, iterations=3)
+        split_obj = scipy.ndimage.binary_dilation(split_obj, iterations = 5 )
         vesselstmp = vessels * (1 - split_obj)
     
         lab, n_obj = scipy.ndimage.label(vesselstmp)
-        print 'sum biggest ', np.sum(lab == max_area_index(lab,n_obj))
-        #print "n_obj  ",  n_obj
-        #import pdb; pdb.set_trace()
-        #print 'max ', np.sum(lab == max_area_index(lab,n_obj))
     
 #    print ("Zjistete si, ktere objekty jsou nejvets a nastavte l1 a l2")
+#    print (str(n_obj))
 
 #    print ("np.sum(lab==3)")
 
-    # všechny objekty, na které se to rozpadlo
-    #pyed = py3DSeedEditor.py3DSeedEditor(lab)
-    #pyed.show()
     obj1 = get_biggest_object(lab)
-
+   # pyed = py3DSeedEditor.py3DSeedEditor(lab)
+    #pyed.show()
 # vymaz nejvetsiho
     lab[obj1==1] = 0
     obj2 = get_biggest_object(lab)
 
     lab = obj1 + 2*obj2
-    #print "baf"
-    spl_vis = split_obj*2
-    spl_vis[split_obj0] = 1
-    #spl_vis[]
-    pyed = py3DSeedEditor.py3DSeedEditor(lab, seeds=spl_vis)
-    pyed.show()
-    cut_by_user = split_obj0
-    return lab, cut_by_user
+   # pyed = py3DSeedEditor.py3DSeedEditor(lab)
+   # pyed.show()
+    return lab
     pass
 
-def cut_editor(segmentation, voxelsize_mm = np.ones([3,1]), degrad = 4):
+def cut_editor(segmentation, voxelsize_mm = np.ones([3,1]), degrad = 3):
     """
     Funkce vrací trojrozměrné porobné jako data['segmentation'] 
     v data['slab'] je popsáno, co která hodnota znamená
     """
     labels = []
-
-    print segmentation.shape
     segmentation = segmentation[::degrad,::degrad,::degrad]
-    print segmentation.dtype
-    
-    import pdb; pdb.set_trace()
+    print("Generuji data...")
     mesh_data = seg2fem.gen_mesh_from_voxels_mc(segmentation, voxelsize_mm*degrad)
+    print("Done")
     if True:
         mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
     vtk_file = "mesh_geom.vtk"
     mesh_data.write(vtk_file)
     app = QApplication(sys.argv)
-    view = viewer.QVTKViewer(vtk_file)
-    view.exec_()
+    view = viewer3.QVTKViewer(vtk_file)
 
     return labels
     pass
 
-
-def resection(data):
+def change(data,name):
     vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
-# ostranění porty z více kusů, nastaví se jim hodnota liver
+    data['segmentation'][vessels == 2] = data['slab']['porta']
+    segmentation = data['segmentation']
+    cut_editor(segmentation == data['slab'][name])
+    
+    
+    
+def resection(data,name):
+    vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
+    # ostranění porty z více kusů, nastaví se jim hodnota liver
     #data['segmentation'][data['segmentation'] == data['slab']['porta']] = data['slab']['liver']
     #show3.show3(data['segmentation'])
 
-    #data['segmentation'][vessels == 1] = data['slab']['porta']
+    data['segmentation'][vessels == 2] = data['slab']['porta']
     segmentation = data['segmentation']
-    print ("Select cut")
+    print(data['slab'])
+    change(data,name)
     
-    print data["slab"]
-    #lab = cut_editor(segmentation > 0)#== data['slab']['porta'])
+    #print data["slab"]
+    #change(segmentation == data['slab']['porta'])
+    #lab = cut_editor(segmentation == data['slab']['porta'])
 
-    lab, cut = cut_editor_old(data)#['segmentation'] == data['slab']['porta'])
+    #lab = cut_editor_old(segmentation)
     
 
     l1 = 1
@@ -132,63 +126,24 @@ def resection(data):
     
 
     # dist se tady počítá od nul jenom v jedničkách
-    dist1 = scipy.ndimage.distance_transform_edt(lab != l1)
-    dist2 = scipy.ndimage.distance_transform_edt(lab != l2)
+    #dist1 = scipy.ndimage.distance_transform_edt(lab != l1)
+    #dist2 = scipy.ndimage.distance_transform_edt(lab != l2)
 
 
     #segm = (dist1 < dist2) * (data['segmentation'] != data['slab']['none'])
-    segm = (((data['segmentation'] != 0) * (dist1 < dist2)).astype('int8') + (data['segmentation'] != 0).astype('int8'))
-
-    v1, v2 = liver_spit_volume_mm3(segm, data['voxelsize_mm'])
-    print "Liver volume: %.4g l" % ((v1+v2)*1e-6)
-    print "volume1: %.4g l  (%.3g %%)" % ((v1)*1e-6, 100*v1/(v1+v2))
-    print "volume2: %.4g l  (%.3g %%)" % ((v2)*1e-6, 100*v2/(v1+v2))
+    #segm = (((data['segmentation'] != 0) * (dist1 < dist2)).astype('int8') + (data['segmentation'] != 0).astype('int8'))
 
     #pyed = py3DSeedEditor.py3DSeedEditor(segm)
+   # pyed.show()
+   # import pdb; pdb.set_trace()
+   # pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], contour=segm)
     #pyed.show()
-    #import pdb; pdb.set_trace()
-    linie = (((data['segmentation'] != 0) * (np.abs(dist1 - dist2) < 1))).astype(np.int8)
-    linie_vis = 2 * linie
-    linie_vis[cut] = 1
-    linie_vis= linie_vis.astype(np.int8)
-    pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], seeds=linie_vis, contour=(data['segmentation'] != 0))
-    pyed.show()
-
     #import pdb; pdb.set_trace()
 
     #show3.show3(data['segmentation'])
-
-    
-    data['slab']['resected_liver'] = 3
-    data['slab']['resected_porta'] = 4
-
-    mask_resected_liver = ((segm == 1) &
-            (data['segmentation'] == data['slab']['liver']))
-    mask_resected_porta = ((segm == 1) &
-            (data['segmentation'] == data['slab']['porta']))
-
-    data['segmentation'][mask_resected_liver] = \
-            data['slab']['resected_liver']
-    data['segmentation'][mask_resected_porta] = \
-            data['slab']['resected_porta']
-    
-    return data
-
     
 
-
-
-def liver_spit_volume_mm3(segm, voxelsize_mm):
-    """
-    segm: 0 - nothing, 1 - remaining tissue, 2 - resected tissue
-    """
-    voxelsize_mm3 = np.prod(voxelsize_mm)
-    v1 = np.sum(segm == 1) * voxelsize_mm3
-    v2 = np.sum(segm == 2) * voxelsize_mm3
-
-    return v1, v2
-
-
+    
 
 def get_biggest_object(data):
     """ Return biggest object """
@@ -207,7 +162,7 @@ def max_area_index(labels, num):
     """
     mx = 0
     mxi = -1
-    for l in range(1,num+1):
+    for l in range(1,num):
         mxtmp = np.sum(labels == l)
         if mxtmp > mx:
             mx = mxtmp
@@ -215,14 +170,16 @@ def max_area_index(labels, num):
 
     return mxi
 
+def prog(name):
+    data = misc.obj_from_file("out", filetype = 'pickle')
+    resection(data,name)
+
 
         
 
 if __name__ == "__main__":
-    data = misc.obj_from_file("vessels.pkl", filetype = 'pickle')
+    data = misc.obj_from_file("out", filetype = 'pickle')
     ds = data['segmentation'] == data['slab']['liver']
-    #pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
-    #pyed.show()
     #seg = np.zeros([100,100,100])
     #seg [50:80, 50:80, 60:75] = 1
     #seg[58:60, 56:72, 66:68]=2
@@ -231,14 +188,8 @@ if __name__ == "__main__":
     #dat [58:60, 56:72, 66:68] =  dat  [58:60, 56:72, 66:68] + 1
     #slab = {'liver':1, 'porta':2, 'portaa':3, 'portab':4}
     #data = {'segmentation':seg, 'data3d':dat, 'slab':slab}
+    name = 'porta'
+    resection(data,name)
 
-    data = resection(data)
-
-    savestring = raw_input('Save output data? (y/n): ')
-    #sn = int(snstring)
-    if savestring in ['Y', 'y']:
-
-
-        misc.obj_to_file(data, "resection.pkl", filetype='pickle')
 #    SectorDisplay2__()
 
