@@ -807,8 +807,10 @@ def main():
         iparams = oseg.get_iparams()
         #import pdb; pdb.set_trace()
         pth, filename = os.path.split(iparams['datadir'])
-        misc.obj_to_file(data, "organ-"+ filename + ".pkl", filetype='pickle')
-        misc.obj_to_file(iparams, 'iparams-'+ filename + '.pkl', filetype='pickle')
+        misc.obj_to_file(data, "organ.pkl", filetype='pickle')
+        #misc.obj_to_file(data, "organ-"+ filename + ".pkl", filetype='pickle')
+        misc.obj_to_file(iparams, 'organ_iparams.pkl', filetype='pickle')
+        #misc.obj_to_file(iparams, 'iparams-'+ filename + '.pkl', filetype='pickle')
         data ['data3d'] = None
         misc.obj_to_file(data, 'organ_small-'+ filename + '.pkl', filetype='pickle')
     #output = segmentation.vesselSegmentation(oseg.data3d,
