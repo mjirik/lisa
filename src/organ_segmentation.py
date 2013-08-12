@@ -25,6 +25,8 @@ import numpy as np
 import scipy
 #from scipy import sparse
 import traceback
+import time
+import audiosupport
 
 # ----------------- my scripts --------
 import py3DSeedEditor
@@ -733,6 +735,10 @@ def main():
             )
     args = parser.parse_args()
 
+
+    t0 = time.time()
+
+
     # voxelsizemm can be number or array
     args.voxelsizemm = np.array(eval(args.voxelsizemm))
 
@@ -789,12 +795,15 @@ def main():
     # volume
     #volume_mm3 = np.sum(oseg.segmentation > 0) * np.prod(oseg.voxelsize_mm)
 
+    t1 = time.time()
+    audiosupport.beep()
     print (
             "Volume " +
             str(oseg.get_segmented_volume_size_mm3() / 1000000.0) + ' [l]')
     #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour =
     # oseg.segmentation)
     #pyed.show()
+    print ("Total time: " + str (t1 - t0))
 
     if args.show_output:
         oseg.show_output()
