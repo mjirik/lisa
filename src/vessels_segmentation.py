@@ -125,7 +125,7 @@ if __name__ == "__main__":
         inputSigma = 0.15,
         dilationIterations = 2,
         nObj = 1,
-        biggestObjects = True,
+        biggestObjects = False,
 #        dataFiltering = True,
         interactivity = True,
         binaryClosingIterations = 5,
