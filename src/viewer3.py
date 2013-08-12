@@ -20,14 +20,26 @@ from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtk import *
 from Tkinter import *
 plane = vtk.vtkPlane()
+normal = None
+coordinates = None
+planew = None
 
 
+class normal_and_coordinates():
+    
+    def set_normal(self):
+        return normal
+        
+    def set_coordinates(self):
+        return coordinates
+
+
+        
 class QVTKViewer(QDialog):
     """
     Simple VTK Viewer.
     """
 
-    planew = None
     
     def __init__(self, vtk_filename):
         
@@ -49,8 +61,7 @@ class QVTKViewer(QDialog):
             planeWidget.ScaleEnabledOff()
             planeWidget.OutlineTranslationOff()
             planeWidget.AddObserver("InteractionEvent", Cutter)
-            print(planeWidget.GetNormal())
-            print(planeWidget.GetOrigin())
+            
             planeWidget.On()
             window.setLayout(grid)
 
@@ -63,18 +74,19 @@ class QVTKViewer(QDialog):
 
         def liver_view():
             print('Zobrazuji liver')
-            vessel_cut.prog('liver')
+            vessel_cut.View('liver')
 
         def vein_view():
             print('Zobrazuji vein')
-            vessel_cut.prog('porta')
+            vessel_cut.View('porta')
 
         def liver_cut():
-            print(self.planew.GetNormal())
-            print(self.planew.GetOrigin())
-            
-            
-            
+            global normal
+            global coordinates
+            normal = self.planew.GetNormal()
+            coordinates = self.planew.GetOrigin()
+            print(normal)
+            print(coordinates)
         
         """
         Initiate Viwer
@@ -191,7 +203,7 @@ class QVTKViewer(QDialog):
         button_cut = QtGui.QPushButton()
         button_cut.setText(unicode('cut'))
         grid.addWidget(button_cut, 4, 0)
-        window.connect(button_cut, QtCore.SIGNAL("clicked()"),(lambda y:lambda: callback(y) )('Stisknuto : liver'))
+        window.connect(button_cut, QtCore.SIGNAL("clicked()"),(lambda y:lambda: callback(y) )('Stisknuto : cut'))
         button_cut.clicked.connect(liver_cut)
         button_cut.show()
 
@@ -203,6 +215,7 @@ class QVTKViewer(QDialog):
         iren.Initialize()
         renWin.Render()
         iren.Start()
+
 
 class MyInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
         def __init__(self,parent=None):
