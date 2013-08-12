@@ -31,6 +31,8 @@ from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
 import misc
 import py3DSeedEditor
 import show3
+normal = 0
+coordinates = None
 
 
 
@@ -76,6 +78,7 @@ def cut_editor_old(data):
     pass
 
 def cut_editor(segmentation, voxelsize_mm = np.ones([3,1]), degrad = 3):
+    global normal,coordinates
     """
     Funkce vrací trojrozměrné porobné jako data['segmentation'] 
     v data['slab'] je popsáno, co která hodnota znamená
@@ -90,10 +93,13 @@ def cut_editor(segmentation, voxelsize_mm = np.ones([3,1]), degrad = 3):
     vtk_file = "mesh_geom.vtk"
     mesh_data.write(vtk_file)
     app = QApplication(sys.argv)
-    view = viewer3.QVTKViewer(vtk_file)
-
-    return labels
+    #view = viewer3.QVTKViewer(vtk_file)
+    viewer3.QVTKViewer(vtk_file)
+    normal = viewer3.normal_and_coordinates().set_normal()
+    coordinates = viewer3.normal_and_coordinates().set_coordinates()
+    return normal,coordinates
     pass
+
 
 def change(data,name):
     vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
@@ -170,7 +176,7 @@ def max_area_index(labels, num):
 
     return mxi
 
-def prog(name):
+def View(name):
     data = misc.obj_from_file("out", filetype = 'pickle')
     resection(data,name)
 
@@ -190,6 +196,8 @@ if __name__ == "__main__":
     #data = {'segmentation':seg, 'data3d':dat, 'slab':slab}
     name = 'porta'
     resection(data,name)
+    print normal
+    print coordinates
 
 #    SectorDisplay2__()
 
