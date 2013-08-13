@@ -31,7 +31,7 @@ import audiosupport
 # ----------------- my scripts --------
 import py3DSeedEditor
 #import dcmreaddata1 as dcmr
-import dcmreaddata as dcmr
+#import dcmreaddata as dcmr
 import pycut
 import argparse
 #import py3DSeedEditor
@@ -39,7 +39,7 @@ import argparse
 import segmentation
 import qmisc
 import misc
-
+import datareader
 
 def interactive_imcrop(im):
 
@@ -126,10 +126,12 @@ class OrganSegmentation():
 
 
             # @TODO dialog v qt
-            reader = dcmr.DicomReader(datadir) # , qt_app=qt_app)
-            self.data3d = reader.get_3Ddata()
-            self.metadata = reader.get_metaData()
-            self.iparams['series_number'] = reader.series_number
+            #reader = dcmr.DicomReader(datadir) # , qt_app=qt_app)
+            #self.data3d = reader.get_3Ddata()
+            #self.metadata = reader.get_metaData()
+            reader = datareader.DataReader()
+            self.data3d, self.metadata = reader.Get3DData(datadir)
+            self.iparams['series_number'] = self.metadata['series_number']
             self.iparams['datadir'] = datadir
         else:
             self.data3d = data3d
@@ -638,41 +640,11 @@ def readData3d(dcmdir):
         from PyQt4 import QtGui
 #QApplication
         qt_app = QtGui.QApplication(sys.argv)
-        dcmdir = dcmr.get_dcmdir_qt(qt_app)
-    if os.path.isfile(dcmdir):
-# reading raw file
-        import SimpleITK as sitk
-        image = sitk.ReadImage(dcmdir)
-        #image = sitk.ReadImage('/home/mjirik/data/medical/data_orig/sliver07/01/liver-orig001.mhd')
-        #sz = image.GetSize()
+        dcmdir = datareader.get_dcmdir_qt(qt_app)
+    print 'd : ', dcmdir
+    reader = datareader.DataReader()
+    data3d, metadata = reader.Get3DData(dcmdir)
 
-        #data3d = sitk.Image(sz[0],sz[1],sz[2], sitk.sitkInt16)
-
-        #for i in range(0,sz[0]):
-        #    print i
-        #    for j in range(0,sz[1]):
-        #        for k in range(0,sz[2]):
-        #            data3d[i,j,k]=image[i,j,k]
-
-        data3d = sitk.GetArrayFromImage(image) + 1024
-        data3d = np.transpose(data3d)
-        data3d = np.rollaxis(data3d,1)
-        metadata = {}#reader.get_metaData()
-        metadata['series_number'] = 0#reader.series_number
-        metadata['datadir'] = dcmdir
-        metadata['voxelsizemm'] = image.GetSpacing()
-
-        #import pdb; pdb.set_trace()
-
-    else:
-#reading dicom
-
-
-        reader = dcmr.DicomReader(dcmdir) # , qt_app=qt_app)
-        data3d = reader.get_3Ddata()
-        metadata = reader.get_metaData()
-        metadata['series_number'] = reader.series_number
-        metadata['datadir'] = dcmdir
     return data3d, metadata, qt_app
 
 
