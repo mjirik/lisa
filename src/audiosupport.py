@@ -4,7 +4,7 @@
 
 import pyaudio
 import wave
-
+import math
 import sys
 import os.path
 
@@ -36,7 +36,27 @@ def play(filename):
 
     p.terminate()
 
+def play2():
+    PyAudio = pyaudio.PyAudio
+    RATE = 16000
+    WAVE = 1000
+    data = ''.join([chr(int(math.sin(x/((RATE/WAVE)/math.pi))*127+128)) for x in xrange(RATE)])
+    p = PyAudio()
+
+    stream = p.open(
+            format=p.get_format_from_width(1),
+            channels=1,
+            rate=RATE,
+            output=True
+            )
+    for DISCARD in xrange(5):
+            stream.write(data)
+            stream.stop_stream()
+            stream.close()
+            p.terminate()
+
 def beep():
+    #play2()
     play(os.path.join(path_to_script, "../sound/beep-1.wav"))
 
 if __name__ == "__main__":
