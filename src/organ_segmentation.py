@@ -137,7 +137,6 @@ class OrganSegmentation():
             self.metadata = {'series_number':-1, 'voxelsizemm':1, 'datadir':None}
             self.metadata.update(metadata)
 
-            print "metadata : ", metadata
             self.iparams['series_number'] = self.metadata['series_number']
             self.iparams['datadir'] = self.metadata['datadir']
 
