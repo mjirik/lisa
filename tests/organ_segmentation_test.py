@@ -310,7 +310,7 @@ class OrganSegmentationTest(unittest.TestCase):
 
         #print ("Data size: " + str(data3d.nbytes) + ', shape: ' + str(data3d.shape) )
 
-        igc = pycat.ImageGraphCut(data3d, zoom = 0.5)
+        igc = pycut.ImageGraphCut(data3d, zoom = 0.5)
         seeds = igc.seeds
         seeds[0,:,0] = 1
         seeds[60:66,60:66,5:6] = 2

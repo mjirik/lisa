@@ -20,7 +20,7 @@ from PyQt4.QtGui import QFileDialog, QApplication, QMainWindow
 import numpy as np
 
 
-import pycat
+import pycut
 
 
 #import dcmreaddata1 as dcmr
@@ -60,7 +60,7 @@ class PycutTest(unittest.TestCase):
         #x[4:-4, 6:-2, 1:-6] = -1
 
         segparams = {'pairwiseAlpha':10, 'use_boundary_penalties':True}
-        igc = pycat.ImageGraphCut(data, segparams=segparams)
+        igc = pycut.ImageGraphCut(data, segparams=segparams)
         igc.interactivity()
 # instead of interacitivity just set seeeds
         #igc.set_seeds(seeds)
@@ -88,7 +88,7 @@ class PycutTest(unittest.TestCase):
         """
 
         data = self.generate_data([16,16,16])*100
-        igc = pycat.ImageGraphCut(data)
+        igc = pycut.ImageGraphCut(data)
         #igc.interactivity()
 
         penalty_array = igc.boundary_penalties_array(axis=0)
@@ -146,7 +146,7 @@ class PycutTest(unittest.TestCase):
         seeds[6,8:-5,2] = 2
         #x[4:-4, 6:-2, 1:-6] = -1
 
-        igc = pycat.ImageGraphCut(data)
+        igc = pycut.ImageGraphCut(data)
         igc.interactivity()
 # instead of interacitivity just set seeeds
         #igc.set_seeds(seeds)

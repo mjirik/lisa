@@ -32,7 +32,7 @@ import audiosupport
 import py3DSeedEditor
 #import dcmreaddata1 as dcmr
 import dcmreaddata as dcmr
-import pycat
+import pycut
 import argparse
 #import py3DSeedEditor
 
@@ -230,7 +230,7 @@ class OrganSegmentation():
 
         #print 'data shp',  data3d_res.shape
         #import pdb; pdb.set_trace()
-        igc = pycat.ImageGraphCut(
+        igc = pycut.ImageGraphCut(
                 data3d_res,
 #                gcparams={'pairwise_alpha': 30},
                 segparams=self.segparams,
@@ -353,7 +353,7 @@ class OrganSegmentation():
     def interactivity(self, min_val=800, max_val=1300):
         #import pdb; pdb.set_trace()
 # Staré volání
-        #igc = pycat.ImageGraphCut(self.data3d, zoom = self.zoom)
+        #igc = pycut.ImageGraphCut(self.data3d, zoom = self.zoom)
         #igc.gcparams['pairwise_alpha'] = 30
         #seeds_res = scipy.ndimage.zoom(self.seeds , self.zoom,
         # prefilter=False, mode= 'nearest', order = 1)
@@ -396,7 +396,7 @@ class OrganSegmentation():
         """
         #import pdb; pdb.set_trace()
 # Staré volání
-        #igc = pycat.ImageGraphCut(self.data3d, zoom = self.zoom)
+        #igc = pycut.ImageGraphCut(self.data3d, zoom = self.zoom)
         #igc.gcparams['pairwise_alpha'] = 30
         #seeds_res = scipy.ndimage.zoom(self.seeds , self.zoom,
         # prefilter=False, mode= 'nearest', order = 1)
@@ -790,7 +790,7 @@ def main():
 
     oseg.interactivity(args.viewermin, args.viewermax)
 
-    #igc = pycat.ImageGraphCut(data3d, zoom = 0.5)
+    #igc = pycut.ImageGraphCut(data3d, zoom = 0.5)
     #igc.interactivity()
 
     #igc.make_gc()
