@@ -2,8 +2,6 @@
 
 
 
-import pyaudio
-import wave
 import math
 import sys
 import os.path
@@ -16,6 +14,10 @@ sys.path.append(os.path.join(path_to_script, "../sound/"))
 CHUNK = 1024
 
 def play(filename):
+# sudo apt-get install python-pyaudio
+    import pyaudio
+    import wave
+
     wf = wave.open(filename, 'rb')
 
     p = pyaudio.PyAudio()
@@ -37,6 +39,8 @@ def play(filename):
     p.terminate()
 
 def play2():
+    import pyaudio
+    import wave
     PyAudio = pyaudio.PyAudio
     RATE = 16000
     WAVE = 1000
@@ -57,7 +61,9 @@ def play2():
 
 def beep():
     #play2()
-    play(os.path.join(path_to_script, "../sound/beep-1.wav"))
+    #play(os.path.join(path_to_script, "../sound/beep-1.wav"))
+    import subprocess 
+    subprocess.call('play -q -n synth 0.3 sine 880 vol 0.3', shell=True)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
