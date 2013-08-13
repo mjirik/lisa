@@ -736,7 +736,6 @@ def main():
     args = parser.parse_args()
 
 
-    t0 = time.time()
 
 
     # voxelsizemm can be number or array
@@ -763,6 +762,7 @@ def main():
 
     if args.iparams is not None:
         iparams = misc.obj_from_file(args.iparams, filetype='pickle')
+        t0 = time.time()
         oseg = OrganSegmentation(**iparams)
         
     else:
@@ -771,6 +771,7 @@ def main():
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
         data3d, metadata, qt_app = readData3d(args.dcmdir)
 
+        t0 = time.time()
         oseg = OrganSegmentation(None, #args.dcmdir,
                 data3d=data3d,
                 metadata=metadata,
