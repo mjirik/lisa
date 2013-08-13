@@ -133,7 +133,11 @@ class OrganSegmentation():
             self.iparams['datadir'] = datadir
         else:
             self.data3d = data3d
-            self.metadata = metadata
+            # default values are updated in next line
+            self.metadata = {'series_number':-1, 'voxelsizemm':1, 'datadir':None}
+            self.metadata.update(metadata)
+
+            print "metadata : ", metadata
             self.iparams['series_number'] = self.metadata['series_number']
             self.iparams['datadir'] = self.metadata['datadir']
 
