@@ -55,7 +55,21 @@ def sample_input_data():
     #print sample_data_file, path_to_script
     misc.obj_to_file(inputdata, sample_data_file, filetype='yaml')
 
-def compare_volumes(vol1, vol2):
+def compare_volumes(vol1, vol2, voxelsize_mm):
+    volume1_mm3 = np.sum(vol1 > 0) * np.prod(voxelsize_mm)
+    volume2_mm3 = np.sum(vol2 > 0) * np.prod(voxelsize_mm)
+    print 'vol1 [mm3]: ', volume1_mm3
+    print 'vol2 [mm3]: ', volume2_mm3
+
+    df = vol1 - vol2
+    df1 = np.sum(df == 1) * np.prod(voxelsize_mm)
+    df2 = np.sum(df == -1) * np.prod(voxelsize_mm)
+
+    print 'err+ [mm3]: ', df1, ' err+ [%]: ', df1/volume1_mm3
+    print 'err- [mm3]: ', df2, ' err- [%]: ', df2/volume1_mm3
+    pyed = py3DSeedEditor.py3DSeedEditor(df, contour =
+     vol2)
+    pyed.show()
     pass
 
 
@@ -90,12 +104,19 @@ def main():
 
 
     import pdb; pdb.set_trace()
-
-
+    data3d_a = (data3d_a > 1024).astype(np.int8)
+    data3d_b = (data3d_b > 0).astype(np.int8)
 
     pyed = py3DSeedEditor.py3DSeedEditor(data3d_b, contour =
      data3d_a)
     pyed.show()
+
+
+
+
+    compare_volumes(data3d_a , data3d_b , metadata_a['voxelsizemm'])
+
+
 
 
 
