@@ -142,6 +142,8 @@ class OrganSegmentation():
             self.iparams['series_number'] = self.metadata['series_number']
             self.iparams['datadir'] = self.metadata['datadir']
 
+
+            self.orig_shape = self.data3d.shape
 # manualcrop
         if manualroi is not None:
 # @todo opravit souřadný systém v součinnosti s autocrop
@@ -572,6 +574,7 @@ class OrganSegmentation():
         data['segmentation'] = self.segmentation
         data['slab'] = slab
         data['voxelsize_mm'] = self.voxelsize_mm
+        data['orig_shape'] = self.orig_shape
         #import pdb; pdb.set_trace()
         return data
 

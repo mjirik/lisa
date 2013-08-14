@@ -13,6 +13,7 @@ sys.path.append(os.path.join(path_to_script,
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
 import unittest
+import numpy as np
 
 import logging
 logger = logging.getLogger(__name__)

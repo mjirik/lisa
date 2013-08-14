@@ -1,0 +1,132 @@
+#! /usr/bin/python
+# -*- coding: utf-8 -*-
+
+# import funkcí z jiného adresáře
+import sys
+import os.path
+
+path_to_script = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(path_to_script, "../src/"))
+sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
+sys.path.append(os.path.join(path_to_script,
+                             "../extern/pycat/extern/py3DSeedEditor/"))
+#sys.path.append(os.path.join(path_to_script, "../extern/"))
+#import featurevector
+import unittest
+
+import logging
+logger = logging.getLogger(__name__)
+
+
+#import apdb
+#  apdb.set_trace();
+#import scipy.io
+import numpy as np
+import scipy
+#from scipy import sparse
+import traceback
+
+# ----------------- my scripts --------
+import py3DSeedEditor
+#import dcmreaddata1 as dcmr
+import dcmreaddata as dcmr
+import pycut
+import argparse
+#import py3DSeedEditor
+
+import segmentation
+import qmisc
+import misc
+import organ_segmentation
+import experiments
+import datareader
+
+
+def sample_input_data():
+    inputdata = {'basedir':'/home/mjirik/data/medical/',
+            'data': [
+                {'sliverseg':'data_orig/sliver07/training-part1/liver-seg001.mhd', 'ourseg':'data_processed/organ_small-liver-orig001.mhd.pkl'},
+                {'sliverseg':'data_orig/sliver07/training-part1/liver-seg002.mhd', 'ourseg':'data_processed/organ_small-liver-orig002.mhd.pkl'},
+                ]
+            }
+
+
+    sample_data_file = os.path.join(path_to_script, "20130812_liver_volumetry_sample.yaml")
+    #print sample_data_file, path_to_script
+    misc.obj_to_file(inputdata, sample_data_file, filetype='yaml')
+
+def compare_volumes(vol1, vol2):
+    pass
+
+
+def main():
+
+    #logger = logging.getLogger(__name__)
+    logger = logging.getLogger()
+
+    logger.setLevel(logging.WARNING)
+    ch = logging.StreamHandler()
+    logger.addHandler(ch)
+
+    #logger.debug('input params')
+
+    sample_input_data()
+    # input parser
+    print 'file' , __file__
+    data_file = os.path.join(path_to_script, "20130812_liver_volumetry_sample.yaml")
+    inputdata = misc.obj_from_file(data_file, filetype='yaml')
+    
+
+    reader = datareader.DataReader()
+    data3d_a_path = os.path.join(inputdata['basedir'], inputdata['data'][0]['sliverseg'])
+    data3d_a, metadata_a = reader.Get3DData(data3d_a_path)
+
+
+    data3d_b_path = os.path.join(inputdata['basedir'], inputdata['data'][0]['ourseg'])
+    obj_b = misc.obj_from_file(data3d_b_path, filetype='pickle')
+    #data_b, metadata_b = reader.Get3DData(data3d_b_path)
+
+    data3d_b = qmisc.uncrop(obj_b['segmentation'], obj_b['crinfo'],data3d_a.shape)
+
+
+    import pdb; pdb.set_trace()
+
+
+
+    pyed = py3DSeedEditor.py3DSeedEditor(data3d_b, contour =
+     data3d_a)
+    pyed.show()
+
+
+
+
+
+    #igc = pycat.ImageGraphCut(data3d, zoom = 0.5)
+    #igc.interactivity()
+
+    #igc.make_gc()
+    #igc.show_segmentation()
+
+    # volume
+    #volume_mm3 = np.sum(oseg.segmentation > 0) * np.prod(oseg.voxelsize_mm)
+
+    #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour =
+    # oseg.segmentation)
+    #pyed.show()
+
+#    if args.show_output:
+#        oseg.show_output()
+#
+#    savestring = raw_input('Save output data? (y/n): ')
+#    #sn = int(snstring)
+#    if savestring in ['Y', 'y']:
+#
+#        data = oseg.export()
+#
+#        misc.obj_to_file(data, "organ.pkl", filetype='pickle')
+#        misc.obj_to_file(oseg.get_ipars(), 'ipars.pkl', filetype='pickle')
+#    #output = segmentation.vesselSegmentation(oseg.data3d,
+    # oseg.orig_segmentation)
+
+if __name__ == "__main__":
+    main()
