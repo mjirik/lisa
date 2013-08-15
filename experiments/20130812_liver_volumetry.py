@@ -47,6 +47,8 @@ def sample_input_data():
             'data': [
                 {'sliverseg':'data_orig/sliver07/training-part1/liver-seg001.mhd', 'ourseg':'data_processed/organ_small-liver-orig001.mhd.pkl'},
                 {'sliverseg':'data_orig/sliver07/training-part1/liver-seg002.mhd', 'ourseg':'data_processed/organ_small-liver-orig002.mhd.pkl'},
+                {'sliverseg':'data_orig/sliver07/training-part1/liver-seg003.mhd', 'ourseg':'data_processed/organ_small-liver-orig003.mhd.pkl'},
+                {'sliverseg':'data_orig/sliver07/training-part1/liver-seg004.mhd', 'ourseg':'data_processed/organ_small-liver-orig004.mhd.pkl'},
                 ]
             }
 
@@ -67,10 +69,20 @@ def compare_volumes(vol1, vol2, voxelsize_mm):
 
     print 'err+ [mm3]: ', df1, ' err+ [%]: ', df1/volume1_mm3
     print 'err- [mm3]: ', df2, ' err- [%]: ', df2/volume1_mm3
-    pyed = py3DSeedEditor.py3DSeedEditor(df, contour =
-     vol2)
-    pyed.show()
-    pass
+    #pyed = py3DSeedEditor.py3DSeedEditor(df, contour =
+    # vol2)
+    #pyed.show()
+
+    evaluation = {
+            'volume1_mm3': volume1_mm3,
+            'volume2_mm3': volume2_mm3,
+            'err1_mm3':df1,
+            'err2_mm3':df2,
+            'err1_percent': df1/volume1_mm3,
+            'err2_percent': df2/volume1_mm3,
+
+            }
+    return evaluation
 
 
 def main():
@@ -90,34 +102,55 @@ def main():
     data_file = os.path.join(path_to_script, "20130812_liver_volumetry_sample.yaml")
     inputdata = misc.obj_from_file(data_file, filetype='yaml')
     
+    
+    evaluation_all = {
+            'file1': [],
+            'file2': [],
+            'volume1_mm3': [],
+            'volume2_mm3': [],
+            'err1_mm3': [],
+            'err2_mm3': [],
+            'err1_percent': [],
+            'err2_percent': []
 
-    reader = datareader.DataReader()
-    data3d_a_path = os.path.join(inputdata['basedir'], inputdata['data'][0]['sliverseg'])
-    data3d_a, metadata_a = reader.Get3DData(data3d_a_path)
+            }
+    for i in range(0,len(inputdata['data'])):
 
-
-    data3d_b_path = os.path.join(inputdata['basedir'], inputdata['data'][0]['ourseg'])
-    obj_b = misc.obj_from_file(data3d_b_path, filetype='pickle')
-    #data_b, metadata_b = reader.Get3DData(data3d_b_path)
-
-    data3d_b = qmisc.uncrop(obj_b['segmentation'], obj_b['crinfo'],data3d_a.shape)
-
-
-    import pdb; pdb.set_trace()
-    data3d_a = (data3d_a > 1024).astype(np.int8)
-    data3d_b = (data3d_b > 0).astype(np.int8)
-
-    pyed = py3DSeedEditor.py3DSeedEditor(data3d_b, contour =
-     data3d_a)
-    pyed.show()
+        reader = datareader.DataReader()
+        data3d_a_path = os.path.join(inputdata['basedir'], inputdata['data'][i]['sliverseg'])
+        data3d_a, metadata_a = reader.Get3DData(data3d_a_path)
 
 
+        data3d_b_path = os.path.join(inputdata['basedir'], inputdata['data'][i]['ourseg'])
+        obj_b = misc.obj_from_file(data3d_b_path, filetype='pickle')
+        #data_b, metadata_b = reader.Get3DData(data3d_b_path)
+
+        data3d_b = qmisc.uncrop(obj_b['segmentation'], obj_b['crinfo'],data3d_a.shape)
 
 
-    compare_volumes(data3d_a , data3d_b , metadata_a['voxelsizemm'])
+        #import pdb; pdb.set_trace()
+        data3d_a = (data3d_a > 1024).astype(np.int8)
+        data3d_b = (data3d_b > 0).astype(np.int8)
+
+        pyed = py3DSeedEditor.py3DSeedEditor(data3d_b, contour =
+        data3d_a)
+        pyed.show()
 
 
 
+
+        evaluation_one = compare_volumes(data3d_a , data3d_b , metadata_a['voxelsizemm'])
+        evaluation_all['file1'] = data3d_a_path
+        evaluation_all['file2'] = data3d_b_path
+        evaluation_all['volume1_mm3'].append(evaluation_one['volume1_mm3'])
+        evaluation_all['volume2_mm3'].append(evaluation_one['volume2_mm3'])
+        evaluation_all['err1_mm3'].append(evaluation_one['err1_mm3'])
+        evaluation_all['err2_mm3'].append(evaluation_one['err2_mm3'])
+        evaluation_all['err1_percent'].append(evaluation_one['err1_percent'])
+        evaluation_all['err2_percent'].append(evaluation_one['err2_percent'])
+
+
+    print evaluation_all
 
 
 

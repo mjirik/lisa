@@ -61,10 +61,22 @@ def crop(data, crinfo):
 def uncrop(data, crinfo, orig_shape):
     data_out = np.zeros(orig_shape, dtype=data.dtype)
 
+
+    print crinfo
+    print orig_shape
+    print data.shape
+
+    startx = np.round(crinfo[0][0]).astype(int)
+    starty = np.round(crinfo[1][0]).astype(int)
+    startz = np.round(crinfo[2][0]).astype(int)
+    
     data_out [
-            np.round(crinfo[0][0]).astype(int):np.round(crinfo[0][1]).astype(int)+1,
-            np.round(crinfo[1][0]).astype(int):np.round(crinfo[1][1]).astype(int)+1,
-            np.round(crinfo[2][0]).astype(int):np.round(crinfo[2][1]).astype(int)+1
+            #np.round(crinfo[0][0]).astype(int):np.round(crinfo[0][1]).astype(int)+1,
+            #np.round(crinfo[1][0]).astype(int):np.round(crinfo[1][1]).astype(int)+1,
+            #np.round(crinfo[2][0]).astype(int):np.round(crinfo[2][1]).astype(int)+1
+            startx:startx + data.shape[0],
+            starty:starty + data.shape[1],
+            startz:startz + data.shape[2]
             ] = data
 
     return data_out
