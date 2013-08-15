@@ -83,6 +83,7 @@ class OrganSegmentation():
         self.iparams['working_voxelsize_mm'] = self.working_voxelsize_mm
 
 
+        self.crinfo = [[0, -1], [0, -1], [0, -1]]
 
         self.parameters = {}
 
@@ -151,6 +152,7 @@ class OrganSegmentation():
             self.data3d, self.crinfo = qmisc.manualcrop(self.data3d)
             self.iparams['roi'] = self.crinfo
             self.iparams['manualroi'] = None
+            #print self.crinfo
         elif roi is not None:
             self.data3d = qmisc.crop(self.data3d, roi)
             self.crinfo = roi
@@ -168,7 +170,6 @@ class OrganSegmentation():
         self.autocrop = autocrop
         self.autocrop_margin_mm = np.array(autocrop_margin_mm)
         self.autocrop_margin = self.autocrop_margin_mm / self.voxelsize_mm
-        self.crinfo = [[0, -1], [0, -1], [0, -1]]
         self.texture_analysis = texture_analysis
         self.smoothing = smoothing
         self.smoothing_mm = smoothing_mm
@@ -332,14 +333,17 @@ class OrganSegmentation():
         if self.smoothing:
             self.segmentation_smoothing(self.smoothing_mm)
 
+        print self.crinfo
         if self.autocrop is not None:
             #import pdb; pdb.set_trace()
 
-            self.crinfo = self._crinfo_from_specific_data(
+            tmpcrinfo = self._crinfo_from_specific_data(
                     self.segmentation,
                     self.autocrop_margin)
-            self.segmentation = self._crop(self.segmentation, self.crinfo)
-            self.data3d = self._crop(self.data3d, self.crinfo)
+            self.segmentation = self._crop(self.segmentation, tmpcrinfo)
+            self.data3d = self._crop(self.data3d, tmpcrinfo)
+
+            self.crinfo = qmisc.combinecrinfo(self.crinfo, tmpcrinfo)
 
         if self.texture_analysis not in (None, False):
             import texture_analysis

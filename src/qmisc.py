@@ -58,13 +58,31 @@ def crop(data, crinfo):
             crinfo[2][0]:crinfo[2][1]
             ]
 
+
+def combinecrinfo(crinfo1, crinfo2):
+    """
+    Combine two crinfos. First used is crinfo1, second used is crinfo2.
+    """
+
+    #print 'cr1', crinfo1
+    #print 'cr2', crinfo2
+    crinfo = [
+            [crinfo1[0][0] + crinfo2[0][0], crinfo1[0][0] + crinfo2[0][1]],
+            [crinfo1[1][0] + crinfo2[1][0], crinfo1[1][0] + crinfo2[1][1]],
+            [crinfo1[2][0] + crinfo2[2][0], crinfo1[2][0] + crinfo2[2][1]]
+            ]
+
+    return crinfo
+
+
 def uncrop(data, crinfo, orig_shape):
+
     data_out = np.zeros(orig_shape, dtype=data.dtype)
 
 
-    print crinfo
-    print orig_shape
-    print data.shape
+    #print 'uncrop ', crinfo
+    #print orig_shape
+    #print data.shape
 
     startx = np.round(crinfo[0][0]).astype(int)
     starty = np.round(crinfo[1][0]).astype(int)
