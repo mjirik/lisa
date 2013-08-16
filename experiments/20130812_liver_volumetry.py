@@ -99,6 +99,8 @@ def compare_volumes(vol1, vol2, voxelsize_mm):
     #pyed.show()
 
 
+    #get_border(vol1)
+    metric_AvgD(vol1, vol2, voxelsize_mm)
     evaluation = {
             'volume1_mm3': volume1_mm3,
             'volume2_mm3': volume2_mm3,
@@ -111,6 +113,40 @@ def compare_volumes(vol1, vol2, voxelsize_mm):
             }
     return evaluation
 
+def metric_AvgD(vol1, vol2, voxelsize_mm):
+    border1 = get_border(vol1)
+    border2 = get_border(vol2)
+    
+
+    b1dst = scipy.ndimage.morphology.distance_transform_edt(border1,sampling=voxelsize_mm)
+
+
+    dst_b1_to_b2 = border2*b1dst
+    #import pdb; pdb.set_trace()
+    #pyed = py3DSeedEditor.py3DSeedEditor(dst_b1_to_b2, contour =
+    #vol1)
+    #pyed.show()
+    avgd = np.average(dst_b1_to_b2[np.nonzero(dst_b1_to_b2)])
+    maxd = np.max(dst_b1_to_b2)
+
+    print 'AvgD [mm]', avgd
+    print 'MaxD [mm]', maxd
+
+def get_border(image3d):
+    from scipy import ndimage
+    kernel = np.ones([3,3,3])
+    conv = scipy.ndimage.convolve(image3d, kernel)
+    conv[conv==27] = 0
+    conv = conv * image3d
+
+    conv = conv > 0
+    
+
+    #pyed = py3DSeedEditor.py3DSeedEditor(conv, contour =
+    #image3d)
+    #pyed.show()
+    
+    return conv
 
 def main():
 

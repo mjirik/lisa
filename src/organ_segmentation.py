@@ -195,7 +195,7 @@ class OrganSegmentation():
         if np.isscalar(working_voxelsize_mm):
             working_voxelsize_mm = np.ones([3]) * self.working_voxelsize_mm
 
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         self.zoom = self.voxelsize_mm /(1.0 * self.working_voxelsize_mm)
 
 #    def set_iparams(self, iparams):
@@ -698,9 +698,14 @@ def main():
             help='run in debug mode')
     parser.add_argument('-vs', '--voxelsizemm', default='3', type=str,
             help='Insert working voxelsize. It can be number or \
-            array of three numbers. \n \
+            array of three numbers. It is possible use original \n \
+            resolution or half of original resolution. \n \
             -vs 3 \n \
-            -vs [3,3,5]')
+            -vs [3,3,5] \n \
+            -vs orig \n \
+            -vs orig/2 \n \
+            '
+            )
     parser.add_argument('-mroi', '--manualroi', action='store_true',
             help='manual crop before data processing',
             default=None)
