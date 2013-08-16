@@ -76,40 +76,10 @@ class OrganSegmentation():
         """
         self.iparams = {}
         self.datadir = datadir
-        if np.isscalar(working_voxelsize_mm):
-            self.working_voxelsize_mm = [working_voxelsize_mm] * 3
-        else:
-            self.working_voxelsize_mm = working_voxelsize_mm
-        self.iparams['working_voxelsize_mm'] = self.working_voxelsize_mm
 
 
         self.crinfo = [[0, -1], [0, -1], [0, -1]]
 
-        self.parameters = {}
-
-
-        #self.segparams = {'pairwiseAlpha':2, 'use_boundary_penalties':True,'boundary_penalties_sigma':50}
-
-# for each mm on boundary there will be sum of penalty equal 10
-        self.segparams = {'pairwise_alpha_per_mm2':10, 'use_boundary_penalties':False,'boundary_penalties_sigma':50}
-        self.segparams = {'pairwise_alpha_per_mm2':60, 'use_boundary_penalties':False,'boundary_penalties_sigma':50}
-        #print segparams
-# @TODO each axis independent alpha
-        self.segparams.update(segparams)
-
-        self.segparams['pairwise_alpha'] = \
-                self.segparams['pairwise_alpha_per_mm2'] / \
-                np.mean(self.iparams['working_voxelsize_mm'])
-
-        #self.segparams['pairwise_alpha']=25
-        
-
-
-        # parameters with same effect as interactivity
-        #if iparams is None:
-        #    self.iparams= {}
-        #else:
-        #    self.set_iparams(iparams)
 
 
         self.qt_app = qt_app
@@ -145,6 +115,52 @@ class OrganSegmentation():
 
 
             self.orig_shape = self.data3d.shape
+
+
+        # voxelsize processing
+        if working_voxelsize_mm == 'orig':
+            working_voxelsize_mm = self.metadata['voxelsizemm']
+        elif working_voxelsize_mm == 'orig/2':
+            working_voxelsize_mm = np.array(self.metadata['voxelsizemm'])*2
+
+
+
+        if np.isscalar(working_voxelsize_mm):
+            self.working_voxelsize_mm = [working_voxelsize_mm] * 3
+        else:
+            self.working_voxelsize_mm = np.array(working_voxelsize_mm)
+
+
+        self.iparams['working_voxelsize_mm'] = self.working_voxelsize_mm
+
+
+        #self.parameters = {}
+
+
+        #self.segparams = {'pairwiseAlpha':2, 'use_boundary_penalties':True,'boundary_penalties_sigma':50}
+
+# for each mm on boundary there will be sum of penalty equal 10
+        self.segparams = {'pairwise_alpha_per_mm2':10, 'use_boundary_penalties':False,'boundary_penalties_sigma':50}
+        self.segparams = {'pairwise_alpha_per_mm2':60, 'use_boundary_penalties':False,'boundary_penalties_sigma':50}
+        #print segparams
+# @TODO each axis independent alpha
+        self.segparams.update(segparams)
+
+        self.segparams['pairwise_alpha'] = \
+                self.segparams['pairwise_alpha_per_mm2'] / \
+                np.mean(self.iparams['working_voxelsize_mm'])
+
+        #self.segparams['pairwise_alpha']=25
+        
+
+
+        # parameters with same effect as interactivity
+        #if iparams is None:
+        #    self.iparams= {}
+        #else:
+        #    self.set_iparams(iparams)
+
+
 # manualcrop
         if manualroi is not None:
 # @todo opravit souřadný systém v součinnosti s autocrop
@@ -177,9 +193,10 @@ class OrganSegmentation():
 
 
         if np.isscalar(working_voxelsize_mm):
-            working_voxelsize_mm = np.ones([3]) * working_voxelsize_mm
+            working_voxelsize_mm = np.ones([3]) * self.working_voxelsize_mm
 
-        self.zoom = self.voxelsize_mm /(1.0 * working_voxelsize_mm)
+        import pdb; pdb.set_trace()
+        self.zoom = self.voxelsize_mm /(1.0 * self.working_voxelsize_mm)
 
 #    def set_iparams(self, iparams):
 #        """
@@ -225,6 +242,8 @@ class OrganSegmentation():
 
 
     def _interactivity_begin(self):
+
+        print 'zoom ', self.zoom 
         data3d_res = scipy.ndimage.zoom(
                 self.data3d,
                 self.zoom,
@@ -721,7 +740,10 @@ def main():
 
 
     # voxelsizemm can be number or array
-    args.voxelsizemm = np.array(eval(args.voxelsizemm))
+    #if args.voxelsizemm != 'orig':
+    if not args.voxelsizemm.startswith('orig'):
+        import pdb; pdb.set_trace()
+        args.voxelsizemm = np.array(eval(args.voxelsizemm))
 
     #  
     args.segparams = eval(args.segparams)

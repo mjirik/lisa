@@ -45,11 +45,13 @@ import datareader
 def sample_input_data():
     inputdata = {'basedir':'/home/mjirik/data/medical/',
             'data': [
-               # {'sliverseg':'data_orig/sliver07/training-part1/liver-seg001.mhd', 'ourseg':'data_processed/organ_small-liver-orig001.mhd.pkl'},
-               # {'sliverseg':'data_orig/sliver07/training-part1/liver-seg002.mhd', 'ourseg':'data_processed/organ_small-liver-orig002.mhd.pkl'},
-               # {'sliverseg':'data_orig/sliver07/training-part1/liver-seg003.mhd', 'ourseg':'data_processed/organ_small-liver-orig003.mhd.pkl'},
-               # {'sliverseg':'data_orig/sliver07/training-part1/liver-seg004.mhd', 'ourseg':'data_processed/organ_small-liver-orig004.mhd.pkl'},
+                {'sliverseg':'data_orig/sliver07/training-part1/liver-seg001.mhd', 'ourseg':'data_processed/organ_small-liver-orig001.mhd.pkl'},
+                {'sliverseg':'data_orig/sliver07/training-part1/liver-seg002.mhd', 'ourseg':'data_processed/organ_small-liver-orig002.mhd.pkl'},
+                {'sliverseg':'data_orig/sliver07/training-part1/liver-seg003.mhd', 'ourseg':'data_processed/organ_small-liver-orig003.mhd.pkl'},
+                {'sliverseg':'data_orig/sliver07/training-part1/liver-seg004.mhd', 'ourseg':'data_processed/organ_small-liver-orig004.mhd.pkl'},
                 {'sliverseg':'data_orig/sliver07/training-part1/liver-seg005.mhd', 'ourseg':'data_processed/organ_small-liver-orig005.mhd.pkl'},
+                {'sliverseg':'data_orig/sliver07/training-part2/liver-seg006.mhd', 'ourseg':'data_processed/organ_small-liver-orig006.mhd.pkl'},
+                {'sliverseg':'data_orig/sliver07/training-part2/liver-seg008.mhd', 'ourseg':'data_processed/organ_small-liver-orig008.mhd.pkl'},
                 ]
             }
 
@@ -58,9 +60,18 @@ def sample_input_data():
     #print sample_data_file, path_to_script
     misc.obj_to_file(inputdata, sample_data_file, filetype='yaml')
 
+#def voe_metric(vol1, vol2, voxelsize_mm):
+
+
 def compare_volumes(vol1, vol2, voxelsize_mm):
-    volume1_mm3 = np.sum(vol1 > 0) * np.prod(voxelsize_mm)
-    volume2_mm3 = np.sum(vol2 > 0) * np.prod(voxelsize_mm)
+    """
+    vol1: reference
+    vol2: segmentation
+    """
+    volume1 = np.sum(vol1 > 0)
+    volume2 = np.sum(vol2 > 0)
+    volume1_mm3 = volume1 * np.prod(voxelsize_mm)
+    volume2_mm3 = volume2 * np.prod(voxelsize_mm)
     print 'vol1 [mm3]: ', volume1_mm3
     print 'vol2 [mm3]: ', volume2_mm3
 
@@ -68,19 +79,34 @@ def compare_volumes(vol1, vol2, voxelsize_mm):
     df1 = np.sum(df == 1) * np.prod(voxelsize_mm)
     df2 = np.sum(df == -1) * np.prod(voxelsize_mm)
 
-    print 'err+ [mm3]: ', df1, ' err+ [%]: ', df1/volume1_mm3
-    print 'err- [mm3]: ', df2, ' err- [%]: ', df2/volume1_mm3
+    print 'err- [mm3]: ', df1, ' err- [%]: ', df1/volume1_mm3*100
+    print 'err+ [mm3]: ', df2, ' err+ [%]: ', df2/volume1_mm3*100
+
+    #VOE[%]
+    intersection = np.sum(df != 0).astype(float)
+    union = (np.sum(vol1 > 0) + np.sum(vol2 > 0)).astype(float)
+    voe = 100*( (intersection / union))
+    print 'VOE [%]', voe
+
+
+    #VD[%]
+    vd = 100* (volume2-volume1).astype(float)/volume1.astype(float)
+    print 'VD [%]', vd
+    #import pdb; pdb.set_trace()
+
     #pyed = py3DSeedEditor.py3DSeedEditor(df, contour =
     # vol2)
     #pyed.show()
+
 
     evaluation = {
             'volume1_mm3': volume1_mm3,
             'volume2_mm3': volume2_mm3,
             'err1_mm3':df1,
             'err2_mm3':df2,
-            'err1_percent': df1/volume1_mm3,
-            'err2_percent': df2/volume1_mm3,
+            'err1_percent': df1/volume1_mm3*100,
+            'err2_percent': df2/volume1_mm3*100,
+            'voe': voe
 
             }
     return evaluation
@@ -104,6 +130,7 @@ def main():
     inputdata = misc.obj_from_file(data_file, filetype='yaml')
     
     
+    visualization = False
     evaluation_all = {
             'file1': [],
             'file2': [],
@@ -133,16 +160,17 @@ def main():
         data3d_a = (data3d_a > 1024).astype(np.int8)
         data3d_b = (data3d_b > 0).astype(np.int8)
 
-        pyed = py3DSeedEditor.py3DSeedEditor(data3d_b, contour =
-        data3d_a)
-        pyed.show()
+        if visualization:
+            pyed = py3DSeedEditor.py3DSeedEditor(data3d_b, contour =
+            data3d_a)
+            pyed.show()
 
 
 
 
         evaluation_one = compare_volumes(data3d_a , data3d_b , metadata_a['voxelsizemm'])
-        evaluation_all['file1'] = data3d_a_path
-        evaluation_all['file2'] = data3d_b_path
+        evaluation_all['file1'].append(data3d_a_path)
+        evaluation_all['file2'].append(data3d_b_path)
         evaluation_all['volume1_mm3'].append(evaluation_one['volume1_mm3'])
         evaluation_all['volume2_mm3'].append(evaluation_one['volume2_mm3'])
         evaluation_all['err1_mm3'].append(evaluation_one['err1_mm3'])
@@ -152,6 +180,7 @@ def main():
 
 
     print evaluation_all
+    #import pdb; pdb.set_trace()
 
 
 
