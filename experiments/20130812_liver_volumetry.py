@@ -42,6 +42,11 @@ import experiments
 import datareader
 
 
+# okraj v pixelech využitý pro snížení výpočetní náročnosti během vyhodnocování AvgD
+CROP_MARGIN = [20]
+
+
+
 def sample_input_data():
     inputdata = {'basedir':'/home/mjirik/data/medical/',
             'data': [
@@ -100,7 +105,10 @@ def compare_volumes(vol1, vol2, voxelsize_mm):
 
 
     #get_border(vol1)
-    metric_AvgD(vol1, vol2, voxelsize_mm)
+    avgd, rmsd, maxd = distance_matrics(vol1, vol2, voxelsize_mm)
+    print 'AvgD [mm]', avgd
+    print 'RMSD [mm]', rmsd
+    print 'MaxD [mm]', maxd
     evaluation = {
             'volume1_mm3': volume1_mm3,
             'volume2_mm3': volume2_mm3,
@@ -108,12 +116,21 @@ def compare_volumes(vol1, vol2, voxelsize_mm):
             'err2_mm3':df2,
             'err1_percent': df1/volume1_mm3*100,
             'err2_percent': df2/volume1_mm3*100,
-            'voe': voe
-
+            'voe': voe,
+            'vd': vd,
+            'avgd': avgd,
+            'rmsd': rmsd,
+            'maxd': maxd
             }
     return evaluation
 
-def metric_AvgD(vol1, vol2, voxelsize_mm):
+def distance_matrics(vol1, vol2, voxelsize_mm):
+    # crop data to reduce comutation time
+    crinfo = qmisc.crinfo_from_specific_data(vol1, CROP_MARGIN)
+    vol1 = qmisc.crop(vol1, crinfo)
+    vol2 = qmisc.crop(vol2, crinfo)
+
+
     border1 = get_border(vol1)
     border2 = get_border(vol2)
     
@@ -123,14 +140,14 @@ def metric_AvgD(vol1, vol2, voxelsize_mm):
 
     dst_b1_to_b2 = border2*b1dst
     #import pdb; pdb.set_trace()
-    #pyed = py3DSeedEditor.py3DSeedEditor(dst_b1_to_b2, contour =
-    #vol1)
-    #pyed.show()
+#    pyed = py3DSeedEditor.py3DSeedEditor(dst_b1_to_b2, contour=vol1)
+#    pyed.show()
     avgd = np.average(dst_b1_to_b2[np.nonzero(dst_b1_to_b2)])
+    rmsd = np.average(dst_b1_to_b2[np.nonzero(dst_b1_to_b2)]**2)
     maxd = np.max(dst_b1_to_b2)
 
-    print 'AvgD [mm]', avgd
-    print 'MaxD [mm]', maxd
+
+    return avgd, rmsd, maxd
 
 def get_border(image3d):
     from scipy import ndimage
@@ -175,7 +192,12 @@ def main():
             'err1_mm3': [],
             'err2_mm3': [],
             'err1_percent': [],
-            'err2_percent': []
+            'err2_percent': [],
+            'voe': [],
+            'vd': [],
+            'avgd': [],
+            'rmsd': [],
+            'maxd': []
 
             }
     for i in range(0,len(inputdata['data'])):
@@ -213,6 +235,11 @@ def main():
         evaluation_all['err2_mm3'].append(evaluation_one['err2_mm3'])
         evaluation_all['err1_percent'].append(evaluation_one['err1_percent'])
         evaluation_all['err2_percent'].append(evaluation_one['err2_percent'])
+        evaluation_all['voe'].append(evaluation_one['voe'])
+        evaluation_all['vd'].append(evaluation_one['vd'])
+        evaluation_all['avgd'].append(evaluation_one['avgd'])
+        evaluation_all['rmsd'].append(evaluation_one['rmsd'])
+        evaluation_all['maxd'].append(evaluation_one['maxd'])
 
 
     print evaluation_all

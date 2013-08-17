@@ -522,41 +522,15 @@ class OrganSegmentation():
         """
         Crop data with crinfo
         """
-        data = data[crinfo[0][0]:crinfo[0][1],
-                crinfo[1][0]:crinfo[1][1], crinfo[2][0]:crinfo[2][1]]
+        data = qmisc.crop(data, crinfo)
+        #data[crinfo[0][0]:crinfo[0][1],
+               # crinfo[1][0]:crinfo[1][1], crinfo[2][0]:crinfo[2][1]]
         return data
 
     def _crinfo_from_specific_data(self, data, margin):
 # hledáme automatický ořez, nonzero dá indexy
-        nzi = np.nonzero(data)
+        return qmisc.crinfo_from_specific_data(data, margin)
 
-        x1 = np.min(nzi[0]) - margin[0]
-        x2 = np.max(nzi[0]) + margin[0] + 1
-        y1 = np.min(nzi[1]) - margin[0]
-        y2 = np.max(nzi[1]) + margin[0] + 1
-        z1 = np.min(nzi[2]) - margin[0]
-        z2 = np.max(nzi[2]) + margin[0] + 1
-
-# ošetření mezí polí
-        if x1 < 0:
-            x1 = 0
-        if y1 < 0:
-            y1 = 0
-        if z1 < 0:
-            z1 = 0
-
-        if x2 > data.shape[0]:
-            x2 = data.shape[0] - 1
-        if y2 > data.shape[1]:
-            y2 = data.shape[1] - 1
-        if z2 > data.shape[2]:
-            z2 = data.shape[2] - 1
-
-# ořez
-        crinfo = [[x1, x2], [y1, y2], [z1, z2]]
-        #dataout = self._crop(data,crinfo)
-        #dataout = data[x1:x2, y1:y2, z1:z2]
-        return crinfo
 
     def im_crop(self, im,  roi_start, roi_stop):
         im_out = im[ \
