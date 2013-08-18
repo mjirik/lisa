@@ -126,10 +126,14 @@ class OrganSegmentation():
 
 
         if np.isscalar(working_voxelsize_mm):
-            self.working_voxelsize_mm = [working_voxelsize_mm] * 3
-        else:
-            self.working_voxelsize_mm = np.array(working_voxelsize_mm)
+            self.working_voxelsize_mm = ([working_voxelsize_mm] * 3)
 
+
+        
+        self.working_voxelsize_mm = np.array(self.working_voxelsize_mm).astype(float)
+
+       # if np.isscalar(self.working_voxelsize_mm):
+       #     self.working_voxelsize_mm = (np.ones([3]) * self.working_voxelsize_mm).astype(float)
 
         self.iparams['working_voxelsize_mm'] = self.working_voxelsize_mm
 
@@ -192,10 +196,11 @@ class OrganSegmentation():
         self.edit_data = edit_data
 
 
-        if np.isscalar(working_voxelsize_mm):
-            working_voxelsize_mm = np.ones([3]) * self.working_voxelsize_mm
 
         #import pdb; pdb.set_trace()
+        print 'swvs: ', self.working_voxelsize_mm
+        print 'wvs: ', working_voxelsize_mm
+        print 'svs: ', self.voxelsize_mm
         self.zoom = self.voxelsize_mm /(1.0 * self.working_voxelsize_mm)
 
 #    def set_iparams(self, iparams):
