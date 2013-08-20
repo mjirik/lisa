@@ -53,8 +53,8 @@ if __name__ == "__main__":
             help='path to data dir')
     parser.add_argument('-d', '--debug', action='store_true',
             help='run in debug mode')
-    parser.add_argument('-t', '--tests', action='store_true',
-            help='run unittest')
+    parser.add_argument('-bg', '--biggest', action='store_true',
+            help='find biggest object')
     parser.add_argument('-ed', '--exampledata', action='store_true',
             help='run unittest')
     parser.add_argument('-i', '--inputfile',  default=None,
@@ -72,11 +72,6 @@ if __name__ == "__main__":
         logger.setLevel(logging.DEBUG)
 
 
-    if args.tests:
-        # hack for use argparse and unittest in one module
-        sys.argv[1:]=[]
-        unittest.main()
-        sys.exit()
 
     defaultoutputfile =  "vessels.pkl"
     if args.defaultoutputfile:
@@ -112,8 +107,8 @@ if __name__ == "__main__":
     #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour = oseg.orig_scale_segmentation)
 
     print 'slab', data['slab']
-    pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], contour = data['segmentation'])
-    pyed.show()
+    #pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], contour = data['segmentation'])
+    #pyed.show()
     #import pdb; pdb.set_trace()
 
     outputTmp = segmentation.vesselSegmentation(
@@ -124,7 +119,7 @@ if __name__ == "__main__":
         inputSigma = 0.15,
         dilationIterations = 2,
         nObj = 1,
-        biggestObjects = False,
+        biggestObjects = args.biggest,
 #        dataFiltering = True,
         interactivity = True,
         binaryClosingIterations = 5,
@@ -162,8 +157,8 @@ if __name__ == "__main__":
     pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'],  contour=data['segmentation']==data['slab']['porta'])
     pyed.show()
 
-    pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
-    pyed.show()
+    #pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
+    #pyed.show()
     # Uvolneni pameti
     garbage.collect()
 
@@ -177,3 +172,4 @@ if __name__ == "__main__":
             misc.obj_to_file(data, defaultoutputfile, filetype = 'pickle')
     else:
         misc.obj_to_file(data, args.outputfile, filetype = 'pickle')
+
