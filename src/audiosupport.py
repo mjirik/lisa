@@ -13,7 +13,7 @@ sys.path.append(os.path.join(path_to_script, "../sound/"))
 
 CHUNK = 1024
 
-def play(filename):
+def play(filename):# pragma: no cover
 # sudo apt-get install python-pyaudio
     import pyaudio
     import wave
@@ -38,7 +38,7 @@ def play(filename):
 
     p.terminate()
 
-def play2():
+def play2():# pragma: no cover
     import pyaudio
     import wave
     PyAudio = pyaudio.PyAudio
@@ -59,7 +59,7 @@ def play2():
             stream.close()
             p.terminate()
 
-def beep():
+def beep():# pragma: no cover
     #play2()
     #play(os.path.join(path_to_script, "../sound/beep-1.wav"))
     import subprocess 

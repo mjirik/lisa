@@ -34,7 +34,7 @@ def isSparseMatrix(obj):
 
 
 import py3DSeedEditor
-def manualcrop(data):
+def manualcrop(data):  # pragma: no cover
 
     import seed_editor_qt
     pyed = seed_editor_qt.QTSeedEditor(data, mode='crop')
