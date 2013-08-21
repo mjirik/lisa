@@ -188,7 +188,7 @@ class QVTKViewer(QDialog):
         button_vein.setText(unicode('vein'))
         grid.addWidget(button_vein, 2, 0)
         window.connect(button_vein, QtCore.SIGNAL("clicked()"),(lambda y:lambda: callback(y) )('Stisknuto : vein'))
-        button_liver.clicked.connect(vein_view)
+        button_vein.clicked.connect(vein_view)
         button_vein.show()
         
         # Button plane
