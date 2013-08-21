@@ -10,7 +10,7 @@ Requirements
 
 Fallowing packages are installed automatically with mysetup.py
 
-    sudo apt-get install python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml python-audio
+    sudo apt-get install python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox
 
 
 Install

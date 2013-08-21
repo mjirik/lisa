@@ -28,7 +28,7 @@ import scipy
 # ----------------- my scripts --------
 import py3DSeedEditor
 import dcmreaddata as dcmr
-import pycat
+import pycut
 import argparse
 #import py3DSeedEditor
 
@@ -247,7 +247,7 @@ def main():
 
     #print ("Data size: " + str(data3d.nbytes) + ', shape: ' + str(data3d.shape) )
 
-    #igc = pycat.ImageGraphCut(data3d, zoom = 0.5)
+    #igc = pycut.ImageGraphCut(data3d, zoom = 0.5)
     #igc.interactivity()
 
 

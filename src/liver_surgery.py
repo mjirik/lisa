@@ -6,7 +6,6 @@ import sys
 import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-#sys.path.append(os.path.join(path_to_script, "../extern/pycat/"))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 sys.path.append(os.path.join(path_to_script,
                              "../extern/pycat/extern/py3DSeedEditor/"))
@@ -35,7 +34,7 @@ import traceback
 import py3DSeedEditor
 #import dcmreaddata1 as dcmr
 import dcmreaddata as dcmr
-import pycat
+import pycut
 import argparse
 #import py3DSeedEditor
 
@@ -299,7 +298,7 @@ def main():
 
     oseg.interactivity()
 
-    #igc = pycat.ImageGraphCut(data3d, zoom = 0.5)
+    #igc = pycut.ImageGraphCut(data3d, zoom = 0.5)
     #igc.interactivity()
 
     #igc.make_gc()
@@ -349,7 +348,7 @@ def main():
         if self.dcm_3Ddata is None:
             self.statusBar().showMessage('No DICOM data!')
             return
-        igc = pycat.ImageGraphCut(self.dcm_3Ddata,
+        igc = pycut.ImageGraphCut(self.dcm_3Ddata,
                 voxelsize=self.voxel_sizemm)
 
         pyed = QTSeedEditor(self.dcm_3Ddata,

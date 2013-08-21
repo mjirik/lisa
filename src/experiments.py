@@ -7,8 +7,6 @@
 import sys
 import os.path
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-#sys.path.append(os.path.join(path_to_script, "../extern/pycat/"))
-#sys.path.append(os.path.join(path_to_script, "../extern/pycat/extern/py3DSeedEditor/"))
 #import featurevector
 import argparse
 
