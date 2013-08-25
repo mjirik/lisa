@@ -127,6 +127,8 @@ class OrganSegmentation():
 
         if np.isscalar(working_voxelsize_mm):
             self.working_voxelsize_mm = ([working_voxelsize_mm] * 3)
+        else:
+            self.working_voxelsize_mm = working_voxelsize_mm
 
 
         
@@ -726,7 +728,7 @@ def main():
     # voxelsizemm can be number or array
     #if args.voxelsizemm != 'orig':
     if not args.voxelsizemm.startswith('orig'):
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         args.voxelsizemm = np.array(eval(args.voxelsizemm))
 
     #  
