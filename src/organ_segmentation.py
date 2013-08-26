@@ -120,8 +120,10 @@ class OrganSegmentation():
         # voxelsize processing
         if working_voxelsize_mm == 'orig':
             working_voxelsize_mm = self.metadata['voxelsizemm']
-        elif working_voxelsize_mm == 'orig/2':
+        elif working_voxelsize_mm == 'orig*2':
             working_voxelsize_mm = np.array(self.metadata['voxelsizemm'])*2
+        elif working_voxelsize_mm == 'orig*4':
+            working_voxelsize_mm = np.array(self.metadata['voxelsizemm'])*4
 
 
 
@@ -199,10 +201,6 @@ class OrganSegmentation():
 
 
 
-        #import pdb; pdb.set_trace()
-        print 'swvs: ', self.working_voxelsize_mm
-        print 'wvs: ', working_voxelsize_mm
-        print 'svs: ', self.voxelsize_mm
         self.zoom = self.voxelsize_mm /(1.0 * self.working_voxelsize_mm)
 
 #    def set_iparams(self, iparams):
@@ -251,6 +249,7 @@ class OrganSegmentation():
     def _interactivity_begin(self):
 
         print 'zoom ', self.zoom 
+        print 'svs_mm ', self.working_voxelsize_mm
         data3d_res = scipy.ndimage.zoom(
                 self.data3d,
                 self.zoom,
@@ -684,7 +683,8 @@ def main():
             -vs 3 \n \
             -vs [3,3,5] \n \
             -vs orig \n \
-            -vs orig/2 \n \
+            -vs orig*2 \n \
+            -vs orig*4 \n \
             '
             )
     parser.add_argument('-mroi', '--manualroi', action='store_true',
@@ -729,7 +729,7 @@ def main():
     #if args.voxelsizemm != 'orig':
     if not args.voxelsizemm.startswith('orig'):
         #import pdb; pdb.set_trace()
-        args.voxelsizemm = np.array(eval(args.voxelsizemm))
+        args.voxelsizemm = eval(args.voxelsizemm)
 
     #  
     args.segparams = eval(args.segparams)
