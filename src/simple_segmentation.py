@@ -54,7 +54,7 @@ class SimpleSegmentation:
 	KONV_MASK = KONV_MASK/9.0	
 	operace = 0
 	spine_finder = np.zeros([data3d.shape[0],data3d.shape[1]], float)
-	for k in range(10):
+	for k in range(20):
 		for i in range(data3d.shape[0]):
 			for j in range(data3d.shape[1]):
 				temp_matrix = data3d[j:(j+KONV_MASK.shape[1]),i:(i+KONV_MASK.shape[0]), k]
@@ -72,7 +72,7 @@ class SimpleSegmentation:
 #Zajistit aby temp_metrix měla jen 2rozměry, protože jinak bude a[i][j] pole 
 			
 				print konvoluce(temp_matrix, KONV_MASK)"""
-	spine_finder_upraveno = spine_finder > (105)
+	spine_finder_upraveno = spine_finder > (210)
 	######
 	spine_finder_upraveno = spine_finder_upraveno*1
 	spine_finder_upraveno += np.ones([spine_finder.shape[0],spine_finder.shape[1]])
@@ -90,7 +90,6 @@ class SimpleSegmentation:
 	plt.subplot(122)
 	plt.imshow(spine_finder_upraveno, cmap = plt.cm.gray)
 	
-		
 	return simple_seg
 
         
