@@ -80,9 +80,9 @@ class SimpleSegmentation:
 	for id_x in range(simple_seg.shape[0]):
 		for id_y in range(simple_seg.shape[1]):
 			for id_z in range(simple_seg.shape[2]):
-				simple_seg[id_x][id_y][id_z] = simple_seg[id_x][id_y][id_z]*spine_finder_upraveno[id_x][id_y]
-				if (spine_finder_upraveno[id_x][id_y] == 2):
-		
+				if spine_finder_upraveno[id_x][id_y] == 2: 				
+					#simple_seg[id_x][id_y][id_z] = simple_seg[id_x][id_y][id_z]*spine_finder_upraveno[id_x][id_y]
+					simple_seg[id_x][id_y][id_z] = 2	
 	import matplotlib.pyplot as plt 	
 	plt.figure(figsize=(16, 5))
 	plt.subplot(121)
