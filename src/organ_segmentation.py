@@ -697,8 +697,6 @@ def main():
             default='{}', 
             help='params for segmentation,\
             example -sp "{\'pairwise_alpha_per_mm2\':90}"')
-    parser.add_argument('-t', '--tests', action='store_true',
-            help='run unittest')
     parser.add_argument('-tx', '--textureanalysis', action='store_true',
             help='run with texture analysis')
     parser.add_argument('-exd', '--exampledata', action='store_true',
@@ -706,10 +704,10 @@ def main():
     parser.add_argument('-ed', '--editdata', action='store_true',
             help='Run data editor')
     parser.add_argument('-vmax', '--viewermax', type=str, #type=int,
-            help='maximum of viewer window',
+            help='Maximum of viewer window, set None for automatic maximum.',
             default='1300')
     parser.add_argument('-vmin', '--viewermin',type=str, #type=int,
-            help='minimum of viewer window',
+            help='Minimum of viewer window, set None for automatic minimum.',
             default='800')
     parser.add_argument('-so', '--show_output', action='store_true',
             help='Show output data in viewer')
@@ -743,11 +741,6 @@ def main():
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
-    if args.tests:
-        # hack for use argparse and unittest in one module
-        sys.argv[1:] = []
-        unittest.main()
-        sys.exit()
 
     if args.exampledata:
 
