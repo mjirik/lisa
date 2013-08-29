@@ -705,12 +705,12 @@ def main():
             help='run unittest')
     parser.add_argument('-ed', '--editdata', action='store_true',
             help='Run data editor')
-    parser.add_argument('-vmax', '--viewermax', type=int,
+    parser.add_argument('-vmax', '--viewermax', type=str, #type=int,
             help='maximum of viewer window',
-            default=1300)
-    parser.add_argument('-vmin', '--viewermin', type=int,
+            default='1300')
+    parser.add_argument('-vmin', '--viewermin',type=str, #type=int,
             help='minimum of viewer window',
-            default=800)
+            default='800')
     parser.add_argument('-so', '--show_output', action='store_true',
             help='Show output data in viewer')
     parser.add_argument(
@@ -733,6 +733,10 @@ def main():
 
     #  
     args.segparams = eval(args.segparams)
+
+
+    args.viewermin = eval(args.viewermin)
+    args.viewermax = eval(args.viewermax)
 #    print type(args.segparams)
 #    args.segparams['hu']=1
 
@@ -804,6 +808,7 @@ def main():
     if savestring in ['Y', 'y']:
 
         data = oseg.export()
+        data['version'] = qmisc.getVersionString()
         iparams = oseg.get_iparams()
         #import pdb; pdb.set_trace()
         pth, filename = os.path.split(iparams['datadir'])

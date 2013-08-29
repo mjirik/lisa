@@ -4,11 +4,18 @@
 
 
 import sys
-sys.path.append("../extern/pycat/")
-sys.path.append("../extern/pycat/extern/py3DSeedEditor/")
+import os.path
+
+path_to_script = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(path_to_script, "../extern/pycat/"))
+sys.path.append(os.path.join(path_to_script, "../extern/pycat/extern/py3DSeedEditor"))
 
 import numpy as np
 
+import logging
+logger = logging.getLogger(__name__)
+
+import subprocess
 
 
 class SparseMatrix():
@@ -129,4 +136,40 @@ def uncrop(data, crinfo, orig_shape):
             ] = data
 
     return data_out
+
+
+def getVersionString():
+    """
+    Function return string with version information.
+    It is performed by use one of three procedures: git describe, 
+    file in .git dir and file __VERSION__.
+    """
+    version_string = None
+    try:
+        version_string = subprocess.check_output(['git','describe'])
+    except:
+        logger.warning('Command "git describe" is not working')
+        
+    if version_string == None:
+        try:
+            path_to_version = os.path.join(path_to_script,'../.git/refs/heads/master')
+            with file(path_to_version) as f: 
+                version_string = f.read()
+        except:
+            logger.warning('Problem with reading file ".git/refs/heads/master"')
+
+    if version_string == None:
+        try:
+            path_to_version = os.path.join(path_to_script,'../__VERSION__')
+            with file(path_to_version) as f: 
+                version_string = f.read()
+            path_to_version = path_to_version + '  version number is created manually'
+
+
+        except:
+            logger.warning('Problem with reading file "__VERSION__"')
+
+    return version_string
+
+
 
