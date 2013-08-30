@@ -1,0 +1,4 @@
+basedir: /home/mjirik/data/medical/
+data:
+- {ourseg: data_processed/organ_small-liver-orig001.mhd.pkl, sliverseg: data_orig/sliver07/training-part1/liver-seg001.mhd}
+- {ourseg: data_processed/organ_small-liver-orig002.mhd.pkl, sliverseg: data_orig/sliver07/training-part1/liver-seg002.mhd}

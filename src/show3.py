@@ -4,7 +4,7 @@
 from numpy import *
  
 
-def show3(data_matrix = None):
+def show3(data_matrix = None): # pragma: no coverage
 
     import vtk
 # We begin by creating the data we want to render.
