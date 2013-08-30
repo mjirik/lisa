@@ -50,8 +50,8 @@ CROP_MARGIN = [20]
 def sample_input_data():
     inputdata = {'basedir':'/home/mjirik/data/medical/',
             'data': [
-#                {'sliverseg':'data_orig/sliver07/training-part1/liver-seg001.mhd', 'ourseg':'data_processed/organ_small-liver-orig001.mhd.pkl'},
-#                {'sliverseg':'data_orig/sliver07/training-part1/liver-seg002.mhd', 'ourseg':'data_processed/organ_small-liver-orig002.mhd.pkl'},
+                {'sliverseg':'data_orig/sliver07/training-part1/liver-seg001.mhd', 'ourseg':'data_processed/organ_small-liver-orig001.mhd.pkl'},
+                {'sliverseg':'data_orig/sliver07/training-part1/liver-seg002.mhd', 'ourseg':'data_processed/organ_small-liver-orig002.mhd.pkl'},
 #                {'sliverseg':'data_orig/sliver07/training-part1/liver-seg003.mhd', 'ourseg':'data_processed/organ_small-liver-orig003.mhd.pkl'},
 #                {'sliverseg':'data_orig/sliver07/training-part1/liver-seg004.mhd', 'ourseg':'data_processed/organ_small-liver-orig004.mhd.pkl'},
 #                {'sliverseg':'data_orig/sliver07/training-part1/liver-seg005.mhd', 'ourseg':'data_processed/organ_small-liver-orig005.mhd.pkl'},
@@ -101,7 +101,7 @@ def compare_volumes(vol1, vol2, voxelsize_mm):
     print 'VD [%]', vd
     #import pdb; pdb.set_trace()
 
-    pyed = py3DSeedEditor.py3DSeedEditor(df, contour=vol2)
+    pyed = py3DSeedEditor.py3DSeedEditor(vol1, contour=vol2)
     pyed.show()
 
 
@@ -177,10 +177,10 @@ def main():
 
     #logger.debug('input params')
 
-    sample_input_data()
+    #sample_input_data()
     # input parser
     print 'file' , __file__
-    data_file = os.path.join(path_to_script, "20130812_liver_volumetry_sample.yaml")
+    data_file = os.path.join(path_to_script, "20130812_liver_volumetry.yaml")
     inputdata = misc.obj_from_file(data_file, filetype='yaml')
     
     
