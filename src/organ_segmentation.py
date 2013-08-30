@@ -120,8 +120,10 @@ class OrganSegmentation():
         # voxelsize processing
         if working_voxelsize_mm == 'orig':
             working_voxelsize_mm = self.metadata['voxelsizemm']
-        elif working_voxelsize_mm == 'orig/2':
+        elif working_voxelsize_mm == 'orig*2':
             working_voxelsize_mm = np.array(self.metadata['voxelsizemm'])*2
+        elif working_voxelsize_mm == 'orig*4':
+            working_voxelsize_mm = np.array(self.metadata['voxelsizemm'])*4
 
 
 
@@ -199,10 +201,6 @@ class OrganSegmentation():
 
 
 
-        #import pdb; pdb.set_trace()
-        print 'swvs: ', self.working_voxelsize_mm
-        print 'wvs: ', working_voxelsize_mm
-        print 'svs: ', self.voxelsize_mm
         self.zoom = self.voxelsize_mm /(1.0 * self.working_voxelsize_mm)
 
 #    def set_iparams(self, iparams):
@@ -251,6 +249,7 @@ class OrganSegmentation():
     def _interactivity_begin(self):
 
         print 'zoom ', self.zoom 
+        print 'svs_mm ', self.working_voxelsize_mm
         data3d_res = scipy.ndimage.zoom(
                 self.data3d,
                 self.zoom,
@@ -684,7 +683,8 @@ def main():
             -vs 3 \n \
             -vs [3,3,5] \n \
             -vs orig \n \
-            -vs orig/2 \n \
+            -vs orig*2 \n \
+            -vs orig*4 \n \
             '
             )
     parser.add_argument('-mroi', '--manualroi', action='store_true',
@@ -697,20 +697,18 @@ def main():
             default='{}', 
             help='params for segmentation,\
             example -sp "{\'pairwise_alpha_per_mm2\':90}"')
-    parser.add_argument('-t', '--tests', action='store_true',
-            help='run unittest')
     parser.add_argument('-tx', '--textureanalysis', action='store_true',
             help='run with texture analysis')
     parser.add_argument('-exd', '--exampledata', action='store_true',
             help='run unittest')
     parser.add_argument('-ed', '--editdata', action='store_true',
             help='Run data editor')
-    parser.add_argument('-vmax', '--viewermax', type=int,
-            help='maximum of viewer window',
-            default=1300)
-    parser.add_argument('-vmin', '--viewermin', type=int,
-            help='minimum of viewer window',
-            default=800)
+    parser.add_argument('-vmax', '--viewermax', type=str, #type=int,
+            help='Maximum of viewer window, set None for automatic maximum.',
+            default='1300')
+    parser.add_argument('-vmin', '--viewermin',type=str, #type=int,
+            help='Minimum of viewer window, set None for automatic minimum.',
+            default='800')
     parser.add_argument('-so', '--show_output', action='store_true',
             help='Show output data in viewer')
     parser.add_argument(
@@ -729,21 +727,20 @@ def main():
     #if args.voxelsizemm != 'orig':
     if not args.voxelsizemm.startswith('orig'):
         #import pdb; pdb.set_trace()
-        args.voxelsizemm = np.array(eval(args.voxelsizemm))
+        args.voxelsizemm = eval(args.voxelsizemm)
 
     #  
     args.segparams = eval(args.segparams)
+
+
+    args.viewermin = eval(args.viewermin)
+    args.viewermax = eval(args.viewermax)
 #    print type(args.segparams)
 #    args.segparams['hu']=1
 
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
-    if args.tests:
-        # hack for use argparse and unittest in one module
-        sys.argv[1:] = []
-        unittest.main()
-        sys.exit()
 
     if args.exampledata:
 
@@ -804,6 +801,7 @@ def main():
     if savestring in ['Y', 'y']:
 
         data = oseg.export()
+        data['version'] = qmisc.getVersionString()
         iparams = oseg.get_iparams()
         #import pdb; pdb.set_trace()
         pth, filename = os.path.split(iparams['datadir'])

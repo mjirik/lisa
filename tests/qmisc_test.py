@@ -116,6 +116,13 @@ class QmiscTest(unittest.TestCase):
 
         self.assertTrue(img_uncropped[4,4,3] == img_in[4,4,3])
 
+    def test_getVersionString(self):
+        """
+        """
+        verstr = qmisc.getVersionString()
+        
+        self.assertTrue(type(verstr) == str)
+
 
 if __name__ == "__main__":
     unittest.main()

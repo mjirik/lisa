@@ -100,6 +100,7 @@ def cut_editor(segmentation, voxelsize_mm = np.ones([3,1]), degrad = 3):
     labels = []
     segmentation = segmentation[::degrad,::degrad,::degrad]
     print("Generuji data...")
+    segmentation = segmentation[:,::-1,:]
     mesh_data = seg2fem.gen_mesh_from_voxels_mc(segmentation, voxelsize_mm*degrad)
     print("Done")
     if True:
@@ -116,8 +117,8 @@ def cut_editor(segmentation, voxelsize_mm = np.ones([3,1]), degrad = 3):
 
 
 def change(data,name):
-    vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
-    data['segmentation'][vessels == 2] = data['slab']['porta']
+    #vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
+    #data['segmentation'][vessels == 2] = data['slab']['porta']
     segmentation = data['segmentation']
     cut_editor(segmentation == data['slab'][name])
     
@@ -193,12 +194,12 @@ def resection_old(data):
     return data
 
 def resection_new(data, name):
-    vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
+    #vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
     # ostranění porty z více kusů, nastaví se jim hodnota liver
     #data['segmentation'][data['segmentation'] == data['slab']['porta']] = data['slab']['liver']
     #show3.show3(data['segmentation'])
 
-    data['segmentation'][vessels == 2] = data['slab']['porta']
+    #data['segmentation'][vessels == 2] = data['slab']['porta']
     segmentation = data['segmentation']
     print(data['slab'])
     change(data,name)
