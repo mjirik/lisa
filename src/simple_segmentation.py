@@ -2,7 +2,12 @@
 # -*- coding: utf-8 -*-
 #definice konstant
 BONES = 1290
-
+SPINE = 52
+INSIDE_BODY = 5
+LUNGS_UP = 400
+LUNGS_DOWN = 150	
+SPINE_ID = 2
+LUNGS_ID = 3
 
 # import funkcí z jiného adresáře
 import sys
@@ -17,7 +22,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 import numpy as np
-#import scipy.ndimage
+import scipy.ndimage
 import argparse
 
 #from PyQt4.QtCore import Qt
@@ -36,6 +41,10 @@ class SimpleSegmentation:
     
     def simple_segmentation(self, data3d, voxelsize_mm):
         simple_seg = np.zeros(data3d.shape )
+	#definice konvoluční masky
+	KONV_MASK = np.ones([3,3], float)
+	KONV_MASK = KONV_MASK/9.0	
+
 
 	#definice konvoluční funkce - param a - matice m*n kterou budeme přenásobovat konvoluční maticí, b - Konvoluční maska m*n
 	def konvoluce(a, b):
@@ -47,49 +56,43 @@ class SimpleSegmentation:
 	
 	# nalezení kostí
 	simple_seg = data3d > BONES 
-	simple_seg[(simple_seg.shape[0]/5)*4:simple_seg.shape[0]] = 0
+	#simple_seg[(simple_seg.shape[0]/5)*4:simple_seg.shape[0]] = 0
 	
 	# nalezení páteře
-	KONV_MASK = np.ones([3,3], float)
-	KONV_MASK = KONV_MASK/9.0	
-	operace = 0
+	body_left = 0
+	body_right = 0	
 	spine_finder = np.zeros([data3d.shape[0],data3d.shape[1]], float)
-	for k in range(20):
+	for k in range(5):
 		for i in range(data3d.shape[0]):
 			for j in range(data3d.shape[1]):
 				temp_matrix = data3d[j:(j+KONV_MASK.shape[1]),i:(i+KONV_MASK.shape[0]), k]
-				temp_matrix = temp_matrix/100
-				operace += 1
-				#print operace				
+				temp_matrix = temp_matrix/100				
 				spine_finder[j][i] += konvoluce(temp_matrix, KONV_MASK)
-				"""temp_matrix = data3d[i:(i+KONV_MASK.shape[0]), j:(j+KONV_MASK.shape[1]), k]			
-#tu je problém nějak musíme z temp_matrix 3d udělat temp_metrix_upravena 2D,
-				print type(temp_matrix)
-				print temp_matrix.shape
-			
-				suma_spfi = 0			
 
-#Zajistit aby temp_metrix měla jen 2rozměry, protože jinak bude a[i][j] pole 
-			
-				print konvoluce(temp_matrix, KONV_MASK)"""
-	spine_finder_upraveno = spine_finder > (210)
-	######
+	spine_finder_upraveno = spine_finder > SPINE
+	######31.5
 	spine_finder_upraveno = spine_finder_upraveno*1
-	spine_finder_upraveno += np.ones([spine_finder.shape[0],spine_finder.shape[1]])
-	
-	for id_x in range(simple_seg.shape[0]):
-		for id_y in range(simple_seg.shape[1]):
+	#spine_finder_upraveno = scipy.ndimage.binary_opening(spine_finder_upraveno)
+
+	#spine_finder_upraveno += np.ones([spine_finder.shape[0],spine_finder.shape[1]])
+	temp_id_y = 0
+	temp_id_y_stop = 0
+	 
+	for id_x in range(simple_seg.shape[0]-3):
+		for id_y in range(simple_seg.shape[1]-3):
 			for id_z in range(simple_seg.shape[2]):
-				if spine_finder_upraveno[id_x][id_y] == 2: 				
-					#simple_seg[id_x][id_y][id_z] = simple_seg[id_x][id_y][id_z]*spine_finder_upraveno[id_x][id_y]
-					simple_seg[id_x][id_y][id_z] = 2	
+				if spine_finder_upraveno[id_x][id_y] == 1: 				
+					simple_seg[id_x][id_y][id_z] = SPINE_ID
+				if (data3d[id_x][id_y][id_z] < LUNGS_UP):
+					if (data3d[id_x][id_y][id_z] > LUNGS_DOWN): 
+						simple_seg[id_x][id_y][id_z] = LUNGS_ID	
 	import matplotlib.pyplot as plt 	
 	plt.figure(figsize=(16, 5))
 	plt.subplot(121)
 	plt.imshow(spine_finder, cmap = plt.cm.gray)
 	plt.subplot(122)
 	plt.imshow(spine_finder_upraveno, cmap = plt.cm.gray)
-	
+
 	return simple_seg
 
         
