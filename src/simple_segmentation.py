@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #definice konstant
 BONES = 1290
-SPINE = 52
+SPINE = 1000
 INSIDE_BODY = 5
 LUNGS_UP = 400
 LUNGS_DOWN = 150	
@@ -62,7 +62,7 @@ class SimpleSegmentation:
 	body_left = 0
 	body_right = 0	
 	spine_finder = np.zeros([data3d.shape[0],data3d.shape[1]], float)
-	for k in range(5):
+	for k in range(data3d.shape[2]):
 		for i in range(data3d.shape[0]):
 			for j in range(data3d.shape[1]):
 				temp_matrix = data3d[j:(j+KONV_MASK.shape[1]),i:(i+KONV_MASK.shape[0]), k]
