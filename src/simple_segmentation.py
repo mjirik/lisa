@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #definice konstant
 BONES = 1290
-SPINE = 1000
+SPINE = 105
 INSIDE_BODY = 5
 LUNGS_UP = 400
 LUNGS_DOWN = 150	
@@ -62,7 +62,7 @@ class SimpleSegmentation:
 	body_left = 0
 	body_right = 0	
 	spine_finder = np.zeros([data3d.shape[0],data3d.shape[1]], float)
-	for k in range(data3d.shape[2]):
+	for k in range(10):
 		for i in range(data3d.shape[0]):
 			for j in range(data3d.shape[1]):
 				temp_matrix = data3d[j:(j+KONV_MASK.shape[1]),i:(i+KONV_MASK.shape[0]), k]
@@ -76,11 +76,19 @@ class SimpleSegmentation:
 
 	#spine_finder_upraveno += np.ones([spine_finder.shape[0],spine_finder.shape[1]])
 	temp_id_y = 0
-	temp_id_y_stop = 0
-	 
-	for id_x in range(simple_seg.shape[0]-3):
-		for id_y in range(simple_seg.shape[1]-3):
+	temp_id_y_stop = 0 
+	for id_x in range(simple_seg.shape[0]):
+		body = 0
+		for id_y in range(simple_seg.shape[1]):
 			for id_z in range(simple_seg.shape[2]):
+				if data3d[id_x][id_y][id_z] > LUNGS_UP:
+					body = 1
+				if body == 1	:
+					if simple_seg[id_x][id_y][id_z] == 1:
+						body = 0
+				if body == 1:
+					if data3d[id_x][id_y][id_z] < LUNGS_DOWN:
+						body = 0
 				if spine_finder_upraveno[id_x][id_y] == 1: 				
 					simple_seg[id_x][id_y][id_z] = SPINE_ID
 				if (data3d[id_x][id_y][id_z] < LUNGS_UP):
