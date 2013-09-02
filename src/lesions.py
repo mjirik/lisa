@@ -103,7 +103,7 @@ class Lesions:
 
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
-    def analyseHistogram(self):
+    def analyseHistogram(self, debug=False):
         voxels = self.data3d[np.nonzero(self.segmentation)]
         # hist, bin_edges = np.histogram(voxels, bins=256)
         # peakind = signal.find_peaks_cwt(hist, np.arange(1,10))
@@ -111,14 +111,35 @@ class Lesions:
         hist, bins = skexp.histogram(voxels)
 
         max_peak = hist.max()
+        max_peakIdx = hist.argmax()
+        peaksT = 0.95 * max_peak
+        peaksIdxs = np.nonzero(hist >= peaksT)[0]
 
-        plt.figure()
-        plt.plot(bins, hist)
-        plt.hold(True)
+        histTIdxs = []
+        for peakIdx in peaksIdxs:
+            minT = 0.95 * hist[peakIdx]
+            maxT = 1.05 * hist[peakIdx]
+            idxs = (hist >= minT) * (hist <= maxT)
+            idxs = np.nonzero(idxs)[0]
+            histTIdxs = np.hstack((histTIdxs, idxs))
+        histTIdxs = histTIdxs.astype(np.int)
+        histTIdxs = np.unique(histTIdxs)
 
-        # plt.plot(peakind, hist[peakind], 'ro')
+        class1 = bins[histTIdxs]
 
-        plt.show()
+        if debug:
+            plt.figure()
+            plt.plot(bins, hist)
+            plt.hold(True)
+
+            plt.plot(bins[max_peakIdx], hist[max_peakIdx], 'ro')
+            plt.plot(bins[histTIdxs], hist[histTIdxs], 'r')
+            plt.plot(bins[histTIdxs[0]], hist[histTIdxs[0]], 'rx')
+            plt.plot(bins[histTIdxs[-1]], hist[histTIdxs[-1]], 'rx')
+            plt.title('Histogram of liver density and its class1 = maximal peak (red dot) +-5% of its density (red line).')
+            plt.show()
+
+        return class1
 
 
 #----------------------------------------------------------------------------------------------------------------------
