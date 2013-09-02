@@ -34,10 +34,26 @@ You can find more install notes in file 'notes.txt'
 Run
 ---
 
-    cd src 
+Object (usualy liver) extraction is started by organ_segmentation script
 
-    python organ_segmentation.py 
+    python python/organ_segmentation.py 
 
-for tumor volume measurement use:
+Segmentation use two types of seeds wich are setted by left and right mouse 
+button. For better volume measurement control use additional parameters 
+for example "-mroi" and "-vs 0.8". If "-mroi" parameter is used you can 
+select region of interest.
 
-    python organ_segmentation.py -mroi -vs 0.8
+
+Vessel localization uses saved data (organ.pkl) from organ_segmentation:
+
+    python src/vessels_segmentation.py -bg -i organ.pkl
+
+Now user interactivity is used to set threshold parametr.
+
+Virtual liver resection is based on data stored in previous step 
+(vessels.pkl).
+
+    python src/vessel_cut.py -oe -i vessels.pkl
+
+In this script is selected cut on vessel by user interactivity. Resected and
+remaining volume is then calculated.

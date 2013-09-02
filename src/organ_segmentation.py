@@ -358,8 +358,10 @@ class OrganSegmentation():
         if self.smoothing:
             self.segmentation_smoothing(self.smoothing_mm)
 
-        print self.crinfo
-        if self.autocrop is not None:
+        print 'crinfo: ', self.crinfo
+        print 'autocrop', self.autocrop
+        if self.autocrop is True:
+            print 
             #import pdb; pdb.set_trace()
 
             tmpcrinfo = self._crinfo_from_specific_data(
@@ -690,6 +692,10 @@ def main():
     parser.add_argument('-mroi', '--manualroi', action='store_true',
             help='manual crop before data processing',
             default=None)
+
+    parser.add_argument('-acr', '--autocrop', 
+            help='automatic crop after data processing',
+            default=True)
     parser.add_argument('-iparams', '--iparams', 
             default=None, 
             help='filename of ipars file with stored interactivity')
@@ -765,6 +771,7 @@ def main():
                 working_voxelsize_mm=args.voxelsizemm,
                 manualroi=args.manualroi,
                 texture_analysis=args.textureanalysis,
+                autocrop=args.autocrop,
                 edit_data=args.editdata,
                 smoothing=args.segmentation_smoothing,
 #            iparams=args.iparams,
