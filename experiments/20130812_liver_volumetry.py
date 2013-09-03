@@ -191,14 +191,23 @@ def main():
 
     #logger.debug('input params')
 
-    sample_input_data()
+    parser = argparse.ArgumentParser(
+            description='Compare two segmentation. Evaluation is similar\
+            to MICCAI 2007 workshop.  Metrics are described in\
+            www.sliver07.com/p7.pdf')
+    parser.add_argument('-si', '--sampleInput',  action='store_true',
+            help='generate sample intput data', default=False)
+    parser.add_argument('-v', '--visualization',  action='store_true',
+            help='Turn on visualization', default=False)
+    args = parser.parse_args()
+
+    if args.sampleInput:
+        sample_input_data()
     # input parser
-    print 'file' , __file__
     data_file = os.path.join(path_to_script, "20130812_liver_volumetry.yaml")
     inputdata = misc.obj_from_file(data_file, filetype='yaml')
     
     
-    visualization = False
     evaluation_all = {
             'file1': [],
             'file2': [],
@@ -233,7 +242,7 @@ def main():
         data3d_a = (data3d_a > 1024).astype(np.int8)
         data3d_b = (data3d_b > 0).astype(np.int8)
 
-        if visualization:
+        if args.visualization:
             pyed = py3DSeedEditor.py3DSeedEditor(data3d_b, contour =
             data3d_a)
             pyed.show()
