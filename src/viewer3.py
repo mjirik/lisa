@@ -38,9 +38,25 @@ class normal_and_coordinates():
 class QVTKViewer(QDialog):
     """
     Simple VTK Viewer.
+    QVTKViewer(segmentation)
+    QVTKViewer(segmentation, voxelsize_mm) # zobrazí vše, co je větší než nula
+    QVTKViewer(segmentation, voxelsize_mm, slab) # umožňuje přepínat mezi více rovinami
+
+    qv = QVTKViewer(segmentation, voxelsize_mm, slab, mode='select_plane')
+    point = qv.getPlane()
     """
 
     
+    #def __init__(self, inputdata, voxelsize_mm=None, slab=None, mode='view', callbackfcn=None):
+    """
+    Args:
+        inputdata: 3D numpy array 
+        voxelsize_mm: Array with voxel dimensions (default=None)
+        slab: Dictionary with description of labels used in inputdata
+        mode: 'view' or 'select_plane'
+        callbackfcn: function which may affect segmentation
+
+    """
     def __init__(self, vtk_filename):
         
         def callback(button):
@@ -234,7 +250,7 @@ class MyInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
         
         e = '%prog [options]\n' + __doc__.rstrip()
 help = {
-    'in_file': 'input VTK file with unstructured mesh',
+    'in_file': 'input pkl file',
 }
   
 def main():
@@ -245,11 +261,20 @@ def main():
     (options, args) = parser.parse_args()
 
     if options.in_filename is None:
-        raise IOError('No VTK data!')
+        raise IOError('No input data!')
 
     app = QApplication(sys.argv)
+
+    # odkomentovat dva řádky
+    #data = misc.obj_from_file(args.inputfile, filetype = 'pickle')
+    #viewer = QVTKViewer(data['segmentation'], data['voxelsize_mm'], data['slab'])
+
+    # zakomentovat jeden řádek
+
     viewer = QVTKViewer(options.in_filename)
+    app.exec_()
     sys.exit(app.exec_())
+    #print viewer.getPlane()
 
 if __name__ == "__main__":
     main()
