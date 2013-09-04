@@ -173,3 +173,30 @@ def getVersionString():
 
 
 
+def get_one_biggest_object(data):
+    """ Return biggest object """
+    lab, num = scipy.ndimage.label(data)
+    #print ("bum = "+str(num))
+    
+    maxlab = max_area_index(lab, num + 1)
+
+    data = (lab == maxlab)
+    return data
+
+
+
+def max_area_index(labels, num):
+    """
+    Return index of maxmum labeled area
+    """
+    mx = 0
+    mxi = -1
+    for l in range(1, num):
+        mxtmp = np.sum(labels == l)
+        if mxtmp > mx:
+            mx = mxtmp
+            mxi = l
+
+    return mxi
+
+

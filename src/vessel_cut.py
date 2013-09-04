@@ -210,33 +210,9 @@ def resection_new(data, name):
 
     
 
-    
-
 def get_biggest_object(data):
-    """ Return biggest object """
-    lab, num = scipy.ndimage.label(data)
-    #print ("bum = "+str(num))
-    
-    maxlab = max_area_index(lab, num + 1)
+    return qmisc.get_one_biggest_object(data)
 
-    data = (lab == maxlab)
-    return data
-
-
-
-def max_area_index(labels, num):
-    """
-    Return index of maxmum labeled area
-    """
-    mx = 0
-    mxi = -1
-    for l in range(1, num + 1):
-        mxtmp = np.sum(labels == l)
-        if mxtmp > mx:
-            mx = mxtmp
-            mxi = l
-
-    return mxi
 
 def liver_spit_volume_mm3(segm, voxelsize_mm):
     """
