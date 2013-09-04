@@ -250,7 +250,7 @@ class MyInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
         
         e = '%prog [options]\n' + __doc__.rstrip()
 help = {
-    'in_file': 'input VTK file with unstructured mesh',
+    'in_file': 'input pkl file',
 }
   
 def main():
@@ -261,13 +261,20 @@ def main():
     (options, args) = parser.parse_args()
 
     if options.in_filename is None:
-        raise IOError('No VTK data!')
+        raise IOError('No input data!')
 
     app = QApplication(sys.argv)
+
+    # odkomentovat dva řádky
+    #data = misc.obj_from_file(args.inputfile, filetype = 'pickle')
+    #viewer = QVTKViewer(data['segmentation'], data['voxelsize_mm'], data['slab'])
+
+    # zakomentovat jeden řádek
+
     viewer = QVTKViewer(options.in_filename)
     app.exec_()
-    #print viewer.getPlane()
     sys.exit(app.exec_())
+    #print viewer.getPlane()
 
 if __name__ == "__main__":
     main()
