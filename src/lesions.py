@@ -28,7 +28,17 @@ import misc
 import py3DSeedEditor
 import show3
 import vessel_cut
+from skimage.segmentation import random_walker
 
+# version-dependent imports ---------------------------------
+from pkg_resources import parse_version
+
+#importing distance transform
+if parse_version(scipy.__version__) > parse_version('0.9'):
+    from scipy.ndimage.morphology import distance_transform_edt
+else:
+    from scipy.ndimage import distance_transform_edt
+# -----------------------------------------------------------
 
 class Lesions:
     """
@@ -92,40 +102,40 @@ class Lesions:
         # pyed.show()
         #
         # segmentation[153:180,70:106,42:55] = slab['lesions']
-        seeds = self.analyseHistogram()
+        class1 = self.analyseHistogram( debug=False )
+        seeds = self.getSeedsUsingClass1(class1)
+
+        sliceIdx = 15
+        liver = self.data3d * (self.segmentation != 0)
+        rw = random_walker(liver, seeds)
+
+        self.segmentation = np.where(class1, self.data['slab']['lesions'], self.segmentation)
 
         return segmentation, slab
 
     def visualization(self):
-
-        pyed = py3DSeedEditor.py3DSeedEditor(self.data['data3d'], contour = self.data['segmentation']==self.data['slab']['lesions'])
+        #pyed = py3DSeedEditor.py3DSeedEditor(self.data['data3d'], seeds = self.data['segmentation']==self.data['slab']['lesions'])
+        pyed = py3DSeedEditor.py3DSeedEditor(self.segmentation==self.data['slab']['lesions'])
         pyed.show()
 
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
     def analyseHistogram(self, debug=False):
         voxels = self.data3d[np.nonzero(self.segmentation)]
-        # hist, bin_edges = np.histogram(voxels, bins=256)
-        # peakind = signal.find_peaks_cwt(hist, np.arange(1,10))
-
         hist, bins = skexp.histogram(voxels)
-
-        max_peak = hist.max()
         max_peakIdx = hist.argmax()
-        peaksT = 0.95 * max_peak
-        peaksIdxs = np.nonzero(hist >= peaksT)[0]
 
-        histTIdxs = []
-        for peakIdx in peaksIdxs:
-            minT = 0.95 * hist[peakIdx]
-            maxT = 1.05 * hist[peakIdx]
-            idxs = (hist >= minT) * (hist <= maxT)
-            idxs = np.nonzero(idxs)[0]
-            histTIdxs = np.hstack((histTIdxs, idxs))
+        minT = 0.95 * hist[max_peakIdx]
+        maxT = 1.05 * hist[max_peakIdx]
+        histTIdxs = (hist >= minT) * (hist <= maxT)
+        histTIdxs = np.nonzero(histTIdxs)[0]
         histTIdxs = histTIdxs.astype(np.int)
-        histTIdxs = np.unique(histTIdxs)
 
-        class1 = bins[histTIdxs]
+        class1TMin = bins[histTIdxs[0]]
+        class1TMax = bins[histTIdxs[-1]]
+
+        liver = self.data3d * (self.segmentation > 0)
+        class1 = np.where( (liver >= class1TMin) * (liver <= class1TMax), 1, 0)
 
         if debug:
             plt.figure()
@@ -144,22 +154,33 @@ class Lesions:
 
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
+    def getSeedsUsingClass1(self, class1):
+        distData = np.where(class1 == 1, False, True)
+        distData *= self.segmentation > 0
+        dists = distance_transform_edt(distData)
+
+        seeds = dists > 0.5 * dists.max()
+
+        allSeeds = np.zeros(self.data3d.shape, dtype=np.int)
+        # allSeeds[np.nonzero(self.segmentation)] = 80
+        allSeeds[np.nonzero(class1)] = 1 #zdrava tkan
+        allSeeds[np.nonzero(seeds)] = 2 #outliers
+        #kvuli segmentaci pomoci random walkera se omezi obraz pouze na segmentovana jatra a cevy
+        allSeeds = np.where(self.segmentation == 0, -1, allSeeds)
+
+        return allSeeds
+
+#----------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------
     def windowing(self, im, level=50, width=300):
         #srovnani na standardni skalu = odecteni 1024HU
         im -= 1024
-        maxHU = level + width
+
+        #zjisteni minimalni a maximalni density
         minHU = level - width
+        maxHU = level + width
 
-        # #oriznuti cisel pod a nad oknem
-        # imw = np.where(im > maxHU, maxHU, im)
-        # imw = np.where(im < minHU, minHU, im)
-        #
-        # #posunuti rozsahu k nule
-        # imw -= minHU
-        #
-        # #uprava rozsahu na interval [0, 255]
-        # inw = imw / width * 255
-
+        #rescalovani intenzity tak, aby skala <minHU, maxHU> odpovidala intervalu <0,255>
         imw = skexp.rescale_intensity(im, in_range=(minHU, maxHU), out_range=(0, 255))
 
         return imw
@@ -178,7 +199,7 @@ if __name__ == "__main__":
 
     tumory.import_data(data)
     tumory.automatic_localization()
-    # tumory.visualization()
+    tumory.visualization()
 
 #    SectorDisplay2__()
 

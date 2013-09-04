@@ -43,5 +43,5 @@ sample_data
 tmp
 
 # Data
-src/*.pkl
-src/*.pickle
+*.pkl
+*.pickle
