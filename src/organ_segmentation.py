@@ -805,13 +805,17 @@ def main():
 
     savestring = raw_input('Save output data? (y/n): ')
     #sn = int(snstring)
-    if savestring in ['Y', 'y']:
+    if savestring in ['Y', 'y','r','R']:
+# rename
 
         data = oseg.export()
         data['version'] = qmisc.getVersionString()
         iparams = oseg.get_iparams()
         #import pdb; pdb.set_trace()
         pth, filename = os.path.split(iparams['datadir'])
+        if savestring in ['r','R']:
+# save renamed file too
+            misc.obj_to_file(data, 'organ_big-'+ filename + '.pkl', filetype='pickle')
         misc.obj_to_file(data, "organ.pkl", filetype='pickle')
         #misc.obj_to_file(data, "organ-"+ filename + ".pkl", filetype='pickle')
         misc.obj_to_file(iparams, 'organ_iparams.pkl', filetype='pickle')
