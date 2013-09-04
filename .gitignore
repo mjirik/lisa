@@ -41,3 +41,7 @@ src/output.mat
 src/uiThreshold.py.orig
 sample_data
 tmp
+
+# Data
+src/*.pkl
+src/*.pickle
