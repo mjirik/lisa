@@ -1,0 +1,10 @@
+basedir: /home/mjirik/data/medical/
+data:
+- {ourseg: data_processed/organ_small-liver-orig001.mhd.pkl, sliverseg: data_orig/sliver07/training-part1/liver-seg001.mhd}
+- {ourseg: data_processed/organ_small-liver-orig002.mhd.pkl, sliverseg: data_orig/sliver07/training-part1/liver-seg002.mhd}
+- {ourseg: data_processed/organ_small-liver-orig003.mhd.pkl, sliverseg: data_orig/sliver07/training-part1/liver-seg003.mhd}
+- {ourseg: data_processed/organ_small-liver-orig004.mhd.pkl, sliverseg: data_orig/sliver07/training-part1/liver-seg004.mhd}
+- {ourseg: data_processed/organ_small-liver-orig005.mhd.pkl, sliverseg: data_orig/sliver07/training-part1/liver-seg005.mhd}
+- {ourseg: data_processed/organ_small-liver-orig006.mhd.pkl, sliverseg: data_orig/sliver07/training-part2/liver-seg006.mhd}
+- {ourseg: data_processed/organ_small-liver-orig008.mhd.pkl, sliverseg: data_orig/sliver07/training-part2/liver-seg008.mhd}
+- {ourseg: data_processed/organ_small-liver-orig009.mhd.pkl, sliverseg: data_orig/sliver07/training-part2/liver-seg009.mhd}

@@ -5,7 +5,6 @@ import ctypes
 import math
 import numpy as np
 import scipy as sp
-import pycat
 import py3DSeedEditor
 
 import sys

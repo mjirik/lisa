@@ -19,7 +19,9 @@ logger = logging.getLogger(__name__)
 import numpy as np
 import scipy.ndimage
 import seg2fem
-import viewer
+import viewer3
+#import vtk
+import argparse
 
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
@@ -30,10 +32,13 @@ from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
 import misc
 import py3DSeedEditor
 import show3
+normal = 0
+coordinates = None
 
 
 
 def cut_editor_old(data):
+    
     pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
     pyed.show()
     split_obj0 = pyed.seeds
@@ -84,34 +89,48 @@ def cut_editor_old(data):
     pyed.show()
     cut_by_user = split_obj0
     return lab, cut_by_user
-    pass
 
-def cut_editor(segmentation, voxelsize_mm = np.ones([3,1]), degrad = 4):
+
+def cut_editor(segmentation, voxelsize_mm = np.ones([3,1]), degrad = 3):
+    global normal,coordinates
     """
     Funkce vrací trojrozměrné porobné jako data['segmentation'] 
     v data['slab'] je popsáno, co která hodnota znamená
     """
     labels = []
-
-    print segmentation.shape
     segmentation = segmentation[::degrad,::degrad,::degrad]
-    print segmentation.dtype
-    
-    import pdb; pdb.set_trace()
+    print("Generuji data...")
+    segmentation = segmentation[:,::-1,:]
     mesh_data = seg2fem.gen_mesh_from_voxels_mc(segmentation, voxelsize_mm*degrad)
+    print("Done")
     if True:
         mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
     vtk_file = "mesh_geom.vtk"
     mesh_data.write(vtk_file)
     app = QApplication(sys.argv)
-    view = viewer.QVTKViewer(vtk_file)
-    view.exec_()
-
-    return labels
+    #view = viewer3.QVTKViewer(vtk_file)
+    viewer3.QVTKViewer(vtk_file)
+    normal = viewer3.normal_and_coordinates().set_normal()
+    coordinates = viewer3.normal_and_coordinates().set_coordinates()
+    return normal,coordinates
     pass
 
 
-def resection(data):
+def change(data,name):
+    #vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
+    #data['segmentation'][vessels == 2] = data['slab']['porta']
+    segmentation = data['segmentation']
+    cut_editor(segmentation == data['slab'][name])
+    
+    
+    
+def resection(data,name, use_old_editor = False):
+    if use_old_editor:
+        return resection_old(data)
+    else:
+        return resection_new(data, name)
+
+def resection_old(data):
     vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
 # ostranění porty z více kusů, nastaví se jim hodnota liver
     #data['segmentation'][data['segmentation'] == data['slab']['porta']] = data['slab']['liver']
@@ -174,8 +193,25 @@ def resection(data):
     
     return data
 
+def resection_new(data, name):
+    #vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
+    # ostranění porty z více kusů, nastaví se jim hodnota liver
+    #data['segmentation'][data['segmentation'] == data['slab']['porta']] = data['slab']['liver']
+    #show3.show3(data['segmentation'])
+
+    #data['segmentation'][vessels == 2] = data['slab']['porta']
+    segmentation = data['segmentation']
+    print(data['slab'])
+    change(data,name)
+    
+    #print data["slab"]
+    #change(segmentation == data['slab']['porta'])
+    #lab = cut_editor(segmentation == data['slab']['porta'])
+
     
 
+def get_biggest_object(data):
+    return qmisc.get_one_biggest_object(data)
 
 
 def liver_spit_volume_mm3(segm, voxelsize_mm):
@@ -188,41 +224,45 @@ def liver_spit_volume_mm3(segm, voxelsize_mm):
 
     return v1, v2
 
-
-
-def get_biggest_object(data):
-    """ Return biggest object """
-    lab, num = scipy.ndimage.label(data)
-    #print ("bum = "+str(num))
-    
-    maxlab = max_area_index(lab, num)
-
-    data = (lab == maxlab)
-    return data
-
-
-def max_area_index(labels, num):
-    """
-    Return index of maxmum labeled area
-    """
-    mx = 0
-    mxi = -1
-    for l in range(1,num+1):
-        mxtmp = np.sum(labels == l)
-        if mxtmp > mx:
-            mx = mxtmp
-            mxi = l
-
-    return mxi
+def View(name):
+    data = misc.obj_from_file("out", filetype = 'pickle')
+    resection(data,name)
 
 
         
 
 if __name__ == "__main__":
-    data = misc.obj_from_file("vessels.pkl", filetype = 'pickle')
+    #logger = logging.getLogger(__name__)
+    logger = logging.getLogger()
+
+    logger.setLevel(logging.WARNING)
+    ch = logging.StreamHandler()
+    logger.addHandler(ch)
+
+
+#    SectorDisplay2__()
+
+
+
+    #logger.debug('input params')
+
+    # input parser
+    parser = argparse.ArgumentParser(description='Segment vessels from liver')
+    parser.add_argument('-i', '--inputfile',  default='out',
+            help='input file from organ_segmentation')
+    parser.add_argument('-ii', '--defaultinputfile',  action='store_true',
+            help='"organ.pkl" as input file from organ_segmentation')
+    parser.add_argument('-oe', '--use_old_editor',  action='store_true',
+            help='use an old editor for vessel cut')
+    parser.add_argument('-o', '--outputfile',  default=None,
+            help='output file')
+    parser.add_argument('-oo', '--defaultoutputfile',  action='store_true',
+            help='"vessels.pickle" as output file')
+    args = parser.parse_args()
+
+
+    data = misc.obj_from_file(args.inputfile, filetype = 'pickle')
     ds = data['segmentation'] == data['slab']['liver']
-    #pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
-    #pyed.show()
     #seg = np.zeros([100,100,100])
     #seg [50:80, 50:80, 60:75] = 1
     #seg[58:60, 56:72, 66:68]=2
@@ -231,14 +271,26 @@ if __name__ == "__main__":
     #dat [58:60, 56:72, 66:68] =  dat  [58:60, 56:72, 66:68] + 1
     #slab = {'liver':1, 'porta':2, 'portaa':3, 'portab':4}
     #data = {'segmentation':seg, 'data3d':dat, 'slab':slab}
-
-    data = resection(data)
-
-    savestring = raw_input('Save output data? (y/n): ')
-    #sn = int(snstring)
-    if savestring in ['Y', 'y']:
+    name = 'porta'
+    resection(data,name, use_old_editor=args.use_old_editor)
+    print normal
+    print coordinates
 
 
-        misc.obj_to_file(data, "resection.pkl", filetype='pickle')
-#    SectorDisplay2__()
+
+    defaultoutputfile =  "05-resection.pkl"
+    if args.defaultoutputfile:
+        args.outputfile = defaultoutputfile
+
+    if args.defaultinputfile:
+        args.inputfile = "vessels.pkl"
+
+    if args.outputfile == None:
+
+        savestring = raw_input ('Save output data? (y/n): ')
+        if savestring in ['Y','y']:
+
+            misc.obj_to_file(data, defaultoutputfile, filetype = 'pickle')
+    else:
+        misc.obj_to_file(data, args.outputfile, filetype = 'pickle')
 

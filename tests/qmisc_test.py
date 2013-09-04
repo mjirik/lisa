@@ -16,9 +16,11 @@ import unittest
 
 
 import numpy as np
+import os
 
 
 import qmisc
+import misc
 
 
 #import dcmreaddata1 as dcmr
@@ -41,6 +43,86 @@ class QmiscTest(unittest.TestCase):
 
         data2 = dataSM.todense()
         self.assertTrue(np.all(data==data2))
+
+    def test_obj_to_and_from_file_yaml(self):
+        testdata = np.random.random([4,4,3])
+        test_object = {'a':1, 'data': testdata}
+
+        filename = 'test_obj_to_and_from_file.yaml'
+        misc.obj_to_file(test_object, filename ,'yaml')
+        saved_object = misc.obj_from_file(filename,'yaml')
+
+        self.assertTrue(saved_object['a'] == 1)
+        self.assertTrue(saved_object['data'][1,1,1] == testdata[1,1,1])
+
+        os.remove(filename)
+
+    def test_obj_to_and_from_file_pickle(self):
+        testdata = np.random.random([4,4,3])
+        test_object = {'a':1, 'data': testdata}
+
+        filename = 'test_obj_to_and_from_file.pkl'
+        misc.obj_to_file(test_object, filename ,'pickle')
+        saved_object = misc.obj_from_file(filename,'pickle')
+
+        self.assertTrue(saved_object['a'] == 1)
+        self.assertTrue(saved_object['data'][1,1,1] == testdata[1,1,1])
+
+        os.remove(filename)
+
+    #def test_obj_to_and_from_file_exeption(self):
+    #    test_object = [1]
+    #    filename = 'test_obj_to_and_from_file_exeption'
+    #    self.assertRaises(misc.obj_to_file(test_object, filename ,'yaml'))
+
+
+    def test_crop_and_uncrop(self):
+        shape = [10,10,5]
+        img_in = np.random.random(shape)
+        
+        crinfo = [[2,8],[3,9],[2,5]]
+
+
+        img_cropped = qmisc.crop(img_in, crinfo)
+
+
+        img_uncropped = qmisc.uncrop(img_cropped, crinfo, shape)
+
+
+        self.assertTrue(img_uncropped[4,4,3] == img_in[4,4,3])
+
+
+
+    def test_multiple_crop_and_uncrop(self):
+        """
+        test combination of multiple crop
+        """
+
+        shape = [10,10,5]
+        img_in = np.random.random(shape)
+        
+        crinfo1 = [[2,8],[3,9],[2,5]]
+        crinfo2 = [[2,5],[1,4],[1,2]]
+
+        img_cropped = qmisc.crop(img_in, crinfo1)
+        img_cropped = qmisc.crop(img_cropped, crinfo2)
+
+        crinfo_combined = qmisc.combinecrinfo(crinfo1, crinfo2)
+
+
+
+        img_uncropped = qmisc.uncrop(img_cropped, crinfo_combined, shape)
+
+
+        self.assertTrue(img_uncropped[4,4,3] == img_in[4,4,3])
+
+    def test_getVersionString(self):
+        """
+        """
+        verstr = qmisc.getVersionString()
+        
+        self.assertTrue(type(verstr) == str)
+
 
 if __name__ == "__main__":
     unittest.main()

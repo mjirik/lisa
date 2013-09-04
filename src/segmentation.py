@@ -55,6 +55,7 @@ Vessel segmentation z jater.
         dilationStructure - struktura pro operaci dilation
         nObj - oznacuje, kolik nejvetsich objektu se ma vyhledat - pokud je rovno 0 (nule), vraci cela data
         getBiggestObjects - moznost, zda se maji vracet nejvetsi objekty nebo ne
+        seeds - moznost zadat pocatecni body segmentace na vstupu. Je to matice o rozmerech jako data. Vsude nuly, tam kde je oznaceni jsou jednicky.
         interactivity - nastavi, zda ma nebo nema byt pouzit interaktivni mod upravy dat
         binaryClosingIterations - vstupni binary closing operations
         binaryOpeningIterations - vstupni binary opening operations
@@ -62,9 +63,21 @@ Vessel segmentation z jater.
     returns:
         filtrovana data
 """
-def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsizemm = [1,1,1], inputSigma = -1,
-dilationIterations = 0, dilationStructure = None, nObj = 1, biggestObjects = True,
-interactivity = True, binaryClosingIterations = 1, binaryOpeningIterations = 1):
+def vesselSegmentation(
+        data,
+        segmentation=-1,
+        threshold=-1,
+        voxelsizemm=[1,1,1],
+        inputSigma=-1,
+        dilationIterations=0,
+        dilationStructure=None,
+        nObj=1,
+        biggestObjects=True,
+        seeds=None,
+        interactivity=True,
+        binaryClosingIterations=1,
+        binaryOpeningIterations=1
+        ):
 
     print('Pripravuji data...')
 
@@ -101,17 +114,19 @@ interactivity = True, binaryClosingIterations = 1, binaryOpeningIterations = 1):
     if(inputSigma > number):
         inputSigma = number
 
-    print('Nyni si levym nebo pravym tlacitkem mysi (klepnutim nebo tazenim) oznacte specificke oblasti k vraceni.')
-    import py3DSeedEditor
-    pyed = py3DSeedEditor.py3DSeedEditor(preparedData)
-    pyed.show()
-    seeds = pyed.seeds
+    ## tohle zajišťuje, že se nebude vybírat uzel, když chceme maximální velkost
+    if biggestObjects is not True:
+        print('Nyni si levym nebo pravym tlacitkem mysi (klepnutim nebo tazenim) oznacte specificke oblasti k vraceni.')
+        import py3DSeedEditor
+        pyed = py3DSeedEditor.py3DSeedEditor(preparedData)
+        pyed.show()
+        seeds = pyed.seeds
 
-    ## Zkontrolovat, jestli uzivatel neco vybral - nejaky item musi byt ruzny od nuly
-    if (seeds != 0).any() == False:
-       seeds = None
-    else:
-        seeds = seeds.nonzero() ## seeds je n-tice poli indexu nenulovych prvku   =>   item krychle je == krychle[ seeds[0][x], seeds[1][x], seeds[2][x] ]
+        ## Zkontrolovat, jestli uzivatel neco vybral - nejaky item musi byt ruzny od nuly
+        if (seeds != 0).any() == False:
+            seeds = None
+        else:
+            seeds = seeds.nonzero() ## seeds je n-tice poli indexu nenulovych prvku   =>   item krychle je == krychle[ seeds[0][x], seeds[1][x], seeds[2][x] ]
 
     ## Samotne filtrovani.
     uiT = uiThreshold.uiThreshold(preparedData, voxel, threshold,

@@ -79,6 +79,7 @@ class VesselsSegmentationTest(unittest.TestCase):
             dilationIterations = 2,
             nObj = 1,
             interactivity = False,
+            biggestObjects=True,
             binaryClosingIterations = 5,
             binaryOpeningIterations = 1)
 
