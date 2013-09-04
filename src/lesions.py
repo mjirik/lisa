@@ -102,14 +102,16 @@ class Lesions:
         # pyed.show()
         #
         # segmentation[153:180,70:106,42:55] = slab['lesions']
-        class1 = self.analyseHistogram( debug=False )
+        class1 = self.analyseHistogram( debug=True )
         seeds = self.getSeedsUsingClass1(class1)
 
-        sliceIdx = 15
         liver = self.data3d * (self.segmentation != 0)
         rw = random_walker(liver, seeds)
 
         self.segmentation = np.where(class1, self.data['slab']['lesions'], self.segmentation)
+
+        py3DSeedEditor.py3DSeedEditor(self.data3d, contour=(rw==2))
+        plt.show()
 
         return segmentation, slab
 
@@ -190,7 +192,9 @@ class Lesions:
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
-    datapath = os.path.join(path_to_script, "../vessels.pkl")
+    datapath = os.path.join(path_to_script, "../vessels1.pkl") #horsi kvalita segmentace
+    # datapath = os.path.join(path_to_script, "../vessels.pkl") #hypodenzni meta
+    # datapath = os.path.join(path_to_script, "../organ.pkl") #horsi kvalita segmentace
     data = misc.obj_from_file(datapath, filetype = 'pickle')
     #ds = data['segmentation'] == data['slab']['liver']
     #pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
@@ -199,7 +203,7 @@ if __name__ == "__main__":
 
     tumory.import_data(data)
     tumory.automatic_localization()
-    tumory.visualization()
+    # tumory.visualization()
 
 #    SectorDisplay2__()
 
