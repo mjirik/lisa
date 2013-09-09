@@ -40,7 +40,7 @@ class DataReader:
             #        for k in range(0,sz[2]):
             #            data3d[i,j,k]=image[i,j,k]
 
-            data3d = sitk.GetArrayFromImage(image) + 1024
+            data3d = sitk.GetArrayFromImage(image) #+ 1024
             data3d = np.transpose(data3d)
             data3d = np.rollaxis(data3d,1)
             metadata = {}#reader.get_metaData()

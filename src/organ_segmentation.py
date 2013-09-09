@@ -711,10 +711,12 @@ def main():
             help='Run data editor')
     parser.add_argument('-vmax', '--viewermax', type=str, #type=int,
             help='Maximum of viewer window, set None for automatic maximum.',
-            default='1300')
+            default='300')
+            #default='1300')
     parser.add_argument('-vmin', '--viewermin',type=str, #type=int,
             help='Minimum of viewer window, set None for automatic minimum.',
-            default='800')
+            #default='800')
+            default='-200')
     parser.add_argument('-so', '--show_output', action='store_true',
             help='Show output data in viewer')
     parser.add_argument(
