@@ -16,6 +16,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 import subprocess
+import scipy
 
 
 class SparseMatrix():
@@ -178,7 +179,7 @@ def get_one_biggest_object(data):
     lab, num = scipy.ndimage.label(data)
     #print ("bum = "+str(num))
     
-    maxlab = max_area_index(lab, num + 1)
+    maxlab = max_area_index(lab, num)
 
     data = (lab == maxlab)
     return data
@@ -191,7 +192,7 @@ def max_area_index(labels, num):
     """
     mx = 0
     mxi = -1
-    for l in range(1, num):
+    for l in range(1, num + 1):
         mxtmp = np.sum(labels == l)
         if mxtmp > mx:
             mx = mxtmp
