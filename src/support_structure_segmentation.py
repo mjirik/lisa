@@ -81,7 +81,7 @@ class SupportStructureSegmentation():
         self.data3d = reader.get_3Ddata()
         self.metadata = reader.get_metaData()
         #self.data3d, self.metadata = dcmr.dcm_read_from_dir(datadir)
-        self.voxelsize_mm = np.array(self.metadata['voxelsizemm'])
+        self.voxelsize_mm = np.array(self.metadata['voxelsize_mm'])
 
 
     def bone_segmentation(self):
@@ -239,7 +239,7 @@ def main():
 
 
     sseg = SupportStructureSegmentation(data3d = data3d, 
-            voxelsize_mm = metadata['voxelsizemm'], 
+            voxelsize_mm = metadata['voxelsize_mm'], 
             )
 
     sseg.bone_segmentation()

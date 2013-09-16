@@ -107,7 +107,7 @@ class OrganSegmentation():
         else:
             self.data3d = data3d
             # default values are updated in next line
-            self.metadata = {'series_number':-1, 'voxelsizemm':1, 'datadir':None}
+            self.metadata = {'series_number':-1, 'voxelsize_mm':1, 'datadir':None}
             self.metadata.update(metadata)
 
             self.iparams['series_number'] = self.metadata['series_number']
@@ -119,11 +119,11 @@ class OrganSegmentation():
 
         # voxelsize processing
         if working_voxelsize_mm == 'orig':
-            working_voxelsize_mm = self.metadata['voxelsizemm']
+            working_voxelsize_mm = self.metadata['voxelsize_mm']
         elif working_voxelsize_mm == 'orig*2':
-            working_voxelsize_mm = np.array(self.metadata['voxelsizemm'])*2
+            working_voxelsize_mm = np.array(self.metadata['voxelsize_mm'])*2
         elif working_voxelsize_mm == 'orig*4':
-            working_voxelsize_mm = np.array(self.metadata['voxelsizemm'])*4
+            working_voxelsize_mm = np.array(self.metadata['voxelsize_mm'])*4
 
 
 
@@ -190,7 +190,7 @@ class OrganSegmentation():
             if qmisc.isSparseMatrix(seeds):
                 seeds = seeds.todense()
             self.iparams['seeds'] = seeds
-        self.voxelsize_mm = np.array(self.metadata['voxelsizemm'])
+        self.voxelsize_mm = np.array(self.metadata['voxelsize_mm'])
         self.autocrop = autocrop
         self.autocrop_margin_mm = np.array(autocrop_margin_mm)
         self.autocrop_margin = self.autocrop_margin_mm / self.voxelsize_mm
@@ -573,7 +573,7 @@ class OrganSegmentation():
         slab['lesions'] = 6
 
         data = {}
-        data['version'] = (1, 0, 0)
+        data['version'] = (1, 0, 1)
         data['data3d'] = self.data3d
         data['crinfo'] = self.crinfo
         data['segmentation'] = self.segmentation
@@ -678,7 +678,7 @@ def main():
             help='path to data dir')
     parser.add_argument('-d', '--debug', action='store_true',
             help='run in debug mode')
-    parser.add_argument('-vs', '--voxelsizemm', default='3', type=str,
+    parser.add_argument('-vs', '--voxelsize_mm', default='3', type=str,
             help='Insert working voxelsize. It can be number or \
             array of three numbers. It is possible use original \n \
             resolution or half of original resolution. \n \
@@ -731,11 +731,11 @@ def main():
 
 
 
-    # voxelsizemm can be number or array
-    #if args.voxelsizemm != 'orig':
-    if not args.voxelsizemm.startswith('orig'):
+    # voxelsize_mm can be number or array
+    #if args.voxelsize_mm != 'orig':
+    if not args.voxelsize_mm.startswith('orig'):
         #import pdb; pdb.set_trace()
-        args.voxelsizemm = eval(args.voxelsizemm)
+        args.voxelsize_mm = eval(args.voxelsize_mm)
 
     #  
     args.segparams = eval(args.segparams)
@@ -770,7 +770,7 @@ def main():
         oseg = OrganSegmentation(None, #args.dcmdir,
                 data3d=data3d,
                 metadata=metadata,
-                working_voxelsize_mm=args.voxelsizemm,
+                working_voxelsize_mm=args.voxelsize_mm,
                 manualroi=args.manualroi,
                 texture_analysis=args.textureanalysis,
                 autocrop=args.autocrop,

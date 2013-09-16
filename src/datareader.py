@@ -46,7 +46,12 @@ class DataReader:
             metadata = {}#reader.get_metaData()
             metadata['series_number'] = 0#reader.series_number
             metadata['datadir'] = dcmdir
-            metadata['voxelsizemm'] = image.GetSpacing()
+            spacing = image.GetSpacing()
+            metadata['voxelsize_mm'] = [
+                    spacing[2],
+                    spacing[1],
+                    spacing[1],
+                    ]
 
             #import pdb; pdb.set_trace()
 
