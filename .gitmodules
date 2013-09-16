@@ -4,3 +4,6 @@
 [submodule "extern/dicom2fem"]
 	path = extern/dicom2fem
 	url = git://github.com/vlukes/dicom2fem.git
+[submodule "extern/py3DSeedEditor"]
+	path = extern/py3DSeedEditor
+	url = https://github.com/mjirik/py3DSeedEditor.git
