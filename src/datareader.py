@@ -40,19 +40,18 @@ class DataReader:
             #            data3d[i,j,k]=image[i,j,k]
 
             data3d = sitk.GetArrayFromImage(image) #+ 1024
-            data3d = np.transpose(data3d)
-            data3d = np.rollaxis(data3d,1)
+            #data3d = np.transpose(data3d)
+            #data3d = np.rollaxis(data3d,1)
             metadata = {}#reader.get_metaData()
             metadata['series_number'] = 0#reader.series_number
             metadata['datadir'] = dcmdir
             spacing = image.GetSpacing()
             metadata['voxelsize_mm'] = [
+                    spacing[1],
                     spacing[2],
-                    spacing[1],
-                    spacing[1],
+                    spacing[0],
                     ]
 
-            #import pdb; pdb.set_trace()
 
         else:
 #reading dicom

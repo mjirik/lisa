@@ -10,7 +10,7 @@ import copy
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
-sys.path.append(os.path.join(path_to_script, "../extern/pycat/extern/py3DSeedEditor/"))
+sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
 
@@ -36,17 +36,22 @@ class DicomWriterTest(unittest.TestCase):
     def test_write_and_read(self):
 
         filename = 'test_file.dcm'
-        data = (np.random.random([100,100,30])*30).astype(np.int16)
-        data[20:60,60:70, 0:5] += 30
+        data = (np.random.random([30,100,120])*30).astype(np.int16)
+        data[0:5,20:60,60:70,] += 30
+        metadata = {'voxelsize_mm': [1,2,3]}
         dw = dwriter.DataWriter()
-        dw.Write3DData(data, filename, 'dcm')
+        dw.Write3DData(data, filename, filetype='dcm', metadata=metadata)
 
         dr = dreader.DataReader()
         newdata, newmetadata = dr.Get3DData(filename)
 
         # hack with -1024, because of wrong data reading
-        self. assertEqual(data[10,10,10], newdata[10,10,10]-1024)
-        self. assertEqual(data[2,10,1], newdata[2,10,1]-1024)
+        self. assertEqual(data[10,10,10], newdata[10,10,10])
+        self. assertEqual(data[2,10,1], newdata[2,10,1])
+        self. assertEqual(metadata['voxelsize_mm'][0], newmetadata['voxelsize_mm'][0])
+# @TODO there is a bug in SimpleITK. slice voxel size must be same
+        #self. assertEqual(metadata['voxelsize_mm'][1], newmetadata['voxelsize_mm'][1])
+        self. assertEqual(metadata['voxelsize_mm'][2], newmetadata['voxelsize_mm'][2])
 
 
 if __name__ == "__main__":

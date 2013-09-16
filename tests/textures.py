@@ -9,7 +9,7 @@ import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
-sys.path.append(os.path.join(path_to_script, "../extern/pycat/extern/py3DSeedEditor/"))
+sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
 
@@ -55,7 +55,7 @@ class TexturesTest(unittest.TestCase):
 
         working_voxelsize_mm = 2
 
-        voxelsize_mm = np.array(metadata['voxelsizemm'])
+        voxelsize_mm = np.array(metadata['voxelsize_mm'])
         zoom = voxelsize_mm / working_voxelsize_mm
 
         PATCH_SIZE = 21

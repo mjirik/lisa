@@ -9,7 +9,7 @@ import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
-sys.path.append(os.path.join(path_to_script, "../extern/pycat/extern/py3DSeedEditor/"))
+sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
 
@@ -38,7 +38,7 @@ class OrganSegmentationTest(unittest.TestCase):
         seeds[19:22,21:27, 19:21] = 2
 
         voxelsize_mm = [5,5,5]
-        metadata = {'voxelsizemm': voxelsize_mm}
+        metadata = {'voxelsize_mm': voxelsize_mm}
         return img3d, metadata, seeds, segmentation
 
     @unittest.skipIf(not interactiveTest, "interactive test")
@@ -172,7 +172,7 @@ class OrganSegmentationTest(unittest.TestCase):
         roi = [[7,27],[2,29],[0,26]]
         seeds = seeds[7:27, 2:29, 0:26]
         voxelsize_mm = [5,5,5]
-        metadata = {'voxelsizemm': voxelsize_mm}
+        metadata = {'voxelsize_mm': voxelsize_mm}
 
         oseg = organ_segmentation.OrganSegmentation(None,
                 data3d=img3d,
@@ -203,7 +203,7 @@ class OrganSegmentationTest(unittest.TestCase):
         seeds [6:9,3:32,9:12] = 2
 #[mm]  10 x 10 x 10        #voxelsize_mm = [1,4,3]
         voxelsize_mm = [5,5,5]
-        metadata = {'voxelsizemm': voxelsize_mm}
+        metadata = {'voxelsize_mm': voxelsize_mm}
 
         oseg = organ_segmentation.OrganSegmentation(None,\
                 data3d=img3d, metadata = metadata, \

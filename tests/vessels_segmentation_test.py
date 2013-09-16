@@ -9,7 +9,7 @@ import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
-sys.path.append(os.path.join(path_to_script, "../extern/pycat/extern/py3DSeedEditor/"))
+sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
 
@@ -73,7 +73,7 @@ class VesselsSegmentationTest(unittest.TestCase):
             data3d,
             segmentation = segm==slab['liver'],
             #segmentation = oseg.orig_scale_segmentation,
-            voxelsizemm = voxelsize_mm,
+            voxelsize_mm = voxelsize_mm,
             threshold = 1204,
             inputSigma = 0.15,
             dilationIterations = 2,
@@ -124,7 +124,7 @@ class VesselsSegmentationTest(unittest.TestCase):
 #            data3d,
 #            segmentation = segm==slab['liver'],
 #            #segmentation = oseg.orig_scale_segmentation,
-#            voxelsizemm = voxelsize_mm,
+#            voxelsize_mm = voxelsize_mm,
 #            threshold = 1204,
 #            inputSigma = 0.15,
 #            dilationIterations = 2,
