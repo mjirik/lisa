@@ -23,7 +23,7 @@ import numpy as np
 import pycut
 
 
-#import dcmreaddata1 as dcmr
+#
 import dcmreaddata as dcmr
 import seed_editor_qt
 

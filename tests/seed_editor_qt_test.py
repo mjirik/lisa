@@ -17,7 +17,7 @@ import numpy as np
 
 
 import organ_segmentation
-import dcmreaddata1 as dcmr
+import dcmreaddata as dcmr
 
 class QTSeedEditorTest(unittest.TestCase):
     interactive_tests = False

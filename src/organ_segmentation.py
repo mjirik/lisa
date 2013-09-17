@@ -29,7 +29,7 @@ import audiosupport
 
 # ----------------- my scripts --------
 import py3DSeedEditor
-#import dcmreaddata1 as dcmr
+#
 #import dcmreaddata as dcmr
 import pycut
 import argparse
@@ -488,27 +488,27 @@ class OrganSegmentation():
 # xx and yy are 200x200 tables containing the x and y coordinates as values
 # mgrid is a mesh creation helper
             xx, yy = np.mgrid[
-                    :self.iparams['seeds'].shape[0], 
-                    :self.iparams['seeds'].shape[1]
+                    :self.iparams['seeds'].shape[1], 
+                    :self.iparams['seeds'].shape[2]
                     ]
 # circles contains the squared distance to the (100, 100) point
 # we are just using the circle equation learnt at school
             circle = (
-                    (xx - x_mm[i] / self.voxelsize_mm[0]) ** 2 +
-                    (yy - y_mm[i] / self.voxelsize_mm[1]) ** 2
+                    (xx - x_mm[i] / self.voxelsize_mm[1]) ** 2 +
+                    (yy - y_mm[i] / self.voxelsize_mm[2]) ** 2
                     ) ** (0.5)
 # donuts contains 1's and 0's organized in a donut shape
 # you apply 2 thresholds on circle to define the shape
             # slice jen s jednim kruhem
             slicecircle = circle < radius
-            slicen = int(z_mm / self.voxelsize_mm[2])
+            slicen = int(z_mm / self.voxelsize_mm[0])
             # slice s tim co už je v něm nastaveno
-            slicetmp = self.iparams['seeds'][:, :, slicen]
+            slicetmp = self.iparams['seeds'][slicen, :, :]
             #import pdb; pdb.set_trace()
 
             slicetmp[slicecircle == 1] = label
 
-            self.iparams['seeds'][:, :, slicen] = slicetmp
+            self.iparams['seeds'][slicen, :, :] = slicetmp
 
 #, QMainWindow
             #import py3DSeedEditor

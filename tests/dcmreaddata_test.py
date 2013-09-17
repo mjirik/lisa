@@ -20,7 +20,7 @@ from PyQt4.QtGui import QFileDialog, QApplication, QMainWindow
 import numpy as np
 
 
-#import dcmreaddata1 as dcmr
+#
 import dcmreaddata as dcmr
 
 class DicomReaderTest(unittest.TestCase):

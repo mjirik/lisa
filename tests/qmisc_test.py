@@ -23,7 +23,7 @@ import qmisc
 import misc
 
 
-#import dcmreaddata1 as dcmr
+#
 
 class QmiscTest(unittest.TestCase):
     interactivetTest = False

@@ -19,7 +19,7 @@ import unittest
 import numpy as np
 
 
-#import dcmreaddata1 as dcmr
+#
 import datawriter as dwriter
 import datareader as dreader
 

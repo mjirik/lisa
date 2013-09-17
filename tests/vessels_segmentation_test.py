@@ -20,7 +20,7 @@ import py3DSeedEditor
 
 import organ_segmentation
 import segmentation
-import dcmreaddata1 as dcmr
+import dcmreaddata as dcmr
 
 class VesselsSegmentationTest(unittest.TestCase):
     interactiveTest = False
@@ -113,10 +113,10 @@ class VesselsSegmentationTest(unittest.TestCase):
         dcmdir = os.path.join(path_to_script,'./../sample_data/jatra_5mm')
         
         oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4)
-        oseg.add_seeds_mm([120],[120],[80], label=1, radius=30)
-        oseg.add_seeds_mm([170,220,250],[250,250,200],[80], label=2, radius=30)
-        #oseg.interactivity()
-        oseg.ninteractivity()
+        oseg.add_seeds_mm([120],[120],[-80], label=1, radius=30)
+        oseg.add_seeds_mm([170,220,250],[250,250,200],[-80], label=2, radius=30)
+        oseg.interactivity(min_val=-200, max_val=200)
+        #oseg.ninteractivity()
 
 #
 #

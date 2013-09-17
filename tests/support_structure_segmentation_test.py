@@ -17,7 +17,7 @@ import unittest
 import numpy as np
 
 
-#import dcmreaddata1 as dcmr
+#
 import dcmreaddata as dcmr
 import support_structure_segmentation
 

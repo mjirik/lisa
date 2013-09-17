@@ -21,7 +21,7 @@ import numpy as np
 
 
 import organ_segmentation
-import dcmreaddata1 as dcmr
+import dcmreaddata as dcmr
 
 
 #  nosetests tests/organ_segmentation_test.py:OrganSegmentationTest.test_create_iparams
