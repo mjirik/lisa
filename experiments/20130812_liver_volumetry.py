@@ -239,7 +239,8 @@ def main():
 
 
         #import pdb; pdb.set_trace()
-        data3d_a = (data3d_a > 1024).astype(np.int8)
+        #data3d_a = (data3d_a > 1024).astype(np.int8)
+        data3d_a = (data3d_a > 1).astype(np.int8)
         data3d_b = (data3d_b > 0).astype(np.int8)
 
         if args.visualization:
