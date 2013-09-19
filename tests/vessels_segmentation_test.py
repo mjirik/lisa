@@ -53,8 +53,8 @@ class VesselsSegmentationTest(unittest.TestCase):
 
 
         data3d = np.zeros(segm.shape)
-        data3d[segm== slab['liver']] = 1180
-        data3d[segm== slab['porta']] = 1230
+        data3d[segm== slab['liver']] = 156
+        data3d[segm== slab['porta']] = 206
         #noise = (np.random.rand(segm.shape[0], segm.shape[1], segm.shape[2])*30).astype(np.int16)
         noise = (np.random.normal(0,30,segm.shape))#.astype(np.int16)
         data3d = (data3d + noise  ).astype(np.int16)
@@ -74,7 +74,7 @@ class VesselsSegmentationTest(unittest.TestCase):
             segmentation = segm==slab['liver'],
             #segmentation = oseg.orig_scale_segmentation,
             voxelsize_mm = voxelsize_mm,
-            threshold = 1204,
+            threshold = 180,
             inputSigma = 0.15,
             dilationIterations = 2,
             nObj = 1,
@@ -113,10 +113,10 @@ class VesselsSegmentationTest(unittest.TestCase):
         dcmdir = os.path.join(path_to_script,'./../sample_data/jatra_5mm')
         
         oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4)
-        oseg.add_seeds_mm([120],[120],[-80], label=1, radius=30)
-        oseg.add_seeds_mm([170,220,250],[250,250,200],[-80], label=2, radius=30)
-        oseg.interactivity(min_val=-200, max_val=200)
-        #oseg.ninteractivity()
+        oseg.add_seeds_mm([120],[120],[-81], label=1, radius=30)
+        oseg.add_seeds_mm([170,220,250],[250,250,200],[-81], label=2, radius=30)
+        #oseg.interactivity(min_val=-200, max_val=200)
+        oseg.ninteractivity()
 
 #
 #
