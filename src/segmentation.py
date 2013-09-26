@@ -49,7 +49,7 @@ Vessel segmentation z jater.
                 -1 zajimava tkan (kosti, ...)
                 0 jinde
         threshold - prah
-        voxelsizemm - (vektor o hodnote 3) rozmery jednoho voxelu
+        voxelsize_mm - (vektor o hodnote 3) rozmery jednoho voxelu
         inputSigma - pocatecni hodnota pro prahovani
         dilationIterations - pocet operaci dilation nad zakladni oblasti pro segmentaci ("segmantation")
         dilationStructure - struktura pro operaci dilation
@@ -67,7 +67,7 @@ def vesselSegmentation(
         data,
         segmentation=-1,
         threshold=-1,
-        voxelsizemm=[1,1,1],
+        voxelsize_mm=[1,1,1],
         inputSigma=-1,
         dilationIterations=0,
         dilationStructure=None,
@@ -84,7 +84,7 @@ def vesselSegmentation(
     if ( nObj < 1 ) :
         nObj = 1
 
-    voxel = numpy.array(voxelsizemm)
+    voxel = numpy.array(voxelsize_mm)
 
     ## Kalkulace objemove jednotky (voxel) (V = a*b*c).
     voxel1 = voxel[0]#[0]
@@ -343,7 +343,7 @@ def _main():
 
     structure = None
     outputTmp = vesselSegmentation(mat['data'], mat['segmentation'], threshold = -1,
-        voxelsizemm = mat['voxelsizemm'], inputSigma = 0.15, dilationIterations = 2,
+        voxelsize_mm = mat['voxelsize_mm'], inputSigma = 0.15, dilationIterations = 2,
         nObj = 2, biggestObjects = True, interactivity = False, binaryClosingIterations = 5, binaryOpeningIterations = 1)
 
     import inspector

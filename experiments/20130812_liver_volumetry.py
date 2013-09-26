@@ -9,7 +9,7 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 sys.path.append(os.path.join(path_to_script,
-                             "../extern/pycat/extern/py3DSeedEditor/"))
+                             "../extern/py3DSeedEditor/"))
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
 import unittest
@@ -239,7 +239,8 @@ def main():
 
 
         #import pdb; pdb.set_trace()
-        data3d_a = (data3d_a > 1024).astype(np.int8)
+        #data3d_a = (data3d_a > 1024).astype(np.int8)
+        data3d_a = (data3d_a > 1).astype(np.int8)
         data3d_b = (data3d_b > 0).astype(np.int8)
 
         if args.visualization:
@@ -250,7 +251,7 @@ def main():
 
 
 
-        evaluation_one = compare_volumes(data3d_a , data3d_b , metadata_a['voxelsizemm'])
+        evaluation_one = compare_volumes(data3d_a , data3d_b , metadata_a['voxelsize_mm'])
         evaluation_all['file1'].append(data3d_a_path)
         evaluation_all['file2'].append(data3d_b_path)
         evaluation_all['volume1_mm3'].append(evaluation_one['volume1_mm3'])
@@ -273,11 +274,6 @@ def main():
 
 
 
-    #igc = pycat.ImageGraphCut(data3d, zoom = 0.5)
-    #igc.interactivity()
-
-    #igc.make_gc()
-    #igc.show_segmentation()
 
     # volume
     #volume_mm3 = np.sum(oseg.segmentation > 0) * np.prod(oseg.voxelsize_mm)

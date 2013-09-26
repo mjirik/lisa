@@ -15,12 +15,18 @@ from sys import argv
 
 
 class DataWriter:
-    def Write3DData(self, data3d, path, filetype='dcm'):
+    def Write3DData(self, data3d, path, filetype='dcm', metadata=None):
+        mtd = {'voxelsize_mm':[1,1,1]}
+        if metadata != None:
+            mtd.update(metadata)
+
 
         if filetype in ['dcm', 'DCM', 'dicom']:
             #pixelType = itk.UC
             #imageType = itk.Image[pixelType, 2]
             dim = sitk.GetImageFromArray(data3d)
+            vsz = mtd['voxelsize_mm']
+            dim.SetSpacing([vsz[2], vsz[0], vsz[1]])
             sitk.WriteImage(dim,path)
 
 

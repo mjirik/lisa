@@ -9,7 +9,7 @@ import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
-sys.path.append(os.path.join(path_to_script, "../extern/pycat/extern/py3DSeedEditor/"))
+sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
 
@@ -17,7 +17,7 @@ import numpy as np
 
 
 import organ_segmentation
-import dcmreaddata1 as dcmr
+import dcmreaddata as dcmr
 
 class QTSeedEditorTest(unittest.TestCase):
     interactive_tests = False

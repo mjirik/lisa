@@ -6,10 +6,9 @@ import sys
 import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-#sys.path.append(os.path.join(path_to_script, "../extern/pycat/"))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 sys.path.append(os.path.join(path_to_script,
-                             "../extern/pycat/extern/py3DSeedEditor/"))
+                             "../extern/py3DSeedEditor/"))
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
 import unittest
@@ -41,14 +40,18 @@ class DataReader:
             #            data3d[i,j,k]=image[i,j,k]
 
             data3d = sitk.GetArrayFromImage(image) #+ 1024
-            data3d = np.transpose(data3d)
-            data3d = np.rollaxis(data3d,1)
+            #data3d = np.transpose(data3d)
+            #data3d = np.rollaxis(data3d,1)
             metadata = {}#reader.get_metaData()
             metadata['series_number'] = 0#reader.series_number
             metadata['datadir'] = dcmdir
-            metadata['voxelsizemm'] = image.GetSpacing()
+            spacing = image.GetSpacing()
+            metadata['voxelsize_mm'] = [
+                    spacing[1],
+                    spacing[2],
+                    spacing[0],
+                    ]
 
-            #import pdb; pdb.set_trace()
 
         else:
 #reading dicom
