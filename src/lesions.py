@@ -106,7 +106,7 @@ class Lesions:
         seeds = self.getSeedsUsingClass1(class1)
 
         liver = self.data3d * (self.segmentation != 0)
-        rw = random_walker(liver, seeds)
+        rw = random_walker(liver, seeds, mode='cg_mg')
 
         self.segmentation = np.where(class1, self.data['slab']['lesions'], self.segmentation)
 
@@ -192,8 +192,8 @@ class Lesions:
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
-    datapath = os.path.join(path_to_script, "../vessels1.pkl") #horsi kvalita segmentace
-    # datapath = os.path.join(path_to_script, "../vessels.pkl") #hypodenzni meta
+    #datapath = os.path.join(path_to_script, "../vessels1.pkl") #horsi kvalita segmentace
+    datapath = os.path.join(path_to_script, "../vessels.pkl") #hypodenzni meta
     # datapath = os.path.join(path_to_script, "../organ.pkl") #horsi kvalita segmentace
     data = misc.obj_from_file(datapath, filetype = 'pickle')
     #ds = data['segmentation'] == data['slab']['liver']
