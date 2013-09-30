@@ -8,10 +8,13 @@ Requirements
 
     sudo apt-get install python git 
 
-Fallowing packages are installed automatically with mysetup.py
+Fallowing packages need to be installed
 
-    sudo apt-get install python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox
+    sudo apt-get install python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox python-insighttoolkit3 
 
+SimpleITK is not in ubuntu packages. You can use easy_install
+
+    sudo easy_install -U SimpleITK
 
 Install
 -------

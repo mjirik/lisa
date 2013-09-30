@@ -10,7 +10,7 @@ import copy
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
-sys.path.append(os.path.join(path_to_script, "../extern/pycat/extern/py3DSeedEditor/"))
+sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
 
@@ -20,7 +20,7 @@ from PyQt4.QtGui import QFileDialog, QApplication, QMainWindow
 import numpy as np
 
 
-#import dcmreaddata1 as dcmr
+#
 import dcmreaddata as dcmr
 
 class DicomReaderTest(unittest.TestCase):
@@ -45,8 +45,8 @@ class DicomReaderTest(unittest.TestCase):
         #plt.imshow(overlay[1][:,:,0])
         #plt.show()
         
-        self. assertEqual(overlay[1][200,200],1)
-        self. assertEqual(overlay[1][100,100],0)
+        self. assertEqual(overlay[1][0,200,200],1)
+        self. assertEqual(overlay[1][0,100,100],0)
     def test_read_volumetry_overlay_with_dicom_module(self):
         """
         pydicom module is used for load dicom data. Dicom overlay
@@ -113,9 +113,9 @@ class DicomReaderTest(unittest.TestCase):
         data3d = reader.get_3Ddata()
         metadata = reader.get_metaData()
 #slice size is 512x512
-        self.assertEqual(data3d.shape[0],512)
+        self.assertEqual(data3d.shape[2],512)
 # voxelsize depth = 5 mm
-        self.assertEqual(metadata['voxelsizemm'][2],5)
+        self.assertEqual(metadata['voxelsize_mm'][0],5)
 
     def test_dcmread_series_number(self):
 
@@ -126,8 +126,8 @@ class DicomReaderTest(unittest.TestCase):
         reader =  dcmr.DicomReader(dcmdir,series_number = 7)
         data3d = reader.get_3Ddata()
         metadata = reader.get_metaData()
-        self.assertEqual(data3d.shape[0],512)
-        self.assertEqual(metadata['voxelsizemm'][2],5)
+        self.assertEqual(data3d.shape[2],512)
+        self.assertEqual(metadata['voxelsize_mm'][0],5)
 
     @unittest.skipIf(not interactivetTest, 'interactiveTest')
     def test_dcmread_select_series(self):

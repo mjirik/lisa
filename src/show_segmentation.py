@@ -19,7 +19,13 @@ import seg2fem
 import misc
 import viewer
 
-def showSegmentation(segmentation, voxelsize_mm = np.ones([3,1]), degrad = 4, label = 1):
+def showSegmentation(
+        segmentation,
+        voxelsize_mm=np.ones([3,1]),
+        degrad = 4,
+        label = 1,
+        smoothing=True
+        ):
     """
     Funkce vrací trojrozměrné porobné jako data['segmentation'] 
     v data['slab'] je popsáno, co která hodnota znamená
@@ -30,7 +36,7 @@ def showSegmentation(segmentation, voxelsize_mm = np.ones([3,1]), degrad = 4, la
     
     #import pdb; pdb.set_trace()
     mesh_data = seg2fem.gen_mesh_from_voxels_mc(segmentation, voxelsize_mm*degrad)
-    if False:
+    if smoothing:
         mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
     else:
         mesh_data = seg2fem.gen_mesh_from_voxels_mc(segmentation, voxelsize_mm * 1.0e-2)

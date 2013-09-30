@@ -9,7 +9,7 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 sys.path.append(os.path.join(path_to_script,
-                             "../extern/pycat/extern/py3DSeedEditor/"))
+                             "../extern/py3DSeedEditor/"))
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
 import unittest
@@ -30,7 +30,6 @@ import traceback
 import py3DSeedEditor
 #import dcmreaddata1 as dcmr
 import dcmreaddata as dcmr
-import pycat
 import argparse
 #import py3DSeedEditor
 

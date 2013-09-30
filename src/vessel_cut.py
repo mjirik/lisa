@@ -7,8 +7,7 @@
 import sys
 import os.path
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../extern/pycat/"))
-sys.path.append(os.path.join(path_to_script, "../extern/pycat/extern/py3DSeedEditor/"))
+sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
 sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
 #import featurevector
 import unittest
@@ -32,6 +31,7 @@ from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
 import misc
 import py3DSeedEditor
 import show3
+import qmisc
 normal = 0
 coordinates = None
 
@@ -56,13 +56,13 @@ def cut_editor_old(data):
     print 'sumall ', sumall
     #while n_obj < 2 :
 # dokud neni z celkoveho objektu ustipnuto alespon 80 procent
-    while np.sum(lab == max_area_index(lab,n_obj)) > (0.95*sumall) :
+    while np.sum(lab == qmisc.max_area_index(lab,n_obj)) > (0.95*sumall) :
 
         split_obj = scipy.ndimage.binary_dilation(split_obj, iterations=3)
         vesselstmp = vessels * (1 - split_obj)
     
         lab, n_obj = scipy.ndimage.label(vesselstmp)
-        print 'sum biggest ', np.sum(lab == max_area_index(lab,n_obj))
+        print 'sum biggest ', np.sum(lab == qmisc.max_area_index(lab,n_obj))
         #print "n_obj  ",  n_obj
         #import pdb; pdb.set_trace()
         #print 'max ', np.sum(lab == max_area_index(lab,n_obj))

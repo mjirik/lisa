@@ -10,14 +10,14 @@ import copy
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
-sys.path.append(os.path.join(path_to_script, "../extern/pycat/extern/py3DSeedEditor/"))
+sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
 
 import numpy as np
 
 
-#import dcmreaddata1 as dcmr
+#
 import dcmreaddata as dcmr
 import support_structure_segmentation
 
@@ -46,7 +46,7 @@ class SupportStructureSegmentationTest(unittest.TestCase):
 #            SupportStructureSegmentation
         sss = support_structure_segmentation.SupportStructureSegmentation(
                 data3d = self.data3d,
-                voxelsize_mm = self.metadata['voxelsizemm'], 
+                voxelsize_mm = self.metadata['voxelsize_mm'], 
                 modality = 'CT',
                 slab = slab
 
@@ -82,7 +82,7 @@ class SupportStructureSegmentationTest(unittest.TestCase):
 #            SupportStructureSegmentation
         sss = support_structure_segmentation.SupportStructureSegmentation(
                 data3d = self.data3d,
-                voxelsize_mm = self.metadata['voxelsizemm'], 
+                voxelsize_mm = self.metadata['voxelsize_mm'], 
                 modality = 'CT',
                 slab = slab
 

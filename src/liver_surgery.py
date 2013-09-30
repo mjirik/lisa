@@ -8,7 +8,7 @@ import os.path
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 sys.path.append(os.path.join(path_to_script,
-                             "../extern/pycat/extern/py3DSeedEditor/"))
+                             "../extern/py3DSeedEditor/"))
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
 import unittest
@@ -32,7 +32,7 @@ import traceback
 
 # ----------------- my scripts --------
 import py3DSeedEditor
-#import dcmreaddata1 as dcmr
+#
 import dcmreaddata as dcmr
 import pycut
 import argparse
@@ -122,7 +122,7 @@ class MainWindow(QMainWindow):
                                                            filter='Files (*.dcm)'))
             if len(filename) > 0:
                 savemat(filename, {'data': self.dcm_3Ddata,
-                                   'voxelsizemm': self.voxel_sizemm,
+                                   'voxelsize_mm': self.voxel_size_mm,
                                    'offsetmm': self.dcm_offsetmm},
                                    appendmat=False)
 
@@ -160,13 +160,13 @@ class MainWindow(QMainWindow):
 #        if len(filename) > 0:
 #
 #            data = loadmat(filename,
-#                           variable_names=['data', 'voxelsizemm', 'offsetmm'],
+#                           variable_names=['data', 'voxelsize_mm', 'offsetmm'],
 #                           appendmat=False)
 #            
 #            self.dcm_3Ddata = data['data']
-#            self.voxel_sizemm = data['voxelsizemm']
+#            self.voxel_size_mm = data['voxelsize_mm']
 #            self.dcm_offsetmm = data['offsetmm'] 
-#            self.setVoxelVolume(self.voxel_sizemm.reshape((3,)))
+#            self.setVoxelVolume(self.voxel_size_mm.reshape((3,)))
 #            self.setLabelText(self.text_seg_in, filename)
 #            self.statusBar().showMessage('Ready')
 #            
@@ -191,7 +191,7 @@ class MainWindow(QMainWindow):
         print os_pars_all
         oseg = organ_segmentation.OrganSegmentation(**os_pars_all)
       #  args.dcmdir,
-      #          working_voxelsize_mm=args.voxelsizemm,
+      #          working_voxelsize_mm=args.voxelsize_mm,
       #          manualroi=args.manualroi,
       #          texture_analysis=args.textureanalysis,
       #          edit_data=args.editdata,
@@ -235,7 +235,7 @@ def main():
             help='path to data dir')
     parser.add_argument('-d', '--debug', action='store_true',
             help='run in debug mode')
-    parser.add_argument('-vs', '--voxelsizemm', default='3', type=str,
+    parser.add_argument('-vs', '--voxelsize_mm', default='3', type=str,
             help='Insert working voxelsize. It can be number or \
             array of three numbers. \n \
             -vs 3 \n \
@@ -264,8 +264,8 @@ def main():
             )
     args = parser.parse_args()
 
-    # voxelsizemm can be number or array
-    args.voxelsizemm = np.array(eval(args.voxelsizemm))
+    # voxelsize_mm can be number or array
+    args.voxelsize_mm = np.array(eval(args.voxelsize_mm))
 
     if args.debug:
         logger.setLevel(logging.DEBUG)
@@ -288,7 +288,7 @@ def main():
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
 
     oseg = OrganSegmentation(args.dcmdir,
-            working_voxelsize_mm=args.voxelsizemm,
+            working_voxelsize_mm=args.voxelsize_mm,
             manualroi=args.manualroi,
             texture_analysis=args.textureanalysis,
             edit_data=args.editdata,
@@ -349,7 +349,7 @@ def main():
             self.statusBar().showMessage('No DICOM data!')
             return
         igc = pycut.ImageGraphCut(self.dcm_3Ddata,
-                voxelsize=self.voxel_sizemm)
+                voxelsize=self.voxel_size_mm)
 
         pyed = QTSeedEditor(self.dcm_3Ddata,
                 seeds=self.segmentation_seeds,

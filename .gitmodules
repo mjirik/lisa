@@ -1,9 +1,9 @@
-[submodule "extern/pycat"]
-	path = extern/pycat
-	url = git://github.com/mjirik/pycat.git
 [submodule "extern/pyseg_base"]
 	path = extern/pyseg_base
 	url = git://github.com/mjirik/pyseg_base.git
 [submodule "extern/dicom2fem"]
 	path = extern/dicom2fem
 	url = git://github.com/vlukes/dicom2fem.git
+[submodule "extern/py3DSeedEditor"]
+	path = extern/py3DSeedEditor
+	url = https://github.com/mjirik/py3DSeedEditor.git

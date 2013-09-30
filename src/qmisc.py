@@ -7,8 +7,7 @@ import sys
 import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../extern/pycat/"))
-sys.path.append(os.path.join(path_to_script, "../extern/pycat/extern/py3DSeedEditor"))
+sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor"))
 
 import numpy as np
 
@@ -16,6 +15,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 import subprocess
+import scipy
 
 
 class SparseMatrix():
@@ -178,7 +178,7 @@ def get_one_biggest_object(data):
     lab, num = scipy.ndimage.label(data)
     #print ("bum = "+str(num))
     
-    maxlab = max_area_index(lab, num + 1)
+    maxlab = max_area_index(lab, num)
 
     data = (lab == maxlab)
     return data
@@ -191,7 +191,7 @@ def max_area_index(labels, num):
     """
     mx = 0
     mxi = -1
-    for l in range(1, num):
+    for l in range(1, num + 1):
         mxtmp = np.sum(labels == l)
         if mxtmp > mx:
             mx = mxtmp

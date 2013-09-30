@@ -9,7 +9,7 @@ import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
-sys.path.append(os.path.join(path_to_script, "../extern/pycat/extern/py3DSeedEditor/"))
+sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
 
@@ -17,7 +17,7 @@ import numpy as np
 
 
 import organ_segmentation
-import dcmreaddata1 as dcmr
+import dcmreaddata as dcmr
 
 
 #  nosetests tests/organ_segmentation_test.py:OrganSegmentationTest.test_create_iparams
@@ -38,7 +38,7 @@ class OrganSegmentationTest(unittest.TestCase):
         seeds[19:22,21:27, 19:21] = 2
 
         voxelsize_mm = [5,5,5]
-        metadata = {'voxelsizemm': voxelsize_mm}
+        metadata = {'voxelsize_mm': voxelsize_mm}
         return img3d, metadata, seeds, segmentation
 
     @unittest.skipIf(not interactiveTest, "interactive test")
@@ -49,8 +49,8 @@ class OrganSegmentationTest(unittest.TestCase):
         import numpy as np
         img3d = (np.random.rand(30,30,30)*10).astype(np.int16)
         seeds = (np.zeros(img3d.shape)).astype(np.int8)
-        seeds[12:18,9:16, 3:6] = 1
-        seeds[19:22,21:27, 3:6] = 2
+        seeds[3:6, 12:18,9:16] = 1
+        seeds[3:6,19:22,21:27 ] = 2
 #, QMainWindow
         app = QApplication(sys.argv)
         pyed = QTSeedEditor(img3d, seeds=seeds)
@@ -172,7 +172,7 @@ class OrganSegmentationTest(unittest.TestCase):
         roi = [[7,27],[2,29],[0,26]]
         seeds = seeds[7:27, 2:29, 0:26]
         voxelsize_mm = [5,5,5]
-        metadata = {'voxelsizemm': voxelsize_mm}
+        metadata = {'voxelsize_mm': voxelsize_mm}
 
         oseg = organ_segmentation.OrganSegmentation(None,
                 data3d=img3d,
@@ -194,16 +194,16 @@ class OrganSegmentationTest(unittest.TestCase):
         """
         #dcmdir = os.path.join(path_to_script,'./../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
 # data
-        img3d = np.random.rand(64,64,32) * 5
-        img3d[12:32,5:25,4:24] = img3d [12:32,5:25,4:24] + 15
+        img3d = np.random.rand(32,64,64) * 5
+        img3d[4:24,12:32,5:25,] = img3d [4:24, 12:32,5:25] + 15
 
 #seeds
-        seeds = np.zeros([64,64,32], np.int8)
-        seeds [13:31,22:25,9:12] = 1
-        seeds [6:9,3:32,9:12] = 2
+        seeds = np.zeros([32, 64, 64], np.int8)
+        seeds [9:12,13:31,22:25] = 1
+        seeds [9:12,6:9,3:32] = 2
 #[mm]  10 x 10 x 10        #voxelsize_mm = [1,4,3]
         voxelsize_mm = [5,5,5]
-        metadata = {'voxelsizemm': voxelsize_mm}
+        metadata = {'voxelsize_mm': voxelsize_mm}
 
         oseg = organ_segmentation.OrganSegmentation(None,\
                 data3d=img3d, metadata = metadata, \
