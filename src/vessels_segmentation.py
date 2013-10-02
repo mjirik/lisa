@@ -29,7 +29,7 @@ import argparse
 
 import segmentation
 import inspector
-import organ_segmentation
+#import organ_segmentation
 import misc
 
 # Import garbage collector
@@ -142,7 +142,7 @@ if __name__ == "__main__":
     data['slab']['none'] = 0
     data['slab']['liver'] = 1
     data['slab']['porta'] = 2
-    
+
 
     #print np.max(output)
     #import pdb; pdb.set_trace()
@@ -153,7 +153,7 @@ if __name__ == "__main__":
     data['segmentation'][output] = data['slab']['porta']
     #data['slab'] = slab
 
-    
+
     pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'],  contour=data['segmentation']==data['slab']['porta'])
     pyed.show()
 

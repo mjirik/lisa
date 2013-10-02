@@ -343,8 +343,8 @@ def _main():
 
     structure = None
     outputTmp = vesselSegmentation(mat['data'], mat['segmentation'], threshold = -1,
-        voxelsize_mm = mat['voxelsize_mm'], inputSigma = 0.15, dilationIterations = 2,
-        nObj = 2, biggestObjects = True, interactivity = False, binaryClosingIterations = 5, binaryOpeningIterations = 1)
+        voxelsize_mm = mat['voxelsizemm'], inputSigma = 0.15, dilationIterations = 2,
+        nObj = 2, biggestObjects = False, interactivity = True, binaryClosingIterations = 5, binaryOpeningIterations = 1)
 
     import inspector
     inspect = inspector.inspector(outputTmp)
