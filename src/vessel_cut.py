@@ -141,9 +141,9 @@ def resection_old(data):
     print ("Select cut")
     
     print data["slab"]
-    #lab = cut_editor(segmentation > 0)#== data['slab']['porta'])
+    lab = cut_editor(data)#== data['slab']['porta'])
 
-    lab, cut = cut_editor_old(data)#['segmentation'] == data['slab']['porta'])
+    #lab, cut = cut_editor_old(data)#['segmentation'] == data['slab']['porta'])
     
 
     l1 = 1
@@ -248,7 +248,7 @@ if __name__ == "__main__":
 
     # input parser
     parser = argparse.ArgumentParser(description='Segment vessels from liver')
-    parser.add_argument('-i', '--inputfile',  default='out',
+    parser.add_argument('-i', '--inputfile', 
             help='input file from organ_segmentation')
     parser.add_argument('-ii', '--defaultinputfile',  action='store_true',
             help='"organ.pkl" as input file from organ_segmentation')
@@ -272,7 +272,9 @@ if __name__ == "__main__":
     #slab = {'liver':1, 'porta':2, 'portaa':3, 'portab':4}
     #data = {'segmentation':seg, 'data3d':dat, 'slab':slab}
     name = 'porta'
-    resection(data,name, use_old_editor=args.use_old_editor)
+    segmentation = data['segmentation']
+    cut_editor(segmentation)
+    #resection(data,name, use_old_editor=args.use_old_editor)
     print normal
     print coordinates
 
@@ -283,7 +285,7 @@ if __name__ == "__main__":
         args.outputfile = defaultoutputfile
 
     if args.defaultinputfile:
-        args.inputfile = "vessels.pkl"
+        args.inputfile = "out"
 
     if args.outputfile == None:
 
