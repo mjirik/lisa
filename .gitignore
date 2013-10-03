@@ -45,3 +45,4 @@ tmp
 # Data
 *.pkl
 *.pickle
+*.vtk
