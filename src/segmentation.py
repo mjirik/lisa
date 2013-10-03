@@ -14,6 +14,7 @@ Copyright:   (c) Pavel Volkovinsky
 """
 
 # TODO: Podpora "seeds" - vraceni specifickych objektu
+# TODO: Udelat lepe vraceni nejvetsich (nejvetsiho) objektu (muze vzniknout problem s cernou oblasti)
 # TODO: Bylo by dobre zavest paralelizmus - otazka jak a kde - neda se udelat vsude, casem si to zjistit - urcite pred bakalarskou praci - asi v ramci PRJ5 nebo az mi bude o prazdninach chybet projekt
 
 import unittest
@@ -342,8 +343,8 @@ def _main():
 
     structure = None
     outputTmp = vesselSegmentation(mat['data'], mat['segmentation'], threshold = -1,
-        voxelsize_mm = mat['voxelsize_mm'], inputSigma = 0.15, dilationIterations = 2,
-        nObj = 2, biggestObjects = True, interactivity = False, binaryClosingIterations = 5, binaryOpeningIterations = 1)
+        voxelsize_mm = mat['voxelsizemm'], inputSigma = 0.15, dilationIterations = 2,
+        nObj = 2, biggestObjects = False, interactivity = True, binaryClosingIterations = 5, binaryOpeningIterations = 1)
 
     import inspector
     inspect = inspector.inspector(outputTmp)
