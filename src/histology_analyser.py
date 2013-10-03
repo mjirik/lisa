@@ -25,38 +25,40 @@ import SimpleITK as sitk
 import seed_editor_qt as seqt
 import scipy.ndimage
 
+GAUSSIAN_SIGMA = 1
+
+
 class HistologyAnalyser:
     def __init__ (self, data3d, metadata, threshold):
-        self.data3di = self.muxImage(
-                data3d.astype(np.uint16),
-                metadata
-                )
+        self.data3d = data3d
         self.metadata = metadata
         self.threshold = threshold
 
 
-    def thresh(self, thr):
-        return (self.data3di > thr)
 
     def run(self):
         import pdb; pdb.set_trace()
         self.preprocessing()
 
-        datathr = self.thresh(self.threshold)
+        self.data3d_thri = self.muxImage(
+                self.data3d_thr2.astype(np.uint16),
+                metadata
+                )
+        sitk.Show(self.data3d_thri)
+
+        self.data3di = self.muxImage(
+                self.data3d.astype(np.uint16),
+                metadata
+                )
+        sitk.Show(self.data3di)
 
 
-        sitk.Show(datathr * 100)
-        bcf = sitk.BinaryClosingByReconstructionImageFilter()
-        print bcf.GetKernelRadius()
-        print 'fg ', bcf.GetForegroundValue()
-        bcf.SetKernelRadius(3)
-        datathr2 = bcf.Execute(datathr)
-        sitk.Show(datathr2 * 200)
 
-        import pdb; pdb.set_trace()
-        dataskel = sitk.BinaryThinning(datathr2)
+        dataskel = sitk.BinaryThinning(self.data3d_thri)
         sitk.Show(dataskel * 100)
         import pdb; pdb.set_trace()
+        #import itk
+        #itk.
 
         #self.output = sitk.GetArrayFromImage(dataskel)
 
@@ -75,6 +77,15 @@ class HistologyAnalyser:
         import pdb; pdb.set_trace()
 
     def preprocessing(self):
+        self.data3d = scipy.ndimage.filters.gaussian_filter(
+                self.data3d,
+                GAUSSIAN_SIGMA
+                )
+        self.data3d_thr = self.data3d > self.threshold
+
+        self.data3d_thr2 = scipy.ndimage.morphology.binary_opening(
+                self.data3d_thr
+                )
         #gf = sitk.SmoothingRecursiveGaussianImageFilter()
         #gf.SetSigma(5)
         #gf = sitk.DiscreteGaussianImageFilter()
