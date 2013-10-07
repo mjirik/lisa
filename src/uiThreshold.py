@@ -347,13 +347,11 @@ class uiThreshold:
         self.lastOpenNum = openNum
 
         ## Zjisteni nejvetsich objektu
-# mjirik: Zakomentoval jsem dva řádky a nahradil je jinými. Zdá se mi, že 
-#         někde v getPriorityObjects je chyba.
+        if (self.biggestObjects == True or self.seeds == None) :
+           self.imgChanged = segmentation.getPriorityObjects(self.imgChanged, self.nObj, self.seeds)
 #        if (self.biggestObjects == True) :
-#           self.imgChanged = segmentation.getPriorityObjects(self.imgChanged, self.nObj, self.seeds)
-        if (self.biggestObjects == True) :
-            import qmisc
-            self.imgChanged = qmisc.get_one_biggest_object(self.imgChanged)
+#            import qmisc
+#            self.imgChanged = qmisc.get_one_biggest_object(self.imgChanged)
 
 
         if ( self.interactivity == True ) :
