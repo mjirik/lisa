@@ -213,22 +213,8 @@ def getPriorityObjects(data, nObj, seeds = None):
 
             ## Vytvoreni vystupu - postupne pricitani dat prislunych specif. labelu.
             returning = dataLabels == seed[0]
-            # Debug:
-            import inspector
-            inspect = inspector.inspector(returning)
-            inspect.run()
-            del(inspect)
-            garbage.collect()
-            #======
             for index in range ( 1, len ( seed ) ) :
                 returning = returning + dataLabels == seed[index]
-                # Debug:
-                import inspector
-                inspect = inspector.inspector(returning)
-                inspect.run()
-                del(inspect)
-                garbage.collect()
-                #======
 
             return returning
             # Function exit

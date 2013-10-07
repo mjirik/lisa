@@ -347,7 +347,7 @@ class uiThreshold:
         self.lastOpenNum = openNum
 
         ## Zjisteni nejvetsich objektu
-        if (self.biggestObjects == True or self.seeds == None) :
+        if (self.biggestObjects == True or self.seeds != None) :
            self.imgChanged = segmentation.getPriorityObjects(self.imgChanged, self.nObj, self.seeds)
 #        if (self.biggestObjects == True) :
 #            import qmisc
