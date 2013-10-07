@@ -55,12 +55,19 @@ class Lesions:
 
 
     """
+
+
+#----------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------
     def __init__(self, data3d=None, voxelsize_mm=None, segmentation=None, slab=None):
         self.data3d = data3d
         self.segmentation = segmentation
         self.slab = slab
         self.voxelsize_mm = voxelsize_mm
-    
+
+
+#----------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------
     def import_data(self, data):
         self.data = data
         self.data3d = data['data3d']
@@ -68,11 +75,12 @@ class Lesions:
         self.slab = data['slab']
         self.voxelsize_mm = data['voxelsize_mm']
 
+
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
     def automatic_localization(self):
-        """ 
-        Automatic localization of lesions. Params from constructor 
+        """
+        Automatic localization of lesions. Params from constructor
         or import_data() function.
         """
         self.segmentation, self.slab = self._automatic_localization(
@@ -82,11 +90,13 @@ class Lesions:
                 self.slab
                 )
 
+
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
     def export_data(self):
         self.data['segmentation'] = self.segmentation
         pass
+
 
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
@@ -107,17 +117,31 @@ class Lesions:
         liver = self.data3d * (self.segmentation != 0)
         rw = random_walker(liver, seeds, mode='cg_mg')
 
-        self.segmentation = np.where(class1, self.data['slab']['lesions'], self.segmentation)
+        #self.segmentation = np.where(class1, self.data['slab']['lesions'], self.segmentation)
+        self.segmentation = np.where(rw==2, self.data['slab']['lesions'], self.segmentation)
 
-        py3DSeedEditor.py3DSeedEditor(self.data3d, contour=(rw==2))
+        #py3DSeedEditor.py3DSeedEditor(self.data3d, contour=(rw==2))
+        py3DSeedEditor.py3DSeedEditor(self.data3d, contour=(self.segmentation==self.data['slab']['lesions']))
         plt.show()
+
+
 
         return segmentation, slab
 
+
+#----------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------
+#    def getObjects(self):
+
+
+
+#----------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------
     def visualization(self):
         #pyed = py3DSeedEditor.py3DSeedEditor(self.data['data3d'], seeds = self.data['segmentation']==self.data['slab']['lesions'])
         pyed = py3DSeedEditor.py3DSeedEditor(self.segmentation==self.data['slab']['lesions'])
         pyed.show()
+
 
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
@@ -171,6 +195,7 @@ class Lesions:
 
         return allSeeds
 
+
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
     def windowing(self, im, level=50, width=300):
@@ -185,7 +210,6 @@ class Lesions:
         imw = skexp.rescale_intensity(im, in_range=(minHU, maxHU), out_range=(0, 255))
 
         return imw
-
 
 
 #----------------------------------------------------------------------------------------------------------------------
