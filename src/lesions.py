@@ -27,7 +27,12 @@ import misc
 import py3DSeedEditor
 import show3
 import vessel_cut
+from scipy.ndimage.measurements import label
+from skimage.morphology import remove_small_objects
 from skimage.segmentation import random_walker
+from skimage import measure as skmeasure
+import scipy.ndimage.morphology as scimorph
+import cv2
 
 # version-dependent imports ---------------------------------
 from pkg_resources import parse_version
@@ -111,28 +116,64 @@ class Lesions:
         # pyed.show()
         #
         # segmentation[153:180,70:106,42:55] = slab['lesions']
-        class1 = self.analyseHistogram( debug=True )
+        class1 = self.analyseHistogram( debug=False )
         seeds = self.getSeedsUsingClass1(class1)
 
         liver = self.data3d * (self.segmentation != 0)
+        print('Starting random walker...')
         rw = random_walker(liver, seeds, mode='cg_mg')
+        print('...finished.')
 
         #self.segmentation = np.where(class1, self.data['slab']['lesions'], self.segmentation)
-        self.segmentation = np.where(rw==2, self.data['slab']['lesions'], self.segmentation)
+        label_l = self.data['slab']['lesions']
+        label_v = self.data['slab']['porta']
+
+        self.segmentation = np.where(np.logical_and(rw==2, self.segmentation!=label_v), label_l, self.segmentation)
 
         #py3DSeedEditor.py3DSeedEditor(self.data3d, contour=(rw==2))
         py3DSeedEditor.py3DSeedEditor(self.data3d, contour=(self.segmentation==self.data['slab']['lesions']))
         plt.show()
 
-
+        l, nl = self.getObjects()
 
         return segmentation, slab
 
 
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
-#    def getObjects(self):
+    def getObjects(self):
+        min_size_of_comp = 200
+        label_l = self.data['slab']['lesions']
 
+        only_big = remove_small_objects(self.segmentation==label_l, min_size=min_size_of_comp, connectivity=1, in_place=False)
+        labels, nlabels = label(only_big)
+
+        features = np.zeros((nlabels, 2))
+        for lab in range(1, nlabels+1):
+            bounds = self.getBounds(labels == lab)
+            size = (labels == lab).sum()
+            ecc = bounds.sum()**2 / size
+            print 'ecc = %.3f'%(ecc)
+            #py3DSeedEditor.py3DSeedEditor(self.data3d, contour=(labels==lab)).show()
+
+            features[lab,0] = size
+            features[lab,0] = ecc
+
+
+        #feats = skmeasure.regionprops(labels, properties=['Area', 'Eccentricity'])
+        #for f in range(len(feats)):
+        #    features[f,0] =  feats[0]['Area']
+        #    features[f,1] =  feats[0]['Eccentricity']
+
+        return labels, nlabels
+
+
+#----------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------
+    def getBounds(self, obj):
+        obj_er = scimorph.binary_erosion(obj)
+        bounds = obj - obj_er
+        return bounds
 
 
 #----------------------------------------------------------------------------------------------------------------------
@@ -232,9 +273,9 @@ def main():
             help='path to data dir')
 
     args = parser.parse_args()
-#datapath = os.path.join(path_to_script, "../vessels1.pkl") #horsi kvalita segmentace
+    #datapath = os.path.join(path_to_script, "../vessels1.pkl") #horsi kvalita segmentace
     #datapath = os.path.join(path_to_script, args.inputfile) #hypodenzni meta
-    # datapath = os.path.join(path_to_script, "../organ.pkl") #horsi kvalita segmentace
+    #datapath = os.path.join(path_to_script, "../organ.pkl") #horsi kvalita segmentace
     data = misc.obj_from_file(args.inputfile, filetype = 'pickle')
     #ds = data['segmentation'] == data['slab']['liver']
     #pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
