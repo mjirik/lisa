@@ -816,13 +816,13 @@ def main():
         pth, filename = os.path.split(iparams['datadir'])
         if savestring in ['r','R']:
 # save renamed file too
-            misc.obj_to_file(data, 'organ_big-'+ filename + '.pkl', filetype='pickle')
-        misc.obj_to_file(data, "organ.pkl", filetype='pickle')
+            misc.obj_to_file(data, 'organ_big-'+ filename + '.pklz', filetype='pklz')
+        misc.obj_to_file(data, "organ.pklz", filetype='pklz')
         #misc.obj_to_file(data, "organ-"+ filename + ".pkl", filetype='pickle')
         misc.obj_to_file(iparams, 'organ_iparams.pkl', filetype='pickle')
         #misc.obj_to_file(iparams, 'iparams-'+ filename + '.pkl', filetype='pickle')
         data ['data3d'] = None
-        misc.obj_to_file(data, 'organ_small-'+ filename + '.pkl', filetype='pickle')
+        misc.obj_to_file(data, 'organ_small-'+ filename + '.pklz', filetype='pklz')
     #output = segmentation.vesselSegmentation(oseg.data3d,
     # oseg.orig_segmentation)
 
