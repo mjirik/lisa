@@ -56,6 +56,7 @@ def sample_input_data():
                 {'sliverseg':'data_orig/sliver07/training-part1/liver-seg004.mhd', 'ourseg':'data_processed/organ_small-liver-orig004.mhd.pkl'},
                 {'sliverseg':'data_orig/sliver07/training-part1/liver-seg005.mhd', 'ourseg':'data_processed/organ_small-liver-orig005.mhd.pkl'},
                 {'sliverseg':'data_orig/sliver07/training-part2/liver-seg006.mhd', 'ourseg':'data_processed/organ_small-liver-orig006.mhd.pkl'},
+                {'sliverseg':'data_orig/sliver07/training-part2/liver-seg007.mhd', 'ourseg':'data_processed/organ_small-liver-orig007.mhd.pkl'},
                 {'sliverseg':'data_orig/sliver07/training-part2/liver-seg008.mhd', 'ourseg':'data_processed/organ_small-liver-orig008.mhd.pkl'},
 ##
                 {'sliverseg':'data_orig/sliver07/training-part2/liver-seg009.mhd', 'ourseg':'data_processed/organ_small-liver-orig009.mhd.pkl'},
@@ -240,12 +241,13 @@ def main():
 
         #import pdb; pdb.set_trace()
         #data3d_a = (data3d_a > 1024).astype(np.int8)
-        data3d_a = (data3d_a > 1).astype(np.int8)
+        data3d_a = (data3d_a > 0).astype(np.int8)
         data3d_b = (data3d_b > 0).astype(np.int8)
 
         if args.visualization:
-            pyed = py3DSeedEditor.py3DSeedEditor(data3d_b, contour =
-            data3d_a)
+            pyed = py3DSeedEditor.py3DSeedEditor(data3d_a, #+ (4 * data3d_b)#, 
+                    contour=data3d_b
+                    )
             pyed.show()
 
 

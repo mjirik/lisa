@@ -148,7 +148,7 @@ class OrganSegmentation():
 
 # for each mm on boundary there will be sum of penalty equal 10
         self.segparams = {'pairwise_alpha_per_mm2':10, 'use_boundary_penalties':False,'boundary_penalties_sigma':50}
-        self.segparams = {'pairwise_alpha_per_mm2':60, 'use_boundary_penalties':False,'boundary_penalties_sigma':50}
+        self.segparams = {'pairwise_alpha_per_mm2':40, 'use_boundary_penalties':False,'boundary_penalties_sigma':50}
         #print segparams
 # @TODO each axis independent alpha
         self.segparams.update(segparams)

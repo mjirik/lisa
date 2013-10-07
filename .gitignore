@@ -45,3 +45,6 @@ tmp
 # Data
 *.pkl
 *.pickle
+*.vtk
+
+*.yaml

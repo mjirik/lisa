@@ -47,9 +47,9 @@ class DataReader:
             metadata['datadir'] = dcmdir
             spacing = image.GetSpacing()
             metadata['voxelsize_mm'] = [
-                    spacing[1],
                     spacing[2],
                     spacing[0],
+                    spacing[1],
                     ]
 
 

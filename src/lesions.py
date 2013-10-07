@@ -14,10 +14,10 @@ import skimage.exposure as skexp
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
 #import featurevector
-import unittest
 
 import logging
 logger = logging.getLogger(__name__)
+import argparse
 
 import numpy as np
 import scipy.ndimage
@@ -214,11 +214,28 @@ class Lesions:
 
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
-if __name__ == "__main__":
-    #datapath = os.path.join(path_to_script, "../vessels1.pkl") #horsi kvalita segmentace
-    datapath = os.path.join(path_to_script, "../vessels.pkl") #hypodenzni meta
+def main():
+
+    logger = logging.getLogger()
+
+    logger.setLevel(logging.WARNING)
+    ch = logging.StreamHandler()
+    logger.addHandler(ch)
+
+    #logger.debug('input params')
+
+    # input parser
+    parser = argparse.ArgumentParser(
+            description='Module for segmentation of simple anatomical structures')
+    parser.add_argument('-i', '--inputfile',
+            default='vessels.pkl',
+            help='path to data dir')
+
+    args = parser.parse_args()
+#datapath = os.path.join(path_to_script, "../vessels1.pkl") #horsi kvalita segmentace
+    #datapath = os.path.join(path_to_script, args.inputfile) #hypodenzni meta
     # datapath = os.path.join(path_to_script, "../organ.pkl") #horsi kvalita segmentace
-    data = misc.obj_from_file(datapath, filetype = 'pickle')
+    data = misc.obj_from_file(args.inputfile, filetype = 'pickle')
     #ds = data['segmentation'] == data['slab']['liver']
     #pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
     #pyed.show()
@@ -230,3 +247,5 @@ if __name__ == "__main__":
 
 #    SectorDisplay2__()
 
+if __name__ == "__main__":
+    main()
