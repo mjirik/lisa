@@ -113,7 +113,7 @@ def vesselSegmentation(
     if(inputSigma > number):
         inputSigma = number
 
-    if biggestObjects is not True:
+    if biggestObjects == False and seeds == None:
         print('Nyni si levym nebo pravym tlacitkem mysi (klepnutim nebo tazenim) oznacte specificke oblasti k vraceni.')
         import py3DSeedEditor
         pyed = py3DSeedEditor.py3DSeedEditor(preparedData)
