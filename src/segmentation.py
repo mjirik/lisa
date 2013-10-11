@@ -65,18 +65,18 @@ Vessel segmentation z jater.
 """
 def vesselSegmentation(
         data,
-        segmentation=-1,
-        threshold=-1,
-        voxelsize_mm=[1,1,1],
-        inputSigma=-1,
-        dilationIterations=0,
-        dilationStructure=None,
-        nObj=1,
-        biggestObjects=True,
-        seeds=None,
-        interactivity=True,
-        binaryClosingIterations=1,
-        binaryOpeningIterations=1
+        segmentation = -1,
+        threshold = -1,
+        voxelsize_mm = [1,1,1],
+        inputSigma = -1,
+        dilationIterations = 0,
+        dilationStructure = None,
+        nObj = 1,
+        biggestObjects = True,
+        seeds = None,
+        interactivity = True,
+        binaryClosingIterations = 1,
+        binaryOpeningIterations = 1
         ):
 
     print('Pripravuji data...')
@@ -103,7 +103,6 @@ def vesselSegmentation(
 
     ## Ziskani datove oblasti jater (bud pouze jater nebo i jejich okoli - zalezi,
     ## jakym zpusobem bylo nalozeno s operaci dilatace dat).
-
     preparedData = data * (segmentation == 1)
     del(data)
     del(segmentation)
@@ -114,8 +113,7 @@ def vesselSegmentation(
     if(inputSigma > number):
         inputSigma = number
 
-    ## tohle zajišťuje, že se nebude vybírat uzel, když chceme maximální velkost
-    if biggestObjects is not True:
+    if biggestObjects == False and seeds == None:
         print('Nyni si levym nebo pravym tlacitkem mysi (klepnutim nebo tazenim) oznacte specificke oblasti k vraceni.')
         import py3DSeedEditor
         pyed = py3DSeedEditor.py3DSeedEditor(preparedData)
@@ -173,43 +171,58 @@ def getPriorityObjects(data, nObj, seeds = None):
     ## Uzivatel si nevybral specificke objekty.
     if (seeds == None) :
 
-        ## Doufejme, ze cerna oblast nebude mensi nez nektere objekty jater.
-        ## Nebo-li tady pocitam s tim, ze cerna oblast bude nejvetsi objekt.
-        returning = dataLabels == 1
-        for label in range ( 2, nObj + 1 ) :
-            returning = returning + dataLabels == label
+        ## Zjisteni nejvetsich objektu
+        arrayLabelsSum, arrayLabels = areaIndexes(dataLabels, length)
+        arrayLabelsSum, arrayLabels = selectSort(arrayLabelsSum, arrayLabels)
 
-        return returning
-        # Function exit
-
-    ## Uzivatel si vybral specificke objekty.
-    seed = []
-    stop = seeds[0].size ## Zjisteni poctu seedu.
-    for index in range(0, stop):
-        ## Tady se ukladaji labely na mistech, ve kterych kliknul uzivatel.
-        tmp = dataLabels[ seeds[0][index], seeds[1][index], seeds[2][index] ]
-        if tmp != 0: ## Tady opet pocitam s tim, ze oznaceni nulou pripada nejvetsimu objektu - cerne oblasti.
-            seed.append(tmp)
-
-    ## Pokud existuji vhodne labely, vytvori se nova data k vraceni.
-    ## Pokud ne, vrati se cela nafiltrovana data, ktera do funkce prisla (nedojde k vraceni specifickych objektu).
-    if len ( seed ) > 0:
-
-        ## Zbaveni se duplikatu.
-        seed = list( set ( seed ) )
-
-        ## Vytvoreni vystupu - postupne pricitani dat prislunych specif. labelu.
-        returning = dataLabels == seed[0]
-        for index in range ( 1, len ( seed ) ) :
-            returning = returning + dataLabels == seed[index]
+        returning = None
+        label = 0
+        stop = nObj - 1
+        while label <= stop :
+            if label >= len(arrayLabels):
+               break
+            if arrayLabels[label] != 0:
+               if returning == None:
+                  returning = dataLabels == arrayLabels[label]
+               else:
+                  returning = returning + dataLabels == arrayLabels[label]
+            else:
+               stop = stop + 1
+            label = label + 1
 
         return returning
         # Function exit
 
     else:
 
-        return data
-        # Function exit
+        ## Uzivatel si vybral specificke objekty.
+        seed = []
+        stop = seeds[0].size ## Zjisteni poctu seedu.
+        for index in range(0, stop):
+            ## Tady se ukladaji labely na mistech, ve kterych kliknul uzivatel.
+            tmp = dataLabels[ seeds[0][index], seeds[1][index], seeds[2][index] ]
+            if tmp != 0: ## Tady opet pocitam s tim, ze oznaceni nulou pripada cerne oblasti.
+                seed.append(tmp)
+
+        ## Pokud existuji vhodne labely, vytvori se nova data k vraceni.
+        ## Pokud ne, vrati se cela nafiltrovana data, ktera do funkce prisla (nedojde k vraceni specifickych objektu).
+        if len ( seed ) > 0:
+
+            ## Zbaveni se duplikatu.
+            seed = list( set ( seed ) )
+
+            ## Vytvoreni vystupu - postupne pricitani dat prislunych specif. labelu.
+            returning = dataLabels == seed[0]
+            for index in range ( 1, len ( seed ) ) :
+                returning = returning + dataLabels == seed[index]
+
+            return returning
+            # Function exit
+
+        else:
+
+            return data
+            # Function exit
 
 """
 Zjisti cetnosti jednotlivych oznacenych ploch (labeled areas)

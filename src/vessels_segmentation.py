@@ -71,8 +71,6 @@ if __name__ == "__main__":
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
-
-
     defaultoutputfile =  "vessels.pkl"
     if args.defaultoutputfile:
         args.outputfile = defaultoutputfile
