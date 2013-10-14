@@ -13,6 +13,7 @@ import skimage.exposure as skexp
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
+sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
 #import featurevector
 
 import logging
@@ -25,6 +26,7 @@ import scipy
 # ----------------- my scripts --------
 import misc
 import py3DSeedEditor
+import dcmreaddata
 import show3
 import vessel_cut
 import scipy.ndimage.measurements as scimeas
@@ -396,8 +398,29 @@ class Lesions:
 
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
-def main():
+    def overlay_test(self):
+        #dcr = dcmreaddata.DicomReader(r'c:\Data\kky\pro mechaniku 21.12.2012\52496602\Export0001\SR0000')
+        dcr = dcmreaddata.DicomReader(r'c:\Data\kky\pro mechaniku 21.12.2012\53009707\Export0000\SR0000')
+        data3d = dcr.get_3Ddata()
+        overlay = dcr.get_overlay()
+        winW = 350
+        winC = 50
+        minW = winC - (winW / 2.)
+        maxW = winC + (winW / 2.)
 
+        for key in overlay.keys():
+            overlay = overlay[key]
+
+            for i in range(overlay.shape[0]):
+                plt.figure(), plt.gray()
+                plt.subplot(121), plt.imshow(data3d[i,:,:], vmin=minW, vmax=maxW)
+                plt.subplot(122), plt.imshow(overlay[i,:,:])
+        plt.show()
+
+
+#----------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------
+def main():
     logger = logging.getLogger()
 
     logger.setLevel(logging.WARNING)
@@ -422,10 +445,10 @@ def main():
     #pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
     #pyed.show()
     tumory = Lesions()
+    tumory.overlay_test()
 
-    tumory.import_data(data)
-    tumory.automatic_localization()
-    # tumory.visualization()
+    #tumory.import_data(data)
+    #tumory.automatic_localization()
 
 #    SectorDisplay2__()
 
