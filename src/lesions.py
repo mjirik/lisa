@@ -13,6 +13,7 @@ import skimage.exposure as skexp
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
+sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
 #import featurevector
 
 import logging
@@ -25,6 +26,7 @@ import scipy
 # ----------------- my scripts --------
 import misc
 import py3DSeedEditor
+import dcmreaddata
 import show3
 import vessel_cut
 import scipy.ndimage.measurements as scimeas
@@ -35,6 +37,7 @@ import scipy.ndimage.morphology as scimorph
 from scipy.ndimage import generate_binary_structure
 import cv2
 from mayavi import mlab
+import pymorph as pm
 
 # version-dependent imports ---------------------------------
 from pkg_resources import parse_version
@@ -396,8 +399,47 @@ class Lesions:
 
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
-def main():
+    def overlay_test(self):
+        #filename = r'c:\Data\kky\pro mechaniku 21.12.2012\53009707\Export0000\SR0000'
+        #filename = r'c:\Data\kky\pro mechaniku 21.12.2012\52496602\Export0001\SR0000'
+        #filename = r'c:\Data\kky\pro mechaniku 21.12.2012\54559730\Export0000\SR0000'
+        filename = r'c:\Data\kky\pro mechaniku 21.12.2012\53596059\Export0000\SR0000'
+        #dcr = dcmreaddata.DicomReader(r'c:\Data\kky\pro mechaniku 21.12.2012\52496602\Export0001\SR0000')
+        dcr = dcmreaddata.DicomReader(filename)
+        data3d = dcr.get_3Ddata()
+        overlay = dcr.get_overlay()
+        winW = 350
+        winC = 50
+        minW = winC - (winW / 2.)
+        maxW = winC + (winW / 2.)
 
+        for key in overlay.keys():
+            overlay = overlay[key]
+
+            for i in range(overlay.shape[0]):
+                plt.figure(), plt.gray()
+                plt.subplot(121), plt.imshow(data3d[i,:,:], vmin=minW, vmax=maxW)
+                plt.subplot(122), plt.imshow(overlay[i,:,:])
+                cv2.imwrite(filename+'/overlay_%i.png'%(i), data3d[i,:,:])
+                #filled = scimorph.binary_dilation(overlay[i,:,:]>0, np.ones((3,3),dtype=np.bool))
+                #filled = scimorph.binary_fill_holes(filled, np.ones((3,3),dtype=np.bool))#pm.close_holes(overlay[i,:,:]>0, np.ones((3,3),dtype=np.bool))
+                #filled = scimorph.binary_erosion(filled, np.ones((3,3),dtype=np.bool))
+                #plt.imshow(filled)
+                #pts = plt.ginput(0)
+                #labels, nlabels = scimeas.label(filled)
+                #overlay[i,:,:] = np.zeros_like(filled)
+                #for pt in pts:
+                #    label = labels[pt[1],pt[0]]
+                #    overlay[i,:,:] += labels == label
+                #    print label
+                #plt.imshow(overlay[i,:,:])
+
+        plt.show()
+
+
+#----------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------
+def main():
     logger = logging.getLogger()
 
     logger.setLevel(logging.WARNING)
@@ -422,10 +464,10 @@ def main():
     #pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
     #pyed.show()
     tumory = Lesions()
+    tumory.overlay_test()
 
-    tumory.import_data(data)
-    tumory.automatic_localization()
-    # tumory.visualization()
+    #tumory.import_data(data)
+    #tumory.automatic_localization()
 
 #    SectorDisplay2__()
 
