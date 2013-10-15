@@ -1,17 +1,13 @@
-﻿#
-# -*- coding: utf-8 -*-
-"""
-================================================================================
-Name:        segmentation
-Purpose:     (CZE-ZCU-FAV-KKY) Liver medical project
-
-Author:      Pavel Volkovinsky
-Email:		 volkovinsky.pavel@gmail.com
-
-Created:     08.11.2012
-Copyright:   (c) Pavel Volkovinsky
-================================================================================
-"""
+﻿#-------------------------------------------------------------------------------
+# Name:        segmentation
+# Purpose:     ZCU - FAV
+#
+# Author:      Pavel Volkovinsky
+# Email:       volkovinsky.pavel@gmail.com
+#
+# Created:     08/11/2012
+# Copyright:   (c) Pavel Volkovinsky 2013
+#-------------------------------------------------------------------------------
 
 # TODO: Podpora "seeds" - vraceni specifickych objektu
 # TODO: Udelat lepe vraceni nejvetsich (nejvetsiho) objektu (muze vzniknout problem s cernou oblasti)
@@ -156,12 +152,16 @@ Vraceni N nejvetsich objektu.
     returns:
         data s nejvetsimi objekty
 """
-def getPriorityObjects(data, nObj, seeds = None):
+def getPriorityObjects(data, nObj = 1, seeds = None, debug = False):
 
     ## Oznaceni dat.
     ## labels - oznacena data.
     ## length - pocet rozdilnych oznaceni.
     dataLabels, length = scipy.ndimage.label(data)
+
+    if debug:
+       print 'data labels:'
+       print dataLabels
 
     ## Podminka maximalniho mnozstvi objektu.
     maxN = 250
@@ -171,38 +171,56 @@ def getPriorityObjects(data, nObj, seeds = None):
     ## Uzivatel si nevybral specificke objekty.
     if (seeds == None) :
 
-        ## Zjisteni nejvetsich objektu
+        ## Zjisteni nejvetsich objektu.
         arrayLabelsSum, arrayLabels = areaIndexes(dataLabels, length)
+        ## Serazeni labelu podle velikosti oznacenych dat (prvku / ploch).
         arrayLabelsSum, arrayLabels = selectSort(arrayLabelsSum, arrayLabels)
 
         returning = None
         label = 0
         stop = nObj - 1
+        ## Budeme postupne prochazet arrayLabels a postupne pridavat jednu oblast za druhou (od te nejvetsi - mimo nuloveho pozadi) dokud nebudeme mit dany pocet objektu (nObj).
         while label <= stop :
             if label >= len(arrayLabels):
-               break
+                break
             if arrayLabels[label] != 0:
-               if returning == None:
-                  returning = dataLabels == arrayLabels[label]
-               else:
-                  returning = returning + dataLabels == arrayLabels[label]
+                if returning == None:
+                    ## "Prvni" iterace
+                    returning = data * (dataLabels == arrayLabels[label])
+                else:
+                    ## Jakakoli dalsi iterace
+                    returning = returning + data * (dataLabels == arrayLabels[label])
             else:
-               stop = stop + 1
+                ## Musime prodlouzit hledany interval, protoze jsme narazili na nulove pozadi.
+                stop = stop + 1
             label = label + 1
+            if debug:
+                print (str(label - 1)) + ':'
+                print returning
 
         return returning
         # Function exit
 
+    ## Uzivatel si vybral specificke objekty.
     else:
 
-        ## Uzivatel si vybral specificke objekty.
+        ## Zalozeni pole pro ulozeni seedu
         seed = []
-        stop = seeds[0].size ## Zjisteni poctu seedu.
+        ## Zjisteni poctu seedu.
+        stop = seeds[0].size
+        tmpSeed = 0
         for index in range(0, stop):
             ## Tady se ukladaji labely na mistech, ve kterych kliknul uzivatel.
-            tmp = dataLabels[ seeds[0][index], seeds[1][index], seeds[2][index] ]
-            if tmp != 0: ## Tady opet pocitam s tim, ze oznaceni nulou pripada cerne oblasti.
-                seed.append(tmp)
+            if numpy.ndim(dataLabels) == 3:
+                ## 3D data.
+                tmpSeed = dataLabels[ seeds[0][index], seeds[1][index], seeds[2][index] ]
+            elif numpy.ndim(dataLabels) == 2:
+                ## 2D data.
+                tmpSeed = dataLabels[ seeds[0][index], seeds[1][index] ]
+            ## Tady opet pocitam s tim, ze oznaceni nulou pripada cerne oblasti (pozadi).
+            if tmpSeed != 0:
+                ## Pokud se nejedna o pozadi (cernou oblast), tak si seed zapamatuji
+                seed.append(tmpSeed)
 
         ## Pokud existuji vhodne labely, vytvori se nova data k vraceni.
         ## Pokud ne, vrati se cela nafiltrovana data, ktera do funkce prisla (nedojde k vraceni specifickych objektu).
@@ -210,11 +228,20 @@ def getPriorityObjects(data, nObj, seeds = None):
 
             ## Zbaveni se duplikatu.
             seed = list( set ( seed ) )
+            if debug:
+                print 'seed list:'
+                print seed
 
             ## Vytvoreni vystupu - postupne pricitani dat prislunych specif. labelu.
-            returning = dataLabels == seed[0]
-            for index in range ( 1, len ( seed ) ) :
-                returning = returning + dataLabels == seed[index]
+            returning = None
+            for index in range ( 0, len ( seed ) ) :
+                if returning == None:
+                    returning = data * (dataLabels == seed[index])
+                else:
+                    returning = returning + data * (dataLabels == seed[index])
+                if debug:
+                    print (str(index)) + ':'
+                    print returning
 
             return returning
             # Function exit
