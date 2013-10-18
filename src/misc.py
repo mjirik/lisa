@@ -35,7 +35,7 @@ def read_pkl_and_pklz(filename):
         fcontent = f.read()
         f.close()
     except Exception as e:
-        print "Warnint: Input gzip exception: ", e
+        print "Warning: Input gzip exception: ", e
         f = open(filename, 'rb')
         fcontent = f.read()
         f.close()
