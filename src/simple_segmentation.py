@@ -55,9 +55,13 @@ class SimpleSegmentation:
 	
 	#nalzení páteře
 	spine_finder = scipy.ndimage.filters.convolve((simple_seg).astype(np.int), KONV_MASK)
-	pyed = py3DSeedEditor.py3DSeedEditor(spine_finder>25)
-	#pyed.show()
-	simple_seg += ((spine_finder>25)*SPINE_ID);
+	#pyed = py3DSeedEditor.py3DSeedEditor(simple_seg)
+	#
+				
+	simple_seg += ((spine_finder>25)*SPINE_ID)
+	pyed = py3DSeedEditor.py3DSeedEditor(simple_seg)
+	pyed.show()	
+
 	return simple_seg
 
         
