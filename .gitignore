@@ -42,6 +42,10 @@ src/uiThreshold.py.orig
 sample_data
 tmp
 
+experiments/20130812_liver_volumetry_sample.yaml
+
+
+
 # Data
 *.pkl
 *.pklz
