@@ -47,6 +47,7 @@ class PycutTest(unittest.TestCase):
         #x_noisy = x + np.random.normal(0, 0.6, size=x.shape)
         return data
 
+    @unittest.skip("ITK has only 2D skeleton")
     def test_simple_itk(self):
         import SimpleITK as sitk
         data = self.generate_data()
@@ -55,6 +56,7 @@ class PycutTest(unittest.TestCase):
 
 
 
+    @unittest.skip("ITK has only 2D skeleton")
     def test_itk_skeleton_3d(self):
         """
         This is not working. ITK has 2D thinning algorithm only. :-(

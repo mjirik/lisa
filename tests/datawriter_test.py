@@ -6,6 +6,7 @@
 # import funkcí z jiného adresáře
 import sys
 import os.path
+import os
 import copy
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
@@ -45,6 +46,10 @@ class DicomWriterTest(unittest.TestCase):
         dr = dreader.DataReader()
         newdata, newmetadata = dr.Get3DData(filename)
 
+
+        print  "meta ", metadata
+        print  "new meta ", newmetadata
+
         # hack with -1024, because of wrong data reading
         self. assertEqual(data[10,10,10], newdata[10,10,10])
         self. assertEqual(data[2,10,1], newdata[2,10,1])
@@ -52,6 +57,7 @@ class DicomWriterTest(unittest.TestCase):
 # @TODO there is a bug in SimpleITK. slice voxel size must be same
         #self. assertEqual(metadata['voxelsize_mm'][1], newmetadata['voxelsize_mm'][1])
         self. assertEqual(metadata['voxelsize_mm'][2], newmetadata['voxelsize_mm'][2])
+        os.remove(filename)
 
 
 if __name__ == "__main__":

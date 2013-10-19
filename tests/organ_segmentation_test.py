@@ -195,7 +195,7 @@ class OrganSegmentationTest(unittest.TestCase):
         #dcmdir = os.path.join(path_to_script,'./../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
 # data
         img3d = np.random.rand(32,64,64) * 5
-        img3d[4:24,12:32,5:25,] = img3d [4:24, 12:32,5:25] + 15
+        img3d[4:24,12:32,5:25,] = img3d [4:24, 12:32,5:25] + 25
 
 #seeds
         seeds = np.zeros([32, 64, 64], np.int8)

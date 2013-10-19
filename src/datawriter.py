@@ -26,7 +26,7 @@ class DataWriter:
             #imageType = itk.Image[pixelType, 2]
             dim = sitk.GetImageFromArray(data3d)
             vsz = mtd['voxelsize_mm']
-            dim.SetSpacing([vsz[2], vsz[0], vsz[1]])
+            dim.SetSpacing([vsz[0], vsz[2], vsz[1]])
             sitk.WriteImage(dim,path)
 
 
