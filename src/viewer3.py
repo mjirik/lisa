@@ -29,11 +29,17 @@ import py3DSeedEditor
 import show3
 import qmisc
 
-
+# inicializace proměnných 
 plane = vtk.vtkPlane()
 normal = None
 coordinates = None
 planew = None
+iren = vtk.vtkRenderWindowInteractor()
+renWin = vtk.vtkRenderWindow()
+surface = vtk.vtkDataSetSurfaceFilter()
+app = QApplication(sys.argv)
+window = QtGui.QWidget()
+
 
 
 class normal_and_coordinates():
@@ -68,8 +74,9 @@ class QVTKViewer():
         self.segmentation = segmentation
         self.voxelsize_mm = voxelsize_mm
     """
-    def __init__(self, vtk_filename):
-        self.vtk_filename = vtk_filename
+    def __init__(self, inputfile, mode):
+        self.vtk_filename = inputfile
+        self.mode = mode
 
         pass
 ##------------------------------------------------------------------------------------------
@@ -78,6 +85,9 @@ class QVTKViewer():
         segmentation = segmentation[:,::-1,:]
         print("Generuji data...")
         mesh_data = seg2fem.gen_mesh_from_voxels_mc(segmentation, voxelsize_mm*degrad)
+        if True:
+            for x in xrange (10):
+                mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
         vtk_file = "mesh_new.vtk"
         mesh_data.write(vtk_file)
         print("Done")
@@ -93,7 +103,7 @@ class QVTKViewer():
 
     """
 ##------------------------------------------------------------------------------------------
-    def Plane():
+    def Plane(self):
         planeWidget = vtk.vtkImplicitPlaneWidget() 
         planeWidget.SetInteractor(iren) 
         planeWidget.SetPlaceFactor(1.5)
@@ -103,35 +113,35 @@ class QVTKViewer():
         planeWidget.OutsideBoundsOff()
         planeWidget.ScaleEnabledOff()
         planeWidget.OutlineTranslationOff()
-        planeWidget.AddObserver("InteractionEvent", Cutter)
+        planeWidget.AddObserver("InteractionEvent", self.Cutter)
             
         planeWidget.On()
-        window.setLayout(grid)
+        #window.setLayout(grid)
 
         self.planew = planeWidget
             
-        window.show()
-        iren.Initialize()
-        renWin.Render()
-        iren.Start()
+        #window.show()
+        #iren.Initialize()
+        #renWin.Render()
+        #iren.Start()
 ##------------------------------------------------------------------------------------------
 
-    def callback(button):
+    def callback(self,button):
         print button
             
-    def Cutter(obj, event):
+    def Cutter(self,obj, event):
         global plane, selectActor
         obj.GetPlane(plane)
 
-    def liver_view():
+    def liver_view(self):
         print('Zobrazuji liver')
         vessel_cut.View('liver')
 
-    def vein_view():
+    def vein_view(self):
         print('Zobrazuji vein')
         vessel_cut.View('porta')
 
-    def liver_cut():
+    def liver_cut(self):
         global normal
         global coordinates
         normal = self.planew.GetNormal()
@@ -139,47 +149,64 @@ class QVTKViewer():
         print(normal)
         print(coordinates)
 ##------------------------------------------------------------------------------------------
-    def buttons():
+    def buttons(self,window,grid):
+        '''
+        window.resize(80,55)
+        layout = QtGui.QVBoxLayout()
+        buttons = QtGui.QDialogButtonBox(window)
+        buttons.setGeometry(QtCore.QRect(0, 0, 100, 100))
+        buttons.setOrientation(QtCore.Qt.Vertical)
+        buttons.setStandardButtons(QtGui.QDialogButtonBox.Close|QtGui.QDialogButtonBox.Ok)
+        buttons.setObjectName(("buttonBox"))
+        grid.addWidget(buttons)
+        '''     
         # Button liver
         button_liver = QtGui.QPushButton()
         button_liver.setText(unicode('liver'))
         grid.addWidget(button_liver, 1, 0)
-        window.connect(button_liver, QtCore.SIGNAL("clicked()"),(lambda y:lambda: callback(y) )('Stisknuto : liver'))
-        button_liver.clicked.connect(liver_view)
+        window.connect(button_liver, QtCore.SIGNAL("clicked()"),(lambda y:lambda: self.callback(y) )('Stisknuto : liver'))
+        #button_liver.clicked.connect(self.liver_view)
         button_liver.show()
 
         # Button vein
         button_vein = QtGui.QPushButton()
         button_vein.setText(unicode('vein'))
         grid.addWidget(button_vein, 2, 0)
-        window.connect(button_vein, QtCore.SIGNAL("clicked()"),(lambda y:lambda: callback(y) )('Stisknuto : vein'))
-        button_vein.clicked.connect(vein_view)
+        window.connect(button_vein, QtCore.SIGNAL("clicked()"),(lambda y:lambda: self.callback(y) )('Stisknuto : vein'))
+        #button_vein.clicked.connect(self.vein_view)
         button_vein.show()
         
         # Button plane
         button_plane = QtGui.QPushButton()
         button_plane.setText(unicode('plane'))
         grid.addWidget(button_plane, 3, 0)
-        window.connect(button_plane, QtCore.SIGNAL("clicked()"),(lambda y:lambda: callback(y) )('Stisknuto : plane'))
-        button_plane.clicked.connect(Plane)
+        window.connect(button_plane, QtCore.SIGNAL("clicked()"),(lambda y:lambda: self.callback(y) )('Stisknuto : plane'))
+        button_plane.clicked.connect(self.Plane)
         button_plane.show()
 
         # Button cut
         button_cut = QtGui.QPushButton()
         button_cut.setText(unicode('cut'))
         grid.addWidget(button_cut, 4, 0)
-        window.connect(button_cut, QtCore.SIGNAL("clicked()"),(lambda y:lambda: callback(y) )('Stisknuto : cut'))
-        button_cut.clicked.connect(liver_cut)
+        window.connect(button_cut, QtCore.SIGNAL("clicked()"),(lambda y:lambda: self.callback(y) )('Stisknuto : cut'))
+        #button_cut.clicked.connect(liver_cut)
         button_cut.show()
+        
+        #iren.Initialize()
+        window.show()
+        renWin.Render()
+        iren.Start()
+        # vypina okno View
+        renWin.Finalize()
+
+        
 ##-----------------------------------------------------------------------------------------    
-    def View(self,vtk_filename):
+    def View(self,vtk_filename,accept):
 
         # Renderer and InteractionStyle
-        ren = vtk.vtkRenderer()
-        renWin = vtk.vtkRenderWindow()
+        ren = vtk.vtkRenderer()	
         renWin.AddRenderer(ren)
 
-        iren = vtk.vtkRenderWindowInteractor()
         iren.SetRenderWindow(renWin)
         iren.SetInteractorStyle(MyInteractorStyle())
         
@@ -189,7 +216,6 @@ class QVTKViewer():
         reader.Update()
 
         # VTK surface
-        surface=vtk.vtkDataSetSurfaceFilter()
         surface.SetInput(reader.GetOutput())
         surface.Update()
 
@@ -209,7 +235,7 @@ class QVTKViewer():
         clipActor.SetMapper(clipMapper)
         clipActor.GetProperty().SetColor(1.0,0.0,0.0)
         clipActor.SetBackfaceProperty(backProp)
-
+        
         cutEdges = vtk.vtkCutter()
         cutEdges.SetInput(surface.GetOutput())
         cutEdges.SetCutFunction(plane)
@@ -241,6 +267,7 @@ class QVTKViewer():
         actor = vtk.vtkActor()
         actor.SetMapper(mapper)
         actor.GetProperty().EdgeVisibilityOn()
+        # nastavi barvu linek UnstructuredGrid
         actor.GetProperty().SetColor(0.0,0.0,1.0)
         #sirka linek u objektu 
         actor.GetProperty().SetLineWidth(0.1)
@@ -249,17 +276,13 @@ class QVTKViewer():
         #ren.AddActor(cutActor)
         ren.AddActor(actor)
 
-        window = QtGui.QWidget()
-        grid = QtGui.QGridLayout()
-
-
-        window.setLayout(grid)
-        #window.show()
-      
-        # set interaction and Interaction style
-        iren.Initialize()
-        renWin.Render()
-        iren.Start()
+        # pri rezani se nezobrazi okno protoze iren se inicializuje pouze v buttons, nutno
+        # ho inicializovat i tady
+        if accept:  
+            iren.Initialize()
+            renWin.Render()
+            iren.Start()
+            renWin.Finalize()
 ##------------------------------------------------------------------------------------------
 
 
@@ -287,28 +310,52 @@ help = {
     
 def main():
     parser = argparse.ArgumentParser(description='Simple VTK Viewer')
-    parser.add_argument('-pi','--picklefile', default=None,
+    parser.add_argument('-pkl','--picklefile', default=None,
                       help='File as .pkl')
     parser.add_argument('-vtk','--vtkfile', default=None,
                       help='File as .vtk')
+    parser.add_argument('-mode','--mode', default=None,
+                      help='Mode for construction plane of resection')
     args = parser.parse_args()
 
     #if args.picklefile is None:
     #   raise IOError('No input data!')
 
-    app = QApplication(sys.argv)
-    # odkomentovat dva řádky
+    
+    # vytvoreni okna
+    window = QtGui.QWidget()
+    grid = QtGui.QGridLayout()
+    window.setWindowTitle("3D liver");
+    window.setLayout(grid)
+    # vytvoreni vieweru a generovani dat
+    viewer = QVTKViewer(args.picklefile,args.mode)
+    accept = False
+    
     if args.picklefile:
-        viewer = QVTKViewer(args.picklefile)
         data = misc.obj_from_file(args.picklefile, filetype = 'pickle')
         segmentation = data['segmentation']
-        #viewer = QVTKViewer(data['segmentation'], data['voxelsize_mm'], data['slab'])
         mesh = viewer.generate_mesh(segmentation)
-        viewer.View(mesh)
+        
+        if args.mode == 'View':
+            accept = True
+            viewer.View(mesh,accept)
+        if args.mode == 'Cut':
+            #viewer = QVTKViewer(data['segmentation'], data['voxelsize_mm'], data['slab'])
+            accept = False
+            viewer.View(mesh,accept)
+            viewer.buttons(window,grid)
                         
     if args.vtkfile:
-        viewer = QVTKViewer(args.vtkfile)
-        viewer.View(args.vtkfile)
+        if args.mode == 'View':
+            accept = True
+            viewer.View(args.vtkfile,accept)
+        if args.mode == 'Cut':
+            accept = False
+            #viewer = QVTKViewer(data['segmentation'], data['voxelsize_mm'], data['slab'])
+            viewer.View(args.vtkfile,accept)
+            viewer.buttons(window,grid)
+
+    
     app.exec_()
     sys.exit(app.exec_())
     #print viewer.getPlane()
