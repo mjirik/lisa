@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-Simple VTK Viewer.
+'''
+VTK Viewer pro 3D zobrazeni
 
-Example:
+# program mozne spustit ve dvou rezimech View a Cut
+# Vstupní soubor může být soubor pickle nebo už vygenerovaný vtk
+# Priklady :
+# viewer3.py -vtk mesh_new.vtk -mode 'View'
+# viewer3.py -vtk mesh_new.vtk -mode 'Cut'  
+'''
 
-$ viewer.py -f head.vtk
-"""
 from optparse import OptionParser
 import sys
 import vessel_cut
@@ -53,16 +56,14 @@ class normal_and_coordinates():
 
         
 class QVTKViewer():
-    """
-    Simple VTK Viewer.
+    '''
     QVTKViewer(segmentation)
     QVTKViewer(segmentation, voxelsize_mm) # zobrazí vše, co je větší než nula
     QVTKViewer(segmentation, voxelsize_mm, slab) # umožňuje přepínat mezi více rovinami
 
     qv = QVTKViewer(segmentation, voxelsize_mm, slab, mode='select_plane')
     point = qv.getPlane()
-    """
-    """
+    
     #def __init__(self, inputdata, voxelsize_mm=None, slab=None, mode='view', callbackfcn=None):
         self.inputdata = inputdata
         self.voxelsize_mm = voxelsize_mm
@@ -73,7 +74,7 @@ class QVTKViewer():
     #def __init__(self,segmentation,voxelsize_mm):
         self.segmentation = segmentation
         self.voxelsize_mm = voxelsize_mm
-    """
+    '''
     def __init__(self, inputfile, mode):
         self.vtk_filename = inputfile
         self.mode = mode
@@ -93,7 +94,7 @@ class QVTKViewer():
         print("Done")
         return vtk_file
 ##------------------------------------------------------------------------------------------
-    """
+    '''
     Args:
         inputdata: 3D numpy array 
         voxelsize_mm: Array with voxel dimensions (default=None)
@@ -101,7 +102,7 @@ class QVTKViewer():
         mode: 'view' or 'select_plane'
         callbackfcn: function which may affect segmentation
 
-    """
+    '''
 ##------------------------------------------------------------------------------------------
     def Plane(self):
         planeWidget = vtk.vtkImplicitPlaneWidget() 
@@ -159,7 +160,8 @@ class QVTKViewer():
         buttons.setStandardButtons(QtGui.QDialogButtonBox.Close|QtGui.QDialogButtonBox.Ok)
         buttons.setObjectName(("buttonBox"))
         grid.addWidget(buttons)
-        '''     
+        '''
+        '''
         # Button liver
         button_liver = QtGui.QPushButton()
         button_liver.setText(unicode('liver'))
@@ -175,7 +177,7 @@ class QVTKViewer():
         window.connect(button_vein, QtCore.SIGNAL("clicked()"),(lambda y:lambda: self.callback(y) )('Stisknuto : vein'))
         #button_vein.clicked.connect(self.vein_view)
         button_vein.show()
-        
+        '''
         # Button plane
         button_plane = QtGui.QPushButton()
         button_plane.setText(unicode('plane'))
@@ -189,7 +191,7 @@ class QVTKViewer():
         button_cut.setText(unicode('cut'))
         grid.addWidget(button_cut, 4, 0)
         window.connect(button_cut, QtCore.SIGNAL("clicked()"),(lambda y:lambda: self.callback(y) )('Stisknuto : cut'))
-        #button_cut.clicked.connect(liver_cut)
+        button_cut.clicked.connect(self.liver_cut)
         button_cut.show()
         
         #iren.Initialize()
