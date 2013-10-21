@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 import datareader
 import misc
+import qmisc
 import py3DSeedEditor
 
 
@@ -30,8 +31,9 @@ def show(data3d_a_path, data3d_b_path, ourSegmentation):
     data3d_b, metadata_b = reader.Get3DData(data3d_b_path)
 
     if ourSegmentation != None:
-        data_our = misc.obj_from_file(ourSegmentation, 'piclke')
-        data3d_our = data_our['segmentation']
+        data_our = misc.obj_from_file(ourSegmentation, 'pickle')
+        #data3d_our = data_our['segmentation']
+        data3d_our = qmisc.uncrop(data_our['segmentation'], data_our['crinfo'],data3d_a.shape)
 #@TODO dodělat uncrop  a podobné kratochvíle
 
     #data3d_b_path = os.path.join(inputdata['basedir'], inputdata['data'][i]['ourseg'])
@@ -68,15 +70,13 @@ def main():
     data3d_a_path = os.path.join(path_to_script, '../../../data/medical/data_orig/sliver07/training-part1/liver-orig001.mhd')
     data3d_b_path = os.path.join(path_to_script, '../../../data/medical/data_orig/sliver07/training-part1/liver-seg001.mhd')
     parser = argparse.ArgumentParser(
-            description='Visualization')
+            description='Visualization of sliver data and our segmentation')
     parser.add_argument('-sd', '--sliverData',
-            help='input data', default=data3d_a_path)
+            help='path to input sliver data', default=data3d_a_path)
     parser.add_argument('-ss', '--sliverSegmentation',
-            help='input segmentation', default=data3d_b_path)
+            help='path to input sliver segmentation', default=data3d_b_path)
     parser.add_argument('-os', '--ourSegmentation',
-            help='input segmentation', default=None)
-    parser.add_argument('-v', '--visualization',  action='store_true',
-            help='Turn on visualization', default=False)
+            help='path to out pklz or pkl segmentation', default=None)
     args = parser.parse_args()
 
     show(args.sliverData, args.sliverSegmentation, args.ourSegmentation)
