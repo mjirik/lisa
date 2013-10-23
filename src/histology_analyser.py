@@ -22,8 +22,13 @@ import numpy as np
 import misc
 import datareader
 import SimpleITK as sitk
-import seed_editor_qt as seqt
 import scipy.ndimage
+from PyQt4.QtGui import QApplication
+
+import seed_editor_qt as seqt
+import skelet3d
+import segmentation
+
 
 GAUSSIAN_SIGMA = 1
 
@@ -38,25 +43,52 @@ class HistologyAnalyser:
 
     def run(self):
         import pdb; pdb.set_trace()
-        self.preprocessing()
+        #self.preprocessing()
 
-        self.data3d_thri = self.muxImage(
-                self.data3d_thr2.astype(np.uint16),
-                metadata
-                )
-        sitk.Show(self.data3d_thri)
+        data3d_thr = segmentation.vesselSegmentation(
+            self.data3d,
+            segmentation = np.ones(self.data3d.shape, dtype='int8'),
+            #segmentation = oseg.orig_scale_segmentation,
+            threshold = -1,
+            inputSigma = 0.15,
+            dilationIterations = 2,
+            nObj = 1,
+            biggestObjects = False,
+#        dataFiltering = True,
+            interactivity = True,
+            binaryClosingIterations = 5,
+            binaryOpeningIterations = 1)
+        #self.data3d_thri = self.muxImage(
+        #        self.data3d_thr2.astype(np.uint16),
+        #        metadata
+        #        )
+        #sitk.Show(self.data3d_thri)
 
-        self.data3di = self.muxImage(
-                self.data3d.astype(np.uint16),
-                metadata
-                )
-        sitk.Show(self.data3di)
+        #self.data3di = self.muxImage(
+        #        self.data3d.astype(np.uint16),
+        #        metadata
+        #        )
+        #sitk.Show(self.data3di)
 
-
-
-        dataskel = sitk.BinaryThinning(self.data3d_thri)
-        sitk.Show(dataskel * 100)
         import pdb; pdb.set_trace()
+        app = QApplication(sys.argv)
+
+        pyed = seqt.QTSeedEditor(
+                data3d,
+                contours=data3d_thr.astype(np.int8)
+                )
+        #app.exec_()
+
+        import pdb; pdb.set_trace()
+        data3d_skel = skelet3d.skelet3d(data3d_thr)
+
+        pyed = seqt.QTSeedEditor(
+                data3d, 
+                contours=data3d_thr.astype(np.int8),
+                seeds=data3d_skel
+                )
+        app.exec_()
+
         #import itk
         #itk.
 
@@ -75,6 +107,7 @@ class HistologyAnalyser:
 
         sitk.Show(filtered * 10)
         import pdb; pdb.set_trace()
+
 
     def preprocessing(self):
         self.data3d = scipy.ndimage.filters.gaussian_filter(
