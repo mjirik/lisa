@@ -42,6 +42,9 @@ renWin = vtk.vtkRenderWindow()
 surface = vtk.vtkDataSetSurfaceFilter()
 app = QApplication(sys.argv)
 window = QtGui.QWidget()
+stisk = False
+
+
 
 
 
@@ -120,6 +123,7 @@ class QVTKViewer():
         #window.setLayout(grid)
 
         self.planew = planeWidget
+        self.stisk = 'True'
             
         #window.show()
         #iren.Initialize()
@@ -145,10 +149,15 @@ class QVTKViewer():
     def liver_cut(self):
         global normal
         global coordinates
-        normal = self.planew.GetNormal()
-        coordinates = self.planew.GetOrigin()
-        print(normal)
-        print(coordinates)
+        # pokud bylo stisknuto tlacitko Cut pred Plane, vypise chybu
+        try:
+            normal = self.planew.GetNormal()
+            coordinates = self.planew.GetOrigin()
+            print(normal)
+            print(coordinates)
+        except AttributeError:
+            print('Neexistuje rovina rezu - Plane')
+            
 ##------------------------------------------------------------------------------------------
     def buttons(self,window,grid):
         '''
@@ -190,8 +199,8 @@ class QVTKViewer():
         button_cut = QtGui.QPushButton()
         button_cut.setText(unicode('cut'))
         grid.addWidget(button_cut, 4, 0)
-        window.connect(button_cut, QtCore.SIGNAL("clicked()"),(lambda y:lambda: self.callback(y) )('Stisknuto : cut'))
         button_cut.clicked.connect(self.liver_cut)
+  
         button_cut.show()
         
         #iren.Initialize()
