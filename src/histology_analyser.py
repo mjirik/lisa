@@ -94,10 +94,12 @@ class HistologyAnalyser:
         import pdb; pdb.set_trace()
         mocnost = scipy.ndimage.filters.convolve(data3d_skel, kernel)
         nodes = ((mocnost*data3d_skel>3).astype(np.int8))
+        data3d_skel[nodes==1] = 2
 # @TODO dokončit vizualizaci uzlů
         import pdb; pdb.set_trace()
         pyed = seqt.QTSeedEditor(
                 data3d,
+                seeds=data3d_skel,
                 contours=data3d_thr.astype(np.int8)
                 )
 
