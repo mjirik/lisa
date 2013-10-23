@@ -70,7 +70,6 @@ class HistologyAnalyser:
         #        )
         #sitk.Show(self.data3di)
 
-        import pdb; pdb.set_trace()
         app = QApplication(sys.argv)
 
         pyed = seqt.QTSeedEditor(
@@ -79,7 +78,6 @@ class HistologyAnalyser:
                 )
         #app.exec_()
 
-        import pdb; pdb.set_trace()
         data3d_skel = skelet3d.skelet3d(data3d_thr)
 
         pyed = seqt.QTSeedEditor(
@@ -87,8 +85,24 @@ class HistologyAnalyser:
                 contours=data3d_thr.astype(np.int8),
                 seeds=data3d_skel
                 )
-        app.exec_()
+        #app.exec_()
 
+
+# -----------------  get nodes --------------------------
+        kernel = np.ones([3,3,3])
+
+        import pdb; pdb.set_trace()
+        mocnost = scipy.ndimage.filters.convolve(data3d_skel, kernel)
+        nodes = ((mocnost*data3d_skel>3).astype(np.int8))
+# @TODO dokončit vizualizaci uzlů
+        import pdb; pdb.set_trace()
+        pyed = seqt.QTSeedEditor(
+                data3d,
+                contours=data3d_thr.astype(np.int8)
+                )
+
+
+        import pdb; pdb.set_trace()
         #import itk
         #itk.
 
