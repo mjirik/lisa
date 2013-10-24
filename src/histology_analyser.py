@@ -19,6 +19,7 @@ import argparse
 
 
 import numpy as np
+import scipy.ndimage
 import misc
 import datareader
 import SimpleITK as sitk
@@ -72,10 +73,6 @@ class HistologyAnalyser:
 
         app = QApplication(sys.argv)
 
-        pyed = seqt.QTSeedEditor(
-                data3d,
-                contours=data3d_thr.astype(np.int8)
-                )
         #app.exec_()
 
         data3d_skel = skelet3d.skelet3d(data3d_thr)
@@ -83,48 +80,23 @@ class HistologyAnalyser:
         pyed = seqt.QTSeedEditor(
                 data3d, 
                 contours=data3d_thr.astype(np.int8),
-                seeds=data3d_skel
+                seeds=data3d_skel.astype(np.int8)
                 )
         #app.exec_()
-
-
-# -----------------  get nodes --------------------------
-        kernel = np.ones([3,3,3])
-
+        data3d_nodes = skeleton_nodes(data3d_skel)
+        skeleton_analysis(data3d_nodes)
+        data3d_nodes[data3d_nodes==3] = 2
+        print "skelet with nodes"
         import pdb; pdb.set_trace()
-        mocnost = scipy.ndimage.filters.convolve(data3d_skel, kernel)
-        nodes = ((mocnost*data3d_skel>3).astype(np.int8))
-        data3d_skel[nodes==1] = 2
-# @TODO dokončit vizualizaci uzlů
-        import pdb; pdb.set_trace()
+
         pyed = seqt.QTSeedEditor(
                 data3d,
-                seeds=data3d_skel,
+                seeds=(data3d_nodes).astype(np.int8),
                 contours=data3d_thr.astype(np.int8)
                 )
 
 
         import pdb; pdb.set_trace()
-        #import itk
-        #itk.
-
-        #self.output = sitk.GetArrayFromImage(dataskel)
-
-#   konluce
-        dataskel_nd = sitk.GetArrayFromImage(dataskel)
-        conv_kernel = np.ones([3,3,3], dtype=np.int16)
-        filtered_nd = scipy.ndimage.filters.convolve(dataskel_nd, conv_kernel)
-        filtered_nd = filtered_nd[dataskel_nd==1]
-
-
-        #cf = sitk.ConvolutionImageFilter()
-        #filtered = cf.Execute(dataskel, conv_kernel)
-        filtered = sitk.GetImageFromArray(filtered_nd.astype(np.int16))
-
-        sitk.Show(filtered * 10)
-        import pdb; pdb.set_trace()
-
-
     def preprocessing(self):
         self.data3d = scipy.ndimage.filters.gaussian_filter(
                 self.data3d,
@@ -162,10 +134,50 @@ class HistologyAnalyser:
         app.exec_()
 
 
+def skeleton_nodes(data3d_skel):
+    """
+    Return 3d ndarray where 0 is background, 1 is skeleton, 2 is node 
+    and 3 is terminal node
+    
+    """
+
+# -----------------  get nodes --------------------------
+    kernel = np.ones([3,3,3])
+
+    mocnost = scipy.ndimage.filters.convolve(data3d_skel, kernel)
+    nodes = ((mocnost*data3d_skel>3).astype(np.int8))
+    terminals = (\
+            ((mocnost*data3d_skel) == 2)|((mocnost*data3d_skel) == 1) \
+            ).astype(np.int8)
+    data3d_skel[nodes==1] = 2
+    data3d_skel[terminals==1] = 3
+
+    return data3d_skel
+    
+def element_analysis(sklabel, el_number):
+    element = (sklabel == el_number)
+    dilat_element = scipy.ndimage.morphology.binary_dilation(element)
+# element dilate * sklabel[sklabel < 0]
+
+    pass
+
+def connection_analysis(sklabel, el_number):
+    element = (sklabel == el_number)
+# element dilate * sklabel[sklabel < 0]
+    pass
+
+def skeleton_analysis(skelet_nodes, volume_data = None):
+    sklabel_edg, len_edg = scipy.ndimage.label(skelet_nodes == 1)
+    sklabel_nod, len_nod = scipy.ndimage.label(skelet_nodes > 1 )
+
+    sklabel = sklabel_edg - sklabel_nod
+    
+    import pdb; pdb.set_trace()
 
 
 
 if __name__ == "__main__":
+    import misc
     logger = logging.getLogger()
 
     logger.setLevel(logging.WARNING)
