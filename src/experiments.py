@@ -51,10 +51,24 @@ def get_subdirs(dirpath, wildcard = '*', outputfile = 'experiment_data.yaml'):
     misc.obj_to_file(dirlist, 'experiment_data.yaml','yaml')
     return dirlist
 
-
-
-
-
+## Funkce vrati cast 3d dat. Funkce ma tri parametry :
+## 	data - puvodni 3d data
+##  sp - vektor udavajici zacatek oblasti, kterou chceme nacist napr [10,20,2]
+##       Poradi : [z,y,x]
+##  area - (area size) udava velikost oblasti, kterou chceme vratit. Opet vektor
+##   		 stejne jako u sp
+## Funkce kontroluje prekroceni velikosti obrazku.
+def getArea(data,sp,area):
+		if((sp[0]+ area[0]) > data.shape[0]):
+				sp[0] = data.shape[0] - area[0] - 1
+				print "Funkce getArea() : Byla prekrocena velikost dat v ose Z"
+		if((sp[1]+ area[1]) > data.shape[1]):
+				sp[1] = data.shape[1] - area[0] - 1
+				print "Funkce getArea() : Byla prekrocena velikost dat v ose Y"
+		if((sp[2]+ area[2]) > data.shape[2]):
+				sp[2] = data.shape[2] - area[0] - 1
+				print "Funkce getArea() : Byla prekrocena velikost dat v ose X"
+		return data[sp[0]:sp[0]+area[0], sp[1]:sp[1]+area[1], sp[2]:sp[2]+area[2]]
 
 
 if __name__ == "__main__":
