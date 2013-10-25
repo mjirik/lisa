@@ -75,6 +75,7 @@ class HistologyAnalyser:
 
         #app.exec_()
 
+        print "skelet"
         data3d_skel = skelet3d.skelet3d(data3d_thr)
 
         pyed = seqt.QTSeedEditor(
@@ -83,7 +84,7 @@ class HistologyAnalyser:
                 seeds=data3d_skel.astype(np.int8)
                 )
         #app.exec_()
-        data3d_nodes = skeleton_nodes(data3d_skel)
+        data3d_nodes = skeleton_nodes(data3d_skel, data3d_thr)
         skeleton_analysis(data3d_nodes)
         data3d_nodes[data3d_nodes==3] = 2
         print "skelet with nodes"
@@ -134,21 +135,53 @@ class HistologyAnalyser:
         app.exec_()
 
 
-def skeleton_nodes(data3d_skel):
+def skeleton_nodes(data3d_skel, data3d_thr):
     """
     Return 3d ndarray where 0 is background, 1 is skeleton, 2 is node 
     and 3 is terminal node
     
     """
+    # @TODO  remove data3d_thr
 
 # -----------------  get nodes --------------------------
     kernel = np.ones([3,3,3])
+    #kernel[0,0,0]=0
+    #kernel[0,0,2]=0
+    #kernel[0,2,0]=0
+    #kernel[0,2,2]=0
+    #kernel[2,0,0]=0
+    #kernel[2,0,2]=0
+    #kernel[2,2,0]=0
+    #kernel[2,2,2]=0
 
-    mocnost = scipy.ndimage.filters.convolve(data3d_skel, kernel)
-    nodes = ((mocnost*data3d_skel>3).astype(np.int8))
-    terminals = (\
-            ((mocnost*data3d_skel) == 2)|((mocnost*data3d_skel) == 1) \
-            ).astype(np.int8)
+    #kernel = np.zeros([3,3,3])
+    #kernel[1,1,:] = 1
+    #kernel[1,:,1] = 1
+    #kernel[:,1,1] = 1
+
+    #data3d_skel = np.zeros([40,40,40])
+    #data3d_skel[10,10,10] = 1
+    #data3d_skel[10,11,10] = 1
+    #data3d_skel[10,12,10] = 1
+    #data3d_skel = data3d_skel.astype(np.int8)
+
+
+    mocnost = scipy.ndimage.filters.convolve(data3d_skel, kernel) * data3d_skel
+    #import pdb; pdb.set_trace()
+
+    nodes = (mocnost > 3).astype(np.int8)
+    terminals = (mocnost == 2).astype(np.int8)
+
+    nt = nodes - terminals
+
+    pyed = seqt.QTSeedEditor(
+            mocnost, 
+            contours=data3d_thr.astype(np.int8),
+            seeds=nt
+            )
+
+    import pdb; pdb.set_trace()
+
     data3d_skel[nodes==1] = 2
     data3d_skel[terminals==1] = 3
 
