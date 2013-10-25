@@ -190,6 +190,11 @@ def skeleton_nodes(data3d_skel, data3d_thr):
 def element_analysis(sklabel, el_number):
     element = (sklabel == el_number)
     dilat_element = scipy.ndimage.morphology.binary_dilation(element)
+
+    print 'element_analysis'
+
+    import pdb; pdb.set_trace()
+
 # element dilate * sklabel[sklabel < 0]
 
     pass
@@ -200,11 +205,18 @@ def connection_analysis(sklabel, el_number):
     pass
 
 def skeleton_analysis(skelet_nodes, volume_data = None):
-    sklabel_edg, len_edg = scipy.ndimage.label(skelet_nodes == 1)
-    sklabel_nod, len_nod = scipy.ndimage.label(skelet_nodes > 1 )
+    sklabel_edg, len_edg = scipy.ndimage.label(skelet_nodes == 1, structure=np.ones([3,3,3]))
+    sklabel_nod, len_nod = scipy.ndimage.label(skelet_nodes > 1, structure=np.ones([3,3,3]))
 
     sklabel = sklabel_edg - sklabel_nod
+
+    stats = []
     
+    for i in range (1,len_edg):
+        elst = element_analysis(sklabel, i)
+        stats.append(elst)
+
+    return stats
     import pdb; pdb.set_trace()
 
 
