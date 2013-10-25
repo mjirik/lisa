@@ -22,6 +22,8 @@ sys.path.append(os.path.join(path_to_script, "../src/"))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 sys.path.append(os.path.join(path_to_script,
                              "../extern/py3DSeedEditor/"))
+sys.path.append(os.path.join(path_to_script,
+                             "../extern/lbp/"))
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
 import unittest
@@ -48,6 +50,7 @@ import argparse
 import misc
 import datareader
 import matplotlib.pyplot as plt
+import realtime_lbp as real_lib
 
 
 
@@ -74,6 +77,14 @@ def feat_hist(data3d_orig, data3d_seg, visualization=True):
 
 
 
+def lbp(data3d_orig, data3d_seg, visualization=True):
+    realLbp = real_lib.loadRealtimeLbpLibrary()  
+    lbpRef = np.zeros([1,256])
+    lbpRef = real_lib.realTimeLbpImNp(realLbp,data3d_orig[:,:,1])
+    return lbpRef
+
+
+
 def get_features(data3d_orig, data3d_seg, visualization=True):
     """
     Sem doplníme všechny naše měření. Pro ukázku jsem vytvořil měření
@@ -83,6 +94,7 @@ def get_features(data3d_orig, data3d_seg, visualization=True):
     """
     featur = {}
     featur['hist'] = feat_hist(data3d_orig, data3d_seg, visualization)
+    featur['lbp'] = lbp(data3d_orig, data3d_seg, visualization)
 
 
 
