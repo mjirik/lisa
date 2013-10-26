@@ -43,7 +43,6 @@ class HistologyAnalyser:
 
 
     def run(self):
-        import pdb; pdb.set_trace()
         #self.preprocessing()
 
         data3d_thr = segmentation.vesselSegmentation(
@@ -78,11 +77,11 @@ class HistologyAnalyser:
         print "skelet"
         data3d_skel = skelet3d.skelet3d(data3d_thr)
 
-        pyed = seqt.QTSeedEditor(
-                data3d, 
-                contours=data3d_thr.astype(np.int8),
-                seeds=data3d_skel.astype(np.int8)
-                )
+       # pyed = seqt.QTSeedEditor(
+       #         data3d, 
+       #         contours=data3d_thr.astype(np.int8),
+       #         seeds=data3d_skel.astype(np.int8)
+       #         )
         #app.exec_()
         data3d_nodes = skeleton_nodes(data3d_skel, data3d_thr)
         skeleton_analysis(data3d_nodes)
@@ -90,14 +89,14 @@ class HistologyAnalyser:
         print "skelet with nodes"
         import pdb; pdb.set_trace()
 
-        pyed = seqt.QTSeedEditor(
-                data3d,
-                seeds=(data3d_nodes).astype(np.int8),
-                contours=data3d_thr.astype(np.int8)
-                )
+       # pyed = seqt.QTSeedEditor(
+       #         data3d,
+       #         seeds=(data3d_nodes).astype(np.int8),
+       #         contours=data3d_thr.astype(np.int8)
+       #         )
 
 
-        import pdb; pdb.set_trace()
+       # import pdb; pdb.set_trace()
     def preprocessing(self):
         self.data3d = scipy.ndimage.filters.gaussian_filter(
                 self.data3d,
@@ -187,11 +186,29 @@ def skeleton_nodes(data3d_skel, data3d_thr):
 
     return data3d_skel
     
-def element_analysis(sklabel, el_number):
-    element = (sklabel == el_number)
-    dilat_element = scipy.ndimage.morphology.binary_dilation(element)
+def node_analysis(sklabel):
+    pass
 
+def element_neighbors(sklabel, el_number):
+    """
+    Gives array of element neghbors numbers
+    """
+    element = (sklabel == el_number)
+    dilat_element = scipy.ndimage.morphology.binary_dilation(
+            element,
+            structure=np.ones([3,3,3])
+            )
+
+    neighborhood = sklabel * dilat_element
+
+    neighbors = np.unique(neighborhood)[np.unique(neighborhood)<0]
+    return neighbors
+
+
+def edge_analysis(sklabel, edg_number):
     print 'element_analysis'
+    elneigh = element_neighbors(sklabel,edg_number)
+    
 
     import pdb; pdb.set_trace()
 
@@ -205,6 +222,14 @@ def connection_analysis(sklabel, el_number):
     pass
 
 def skeleton_analysis(skelet_nodes, volume_data = None):
+    """
+    Glossary:
+    element: line structure of skeleton connected to node on both ends
+    node: connection point of elements. It is one or few voxelsize_mm
+    terminal: terminal node
+    
+
+    """
     sklabel_edg, len_edg = scipy.ndimage.label(skelet_nodes == 1, structure=np.ones([3,3,3]))
     sklabel_nod, len_nod = scipy.ndimage.label(skelet_nodes > 1, structure=np.ones([3,3,3]))
 
@@ -213,8 +238,8 @@ def skeleton_analysis(skelet_nodes, volume_data = None):
     stats = []
     
     for i in range (1,len_edg):
-        elst = element_analysis(sklabel, i)
-        stats.append(elst)
+        edgst = edge_analysis(sklabel, i)
+        stats.append(edgst)
 
     return stats
     import pdb; pdb.set_trace()
