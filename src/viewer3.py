@@ -5,9 +5,10 @@ VTK Viewer pro 3D zobrazeni
 
 # program mozne spustit ve dvou rezimech View a Cut
 # Vstupní soubor může být soubor pickle nebo už vygenerovaný vtk
+# Je mozne zobrazovat cela jatra, nebo hlavni portalni zilu prikazy : liver, porta
 # Priklady :
-# viewer3.py -vtk mesh_new.vtk -mode 'View'
-# viewer3.py -vtk mesh_new.vtk -mode 'Cut'  
+# viewer3.py -vtk mesh_new.vtk -mode 'View' -slab 'liver'
+# viewer3.py -pkl vessels002.pkl -mode 'Cut'  -slab 'porta'
 '''
 
 from optparse import OptionParser
@@ -32,7 +33,7 @@ import py3DSeedEditor
 import show3
 import qmisc
 
-# inicializace proměnných 
+# pouzivane promenne 
 plane = vtk.vtkPlane()
 normal = None
 coordinates = None
@@ -42,7 +43,7 @@ renWin = vtk.vtkRenderWindow()
 surface = vtk.vtkDataSetSurfaceFilter()
 app = QApplication(sys.argv)
 window = QtGui.QWidget()
-stisk = False
+
 
 
 
@@ -94,8 +95,8 @@ class QVTKViewer():
                 mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
         vtk_file = "mesh_new.vtk"
         mesh_data.write(vtk_file)
-        print("Done")
         return vtk_file
+        print("Done")
 ##------------------------------------------------------------------------------------------
     '''
     Args:
@@ -123,7 +124,6 @@ class QVTKViewer():
         #window.setLayout(grid)
 
         self.planew = planeWidget
-        self.stisk = 'True'
             
         #window.show()
         #iren.Initialize()
@@ -199,8 +199,7 @@ class QVTKViewer():
         button_cut = QtGui.QPushButton()
         button_cut.setText(unicode('cut'))
         grid.addWidget(button_cut, 4, 0)
-        button_cut.clicked.connect(self.liver_cut)
-  
+        button_cut.clicked.connect(self.liver_cut) 
         button_cut.show()
         
         #iren.Initialize()
@@ -327,6 +326,8 @@ def main():
                       help='File as .vtk')
     parser.add_argument('-mode','--mode', default=None,
                       help='Mode for construction plane of resection')
+    parser.add_argument('-slab','--slab', default=None,
+                      help='liver or porta - view')
     args = parser.parse_args()
 
     #if args.picklefile is None:
@@ -344,10 +345,10 @@ def main():
     
     if args.picklefile:
         data = misc.obj_from_file(args.picklefile, filetype = 'pickle')
-        segmentation = data['segmentation']
-        mesh = viewer.generate_mesh(segmentation)
+        #segmentation = data['segmentation']
+        mesh = viewer.generate_mesh(data['segmentation'] == data['slab'][args.slab])
         
-        if args.mode == 'View':
+        if args.mode == 'View' or args.mode == None:
             accept = True
             viewer.View(mesh,accept)
         if args.mode == 'Cut':
@@ -357,7 +358,7 @@ def main():
             viewer.buttons(window,grid)
                         
     if args.vtkfile:
-        if args.mode == 'View':
+        if args.mode == 'View' or args.mode == None:
             accept = True
             viewer.View(args.vtkfile,accept)
         if args.mode == 'Cut':
