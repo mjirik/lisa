@@ -85,7 +85,7 @@ class HistologyAnalyser:
        #         )
         #app.exec_()
         data3d_nodes = skeleton_nodes(data3d_skel, data3d_thr)
-        stats = skeleton_analysis(data3d_nodes)
+        stats = skeleton_analysis(data3d_nodes, data3d_thr)
         #data3d_nodes[data3d_nodes==3] = 2
         self.stats = stats
 
@@ -129,6 +129,7 @@ class HistologyAnalyser:
         #sitk.
     def writeStatsToCSV(self, filename='hist_stats.csv'):
         data = self.stats
+        import pdb; pdb.set_trace()
 
         with open(filename, 'wb') as csvfile:
             writer = csv.writer(
@@ -138,15 +139,19 @@ class HistologyAnalyser:
                     quoting=csv.QUOTE_MINIMAL
                     )
 
-            for dataline in data:
+            for lineid in data:
+                dataline = data[lineid]
                 writer.writerow(self.__dataToCSVLine(dataline))
                 #spamwriter.writerow(['Spam', 'Lovely Spam', 'Wonderful Spam'])
     def __dataToCSVLine(self, dataline):
+        arr = []
+# @TODO arr.append
         try:
             arr = [
                     dataline['id'], 
                     dataline['nodeId0'],
-                    dataline['nodeId1']
+                    dataline['nodeId1'],
+                    dataline['radius']
                     ]
         except:
             arr = []
@@ -275,7 +280,39 @@ def edge_analysis(sklabel, edg_number):
 
     pass
 
-def connection_analysis(sklabel, edg_number):
+def __radius_analysis_init(sklabel, volume_data, voxelsize_mm=[1,1,1]):
+    """
+    Computes skeleton with distances from edge of volume.
+    sklabel: skeleton or labeled skeleton
+    volume_data: volumetric data with zeros and ones
+    """
+    uq = np.unique(volume_data)
+    if (uq[0]==0) & (uq[1]==1):
+        dst = scipy.ndimage.morphology.distance_transform_edt(
+                volume_data,
+                sampling=voxelsize_mm
+                )
+        dst = dst * (sklabel != 0)
+        
+        return dst
+
+    else:
+        print "__radius_analysis_init() error.  "
+        return None
+
+
+def __radius_analysis(sklabel, skdst, edg_number):
+    """
+    return smaller radius of tube
+    """
+    edg_skdst = skdst * (sklabel == edg_number)
+    return np.mean(edg_skdst[edg_skdst != 0])
+
+
+
+    pass
+
+def __connection_analysis(sklabel, edg_number):
     """
     Analysis of which edge is connected
     """
@@ -283,7 +320,7 @@ def connection_analysis(sklabel, edg_number):
     if len(edg_neigh) != 2:
         print ('Wrong number (' + str(edg_neigh) +
                 ') of connected edges in connection_analysis() for\
-                        edge number ' + str(edg_number))
+                edge number ' + str(edg_number))
         edg_stats = {
                 'id':edg_number
                 }
@@ -307,7 +344,7 @@ def connection_analysis(sklabel, edg_number):
 
     return edg_stats
 
-def skeleton_analysis(skelet_nodes, volume_data = None):
+def skeleton_analysis(skelet_nodes, volume_data = None, voxelsize_mm=[1,1,1]):
     """
     Glossary:
     element: line structure of skeleton connected to node on both ends
@@ -320,14 +357,19 @@ def skeleton_analysis(skelet_nodes, volume_data = None):
     sklabel_nod, len_nod = scipy.ndimage.label(skelet_nodes > 1, structure=np.ones([3,3,3]))
 
     sklabel = sklabel_edg - sklabel_nod
+    if volume_data is not None:
+        skdst = __radius_analysis_init(sklabel, volume_data, voxelsize_mm)
 
-    stats = []
-    len_edg = 100
+    stats = {}
+    len_edg = 50
     
-    for i in range (1,len_edg):
-        edgst = connection_analysis(sklabel, i)
+    for edg_number in range (1,len_edg):
+        edgst = __connection_analysis(sklabel, edg_number)
         #edgst = edge_analysis(sklabel, i)
-        stats.append(edgst)
+        if volume_data is not None:
+            edgst['radius'] = __radius_analysis(sklabel, skdst, edg_number)
+        stats[edgst['id']] = edgst
+
 
     return stats
     #import pdb; pdb.set_trace()
