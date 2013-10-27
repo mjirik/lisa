@@ -25,6 +25,7 @@ import datareader
 import SimpleITK as sitk
 import scipy.ndimage
 from PyQt4.QtGui import QApplication
+import csv
 
 import seed_editor_qt as seqt
 import skelet3d
@@ -84,10 +85,9 @@ class HistologyAnalyser:
        #         )
         #app.exec_()
         data3d_nodes = skeleton_nodes(data3d_skel, data3d_thr)
-        skeleton_analysis(data3d_nodes)
-        data3d_nodes[data3d_nodes==3] = 2
-        print "skelet with nodes"
-        import pdb; pdb.set_trace()
+        stats = skeleton_analysis(data3d_nodes)
+        #data3d_nodes[data3d_nodes==3] = 2
+        self.stats = stats
 
        # pyed = seqt.QTSeedEditor(
        #         data3d,
@@ -127,6 +127,33 @@ class HistologyAnalyser:
         
 
         #sitk.
+    def writeStatsToCSV(self, filename='hist_stats.csv'):
+        data = self.stats
+
+        with open(filename, 'wb') as csvfile:
+            writer = csv.writer(
+                    csvfile,
+                    delimiter=';',
+                    quotechar='"',
+                    quoting=csv.QUOTE_MINIMAL
+                    )
+
+            for dataline in data:
+                writer.writerow(self.__dataToCSVLine(dataline))
+                #spamwriter.writerow(['Spam', 'Lovely Spam', 'Wonderful Spam'])
+    def __dataToCSVLine(self, dataline):
+        try:
+            arr = [
+                    dataline['id'], 
+                    dataline['nodeId0'],
+                    dataline['nodeId1']
+                    ]
+        except:
+            arr = []
+
+        return arr
+
+
 
     def show(self):
         app = QApplication(sys.argv)
@@ -169,17 +196,17 @@ def skeleton_nodes(data3d_skel, data3d_thr):
     #import pdb; pdb.set_trace()
 
     nodes = (mocnost > 3).astype(np.int8)
-    terminals = (mocnost == 2).astype(np.int8)
+    terminals = ((mocnost == 2) | (mocnost == 1)).astype(np.int8)
 
     nt = nodes - terminals
 
-    pyed = seqt.QTSeedEditor(
-            mocnost, 
-            contours=data3d_thr.astype(np.int8),
-            seeds=nt
-            )
+    #pyed = seqt.QTSeedEditor(
+    #        mocnost, 
+    #        contours=data3d_thr.astype(np.int8),
+    #        seeds=nt
+    #        )
 
-    import pdb; pdb.set_trace()
+    #import pdb; pdb.set_trace()
 
     data3d_skel[nodes==1] = 2
     data3d_skel[terminals==1] = 3
@@ -193,33 +220,92 @@ def element_neighbors(sklabel, el_number):
     """
     Gives array of element neghbors numbers
     """
+
+    BOUNDARY_PX = 5
     element = (sklabel == el_number)
+    enz = element.nonzero()
+
+
+
+# limits for square neighborhood
+    lo0 = np.max([0, np.min(enz[0]) - BOUNDARY_PX])
+    lo1 = np.max([0, np.min(enz[1]) - BOUNDARY_PX])
+    lo2 = np.max([0, np.min(enz[2]) - BOUNDARY_PX])
+    hi0 = np.min([sklabel.shape[0], np.max(enz[0]) + BOUNDARY_PX])
+    hi1 = np.min([sklabel.shape[1], np.max(enz[1]) + BOUNDARY_PX])
+    hi2 = np.min([sklabel.shape[2], np.max(enz[2]) + BOUNDARY_PX])
+
+# sklabel crop
+    sklabelcr = sklabel[
+            lo0:hi0,
+            lo1:hi1,
+            lo2:hi2
+            ]
+
+    # element crop
+    element = (sklabelcr == el_number)
+
     dilat_element = scipy.ndimage.morphology.binary_dilation(
             element,
             structure=np.ones([3,3,3])
             )
 
-    neighborhood = sklabel * dilat_element
+    neighborhood = sklabelcr * dilat_element
 
-    neighbors = np.unique(neighborhood)[np.unique(neighborhood)<0]
+# if el_number is edge, return nodes 
+    neighbors = np.unique(neighborhood)
+    neighbors = neighbors [neighbors != 0]
+    neighbors = neighbors [neighbors != el_number]
+    #neighbors = [np.unique(neighborhood) != el_number]
+    #if el_number > 0:
+    #    neighbors = np.unique(neighborhood)[np.unique(neighborhood)<0]
+    #else:
+    #    neighbors = np.unique(neighborhood)[np.unique(neighborhood)>0]
     return neighbors
 
 
 def edge_analysis(sklabel, edg_number):
     print 'element_analysis'
-    elneigh = element_neighbors(sklabel,edg_number)
+
+
     
 
-    import pdb; pdb.set_trace()
 
 # element dilate * sklabel[sklabel < 0]
 
     pass
 
-def connection_analysis(sklabel, el_number):
-    element = (sklabel == el_number)
-# element dilate * sklabel[sklabel < 0]
-    pass
+def connection_analysis(sklabel, edg_number):
+    """
+    Analysis of which edge is connected
+    """
+    edg_neigh = element_neighbors(sklabel,edg_number)
+    if len(edg_neigh) != 2:
+        print ('Wrong number (' + str(edg_neigh) +
+                ') of connected edges in connection_analysis() for\
+                        edge number ' + str(edg_number))
+        edg_stats = {
+                'id':edg_number
+                }
+    else:
+        connectedEdges0 = element_neighbors(sklabel, edg_neigh[0])
+        connectedEdges1 = element_neighbors(sklabel, edg_neigh[1])
+# remove edg_number from connectedEdges list
+        connectedEdges0 = connectedEdges0[connectedEdges0 != edg_number]
+        connectedEdges1 = connectedEdges1[connectedEdges1 != edg_number]
+        print 'edg_neigh ', edg_neigh, ' ,0: ', connectedEdges0, '  ,0 '
+
+        #import pdb; pdb.set_trace()
+
+        edg_stats = {
+                'id':edg_number,
+                'nodeId0':edg_neigh[0],
+                'nodeId1':edg_neigh[1],
+                'connectedEdges0':connectedEdges0,
+                'connectedEdges1':connectedEdges1
+                }
+
+    return edg_stats
 
 def skeleton_analysis(skelet_nodes, volume_data = None):
     """
@@ -236,13 +322,15 @@ def skeleton_analysis(skelet_nodes, volume_data = None):
     sklabel = sklabel_edg - sklabel_nod
 
     stats = []
+    len_edg = 100
     
     for i in range (1,len_edg):
-        edgst = edge_analysis(sklabel, i)
+        edgst = connection_analysis(sklabel, i)
+        #edgst = edge_analysis(sklabel, i)
         stats.append(edgst)
 
     return stats
-    import pdb; pdb.set_trace()
+    #import pdb; pdb.set_trace()
 
 
 
@@ -285,6 +373,7 @@ if __name__ == "__main__":
 
     ha = HistologyAnalyser(data3d, metadata, args.threshold)
     ha.run()
-    ha.show()
+    ha.writeStatsToCSV()
+    #ha.show()
     
 
