@@ -29,17 +29,21 @@ def func(t, a, b, c, d):
     y = c*t + d
     return x,y
 
-t = np.linspace(0, 1, 10)
+t = np.linspace(0, 1, 20)
 
-y = func(t, 1, 2, 3, 4)
+#y = func(t, 1, 2, 3, 4)
+#y = np.array(y)
+#yn = y + 0.2*np.random.normal(size=len(t))
 
-y = np.array(y)
+yn = []
+#for i in range(0,len(t):
+#    x,y = func(t, 1, 2, 3, 4)
+#    yn.append((x+
 
 
-
-
-yn = y + 0.2*np.random.normal(size=len(t))
 import pdb; pdb.set_trace()
 
-params, pcov = curve_fit(func, A[:,:2], A[:,2], guess)
+params, pcov = curve_fit(func, t, yn)
 
+
+print (params)
