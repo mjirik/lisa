@@ -3,21 +3,40 @@ liver-surgery
 
 Coputer-assisted liver surgery. 
 
+
 Requirements
 ------------
 
-    sudo apt-get install python git 
+Installing requires you to have installed:
 
-Fallowing packages need to be installed
+* GIT - distributed version control system (http://git-scm.com)
+* numpy (http://www.numpy.org)
+* scipy (http://scipy.org)
+* scikit-learn (http://scikit-learn.org)
+* Cython - C-extension for Python (http://cython.org)
+* pyqt - Python bindings for Qt application framework
+(http://www.riverbankcomputing.com/software/pyqt)
+* pygco - Graphcuts for Python (https://github.com/amueller/gco_python)
+* pydicom - package for working with DICOM files
+(http://code.google.com/p/pydicom)
 
-    sudo apt-get install python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox python-insighttoolkit3 
+On Linux, use package manager of your distribution
+
+    sudo apt-get install python git python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox python-insighttoolkit3 
 
 SimpleITK is not in ubuntu packages. You can use easy_install
 
     sudo easy_install -U SimpleITK
 
+
+On Window, you can use Python XY (http://code.google.com/p/pythonxy/) and
+packages by Christoph Gohlke (http://www.lfd.uci.edu/~gohlke/pythonlibs/)
+
+
 Install
 -------
+
+
 
     git clone --recursive git@github.com:mjirik/liver-surgery.git
 
@@ -29,9 +48,9 @@ or
 
     git submodule update --init --recursive
 
-    python ./mysetup.py
 
 You can find more install notes in file 'notes.txt'
+(https://github.com/mjirik/liver-surgery/blob/master/notes.txt)
 
 
 Run
