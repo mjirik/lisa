@@ -100,6 +100,14 @@ def vesselSegmentation(
     ## Ziskani datove oblasti jater (bud pouze jater nebo i jejich okoli - zalezi,
     ## jakym zpusobem bylo nalozeno s operaci dilatace dat).
     preparedData = data * (segmentation == 1)
+    print 'Typ vstupnich dat: ' + str(preparedData.dtype)
+    if preparedData.dtype != numpy.uint8:
+       print 'Data nejsou typu numpy.uint8 => muze dojit k errorum'
+    if numpy.can_cast(preparedData.dtype, numpy.float):
+       print 'Data nejsou takoveho typu, aby byly preveditelne na numpy.float => muze dojit k errorum'
+
+    if (preparedData == False).all():
+       print 'ERROR: (debug message) (jsou spatna data nebo segmentacni matice): all is true == data is all false == bad segmentation matrix (if data matrix is ok)'
     del(data)
     del(segmentation)
 
@@ -133,15 +141,6 @@ def vesselSegmentation(
     ## Vraceni matice
     return output
 
-    """
-    if(dataFiltering == False):
-        ## Data vstoupila jiz filtrovana, tudiz neprosly nalezenim nejvetsich objektu.
-        return getPriorityObjects(data = output, N = nObj)
-    else:
-        ## Data vstoupila nefiltrovana, tudiz jiz prosly nalezenim nejvetsich objektu.
-        return output
-    """
-
 """
 Vraceni N nejvetsich objektu.
     input:
@@ -158,6 +157,8 @@ def getPriorityObjects(data, nObj = 1, seeds = None, debug = False):
     ## labels - oznacena data.
     ## length - pocet rozdilnych oznaceni.
     dataLabels, length = scipy.ndimage.label(data)
+
+    print 'Oznaceno ' + str(length) + ' oblasti'
 
     if debug:
        print 'data labels:'
@@ -197,6 +198,9 @@ def getPriorityObjects(data, nObj = 1, seeds = None, debug = False):
             if debug:
                 print (str(label - 1)) + ':'
                 print returning
+
+        if returning == None:
+           print 'Zadna validni olabelovana data!'
 
         return returning
         # Function exit

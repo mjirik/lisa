@@ -128,9 +128,9 @@ class uiThreshold:
             self.fig.subplots_adjust(left = 0.1, bottom = 0.3)
 
             ## Vykreslit obrazek
-            self.im1 = self.ax1.imshow(numpy.amax(self.data, 0), self.cmap)
-            self.im2 = self.ax2.imshow(numpy.amax(self.data, 1), self.cmap)
-            self.im3 = self.ax3.imshow(numpy.amax(self.data, 2), self.cmap)
+            self.ax1.imshow(numpy.amax(self.data, 0), self.cmap)
+            self.ax2.imshow(numpy.amax(self.data, 1), self.cmap)
+            self.ax3.imshow(numpy.amax(self.data, 2), self.cmap)
 
             ## Zalozeni mist pro slidery
             self.axcolor = 'white' # lightgoldenrodyellow
@@ -254,8 +254,7 @@ class uiThreshold:
 
         ## Filtrovani
         if(self.lastSigma != sigma):
-            scipy.ndimage.filters.gaussian_filter(self.data, sigmaNew,
-                0, self.imgFiltering, 'reflect', 0.0)
+            scipy.ndimage.filters.gaussian_filter(self.data, sigmaNew, 0, self.imgFiltering, 'reflect', 0.0)
             self.calculateAutomaticThreshold()
             ## Ulozeni posledni hodnoty sigma pro neopakovani stejne operace
             self.lastSigma = sigma
@@ -270,7 +269,7 @@ class uiThreshold:
 
                 self.calculateAutomaticThreshold()
 
-            self.imgBeforeBinaryClosing = (self.imgFiltering > self.threshold)
+            self.imgBeforeBinaryClosing = self.imgFiltering * (self.imgFiltering > self.threshold)
 
             if ( self.interactivity == True ) :
 
@@ -286,7 +285,7 @@ class uiThreshold:
 
                 if ( (self.lastMinThresNum != self.threshold) or (self.overrideSigma == True) ):
 
-                    self.imgBeforeBinaryClosing = (self.imgFiltering > self.threshold)
+                    self.imgBeforeBinaryClosing = self.imgFiltering * (self.imgFiltering > self.threshold)
 
                     if ( self.interactivity == True ) :
 
@@ -298,7 +297,7 @@ class uiThreshold:
 
             elif ( (self.lastMinThresNum != self.smin.val) or (self.overrideSigma == True) ) :
 
-                self.imgBeforeBinaryClosing = (self.imgFiltering > self.smin.val)
+                self.imgBeforeBinaryClosing = self.imgFiltering * (self.imgFiltering > self.smin.val)
                 self.lastMinThresNum = self.smin.val
                 self.overrideThres = True
 
@@ -320,23 +319,20 @@ class uiThreshold:
 
         ## Vlastni binarni uzavreni.
         if(self.firstRun == True and self.ICBinaryClosingIterations >= 1):
-            self.imgBeforeBinaryOpening = scipy.ndimage.binary_closing(self.imgBeforeBinaryClosing,
-                    structure = None, iterations = closeNum)
+            self.imgBeforeBinaryOpening = self.imgBeforeBinaryClosing * scipy.ndimage.binary_closing(self.imgBeforeBinaryClosing, structure = None, iterations = closeNum)
         else:
             if( ((closeNum >= 1) and (self.lastCloseNum != closeNum)) or (self.overrideThres == True) ):
-                self.imgBeforeBinaryOpening = scipy.ndimage.binary_closing(self.imgBeforeBinaryClosing,
-                    structure = None, iterations = closeNum)
+                self.imgBeforeBinaryOpening = self.imgBeforeBinaryClosing * scipy.ndimage.binary_closing(self.imgBeforeBinaryClosing, structure = None, iterations = closeNum)
             else:
                 self.imgBeforeBinaryOpening = self.imgBeforeBinaryClosing
         self.lastCloseNum = closeNum
 
         ## Vlastni binarni otevreni.
         if(self.firstRun == True and self.ICBinaryOpeningIterations >= 1):
-            self.imgChanged = scipy.ndimage.binary_opening(self.imgBeforeBinaryOpening,
-                    structure = None, iterations = openNum)
+            self.imgChanged = self.imgBeforeBinaryOpening * scipy.ndimage.binary_opening(self.imgBeforeBinaryOpening, structure = None, iterations = openNum)
         else:
             if( ((openNum >= 1) and (self.lastOpenNum != openNum)) or (self.overrideThres == True) ):
-                self.imgChanged = scipy.ndimage.binary_opening(self.imgBeforeBinaryOpening,
+                self.imgChanged = self.imgBeforeBinaryOpening * scipy.ndimage.binary_opening(self.imgBeforeBinaryOpening,
                     structure = None, iterations = openNum)
             else:
                 self.imgChanged = self.imgBeforeBinaryOpening
@@ -352,9 +348,9 @@ class uiThreshold:
 
         if ( self.interactivity == True ) :
             ## Predani obrazku k vykresleni
-            self.im1 = self.ax1.imshow(numpy.amax(self.imgChanged, 0), self.cmap)
-            self.im2 = self.ax2.imshow(numpy.amax(self.imgChanged, 1), self.cmap)
-            self.im3 = self.ax3.imshow(numpy.amax(self.imgChanged, 2), self.cmap)
+            self.ax1.imshow(numpy.amax(self.imgChanged, 0), self.cmap)
+            self.ax2.imshow(numpy.amax(self.imgChanged, 1), self.cmap)
+            self.ax3.imshow(numpy.amax(self.imgChanged, 2), self.cmap)
 
 ##            ## Minimalni pouzitelna hodnota prahovani v obrazku
 ##            self.min0 = numpy.amin(self.imgChanged)
