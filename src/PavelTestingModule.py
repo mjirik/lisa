@@ -12,7 +12,7 @@
 import segmentation as sg
 import numpy as np
 
-def main():
+def main1():
 
     ## Vytvorim si vlastni testovaci matici.
     matrix = np.zeros((7, 7))
@@ -29,7 +29,7 @@ def main():
     print matrix
 
     ## Vratit 4 nejvetsi objekty - v debug modu.
-    obj = 4
+    obj = 2
     print '>>> Nejvetsi objekty v matici (' + str(obj) + '):'
     matrix2 = sg.getPriorityObjects(matrix, nObj = obj, seeds = None, debug = True)
 
@@ -51,6 +51,53 @@ def main():
     ## Uplatneni seedu na matici po ziskani nejvetsich objektu
     matrix4 = sg.getPriorityObjects(matrix2, nObj = obj, seeds = mySeeds, debug = True)
 
+def main2():
+
+    slab = {'none':0, 'liver':1, 'porta':2}
+    voxelsize_mm = np.array([1.0, 1.0, 1.2])
+
+    segm = np.zeros([256, 256, 80], dtype = np.int16)
+
+    # liver
+    segm[70:180, 40:190, 30:60] = slab['liver']
+    # port
+    segm[120:130, 70:190, 40:45] = slab['porta']
+    segm[80:130, 100:110, 40:45] = slab['porta']
+    segm[120:170, 130:135, 40:44] = slab['porta']
+
+    data3d = np.zeros(segm.shape)
+    data3d[segm == slab['liver']] = 156
+    data3d[segm == slab['porta']] = 206
+    #noise = (np.random.rand(segm.shape[0], segm.shape[1], segm.shape[2])*30).astype(np.int16)
+    noise = (np.random.normal(0, 30, segm.shape))#.astype(np.int16)
+    data3d = (data3d + noise).astype(np.int16)
+
+    # @TODO je tam bug, prohl??e? neum? korektn? pracovat s doubly
+    #        app = QApplication(sys.argv)
+    #        #pyed = QTSeedEditor(noise )
+    #        pyed = QTSeedEditor(data3d)
+    #        pyed.exec_()
+    #        #img3d = np.zeros([256,256,80], dtype=np.int16)
+
+    # pyed = py3DSeedEditor.py3DSeedEditor(data3d)
+    # pyed.show()
+
+    outputTmp = sg.vesselSegmentation(
+        data3d,
+        segmentation = segm == slab['liver'],
+        voxelsize_mm = voxelsize_mm,
+        threshold = 180,
+        inputSigma = 0.15,
+        dilationIterations = 2,
+        nObj = 1,
+        interactivity = True,
+        biggestObjects = True,
+        binaryClosingIterations = 5,
+        binaryOpeningIterations = 1)
+
+    if outputTmp == None:
+       print 'Final output is None'
+
 if __name__ == '__main__':
 
-    main()
+    main2()
