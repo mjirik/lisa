@@ -151,7 +151,8 @@ class HistologyAnalyser:
                     dataline['id'], 
                     dataline['nodeId0'],
                     dataline['nodeId1'],
-                    dataline['radius']
+                    dataline['radius'],
+                    dataline['lengthEstimation']
                     ]
         except:
             arr = []
@@ -269,6 +270,13 @@ def element_neighbors(sklabel, el_number):
     return neighbors
 
 
+def __edge_length(sklabel, edg_number, voxelsize_mm):
+    return {'lengthEstimation':np.sum(sklabel == edg_number) + 2}
+
+def __edge_curve(sklabel, edg_number, voxelsize_mm, edgst):
+    pass
+
+
 def edge_analysis(sklabel, edg_number):
     print 'element_analysis'
 
@@ -310,7 +318,6 @@ def __radius_analysis(sklabel, skdst, edg_number):
 
 
 
-    pass
 
 def __connection_analysis(sklabel, edg_number):
     """
@@ -365,6 +372,7 @@ def skeleton_analysis(skelet_nodes, volume_data = None, voxelsize_mm=[1,1,1]):
     
     for edg_number in range (1,len_edg):
         edgst = __connection_analysis(sklabel, edg_number)
+        edgst.update(__edge_length(sklabel, edg_number, voxelsize_mm))
         #edgst = edge_analysis(sklabel, i)
         if volume_data is not None:
             edgst['radius'] = __radius_analysis(sklabel, skdst, edg_number)
