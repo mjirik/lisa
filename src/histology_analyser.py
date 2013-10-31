@@ -76,6 +76,7 @@ class HistologyAnalyser:
         #app.exec_()
 
         print "skelet"
+        data3d_thr = (data3d_thr > 0).astype(np.int8)
         data3d_skel = skelet3d.skelet3d(data3d_thr)
 
        # pyed = seqt.QTSeedEditor(
@@ -85,15 +86,20 @@ class HistologyAnalyser:
        #         )
         #app.exec_()
         data3d_nodes = skeleton_nodes(data3d_skel, data3d_thr)
+        data3d_nodes_vis = data3d_nodes.copy()
+        data3d_nodes_vis[data3d_nodes_vis == 3] = 2
+        import pdb; pdb.set_trace()
+
+        pyed = seqt.QTSeedEditor(
+                data3d,
+                seeds=(data3d_nodes_vis).astype(np.int8),
+                contours=data3d_thr.astype(np.int8)
+                )
+        app.exec_()
         stats = skeleton_analysis(data3d_nodes, data3d_thr)
         #data3d_nodes[data3d_nodes==3] = 2
         self.stats = stats
 
-       # pyed = seqt.QTSeedEditor(
-       #         data3d,
-       #         seeds=(data3d_nodes).astype(np.int8),
-       #         contours=data3d_thr.astype(np.int8)
-       #         )
 
 
        # import pdb; pdb.set_trace()
