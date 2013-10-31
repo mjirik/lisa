@@ -219,10 +219,19 @@ class SkeletonAnalyser:
             edgst = self.__connection_analysis(edg_number)
             edgst.update(self.__edge_length(edg_number))
             edgst.update(self.__edge_curve(edg_number, edgst))
+            edgst.update(self.__edge_vectors(edg_number, edgst))
             #edgst = edge_analysis(sklabel, i)
             if self.volume_data is not None:
                 edgst['radius'] = float(self.__radius_analysis(skdst, edg_number))
             stats[edgst['id']] = edgst
+
+        # second run for connected analysis
+        #@TODO dokončit
+ #       for edg_number in range (1,len_edg):
+ #           edgst = stats[edg_number]
+ #           edgst.update(self.__connected_edge_angle(edg_number, stats))
+
+
 
 
         return stats
@@ -236,21 +245,58 @@ class SkeletonAnalyser:
         self.sklabel = sklabel_edg - sklabel_nod
 
 
-    def __angles(self, edg_number, edg_stats):
+    def __edge_vectors(self, edg_number, edg_stats):
         """
+        Return begin and end vector of edge.
         run after __edge_curve()
         """
 # this edge
         curve_params = edg_stats['curve_params']
-        vector0 = self.get_vector_from_curve(0, 0.25, curve_params)
-        vector1 = self.get_vector_from_curve(1, 0.75, curve_params)
+        vector0 = self.__get_vector_from_curve(0.25, 0, curve_params)
+        vector1 = self.__get_vector_from_curve(0.75, 1, curve_params)
 
 
-        pass
+        return {'vector0':vector0.tolist(), 'vector1': vector1.tolist()}
 
-    def __get_vector_from_curve(t0, t1, curve_params):
-        return curve_model(t1, curve_params) - \
-                curve_model(t0,curve_params)
+    def __connected_edge_angle(self, edg_number, stats):
+        """
+        count angles betwen end vectors of edges
+        """
+        connectedEdges0 = stats[edg_number]['connectedEdges0']
+        connectedEdges1 = stats[edg_number]['connectedEdges1']
+
+        vector0 = stats[edg_number]['vector0']
+        vector1 = stats[edg_number]['vector1']
+        try:
+# we need find end of edge connected to our node
+            #import pdb; pdb.set_trace()
+            if stats[edg_number]['nodeId0'] == stats[connectedEdges0[0]]['nodeId0']:
+# sousední hrana u uzlu na konci 0 má stejný node na svém konci 0 jako nynější hrana
+                vector00 = stats[connectedEdges0[0]]['vector0']
+            else:
+                vector00 = stats[connectedEdges0[0]]['vector1']
+
+            # second neighbors on end "0"
+            if  stats[edg_number]['nodeId0'] == stats[connectedEdges0[1]]['nodeId0']:
+# sousední hrana u uzlu na konci 0 má stejný node na svém konci 0 jako nynější hrana
+                vector01 = stats[connectedEdges0[1]]['vector0']
+            else:
+                vector01 = stats[connectedEdges0[1]]['vector1']
+            print "ahoj"
+        except:
+            print ("Cannot compute angles for edge " + str(edg_number))
+
+        angle0 = np.arccos(np.dot(vector01, vector00))
+
+        return {'angle0':angle0}
+
+
+
+    def __get_vector_from_curve(self, t0, t1, curve_params):
+        return (np.array(curve_model(t1, curve_params)) - \
+                np.array(curve_model(t0,curve_params)))
+
+    
 
     def __skeleton_nodes(self, data3d_skel, data3d_thr):
         """
