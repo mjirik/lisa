@@ -230,9 +230,9 @@ class SkeletonAnalyser:
 
         # second run for connected analysis
         #@TODO dokončit
- #       for edg_number in range (1,len_edg):
- #           edgst = stats[edg_number]
- #           edgst.update(self.__connected_edge_angle(edg_number, stats))
+        for edg_number in range (1,len_edg):
+            edgst = stats[edg_number]
+            edgst.update(self.__connected_edge_angle(edg_number, stats))
 
 
 
@@ -302,8 +302,13 @@ class SkeletonAnalyser:
         vector1 = stats[edg_number]['vector1']
         try:
             vector00 = self.__vector_of_connected_edge(edg_number, stats, 0, 0)
-        except:
+        except Exception as e:
             print ("connected edge (number ", edg_number, ")vector not found")
+            print (e)
+
+        angle0 = 0
+        #angle0 = np.arccos(np.dot(vector0, vector00))
+        return {'angle0':angle0}
 
 #        try:
 ## we need find end of edge connected to our node
