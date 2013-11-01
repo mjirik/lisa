@@ -27,6 +27,9 @@ import scipy.ndimage
 from PyQt4.QtGui import QApplication
 import csv
 
+import sys, traceback
+
+
 import seed_editor_qt as seqt
 import skelet3d
 import segmentation
@@ -251,44 +254,80 @@ class SkeletonAnalyser:
         run after __edge_curve()
         """
 # this edge
-        curve_params = edg_stats['curve_params']
-        vector0 = self.__get_vector_from_curve(0.25, 0, curve_params)
-        vector1 = self.__get_vector_from_curve(0.75, 1, curve_params)
+        try:
+            curve_params = edg_stats['curve_params']
+            vector0 = self.__get_vector_from_curve(0.25, 0, curve_params)
+            vector1 = self.__get_vector_from_curve(0.75, 1, curve_params)
+        except Exception as ex:
+            print (ex)
+            return {}
 
 
         return {'vector0':vector0.tolist(), 'vector1': vector1.tolist()}
+
+    def __vector_of_connected_edge(self, 
+            edg_number, 
+            stats,
+            edg_end,
+            con_edg_order):
+        """
+        find common node with connected edge and its vector
+        edg_end: Which end of edge you want (0 or 1)
+        con_edg_order: Which edge of selected end of edge you want (0,1)
+        """
+        if edg_end == 0:
+            connectedEdges = stats[edg_number]['connectedEdges0']
+            ndid = 'nodeId0'
+        else:
+            connectedEdges = stats[edg_number]['connectedEdges1']
+            ndid = 'nodeId1'
+
+        connectedEdgeStats = connectedEdges[con_edg_order]
+
+        if stats[edg_number][ndid] == connectedEdgeStats['nodeId0']:
+# sousední hrana u uzlu na konci 0 má stejný node na svém konci 0 jako nynější hrana
+            vector = connectedEdgeStats['vector0']
+        elif stats[edg_number][ndid] == connectedEdgeStats['nodeId1']:
+            vector = connectedEdgeStats['vector1']
+
+
+        return vector
 
     def __connected_edge_angle(self, edg_number, stats):
         """
         count angles betwen end vectors of edges
         """
-        connectedEdges0 = stats[edg_number]['connectedEdges0']
-        connectedEdges1 = stats[edg_number]['connectedEdges1']
 
         vector0 = stats[edg_number]['vector0']
         vector1 = stats[edg_number]['vector1']
         try:
-# we need find end of edge connected to our node
-            #import pdb; pdb.set_trace()
-            if stats[edg_number]['nodeId0'] == stats[connectedEdges0[0]]['nodeId0']:
-# sousední hrana u uzlu na konci 0 má stejný node na svém konci 0 jako nynější hrana
-                vector00 = stats[connectedEdges0[0]]['vector0']
-            else:
-                vector00 = stats[connectedEdges0[0]]['vector1']
-
-            # second neighbors on end "0"
-            if  stats[edg_number]['nodeId0'] == stats[connectedEdges0[1]]['nodeId0']:
-# sousední hrana u uzlu na konci 0 má stejný node na svém konci 0 jako nynější hrana
-                vector01 = stats[connectedEdges0[1]]['vector0']
-            else:
-                vector01 = stats[connectedEdges0[1]]['vector1']
-            print "ahoj"
+            vector00 = self.__vector_of_connected_edge(edg_number, stats, 0, 0)
         except:
-            print ("Cannot compute angles for edge " + str(edg_number))
+            print ("connected edge (number ", edg_number, ")vector not found")
 
-        angle0 = np.arccos(np.dot(vector01, vector00))
-
-        return {'angle0':angle0}
+#        try:
+## we need find end of edge connected to our node
+#            #import pdb; pdb.set_trace()
+#            if stats[edg_number]['nodeId0'] == stats[connectedEdges0[0]]['nodeId0']:
+## sousední hrana u uzlu na konci 0 má stejný node na svém konci 0 jako nynější hrana
+#                vector00 = stats[connectedEdges0[0]]['vector0']
+#            else:
+#                vector00 = stats[connectedEdges0[0]]['vector1']
+#        except:
+#
+#            # second neighbors on end "0"
+#            if  stats[edg_number]['nodeId0'] == stats[connectedEdges0[1]]['nodeId0']:
+## sousední hrana u uzlu na konci 0 má stejný node na svém konci 0 jako nynější hrana
+#                vector01 = stats[connectedEdges0[1]]['vector0']
+#            else:
+#                vector01 = stats[connectedEdges0[1]]['vector1']
+#            print "ahoj"
+#        except:
+#            print ("Cannot compute angles for edge " + str(edg_number))
+#
+#        angle0 = np.arccos(np.dot(vector01, vector00))
+#
+#        return {'angle0':angle0}
 
 
 
@@ -418,6 +457,7 @@ class SkeletonAnalyser:
                         'vector':(point1-point0).tolist()}}
         except Exception as ex:
             logger.warning("Problem in __edge_curve()")
+            print (ex)
 
         return retval
 
