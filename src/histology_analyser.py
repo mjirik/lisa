@@ -162,8 +162,8 @@ class HistologyAnalyser:
         try:
             arr = [
                     dataline['id'], 
-                    dataline['nodeId0'],
-                    dataline['nodeId1'],
+                    dataline['nodeIdA'],
+                    dataline['nodeIdB'],
                     dataline['radius'],
                     dataline['lengthEstimation']
                     ]
@@ -228,7 +228,6 @@ class SkeletonAnalyser:
                 edgst['radius'] = float(self.__radius_analysis(skdst, edg_number))
             stats[edgst['id']] = edgst
 
-        # second run for connected analysis
         #@TODO dokončit
         for edg_number in range (1,len_edg):
             edgst = stats[edg_number]
@@ -256,14 +255,14 @@ class SkeletonAnalyser:
 # this edge
         try:
             curve_params = edg_stats['curve_params']
-            vector0 = self.__get_vector_from_curve(0.25, 0, curve_params)
-            vector1 = self.__get_vector_from_curve(0.75, 1, curve_params)
+            vectorA = self.__get_vector_from_curve(0.25, 0, curve_params)
+            vectorB = self.__get_vector_from_curve(0.75, 1, curve_params)
         except Exception as ex:
             print (ex)
             return {}
 
 
-        return {'vector0':vector0.tolist(), 'vector1': vector1.tolist()}
+        return {'vectorA':vectorA.tolist(), 'vectorB': vectorB.tolist()}
 
     def __vector_of_connected_edge(self, 
             edg_number, 
@@ -275,20 +274,24 @@ class SkeletonAnalyser:
         edg_end: Which end of edge you want (0 or 1)
         con_edg_order: Which edge of selected end of edge you want (0,1)
         """
-        if edg_end == 0:
-            connectedEdges = stats[edg_number]['connectedEdges0']
-            ndid = 'nodeId0'
+        if edg_end == 'A':
+            connectedEdges = stats[edg_number]['connectedEdgesA']
+            ndid = 'nodeIdA'
+        elif edg_end == 'B' :
+            connectedEdges = stats[edg_number]['connectedEdgesB']
+            ndid = 'nodeIdB'
         else:
-            connectedEdges = stats[edg_number]['connectedEdges1']
-            ndid = 'nodeId1'
+            logger.error ('Wrong edg_end in __vector_of_connected_edge()')
+            
 
-        connectedEdgeStats = connectedEdges[con_edg_order]
+        connectedEdgeStats = stats[connectedEdges[con_edg_order]]
+        #import pdb; pdb.set_trace()
 
-        if stats[edg_number][ndid] == connectedEdgeStats['nodeId0']:
+        if stats[edg_number][ndid] == connectedEdgeStats['nodeIdA']:
 # sousední hrana u uzlu na konci 0 má stejný node na svém konci 0 jako nynější hrana
-            vector = connectedEdgeStats['vector0']
-        elif stats[edg_number][ndid] == connectedEdgeStats['nodeId1']:
-            vector = connectedEdgeStats['vector1']
+            vector = connectedEdgeStats['vectorA']
+        elif stats[edg_number][ndid] == connectedEdgeStats['nodeIdB']:
+            vector = connectedEdgeStats['vectorB']
 
 
         return vector
@@ -298,39 +301,47 @@ class SkeletonAnalyser:
         count angles betwen end vectors of edges
         """
 
-        vector0 = stats[edg_number]['vector0']
-        vector1 = stats[edg_number]['vector1']
+        out = {}
+        vectorA = stats[edg_number]['vectorA']
+        vectorB = stats[edg_number]['vectorB']
         try:
-            vector00 = self.__vector_of_connected_edge(edg_number, stats, 0, 0)
+            vectorA0 = self.__vector_of_connected_edge(edg_number, stats, 'A', 0)
+            angleA0 = np.arccos(np.dot(vectorA, vectorA0))
+            out.update({'angleA0':angleA0.tolist()})
         except Exception as e:
-            print ("connected edge (number ", edg_number, ")vector not found")
-            print (e)
+            #print (e)
+            #traceback.print_exc()
+            print ("connected edge (number ", edg_number, ") vectorA not found")
 
-        angle0 = 0
-        #angle0 = np.arccos(np.dot(vector0, vector00))
-        return {'angle0':angle0}
+        try:
+            vectorA1 = self.__vector_of_connected_edge(edg_number, stats, 'A', 1)
+        except Exception as e:
+            print ("connected edge (number ", edg_number, ") vectorA not found")
+
+        angleA0 = 0
+        return out
 
 #        try:
 ## we need find end of edge connected to our node
 #            #import pdb; pdb.set_trace()
-#            if stats[edg_number]['nodeId0'] == stats[connectedEdges0[0]]['nodeId0']:
+#            if stats[edg_number]['nodeIdA'] == stats[connectedEdgesA[0]]['nodeId0']:
 ## sousední hrana u uzlu na konci 0 má stejný node na svém konci 0 jako nynější hrana
-#                vector00 = stats[connectedEdges0[0]]['vector0']
+#                vectorA0 = stats[connectedEdgesA[0]]['vectorA']
 #            else:
-#                vector00 = stats[connectedEdges0[0]]['vector1']
+#                vectorA0 = stats[connectedEdgesA[0]]['vectorB']
 #        except:
 #
 #            # second neighbors on end "0"
-#            if  stats[edg_number]['nodeId0'] == stats[connectedEdges0[1]]['nodeId0']:
+#            if  stats[edg_number]['nodeIdA'] == stats[connectedEdgesA[1]]['nodeId0']:
 ## sousední hrana u uzlu na konci 0 má stejný node na svém konci 0 jako nynější hrana
-#                vector01 = stats[connectedEdges0[1]]['vector0']
+#                vectorA1 = stats[connectedEdgesA[1]]['vectorA']
 #            else:
-#                vector01 = stats[connectedEdges0[1]]['vector1']
+#                vectorA1 = stats[connectedEdgesA[1]]['vectorB']
 #            print "ahoj"
 #        except:
 #            print ("Cannot compute angles for edge " + str(edg_number))
 #
-#        angle0 = np.arccos(np.dot(vector01, vector00))
+#        angle0 = np.arccos(np.dot(vectorA1, vectorA0))
 #
 #        return {'angle0':angle0}
 
@@ -453,8 +464,8 @@ class SkeletonAnalyser:
     def __edge_curve(self,  edg_number, edg_stats):
         retval = {}
         try:
-            nd00, nd01, nd02 = (edg_stats['nodeId0'] == self.sklabel).nonzero()
-            nd10, nd11, nd12 = (edg_stats['nodeId1'] == self.sklabel).nonzero()
+            nd00, nd01, nd02 = (edg_stats['nodeIdA'] == self.sklabel).nonzero()
+            nd10, nd11, nd12 = (edg_stats['nodeIdB'] == self.sklabel).nonzero()
             point0 = np.array([np.mean(nd00), np.mean(nd01), np.mean(nd02)])
             point1 = np.array([np.mean(nd10), np.mean(nd11), np.mean(nd12)])
             retval = {'curve_params':
@@ -522,21 +533,21 @@ class SkeletonAnalyser:
                     'id':edg_number
                     }
         else:
-            connectedEdges0 = self.__element_neighbors(edg_neigh[0])
-            connectedEdges1 = self.__element_neighbors(edg_neigh[1])
+            connectedEdgesA = self.__element_neighbors(edg_neigh[0])
+            connectedEdgesB = self.__element_neighbors(edg_neigh[1])
 # remove edg_number from connectedEdges list
-            connectedEdges0 = connectedEdges0[connectedEdges0 != edg_number]
-            connectedEdges1 = connectedEdges1[connectedEdges1 != edg_number]
-            print 'edg_neigh ', edg_neigh, ' ,0: ', connectedEdges0, '  ,0 '
+            connectedEdgesA = connectedEdgesA[connectedEdgesA != edg_number]
+            connectedEdgesB = connectedEdgesB[connectedEdgesB != edg_number]
+            print 'edg_neigh ', edg_neigh, ' ,0: ', connectedEdgesA, '  ,0 '
 
             #import pdb; pdb.set_trace()
 
             edg_stats = {
                     'id':edg_number,
-                    'nodeId0':int(edg_neigh[0]),
-                    'nodeId1':int(edg_neigh[1]),
-                    'connectedEdges0':connectedEdges0.tolist(),
-                    'connectedEdges1':connectedEdges1.tolist()
+                    'nodeIdA':int(edg_neigh[0]),
+                    'nodeIdB':int(edg_neigh[1]),
+                    'connectedEdgesA':connectedEdgesA.tolist(),
+                    'connectedEdgesB':connectedEdgesB.tolist()
                     }
 
         return edg_stats
