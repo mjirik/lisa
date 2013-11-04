@@ -86,6 +86,16 @@ ověřeno pro python 2.7 32
 nainstalovat mingw
 
 
+Instalace na Windows 2 (4.11.2013)
+==================================
+
+
+* Python XY (http://code.google.com/p/pythonxy/)
+
+
+
+
+
 Testování funkčnosti windows pomocí wine
 ========================================
 
