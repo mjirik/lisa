@@ -211,22 +211,34 @@ class SkeletonAnalyser:
         
 
         """
-        if self.volume_data is not None:
-            skdst = self.__radius_analysis_init()
-
-        stats = {}
-        len_edg = np.max(self.sklabel)
-        len_edg = 30
-        
-        for edg_number in range (1,len_edg):
-            edgst = self.__connection_analysis(edg_number)
-            edgst.update(self.__edge_length(edg_number))
-            edgst.update(self.__edge_curve(edg_number, edgst))
-            edgst.update(self.__edge_vectors(edg_number, edgst))
-            #edgst = edge_analysis(sklabel, i)
+        fast = True
+        if not fast:
             if self.volume_data is not None:
-                edgst['radius'] = float(self.__radius_analysis(skdst, edg_number))
-            stats[edgst['id']] = edgst
+                skdst = self.__radius_analysis_init()
+
+            stats = {}
+            len_edg = np.max(self.sklabel)
+            len_edg = 30
+            
+            for edg_number in range (1,len_edg):
+                edgst = self.__connection_analysis(edg_number)
+                edgst.update(self.__edge_length(edg_number))
+                edgst.update(self.__edge_curve(edg_number, edgst))
+                edgst.update(self.__edge_vectors(edg_number, edgst))
+                #edgst = edge_analysis(sklabel, i)
+                if self.volume_data is not None:
+                    edgst['radius'] = float(self.__radius_analysis(skdst, edg_number))
+                stats[edgst['id']] = edgst
+            
+#save data for faster debug
+            struct = {'sVD':self.volume_data, 'stats':stats, 'len_edg':len_edg}
+            misc.obj_to_file(struct, filename='tmp.pkl', filetype='pickle')
+        else:
+            struct = misc.obj_from_file(filename='tmp.pkl', filetype='pickle')
+            self.volume_data = struct['sVD']
+            stats = struct['stats']
+            len_edg = struct['len_edg']
+
 
         #@TODO dokončit
         for edg_number in range (1,len_edg):
@@ -304,6 +316,7 @@ class SkeletonAnalyser:
         out = {}
         vectorA = stats[edg_number]['vectorA']
         vectorB = stats[edg_number]['vectorB']
+        import pdb; pdb.set_trace()
         try:
             vectorA0 = self.__vector_of_connected_edge(edg_number, stats, 'A', 0)
             angleA0 = np.arccos(np.dot(vectorA, vectorA0))
@@ -311,12 +324,12 @@ class SkeletonAnalyser:
         except Exception as e:
             #print (e)
             #traceback.print_exc()
-            print ("connected edge (number ", edg_number, ") vectorA not found")
+            print ("connected edge (number ", edg_number, ") vectorA not found 0")
 
         try:
             vectorA1 = self.__vector_of_connected_edge(edg_number, stats, 'A', 1)
         except Exception as e:
-            print ("connected edge (number ", edg_number, ") vectorA not found")
+            print ("connected edge (number ", edg_number, ") vectorA not found 1")
 
         angleA0 = 0
         return out
