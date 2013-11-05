@@ -37,6 +37,8 @@ import misc
 
 
 GAUSSIAN_SIGMA = 1
+fast_debug = False
+fast_debug = True
 
 
 class HistologyAnalyser:
@@ -49,46 +51,54 @@ class HistologyAnalyser:
 
     def run(self):
         #self.preprocessing()
-
-        data3d_thr = segmentation.vesselSegmentation(
-            self.data3d,
-            segmentation = np.ones(self.data3d.shape, dtype='int8'),
-            #segmentation = oseg.orig_scale_segmentation,
-            threshold = -1,
-            inputSigma = 0.15,
-            dilationIterations = 2,
-            nObj = 1,
-            biggestObjects = False,
-#        dataFiltering = True,
-            interactivity = True,
-            binaryClosingIterations = 5,
-            binaryOpeningIterations = 1)
-        #self.data3d_thri = self.muxImage(
-        #        self.data3d_thr2.astype(np.uint16),
-        #        metadata
-        #        )
-        #sitk.Show(self.data3d_thri)
-
-        #self.data3di = self.muxImage(
-        #        self.data3d.astype(np.uint16),
-        #        metadata
-        #        )
-        #sitk.Show(self.data3di)
-
         app = QApplication(sys.argv)
+        if not fast_debug:
 
-        #app.exec_()
+            data3d_thr = segmentation.vesselSegmentation(
+                self.data3d,
+                segmentation = np.ones(self.data3d.shape, dtype='int8'),
+                #segmentation = oseg.orig_scale_segmentation,
+                threshold = -1,
+                inputSigma = 0.15,
+                dilationIterations = 2,
+                nObj = 1,
+                biggestObjects = False,
+#        dataFiltering = True,
+                interactivity = True,
+                binaryClosingIterations = 5,
+                binaryOpeningIterations = 1)
+            #self.data3d_thri = self.muxImage(
+            #        self.data3d_thr2.astype(np.uint16),
+            #        metadata
+            #        )
+            #sitk.Show(self.data3d_thri)
 
-        print "skelet"
-        data3d_thr = (data3d_thr > 0).astype(np.int8)
-        data3d_skel = skelet3d.skelet3d(data3d_thr)
+            #self.data3di = self.muxImage(
+            #        self.data3d.astype(np.uint16),
+            #        metadata
+            #        )
+            #sitk.Show(self.data3di)
 
-       # pyed = seqt.QTSeedEditor(
-       #         data3d, 
-       #         contours=data3d_thr.astype(np.int8),
-       #         seeds=data3d_skel.astype(np.int8)
-       #         )
-        #app.exec_()
+
+            #app.exec_()
+
+            print "skelet"
+            data3d_thr = (data3d_thr > 0).astype(np.int8)
+            data3d_skel = skelet3d.skelet3d(data3d_thr)
+
+        # pyed = seqt.QTSeedEditor(
+        #         data3d, 
+        #         contours=data3d_thr.astype(np.int8),
+        #         seeds=data3d_skel.astype(np.int8)
+        #         )
+            #app.exec_()
+            struct = {'sk':data3d_skel, 'thr': data3d_thr}
+            misc.obj_to_file(struct, filename='tmp0.pkl', filetype='pickle')
+        else:
+            struct = misc.obj_from_file(filename='tmp0.pkl', filetype='pickle')
+            data3d_skel = struct['sk']
+            data3d_thr = struct['thr']
+
         skan = SkeletonAnalyser(data3d_skel, volume_data=data3d_thr)
         data3d_nodes_vis = skan.sklabel.copy()
 # edges
@@ -211,8 +221,7 @@ class SkeletonAnalyser:
         
 
         """
-        fast = True
-        if not fast:
+        if not fast_debug:
             if self.volume_data is not None:
                 skdst = self.__radius_analysis_init()
 
@@ -319,8 +328,9 @@ class SkeletonAnalyser:
         import pdb; pdb.set_trace()
         try:
             vectorA0 = self.__vector_of_connected_edge(edg_number, stats, 'A', 0)
+            print 'va ', vectorA0
             angleA0 = np.arccos(np.dot(vectorA, vectorA0))
-            out.update({'angleA0':angleA0.tolist()})
+            out.update({'angleAa0':angleA0.tolist()})
         except Exception as e:
             #print (e)
             #traceback.print_exc()
