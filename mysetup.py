@@ -229,7 +229,12 @@ def get_sample_data():
     datafile = zipfile.ZipFile(local_file_name)
     #datafile.setpassword('queetech')
     datafile.extractall('./sample_data/')
-    os.remove(local_file_name)
+    try:
+        os.remove(local_file_name)
+    except Exception as e:
+        print ("Cannot remove file '" + local_file_name + "'. Please remove\
+        it manually.")
+            #print (e)
 
 # get jatra_06mm_jenjatra
 
