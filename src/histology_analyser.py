@@ -227,7 +227,7 @@ class SkeletonAnalyser:
 
             stats = {}
             len_edg = np.max(self.sklabel)
-            len_edg = 30
+            #len_edg = 30
             
             for edg_number in range (1,len_edg):
                 edgst = self.__connection_analysis(edg_number)
@@ -285,6 +285,29 @@ class SkeletonAnalyser:
 
         return {'vectorA':vectorA.tolist(), 'vectorB': vectorB.tolist()}
 
+    def __vectors_to_angle_deg(self, v1, v2):
+        """
+        Return angle of two vectors in degrees
+        """
+# get normalised vectors
+        v1u = v1/np.linalg.norm(v1)
+        v2u = v2/np.linalg.norm(v2)
+        print 'v1u ', v1u, ' v2u ', v2u
+
+        angle = np.arccos(np.dot(v1u, v2u))
+# special cases
+        if np.isnan(angle):
+            if (v1u == v2u).all():
+                angle == 0
+            else:
+                angle == np.pi
+
+        angle_deg = np.degrees(angle)
+
+        print 'angl ', angle, ' angl_deg ', angle_deg
+        return angle_deg
+
+
     def __vector_of_connected_edge(self, 
             edg_number, 
             stats,
@@ -317,29 +340,37 @@ class SkeletonAnalyser:
 
         return vector
 
+    def __connected_edge_angle_on_one_end(self, edg_number, stats, edg_end):
+        out = {}
+
+        return out
+
+
     def __connected_edge_angle(self, edg_number, stats):
         """
         count angles betwen end vectors of edges
         """
 
         out = {}
-        vectorA = stats[edg_number]['vectorA']
-        vectorB = stats[edg_number]['vectorB']
-        import pdb; pdb.set_trace()
+        try:
+            vectorA = stats[edg_number]['vectorA']
+            vectorB = stats[edg_number]['vectorB']
+        except Exception as e:
+            traceback.print_exc()
         try:
             vectorA0 = self.__vector_of_connected_edge(edg_number, stats, 'A', 0)
-            print 'va ', vectorA0
-            angleA0 = np.arccos(np.dot(vectorA, vectorA0))
-            out.update({'angleAa0':angleA0.tolist()})
+            #angleA0a = np.arccos(np.dot(vectorA, vectorA0))
+            angleA0 = self.__vectors_to_angle_deg(vectorA, vectorA0)
+            print 'va ', vectorA0, 'a0a', angleA0, 'a0', angleA0
+            out.update({'angleA0':angleA0.tolist()})
         except Exception as e:
-            #print (e)
-            #traceback.print_exc()
-            print ("connected edge (number ", edg_number, ") vectorA not found 0")
+            traceback.print_exc()
+            print ("connected edge (number " + str(edg_number) + ") vectorA not found 0 " )
 
         try:
             vectorA1 = self.__vector_of_connected_edge(edg_number, stats, 'A', 1)
         except Exception as e:
-            print ("connected edge (number ", edg_number, ") vectorA not found 1")
+            print ("connected edge (number " + str(edg_number) + ") vectorA not found 1")
 
         angleA0 = 0
         return out
@@ -617,7 +648,6 @@ if __name__ == "__main__":
     ha = HistologyAnalyser(data3d, metadata, args.threshold)
     ha.run()
     ha.writeStatsToCSV()
-    import pdb; pdb.set_trace()
     ha.writeStatsToYAML()
     #ha.show()
     
