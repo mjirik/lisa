@@ -162,5 +162,49 @@ instalace gco
 git clone pycat
 
 
+Install Mac OS
+==============
+
+git - instalátor
+pro nainstalování bylo nutné povolit instalace nejen od známých vývojářů, ale z libovolného zdroje. To se dělá v nastavení - zabezpečení a soukromí - obecné - povolit aplikace stažené z libovolného zdroje
+
+xcode - z appstore
+nutný update, k tomu jsem si musel udělat appleID
+
+gco_python
+
+git clone https://github.com/amueller/gco_python.git
+
+
+sudo easy install cython
+
+
+#mac
+curl -O http://vision.csd.uwo.ca/code/gco-v3.0.zip
+
+make
+
+
+ale pak pád
+
+instalace scipy patrně takto
+https://github.com/fonnesbeck/ScipySuperpack
+
+
+
+
+
+
+
+
+
+přepsal jsem kody na gco_python. Přidal jsem všude this->
+
+chybí pyqt
+sudo port selfupdate
+sudo port py27-pyqy4
+
+sudo easy_install scipy - nefunguje
+sudo port install py27-numpy py27-scipy py27-matplotlib py27-ipython +notebook py27-pandas py27-sympy py27-nose
 
 
