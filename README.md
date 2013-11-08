@@ -32,6 +32,11 @@ SimpleITK is not in ubuntu packages. You can use easy_install
 On Window, you can use Python XY (http://code.google.com/p/pythonxy/) and
 packages by Christoph Gohlke (http://www.lfd.uci.edu/~gohlke/pythonlibs/)
 
+On Mac, see notes.txt 
+(https://github.com/mjirik/liver-surgery/blob/master/notes.txt)  
+and pyseg_base install notes 
+(https://github.com/mjirik/pyseg_base/blob/master/INSTALL)
+
 
 Install
 -------
