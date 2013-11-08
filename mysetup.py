@@ -4,6 +4,7 @@ import os
 import zipfile
 import subprocess
 import sys
+import traceback
 
 import logging
 logger = logging.getLogger(__name__)
@@ -14,6 +15,7 @@ if sys.version_info < (3,0):
     import urllib as urllibr
 else:
     import urllib.request as urllibr
+
 
 
 
@@ -207,6 +209,14 @@ def windows_build_gco():
 
     #subprocess.call('envinstall\envwindows.bat')
 
+def remove(local_file_name):
+    try:
+        os.remove(local_file_name)
+    except Exception as e:
+        print ("Cannot remove file '" + local_file_name + "'. Please remove\
+        it manually.")
+        print (e)
+
 def get_sample_data():
 # download sample data
     print('Downloading sample data')
@@ -229,12 +239,7 @@ def get_sample_data():
     datafile = zipfile.ZipFile(local_file_name)
     #datafile.setpassword('queetech')
     datafile.extractall('./sample_data/')
-    try:
-        os.remove(local_file_name)
-    except Exception as e:
-        print ("Cannot remove file '" + local_file_name + "'. Please remove\
-        it manually.")
-            #print (e)
+    remove(local_file_name)
 
 # get jatra_06mm_jenjatra
 
@@ -245,14 +250,14 @@ def get_sample_data():
     urllibr.urlretrieve(url, local_file_name)
     datafile = zipfile.ZipFile(local_file_name)
     datafile.extractall('./sample_data/')
-    os.remove(local_file_name)
+    remove(local_file_name)
 # get jatra 5mm
     url = "http://147.228.240.61/queetech/sample-data/jatra_5mm.zip"
     local_file_name = './sample_data/jatra_5mm.zip'
     urllibr.urlretrieve(url, local_file_name)
     datafile = zipfile.ZipFile(local_file_name)
     datafile.extractall('./sample_data/')
-    os.remove(local_file_name)
+    remove(local_file_name)
 
 #get volumetry sample
     url = "http://147.228.240.61/queetech/sample-data/volumetrie.zip"
@@ -260,7 +265,7 @@ def get_sample_data():
     urllibr.urlretrieve(url, local_file_name)
     datafile = zipfile.ZipFile(local_file_name)
     datafile.extractall('./sample_data/')
-    os.remove(local_file_name)
+    remove(local_file_name)
 
 # get organ.pkl and vessels.pkl
     url = "http://147.228.240.61/queetech/sample-data/organ.pkl.zip"
@@ -268,14 +273,14 @@ def get_sample_data():
     urllibr.urlretrieve(url, local_file_name)
     datafile = zipfile.ZipFile(local_file_name)
     datafile.extractall('./sample_data/')
-    os.remove(local_file_name)
+    remove(local_file_name)
 
     url = "http://147.228.240.61/queetech/sample-data/vessels.pkl.zip"
     local_file_name = './sample_data/vessels.pkl.zip'
     urllibr.urlretrieve(url, local_file_name)
     datafile = zipfile.ZipFile(local_file_name)
     datafile.extractall('./sample_data/')
-    os.remove(local_file_name)
+    remove(local_file_name)
 
 def windows_get_gco():
     url = "http://147.228.240.61/queetech/install/pygco-py27-32bit/pygco.pyd"
