@@ -1,55 +1,63 @@
+
 Install Mac OS
 ==============
 
-* GIT
 
-Use mac installer  (http://git-scm.com/download/mac)
-
-There is a need to allow install applications from unknown developers
-(Settings - Security & Privacy - General - Allow applications downloaded from)
-
-* Xcode, gcc and make 
-
-Install Xcode from appstore. You will need an AppleID.
-Then add terminal tools (http://stackoverflow.com/questions/10265742/how-to-install-make-and-gcc-on-a-mac)
-
-* MacPorts
+ * GIT
  
-Use standard pkg package. (http://www.macports.org/install.php)
-Tested on Mountain Lion installer 
-(https://distfiles.macports.org/MacPorts/MacPorts-2.2.1-10.8-MountainLion.pkg
+    Use mac installer  (http://git-scm.com/download/mac)
+    There is a need to allow install applications from unknown developers
+    (Settings - Security & Privacy - General - Allow applications downloaded from)
+
+ * Xcode, gcc and make
+
+    Install Xcode from appstore. You will need an AppleID.
+    Then add terminal tools (http://stackoverflow.com/questions/10265742/how-to-install-make-and-gcc-on-a-mac)
+
+ * MacPorts
+
+    Use standard pkg package. (http://www.macports.org/install.php)
+    Tested on Mountain Lion installer 
+    (https://distfiles.macports.org/MacPorts/MacPorts-2.2.1-10.8-MountainLion.pkg
 
 
-* Numpy, Scipy, ...
+ * Numpy, Scipy, ...
 
-    sudo port selfupdate
-    sudo port upgrade outdated
-    sudo port install py27-pyqt4 py27-numpy py27-scipy py27-matplotlib py27-ipython +notebook py27-pandas py27-sympy py27-nose  py-scikit-learn py-pydicom
 
-* Select default python
+        sudo port selfupdate
+        sudo port upgrade outdated
+        sudo port install py27-pyqt4 py27-numpy py27-scipy py27-matplotlib py27-ipython +notebook py27-pandas py27-sympy py27-nose  py-scikit-learn py-pydicom
 
-    sudo port select --set python python27
+ * Select default python
 
-* cython
 
-    sudo easy_install cython
+        sudo port select --set python python27
 
-* gco_python
+ * Cython
 
-See install notes to pyseg_base (https://github.com/mjirik/pyseg_base/blob/master/INSTALL).
-If there is a problem with clang compiler, you are should edit gco 
-source files and add "this->" string. Also you can use patch from pyseg_base
 
-* source files
+        sudo easy_install cython
 
-    git clone git@github.com:mjirik/pyseg_base.git
-    git submodule update --init --recursive
+ * gco_python
+
+    See install notes to pyseg_base (https://github.com/mjirik/pyseg_base/blob/master/INSTALL).
+    If there is a problem with clang compiler, you are should edit gco 
+    source files and add "this->" string. Also you can use patch from pyseg_base
+
+ * source files
+
+
+        git clone git@github.com:mjirik/pyseg_base.git
+        git submodule update --init --recursive
+
+
 
 
 Instalace Ubuntu 12.04
 ======================
 
-sudo apt-get install python-numpy python-scipy python-matplotlib
+
+    sudo apt-get install python-numpy python-scipy python-matplotlib
 
 
 Instalace Windows
@@ -57,25 +65,25 @@ Instalace Windows
 
 http://www.lfd.uci.edu/~gohlke/pythonlibs/
 
-0*) Python
-1*) Numpy (musi byt nainstalovan drive nez Scipy)
-2*) Scipy (musi byt nainstalovan po Numpy)
+1. Python (*)
+2. Numpy (musi byt nainstalovan drive nez Scipy) (*)
+3. Scipy (musi byt nainstalovan po Numpy) (*)
 
 *) Poznamky:
 	Je potreba pozorne volit 64/32 bit knihovny a nezamenovat je. Python, i knihovny museji byt jen 64 bit nebo jen 32 bit. Doporucujeme uzivat Numpy MKL. Jsou to vypocetni optimalizace, ktere pozdeji pozadujici navazujici baliky.
 
 Errory:
-	1) V pripade zavaznejsich problemu (tzn. nefunkcnost) 	vymazat dane verze Pythonu, Numpy a Scipy a preinstalovat 	je.
-	2) Resit na strankach vyrobce softwaru.
+
+1. V pripade zavaznejsich problemu (tzn. nefunkcnost) 	vymazat dane verze Pythonu, Numpy a Scipy a preinstalovat 	je.
+2. Resit na strankach vyrobce softwaru.
 
 Dodatecne instalace:
-	1) matplotlib
-		Navod je zde:
-			http://matplotlib.org/users/installing.html
-		Melo by stacit ze stranky
-		http://sourceforge.net/projects/matplotlib/files/ 
-		ve slozce "matplotlib" stahnout prislusnou verzi 			matplotlib a nainstalovat po nainstalovani Numpy 
-		a Scipy.
+
+1. matplotlib
+    Navod je zde: (http://matplotlib.org/users/installing.html)
+    Melo by stacit ze stranky (http://sourceforge.net/projects/matplotlib/files/)
+    ve slozce "matplotlib" stahnout prislusnou verzi matplotlib a nainstalovat po nainstalovani Numpy a Scipy.
+
 
 gco_python v sedmi snadných krocích
 -----------------------------------
