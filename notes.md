@@ -1,4 +1,3 @@
-
 Install Mac OS
 ==============
 
@@ -94,8 +93,9 @@ ověřeno pro python 2.7 32
 
 2) Zdrojové kódy
     V zásadě je potřeba mít zdrojové kódy gco a gco_python.  
-    gco_python = "https://github.com/amueller/gco_python/archive/master.zip"
-    gco = "http://vision.csd.uwo.ca/code/gco-v3.0.zip"
+    
+        gco_python = "https://github.com/amueller/gco_python/archive/master.zip"
+        gco = "http://vision.csd.uwo.ca/code/gco-v3.0.zip"
 
     Gco se normálně překládá pomocí matlabu. My to uděláme jinak.
     Zdrojové kódy uspořádejme tak, že bude adresář gco_python se zdrojovými 
