@@ -15,6 +15,7 @@ from optparse import OptionParser
 import sys
 import vessel_cut
 import numpy as np
+import numpy as nm
 import scipy.ndimage
 import argparse
 
@@ -43,6 +44,7 @@ renWin = vtk.vtkRenderWindow()
 surface = vtk.vtkDataSetSurfaceFilter()
 app = QApplication(sys.argv)
 window = QtGui.QWidget()
+okno = QtGui.QWidget()
 
 
 
@@ -85,7 +87,7 @@ class QVTKViewer():
 
         pass
 ##------------------------------------------------------------------------------------------
-    def generate_mesh(self,segmentation,degrad = 4,voxelsize_mm = np.ones([3,1])):
+    def generate_mesh(self,segmentation,voxelsize_mm,degrad = 4):
         segmentation = segmentation[::degrad,::degrad,::degrad]
         segmentation = segmentation[:,::-1,:]
         print("Generuji data...")
@@ -93,10 +95,10 @@ class QVTKViewer():
         if True:
             for x in xrange (10):
                 mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
+        print("Done")
         vtk_file = "mesh_new.vtk"
         mesh_data.write(vtk_file)
         return vtk_file
-        print("Done")
 ##------------------------------------------------------------------------------------------
     '''
     Args:
@@ -157,6 +159,47 @@ class QVTKViewer():
             print(coordinates)
         except AttributeError:
             print('Neexistuje rovina rezu - Plane')
+
+    def close(self):
+        okno.close()
+
+    # slouzi k nastaveni velikosti voxelu
+    def Set_voxel_size(self):
+        '''
+        rozmer_x = QtGui.QInputDialog()
+        rozmer_y = QtGui.QInputDialog()
+        rozmer_z= QtGui.QInputDialog()
+        #.rozmer_x.getInteger(window,'Voxel_size', 'Rozmer voxelu v x:', QLineEdit.Normal)
+        #rozmer_y.getInteger(window, 'Voxel_size', 'Rozmer voxelu v y:', QLineEdit.Normal)
+        #rozmer_z.getInteger(window, 'Voxel_size', 'Rozmer voxelu v z:', QLineEdit.Normal)
+        okno.setWindowTitle("Voxel_size")
+        layout = QtGui.QGridLayout()
+        okno.setLayout(layout)
+        rozmer_x.setOptions(QInputDialog.NoButtons)
+        rozmer_y.setOptions(QInputDialog.NoButtons)
+        rozmer_z.setOptions(QInputDialog.NoButtons)
+        ok_button = QtGui.QPushButton()
+        ok_button.setText('Ok')
+        layout.addWidget(rozmer_x,0,2) 
+        layout.addWidget(rozmer_y,1,2)      
+        layout.addWidget(rozmer_z,2,2)
+        layout.addWidget(ok_button,3,2)
+        okno.connect(ok_button, QtCore.SIGNAL("clicked()"),(lambda y:lambda: self.close() )('Stisknuto : ok'))
+        okno.show()
+        renWin.Render()
+        iren.Start()
+        renWin.Finalize()
+   
+        #promen_z = QInputDialog()
+        #winter = QtCore.QStringList()
+        #winter = 'December, January, February'
+        #print winter
+        #promen_z.setComboBoxItems(winter)
+        print(rozmer_x)
+        print(rozmer_y)
+        print(rozmer_z)
+
+        '''
             
 ##------------------------------------------------------------------------------------------
     def buttons(self,window,grid):
@@ -187,6 +230,7 @@ class QVTKViewer():
         #button_vein.clicked.connect(self.vein_view)
         button_vein.show()
         '''
+        
         # Button plane
         button_plane = QtGui.QPushButton()
         button_plane.setText(unicode('plane'))
@@ -326,7 +370,7 @@ def main():
                       help='File as .vtk')
     parser.add_argument('-mode','--mode', default=None,
                       help='Mode for construction plane of resection')
-    parser.add_argument('-slab','--slab', default=None,
+    parser.add_argument('-slab','--slab', default = 'liver',
                       help='liver or porta - view')
     args = parser.parse_args()
 
@@ -337,23 +381,38 @@ def main():
     # vytvoreni okna
     window = QtGui.QWidget()
     grid = QtGui.QGridLayout()
-    window.setWindowTitle("3D liver");
+    window.setWindowTitle("3D liver")
     window.setLayout(grid)
     # vytvoreni vieweru a generovani dat
     viewer = QVTKViewer(args.picklefile,args.mode)
     accept = False
+    # dotaz na zadani rozmeru voxelu
+    
     
     if args.picklefile:
+        zadani_rozmeru = raw_input('Chcete zadat rozmery voxelu? Ano, Ne (standardni rozmer 1x1x1) : ')
+        if zadani_rozmeru == 'Ano':
+            print 'Stisknuto Ano'
+            rozmer_x = float(raw_input('Zadejte rozmer x: '))
+            rozmer_y = float(raw_input('Zadejte rozmer y: '))
+            rozmer_z = float(raw_input('Zadejte rozmer z: '))
+        else:
+            print 'Stisknuto Ne'
+            rozmer_x = 1
+            rozmer_y = 1
+            rozmer_z = 1
+        print ('x : ' ,rozmer_x, ' y : ' ,rozmer_y, ' z : ' ,rozmer_z)
+            
         data = misc.obj_from_file(args.picklefile, filetype = 'pickle')
         #segmentation = data['segmentation']
-        mesh = viewer.generate_mesh(data['segmentation'] == data['slab'][args.slab])
-        
+        mesh = viewer.generate_mesh(data['segmentation'] == data['slab'][args.slab],nm.array([rozmer_x, rozmer_y, rozmer_z]))
         if args.mode == 'View' or args.mode == None:
             accept = True
             viewer.View(mesh,accept)
         if args.mode == 'Cut':
             #viewer = QVTKViewer(data['segmentation'], data['voxelsize_mm'], data['slab'])
             accept = False
+            viewer.Set_voxel_size()
             viewer.View(mesh,accept)
             viewer.buttons(window,grid)
                         
@@ -364,6 +423,7 @@ def main():
         if args.mode == 'Cut':
             accept = False
             #viewer = QVTKViewer(data['segmentation'], data['voxelsize_mm'], data['slab'])
+            viewer.Set_voxel_size()
             viewer.View(args.vtkfile,accept)
             viewer.buttons(window,grid)
 
