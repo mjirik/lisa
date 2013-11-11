@@ -39,6 +39,7 @@ import segmentation
 import qmisc
 import misc
 import datareader
+import config
 
 def interactive_imcrop(im):
 
@@ -64,6 +65,8 @@ class OrganSegmentation():
             segparams={},
             roi=None,
  #           iparams=None,
+            output_label=1,
+            slab={},
             qt_app=None
             ):
         """
@@ -72,12 +75,17 @@ class OrganSegmentation():
              problem with correct coordinates
         data3d, metadata: it can be used for data loading not from directory.
             If both are setted, datadir is ignored
+        output_label: label for output segmented volume
+        slab: aditional label system for description segmented data 
+        {'none':0, 'liver':1, 'lesions':6}
         """
         self.iparams = {}
         self.datadir = datadir
 
 
         self.crinfo = [[0, -1], [0, -1], [0, -1]]
+        self.slab = slab
+        self.output_label = output_label
 
 
 
@@ -328,6 +336,7 @@ class OrganSegmentation():
 
 
 
+
         #print  np.sum(self.segmentation)*np.prod(self.voxelsize_mm)
 
 # @TODO odstranit hack pro oříznutí na stejnou velikost
@@ -357,10 +366,10 @@ class OrganSegmentation():
         if self.smoothing:
             self.segmentation_smoothing(self.smoothing_mm)
 
-        print 'crinfo: ', self.crinfo
-        print 'autocrop', self.autocrop
+        #print 'crinfo: ', self.crinfo
+        #print 'autocrop', self.autocrop
         if self.autocrop is True:
-            print 
+            #print 
             #import pdb; pdb.set_trace()
 
             tmpcrinfo = self._crinfo_from_specific_data(
@@ -382,6 +391,9 @@ class OrganSegmentation():
                     self.segmentation,
                     self.voxelsize_mm
                     )
+
+        # set label number
+        self.segmentation[self.segmentation == 1] = self.output_label
 #
 
     def interactivity(self, min_val=800, max_val=1300):
@@ -419,6 +431,8 @@ class OrganSegmentation():
             raise Exception("Interactive object segmentation failed.\
                     You must select seeds.")
         self.segmentation = (igc.segmentation == 0).astype(np.int8)
+
+# correct label
 
         self._interactivity_end(igc)
         #igc.make_gc()
@@ -570,6 +584,7 @@ class OrganSegmentation():
         slab['none'] = 0
         slab['liver'] = 1
         slab['lesions'] = 6
+        slab.update(self.slab)
 
         data = {}
         data['version'] = (1, 0, 1)
@@ -648,7 +663,6 @@ def readData3d(dcmdir):
 #QApplication
         qt_app = QtGui.QApplication(sys.argv)
         dcmdir = datareader.get_dcmdir_qt(qt_app)
-    print 'd : ', dcmdir
     reader = datareader.DataReader()
     data3d, metadata = reader.Get3DData(dcmdir)
 
@@ -692,6 +706,12 @@ def main():
             help='manual crop before data processing',
             default=None)
 
+    parser.add_argument('-ol', '--output_label', default=1,
+            help='label for segmented data')
+    parser.add_argument('--slab', 
+            default='{}', 
+            help='labels for segmentation,\
+                    example -slab "{\'liver\':1, \'lesions\':6}"')
     parser.add_argument('-acr', '--autocrop', 
             help='automatic crop after data processing',
             default=True)
@@ -738,6 +758,7 @@ def main():
 
     #  
     args.segparams = eval(args.segparams)
+    args.slab = eval(args.slab)
 
 
     args.viewermin = eval(args.viewermin)
@@ -777,6 +798,8 @@ def main():
                 smoothing=args.segmentation_smoothing,
 #            iparams=args.iparams,
                 segparams=args.segparams,
+                output_label=args.output_label,
+                slab=args.slab,
                 qt_app=qt_app
                 )
 
@@ -804,9 +827,9 @@ def main():
     if args.show_output:
         oseg.show_output()
 
-    savestring = raw_input('Save output data? (y/n): ')
+    savestring = raw_input('Save output data? Yes/No/All with input data (y/n/a): ')
     #sn = int(snstring)
-    if savestring in ['Y', 'y','r','R']:
+    if savestring in ['Y', 'y','a','A']:
 # rename
 
         data = oseg.export()
@@ -814,7 +837,7 @@ def main():
         iparams = oseg.get_iparams()
         #import pdb; pdb.set_trace()
         pth, filename = os.path.split(iparams['datadir'])
-        if savestring in ['r','R']:
+        if savestring in ['a','A']:
 # save renamed file too
             misc.obj_to_file(data, 'organ_big-'+ filename + '.pklz', filetype='pklz')
         misc.obj_to_file(data, "organ.pklz", filetype='pklz')

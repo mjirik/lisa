@@ -38,7 +38,7 @@ import misc
 
 GAUSSIAN_SIGMA = 1
 fast_debug = False
-fast_debug = True
+#fast_debug = True
 
 
 class HistologyAnalyser:
@@ -227,7 +227,7 @@ class SkeletonAnalyser:
 
             stats = {}
             len_edg = np.max(self.sklabel)
-            #len_edg = 30
+            len_edg = 30
             
             for edg_number in range (1,len_edg):
                 edgst = self.__connection_analysis(edg_number)
