@@ -18,7 +18,6 @@ import numpy as np
 
 
 import dcmreaddata as dcmr
-import lesions
 
 class LesionsTest(unittest.TestCase):
 
@@ -29,6 +28,7 @@ class LesionsTest(unittest.TestCase):
         """
         Function uses lesions  automatic localization in synthetic data.
         """
+        import lesions
         #dcmdir = os.path.join(path_to_script,'./../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
 # data
         slab = {'none':0, 'liver':1, 'porta':2, 'lesions':6}

@@ -70,8 +70,8 @@ class VesselsSegmentationTest(unittest.TestCase):
        # pyed.show()
 
         outputTmp = segmentation.vesselSegmentation(
-            data3d,
-            segmentation = segm==slab['liver'],
+            data3d, #.astype(np.uint8),
+            segmentation = (segm==slab['liver']), #.astype(np.uint8),
             #segmentation = oseg.orig_scale_segmentation,
             voxelsize_mm = voxelsize_mm,
             threshold = 180,
