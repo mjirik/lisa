@@ -102,6 +102,11 @@ def get_features(data3d_orig, data3d_seg, visualization=True):
     return featur
 
 
+# @TODO dodělat rozsekávač
+def cutter(data3d_orig, data3d_seg, size ):
+
+    pass
+
 
 
 
