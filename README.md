@@ -1,7 +1,8 @@
-liver-surgery
+LISA 
 =============
 
-Coputer-assisted liver surgery. 
+LIver Surgery Analyser.
+
 
 
 Requirements
