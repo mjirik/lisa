@@ -49,7 +49,7 @@ def interactive_imcrop(im):
 class OrganSegmentation():
     def __init__(
             self,
-            datadir=None,
+            datapath=None,
             working_voxelsize_mm=1,
             series_number=None,
             autocrop=True,
@@ -70,17 +70,17 @@ class OrganSegmentation():
             qt_app=None
             ):
         """
-        datadir: path to directory with dicom files
+        datapath: path to directory with dicom files
         manualroi: manual set of ROI before data processing, there is a
              problem with correct coordinates
         data3d, metadata: it can be used for data loading not from directory.
-            If both are setted, datadir is ignored
+            If both are setted, datapath is ignored
         output_label: label for output segmented volume
         slab: aditional label system for description segmented data 
         {'none':0, 'liver':1, 'lesions':6}
         """
         self.iparams = {}
-        self.datadir = datadir
+        self.datapath = datapath
 
 
         self.crinfo = [[0, -1], [0, -1], [0, -1]]
@@ -93,32 +93,32 @@ class OrganSegmentation():
         # TODO uninteractive Serie selection
         if data3d is None or metadata is None:
 
-            if self.iparams.has_key('datadir'):
-                datadir = self.iparams['datadir']
+            if self.iparams.has_key('datapath'):
+                datapath = self.iparams['datapath']
 
 
-            #self.data3d, self.metadata = dcmr.dcm_read_from_dir(datadir)
-            if datadir == None:
+            #self.data3d, self.metadata = dcmr.dcm_read_from_dir(datapath)
+            if datapath == None:
                 self.process_qt_app()
-                datadir = dcmr.get_dcmdir_qt(self.qt_app)
+                datapath = dcmr.get_dcmdir_qt(self.qt_app)
 
 
             # @TODO dialog v qt
-            #reader = dcmr.DicomReader(datadir) # , qt_app=qt_app)
+            #reader = dcmr.DicomReader(datapath) # , qt_app=qt_app)
             #self.data3d = reader.get_3Ddata()
             #self.metadata = reader.get_metaData()
             reader = datareader.DataReader()
-            self.data3d, self.metadata = reader.Get3DData(datadir)
+            self.data3d, self.metadata = reader.Get3DData(datapath)
             self.iparams['series_number'] = self.metadata['series_number']
-            self.iparams['datadir'] = datadir
+            self.iparams['datapath'] = datapath
         else:
             self.data3d = data3d
             # default values are updated in next line
-            self.metadata = {'series_number':-1, 'voxelsize_mm':1, 'datadir':None}
+            self.metadata = {'series_number':-1, 'voxelsize_mm':1, 'datapath':None}
             self.metadata.update(metadata)
 
             self.iparams['series_number'] = self.metadata['series_number']
-            self.iparams['datadir'] = self.metadata['datadir']
+            self.iparams['datapath'] = self.metadata['datapath']
 
 
             self.orig_shape = self.data3d.shape
@@ -226,7 +226,7 @@ class OrganSegmentation():
 #            pass
 #
 #        self.iparams = iparams
-        print 'dir ', self.iparams['datadir'],", series_number", self.iparams['series_number'], 'voxelsize_mm', self.voxelsize_mm
+        print 'dir ', self.iparams['datapath'],", series_number", self.iparams['series_number'], 'voxelsize_mm', self.voxelsize_mm
 
     def process_qt_app(self):
         """
@@ -689,7 +689,7 @@ def main():
             description='Segment vessels from liver \n\
                     \npython organ_segmentation.py\n\
                     \npython organ_segmentation.py -mroi -vs 0.6')
-    parser.add_argument('-dd', '--dcmdir',
+    parser.add_argument('-dd', '--datapath',
             default=None,
             help='path to data dir')
     parser.add_argument('-d', '--debug', action='store_true',
@@ -725,11 +725,11 @@ def main():
             default='{}', 
             help='params for segmentation,\
             example -sp "{\'pairwise_alpha_per_mm2\':90}"')
-    parser.add_argument('-tx', '--textureanalysis', action='store_true',
+    parser.add_argument('-tx', '--texture_analysis', action='store_true',
             help='run with texture analysis')
     parser.add_argument('-exd', '--exampledata', action='store_true',
             help='run unittest')
-    parser.add_argument('-ed', '--editdata', action='store_true',
+    parser.add_argument('-ed', '--edit_data', action='store_true',
             help='Run data editor')
     parser.add_argument('-vmax', '--viewermax', type=str, #type=int,
             help='Maximum of viewer window, set None for automatic maximum.',
@@ -752,7 +752,6 @@ def main():
     args = vars(args_obj)
     oseg_argspec = config.get_default_function_config(OrganSegmentation.__init__)
 
-    #import pdb; pdb.set_trace()
 
 
 
@@ -769,8 +768,6 @@ def main():
 
     args["viewermin"] = eval(args["viewermin"])
     args["viewermax"] = eval(args["viewermax"])
-#    print type(args["segparams"])
-#    args["segparams"]['hu']=1
 
     if args["debug"]:
         logger.setLevel(logging.DEBUG)
@@ -778,7 +775,7 @@ def main():
 
     if args["exampledata"]:
 
-        args["dcmdir"] = '../sample_data/\
+        args["datapath"] = '../sample_data/\
                 matlab/examples/sample_data/DICOM/digest_article/'
 
     if args["iparams"] is not None:
@@ -790,27 +787,14 @@ def main():
     #else:
     #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
-        data3d, metadata, qt_app = readData3d(args["dcmdir"])
+        data3d, metadata, qt_app = readData3d(args["datapath"])
 
         t0 = time.time()
-        oseg_params = {
-                "datadir":None, #args.dcmdir,
-                "data3d":data3d,
-                "metadata":metadata,
-                "working_voxelsize_mm":args["working_voxelsize_mm"],
-                "manualroi":args["manualroi"],
-                "texture_analysis":args["textureanalysis"],
-                "autocrop":args["autocrop"],
-                "edit_data":args["editdata"],
-                "smoothing":args["segmentation_smoothing"],
-#            iparams:args.iparams,
-                "segparams":args["segparams"],
-                "output_label":args["output_label"],
-                "slab":args["slab"],
-                "qt_app":qt_app
-                }
-        # @TODO
-        #oseg_params = config.subdict(args, oseg_argspec[0])
+
+        oseg_params = config.subdict(args, oseg_argspec[0])
+	oseg_params["data3d"] = data3d
+	oseg_params["metadata"] = metadata
+        import pdb; pdb.set_trace()
         oseg = OrganSegmentation(**oseg_params)
         
 
@@ -850,7 +834,7 @@ def main():
         data['version'] = qmisc.getVersionString()
         iparams = oseg.get_iparams()
         #import pdb; pdb.set_trace()
-        pth, filename = os.path.split(iparams['datadir'])
+        pth, filename = os.path.split(iparams['datapath'])
         if savestring in ['a','A']:
 # save renamed file too
             misc.obj_to_file(data, 'organ_big-'+ filename + '.pklz', filetype='pklz')

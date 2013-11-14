@@ -33,7 +33,11 @@ def get_default_function_config(p_fcn):
     return fcn_cfg 
 
 def subdict(bigdict, wanted_keys):
-    return dict([(i, bigdict[i]) for i in wanted_keys if i in bigdict])
+    ret = dict([(i, bigdict[i]) for i in wanted_keys if i in bigdict])
+    # @TODO not working for wanted_keys len == 1, I dont know why, hack fallows
+    if len(wanted_keys) == 1:
+        ret = {bigdict[wanted_keys[0]]}
+    return ret
 
 
 def save_config(cfg, pointer):
