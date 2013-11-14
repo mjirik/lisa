@@ -15,8 +15,26 @@ sys.path.append(os.path.join(path_to_script,
 import logging
 logger = logging.getLogger(__name__)
 
+import inspect
 
-def get_default_config(p_fcn):
-    pass
+
+import misc
+
+def load_config(filename):
+    if os.path.isfile(filename):
+        cfg = misc.obj_from_file(filename, filetype='yaml')
+    else:
+        # default config
+        pass
+
+def get_default_function_config(p_fcn):
+    #fcn_cfg = {p_fcn.__name__:inspect.getargspec(p_fcn)}
+    fcn_cfg = inspect.getargspec(p_fcn)
+    return fcn_cfg 
+
+def subdict(bigdict, wanted_keys):
+    return dict([(i, bigdict[i]) for i in wanted_keys if i in bigdict])
+
+
 def save_config(cfg, pointer):
     pass

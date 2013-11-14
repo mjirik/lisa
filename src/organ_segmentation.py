@@ -668,6 +668,9 @@ def readData3d(dcmdir):
 
     return data3d, metadata, qt_app
 
+def save_config(cfg, filename):
+    cfg
+    misc.obj_to_file(cfg, filename, filetype="yaml")
 
 
 def main():
@@ -691,7 +694,7 @@ def main():
             help='path to data dir')
     parser.add_argument('-d', '--debug', action='store_true',
             help='run in debug mode')
-    parser.add_argument('-vs', '--voxelsize_mm', default='3', type=str,
+    parser.add_argument('-vs', '--working_voxelsize_mm', default='3', type=str,
             help='Insert working voxelsize. It can be number or \
             array of three numbers. It is possible use original \n \
             resolution or half of original resolution. \n \
@@ -745,38 +748,41 @@ def main():
             help='Smoothing of output segmentation',
             default=False
             )
-    args = parser.parse_args()
+    args_obj = parser.parse_args()
+    args = vars(args_obj)
+    oseg_argspec = config.get_default_function_config(OrganSegmentation.__init__)
 
+    #import pdb; pdb.set_trace()
 
 
 
     # voxelsize_mm can be number or array
     #if args.voxelsize_mm != 'orig':
-    if not args.voxelsize_mm.startswith('orig'):
+    if not args["working_voxelsize_mm"].startswith('orig'):
         #import pdb; pdb.set_trace()
-        args.voxelsize_mm = eval(args.voxelsize_mm)
+        args["working_voxelsize_mm"] = eval(args["working_voxelsize_mm"])
 
     #  
-    args.segparams = eval(args.segparams)
-    args.slab = eval(args.slab)
+    args["segparams"] = eval(args["segparams"])
+    args["slab"] = eval(args["slab"])
 
 
-    args.viewermin = eval(args.viewermin)
-    args.viewermax = eval(args.viewermax)
-#    print type(args.segparams)
-#    args.segparams['hu']=1
+    args["viewermin"] = eval(args["viewermin"])
+    args["viewermax"] = eval(args["viewermax"])
+#    print type(args["segparams"])
+#    args["segparams"]['hu']=1
 
-    if args.debug:
+    if args["debug"]:
         logger.setLevel(logging.DEBUG)
 
 
-    if args.exampledata:
+    if args["exampledata"]:
 
-        args.dcmdir = '../sample_data/\
+        args["dcmdir"] = '../sample_data/\
                 matlab/examples/sample_data/DICOM/digest_article/'
 
-    if args.iparams is not None:
-        iparams = misc.obj_from_file(args.iparams, filetype='pickle')
+    if args["iparams"] is not None:
+        iparams = misc.obj_from_file(args["iparams"], filetype='pickle')
         t0 = time.time()
         oseg = OrganSegmentation(**iparams)
         
@@ -784,26 +790,34 @@ def main():
     #else:
     #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
-        data3d, metadata, qt_app = readData3d(args.dcmdir)
+        data3d, metadata, qt_app = readData3d(args["dcmdir"])
 
         t0 = time.time()
-        oseg = OrganSegmentation(None, #args.dcmdir,
-                data3d=data3d,
-                metadata=metadata,
-                working_voxelsize_mm=args.voxelsize_mm,
-                manualroi=args.manualroi,
-                texture_analysis=args.textureanalysis,
-                autocrop=args.autocrop,
-                edit_data=args.editdata,
-                smoothing=args.segmentation_smoothing,
-#            iparams=args.iparams,
-                segparams=args.segparams,
-                output_label=args.output_label,
-                slab=args.slab,
-                qt_app=qt_app
-                )
+        oseg_params = {
+                "datadir":None, #args.dcmdir,
+                "data3d":data3d,
+                "metadata":metadata,
+                "working_voxelsize_mm":args["working_voxelsize_mm"],
+                "manualroi":args["manualroi"],
+                "texture_analysis":args["textureanalysis"],
+                "autocrop":args["autocrop"],
+                "edit_data":args["editdata"],
+                "smoothing":args["segmentation_smoothing"],
+#            iparams:args.iparams,
+                "segparams":args["segparams"],
+                "output_label":args["output_label"],
+                "slab":args["slab"],
+                "qt_app":qt_app
+                }
+        # @TODO
+        #oseg_params = config.subdict(args, oseg_argspec[0])
+        oseg = OrganSegmentation(**oseg_params)
+        
 
-    oseg.interactivity(args.viewermin, args.viewermax)
+
+
+    oseg.interactivity(args["viewermin"], args["viewermax"])
+    
 
     #igc = pycut.ImageGraphCut(data3d, zoom = 0.5)
     #igc.interactivity()
@@ -824,7 +838,7 @@ def main():
     #pyed.show()
     print ("Total time: " + str (t1 - t0))
 
-    if args.show_output:
+    if args["show_output"]:
         oseg.show_output()
 
     savestring = raw_input('Save output data? Yes/No/All with input data (y/n/a): ')
