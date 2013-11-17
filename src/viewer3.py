@@ -50,18 +50,10 @@ okno = QtGui.QWidget()
 
 
 
-
-class normal_and_coordinates():
+        
+class Viewer():
     
-    def set_normal(self):
-        return normal
-        
-    def set_coordinates(self):
-        return coordinates
-
-
-        
-class QVTKViewer():
+    
     '''
     QVTKViewer(segmentation)
     QVTKViewer(segmentation, voxelsize_mm) # zobrazí vše, co je větší než nula
@@ -86,6 +78,13 @@ class QVTKViewer():
         self.mode = mode
 
         pass
+
+##------------------------------------------------------------------------------------------    
+    def set_normal(self,normal):
+        self.normal = normal
+        
+    def set_coordinates(self,coordinates):
+        self.coordinates = coordinates
 ##------------------------------------------------------------------------------------------
     def generate_mesh(self,segmentation,voxelsize_mm,degrad = 4):
         segmentation = segmentation[::degrad,::degrad,::degrad]
@@ -153,15 +152,12 @@ class QVTKViewer():
         global coordinates
         # pokud bylo stisknuto tlacitko Cut pred Plane, vypise chybu
         try:
-            normal = self.planew.GetNormal()
-            coordinates = self.planew.GetOrigin()
-            print(normal)
-            print(coordinates)
+            self.set_normal(self.planew.GetNormal())
+            self.set_coordinates(self.planew.GetOrigin())
+            print(self.normal)
+            print(self.coordinates)
         except AttributeError:
             print('Neexistuje rovina rezu - Plane')
-
-    def close(self):
-        okno.close()
 
     # slouzi k nastaveni velikosti voxelu
     def Set_voxel_size(self):
@@ -384,23 +380,21 @@ def main():
     window.setWindowTitle("3D liver")
     window.setLayout(grid)
     # vytvoreni vieweru a generovani dat
-    viewer = QVTKViewer(args.picklefile,args.mode)
+    viewer = Viewer(args.picklefile,args.mode)
     accept = False
     # dotaz na zadani rozmeru voxelu
     
     
     if args.picklefile:
-        zadani_rozmeru = raw_input('Chcete zadat rozmery voxelu? Ano, Ne (standardni rozmer 1x1x1) : ')
-        if zadani_rozmeru == 'Ano':
-            print 'Stisknuto Ano'
+        zadani_rozmeru = raw_input('Chcete zadat rozmery voxelu? (A)no, (N)e (standardni rozmer 1x1x1) : ')
+        if zadani_rozmeru == 'A':
             rozmer_x = float(raw_input('Zadejte rozmer x: '))
             rozmer_y = float(raw_input('Zadejte rozmer y: '))
             rozmer_z = float(raw_input('Zadejte rozmer z: '))
         else:
-            print 'Stisknuto Ne'
-            rozmer_x = 1
-            rozmer_y = 1
-            rozmer_z = 1
+            rozmer_x = 1.0
+            rozmer_y = 1.0
+            rozmer_z = 1.0
         print ('x : ' ,rozmer_x, ' y : ' ,rozmer_y, ' z : ' ,rozmer_z)
             
         data = misc.obj_from_file(args.picklefile, filetype = 'pickle')
