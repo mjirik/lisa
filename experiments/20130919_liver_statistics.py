@@ -39,6 +39,7 @@ import numpy as np
 import scipy
 #from scipy import sparse
 import traceback
+import itertools
 
 # ----------------- my scripts --------
 import py3DSeedEditor
@@ -94,7 +95,7 @@ def get_features(data3d_orig, data3d_seg, visualization=True):
     """
     featur = {}
     featur['hist'] = feat_hist(data3d_orig, data3d_seg, visualization)
-    featur['lbp'] = lbp(data3d_orig, data3d_seg, visualization)
+    #featur['lbp'] = lbp(data3d_orig, data3d_seg, visualization)
 
 
 
@@ -102,10 +103,37 @@ def get_features(data3d_orig, data3d_seg, visualization=True):
     return featur
 
 
-# @TODO dodělat rozsekávač
-def cutter(data3d_orig, data3d_seg, size ):
+def get_features_in_tiles(data3d_orig, data3d_seg, tile_shape):
+# @TODO here
+    cindexes = cutter_indexes(data3d_orig.shape, tile_shape)
+    for cindex in cindexes:
+        tile_orig = cut_tile(data3d_orig, cindex, tile_shape)
+        tile_seg = cut_tile(data3d_seg, cindex, tile_shape)
+        features_t = get_features(tile_orig, tile_seg)
+        if (tile_seg == 1).all(): 
+            pass
 
-    pass
+
+
+def cutter_indexes(shape, tile_shape):
+    """
+    shape: shape of cutted data
+    tile_shape: shape of tile
+
+    """
+    r0 = range(0,shape[0]-tile_shape[0] + 1, tile_shape[0])
+    r1 = range(1,shape[1]-tile_shape[1] + 1, tile_shape[1])
+    r2 = range(2,shape[2]-tile_shape[2] + 1, tile_shape[2])
+    r1 = range(0,shape[1], tile_shape[1])
+    r2 = range(0,shape[2], tile_shape[2])
+    cut_iterator = itertools.product(r0[:-1], r1[:-1], r2[:-1])
+    return list(cut_iterator)
+
+
+
+# @TODO dodělat rozsekávač
+def cut_tile(data3d, cindex, tile_shape ):
+    return data3d[cindex + np.array(tile_shape)]
 
 
 
@@ -203,6 +231,8 @@ def main():
             data3d_seg,
             visualization=args.visualization
             ))
+        tile_shape = [1,32,32]
+        get_features_in_tiles(data3d_orig, data3d_seg, tile_shape)
 
 
 
