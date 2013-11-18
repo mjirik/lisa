@@ -38,7 +38,7 @@ import misc
 
 GAUSSIAN_SIGMA = 1
 fast_debug = False
-#fast_debug = True
+fast_debug = True
 
 
 class HistologyAnalyser:
@@ -112,6 +112,7 @@ class HistologyAnalyser:
                 contours=data3d_thr.astype(np.int8)
                 )
         app.exec_()
+        import pdb; pdb.set_trace()
         stats = skan.skeleton_analysis()
         #data3d_nodes[data3d_nodes==3] = 2
         self.stats = stats
@@ -227,7 +228,7 @@ class SkeletonAnalyser:
 
             stats = {}
             len_edg = np.max(self.sklabel)
-            len_edg = 30
+            #len_edg = 30
             
             for edg_number in range (1,len_edg):
                 edgst = self.__connection_analysis(edg_number)
@@ -340,8 +341,71 @@ class SkeletonAnalyser:
 
         return vector
 
+    def perpendicular_to_two_vects(self, v1, v2):
+#determinant
+        a = (v1[1]*v2[2]) - (v1[2]*v2[1])
+        b = -((v1[0]*v2[2]) - (v1[2]*v2[0]))
+        c = (v1[0]*v2[1]) - (v1[1]*v2[0])
+        return [a,b,c]
+
+
+    def projection_of_vect_to_xy_plane(self, vect, xy1, xy2):
+        """
+        Return porojection of vect to xy plane given by vectprs xy1 and xy2
+        """
+        norm = self.perpendicular_to_two_vects(xy1, xy2)
+        vect_proj = np.array(vect) - (np.dot(vect,norm)/np.linalg.norm(norm)**2) * np.array(norm)
+        return vect_proj
+
     def __connected_edge_angle_on_one_end(self, edg_number, stats, edg_end):
+        """
+        edg_number: integer with edg_number
+        stats: dictionary with all statistics and computations
+        edg_end: letter 'A' or 'B'
+        creates phiXa, phiXb and phiXc. 
+        See Schwen2012 : Analysis and algorithmic generation of hepatic vascular system.
+        """
         out = {}
+
+        vector_key = 'vector' + edg_end
+        try:
+            vector = stats[edg_number][vector_key]
+        except Exception as e:
+            print (e)
+            #traceback.print_exc()
+
+        try:
+            vectorX0 = self.__vector_of_connected_edge(edg_number, stats, edg_end, 0)
+            phiXa = self.__vectors_to_angle_deg(vectorX0, vector)
+
+            out.update({'phiA0' + edg_end + 'a':phiXa.tolist()})
+        except Exception as e:
+            print (e)
+        try:
+            vectorX1 = self.__vector_of_connected_edge(edg_number, stats, edg_end, 1)
+        except Exception as e:
+            print (e)
+
+        try:
+
+            vect_proj = self.projection_of_vect_to_xy_plane(vector, vectorX0, vectorX1)
+            phiXa = self.__vectors_to_angle_deg(vectorX0, vectorX1)
+            phiXb = self.__vectors_to_angle_deg(vector, vect_proj)
+            vectorX01avg = \
+                    np.array(vectorX0/np.linalg.norm(vectorX0)) +\
+                    np.array(vectorX1/np.linalg.norm(vectorX1))
+            phiXc = self.__vectors_to_angle_deg(vectorX01avg, vect_proj)
+
+            out.update({
+                'phi' + edg_end + 'a':phiXa.tolist(),
+                'phi' + edg_end + 'b':phiXb.tolist(),
+                'phi' + edg_end + 'c':phiXc.tolist()
+                })
+
+
+        except Exception as e:
+            print (e)
+
 
         return out
 
@@ -372,6 +436,8 @@ class SkeletonAnalyser:
         except Exception as e:
             print ("connected edge (number " + str(edg_number) + ") vectorA not found 1")
 
+        out.update(self.__connected_edge_angle_on_one_end(edg_number, stats, 'A'))
+        out.update(self.__connected_edge_angle_on_one_end(edg_number, stats, 'B'))
         angleA0 = 0
         return out
 
