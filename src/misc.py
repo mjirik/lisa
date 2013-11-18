@@ -66,7 +66,7 @@ def obj_to_file(obj, filename = 'annotation.yaml', filetype = 'yaml'):
     elif filetype in ('picklezip', 'pklz'):
         import gzip
         import pickle
-        f = gzip.open(filename, 'wb', compresslevel=3)
+        f = gzip.open(filename, 'wb', compresslevel=1)
         #f = open(filename, 'wb')
         pickle.dump(obj,f)
         f.close

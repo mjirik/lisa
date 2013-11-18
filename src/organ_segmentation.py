@@ -57,7 +57,7 @@ class OrganSegmentation():
             autocrop_margin_mm=[10, 10, 10],
             manualroi=None,
             texture_analysis=None,
-            segmentation_smoothing=True,
+            segmentation_smoothing=False,
             smoothing_mm=4,
             data3d=None,
             metadata=None,
@@ -689,7 +689,8 @@ def main():
     cfgplus = {
             'datapath':None,
             'viewermax':300,
-            'viewermin':-100
+            'viewermin':-100,
+            'output_datapath':os.path.expanduser("~/lisa_data")
             }
 
     cfg = config.get_default_function_config(OrganSegmentation.__init__)
@@ -725,6 +726,9 @@ def main():
     parser.add_argument('-mroi', '--manualroi', action='store_true',
             help='manual crop before data processing',
             default=cfg["manualroi"])
+
+    parser.add_argument('-op', '--output_datapath', default=cfg["output_datapath"],
+            help='path for output data')
 
     parser.add_argument('-ol', '--output_label', default=1,
             help='label for segmented data')
@@ -813,6 +817,8 @@ def main():
     #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
         data3d, metadata, qt_app = readData3d(args["datapath"])
+        args['datapath'] = metadata['datadir']
+        
 
         t0 = time.time()
 
@@ -852,22 +858,35 @@ def main():
     savestring = raw_input('Save output data? Yes/No/All with input data (y/n/a): ')
     #sn = int(snstring)
     if savestring in ['Y', 'y','a','A']:
+        if not  os.path.exists(args["output_datapath"]):
+            os.makedirs(args['output_datapath'])
+
+        op = args['output_datapath']
 # rename
 
         data = oseg.export()
         data['version'] = qmisc.getVersionString()
         iparams = oseg.get_iparams()
         #import pdb; pdb.set_trace()
-        pth, filename = os.path.split(iparams['datapath'])
+        pth, filename = os.path.split(os.path.normpath(args['datapath']))
         if savestring in ['a','A']:
 # save renamed file too
-            misc.obj_to_file(data, 'organ_big-'+ filename + '.pklz', filetype='pklz')
-        misc.obj_to_file(data, "organ.pklz", filetype='pklz')
-        #misc.obj_to_file(data, "organ-"+ filename + ".pkl", filetype='pickle')
-        misc.obj_to_file(iparams, 'organ_iparams.pkl', filetype='pickle')
+            filepath = 'organ_big-'+ filename + '.pklz'
+            filepath = os.path.join(op,filename)
+            misc.obj_to_file(data, filepath, filetype='pklz')
+
+        filepath ='organ.pklz'
+        filepath = os.path.join(op,filepath)
+        misc.obj_to_file(data, filepath, filetype='pklz')
+
+        filepath='organ_iparams.pklz'
+        filepath = os.path.join(op, filepath)
+        misc.obj_to_file(iparams, filepath, filetype='pklz')
         #misc.obj_to_file(iparams, 'iparams-'+ filename + '.pkl', filetype='pickle')
         data ['data3d'] = None
-        misc.obj_to_file(data, 'organ_small-'+ filename + '.pklz', filetype='pklz')
+        filepath = 'organ_small-'+ filename + '.pklz'
+        filepath = os.path.join(op, filepath)
+        misc.obj_to_file(data, filepath, filetype='pklz')
     #output = segmentation.vesselSegmentation(oseg.data3d,
     # oseg.orig_segmentation)
 
