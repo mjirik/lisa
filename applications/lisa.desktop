@@ -1,0 +1,12 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Name=LISA
+GenericName=LISA
+Comment=LIver Surgery Analyser
+Exec=python ../src/organ_segmentation.py
+Terminal=false
+Type=Application
+Icon=/home/mjirik/projects/liver-surgery/applications/LISA256.png
+Categories=Network;FileTransfer;
+StartupNotify=false
