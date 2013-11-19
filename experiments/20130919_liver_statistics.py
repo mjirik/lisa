@@ -104,14 +104,30 @@ def get_features(data3d_orig, data3d_seg, visualization=True):
 
 
 def get_features_in_tiles(data3d_orig, data3d_seg, tile_shape):
+    """
+    cindexes: indexes of tiles
+    features_t: numpy array of features
+    segmentation_cover: np array with coverages of tiles with segmentation 
+    (float 0 by 1)
+
+    """
 # @TODO here
     cindexes = cutter_indexes(data3d_orig.shape, tile_shape)
-    for cindex in cindexes:
+    output = {}
+# create empty list of defined length
+    features_t = [None]*len(cindexes)
+    seg_cover_t = [None]*len(cindexes)
+    for i in range(0, len(cindexes)):
+        cindex = cindexes[i]
         tile_orig = cut_tile(data3d_orig, cindex, tile_shape)
         tile_seg = cut_tile(data3d_seg, cindex, tile_shape)
-        features_t = get_features(tile_orig, tile_seg)
-        if (tile_seg == 1).all(): 
-            pass
+        tf = get_features(tile_orig, tile_seg)
+        sc = np.sum(tile_seg > 0) / np.prod(tile_shape)
+        features_t[i] = tf
+        seg_cover_t[i] = sc
+    return cindexes, features_t, seg_cover_t
+        #if (tile_seg == 1).all(): 
+        #    pass
 
 
 
@@ -133,6 +149,7 @@ def cutter_indexes(shape, tile_shape):
 
 # @TODO dodělat rozsekávač
 def cut_tile(data3d, cindex, tile_shape ):
+    print cindex, "    tile shaoe ", tile_shape
     return data3d[cindex + np.array(tile_shape)]
 
 
@@ -173,6 +190,9 @@ def write_csv(data, filename= "20130919_liver_statistics.yaml"):
             #spamwriter.writerow(['Spam', 'Lovely Spam', 'Wonderful Spam'])
 
 
+#def training_dataset_prepare
+
+
 def main():
 
     #logger = logging.getLogger(__name__)
@@ -200,8 +220,11 @@ def main():
     
 
     fvall = []
+    fv_tiles = []
+    indata_len = len(inputdata['data'])
+    indata_len = 3
     
-    for i in range(0,len(inputdata['data'])):
+    for i in range(0, indata_len):
 
         reader = datareader.DataReader()
         data3d_a_path = os.path.join(inputdata['basedir'], inputdata['data'][i]['sliverseg'])
@@ -226,13 +249,14 @@ def main():
             
             pyed.show()
             #import pdb; pdb.set_trace()
-        fvall.insert(i, get_features(
-            data3d_orig,
-            data3d_seg,
-            visualization=args.visualization
-            ))
+        #fvall.insert(i, get_features(
+        #    data3d_orig,
+        #    data3d_seg,
+        #    visualization=args.visualization
+        #    ))
         tile_shape = [1,32,32]
-        get_features_in_tiles(data3d_orig, data3d_seg, tile_shape)
+        fv_t = get_features_in_tiles(data3d_orig, data3d_seg, tile_shape)
+        fv_tiles.insert(fv_t)
 
 
 
