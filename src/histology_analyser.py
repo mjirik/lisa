@@ -22,7 +22,7 @@ import numpy as np
 import scipy.ndimage
 import misc
 import datareader
-import SimpleITK as sitk
+#import SimpleITK as sitk
 import scipy.ndimage
 from PyQt4.QtGui import QApplication
 import csv
