@@ -117,10 +117,12 @@ def get_features_in_tiles(data3d_orig, data3d_seg, tile_shape):
 # create empty list of defined length
     features_t = [None]*len(cindexes)
     seg_cover_t = [None]*len(cindexes)
+    print " ####    get fv", len(cindexes), " dsh ", data3d_orig.shape
     for i in range(0, len(cindexes)):
         cindex = cindexes[i]
         tile_orig = cut_tile(data3d_orig, cindex, tile_shape)
         tile_seg = cut_tile(data3d_seg, cindex, tile_shape)
+        print tile_seg.shape
         tf = get_features(tile_orig, tile_seg)
         sc = np.sum(tile_seg > 0) / np.prod(tile_shape)
         features_t[i] = tf
@@ -149,8 +151,14 @@ def cutter_indexes(shape, tile_shape):
 
 # @TODO dodělat rozsekávač
 def cut_tile(data3d, cindex, tile_shape ):
-    print cindex, "    tile shaoe ", tile_shape
-    return data3d[cindex + np.array(tile_shape)]
+    upper_corner = cindex + np.array(tile_shape)
+    print cindex, "    tile shaoe ", tile_shape, ' uc ', upper_corner, ' dsh ', data3d.shape
+
+    return data3d[
+            cindex[0]:upper_corner[0],
+            cindex[1]:upper_corner[1],
+            cindex[2]:upper_corner[2]
+            ]
 
 
 
@@ -254,7 +262,7 @@ def main():
         #    data3d_seg,
         #    visualization=args.visualization
         #    ))
-        tile_shape = [1,32,32]
+        tile_shape = [1,128,128]
         fv_t = get_features_in_tiles(data3d_orig, data3d_seg, tile_shape)
         fv_tiles.insert(fv_t)
 
