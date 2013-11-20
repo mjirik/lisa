@@ -22,6 +22,8 @@ import viewer3
 #import vtk
 import argparse
 
+from PyQt4 import QtCore, QtGui
+from PyQt4.QtGui import *
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
      QGridLayout, QLabel, QPushButton, QFrame, QFileDialog,\
@@ -91,12 +93,23 @@ def cut_editor_old(data):
     return lab, cut_by_user
 
 
-def cut_editor(segmentation, voxelsize_mm = np.ones([3,1]), degrad = 3):
-    global normal,coordinates
-    """
+def cut_editor(segmentation, voxelsize_mm = np.ones([3,1]), degrad = 4):
+    #global normal,coordinates
+    window = QtGui.QWidget()
+    grid = QtGui.QGridLayout()
+    window.setWindowTitle("3D liver")
+    window.setLayout(grid)
+    
+    viewer = viewer3.Viewer(segmentation,'Cut')
+    mesh = viewer.generate_mesh(segmentation,voxelsize_mm,degrad)
+    viewer.View(mesh,False)
+    viewer.buttons(window,grid)
+    print(viewer.normal)
+    print(viewer.coordinates)
+    
+    '''
     Funkce vrací trojrozměrné porobné jako data['segmentation'] 
     v data['slab'] je popsáno, co která hodnota znamená
-    """
     labels = []
     segmentation = segmentation[::degrad,::degrad,::degrad]
     print("Generuji data...")
@@ -108,11 +121,15 @@ def cut_editor(segmentation, voxelsize_mm = np.ones([3,1]), degrad = 3):
     vtk_file = "mesh_geom.vtk"
     mesh_data.write(vtk_file)
     app = QApplication(sys.argv)
-    #view = viewer3.QVTKViewer(vtk_file)
-    viewer3.QVTKViewer(vtk_file)
-    normal = viewer3.normal_and_coordinates().set_normal()
-    coordinates = viewer3.normal_and_coordinates().set_coordinates()
-    return normal,coordinates
+    #view = viewer3.QVTKViewer(vtk_file,'Cut')
+    '''
+
+    
+    
+    
+    #normal = viewer3.normal_and_coordinates().set_normal()
+    #coordinates = viewer3.normal_and_coordinates().set_coordinates()
+    #return normal,coordinates
     pass
 
 
@@ -275,8 +292,8 @@ if __name__ == "__main__":
     segmentation = data['segmentation']
     cut_editor(segmentation)
     #resection(data,name, use_old_editor=args.use_old_editor)
-    print normal
-    print coordinates
+    #print normal
+    #print coordinates
 
 
 
