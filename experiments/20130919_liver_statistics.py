@@ -52,11 +52,12 @@ import misc
 import datareader
 import matplotlib.pyplot as plt
 import realtime_lbp as real_lib
+import experiments
 
 
 
 
-def feat_hist(data3d_orig, data3d_seg, visualization=True):
+def feat_hist_by_segmentation(data3d_orig, data3d_seg, visualization=True):
     bins = range(-1024,1024,1)
     bins = range(-512,512,1)
     hist1, bin_edges1 = np.histogram(data3d_orig[data3d_seg>0], bins=bins)
@@ -76,6 +77,13 @@ def feat_hist(data3d_orig, data3d_seg, visualization=True):
     return fv_hist
 
 
+def feat_hist(data3d_orig, visualization=True):
+    bins = range(-1024,1024,1)
+    bins = range(-512,512,1)
+    bins = range(-512,512,10)
+    hist1, bin_edges1 = np.histogram(data3d_orig, bins=bins)
+    return hist1
+
 
 
 def lbp(data3d_orig, data3d_seg, visualization=True):
@@ -93,8 +101,9 @@ def get_features(data3d_orig, data3d_seg, visualization=True):
     data3d_orig: CT data3d_orig
     data3d_seg: jedničky tam, kde jsou játra
     """
-    featur = {}
-    featur['hist'] = feat_hist(data3d_orig, data3d_seg, visualization)
+    featur = feat_hist(data3d_orig, visualization)
+    #featur = {}
+    #featur['hist'] = feat_hist(data3d_orig, visualization)
     #featur['lbp'] = lbp(data3d_orig, data3d_seg, visualization)
 
 
@@ -120,11 +129,10 @@ def get_features_in_tiles(data3d_orig, data3d_seg, tile_shape):
     print " ####    get fv", len(cindexes), " dsh ", data3d_orig.shape
     for i in range(0, len(cindexes)):
         cindex = cindexes[i]
-        tile_orig = cut_tile(data3d_orig, cindex, tile_shape)
-        tile_seg = cut_tile(data3d_seg, cindex, tile_shape)
-        print tile_seg.shape
-        tf = get_features(tile_orig, tile_seg)
-        sc = np.sum(tile_seg > 0) / np.prod(tile_shape)
+        tile_orig = experiments.getArea(data3d_orig, cindex, tile_shape)
+        tile_seg = experiments.getArea(data3d_seg, cindex, tile_shape)
+        tf = get_features(tile_orig, tile_seg, visualization=False)
+        sc = np.sum(tile_seg > 0).astype(np.float) / np.prod(tile_shape)
         features_t[i] = tf
         seg_cover_t[i] = sc
     return cindexes, features_t, seg_cover_t
@@ -151,6 +159,9 @@ def cutter_indexes(shape, tile_shape):
 
 # @TODO dodělat rozsekávač
 def cut_tile(data3d, cindex, tile_shape ):
+    """
+    Function is similar to experiments.getArea()
+    """
     upper_corner = cindex + np.array(tile_shape)
     print cindex, "    tile shaoe ", tile_shape, ' uc ', upper_corner, ' dsh ', data3d.shape
 
@@ -264,7 +275,16 @@ def main():
         #    ))
         tile_shape = [1,128,128]
         fv_t = get_features_in_tiles(data3d_orig, data3d_seg, tile_shape)
-        fv_tiles.insert(fv_t)
+        cindexes, features_t, seg_cover_t = fv_t
+
+        labels = np.array(seg_cover_t) > 0.5
+        from sklearn import svm
+
+        clf = svm.SVC()
+        clf.fit(features_t, labels)
+        classifed = clf.predict(features_t)
+        import pdb; pdb.set_trace()
+        fv_tiles.insert(i, fv_t)
 
 
 
