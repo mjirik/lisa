@@ -1,7 +1,7 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
 """
-Experiment s 'barevným' modelem jater. 
+Experiment s 'barevným' modelem jater.
 Pro spuštění zkuste help:
 
 python experiments/20130919_liver_statistics.py --help
@@ -87,7 +87,7 @@ def feat_hist(data3d_orig, visualization=True):
 
 
 def lbp(data3d_orig, data3d_seg, visualization=True):
-    realLbp = real_lib.loadRealtimeLbpLibrary()  
+    realLbp = real_lib.loadRealtimeLbpLibrary()
     lbpRef = np.zeros([1,256])
     lbpRef = real_lib.realTimeLbpImNp(realLbp,data3d_orig[:,:,1])
     return lbpRef
@@ -116,7 +116,7 @@ def get_features_in_tiles(data3d_orig, data3d_seg, tile_shape):
     """
     cindexes: indexes of tiles
     features_t: numpy array of features
-    segmentation_cover: np array with coverages of tiles with segmentation 
+    segmentation_cover: np array with coverages of tiles with segmentation
     (float 0 by 1)
 
     """
@@ -136,7 +136,7 @@ def get_features_in_tiles(data3d_orig, data3d_seg, tile_shape):
         features_t[i] = tf
         seg_cover_t[i] = sc
     return cindexes, features_t, seg_cover_t
-        #if (tile_seg == 1).all(): 
+        #if (tile_seg == 1).all():
         #    pass
 
 
@@ -172,7 +172,15 @@ def cut_tile(data3d, cindex, tile_shape ):
             ]
 
 
-
+def set_labels_to_tiled_data(cindexes, tile_shape, labels, data3d_shape):
+    """ Creates 3D image with values of labels
+    """
+    labels = np.zeros(data3d_shape, dtype=np.int8)
+    for i in range(0, len(cindexes)):
+        cindex = cindexes[i]
+# TODO labels shape
+        labels = experiments.setArea(labels, cindex, tile_shape, labels[i])
+    return labels
 
 
 
@@ -236,13 +244,13 @@ def main():
     # input parser
     data_file = os.path.join(path_to_script,  "20130919_liver_statistics.yaml")
     inputdata = misc.obj_from_file(data_file, filetype='yaml')
-    
+
 
     fvall = []
     fv_tiles = []
     indata_len = len(inputdata['data'])
     indata_len = 3
-    
+
     for i in range(0, indata_len):
 
         reader = datareader.DataReader()
@@ -264,8 +272,8 @@ def main():
                     data3d_orig,
                     contour=data3d_seg
                     )
-            
-            
+
+
             pyed.show()
             #import pdb; pdb.set_trace()
         #fvall.insert(i, get_features(
@@ -282,8 +290,11 @@ def main():
 
         clf = svm.SVC()
         clf.fit(features_t, labels)
-        classifed = clf.predict(features_t)
-        import pdb; pdb.set_trace()
+        labels = clf.predict(features_t)
+        import ipdb; ipdb.set_trace() # BREAKPOINT
+
+        labels = set_labels_to_tiled_data(cindexes, tile_shape, labels,
+                                 data3d_orig.shape)
         fv_tiles.insert(i, fv_t)
 
 

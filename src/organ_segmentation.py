@@ -70,14 +70,13 @@ class OrganSegmentation():
             slab={},
             qt_app=None
             ):
-        """
-        datapath: path to directory with dicom files
+        """ datapath: path to directory with dicom files
         manualroi: manual set of ROI before data processing, there is a
              problem with correct coordinates
         data3d, metadata: it can be used for data loading not from directory.
             If both are setted, datapath is ignored
         output_label: label for output segmented volume
-        slab: aditional label system for description segmented data 
+        slab: aditional label system for description segmented data
         {'none':0, 'liver':1, 'lesions':6}
         """
         self.iparams = {}
@@ -141,7 +140,7 @@ class OrganSegmentation():
             self.working_voxelsize_mm = working_voxelsize_mm
 
 
-        
+
         self.working_voxelsize_mm = np.array(self.working_voxelsize_mm).astype(float)
 
        # if np.isscalar(self.working_voxelsize_mm):
@@ -167,7 +166,7 @@ class OrganSegmentation():
                 np.mean(self.iparams['working_voxelsize_mm'])
 
         #self.segparams['pairwise_alpha']=25
-        
+
 
 
         # parameters with same effect as interactivity
@@ -213,7 +212,7 @@ class OrganSegmentation():
 
 #    def set_iparams(self, iparams):
 #        """
-#        Set interactivity variables. Make numpy array from scipy sparse 
+#        Set interactivity variables. Make numpy array from scipy sparse
 #        matrix.
 #        """
 #
@@ -250,13 +249,13 @@ class OrganSegmentation():
 #    def save_ipars(self, filename = 'ipars.pkl'):
 #        import misc
 #        misc.obj_to_file(self.get_ipars(), filename)
-        
+
 
 
 
     def _interactivity_begin(self):
 
-        print 'zoom ', self.zoom 
+        print 'zoom ', self.zoom
         print 'svs_mm ', self.working_voxelsize_mm
         data3d_res = scipy.ndimage.zoom(
                 self.data3d,
@@ -275,7 +274,7 @@ class OrganSegmentation():
                 voxelsize=self.working_voxelsize_mm
                 )
 
-        
+
 # version comparison
         from pkg_resources import parse_version
         import sklearn
@@ -306,12 +305,12 @@ class OrganSegmentation():
 
             #import pdb; pdb.set_trace()
 
-        #print "sh2", self.data3d.shape 
+        #print "sh2", self.data3d.shape
         return igc
 
     def _interactivity_end(self, igc):
         logger.debug('_interactivity_end')
-        #print "sh3", self.data3d.shape 
+        #print "sh3", self.data3d.shape
 
 
 #        import pdb; pdb.set_trace()
@@ -370,7 +369,7 @@ class OrganSegmentation():
         #print 'crinfo: ', self.crinfo
         #print 'autocrop', self.autocrop
         if self.autocrop is True:
-            #print 
+            #print
             #import pdb; pdb.set_trace()
 
             tmpcrinfo = self._crinfo_from_specific_data(
@@ -503,7 +502,7 @@ class OrganSegmentation():
 # xx and yy are 200x200 tables containing the x and y coordinates as values
 # mgrid is a mesh creation helper
             xx, yy = np.mgrid[
-                    :self.iparams['seeds'].shape[1], 
+                    :self.iparams['seeds'].shape[1],
                     :self.iparams['seeds'].shape[2]
                     ]
 # circles contains the squared distance to the (100, 100) point
@@ -710,7 +709,7 @@ def main():
             help='path to data dir')
     parser.add_argument('-d', '--debug', action='store_true',
             help='run in debug mode')
-    parser.add_argument('-vs', '--working_voxelsize_mm', 
+    parser.add_argument('-vs', '--working_voxelsize_mm',
             default=cfg["working_voxelsize_mm"],
             type=eval,  # type=str,
             help='Insert working voxelsize. It can be number or \
@@ -732,19 +731,19 @@ def main():
 
     parser.add_argument('-ol', '--output_label', default=1,
             help='label for segmented data')
-    parser.add_argument('--slab', 
-            default=cfg["slab"], 
+    parser.add_argument('--slab',
+            default=cfg["slab"],
             type=eval,
             help='labels for segmentation,\
                     example -slab "{\'liver\':1, \'lesions\':6}"')
-    parser.add_argument('-acr', '--autocrop', 
+    parser.add_argument('-acr', '--autocrop',
             help='automatic crop after data processing',
             default=cfg["autocrop"])
-    parser.add_argument('-iparams', '--iparams', 
-            default=None, 
+    parser.add_argument('-iparams', '--iparams',
+            default=None,
             help='filename of ipars file with stored interactivity')
-    parser.add_argument('-sp', '--segparams', 
-            default=cfg["segparams"], 
+    parser.add_argument('-sp', '--segparams',
+            default=cfg["segparams"],
             help='params for segmentation,\
             example -sp "{\'pairwise_alpha_per_mm2\':90}"')
     parser.add_argument('-tx', '--texture_analysis', action='store_true',
@@ -790,7 +789,7 @@ def main():
 #        #import pdb; pdb.set_trace()
 #        args["working_voxelsize_mm"] = eval(args["working_voxelsize_mm"])
 
-    #  
+    #
     #args["segparams"] = eval(args["segparams"])
     #args["slab"] = eval(args["slab"])
 
@@ -811,14 +810,14 @@ def main():
         iparams = misc.obj_from_file(args["iparams"], filetype='pickle')
         t0 = time.time()
         oseg = OrganSegmentation(**iparams)
-        
+
     else:
     #else:
     #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
         data3d, metadata, qt_app = readData3d(args["datapath"])
         args['datapath'] = metadata['datadir']
-        
+
 
         t0 = time.time()
 
@@ -826,12 +825,12 @@ def main():
 	oseg_params["data3d"] = data3d
 	oseg_params["metadata"] = metadata
         oseg = OrganSegmentation(**oseg_params)
-        
+
 
 
 
     oseg.interactivity(args["viewermin"], args["viewermax"])
-    
+
 
     #igc = pycut.ImageGraphCut(data3d, zoom = 0.5)
     #igc.interactivity()
