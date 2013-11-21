@@ -105,6 +105,7 @@ if __name__ == "__main__":
     #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour = oseg.orig_scale_segmentation)
 
     print 'slab', data['slab']
+    import ipdb; ipdb.set_trace()  # BREAKPOINT
     #pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], contour = data['segmentation'])
     #pyed.show()
     #import pdb; pdb.set_trace()
@@ -166,8 +167,11 @@ if __name__ == "__main__":
         savestring = raw_input ('Save output data? (y/n): ')
         #sn = int(snstring)
         if savestring in ['Y','y']:
+            pth, filename = os.path.split(os.path.normpath(args.inputfile))
 
-            misc.obj_to_file(data, defaultoutputfile, filetype = 'pickle')
+            misc.obj_to_file(data,
+                             defaultoutputfile + '-' + filename,
+                             filetype = 'pickle')
     else:
         misc.obj_to_file(data, args.outputfile, filetype = 'pickle')
 
