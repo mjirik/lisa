@@ -138,6 +138,10 @@ def vesselSegmentation(
     del(uiT)
     garbage.collect()
 
+    ## Vypocet binarni matice
+    output = output / output
+    output[numpy.isnan(output)] = 0
+
     ## Vraceni matice
     return output
 

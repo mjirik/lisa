@@ -28,6 +28,13 @@ def main1():
     print 'Matrix:'
     print matrix
 
+    ##matrixX = matrix / matrix
+    ##print 'Matrix binary:'
+    ##print matrixX
+    ##matrixX[np.isnan(matrixX)] = 0
+    ##print 'Matrix binary:'
+    ##print matrixX
+
     ## Vratit 4 nejvetsi objekty - v debug modu.
     obj = 2
     print '>>> Nejvetsi objekty v matici (' + str(obj) + '):'
@@ -100,4 +107,4 @@ def main2():
 
 if __name__ == '__main__':
 
-    main2()
+    main1()
