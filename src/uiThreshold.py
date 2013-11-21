@@ -325,7 +325,6 @@ class uiThreshold:
         else:
             if( ((closeNum >= 1) and (self.lastCloseNum != closeNum)) or (self.overrideThres == True) ) and closeNum > 0:
                 self.imgFiltering = self.imgFiltering * scipy.ndimage.binary_closing(self.imgFiltering, structure = None, iterations = closeNum)
-        print closeNum
         self.lastCloseNum = closeNum
 
         ## Vlastni binarni otevreni.
@@ -335,7 +334,6 @@ class uiThreshold:
             if( ((openNum >= 1) and (self.lastOpenNum != openNum)) or (self.overrideThres == True) ) and openNum > 0:
                 self.imgFiltering = self.imgFiltering * scipy.ndimage.binary_opening(self.imgFiltering,
                     structure = None, iterations = openNum)
-        print openNum
         self.lastOpenNum = openNum
 
         ## Zjisteni nejvetsich objektu
