@@ -1,17 +1,15 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
 """
-Experiment s 'barevným' modelem jater.
+Experiment s \"barevným\" modelem jater.
 Pro spuštění zkuste help:
 
 python experiments/20130919_liver_statistics.py --help
 
 Měřené vlastnosti se přidávají do get_features().
 Pro přidání dalších dat, editujte příslušný yaml soubor.
+
 """
-
-
-
 
 # import funkcí z jiného adresáře
 import sys
@@ -55,13 +53,11 @@ import realtime_lbp as real_lib
 import experiments
 
 
-
-
 def feat_hist_by_segmentation(data3d_orig, data3d_seg, visualization=True):
-    bins = range(-1024,1024,1)
-    bins = range(-512,512,1)
-    hist1, bin_edges1 = np.histogram(data3d_orig[data3d_seg>0], bins=bins)
-    hist2, bin_edges2 = np.histogram(data3d_orig[data3d_seg<=0], bins=bins)
+    bins = range(-1024, 1024, 1)
+    bins = range(-512, 512, 1)
+    hist1, bin_edges1 = np.histogram(data3d_orig[data3d_seg > 0], bins=bins)
+    hist2, bin_edges2 = np.histogram(data3d_orig[data3d_seg <= 0], bins=bins)
     #import pdb; pdb.set_trace()
     if visualization:
         plt_liver = plt.step(bin_edges1[1:], hist1)
@@ -69,51 +65,51 @@ def feat_hist_by_segmentation(data3d_orig, data3d_seg, visualization=True):
         plt.legend([plt_liver, plt_rest], ['Liver', 'Other tissue'])
         #plt.plot(bin_edges1[1:], hist1, bin_edges2[1:], hist2)
         plt.show()
-    fv_hist = {
-            'hist1':hist1,
-            'hist2':hist2,
-            'bins':bins
-            }
+    fv_hist = {'hist1': hist1,
+               'hist2': hist2,
+               'bins': bins
+               }
     return fv_hist
 
 
 def feat_hist(data3d_orig, visualization=True):
-    bins = range(-1024,1024,1)
-    bins = range(-512,512,1)
-    bins = range(-512,512,10)
+    bins = range(-1024, 1024, 1)
+    bins = range(-512, 512, 1)
+    bins = range(-512, 512, 10)
+    bins = range(-512, 512, 64)
     hist1, bin_edges1 = np.histogram(data3d_orig, bins=bins)
     return hist1
 
 
-
 def lbp(data3d_orig, data3d_seg, visualization=True):
     realLbp = real_lib.loadRealtimeLbpLibrary()
-    lbpRef = np.zeros([1,256])
-    lbpRef = real_lib.realTimeLbpImNp(realLbp,data3d_orig[:,:,1])
+    lbpRef = np.zeros([1, 256])
+    lbpRef = real_lib.realTimeLbpImNp(realLbp, data3d_orig[:, :, 1])
     return lbpRef
-
 
 
 def get_features(data3d_orig, data3d_seg, visualization=True):
     """
-    Sem doplníme všechny naše měření. Pro ukázku jsem vytvořil měření
+    Sem doplníme všechny naše měření.
+
+    Pro ukázku jsem vytvořil měření
     histogramu.
     data3d_orig: CT data3d_orig
     data3d_seg: jedničky tam, kde jsou játra
+
     """
     featur = feat_hist(data3d_orig, visualization)
     #featur = {}
     #featur['hist'] = feat_hist(data3d_orig, visualization)
     #featur['lbp'] = lbp(data3d_orig, data3d_seg, visualization)
 
-
-
-
     return featur
 
 
 def get_features_in_tiles(data3d_orig, data3d_seg, tile_shape):
     """
+    Computes features for small blocks of image data (tiles).
+
     cindexes: indexes of tiles
     features_t: numpy array of features
     segmentation_cover: np array with coverages of tiles with segmentation
@@ -124,8 +120,8 @@ def get_features_in_tiles(data3d_orig, data3d_seg, tile_shape):
     cindexes = cutter_indexes(data3d_orig.shape, tile_shape)
     output = {}
 # create empty list of defined length
-    features_t = [None]*len(cindexes)
-    seg_cover_t = [None]*len(cindexes)
+    features_t = [None] * len(cindexes)
+    seg_cover_t = [None] * len(cindexes)
     print " ####    get fv", len(cindexes), " dsh ", data3d_orig.shape
     for i in range(0, len(cindexes)):
         cindex = cindexes[i]
@@ -140,50 +136,46 @@ def get_features_in_tiles(data3d_orig, data3d_seg, tile_shape):
         #    pass
 
 
-
 def cutter_indexes(shape, tile_shape):
     """
+    Make indexes for cutting.
+
     shape: shape of cutted data
     tile_shape: shape of tile
 
     """
-    r0 = range(0,shape[0]-tile_shape[0] + 1, tile_shape[0])
-    r1 = range(1,shape[1]-tile_shape[1] + 1, tile_shape[1])
-    r2 = range(2,shape[2]-tile_shape[2] + 1, tile_shape[2])
-    r1 = range(0,shape[1], tile_shape[1])
-    r2 = range(0,shape[2], tile_shape[2])
+    r0 = range(0, shape[0] - tile_shape[0] + 1, tile_shape[0])
+    r1 = range(1, shape[1] - tile_shape[1] + 1, tile_shape[1])
+    r2 = range(2, shape[2] - tile_shape[2] + 1, tile_shape[2])
+    r1 = range(0, shape[1], tile_shape[1])
+    r2 = range(0, shape[2], tile_shape[2])
     cut_iterator = itertools.product(r0[:-1], r1[:-1], r2[:-1])
     return list(cut_iterator)
 
 
-
 # @TODO dodělat rozsekávač
-def cut_tile(data3d, cindex, tile_shape ):
-    """
-    Function is similar to experiments.getArea()
+def cut_tile(data3d, cindex, tile_shape):
+    """ Function is similar to experiments.getArea()
     """
     upper_corner = cindex + np.array(tile_shape)
     print cindex, "    tile shaoe ", tile_shape, ' uc ', upper_corner, ' dsh ', data3d.shape
 
-    return data3d[
-            cindex[0]:upper_corner[0],
-            cindex[1]:upper_corner[1],
-            cindex[2]:upper_corner[2]
-            ]
+    return data3d[cindex[0]:upper_corner[0],
+                  cindex[1]:upper_corner[1],
+                  cindex[2]:upper_corner[2]
+                  ]
 
 
-def set_labels_to_tiled_data(cindexes, tile_shape, labels, data3d_shape):
+def arrange_to_tiled_data(cindexes, tile_shape, data3d_shape, labels_lin):
     """ Creates 3D image with values of labels
     """
-    labels = np.zeros(data3d_shape, dtype=np.int8)
+    labels = np.zeros(data3d_shape, dtype=type(labels_lin[0]))
     for i in range(0, len(cindexes)):
         cindex = cindexes[i]
+
 # TODO labels shape
-        labels = experiments.setArea(labels, cindex, tile_shape, labels[i])
+        labels = experiments.setArea(labels, cindex, tile_shape, labels_lin[i])
     return labels
-
-
-
 
 
 def sample_input_data():
@@ -195,25 +187,24 @@ def sample_input_data():
             }
 
 
-    sample_data_file = os.path.join(path_to_script, "20130919_liver_statistics.yaml")
+    sample_data_file = os.path.join(path_to_script,
+                                    "20130919_liver_statistics.yaml")
     #print sample_data_file, path_to_script
     misc.obj_to_file(inputdata, sample_data_file, filetype='yaml')
 
 #def voe_metric(vol1, vol2, voxelsize_mm):
 
 
-
-def write_csv(data, filename= "20130919_liver_statistics.yaml"):
+def write_csv(data, filename="20130919_liver_statistics.yaml"):
     import csv
     with open(filename, 'wb') as csvfile:
-        spamwriter = csv.writer(
-                csvfile,
-                delimiter=';',
-                quotechar='"',
-                quoting=csv.QUOTE_MINIMAL
-                )
+        spamwriter = csv.writer(csvfile,
+                                delimiter=';',
+                                quotechar='"',
+                                quoting=csv.QUOTE_MINIMAL
+                                )
         for label in data:
-            spamwriter.writerow([label]+data[label])
+            spamwriter.writerow([label] + data[label])
             #spamwriter.writerow(['Spam', 'Lovely Spam', 'Wonderful Spam'])
 
 
@@ -232,8 +223,8 @@ def main():
     #logger.debug('input params')
 
     parser = argparse.ArgumentParser(
-            description='Compute features on liver and other tissue.' )
-    parser.add_argument('-si', '--sampleInput',  action='store_true',
+            description='Compute features on liver and other tissue.')
+    parser.add_argument('-si', '--sampleInput', action='store_true',
             help='generate sample intput data', default=False)
     parser.add_argument('-v', '--visualization',  action='store_true',
             help='Turn on visualization', default=False)
@@ -245,7 +236,6 @@ def main():
     data_file = os.path.join(path_to_script,  "20130919_liver_statistics.yaml")
     inputdata = misc.obj_from_file(data_file, filetype='yaml')
 
-
     fvall = []
     fv_tiles = []
     indata_len = len(inputdata['data'])
@@ -254,26 +244,22 @@ def main():
     for i in range(0, indata_len):
 
         reader = datareader.DataReader()
-        data3d_a_path = os.path.join(inputdata['basedir'], inputdata['data'][i]['sliverseg'])
+        data3d_a_path = os.path.join(inputdata['basedir'],
+                                     inputdata['data'][i]['sliverseg'])
         data3d_a, metadata_a = reader.Get3DData(data3d_a_path)
 
-
-        data3d_b_path = os.path.join(inputdata['basedir'], inputdata['data'][i]['sliverorig'])
+        data3d_b_path = os.path.join(inputdata['basedir'],
+                                     inputdata['data'][i]['sliverorig'])
         data3d_b, metadata_b = reader.Get3DData(data3d_b_path)
-
-
 
         #import pdb; pdb.set_trace()
         data3d_seg = (data3d_a > 0).astype(np.int8)
         data3d_orig = data3d_b
 
         if args.visualization:
-            pyed = py3DSeedEditor.py3DSeedEditor(
-                    data3d_orig,
-                    contour=data3d_seg
-                    )
-
-
+            pyed = py3DSeedEditor.py3DSeedEditor(data3d_orig,
+                                                 contour=data3d_seg
+                                                 )
             pyed.show()
             #import pdb; pdb.set_trace()
         #fvall.insert(i, get_features(
@@ -281,32 +267,35 @@ def main():
         #    data3d_seg,
         #    visualization=args.visualization
         #    ))
-        tile_shape = [1,128,128]
-        fv_t = get_features_in_tiles(data3d_orig, data3d_seg, tile_shape)
-        cindexes, features_t, seg_cover_t = fv_t
+        tile_shp = [1, 32, 32]
+        fv_t = get_features_in_tiles(data3d_orig, data3d_seg, tile_shp)
+        cidxs, features_t, seg_cover_t = fv_t
 
-        labels = np.array(seg_cover_t) > 0.5
+        labels_train_lin_float = np.array(seg_cover_t)
+        labels_train_lin = labels_train_lin_float > 0.5
         from sklearn import svm
 
         clf = svm.SVC()
-        clf.fit(features_t, labels)
-        labels = clf.predict(features_t)
-        import ipdb; ipdb.set_trace() # BREAKPOINT
+        clf.fit(features_t, labels_train_lin)
+        labels_lin = clf.predict(features_t)
 
-        labels = set_labels_to_tiled_data(cindexes, tile_shape, labels,
-                                 data3d_orig.shape)
+        d_shp = data3d_orig.shape
+
+        labels = arrange_to_tiled_data(cidxs, tile_shp, d_shp, labels_lin)
+        ltl = (labels_train_lin_float * 10).astype(np.int8)
+        labels_train = arrange_to_tiled_data(cidxs, tile_shp, d_shp, ltl)
+
+        pyed = py3DSeedEditor.py3DSeedEditor(labels_train, contour=labels)
+        pyed.show()
         fv_tiles.insert(i, fv_t)
 
-
-
-#
-#
     print fvall
     #write_csv(fvall)
 
 # Ukládání výsledku do souboru
-    output_file = os.path.join(path_to_script,  "20130919_liver_statistics_results.pkl")
-    misc.obj_to_file(fvall,output_file, filetype='pickle')
+    output_file = os.path.join(path_to_script,
+                               "20130919_liver_statistics_results.pkl")
+    misc.obj_to_file(fvall, output_file, filetype='pickle')
 
 if __name__ == "__main__":
     main()

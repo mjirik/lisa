@@ -90,8 +90,6 @@ def setArea(data, sp, area, value):
         sp[2] = data.shape[2] - area[0] - 1
         print "Funkce getArea() : Byla prekrocena velikost dat v ose X"
 
-    print area, sp
-    import ipdb; ipdb.set_trace() # BREAKPOINT
 
     data[sp[0]:sp[0] + area[0], sp[1]:sp[1] + area[1], sp[2]:sp[2] + area[2]] = value
     return data
