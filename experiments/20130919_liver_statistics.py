@@ -76,6 +76,7 @@ def feat_hist(data3d_orig, visualization=True):
     bins = range(-1024, 1024, 1)
     bins = range(-512, 512, 1)
     bins = range(-512, 512, 10)
+    bins = range(-512, 512, 64)
     hist1, bin_edges1 = np.histogram(data3d_orig, bins=bins)
     return hist1
 
@@ -266,7 +267,7 @@ def main():
         #    data3d_seg,
         #    visualization=args.visualization
         #    ))
-        tile_shp = [1, 64, 64]
+        tile_shp = [1, 32, 32]
         fv_t = get_features_in_tiles(data3d_orig, data3d_seg, tile_shp)
         cidxs, features_t, seg_cover_t = fv_t
 
