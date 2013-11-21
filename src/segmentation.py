@@ -135,6 +135,8 @@ def vesselSegmentation(
         interactivity, number, inputSigma, nObj, biggestObjects, binaryClosingIterations,
         binaryOpeningIterations, seeds)
     output = uiT.run()
+
+    del(preparedData)
     del(uiT)
     garbage.collect()
 

@@ -93,16 +93,11 @@ class uiThreshold:
             import copy
             self.data = copy.copy(data)
             self.voxel = copy.copy(voxel)
-            #self.imgChanged = copy.copy(data)
-            #self.imgFiltering = copy.copy(data)
 
         else:
 
             self.data = data.copy()
             self.voxel = voxel.copy()
-            #self.imgUsed = data.copy()
-            #self.imgChanged = data.copy()
-            #self.imgFiltering = data.copy()
 
         ## Kalkulace objemove jednotky (voxel) (V = a*b*c)
         voxel1 = self.voxel[0]
@@ -224,8 +219,6 @@ class uiThreshold:
              garbage.collect()
              matpyplot.show()
 
-        #del(self.imgBeforeBinaryClosing)
-        #del(self.imgBeforeBinaryOpening)
         del(self.imgUsed)
         del(self.data)
 
@@ -303,8 +296,6 @@ class uiThreshold:
                 self.lastMinThresNum = self.smin.val
                 self.overrideThres = True
 
-##        self.imgChanged = self.imgBeforeBinaryClosing
-
         ## Operace binarni otevreni a uzavreni.
         ## Nastaveni hodnot slideru.
         if ( self.interactivity == True ) :
@@ -339,9 +330,6 @@ class uiThreshold:
         ## Zjisteni nejvetsich objektu
         if (self.biggestObjects == True or self.seeds != None) :
            self.imgFiltering = segmentation.getPriorityObjects(self.imgFiltering, self.nObj, self.seeds)
-#        if (self.biggestObjects == True) :
-#            import qmisc
-#            self.imgChanged = qmisc.get_one_biggest_object(self.imgChanged)
 
         self.imgChanged = self.imgFiltering
         if ( self.interactivity == True ) :
@@ -349,11 +337,6 @@ class uiThreshold:
             self.ax1.imshow(numpy.amax(self.imgChanged, 0), self.cmap)
             self.ax2.imshow(numpy.amax(self.imgChanged, 1), self.cmap)
             self.ax3.imshow(numpy.amax(self.imgChanged, 2), self.cmap)
-
-##            ## Minimalni pouzitelna hodnota prahovani v obrazku
-##            self.min0 = numpy.amin(self.imgChanged)
-##            ## Maximalni pouzitelna hodnota prahovani v obrazku
-##            self.max0 = numpy.amax(self.imgChanged)
 
             ## Prekresleni
             self.fig.canvas.draw()
