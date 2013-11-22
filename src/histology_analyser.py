@@ -127,6 +127,7 @@ class HistologyAnalyser:
         )
         pyed.show()
         stats = skan.skeleton_analysis()
+        self.sklabel = skan.sklabel
         #data3d_nodes[data3d_nodes==3] = 2
         self.stats = {'Graph':stats}
 
@@ -162,7 +163,6 @@ class HistologyAnalyser:
 
 
     def writeStatsToYAML(self, filename='hist_stats.yaml'):
-        import ipdb; ipdb.set_trace() # BREAKPOINT
         print 'write to yaml'
         misc.obj_to_file(self.stats, filename=filename, filetype='yaml')
 
@@ -182,6 +182,12 @@ class HistologyAnalyser:
                 dataline = data[lineid]
                 writer.writerow(self.__dataToCSVLine(dataline))
                 #spamwriter.writerow(['Spam', 'Lovely Spam', 'Wonderful Spam'])
+
+
+    def writeSkeletonToPickle(self, filename='skel.pkl'):
+        misc.obj_to_file(self.sklabel, filename=filename, filetype='pickle')
+
+
     def __dataToCSVLine(self, dataline):
         arr = []
 # @TODO arr.append
@@ -741,6 +747,7 @@ if __name__ == "__main__":
     print "              #####    write to file"
     ha.writeStatsToCSV()
     ha.writeStatsToYAML()
+    ha.writeSkeletonToPickle()
     #ha.show()
 
 
