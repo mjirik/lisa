@@ -6,8 +6,6 @@ python src/histology_analyser.py -i ~/data/medical/data_orig/jatra_mikro_data/Ne
 
 """
 
-
-
 import sys
 import os.path
 path_to_script = os.path.dirname(os.path.abspath(__file__))
@@ -27,13 +25,15 @@ import scipy.ndimage
 from PyQt4.QtGui import QApplication
 import csv
 
-import sys, traceback
+import sys
+import traceback
 
 
 import seed_editor_qt as seqt
 import skelet3d
 import segmentation
 import misc
+import py3DSeedEditor as se
 
 
 GAUSSIAN_SIGMA = 1
@@ -42,11 +42,16 @@ fast_debug = True
 
 
 class HistologyAnalyser:
-    def __init__ (self, data3d, metadata, threshold):
+    def __init__(self, data3d, metadata, threshold):
         self.data3d = data3d
-        self.metadata = metadata
         self.threshold = threshold
 
+        print metadata
+        if 'voxelsize_mm' not in metadata.keys():
+# @TODO resolve problem with voxelsize
+            metadata['voxelsize_mm'] = [0.1, 0.2, 0.3]
+
+        self.metadata = metadata
 
 
     def run(self):
@@ -56,17 +61,17 @@ class HistologyAnalyser:
 
             data3d_thr = segmentation.vesselSegmentation(
                 self.data3d,
-                segmentation = np.ones(self.data3d.shape, dtype='int8'),
-                #segmentation = oseg.orig_scale_segmentation,
-                threshold = -1,
-                inputSigma = 0.15,
-                dilationIterations = 2,
-                nObj = 1,
-                biggestObjects = False,
+                segmentation=np.ones(self.data3d.shape, dtype='int8'),
+                #segmentation=oseg.orig_scale_segmentation,
+                threshold=-1,
+                inputSigma=0.15,
+                dilationIterations=2,
+                nObj=1,
+                biggestObjects=False,
 #        dataFiltering = True,
-                interactivity = True,
-                binaryClosingIterations = 5,
-                binaryOpeningIterations = 1)
+                interactivity=True,
+                binaryClosingIterations=5,
+                binaryOpeningIterations=1)
             #self.data3d_thri = self.muxImage(
             #        self.data3d_thr2.astype(np.uint16),
             #        metadata
@@ -87,35 +92,43 @@ class HistologyAnalyser:
             data3d_skel = skelet3d.skelet3d(data3d_thr)
 
         # pyed = seqt.QTSeedEditor(
-        #         data3d, 
+        #         data3d,
         #         contours=data3d_thr.astype(np.int8),
         #         seeds=data3d_skel.astype(np.int8)
         #         )
             #app.exec_()
-            struct = {'sk':data3d_skel, 'thr': data3d_thr}
+            struct = {'sk': data3d_skel, 'thr': data3d_thr}
             misc.obj_to_file(struct, filename='tmp0.pkl', filetype='pickle')
         else:
             struct = misc.obj_from_file(filename='tmp0.pkl', filetype='pickle')
             data3d_skel = struct['sk']
             data3d_thr = struct['thr']
 
-        skan = SkeletonAnalyser(data3d_skel, volume_data=data3d_thr)
+        skan = SkeletonAnalyser(
+            data3d_skel,
+            volume_data=data3d_thr,
+            voxelsize_mm=metadata['voxelsize_mm'])
         data3d_nodes_vis = skan.sklabel.copy()
 # edges
-        data3d_nodes_vis[data3d_nodes_vis > 0 ] = 1
+        data3d_nodes_vis[data3d_nodes_vis > 0] = 1
 # nodes and terminals
-        data3d_nodes_vis[data3d_nodes_vis < 0 ] = 2
+        data3d_nodes_vis[data3d_nodes_vis < 0] = 2
 
-        pyed = seqt.QTSeedEditor(
-                data3d,
-                seeds=(data3d_nodes_vis).astype(np.int8),
-                contours=data3d_thr.astype(np.int8)
-                )
-        app.exec_()
-        import pdb; pdb.set_trace()
+        #pyed = seqt.QTSeedEditor(
+        #    data3d,
+        #    seeds=(data3d_nodes_vis).astype(np.int8),
+        #    contours=data3d_thr.astype(np.int8)
+        #)
+        #app.exec_()
+        pyed = se.py3DSeedEditor(
+            data3d,
+            seeds=(data3d_nodes_vis).astype(np.int8),
+            contour=data3d_thr.astype(np.int8)
+        )
+        pyed.show()
         stats = skan.skeleton_analysis()
         #data3d_nodes[data3d_nodes==3] = 2
-        self.stats = stats
+        self.stats = {'Graph':stats}
 
 
 
@@ -147,13 +160,15 @@ class HistologyAnalyser:
         return data3di
 
 
-        
+
     def writeStatsToYAML(self, filename='hist_stats.yaml'):
-        misc.obj_to_file(self.stats, filetype='yaml')
+        import ipdb; ipdb.set_trace() # BREAKPOINT
+        print 'write to yaml'
+        misc.obj_to_file(self.stats, filename=filename, filetype='yaml')
 
         #sitk.
     def writeStatsToCSV(self, filename='hist_stats.csv'):
-        data = self.stats
+        data = self.stats['Graph']
 
         with open(filename, 'wb') as csvfile:
             writer = csv.writer(
@@ -172,7 +187,7 @@ class HistologyAnalyser:
 # @TODO arr.append
         try:
             arr = [
-                    dataline['id'], 
+                    dataline['id'],
                     dataline['nodeIdA'],
                     dataline['nodeIdB'],
                     dataline['radius'],
@@ -219,7 +234,7 @@ class SkeletonAnalyser:
         element: line structure of skeleton connected to node on both ends
         node: connection point of elements. It is one or few voxelsize_mm
         terminal: terminal node
-        
+
 
         """
         if not fast_debug:
@@ -229,17 +244,17 @@ class SkeletonAnalyser:
             stats = {}
             len_edg = np.max(self.sklabel)
             #len_edg = 30
-            
+
             for edg_number in range (1,len_edg):
                 edgst = self.__connection_analysis(edg_number)
                 edgst.update(self.__edge_length(edg_number))
-                edgst.update(self.__edge_curve(edg_number, edgst))
+                edgst.update(self.__edge_curve(edg_number, edgst, self.voxelsize_mm))
                 edgst.update(self.__edge_vectors(edg_number, edgst))
                 #edgst = edge_analysis(sklabel, i)
                 if self.volume_data is not None:
                     edgst['radius'] = float(self.__radius_analysis(skdst, edg_number))
                 stats[edgst['id']] = edgst
-            
+
 #save data for faster debug
             struct = {'sVD':self.volume_data, 'stats':stats, 'len_edg':len_edg}
             misc.obj_to_file(struct, filename='tmp.pkl', filetype='pickle')
@@ -293,7 +308,7 @@ class SkeletonAnalyser:
 # get normalised vectors
         v1u = v1/np.linalg.norm(v1)
         v2u = v2/np.linalg.norm(v2)
-        print 'v1u ', v1u, ' v2u ', v2u
+        #print 'v1u ', v1u, ' v2u ', v2u
 
         angle = np.arccos(np.dot(v1u, v2u))
 # special cases
@@ -305,12 +320,12 @@ class SkeletonAnalyser:
 
         angle_deg = np.degrees(angle)
 
-        print 'angl ', angle, ' angl_deg ', angle_deg
+        #print 'angl ', angle, ' angl_deg ', angle_deg
         return angle_deg
 
 
-    def __vector_of_connected_edge(self, 
-            edg_number, 
+    def __vector_of_connected_edge(self,
+            edg_number,
             stats,
             edg_end,
             con_edg_order):
@@ -327,7 +342,7 @@ class SkeletonAnalyser:
             ndid = 'nodeIdB'
         else:
             logger.error ('Wrong edg_end in __vector_of_connected_edge()')
-            
+
 
         connectedEdgeStats = stats[connectedEdges[con_edg_order]]
         #import pdb; pdb.set_trace()
@@ -362,7 +377,7 @@ class SkeletonAnalyser:
         edg_number: integer with edg_number
         stats: dictionary with all statistics and computations
         edg_end: letter 'A' or 'B'
-        creates phiXa, phiXb and phiXc. 
+        creates phiXa, phiXb and phiXc.
         See Schwen2012 : Analysis and algorithmic generation of hepatic vascular system.
         """
         out = {}
@@ -415,6 +430,8 @@ class SkeletonAnalyser:
         count angles betwen end vectors of edges
         """
 
+
+# TODO tady je nějaký binec
         out = {}
         try:
             vectorA = stats[edg_number]['vectorA']
@@ -471,17 +488,17 @@ class SkeletonAnalyser:
         return (np.array(curve_model(t1, curve_params)) - \
                 np.array(curve_model(t0,curve_params)))
 
-    
+
 
     def __skeleton_nodes(self, data3d_skel, data3d_thr):
         """
-        Return 3d ndarray where 0 is background, 1 is skeleton, 2 is node 
+        Return 3d ndarray where 0 is background, 1 is skeleton, 2 is node
         and 3 is terminal node
-        
+
         """
         # @TODO  remove data3d_thr
 
-    
+
 # -----------------  get nodes --------------------------
         kernel = np.ones([3,3,3])
         #kernel[0,0,0]=0
@@ -514,7 +531,7 @@ class SkeletonAnalyser:
         nt = nodes - terminals
 
         #pyed = seqt.QTSeedEditor(
-        #        mocnost, 
+        #        mocnost,
         #        contours=data3d_thr.astype(np.int8),
         #        seeds=nt
         #        )
@@ -525,7 +542,7 @@ class SkeletonAnalyser:
         data3d_skel[terminals==1] = 3
 
         return data3d_skel
-        
+
     def node_analysis(sklabel):
         pass
 
@@ -565,7 +582,7 @@ class SkeletonAnalyser:
 
         neighborhood = sklabelcr * dilat_element
 
-# if el_number is edge, return nodes 
+# if el_number is edge, return nodes
         neighbors = np.unique(neighborhood)
         neighbors = neighbors [neighbors != 0]
         neighbors = neighbors [neighbors != el_number]
@@ -581,16 +598,24 @@ class SkeletonAnalyser:
         #self.voxelsize_mm
         return {'lengthEstimation':float(np.sum(self.sklabel == edg_number) + 2)}
 
-    def __edge_curve(self,  edg_number, edg_stats):
+    def __edge_curve(self,  edg_number, edg_stats, voxelsize_mm):
+        """
+        Return params of curve and its starts and ends locations
+        """
         retval = {}
         try:
             nd00, nd01, nd02 = (edg_stats['nodeIdA'] == self.sklabel).nonzero()
             nd10, nd11, nd12 = (edg_stats['nodeIdB'] == self.sklabel).nonzero()
             point0 = np.array([np.mean(nd00), np.mean(nd01), np.mean(nd02)])
             point1 = np.array([np.mean(nd10), np.mean(nd11), np.mean(nd12)])
+            point0_mm = point0 * voxelsize_mm
+            point1_mm = point1 * voxelsize_mm
             retval = {'curve_params':
-                    {'start':point0.tolist(), 
-                        'vector':(point1-point0).tolist()}}
+                      {'start':point0_mm.tolist(),
+                       'vector':(point1_mm-point0_mm).tolist()},
+                      'nodeA_XYZ_mm': point0_mm.tolist(),
+                      'nodeB_XYZ_mm': point1_mm.tolist()
+                      }
         except Exception as ex:
             logger.warning("Problem in __edge_curve()")
             print (ex)
@@ -602,7 +627,7 @@ class SkeletonAnalyser:
         print 'element_analysis'
 
 
-        
+
 
 
 # element dilate * sklabel[sklabel < 0]
@@ -622,7 +647,7 @@ class SkeletonAnalyser:
                     sampling=self.voxelsize_mm
                     )
             dst = dst * (self.sklabel != 0)
-            
+
             return dst
 
         else:
@@ -713,8 +738,9 @@ if __name__ == "__main__":
 
     ha = HistologyAnalyser(data3d, metadata, args.threshold)
     ha.run()
+    print "              #####    write to file"
     ha.writeStatsToCSV()
     ha.writeStatsToYAML()
     #ha.show()
-    
+
 
