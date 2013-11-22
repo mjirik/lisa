@@ -51,7 +51,7 @@ class OrganSegmentation():
     def __init__(
             self,
             datapath=None,
-            working_voxelsize_mm=1,
+            working_voxelsize_mm=3,
             series_number=None,
             autocrop=True,
             autocrop_margin_mm=[10, 10, 10],
