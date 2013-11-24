@@ -59,6 +59,25 @@ class DicomWriterTest(unittest.TestCase):
         self. assertEqual(metadata['voxelsize_mm'][2], newmetadata['voxelsize_mm'][2])
         os.remove(filename)
 
+    def test_write_overlay(self):
+
+        filename = 'test_file.dcm'
+        data = (np.random.random([30,100,120])*30).astype(np.int16)
+        data[0:5,20:60,60:70,] += 30
+
+        overlay = np.zeros([512,512], dtype=np.uint8)
+        overlay [30:70, 110:300] = 1
+
+        metadata = {'voxelsize_mm': [1,2,3]}
+        dw = dwriter.DataWriter()
+        dw.add_overlay_to_slice_file(
+            'sample_data/jatra_5mm/IM-0001-0019.dcm',
+            overlay,
+            0,
+            'out_with_overlay.dcm'
+        )
+
+        #os.remove(filename)
 
 if __name__ == "__main__":
     unittest.main()
