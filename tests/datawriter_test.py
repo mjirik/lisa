@@ -24,6 +24,9 @@ import numpy as np
 import datawriter as dwriter
 import datareader as dreader
 
+
+import py3DSeedEditor as pyed
+
 class DicomWriterTest(unittest.TestCase):
     interactivetTest = False
 #    def setUp(self):
@@ -78,6 +81,38 @@ class DicomWriterTest(unittest.TestCase):
         )
 
         #os.remove(filename)
+
+    def test_write_and_read_file_with_overlay(self):
+        filename = 'test_file.dcm'
+
+        import dicom
+        dcmdata = dicom.read_file(
+            'sample_data/volumetrie/volumetry_slice.DCM'
+        )
+        data = (np.random.random([30,100,120])*30).astype(np.int16)
+        data[0:5,20:60,60:70,] += 30
+        overlay = np.zeros([512,512], dtype=np.uint8)
+        overlay [30:70, 110:300] = 1
+
+        metadata = {'voxelsize_mm': [1,2,3]}
+        dw = dwriter.DataWriter()
+        dw.add_overlay_to_slice_file(
+            #'sample_data/jatra_5mm/IM-0001-0019.dcm',
+            'sample_data/volumetrie/volumetry_slice.DCM',
+            overlay,
+            0,
+            filename
+        )
+        dr = dreader.DataReader()
+        newdata, newmetadata = dr.Get3DData(filename)
+        overlay = dr.GetOverlay()
+        print overlay
+        import ipdb; ipdb.set_trace() # BREAKPOINT
+
+        ed = pyed.py3DSeedEditor(newdata)
+        ed.show()
+
+        os.remove(filename)
 
 if __name__ == "__main__":
     unittest.main()

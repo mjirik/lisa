@@ -91,6 +91,7 @@ class DataWriter:
         #overlay = np.array(pol)
 
         data[dicom_tag1 ,0x3000].value = overlay_raw
+
         return data
 #data = np.zeros([100,100,30], dtype=np.uint8)
 #data[20:60,60:70, 0:5] = 100
