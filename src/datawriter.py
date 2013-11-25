@@ -50,7 +50,7 @@ class DataWriter:
         if filename_out == None:
             filename_out = filename
         data = dicom.read_file(filename)
-        data = self.encode_overlay_slice(data, overlay, 0)
+        data = self.encode_overlay_slice(data, overlay, i_overlay)
         data.save_as(filename_out)
         pass
 
@@ -67,16 +67,48 @@ class DataWriter:
         # and so on.
         dicom_tag1 = 0x6000 + 2*i_overlay
 
+        #  data (0x6000, 0x3000)
+        WR = 'OW'
+        WM = 1
 
         # On (60xx,0010) and (60xx,0011) is stored overlay size
-        data[dicom_tag1,0x0010].value = overlay.shape[0]# rows = 512
-        data[dicom_tag1,0x0011].value = overlay.shape[1]# cols = 512
+        row_el = dicom.dataelem.DataElement(
+            (dicom_tag1, 0x0010),
+            'US',
+            int(overlay.shape[0])
+        )
+        data[row_el.tag] = row_el
 
-        print overlay.shape
+        col_el = dicom.dataelem.DataElement(
+            (dicom_tag1, 0x0011),
+            'US',
+            int(overlay.shape[1])
+        )
+        data[col_el.tag] = col_el
+
+## arrange values to bit array
         overlay_linear = np.reshape(overlay,np.prod(overlay.shape))
 
-        encoded_linear = np.zeros(np.prod(overlay.shape)/n_bits)
-        encoded_linear[10:15] = 255
+    # allocation of dataspace
+        encoded_linear = np.zeros(
+            np.prod(overlay.shape) / n_bits,
+            dtype=np.uint8
+        )
+
+
+# encoded data
+        for i in range(0, len(overlay_linear)):
+            if overlay_linear[i] > 0:
+                bit = 1
+            else:
+                bit = 0
+
+
+            encoded_linear[i/n_bits] |= bit << (i % n_bits)
+
+#                decoded_linear[i*n_bits + k] = (byte_as_int >> k) & 0b1
+
+        #encoded_linear[10:1000] = 255
 
         overlay_raw = encoded_linear.tostring()
 
@@ -89,8 +121,15 @@ class DataWriter:
 #                decoded_linear[i*n_bits + k] = (byte_as_int >> k) & 0b1
 #
         #overlay = np.array(pol)
+        import ipdb; ipdb.set_trace() # BREAKPOINT
+        print overlay_raw
 
-        data[dicom_tag1 ,0x3000].value = overlay_raw
+        overlay_el = dicom.dataelem.DataElement(
+            (dicom_tag1, 0x3000),
+            'OW',
+            overlay_raw
+        )
+        data[overlay_el.tag] = overlay_el
 
         return data
 #data = np.zeros([100,100,30], dtype=np.uint8)

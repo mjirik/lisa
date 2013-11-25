@@ -62,7 +62,7 @@ class DicomWriterTest(unittest.TestCase):
         self. assertEqual(metadata['voxelsize_mm'][2], newmetadata['voxelsize_mm'][2])
         os.remove(filename)
 
-    def test_write_overlay(self):
+    def iiitest_write_overlay(self):
 
         filename = 'test_file.dcm'
         data = (np.random.random([30,100,120])*30).astype(np.int16)
@@ -83,33 +83,40 @@ class DicomWriterTest(unittest.TestCase):
         #os.remove(filename)
 
     def test_write_and_read_file_with_overlay(self):
-        filename = 'test_file.dcm'
+        filename = 'tests_outputs/test_file.dcm'
+        filedir = os.path.dirname(filename)
+
+        if not os.path.exists('tests_outputs'):
+            os.mkdir('tests_outputs')
 
         import dicom
         dcmdata = dicom.read_file(
             'sample_data/volumetrie/volumetry_slice.DCM'
         )
-        data = (np.random.random([30,100,120])*30).astype(np.int16)
-        data[0:5,20:60,60:70,] += 30
-        overlay = np.zeros([512,512], dtype=np.uint8)
-        overlay [30:70, 110:300] = 1
+        import ipdb; ipdb.set_trace() # BREAKPOINT
 
-        metadata = {'voxelsize_mm': [1,2,3]}
+
+        data = (np.random.random([30,100,120])*30).astype(np.int16)
+        data[0:5, 20:60, 60:70] += 30
+        overlay = np.zeros([512, 512], dtype=np.uint8)
+        overlay[450:500, 30:100] = 1
+
+        metadata = {'voxelsize_mm': [1, 2, 3]}
         dw = dwriter.DataWriter()
         dw.add_overlay_to_slice_file(
             #'sample_data/jatra_5mm/IM-0001-0019.dcm',
             'sample_data/volumetrie/volumetry_slice.DCM',
             overlay,
-            0,
+            6,
             filename
         )
         dr = dreader.DataReader()
-        newdata, newmetadata = dr.Get3DData(filename)
+        newdata, newmetadata = dr.Get3DData('tests_outputs')
         overlay = dr.GetOverlay()
         print overlay
         import ipdb; ipdb.set_trace() # BREAKPOINT
 
-        ed = pyed.py3DSeedEditor(newdata)
+        ed = pyed.py3DSeedEditor(overlay[0])
         ed.show()
 
         os.remove(filename)
