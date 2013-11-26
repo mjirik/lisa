@@ -15,10 +15,13 @@ sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
 
+import shutil
 
 
 import numpy as np
 
+import dicom
+dicom.debug(False)
 
 #
 import datawriter as dwriter
@@ -50,8 +53,8 @@ class DicomWriterTest(unittest.TestCase):
         newdata, newmetadata = dr.Get3DData(filename)
 
 
-        print  "meta ", metadata
-        print  "new meta ", newmetadata
+        #print  "meta ", metadata
+        #print  "new meta ", newmetadata
 
         # hack with -1024, because of wrong data reading
         self. assertEqual(data[10,10,10], newdata[10,10,10])
@@ -62,38 +65,17 @@ class DicomWriterTest(unittest.TestCase):
         self. assertEqual(metadata['voxelsize_mm'][2], newmetadata['voxelsize_mm'][2])
         os.remove(filename)
 
-    def iiitest_write_overlay(self):
 
-        filename = 'test_file.dcm'
-        data = (np.random.random([30,100,120])*30).astype(np.int16)
-        data[0:5,20:60,60:70,] += 30
-
-        overlay = np.zeros([512,512], dtype=np.uint8)
-        overlay [30:70, 110:300] = 1
-
-        metadata = {'voxelsize_mm': [1,2,3]}
-        dw = dwriter.DataWriter()
-        dw.add_overlay_to_slice_file(
-            'sample_data/jatra_5mm/IM-0001-0019.dcm',
-            overlay,
-            0,
-            'out_with_overlay.dcm'
-        )
-
-        #os.remove(filename)
-
-    def test_write_and_read_file_with_overlay(self):
+    def test_add_overlay_and_read_file_with_overlay(self):
         filename = 'tests_outputs/test_file.dcm'
         filedir = os.path.dirname(filename)
+
+        # number of tested overlay
+        i_overlay = 6
 
         if not os.path.exists('tests_outputs'):
             os.mkdir('tests_outputs')
 
-        import dicom
-        dcmdata = dicom.read_file(
-            'sample_data/volumetrie/volumetry_slice.DCM'
-        )
-        import ipdb; ipdb.set_trace() # BREAKPOINT
 
 
         data = (np.random.random([30,100,120])*30).astype(np.int16)
@@ -107,19 +89,20 @@ class DicomWriterTest(unittest.TestCase):
             #'sample_data/jatra_5mm/IM-0001-0019.dcm',
             'sample_data/volumetrie/volumetry_slice.DCM',
             overlay,
-            6,
+            i_overlay,
             filename
         )
         dr = dreader.DataReader()
         newdata, newmetadata = dr.Get3DData('tests_outputs')
-        overlay = dr.GetOverlay()
-        print overlay
-        import ipdb; ipdb.set_trace() # BREAKPOINT
+        newoverlay = dr.GetOverlay()
+        # print overlay
 
-        ed = pyed.py3DSeedEditor(overlay[0])
-        ed.show()
+        #ed = pyed.py3DSeedEditor(newoverlay[6])
+        #ed.show()
+        self.assertTrue((newoverlay[i_overlay] == overlay).all())
 
-        os.remove(filename)
+        #os.remove(filename)
+        shutil.rmtree(filedir)
 
 if __name__ == "__main__":
     unittest.main()

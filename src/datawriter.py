@@ -95,7 +95,6 @@ class DataWriter:
             dtype=np.uint8
         )
 
-
 # encoded data
         for i in range(0, len(overlay_linear)):
             if overlay_linear[i] > 0:
@@ -103,15 +102,9 @@ class DataWriter:
             else:
                 bit = 0
 
-
             encoded_linear[i/n_bits] |= bit << (i % n_bits)
 
-#                decoded_linear[i*n_bits + k] = (byte_as_int >> k) & 0b1
-
-        #encoded_linear[10:1000] = 255
-
         overlay_raw = encoded_linear.tostring()
-
 
         # Decoding data. Each bit is stored as array element
 # TODO neni tady ta jednička blbě?
@@ -121,8 +114,6 @@ class DataWriter:
 #                decoded_linear[i*n_bits + k] = (byte_as_int >> k) & 0b1
 #
         #overlay = np.array(pol)
-        import ipdb; ipdb.set_trace() # BREAKPOINT
-        print overlay_raw
 
         overlay_el = dicom.dataelem.DataElement(
             (dicom_tag1, 0x3000),
@@ -132,7 +123,4 @@ class DataWriter:
         data[overlay_el.tag] = overlay_el
 
         return data
-#data = np.zeros([100,100,30], dtype=np.uint8)
-#data[20:60,60:70, 0:5] = 100
-#dw = DataWriter()
-#dw.Write3DData(data, 'soubor.dcm')
+
