@@ -1,5 +1,7 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
+""" Module for readin 3D dicom data
+"""
 
 # import funkcí z jiného adresáře
 import sys

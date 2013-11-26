@@ -66,7 +66,7 @@ class DicomWriterTest(unittest.TestCase):
         os.remove(filename)
 
 
-    def test_add_overlay_and_read_file_with_overlay(self):
+    def test_add_overlay_and_read_one_file_with_overlay(self):
         filename = 'tests_outputs/test_file.dcm'
         filedir = os.path.dirname(filename)
 
@@ -104,5 +104,50 @@ class DicomWriterTest(unittest.TestCase):
         #os.remove(filename)
         shutil.rmtree(filedir)
 
+    def test_add_overlay_to_copied_dir(self):
+        """
+        writes 3d label to copied dicom files
+        """
+        filedir = 'test_outputs_dir'
+        n_files = 3
+
+        # number of tested overlay
+        i_overlay = 6
+
+        if not os.path.exists(filedir):
+            os.mkdir(filedir)
+
+
+# open copied data to obtain dcmfilefilelist
+        dr = dreader.DataReader()
+        data3d, metadata = dr.Get3DData(
+            'sample_data/jatra_5mm/'
+            #'sample_data/volumetrie/'
+        )
+# for test we are working only with small number of files (n_files)
+        metadata['dcmfilelist'] = metadata['dcmfilelist'][:n_files]
+
+
+# create overlay
+        overlay = np.zeros([n_files, 512, 512], dtype=np.uint8)
+        overlay[:, 450:500, 30:100] = 1
+# if there is more slides, try more complicated overlay
+        overlay[0, 430:460, 20:110] = 1
+        overlay[-1:, 470:520, 10:120] = 1
+
+        overlays = {i_overlay:overlay}
+
+        dw = dwriter.DataWriter()
+        dw.DataCopyWithOverlay(metadata['dcmfilelist'], filedir, overlays)
+
+## try read written data
+        dr = dreader.DataReader()
+        newdata, newmetadata = dr.Get3DData(filedir)
+        newoverlay = dr.GetOverlay()
+
+        self.assertTrue((newoverlay[i_overlay] == overlays[i_overlay]).all())
+
+        #os.remove(filename)
+        shutil.rmtree(filedir)
 if __name__ == "__main__":
     unittest.main()

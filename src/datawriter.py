@@ -10,6 +10,7 @@ import numpy as np
 import logging
 logger = logging.getLogger(__name__)
 
+import os.path
 
 import dicom
 #from sys import argv
@@ -33,9 +34,35 @@ class DataWriter:
             #data = dicom.read_file(onefile)
 
 
-    def write_dicom_slice_with_overlay(
-        self, filename, data3d, ovelay, i_overlay):
-        pass
+    def DataCopyWithOverlay(self, dcmfilelist, out_dir, overlays):
+        """
+        Function make 3D data from dicom file slices
+
+        :dcmfilelist list of sorted .dcm files
+        :overlays dictionary of binary overlays. {1:np.array([...]), 3:...}
+        :out_dir output directory
+
+        """
+        dcmlist = dcmfilelist
+        data3d = []
+
+        for i in range(len(dcmlist)):
+            onefile = dcmlist[i]
+
+            logger.info(onefile)
+            data = dicom.read_file(onefile)
+
+            for i_overlay in overlays.keys():
+                overlay3d = overlays[i_overlay]
+                data = self.encode_overlay_slice(data, overlay3d[-1-i,:,:], i_overlay)
+
+            # construct output path
+            head, tail = os.path.split(os.path.normpath(onefile))
+            filename_out = os.path.join(out_dir, tail)
+
+#save
+            data.save_as(filename_out)
+            #import pdb; pdb.set_trace()
 
 
     def add_overlay_to_slice_file(
