@@ -77,6 +77,7 @@ def feat_hist(data3d_orig):
     bins = range(-512, 512, 1)
     bins = range(-512, 512, 10)
     bins = range(-512, 512, 64)
+    bins = range(-512, 512, 100)
     hist1, bin_edges1 = np.histogram(data3d_orig, bins=bins)
     return hist1
 
@@ -210,71 +211,90 @@ def write_csv(data, filename="20130919_liver_statistics.yaml"):
 
 
 #def training_dataset_prepare
+def read_data_orig_and_seg(inputdata, i):
+    """ Loads data_orig and data_seg from yaml file
+    """
+
+    reader = datareader.DataReader()
+    data3d_a_path = os.path.join(inputdata['basedir'],
+                                    inputdata['data'][i]['sliverseg'])
+    data3d_a, metadata_a = reader.Get3DData(data3d_a_path)
+
+    data3d_b_path = os.path.join(inputdata['basedir'],
+                                    inputdata['data'][i]['sliverorig'])
+    data3d_b, metadata_b = reader.Get3DData(data3d_b_path)
+
+    #import pdb; pdb.set_trace()
+    data3d_seg = (data3d_a > 0).astype(np.int8)
+    data3d_orig = data3d_b
+
+    return data3d_orig, data3d_seg
 
 def experiment(path_to_yaml, list_of_feature_fcn, list_of_classifiers,
-               tile_shape, visualization = False):
+               tile_shape, visualization=False):
 
     inputdata = misc.obj_from_file(path_to_yaml, filetype='yaml')
 
 #   TODO work with list_of_feature_fcn and list_of_classifiers
-    prm = list(itertools.product(list_of_feature_fcn, list_of_classifiers))
- #   import ipdb; ipdb.set_trace() # BREAKPOINT
+    featrs_plus_classifs = itertools.product(list_of_feature_fcn, list_of_classifiers)
+    import ipdb; ipdb.set_trace() # BREAKPOINT
 
-    fvall = []
-    fv_tiles = []
-    indata_len = len(inputdata['data'])
-    indata_len = 3
+    results = []
 
-    for i in range(0, indata_len):
+    for fpc in featrs_plus_classifs:
+        fpc
+        fvall = []
+        fv_tiles = []
+        indata_len = len(inputdata['data'])
+        indata_len = 3
 
-        reader = datareader.DataReader()
-        data3d_a_path = os.path.join(inputdata['basedir'],
-                                     inputdata['data'][i]['sliverseg'])
-        data3d_a, metadata_a = reader.Get3DData(data3d_a_path)
 
-        data3d_b_path = os.path.join(inputdata['basedir'],
-                                     inputdata['data'][i]['sliverorig'])
-        data3d_b, metadata_b = reader.Get3DData(data3d_b_path)
+        for i in range(0, indata_len):
+            data3d_orig, data3d_seg = read_data_orig_and_seg(inputdata, i)
 
-        #import pdb; pdb.set_trace()
-        data3d_seg = (data3d_a > 0).astype(np.int8)
-        data3d_orig = data3d_b
+            if visualization:
+                pyed = py3DSeedEditor.py3DSeedEditor(data3d_orig,
+                                                    contour=data3d_seg
+                                                    )
+                pyed.show()
+                #import pdb; pdb.set_trace()
+            #fvall.insert(i, get_features(
+            #    data3d_orig,
+            #    data3d_seg,
+            #    visualization=args.visualization
+            #    ))
+            #feature_fcn = feat_hist
+            feature_fcn = fpc[0]
+            fv_t = get_features_in_tiles(data3d_orig, data3d_seg, tile_shape,
+                                        feature_fcn)
+            cidxs, features_t, seg_cover_t = fv_t
 
-        if visualization:
-            pyed = py3DSeedEditor.py3DSeedEditor(data3d_orig,
-                                                 contour=data3d_seg
-                                                 )
+            labels_train_lin_float = np.array(seg_cover_t)
+            labels_train_lin = labels_train_lin_float > 0.5
+            from sklearn import svm
+
+            #clf = svm.SVC()
+            clf = fpc[1]()
+            clf.fit(features_t, labels_train_lin)
+            labels_lin = clf.predict(features_t)
+
+            d_shp = data3d_orig.shape
+
+            labels = arrange_to_tiled_data(cidxs, tile_shape, d_shp, labels_lin)
+            ltl = (labels_train_lin_float * 10).astype(np.int8)
+            labels_train = arrange_to_tiled_data(cidxs, tile_shape, d_shp, ltl)
+
+            #pyed = py3DSeedEditor.py3DSeedEditor(labels_train, contour=labels)
+            pyed = py3DSeedEditor.py3DSeedEditor(data3d_seg, contour=labels)
             pyed.show()
-            #import pdb; pdb.set_trace()
-        #fvall.insert(i, get_features(
-        #    data3d_orig,
-        #    data3d_seg,
-        #    visualization=args.visualization
-        #    ))
-        tile_shp = [1, 100, 100]
-        feature_fcn = feat_hist
-        fv_t = get_features_in_tiles(data3d_orig, data3d_seg, tile_shp, feature_fcn)
-        cidxs, features_t, seg_cover_t = fv_t
+            fv_tiles.insert(i, fv_t)
 
-        labels_train_lin_float = np.array(seg_cover_t)
-        labels_train_lin = labels_train_lin_float > 0.5
-        from sklearn import svm
+        result = {'params':str(fpc), 'fvall':fvall}
+        results.append(result)
+        print results
 
-        clf = svm.SVC()
-        clf.fit(features_t, labels_train_lin)
-        labels_lin = clf.predict(features_t)
 
-        d_shp = data3d_orig.shape
-
-        labels = arrange_to_tiled_data(cidxs, tile_shp, d_shp, labels_lin)
-        ltl = (labels_train_lin_float * 10).astype(np.int8)
-        labels_train = arrange_to_tiled_data(cidxs, tile_shp, d_shp, ltl)
-
-        pyed = py3DSeedEditor.py3DSeedEditor(labels_train, contour=labels)
-        pyed.show()
-        fv_tiles.insert(i, fv_t)
-
-    return fvall
+    return results
 
 def main():
 
@@ -306,8 +326,9 @@ def main():
     from sklearn.naive_bayes import GaussianNB
 
     list_of_classifiers = [svm.SVC, GaussianNB]
+    tile_shape = [1, 100, 100]
     result = experiment(path_to_yaml, list_of_feature_fcn, list_of_classifiers,
-               args.visualization)
+               tile_shape=tile_shape, visualization=args.visualization)
 
 # Ukládání výsledku do souboru
     output_file = os.path.join(path_to_script,
