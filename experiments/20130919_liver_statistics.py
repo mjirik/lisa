@@ -72,7 +72,7 @@ def feat_hist_by_segmentation(data3d_orig, data3d_seg, visualization=True):
     return fv_hist
 
 
-def feat_hist(data3d_orig, visualization=True):
+def feat_hist(data3d_orig):
     bins = range(-1024, 1024, 1)
     bins = range(-512, 512, 1)
     bins = range(-512, 512, 10)
@@ -88,7 +88,7 @@ def lbp(data3d_orig, data3d_seg, visualization=True):
     return lbpRef
 
 
-def get_features(data3d_orig, data3d_seg, visualization=True):
+def get_features(data3d_orig, data3d_seg, feature_fcn, visualization=True):
     """
     Sem doplníme všechny naše měření.
 
@@ -98,7 +98,7 @@ def get_features(data3d_orig, data3d_seg, visualization=True):
     data3d_seg: jedničky tam, kde jsou játra
 
     """
-    featur = feat_hist(data3d_orig, visualization)
+    featur = feature_fcn(data3d_orig)
     #featur = {}
     #featur['hist'] = feat_hist(data3d_orig, visualization)
     #featur['lbp'] = lbp(data3d_orig, data3d_seg, visualization)
@@ -106,7 +106,7 @@ def get_features(data3d_orig, data3d_seg, visualization=True):
     return featur
 
 
-def get_features_in_tiles(data3d_orig, data3d_seg, tile_shape):
+def get_features_in_tiles(data3d_orig, data3d_seg, tile_shape, feature_fcn):
     """
     Computes features for small blocks of image data (tiles).
 
@@ -127,7 +127,7 @@ def get_features_in_tiles(data3d_orig, data3d_seg, tile_shape):
         cindex = cindexes[i]
         tile_orig = experiments.getArea(data3d_orig, cindex, tile_shape)
         tile_seg = experiments.getArea(data3d_seg, cindex, tile_shape)
-        tf = get_features(tile_orig, tile_seg, visualization=False)
+        tf = get_features(tile_orig, tile_seg, feature_fcn, visualization=False)
         sc = np.sum(tile_seg > 0).astype(np.float) / np.prod(tile_shape)
         features_t[i] = tf
         seg_cover_t[i] = sc
@@ -144,6 +144,7 @@ def cutter_indexes(shape, tile_shape):
     tile_shape: shape of tile
 
     """
+    # TODO přepis r1?
     r0 = range(0, shape[0] - tile_shape[0] + 1, tile_shape[0])
     r1 = range(1, shape[1] - tile_shape[1] + 1, tile_shape[1])
     r2 = range(2, shape[2] - tile_shape[2] + 1, tile_shape[2])
@@ -210,6 +211,70 @@ def write_csv(data, filename="20130919_liver_statistics.yaml"):
 
 #def training_dataset_prepare
 
+def experiment(path_to_yaml, list_of_feature_fcn, list_of_classifiers,
+               tile_shape, visualization = False):
+
+    inputdata = misc.obj_from_file(path_to_yaml, filetype='yaml')
+
+#   TODO work with list_of_feature_fcn and list_of_classifiers
+    prm = list(itertools.product(list_of_feature_fcn, list_of_classifiers))
+ #   import ipdb; ipdb.set_trace() # BREAKPOINT
+
+    fvall = []
+    fv_tiles = []
+    indata_len = len(inputdata['data'])
+    indata_len = 3
+
+    for i in range(0, indata_len):
+
+        reader = datareader.DataReader()
+        data3d_a_path = os.path.join(inputdata['basedir'],
+                                     inputdata['data'][i]['sliverseg'])
+        data3d_a, metadata_a = reader.Get3DData(data3d_a_path)
+
+        data3d_b_path = os.path.join(inputdata['basedir'],
+                                     inputdata['data'][i]['sliverorig'])
+        data3d_b, metadata_b = reader.Get3DData(data3d_b_path)
+
+        #import pdb; pdb.set_trace()
+        data3d_seg = (data3d_a > 0).astype(np.int8)
+        data3d_orig = data3d_b
+
+        if visualization:
+            pyed = py3DSeedEditor.py3DSeedEditor(data3d_orig,
+                                                 contour=data3d_seg
+                                                 )
+            pyed.show()
+            #import pdb; pdb.set_trace()
+        #fvall.insert(i, get_features(
+        #    data3d_orig,
+        #    data3d_seg,
+        #    visualization=args.visualization
+        #    ))
+        tile_shp = [1, 100, 100]
+        feature_fcn = feat_hist
+        fv_t = get_features_in_tiles(data3d_orig, data3d_seg, tile_shp, feature_fcn)
+        cidxs, features_t, seg_cover_t = fv_t
+
+        labels_train_lin_float = np.array(seg_cover_t)
+        labels_train_lin = labels_train_lin_float > 0.5
+        from sklearn import svm
+
+        clf = svm.SVC()
+        clf.fit(features_t, labels_train_lin)
+        labels_lin = clf.predict(features_t)
+
+        d_shp = data3d_orig.shape
+
+        labels = arrange_to_tiled_data(cidxs, tile_shp, d_shp, labels_lin)
+        ltl = (labels_train_lin_float * 10).astype(np.int8)
+        labels_train = arrange_to_tiled_data(cidxs, tile_shp, d_shp, ltl)
+
+        pyed = py3DSeedEditor.py3DSeedEditor(labels_train, contour=labels)
+        pyed.show()
+        fv_tiles.insert(i, fv_t)
+
+    return fvall
 
 def main():
 
@@ -233,69 +298,21 @@ def main():
     if args.sampleInput:
         sample_input_data()
     # input parser
-    data_file = os.path.join(path_to_script,  "20130919_liver_statistics.yaml")
-    inputdata = misc.obj_from_file(data_file, filetype='yaml')
+    path_to_yaml = os.path.join(path_to_script,  "20130919_liver_statistics.yaml")
 
-    fvall = []
-    fv_tiles = []
-    indata_len = len(inputdata['data'])
-    indata_len = 3
-
-    for i in range(0, indata_len):
-
-        reader = datareader.DataReader()
-        data3d_a_path = os.path.join(inputdata['basedir'],
-                                     inputdata['data'][i]['sliverseg'])
-        data3d_a, metadata_a = reader.Get3DData(data3d_a_path)
-
-        data3d_b_path = os.path.join(inputdata['basedir'],
-                                     inputdata['data'][i]['sliverorig'])
-        data3d_b, metadata_b = reader.Get3DData(data3d_b_path)
-
-        #import pdb; pdb.set_trace()
-        data3d_seg = (data3d_a > 0).astype(np.int8)
-        data3d_orig = data3d_b
-
-        if args.visualization:
-            pyed = py3DSeedEditor.py3DSeedEditor(data3d_orig,
-                                                 contour=data3d_seg
-                                                 )
-            pyed.show()
-            #import pdb; pdb.set_trace()
-        #fvall.insert(i, get_features(
-        #    data3d_orig,
-        #    data3d_seg,
-        #    visualization=args.visualization
-        #    ))
-        tile_shp = [1, 32, 32]
-        fv_t = get_features_in_tiles(data3d_orig, data3d_seg, tile_shp)
-        cidxs, features_t, seg_cover_t = fv_t
-
-        labels_train_lin_float = np.array(seg_cover_t)
-        labels_train_lin = labels_train_lin_float > 0.5
-        from sklearn import svm
-
-        clf = svm.SVC()
-        clf.fit(features_t, labels_train_lin)
-        labels_lin = clf.predict(features_t)
-
-        d_shp = data3d_orig.shape
-
-        labels = arrange_to_tiled_data(cidxs, tile_shp, d_shp, labels_lin)
-        ltl = (labels_train_lin_float * 10).astype(np.int8)
-        labels_train = arrange_to_tiled_data(cidxs, tile_shp, d_shp, ltl)
-
-        pyed = py3DSeedEditor.py3DSeedEditor(labels_train, contour=labels)
-        pyed.show()
-        fv_tiles.insert(i, fv_t)
-
-    print fvall
     #write_csv(fvall)
+    list_of_feature_fcn = [feat_hist]
+    from sklearn import svm
+    from sklearn.naive_bayes import GaussianNB
+
+    list_of_classifiers = [svm.SVC, GaussianNB]
+    result = experiment(path_to_yaml, list_of_feature_fcn, list_of_classifiers,
+               args.visualization)
 
 # Ukládání výsledku do souboru
     output_file = os.path.join(path_to_script,
                                "20130919_liver_statistics_results.pkl")
-    misc.obj_to_file(fvall, output_file, filetype='pickle')
+    misc.obj_to_file(result, output_file, filetype='pickle')
 
 if __name__ == "__main__":
     main()
