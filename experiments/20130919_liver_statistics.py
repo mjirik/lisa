@@ -51,7 +51,6 @@ import argparse
 import misc
 import datareader
 import matplotlib.pyplot as plt
-import realtime_lbp as real_lib
 
 
 
@@ -79,6 +78,7 @@ def feat_hist(data3d_orig, data3d_seg, visualization=True):
 
 
 def lbp(data3d_orig, data3d_seg, visualization=True):
+    import realtime_lbp as real_lib
     realLbp = real_lib.loadRealtimeLbpLibrary()  
     lbpRef = np.zeros([1,256])
     lbpRef = real_lib.realTimeLbpImNp(realLbp,data3d_orig[:,:,1])
