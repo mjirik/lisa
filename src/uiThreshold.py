@@ -93,16 +93,11 @@ class uiThreshold:
             import copy
             self.data = copy.copy(data)
             self.voxel = copy.copy(voxel)
-            self.imgChanged = copy.copy(data)
-            self.imgFiltering = copy.copy(data)
 
         else:
 
             self.data = data.copy()
             self.voxel = voxel.copy()
-            self.imgUsed = data.copy()
-            self.imgChanged = data.copy()
-            self.imgFiltering = data.copy()
 
         ## Kalkulace objemove jednotky (voxel) (V = a*b*c)
         voxel1 = self.voxel[0]
@@ -161,14 +156,14 @@ class uiThreshold:
             self.ssigma.on_changed(self.updateImage)
 
             ## Zalozeni mist pro tlacitka
-            self.axbuttnext1 = self.fig.add_axes([0.81, 0.24, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttprev1 = self.fig.add_axes([0.86, 0.24, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttnext2 = self.fig.add_axes([0.81, 0.20, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttprev2 = self.fig.add_axes([0.86, 0.20, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttnextclosing = self.fig.add_axes([0.81, 0.16, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttprevclosing = self.fig.add_axes([0.86, 0.16, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttnextopening = self.fig.add_axes([0.81, 0.12, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttprevopening = self.fig.add_axes([0.86, 0.12, 0.04, 0.03], axisbg = self.axcolor)
+            self.axbuttnext1 = self.fig.add_axes([0.86, 0.24, 0.04, 0.03], axisbg = self.axcolor)
+            self.axbuttprev1 = self.fig.add_axes([0.81, 0.24, 0.04, 0.03], axisbg = self.axcolor)
+            self.axbuttnext2 = self.fig.add_axes([0.86, 0.20, 0.04, 0.03], axisbg = self.axcolor)
+            self.axbuttprev2 = self.fig.add_axes([0.81, 0.20, 0.04, 0.03], axisbg = self.axcolor)
+            self.axbuttnextclosing = self.fig.add_axes([0.86, 0.16, 0.04, 0.03], axisbg = self.axcolor)
+            self.axbuttprevclosing = self.fig.add_axes([0.81, 0.16, 0.04, 0.03], axisbg = self.axcolor)
+            self.axbuttnextopening = self.fig.add_axes([0.86, 0.12, 0.04, 0.03], axisbg = self.axcolor)
+            self.axbuttprevopening = self.fig.add_axes([0.81, 0.12, 0.04, 0.03], axisbg = self.axcolor)
             self.axbuttreset = self.fig.add_axes([0.79, 0.08, 0.06, 0.03], axisbg = self.axcolor)
             self.axbuttcontinue = self.fig.add_axes([0.86, 0.08, 0.06, 0.03], axisbg = self.axcolor)
 
@@ -224,8 +219,6 @@ class uiThreshold:
              garbage.collect()
              matpyplot.show()
 
-        del(self.imgBeforeBinaryClosing)
-        del(self.imgBeforeBinaryOpening)
         del(self.imgUsed)
         del(self.data)
 
@@ -252,6 +245,8 @@ class uiThreshold:
             sigma = numpy.round(self.ssigma.val, 2)
         sigmaNew = self.calculateSigma(sigma)
 
+        self.imgFiltering = self.data
+
         ## Filtrovani
         if(self.lastSigma != sigma):
             scipy.ndimage.filters.gaussian_filter(self.data, sigmaNew, 0, self.imgFiltering, 'reflect', 0.0)
@@ -269,7 +264,7 @@ class uiThreshold:
 
                 self.calculateAutomaticThreshold()
 
-            self.imgBeforeBinaryClosing = self.imgFiltering * (self.imgFiltering > self.threshold)
+            self.imgFiltering = self.imgFiltering * (self.imgFiltering > self.threshold)
 
             if ( self.interactivity == True ) :
 
@@ -285,7 +280,7 @@ class uiThreshold:
 
                 if ( (self.lastMinThresNum != self.threshold) or (self.overrideSigma == True) ):
 
-                    self.imgBeforeBinaryClosing = self.imgFiltering * (self.imgFiltering > self.threshold)
+                    self.imgFiltering = self.imgFiltering * (self.imgFiltering > self.threshold)
 
                     if ( self.interactivity == True ) :
 
@@ -297,11 +292,9 @@ class uiThreshold:
 
             elif ( (self.lastMinThresNum != self.smin.val) or (self.overrideSigma == True) ) :
 
-                self.imgBeforeBinaryClosing = self.imgFiltering * (self.imgFiltering > self.smin.val)
+                self.imgFiltering = self.imgFiltering * (self.imgFiltering > self.smin.val)
                 self.lastMinThresNum = self.smin.val
                 self.overrideThres = True
-
-##        self.imgChanged = self.imgBeforeBinaryClosing
 
         ## Operace binarni otevreni a uzavreni.
         ## Nastaveni hodnot slideru.
@@ -318,44 +311,32 @@ class uiThreshold:
             openNum = self.ICBinaryOpeningIterations
 
         ## Vlastni binarni uzavreni.
-        if(self.firstRun == True and self.ICBinaryClosingIterations >= 1):
-            self.imgBeforeBinaryOpening = self.imgBeforeBinaryClosing * scipy.ndimage.binary_closing(self.imgBeforeBinaryClosing, structure = None, iterations = closeNum)
+        if(self.firstRun == True and self.ICBinaryClosingIterations >= 1) and closeNum > 0:
+            self.imgFiltering = self.imgFiltering * scipy.ndimage.binary_closing(self.imgFiltering, structure = None, iterations = closeNum)
         else:
-            if( ((closeNum >= 1) and (self.lastCloseNum != closeNum)) or (self.overrideThres == True) ):
-                self.imgBeforeBinaryOpening = self.imgBeforeBinaryClosing * scipy.ndimage.binary_closing(self.imgBeforeBinaryClosing, structure = None, iterations = closeNum)
-            else:
-                self.imgBeforeBinaryOpening = self.imgBeforeBinaryClosing
+            if( ((closeNum >= 1) and (self.lastCloseNum != closeNum)) or (self.overrideThres == True) ) and closeNum > 0:
+                self.imgFiltering = self.imgFiltering * scipy.ndimage.binary_closing(self.imgFiltering, structure = None, iterations = closeNum)
         self.lastCloseNum = closeNum
 
         ## Vlastni binarni otevreni.
-        if(self.firstRun == True and self.ICBinaryOpeningIterations >= 1):
-            self.imgChanged = self.imgBeforeBinaryOpening * scipy.ndimage.binary_opening(self.imgBeforeBinaryOpening, structure = None, iterations = openNum)
+        if(self.firstRun == True and self.ICBinaryOpeningIterations >= 1) and openNum > 0:
+            self.imgFiltering = self.imgFiltering * scipy.ndimage.binary_opening(self.imgFiltering, structure = None, iterations = openNum)
         else:
-            if( ((openNum >= 1) and (self.lastOpenNum != openNum)) or (self.overrideThres == True) ):
-                self.imgChanged = self.imgBeforeBinaryOpening * scipy.ndimage.binary_opening(self.imgBeforeBinaryOpening,
+            if( ((openNum >= 1) and (self.lastOpenNum != openNum)) or (self.overrideThres == True) ) and openNum > 0:
+                self.imgFiltering = self.imgFiltering * scipy.ndimage.binary_opening(self.imgFiltering,
                     structure = None, iterations = openNum)
-            else:
-                self.imgChanged = self.imgBeforeBinaryOpening
         self.lastOpenNum = openNum
 
         ## Zjisteni nejvetsich objektu
         if (self.biggestObjects == True or self.seeds != None) :
-           self.imgChanged = segmentation.getPriorityObjects(self.imgChanged, self.nObj, self.seeds)
-#        if (self.biggestObjects == True) :
-#            import qmisc
-#            self.imgChanged = qmisc.get_one_biggest_object(self.imgChanged)
+           self.imgFiltering = segmentation.getPriorityObjects(self.imgFiltering, self.nObj, self.seeds)
 
-
+        self.imgChanged = self.imgFiltering
         if ( self.interactivity == True ) :
             ## Predani obrazku k vykresleni
             self.ax1.imshow(numpy.amax(self.imgChanged, 0), self.cmap)
             self.ax2.imshow(numpy.amax(self.imgChanged, 1), self.cmap)
             self.ax3.imshow(numpy.amax(self.imgChanged, 2), self.cmap)
-
-##            ## Minimalni pouzitelna hodnota prahovani v obrazku
-##            self.min0 = numpy.amin(self.imgChanged)
-##            ## Maximalni pouzitelna hodnota prahovani v obrazku
-##            self.max0 = numpy.amax(self.imgChanged)
 
             ## Prekresleni
             self.fig.canvas.draw()

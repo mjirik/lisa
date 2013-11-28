@@ -19,6 +19,8 @@ from PyQt4.QtGui import QFileDialog, QApplication, QMainWindow
 
 import numpy as np
 
+import dicom
+dicom.debug(False)
 
 #
 import dcmreaddata as dcmr
@@ -44,13 +46,13 @@ class DicomReaderTest(unittest.TestCase):
         #import pdb; pdb.set_trace()
         #plt.imshow(overlay[1][:,:,0])
         #plt.show()
-        
+
         self. assertEqual(overlay[1][0,200,200],1)
         self. assertEqual(overlay[1][0,100,100],0)
     def test_read_volumetry_overlay_with_dicom_module(self):
         """
         pydicom module is used for load dicom data. Dicom overlay
-        is saved on (60xx,3000) bit after bit. Data are decoded and 
+        is saved on (60xx,3000) bit after bit. Data are decoded and
         each bit is stored as array element.
         """
         import dicom
@@ -60,14 +62,14 @@ class DicomReaderTest(unittest.TestCase):
         data = dicom.read_file(dcmfile)
 
 
-        
-        # overlay index 
+
+        # overlay index
         i_overlay = 1
         n_bits = 8
 
 
-        # On (60xx,3000) are stored ovelays. 
-        # First is (6000,3000), second (6002,3000), third (6004,3000),  
+        # On (60xx,3000) are stored ovelays.
+        # First is (6000,3000), second (6002,3000), third (6004,3000),
         # and so on.
         dicom_tag1 = 0x6000 + 2*i_overlay
 
@@ -82,7 +84,7 @@ class DicomReaderTest(unittest.TestCase):
         # Decoding data. Each bit is stored as array element
         for i in range(1,len(overlay_raw)):
             for k in range (0,n_bits):
-                byte_as_int = ord(overlay_raw[i]) 
+                byte_as_int = ord(overlay_raw[i])
                 decoded_linear[i*n_bits + k] = (byte_as_int >> k) & 0b1
 
         #overlay = np.array(pol)
@@ -97,10 +99,10 @@ class DicomReaderTest(unittest.TestCase):
         #pyed = py3DSeedEditor.py3DSeedEditor(overlay)
         #pyed.show()
         #import pdb; pdb.set_trace()
-        
 
 
-        
+
+
 
 
 
@@ -189,19 +191,19 @@ class DicomReaderTest(unittest.TestCase):
 #        data3d = (data3d + noise  ).astype(np.int16)
 #
 #
-#        data={'data3d':data3d, 
+#        data={'data3d':data3d,
 #                'slab':slab,
 #                'voxelsize_mm':voxelsize_mm,
 #                'segmentation':segm_pre
 #                }
 #
-## @TODO je tam bug, prohlížeč neumí korektně pracovat s doubly 
+## @TODO je tam bug, prohlížeč neumí korektně pracovat s doubly
 ##        app = QApplication(sys.argv)
 ##        #pyed = QTSeedEditor(noise )
 ##        pyed = QTSeedEditor(data3d)
 ##        pyed.exec_()
 ##        #img3d = np.zeros([256,256,80], dtype=np.int16)
-#        
+#
 #       # pyed = py3DSeedEditor.py3DSeedEditor(data3d)
 #       # pyed.show()
 #
@@ -210,7 +212,7 @@ class DicomReaderTest(unittest.TestCase):
 #        tumory.import_data(data)
 #        tumory.automatic_localization()
 #        #tumory.visualization()
-#         
+#
 #
 #
 ## ověření výsledku
@@ -218,7 +220,7 @@ class DicomReaderTest(unittest.TestCase):
 #        #pyed.show()
 #
 #        errim = np.abs(
-#                (tumory.segmentation == slab['lesions']).astype(np.int) - 
+#                (tumory.segmentation == slab['lesions']).astype(np.int) -
 #                (segm == slab['lesions']).astype(np.int))
 #
 ## ověření výsledku

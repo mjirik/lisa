@@ -1,5 +1,7 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
+""" Module for readin 3D dicom data
+"""
 
 # import funkcí z jiného adresáře
 import sys
@@ -23,7 +25,11 @@ import dcmreaddata as dcmr
 
 class DataReader:
 
-    def Get3DData(self, dcmdir): 
+    def __init__(self):
+
+        self.overlay_fcn = None
+
+    def Get3DData(self, dcmdir):
         if os.path.isfile(dcmdir):
 # reading raw file
             import SimpleITK as sitk
@@ -62,7 +68,17 @@ class DataReader:
             metadata = reader.get_metaData()
             metadata['series_number'] = reader.series_number
             metadata['datadir'] = dcmdir
+            self.overlay_fcn = reader.get_overlay
         return data3d, metadata
+
+    def GetOverlay(self):
+        """ Generates dictionary of ovelays
+        """
+
+        if self.overlay_fcn == None:
+            return {}
+        else:
+            return self.overlay_fcn()
 
 
 def get_dcmdir_qt(qt_app):

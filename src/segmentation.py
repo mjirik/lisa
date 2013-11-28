@@ -135,8 +135,13 @@ def vesselSegmentation(
         interactivity, number, inputSigma, nObj, biggestObjects, binaryClosingIterations,
         binaryOpeningIterations, seeds)
     output = uiT.run()
+
+    del(preparedData)
     del(uiT)
     garbage.collect()
+
+    ## Vypocet binarni matice
+    output[output != 0] = 1
 
     ## Vraceni matice
     return output

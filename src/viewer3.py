@@ -154,8 +154,8 @@ class Viewer():
         try:
             self.set_normal(self.planew.GetNormal())
             self.set_coordinates(self.planew.GetOrigin())
-            print(self.normal)
-            print(self.coordinates)
+            #print(self.normal)
+            #print(self.coordinates)
         except AttributeError:
             print('Neexistuje rovina rezu - Plane')
 
@@ -333,6 +333,7 @@ class Viewer():
             renWin.Render()
             iren.Start()
             renWin.Finalize()
+
 ##------------------------------------------------------------------------------------------
 
 
@@ -356,7 +357,7 @@ class MyInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
 help = {
     'in_file': 'input pkl file',
 }
-##------------------------------------------------------------------------------------------
+
     
 def main():
     parser = argparse.ArgumentParser(description='Simple VTK Viewer')
@@ -383,8 +384,6 @@ def main():
     viewer = Viewer(args.picklefile,args.mode)
     accept = False
     # dotaz na zadani rozmeru voxelu
-    
-    
     if args.picklefile:
         zadani_rozmeru = raw_input('Chcete zadat rozmery voxelu? (A)no, (N)e (standardni rozmer 1x1x1) : ')
         if zadani_rozmeru == 'A':
@@ -428,4 +427,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+##------------------------------------------------------------------------------------------
     
