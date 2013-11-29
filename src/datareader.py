@@ -29,7 +29,14 @@ class DataReader:
 
         self.overlay_fcn = None
 
-    def Get3DData(self, dcmdir):
+    def Get3DData(self, dcmdir, qt_app=None):
+        """
+        :dcmdir directory with input data
+        :qt_app if it is set to None (as default) all dialogs for series
+        selection are performed in terminal. If qt_app is set to
+        QtGui.QApplication() dialogs are in Qt.
+        """
+
         if os.path.isfile(dcmdir):
 # reading raw file
             import SimpleITK as sitk
@@ -62,8 +69,9 @@ class DataReader:
         else:
 #reading dicom
 
+            print 'GEt šD data ', qt_app
 
-            reader = dcmr.DicomReader(dcmdir) # , qt_app=qt_app)
+            reader = dcmr.DicomReader(dcmdir, qt_app=None, gui=True)
             data3d = reader.get_3Ddata()
             metadata = reader.get_metaData()
             metadata['series_number'] = reader.series_number

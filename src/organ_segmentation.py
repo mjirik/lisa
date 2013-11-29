@@ -664,7 +664,7 @@ def readData3d(dcmdir):
         qt_app = QtGui.QApplication(sys.argv)
         dcmdir = datareader.get_dcmdir_qt(qt_app)
     reader = datareader.DataReader()
-    data3d, metadata = reader.Get3DData(dcmdir)
+    data3d, metadata = reader.Get3DData(dcmdir, qt_app=None)
 
     return data3d, metadata, qt_app
 
