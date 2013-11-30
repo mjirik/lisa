@@ -853,8 +853,11 @@ def main():
 
     if args["show_output"]:
         oseg.show_output()
-
-    savestring = raw_input('Save output data? Yes/No/All with input data (y/n/a): ')
+        
+    from PyQt4.QtGui import QInputDialog
+    snstring, ok = QInputDialog.getText(None, 'Save output data? Yes/No/All with input data (y/n/a): ')
+    savestring = str(snstring)
+    #savestring = raw_input('Save output data? Yes/No/All with input data (y/n/a): ')
     #sn = int(snstring)
     if savestring in ['Y', 'y','a','A']:
         if not  os.path.exists(args["output_datapath"]):
