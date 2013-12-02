@@ -55,8 +55,8 @@ or
     git submodule update --init --recursive
 
 
-You can find more install notes in file 'notes.txt'
-(https://github.com/mjirik/liver-surgery/blob/master/notes.txt)
+You can find more install notes in file 'notes.md'
+(https://github.com/mjirik/liver-surgery/blob/master/notes.md)
 
 
 Run
