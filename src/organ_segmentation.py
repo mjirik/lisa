@@ -55,7 +55,7 @@ class OrganSegmentation():
             series_number=None,
             autocrop=True,
             autocrop_margin_mm=[10, 10, 10],
-            manualroi=None,
+            manualroi=True,
             texture_analysis=None,
             segmentation_smoothing=False,
             smoothing_mm=4,
@@ -177,12 +177,12 @@ class OrganSegmentation():
 
 
 # manualcrop
-        if manualroi is not None:
+        if manualroi is True: #is not None:
 # @todo opravit souřadný systém v součinnosti s autocrop
             self.process_qt_app()
             self.data3d, self.crinfo = qmisc.manualcrop(self.data3d)
             self.iparams['roi'] = self.crinfo
-            self.iparams['manualroi'] = None
+            self.iparams['manualroi'] = True
             #print self.crinfo
         elif roi is not None:
             self.data3d = qmisc.crop(self.data3d, roi)
@@ -853,10 +853,17 @@ def main():
 
     if args["show_output"]:
         oseg.show_output()
-        
+
     from PyQt4.QtGui import QInputDialog
-    snstring, ok = QInputDialog.getText(None, 'Save output data? Yes/No/All with input data (y/n/a): ')
-    savestring = str(snstring)
+    savestring_qt, ok = QInputDialog.getText(
+        None,
+        "Save",
+        'Save output data? Yes/No/All with input data (y/n/a):',
+        text="a"
+    )
+    savestring = str(savestring_qt)
+    #import pdb; pdb.set_trace()
+    #print savestring
     #savestring = raw_input('Save output data? Yes/No/All with input data (y/n/a): ')
     #sn = int(snstring)
     if savestring in ['Y', 'y','a','A']:
@@ -894,3 +901,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+    print "Thank you for using Lisa"
+    exit()
+
