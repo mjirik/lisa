@@ -594,6 +594,8 @@ class OrganSegmentation():
         data['slab'] = slab
         data['voxelsize_mm'] = self.voxelsize_mm
         data['orig_shape'] = self.orig_shape
+# TODO add dcmfilelist
+        #data["metadata"] = self.metadata
         #import pdb; pdb.set_trace()
         return data
 
@@ -654,6 +656,19 @@ class OrganSegmentation():
         #pyed.exec_()
 
         app.exit()
+
+def saveOverlayToDicomCopy(input_dcmfilelist, output_dicom_dir, overlays, crinfo):
+    """
+    Save overlay to dicom
+    """
+
+    if not os.path.exists(output_dicom_dir):
+        os.mkdir(output_dicom_dir)
+
+
+
+    dw = dwriter.DataWriter()
+    dw.DataCopyWithOverlay(metadata['dcmfilelist'], filedir, overlays)
 
 
 def readData3d(dcmdir):
