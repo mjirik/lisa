@@ -20,14 +20,26 @@ Installing requires you to have installed:
 * pygco - Graphcuts for Python (https://github.com/amueller/gco_python)
 * pydicom - package for working with DICOM files
 (http://code.google.com/p/pydicom)
+* pyqt - QT4 for python (https://wiki.python.org/moin/PyQt)
 
-On Linux, use package manager of your distribution
+Simple install instructions fallows. In case of problem see (https://github.com/mjirik/lisa/blob/master/INSTALL.md)
 
-    sudo apt-get install python git python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox python-insighttoolkit3 
+Linux:
+
+use package manager of your distribution
+
+    sudo apt-get install python git python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox python-insighttoolkit3 python-qt4 python-setuptools make
 
 SimpleITK is not in ubuntu packages. You can use easy_install
 
     sudo easy_install -U SimpleITK
+    
+For pygco use following (more info https://github.com/mjirik/pyseg_base/blob/master/INSTALL)
+
+    git clone https://github.com/amueller/gco_python.git
+    cd gco_python
+    make
+    sudo python setup.py install
 
 
 On Window, you can use Python XY (http://code.google.com/p/pythonxy/) and
@@ -39,24 +51,33 @@ and pyseg_base install notes
 (https://github.com/mjirik/pyseg_base/blob/master/INSTALL)
 
 
+
+
+
 Install
 -------
 
 
 
-    git clone --recursive git@github.com:mjirik/liver-surgery.git
+    git clone --recursive git@github.com:mjirik/lisa.git
 
     python ./mysetup.py
 
 or
 
-    git clone git@github.com:mjirik/liver-surgery.git
+    git clone git@github.com:mjirik/lisa.git
 
     git submodule update --init --recursive
 
 
-You can find more install notes in file 'notes.txt'
-(https://github.com/mjirik/liver-surgery/blob/master/notes.txt)
+You can find more install notes in file 'notes.md'
+(https://github.com/mjirik/liver-surgery/blob/master/notes.md)
+
+Get sample data
+---------------
+
+    python mysetup.py -d
+
 
 
 Run
@@ -85,3 +106,11 @@ Virtual liver resection is based on data stored in previous step
 
 In this script is selected cut on vessel by user interactivity. Resected and
 remaining volume is then calculated.
+
+
+Tests
+-----
+
+    nosetests
+    
+    

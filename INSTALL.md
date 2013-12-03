@@ -52,11 +52,28 @@ Install Mac OS
 
 
 
-Instalace Ubuntu 12.04
-======================
+Instalace (L)Ubuntu 13.10
+=========================
 
 
-    sudo apt-get install python-numpy python-scipy python-matplotlib
+    sudo apt-get install python git python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox python-insighttoolkit3 make python-qt4
+    
+    git clone git@github.com:mjirik/liver-surgery.git
+    
+    git submodule update --init --recursive
+    
+    git clone https://github.com/amueller/gco_python.git
+    
+    cd gco_python
+    
+    make
+    
+    python setup.py install
+    
+    
+You can try following command ff there is a problem "Permission denied"
+    
+    sudo chmod a+r /usr/local/lib/python2.7/dist-packages/SimpleITK-0.7.0-py2.7-linux-x86_64.egg/EGG-INFO/top_level.txt
 
 
 Instalace Windows
@@ -142,12 +159,14 @@ ověřeno pro python 2.7 32
 nainstalovat mingw
 
 
-Instalace na Windows 2 (4.11.2013)
-==================================
+Instalace na Windows 2
+======================
 
 
 * Python XY (http://code.google.com/p/pythonxy/)
 
+    Není potřeba nic doinstalovávat.
+    NESTABILNÍ!
 
 
 
