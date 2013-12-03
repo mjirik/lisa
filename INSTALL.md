@@ -69,6 +69,11 @@ Instalace (L)Ubuntu 13.10
     make
     
     python setup.py install
+    
+    
+You can try following command ff there is a problem "Permission denied"
+    
+    sudo chmod a+r /usr/local/lib/python2.7/dist-packages/SimpleITK-0.7.0-py2.7-linux-x86_64.egg/EGG-INFO/top_level.txt
 
 
 Instalace Windows
