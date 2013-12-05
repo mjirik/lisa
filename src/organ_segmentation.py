@@ -870,17 +870,17 @@ def main():
         oseg.show_output()
 
     from PyQt4.QtGui import QInputDialog
-    savestring_qt, ok = QInputDialog.getText(
-        None,
-        "Save",
-        'Save output data? Yes/No/All with input data (y/n/a):',
-        text="a"
-    )
-    savestring = str(savestring_qt)
+    #savestring_qt, ok = QInputDialog.getText(
+    #    None,
+    #    "Save",
+    #    'Save output data? Yes/No/All with input data (y/n/a):',
+    #    text="a"
+    #)
+    #savestring = str(savestring_qt)
     #import pdb; pdb.set_trace()
     #print savestring
-    #savestring = raw_input('Save output data? Yes/No/All with input data (y/n/a): ')
-    #sn = int(snstring)
+    savestring = raw_input('Save output data? Yes/No/All with input data (y/n/a): ')
+    print savestring
     if savestring in ['Y', 'y','a','A']:
         if not  os.path.exists(args["output_datapath"]):
             os.makedirs(args['output_datapath'])
@@ -913,6 +913,9 @@ def main():
         misc.obj_to_file(data, filepath, filetype='pklz')
     #output = segmentation.vesselSegmentation(oseg.data3d,
     # oseg.orig_segmentation)
+    print "uf"
+    import pdb; pdb.set_trace()
+    return
 
 if __name__ == "__main__":
     main()
