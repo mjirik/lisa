@@ -116,20 +116,25 @@ class QmiscTest(unittest.TestCase):
 
         self.assertTrue(img_uncropped[4,4,3] == img_in[4,4,3])
 
-    @unittest.skip("waiting for implementation")
+    #@unittest.skip("waiting for implementation")
     def test_suggest_filename(self):
         import misc
         filename = "mujsoubor"
+        #import ipdb; ipdb.set_trace() # BREAKPOINT
         new_filename = misc.suggest_filename(filename, exists=True)
-        self.assertTrue(filename == new_filename)
+        self.assertTrue(new_filename == "mujsoubor2")
 
-        filename = "mujsoubor-1"
+        filename = "mujsoubor112"
         new_filename = misc.suggest_filename(filename, exists=True)
-        self.assertTrue(new_filename == "mujsoubor-2")
+        self.assertTrue(new_filename == "mujsoubor113")
 
-        filename = "mujsoubor-1"
+        filename = "mujsoubor-2.txt"
         new_filename = misc.suggest_filename(filename, exists=True)
-        self.assertTrue(new_filename == "mujsoubor-3")
+        self.assertTrue(new_filename == "mujsoubor-3.txt")
+
+        filename = "mujsoubor-a24.txt"
+        new_filename = misc.suggest_filename(filename, exists=False)
+        self.assertTrue(new_filename == "mujsoubor-a24.txt")
 
     def test_getVersionString(self):
         """

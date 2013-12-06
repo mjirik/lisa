@@ -8,19 +8,32 @@ import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig()
 
-def suggest_file_name(file_path):
+def suggest_filename(file_path, exists=None):
     """
-    Try if exist path and add number to its end.
+    Try if exist path and append number to its end.
+    For debug you can set as input if file exists or not.
     """
     import os.path
-    if os.path.exists(file_path):
-        cislo = 2
-        try:
-            cislo = int(file_path[-1])
-        except Exception as e:
-            pass
+    import re
+    if not isinstance (exists, bool):
+        exists = os.path.exists(file_path)
 
-        file_path = filepath + str(cislo)
+
+    if exists:
+        file_path, file_extension = os.path.splitext(file_path)
+        #print file_path
+        m = re.search(r"\d+$", file_path)
+        if m is None:
+            #cislo = 2
+            new_cislo_str="2"
+        else:
+            cislostr = (m.group())
+            cislo = int(cislostr) + 1
+            file_path = file_path[:-len(cislostr)]
+            new_cislo_str = str(cislo)
+
+
+        file_path = file_path + new_cislo_str + file_extension#.zfill(2)
 
 
     return file_path
