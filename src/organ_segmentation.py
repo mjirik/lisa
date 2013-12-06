@@ -55,7 +55,7 @@ class OrganSegmentation():
             series_number=None,
             autocrop=True,
             autocrop_margin_mm=[10, 10, 10],
-            manualroi=True,
+            manualroi=False,
             texture_analysis=None,
             segmentation_smoothing=False,
             smoothing_mm=4,

@@ -116,6 +116,21 @@ class QmiscTest(unittest.TestCase):
 
         self.assertTrue(img_uncropped[4,4,3] == img_in[4,4,3])
 
+    @unittest.skip("waiting for implementation")
+    def test_suggest_filename(self):
+        import misc
+        filename = "mujsoubor"
+        new_filename = misc.suggest_filename(filename, exists=True)
+        self.assertTrue(filename == new_filename)
+
+        filename = "mujsoubor-1"
+        new_filename = misc.suggest_filename(filename, exists=True)
+        self.assertTrue(new_filename == "mujsoubor-2")
+
+        filename = "mujsoubor-1"
+        new_filename = misc.suggest_filename(filename, exists=True)
+        self.assertTrue(new_filename == "mujsoubor-3")
+
     def test_getVersionString(self):
         """
         """

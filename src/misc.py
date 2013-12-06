@@ -6,6 +6,7 @@
 
 import logging
 logger = logging.getLogger(__name__)
+logging.basicConfig()
 
 def suggest_file_name(file_path):
     """
@@ -52,7 +53,7 @@ def read_pkl_and_pklz(filename):
         fcontent = f.read()
         f.close()
     except Exception as e:
-        print "Warning: Input gzip exception: ", e
+        logger.warning("Input gzip exception: " + str(e))
         f = open(filename, 'rb')
         fcontent = f.read()
         f.close()
