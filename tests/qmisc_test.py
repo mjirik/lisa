@@ -118,6 +118,10 @@ class QmiscTest(unittest.TestCase):
 
     #@unittest.skip("waiting for implementation")
     def test_suggest_filename(self):
+        """
+        Testing some files. Not testing recursion in filenames. It is situation
+        if there exist file0, file1, file2 and input file is file
+        """
         import misc
         filename = "mujsoubor"
         #import ipdb; ipdb.set_trace() # BREAKPOINT

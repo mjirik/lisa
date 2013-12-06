@@ -34,6 +34,8 @@ def suggest_filename(file_path, exists=None):
 
 
         file_path = file_path + new_cislo_str + file_extension#.zfill(2)
+        # trorcha rekurze
+        file_path = suggest_filename(file_path)
 
 
     return file_path

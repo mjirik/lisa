@@ -897,11 +897,12 @@ def main():
 # save renamed file too
             filepath = 'organ_big-'+ filename + '.pklz'
             filepath = os.path.join(op,filename)
-            filepath = misc.suggest_file_name(filename)
+            filepath = misc.suggest_filename(filepath)
             misc.obj_to_file(data, filepath, filetype='pklz')
 
         filepath ='organ.pklz'
         filepath = os.path.join(op,filepath)
+        #filepath = misc.suggest_filename(filepath)
         misc.obj_to_file(data, filepath, filetype='pklz')
 
         filepath='organ_iparams.pklz'
@@ -911,11 +912,12 @@ def main():
         data ['data3d'] = None
         filepath = 'organ_small-'+ filename + '.pklz'
         filepath = os.path.join(op, filepath)
+        filepath = misc.suggest_filename(filepath)
         misc.obj_to_file(data, filepath, filetype='pklz')
     #output = segmentation.vesselSegmentation(oseg.data3d,
     # oseg.orig_segmentation)
-    print "uf"
-    import pdb; pdb.set_trace()
+#    print "uf"
+#    import pdb; pdb.set_trace()
     return
 
 if __name__ == "__main__":
