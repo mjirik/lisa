@@ -24,7 +24,7 @@ import dcmreaddata as dcmr
 
 
 class OrganSegmentationTest(unittest.TestCase):
-    interactiveTest = True
+    interactiveTest = False
     verbose = False
 
     def generate_data(self):
