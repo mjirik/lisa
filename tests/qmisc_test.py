@@ -38,7 +38,7 @@ class QmiscTest(unittest.TestCase):
         data[0,1,3] = 2
         data[1,2,0] = 1
         data[2,1,1] = 3
-        
+
         dataSM = qmisc.SparseMatrix(data)
 
         data2 = dataSM.todense()
@@ -79,7 +79,7 @@ class QmiscTest(unittest.TestCase):
     def test_crop_and_uncrop(self):
         shape = [10,10,5]
         img_in = np.random.random(shape)
-        
+
         crinfo = [[2,8],[3,9],[2,5]]
 
 
@@ -100,7 +100,7 @@ class QmiscTest(unittest.TestCase):
 
         shape = [10,10,5]
         img_in = np.random.random(shape)
-        
+
         crinfo1 = [[2,8],[3,9],[2,5]]
         crinfo2 = [[2,5],[1,4],[1,2]]
 
@@ -120,7 +120,7 @@ class QmiscTest(unittest.TestCase):
         """
         """
         verstr = qmisc.getVersionString()
-        
+
         self.assertTrue(type(verstr) == str)
 
 

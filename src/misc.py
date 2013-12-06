@@ -7,6 +7,23 @@
 import logging
 logger = logging.getLogger(__name__)
 
+def suggest_file_name(file_path):
+    """
+    Try if exist path and add number to its end.
+    """
+    import os.path
+    if os.path.exists(file_path):
+        cislo = 2
+        try:
+            cislo = int(file_path[-1])
+        except Exception as e:
+            pass
+
+        file_path = filepath + str(cislo)
+
+
+    return file_path
+
 def obj_from_file(filename = 'annotation.yaml', filetype = 'yaml'):
     ''' Read object from file '''
 # TODO solution for file extensions
@@ -26,7 +43,7 @@ def obj_from_file(filename = 'annotation.yaml', filetype = 'yaml'):
 
 def read_pkl_and_pklz(filename):
     """
-    Try read zipped or not zipped pickle file 
+    Try read zipped or not zipped pickle file
     """
     fcontent = None
     try:

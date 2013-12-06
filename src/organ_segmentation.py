@@ -897,6 +897,7 @@ def main():
 # save renamed file too
             filepath = 'organ_big-'+ filename + '.pklz'
             filepath = os.path.join(op,filename)
+            filepath = misc.suggest_file_name(filename)
             misc.obj_to_file(data, filepath, filetype='pklz')
 
         filepath ='organ.pklz'
