@@ -6,6 +6,7 @@
 
 import logging
 logger = logging.getLogger(__name__)
+logging.basicConfig()
 
 def obj_from_file(filename = 'annotation.yaml', filetype = 'yaml'):
     ''' Read object from file '''
@@ -26,7 +27,7 @@ def obj_from_file(filename = 'annotation.yaml', filetype = 'yaml'):
 
 def read_pkl_and_pklz(filename):
     """
-    Try read zipped or not zipped pickle file 
+    Try read zipped or not zipped pickle file
     """
     fcontent = None
     try:
@@ -35,7 +36,7 @@ def read_pkl_and_pklz(filename):
         fcontent = f.read()
         f.close()
     except Exception as e:
-        print "Warning: Input gzip exception: ", e
+        logger.warning("Input gzip exception: " + str(e))
         f = open(filename, 'rb')
         fcontent = f.read()
         f.close()
