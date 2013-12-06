@@ -69,7 +69,6 @@ class DataReader:
         else:
 #reading dicom
 
-            print 'GEt šD data ', qt_app
 
             reader = dcmr.DicomReader(dcmdir, qt_app=None, gui=True)
             data3d = reader.get_3Ddata()

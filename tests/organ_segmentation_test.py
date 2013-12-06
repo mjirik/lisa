@@ -24,7 +24,7 @@ import dcmreaddata as dcmr
 
 
 class OrganSegmentationTest(unittest.TestCase):
-    interactiveTest = False
+    interactiveTest = True
     verbose = False
 
     def generate_data(self):
@@ -60,7 +60,7 @@ class OrganSegmentationTest(unittest.TestCase):
         deletemask = pyed.getSeeds()
         #import pdb; pdb.set_trace()
 
-        
+
         #pyed = QTSeedEditor(deletemask, mode='draw')
         #pyed.exec_()
 
@@ -72,8 +72,8 @@ class OrganSegmentationTest(unittest.TestCase):
         Interactive test uses dicom data for segmentation
         """
         dcmdir = os.path.join(path_to_script,'./../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
-        oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4)
-        
+        oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm=4, manualroi=False)
+
 # manual seeds setting
         print ("with left mouse button select some pixels of the brain")
         print ("with right mouse button select some pixels of other tissues and background")
@@ -105,12 +105,16 @@ class OrganSegmentationTest(unittest.TestCase):
         """
         import misc
         dcmdir = os.path.join(path_to_script,'./../sample_data/jatra_5mm')
-        
+
+        print "Interactive test: with left mouse button select liver, \
+            with right mouse button select other tissues"
         #gcparams = {'pairwiseAlpha':10, 'use_boundary_penalties':True}
         segparams = {'pairwise_alpha_per':3, 'use_boundary_penalties':True,'boundary_penalties_sigma':200}
         oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4, segparams=segparams)
-        oseg.add_seeds_mm([120],[120],[70], label=1, radius=30)
-        oseg.add_seeds_mm([170,220,250],[250,280,200],[70], label=2, radius=30)
+        #oseg.add_seeds_mm([120],[120],[70], label=1, radius=30)
+        #oseg.add_seeds_mm([170,220,250],[250,280,200],[70], label=2, radius=30)
+        oseg.add_seeds_mm([120],[120],[400], label=1, radius=30)
+        oseg.add_seeds_mm([170,220,250],[250,280,200],[400], label=2, radius=30)
 
         "boundary penalties"
         oseg.interactivity()
@@ -130,15 +134,15 @@ class OrganSegmentationTest(unittest.TestCase):
             print "test_create_iparams"
         import misc
         dcmdir = os.path.join(path_to_script,'./../sample_data/jatra_5mm')
-        
+
         segparams = {'pairwiseAlpha':20, 'use_boundary_penalties':False,'boundary_penalties_sigma':200}
         #oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4)
-        oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4, segparams=segparams)
+        oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4, segparams=segparams, manualroi=False)
         #oseg.add_seeds_mm([120,160],[150,120],[70], label=1, radius=20)
         oseg.add_seeds_mm([120,160],[150,80],[85], label=1, radius=20)
         oseg.add_seeds_mm([170,220,250,100],[250,300,200,350],[85], label=2, radius=20)
         oseg.add_seeds_mm([170],[240],[70], label=2, radius=20)
-        
+
         #print "test_ipars"
         #oseg.interactivity()
         oseg.ninteractivity()
@@ -174,12 +178,14 @@ class OrganSegmentationTest(unittest.TestCase):
         voxelsize_mm = [5,5,5]
         metadata = {'voxelsize_mm': voxelsize_mm}
 
-        oseg = organ_segmentation.OrganSegmentation(None,
-                data3d=img3d,
-                metadata=metadata,
-                seeds=seeds,
-                roi=roi,
-                working_voxelsize_mm=5)
+        oseg = organ_segmentation.OrganSegmentation(
+            None,
+            data3d=img3d,
+            metadata=metadata,
+            seeds=seeds,
+            roi=roi,
+            working_voxelsize_mm=5,
+            manualroi=False)
 
         #oseg.interactivity(min_val=0, max_val=30)
         oseg.ninteractivity()
@@ -189,7 +195,7 @@ class OrganSegmentationTest(unittest.TestCase):
 
     def test_box_segmentation(self):
         """
-        Function uses organ_segmentation  for synthetic box object 
+        Function uses organ_segmentation  for synthetic box object
         segmentation.
         """
         #dcmdir = os.path.join(path_to_script,'./../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
@@ -205,11 +211,15 @@ class OrganSegmentationTest(unittest.TestCase):
         voxelsize_mm = [5,5,5]
         metadata = {'voxelsize_mm': voxelsize_mm}
 
-        oseg = organ_segmentation.OrganSegmentation(None,\
-                data3d=img3d, metadata = metadata, \
-                seeds = seeds, \
-                working_voxelsize_mm = 10)
-        
+        oseg = organ_segmentation.OrganSegmentation(
+            None,\
+            data3d=img3d,
+            metadata=metadata, \
+            seeds=seeds, \
+            working_voxelsize_mm=10,
+            manualroi=False
+        )
+
 
         # oseg.seeds = seeds
         #oseg.make_gc()
@@ -221,7 +231,7 @@ class OrganSegmentationTest(unittest.TestCase):
         #oseg.interactivity()
 
         volume = oseg.get_segmented_volume_size_mm3()
-        
+
         #import pdb; pdb.set_trace()
 
         #mel by to být litr. tedy milion mm3
@@ -238,14 +248,14 @@ class OrganSegmentationTest(unittest.TestCase):
     @unittest.skipIf(not interactiveTest, "interactive test")
     def test_vincentka_06_slice_thickness_interactive(self):
         """
-        Interactive test. SliceThickness is not voxel depth. If it is, this 
+        Interactive test. SliceThickness is not voxel depth. If it is, this
         test will fail.
         """
         #dcmdir = os.path.join(path_to_script,'./../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
         dcmdir = os.path.expanduser('~/data/medical/data_orig/vincentka/13021610/10200000/')
         dcmdir = os.path.expanduser('~/data/medical/data_orig/vincentka/13021610/12460000/')
-        oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4)
-        
+        oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4, manualroi=False)
+
 # manual seeds setting
         print ("with left mouse button select some pixels of the bottle content")
         print ("with right mouse button select some pixels of background")
@@ -270,7 +280,7 @@ class OrganSegmentationTest(unittest.TestCase):
         Function uses organ_segmentation object for segmentation
         """
         dcmdir = os.path.join(path_to_script,'./../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
-        oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4)
+        oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4, manualroi=False)
 
         oseg.add_seeds_mm([120],[120],[60], 1, 25)
         oseg.add_seeds_mm([25],[100],[60], 2, 25)
@@ -281,7 +291,7 @@ class OrganSegmentationTest(unittest.TestCase):
         oseg.ninteractivity()
 
         volume = oseg.get_segmented_volume_size_mm3()
-        
+
         #import pdb; pdb.set_trace()
 
         #mel by to být litr. tedy milion mm3
