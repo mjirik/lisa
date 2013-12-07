@@ -42,35 +42,33 @@ import datareader
 import config
 import numbers
 
-def interactive_imcrop(im):
-
-    pass
-
 
 class OrganSegmentation():
     def __init__(
-            self,
-            datapath=None,
-            working_voxelsize_mm=3,
-            series_number=None,
-            autocrop=True,
-            autocrop_margin_mm=[10, 10, 10],
-            manualroi=False,
-            texture_analysis=None,
-            segmentation_smoothing=False,
-            smoothing_mm=4,
-            data3d=None,
-            metadata=None,
-            seeds=None,
-            edit_data=False,
-            segparams={},
-            roi=None,
- #           iparams=None,
-            output_label=1,
-            slab={},
-            qt_app=None
-            ):
-        """ datapath: path to directory with dicom files
+        self,
+        datapath=None,
+        working_voxelsize_mm=3,
+        series_number=None,
+        autocrop=True,
+        autocrop_margin_mm=[10, 10, 10],
+        manualroi=False,
+        texture_analysis=None,
+        segmentation_smoothing=False,
+        smoothing_mm=4,
+        data3d=None,
+        metadata=None,
+        seeds=None,
+        edit_data=False,
+        segparams={},
+        roi=None,
+        #           iparams=None,
+        output_label=1,
+        slab={},
+        qt_app=None
+    ):
+        """ Segmentation of objects from CT data.
+
+        datapath: path to directory with dicom files
         manualroi: manual set of ROI before data processing, there is a
              problem with correct coordinates
         data3d, metadata: it can be used for data loading not from directory.
@@ -78,30 +76,27 @@ class OrganSegmentation():
         output_label: label for output segmented volume
         slab: aditional label system for description segmented data
         {'none':0, 'liver':1, 'lesions':6}
+
         """
         self.iparams = {}
         self.datapath = datapath
-
 
         self.crinfo = [[0, -1], [0, -1], [0, -1]]
         self.slab = slab
         self.output_label = output_label
 
-
-
         self.qt_app = qt_app
         # TODO uninteractive Serie selection
         if data3d is None or metadata is None:
 
-            if self.iparams.has_key('datapath'):
+            #if self.iparams.has_key('datapath'):
+            if 'datapath' in self.iparams:
                 datapath = self.iparams['datapath']
 
-
             #self.data3d, self.metadata = dcmr.dcm_read_from_dir(datapath)
-            if datapath == None:
+            if datapath is None:
                 self.process_qt_app()
                 datapath = dcmr.get_dcmdir_qt(self.qt_app)
-
 
             # @TODO dialog v qt
             #reader = dcmr.DicomReader(datapath) # , qt_app=qt_app)
@@ -114,49 +109,49 @@ class OrganSegmentation():
         else:
             self.data3d = data3d
             # default values are updated in next line
-            self.metadata = {'series_number':-1, 'voxelsize_mm':1, 'datapath':None}
+            self.metadata = {'series_number': -1, 'voxelsize_mm': 1,
+                             'datapath': None}
             self.metadata.update(metadata)
 
             self.iparams['series_number'] = self.metadata['series_number']
             self.iparams['datapath'] = self.metadata['datapath']
 
-
             self.orig_shape = self.data3d.shape
-
 
         # voxelsize processing
         if working_voxelsize_mm == 'orig':
             working_voxelsize_mm = self.metadata['voxelsize_mm']
         elif working_voxelsize_mm == 'orig*2':
-            working_voxelsize_mm = np.array(self.metadata['voxelsize_mm'])*2
+            working_voxelsize_mm = np.array(self.metadata['voxelsize_mm']) * 2
         elif working_voxelsize_mm == 'orig*4':
-            working_voxelsize_mm = np.array(self.metadata['voxelsize_mm'])*4
-
-
+            working_voxelsize_mm = np.array(self.metadata['voxelsize_mm']) * 4
 
         if np.isscalar(working_voxelsize_mm):
             self.working_voxelsize_mm = ([working_voxelsize_mm] * 3)
         else:
             self.working_voxelsize_mm = working_voxelsize_mm
 
-
-
-        self.working_voxelsize_mm = np.array(self.working_voxelsize_mm).astype(float)
+        self.working_voxelsize_mm = np.array(
+            self.working_voxelsize_mm).astype(float)
 
        # if np.isscalar(self.working_voxelsize_mm):
-       #     self.working_voxelsize_mm = (np.ones([3]) * self.working_voxelsize_mm).astype(float)
+       #     self.working_voxelsize_mm = (np.ones([3]) *
+       #self.working_voxelsize_mm).astype(float)
 
         self.iparams['working_voxelsize_mm'] = self.working_voxelsize_mm
 
-
         #self.parameters = {}
 
-
-        #self.segparams = {'pairwiseAlpha':2, 'use_boundary_penalties':True,'boundary_penalties_sigma':50}
+        #self.segparams = {'pairwiseAlpha':2, 'use_boundary_penalties':True,
+        #'boundary_penalties_sigma':50}
 
 # for each mm on boundary there will be sum of penalty equal 10
-        self.segparams = {'pairwise_alpha_per_mm2':10, 'use_boundary_penalties':False,'boundary_penalties_sigma':50}
-        self.segparams = {'pairwise_alpha_per_mm2':40, 'use_boundary_penalties':False,'boundary_penalties_sigma':50}
+        self.segparams = {'pairwise_alpha_per_mm2': 10,
+                          'use_boundary_penalties': False,
+                          'boundary_penalties_sigma': 50}
+        self.segparams = {'pairwise_alpha_per_mm2': 40,
+                          'use_boundary_penalties': False,
+                          'boundary_penalties_sigma': 50}
         #print segparams
 # @TODO each axis independent alpha
         self.segparams.update(segparams)
@@ -167,17 +162,14 @@ class OrganSegmentation():
 
         #self.segparams['pairwise_alpha']=25
 
-
-
         # parameters with same effect as interactivity
         #if iparams is None:
         #    self.iparams= {}
         #else:
         #    self.set_iparams(iparams)
 
-
 # manualcrop
-        if manualroi is True: #is not None:
+        if manualroi is True:  # is not None:
 # @todo opravit souřadný systém v součinnosti s autocrop
             self.process_qt_app()
             self.data3d, self.crinfo = qmisc.manualcrop(self.data3d)
@@ -190,7 +182,7 @@ class OrganSegmentation():
             self.iparams['roi'] = roi
             self.iparams['manualroi'] = None
 
-        if seeds == None:
+        if seeds is None:
             self.iparams['seeds'] = np.zeros(self.data3d.shape, dtype=np.int8)
         else:
 
@@ -206,9 +198,7 @@ class OrganSegmentation():
         self.smoothing_mm = smoothing_mm
         self.edit_data = edit_data
 
-
-
-        self.zoom = self.voxelsize_mm /(1.0 * self.working_voxelsize_mm)
+        self.zoom = self.voxelsize_mm / (1.0 * self.working_voxelsize_mm)
 
 #    def set_iparams(self, iparams):
 #        """
@@ -226,20 +216,24 @@ class OrganSegmentation():
 #            pass
 #
 #        self.iparams = iparams
-        print 'dir ', self.iparams['datapath'],", series_number", self.iparams['series_number'], 'voxelsize_mm', self.voxelsize_mm
+        print 'dir ', self.iparams['datapath'], ", series_number",\
+                self.iparams['series_number'], 'voxelsize_mm',\
+                self.voxelsize_mm
 
     def process_qt_app(self):
         """
+        Get correct qt_app.
+
         Sometimes repeatedly called QApplication causes SIGSEGV crash.
         This is why we try call it as few as possible.
+
         """
-        if self.qt_app == None:
+        if self.qt_app is None:
             #from PyQt4.QtGui import QApplication
             #import PyQt4
             from PyQt4 import QtGui
 #QApplication
             self.qt_app = QtGui.QApplication(sys.argv)
-
 
     def get_iparams(self):
         self.iparams['seeds'] = qmisc.SparseMatrix(self.iparams['seeds'])
@@ -250,30 +244,26 @@ class OrganSegmentation():
 #        import misc
 #        misc.obj_to_file(self.get_ipars(), filename)
 
-
-
-
     def _interactivity_begin(self):
 
         print 'zoom ', self.zoom
         print 'svs_mm ', self.working_voxelsize_mm
         data3d_res = scipy.ndimage.zoom(
-                self.data3d,
-                self.zoom,
-                mode='nearest',
-                order=1
-                )
+            self.data3d,
+            self.zoom,
+            mode='nearest',
+            order=1
+        )
         data3d_res = data3d_res.astype(np.int16)
 
         #print 'data shp',  data3d_res.shape
         #import pdb; pdb.set_trace()
         igc = pycut.ImageGraphCut(
-                data3d_res,
-#                gcparams={'pairwise_alpha': 30},
-                segparams=self.segparams,
-                voxelsize=self.working_voxelsize_mm
-                )
-
+            data3d_res,
+#           gcparams={'pairwise_alpha': 30},
+            segparams=self.segparams,
+            voxelsize=self.working_voxelsize_mm
+        )
 
 # version comparison
         from pkg_resources import parse_version
@@ -285,17 +275,17 @@ class OrganSegmentation():
             cvtype_name = 'cvtype'
 
         igc.modelparams = {
-                'type': 'gmmsame',
-                'params': {cvtype_name: 'full', 'n_components': 3}
-                }
-        if not self.iparams['seeds'] == None:
+            'type': 'gmmsame',
+            'params': {cvtype_name: 'full', 'n_components': 3}
+        }
+        if not self.iparams['seeds'] is None:
             #igc.seeds= self.seeds
             seeds_res = scipy.ndimage.zoom(
-                    self.iparams['seeds'],
-                    self.zoom,
-                    mode='nearest',
-                    order=0
-                    )
+                self.iparams['seeds'],
+                self.zoom,
+                mode='nearest',
+                order=0
+            )
             seeds_res = seeds_res.astype(np.int8)
             igc.set_seeds(seeds_res)
             #print "nastavujeme seedy"
@@ -322,20 +312,17 @@ class OrganSegmentation():
 #                order=0
 #                )
         segm_orig_scale = scipy.ndimage.zoom(
-                self.segmentation,
-                1.0 / self.zoom,
-                mode='nearest',
-                order=0
-                ).astype(np.int8)
+            self.segmentation,
+            1.0 / self.zoom,
+            mode='nearest',
+            order=0
+        ).astype(np.int8)
         seeds = scipy.ndimage.zoom(
-                igc.seeds,
-                1.0 / self.zoom,
-                mode='nearest',
-                order=0
-                )
-
-
-
+            igc.seeds,
+            1.0 / self.zoom,
+            mode='nearest',
+            order=0
+        )
 
         #print  np.sum(self.segmentation)*np.prod(self.voxelsize_mm)
 
@@ -343,25 +330,25 @@ class OrganSegmentation():
 # v podstatě je to vyřešeno, ale nechalo by se to dělat elegantněji v zoom
 # tam je bohužel patrně bug
         shp = [
-                np.min([segm_orig_scale.shape[0], self.data3d.shape[0]]),
-                np.min([segm_orig_scale.shape[1], self.data3d.shape[1]]),
-                np.min([segm_orig_scale.shape[2], self.data3d.shape[2]]),
-                ]
+            np.min([segm_orig_scale.shape[0], self.data3d.shape[0]]),
+            np.min([segm_orig_scale.shape[1], self.data3d.shape[1]]),
+            np.min([segm_orig_scale.shape[2], self.data3d.shape[2]]),
+        ]
         #self.data3d = self.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
 
         self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
         self.segmentation[
-                0:shp[0],
-                0:shp[1],
-                0:shp[2]] = segm_orig_scale[0:shp[0], 0:shp[1], 0:shp[2]]
+            0:shp[0],
+            0:shp[1],
+            0:shp[2]] = segm_orig_scale[0:shp[0], 0:shp[1], 0:shp[2]]
 
         del segm_orig_scale
 
         self.iparams['seeds'] = np.zeros(self.data3d.shape, dtype=np.int8)
         self.iparams['seeds'][
-                0:shp[0],
-                0:shp[1],
-                0:shp[2]] = seeds[0:shp[0], 0:shp[1], 0:shp[2]]
+            0:shp[0],
+            0:shp[1],
+            0:shp[2]] = seeds[0:shp[0], 0:shp[1], 0:shp[2]]
 #
         if self.segmentation_smoothing:
             self.segm_smoothing(self.smoothing_mm)
@@ -373,8 +360,8 @@ class OrganSegmentation():
             #import pdb; pdb.set_trace()
 
             tmpcrinfo = self._crinfo_from_specific_data(
-                    self.segmentation,
-                    self.autocrop_margin)
+                self.segmentation,
+                self.autocrop_margin)
             self.segmentation = self._crop(self.segmentation, tmpcrinfo)
             self.data3d = self._crop(self.data3d, tmpcrinfo)
 
@@ -387,10 +374,10 @@ class OrganSegmentation():
             # texture_analysis.segmentation(self.data3d,
             # self.orig_scale_segmentation, params = self.texture_analysis)
             self.segmentation = texture_analysis.segmentation(
-                    self.data3d,
-                    self.segmentation,
-                    self.voxelsize_mm
-                    )
+                self.data3d,
+                self.segmentation,
+                self.voxelsize_mm
+            )
 
         # set label number
         self.segmentation[self.segmentation == 1] = self.output_label
@@ -405,11 +392,9 @@ class OrganSegmentation():
         # prefilter=False, mode= 'nearest', order = 1)
         #seeds = self.seeds.astype(np.int8)
 
-
         logger.debug('interactivity')
         if self.edit_data:
             self.data3d = self.data_editor(self.data3d)
-
 
         # set window
         if min_val == -1:
@@ -424,10 +409,11 @@ class OrganSegmentation():
         logger.debug('_interactivity_begin()')
         self.process_qt_app()
         #import pdb; pdb.set_trace()
-        igc.interactivity(qt_app = self.qt_app, min_val=min_val, max_val=max_val)
+        igc.interactivity(qt_app = self.qt_app, min_val=min_val,
+                          max_val=max_val)
 # @TODO někde v igc.interactivity() dochází k přehození nul za jedničy,
 # tady se to řeší hackem
-        if type (igc.segmentation) is list:
+        if type(igc.segmentation) is list:
             raise Exception("Interactive object segmentation failed.\
                     You must select seeds.")
         self.segmentation = (igc.segmentation == 0).astype(np.int8)
@@ -676,6 +662,7 @@ def readData3d(dcmdir):
     if dcmdir == None:
         from PyQt4 import QtGui
 #QApplication
+# @TODO problems with QApplication
         qt_app = QtGui.QApplication(sys.argv)
         dcmdir = datareader.get_dcmdir_qt(qt_app)
     reader = datareader.DataReader()
