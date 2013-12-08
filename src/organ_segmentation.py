@@ -157,8 +157,8 @@ class OrganSegmentation():
         self.segparams.update(segparams)
 
         self.segparams['pairwise_alpha'] = \
-                self.segparams['pairwise_alpha_per_mm2'] / \
-                np.mean(self.iparams['working_voxelsize_mm'])
+            self.segparams['pairwise_alpha_per_mm2'] / \
+            np.mean(self.iparams['working_voxelsize_mm'])
 
         #self.segparams['pairwise_alpha']=25
 
@@ -217,8 +217,8 @@ class OrganSegmentation():
 #
 #        self.iparams = iparams
         print 'dir ', self.iparams['datapath'], ", series_number",\
-                self.iparams['series_number'], 'voxelsize_mm',\
-                self.voxelsize_mm
+            self.iparams['series_number'], 'voxelsize_mm',\
+            self.voxelsize_mm
 
     def process_qt_app(self):
         """
@@ -260,7 +260,7 @@ class OrganSegmentation():
         #import pdb; pdb.set_trace()
         igc = pycut.ImageGraphCut(
             data3d_res,
-#           gcparams={'pairwise_alpha': 30},
+            #           gcparams={'pairwise_alpha': 30},
             segparams=self.segparams,
             voxelsize=self.working_voxelsize_mm
         )
@@ -301,7 +301,6 @@ class OrganSegmentation():
     def _interactivity_end(self, igc):
         logger.debug('_interactivity_end')
         #print "sh3", self.data3d.shape
-
 
 #        import pdb; pdb.set_trace()
 #        scipy.ndimage.zoom(
@@ -409,7 +408,7 @@ class OrganSegmentation():
         logger.debug('_interactivity_begin()')
         self.process_qt_app()
         #import pdb; pdb.set_trace()
-        igc.interactivity(qt_app = self.qt_app, min_val=min_val,
+        igc.interactivity(qt_app=self.qt_app, min_val=min_val,
                           max_val=max_val)
 # @TODO někde v igc.interactivity() dochází k přehození nul za jedničy,
 # tady se to řeší hackem
@@ -425,9 +424,7 @@ class OrganSegmentation():
         #igc.show_segmentation()
 
     def ninteractivity(self):
-        """
-        Function for automatic (noninteractiv) mode.
-        """
+        """Function for automatic (noninteractiv) mode."""
         #import pdb; pdb.set_trace()
 # Staré volání
         #igc = pycut.ImageGraphCut(self.data3d, zoom = self.zoom)
@@ -446,9 +443,8 @@ class OrganSegmentation():
         pass
 
     def get_segmented_volume_size_mm3(self):
-        """
-        Compute segmented volume in mm3, based on subsampeled data
-        """
+        """Compute segmented volume in mm3, based on subsampeled data."""
+
         #voxelvolume_mm3 = np.prod(self.working_voxelsize_mm)
         #volume_mm3_rough = np.sum(self.segmentation > 0) * voxelvolume_mm3
 
@@ -471,12 +467,14 @@ class OrganSegmentation():
     def add_seeds_mm(self, x_mm, y_mm, z_mm, label, radius):
         """
         Function add circle seeds to one slice with defined radius.
+
         It is possible set more seeds on one slice with one dimension
 
         x_mm, y_mm coordinates of circle in mm. It may be array.
         z_mm = slice coordinates  in mm. It may be array
         label: one number. 1 is object seed, 2 is background seed
         radius: is radius of circle in mm
+
         """
 
         x_mm = np.array(x_mm)
@@ -488,15 +486,15 @@ class OrganSegmentation():
 # xx and yy are 200x200 tables containing the x and y coordinates as values
 # mgrid is a mesh creation helper
             xx, yy = np.mgrid[
-                    :self.iparams['seeds'].shape[1],
-                    :self.iparams['seeds'].shape[2]
-                    ]
+                :self.iparams['seeds'].shape[1],
+                :self.iparams['seeds'].shape[2]
+            ]
 # circles contains the squared distance to the (100, 100) point
 # we are just using the circle equation learnt at school
             circle = (
-                    (xx - x_mm[i] / self.voxelsize_mm[1]) ** 2 +
-                    (yy - y_mm[i] / self.voxelsize_mm[2]) ** 2
-                    ) ** (0.5)
+                (xx - x_mm[i] / self.voxelsize_mm[1]) ** 2 +
+                (yy - y_mm[i] / self.voxelsize_mm[2]) ** 2
+            ) ** (0.5)
 # donuts contains 1's and 0's organized in a donut shape
 # you apply 2 thresholds on circle to define the shape
             # slice jen s jednim kruhem
@@ -526,9 +524,7 @@ class OrganSegmentation():
         pass
 
     def _crop(self, data, crinfo):
-        """
-        Crop data with crinfo
-        """
+        """ Crop data with crinfo."""
         data = qmisc.crop(data, crinfo)
         #data[crinfo[0][0]:crinfo[0][1],
                # crinfo[1][0]:crinfo[1][1], crinfo[2][0]:crinfo[2][1]]
@@ -538,27 +534,28 @@ class OrganSegmentation():
 # hledáme automatický ořez, nonzero dá indexy
         return qmisc.crinfo_from_specific_data(data, margin)
 
-
-    def im_crop(self, im,  roi_start, roi_stop):
-        im_out = im[ \
-                roi_start[0]:roi_stop[0],\
-                roi_start[1]:roi_stop[1],\
-                roi_start[2]:roi_stop[2],\
-                ]
-        return  im_out
+    def im_crop(self, im, roi_start, roi_stop):
+        im_out = im[
+            roi_start[0]:roi_stop[0],
+            roi_start[1]:roi_stop[1],
+            roi_start[2]:roi_stop[2],
+        ]
+        return im_out
 
     def segm_smoothing(self, sigma_mm):
         """
-        shape of output segmentation is smoothed with gaussian filter. Sigma
-        is computed in mm
+        Shape of output segmentation is smoothed with gaussian filter.
+
+        Sigma is computed in mm
+
         """
         #print "smoothing"
         sigma = float(sigma_mm) / np.array(self.voxelsize_mm)
 
         #print sigma
         #import pdb; pdb.set_trace()
-        self.segmentation = scipy.ndimage.filters.gaussian_filter(\
-                self.segmentation.astype(np.float32), sigma)
+        self.segmentation = scipy.ndimage.filters.gaussian_filter(
+            self.segmentation.astype(np.float32), sigma)
         #import pdb; pdb.set_trace()
         #pyed = py3DSeedEditor.py3DSeedEditor(self.orig_scale_segmentation)
         #pyed.show()
@@ -587,8 +584,10 @@ class OrganSegmentation():
 
     def data_editor(self, im3d, cval=0):
         """
-        Funkce provádí změnu vstupních dat - data3d
-        cval: hodnota, na kterou se nastaví "vymazaná" data
+        Function changes input data - data3d.
+
+        cval: value is set to deleted data
+
         """
 
         from seed_editor_qt import QTSeedEditor
@@ -623,9 +622,7 @@ class OrganSegmentation():
         return im3d
 
     def show_output(self):
-        """
-        Run viewer with output data3d and segmentation
-        """
+        """ Run viewer with output data3d and segmentation. """
 
         from seed_editor_qt import QTSeedEditor
         from PyQt4.QtGui import QApplication
@@ -643,15 +640,13 @@ class OrganSegmentation():
 
         app.exit()
 
-def saveOverlayToDicomCopy(input_dcmfilelist, output_dicom_dir, overlays, crinfo):
-    """
-    Save overlay to dicom
-    """
+
+def saveOverlayToDicomCopy(input_dcmfilelist, output_dicom_dir, overlays,
+                           crinfo):
+    """ Save overlay to dicom. """
 
     if not os.path.exists(output_dicom_dir):
         os.mkdir(output_dicom_dir)
-
-
 
     dw = dwriter.DataWriter()
     dw.DataCopyWithOverlay(metadata['dcmfilelist'], filedir, overlays)
@@ -659,7 +654,7 @@ def saveOverlayToDicomCopy(input_dcmfilelist, output_dicom_dir, overlays, crinfo
 
 def readData3d(dcmdir):
     qt_app = None
-    if dcmdir == None:
+    if dcmdir is None:
         from PyQt4 import QtGui
 #QApplication
 # @TODO problems with QApplication
@@ -669,6 +664,7 @@ def readData3d(dcmdir):
     data3d, metadata = reader.Get3DData(dcmdir, qt_app=None)
 
     return data3d, metadata, qt_app
+
 
 def save_config(cfg, filename):
     cfg
@@ -688,11 +684,11 @@ def main():
 
 ## read confguraton from file, use default values from OrganSegmentation
     cfgplus = {
-            'datapath':None,
-            'viewermax':300,
-            'viewermin':-100,
-            'output_datapath':os.path.expanduser("~/lisa_data")
-            }
+        'datapath': None,
+        'viewermax': 300,
+        'viewermin': -100,
+        'output_datapath':os.path.expanduser("~/lisa_data")
+    }
 
     cfg = config.get_default_function_config(OrganSegmentation.__init__)
     cfg.update(cfgplus)
@@ -700,85 +696,87 @@ def main():
 
     cfg = config.get_config("organ_segmentation.config", cfg)
 
-
     # input parser
     parser = argparse.ArgumentParser(
-            description='Segment vessels from liver \n\
-                    \npython organ_segmentation.py\n\
-                    \npython organ_segmentation.py -mroi -vs 0.6')
+        description='Segment vessels from liver \n\
+                \npython organ_segmentation.py\n\
+                \npython organ_segmentation.py -mroi -vs 0.6')
     parser.add_argument('-dd', '--datapath',
-            default=cfg["datapath"],
-            help='path to data dir')
+                        default=cfg["datapath"],
+                        help='path to data dir')
     parser.add_argument('-d', '--debug', action='store_true',
-            help='run in debug mode')
-    parser.add_argument('-vs', '--working_voxelsize_mm',
-            default=cfg["working_voxelsize_mm"],
-            type=eval,  # type=str,
-            help='Insert working voxelsize. It can be number or \
-            array of three numbers. It is possible use original \n \
-            resolution or half of original resolution. \n \
-            -vs 3 \n \
-            -vs [3,3,5] \n \
-            -vs orig \n \
-            -vs orig*2 \n \
-            -vs orig*4 \n \
-            '
-            )
+                        help='run in debug mode')
+    parser.add_argument(
+        '-vs', '--working_voxelsize_mm',
+        default=cfg["working_voxelsize_mm"],
+        type=eval,  # type=str,
+        help='Insert working voxelsize. It can be number or \
+        array of three numbers. It is possible use original \n \
+        resolution or half of original resolution. \n \
+        -vs 3 \n \
+        -vs [3,3,5] \n \
+        -vs orig \n \
+        -vs orig*2 \n \
+        -vs orig*4 \n \
+        '
+    )
     parser.add_argument('-mroi', '--manualroi', action='store_true',
-            help='manual crop before data processing',
-            default=cfg["manualroi"])
+                        help='manual crop before data processing',
+                        default=cfg["manualroi"])
 
     parser.add_argument('-op', '--output_datapath', default=cfg["output_datapath"],
-            help='path for output data')
+                        help='path for output data')
 
     parser.add_argument('-ol', '--output_label', default=1,
-            help='label for segmented data')
-    parser.add_argument('--slab',
-            default=cfg["slab"],
-            type=eval,
-            help='labels for segmentation,\
-                    example -slab "{\'liver\':1, \'lesions\':6}"')
-    parser.add_argument('-acr', '--autocrop',
-            help='automatic crop after data processing',
-            default=cfg["autocrop"])
-    parser.add_argument('-iparams', '--iparams',
-            default=None,
-            help='filename of ipars file with stored interactivity')
-    parser.add_argument('-sp', '--segparams',
-            default=cfg["segparams"],
-            help='params for segmentation,\
+                        help='label for segmented data')
+    parser.add_argument(
+        '--slab',
+        default=cfg["slab"],
+        type=eval,
+        help='labels for segmentation,\
+            example -slab "{\'liver\':1, \'lesions\':6}"')
+    parser.add_argument(
+        '-acr', '--autocrop',
+        help='automatic crop after data processing',
+        default=cfg["autocrop"])
+    parser.add_argument(
+        '-iparams', '--iparams',
+        default=None,
+        help='filename of ipars file with stored interactivity')
+    parser.add_argument(
+        '-sp', '--segparams',
+        default=cfg["segparams"],
+        help='params for segmentation,\
             example -sp "{\'pairwise_alpha_per_mm2\':90}"')
-    parser.add_argument('-tx', '--texture_analysis', action='store_true',
-            help='run with texture analysis')
+    parser.add_argument(
+        '-tx', '--texture_analysis', action='store_true',
+        help='run with texture analysis')
     parser.add_argument('-exd', '--exampledata', action='store_true',
-            help='run unittest')
+                        help='run unittest')
     parser.add_argument('-ed', '--edit_data', action='store_true',
-            help='Run data editor')
+                        help='Run data editor')
     parser.add_argument('-vmax', '--viewermax', type=eval, #type=int,
-            help='Maximum of viewer window, set None for automatic maximum.',
-            default=cfg["viewermax"])
-            #default='1300')
+        help='Maximum of viewer window, set None for automatic maximum.',
+        default=cfg["viewermax"])
+        #default='1300')
     parser.add_argument('-vmin', '--viewermin',type=eval, #type=int,
-            help='Minimum of viewer window, set None for automatic minimum.',
-            #default='800')
-            default=cfg["viewermin"])
+        help='Minimum of viewer window, set None for automatic minimum.',
+        #default='800')
+        default=cfg["viewermin"])
     parser.add_argument('-so', '--show_output', action='store_true',
-            help='Show output data in viewer')
+        help='Show output data in viewer')
     parser.add_argument('-a', '--arg', nargs='+', type=float)
     parser.add_argument(
-            '-ss',
-            '--segmentation_smoothing',
-            action='store_true',
-            help='Smoothing of output segmentation',
-            default=cfg["segmentation_smoothing"]
-            )
+        '-ss',
+        '--segmentation_smoothing',
+        action='store_true',
+        help='Smoothing of output segmentation',
+        default=cfg["segmentation_smoothing"]
+    )
     args_obj = parser.parse_args()
     args = vars(args_obj)
     #print args["arg"]
     oseg_argspec_keys = config.get_function_keys(OrganSegmentation.__init__)
-
-
-
 
     # voxelsize_mm can be number or array
     #if args.voxelsize_mm != 'orig':
@@ -802,7 +800,6 @@ def main():
     if args["debug"]:
         logger.setLevel(logging.DEBUG)
 
-
     if args["exampledata"]:
 
         args["datapath"] = '../sample_data/\
@@ -824,34 +821,29 @@ def main():
         t0 = time.time()
 
         oseg_params = config.subdict(args, oseg_argspec_keys)
-	oseg_params["data3d"] = data3d
-	oseg_params["metadata"] = metadata
+        oseg_params["data3d"] = data3d
+        oseg_params["metadata"] = metadata
         oseg = OrganSegmentation(**oseg_params)
 
-
-
-
     oseg.interactivity(args["viewermin"], args["viewermax"])
-
 
     #igc = pycut.ImageGraphCut(data3d, zoom = 0.5)
     #igc.interactivity()
 
     #igc.make_gc()
     #igc.show_segmentation()
-
     # volume
     #volume_mm3 = np.sum(oseg.segmentation > 0) * np.prod(oseg.voxelsize_mm)
 
     t1 = time.time()
     audiosupport.beep()
-    print (
-            "Volume " +
-            str(oseg.get_segmented_volume_size_mm3() / 1000000.0) + ' [l]')
+    print(
+        "Volume " +
+        str(oseg.get_segmented_volume_size_mm3() / 1000000.0) + ' [l]')
     #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour =
     # oseg.segmentation)
     #pyed.show()
-    print ("Total time: " + str (t1 - t0))
+    print("Total time: " + str (t1 - t0))
 
     if args["show_output"]:
         oseg.show_output()
@@ -868,8 +860,8 @@ def main():
     #print savestring
     savestring = raw_input('Save output data? Yes/No/All with input data (y/n/a): ')
     print savestring
-    if savestring in ['Y', 'y','a','A']:
-        if not  os.path.exists(args["output_datapath"]):
+    if savestring in ['Y', 'y', 'a', 'A']:
+        if not os.path.exists(args["output_datapath"]):
             os.makedirs(args['output_datapath'])
 
         op = args['output_datapath']
@@ -880,24 +872,24 @@ def main():
         iparams = oseg.get_iparams()
         #import pdb; pdb.set_trace()
         pth, filename = os.path.split(os.path.normpath(args['datapath']))
-        if savestring in ['a','A']:
+        if savestring in ['a', 'A']:
 # save renamed file too
-            filepath = 'organ_big-'+ filename + '.pklz'
-            filepath = os.path.join(op,filename)
+            filepath = 'organ_big-' + filename + '.pklz'
+            filepath = os.path.join(op, filename)
             filepath = misc.suggest_filename(filepath)
             misc.obj_to_file(data, filepath, filetype='pklz')
 
-        filepath ='organ.pklz'
-        filepath = os.path.join(op,filepath)
+        filepath = 'organ.pklz'
+        filepath = os.path.join(op, filepath)
         #filepath = misc.suggest_filename(filepath)
         misc.obj_to_file(data, filepath, filetype='pklz')
 
-        filepath='organ_iparams.pklz'
+        filepath = 'organ_iparams.pklz'
         filepath = os.path.join(op, filepath)
         misc.obj_to_file(iparams, filepath, filetype='pklz')
         #misc.obj_to_file(iparams, 'iparams-'+ filename + '.pkl', filetype='pickle')
-        data ['data3d'] = None
-        filepath = 'organ_small-'+ filename + '.pklz'
+        data['data3d'] = None
+        filepath = 'organ_small-' + filename + '.pklz'
         filepath = os.path.join(op, filepath)
         filepath = misc.suggest_filename(filepath)
         misc.obj_to_file(data, filepath, filetype='pklz')
@@ -911,4 +903,3 @@ if __name__ == "__main__":
     main()
     print "Thank you for using Lisa"
     exit()
-
