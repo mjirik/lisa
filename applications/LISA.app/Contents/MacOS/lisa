@@ -1,4 +1,6 @@
 #!
 cd /Users/mjirik/projects/liver-surgery/
-git checkout -b origin stable
+#git checkout -b origin stable
+git pull origin stable
 python /Users/mjirik/projects/liver-surgery/src/organ_segmentation.py
+
