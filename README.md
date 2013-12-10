@@ -57,16 +57,18 @@ and pyseg_base install notes
 Install
 -------
 
+For stable branche
 
+    git clone --recursive -b stable https://github.com/mjirik/lisa.git
+
+or for current developement
 
     git clone --recursive git@github.com:mjirik/lisa.git
-
     python ./mysetup.py
 
 or
 
     git clone git@github.com:mjirik/lisa.git
-
     git submodule update --init --recursive
 
 
