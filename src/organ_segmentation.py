@@ -29,7 +29,7 @@ import audiosupport
 # ----------------- my scripts --------
 #import py3DSeedEditor
 #
-#import dcmreaddata as dcmr
+import dcmreaddata as dcmr
 import pycut
 import argparse
 #import py3DSeedEditor
@@ -756,6 +756,11 @@ def main():
     # now is in cfg default values
 
     cfg = config.get_config("organ_segmentation.config", cfg)
+# read user defined config in user data
+    cfg = config.get_config(
+        os.path.join(cfg['output_datapath'], "organ_segmentation.config"),
+        cfg
+    )
 
     # input parser
     parser = argparse.ArgumentParser(
