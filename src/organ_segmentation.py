@@ -11,7 +11,6 @@ sys.path.append(os.path.join(path_to_script,
                              "../extern/py3DSeedEditor/"))
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
-import unittest
 
 import logging
 logger = logging.getLogger(__name__)
@@ -23,24 +22,24 @@ logger = logging.getLogger(__name__)
 import numpy as np
 import scipy
 #from scipy import sparse
-import traceback
+#import traceback
 import time
 import audiosupport
 
 # ----------------- my scripts --------
-import py3DSeedEditor
+#import py3DSeedEditor
 #
 #import dcmreaddata as dcmr
 import pycut
 import argparse
 #import py3DSeedEditor
 
-import segmentation
+#import segmentation
 import qmisc
 import misc
 import datareader
 import config
-import numbers
+#import numbers
 
 
 class OrganSegmentation():
@@ -596,7 +595,7 @@ class OrganSegmentation():
 
         from seed_editor_qt import QTSeedEditor
         from PyQt4.QtGui import QApplication
-        import numpy as np
+        #import numpy as np
 #, QMainWindow
         print ("Select voxels for deletion")
         app = QApplication(sys.argv)
@@ -630,7 +629,7 @@ class OrganSegmentation():
 
         from seed_editor_qt import QTSeedEditor
         from PyQt4.QtGui import QApplication
-        import numpy as np
+        #import numpy as np
 #, QMainWindow
         print ("Select voxels for deletion")
         app = QApplication(sys.argv)
@@ -661,8 +660,14 @@ def readData3d(dcmdir):
     if dcmdir is None:
         from PyQt4 import QtGui
 #QApplication
-# @TODO problems with QApplication
         qt_app = QtGui.QApplication(sys.argv)
+# same as  data_reader_get_dcmdir_qt
+#        from PyQt4.QtGui import QFileDialog, QApplication
+#        dcmdir = QFileDialog.getExistingDirectory(
+#                caption='Select DICOM Folder',
+#                options=QFileDialog.ShowDirsOnly)
+#        dcmdir = "%s" %(dcmdir)
+#        dcmdir = dcmdir.encode("utf8")
         dcmdir = datareader.get_dcmdir_qt(qt_app)
     reader = datareader.DataReader()
     data3d, metadata = reader.Get3DData(dcmdir, qt_app=None)
@@ -675,7 +680,7 @@ def save_config(cfg, filename):
     misc.obj_to_file(cfg, filename, filetype="yaml")
 
 
-def save_outputs(args, osegi, t1):
+def save_outputs(args, oseg):
     from PyQt4.QtGui import QInputDialog
     #savestring_qt, ok = QInputDialog.getText(
     #    None,
@@ -871,11 +876,10 @@ def main():
         data3d, metadata, qt_app = readData3d(args["datapath"])
         args['datapath'] = metadata['datadir']
 
-        t0 = time.time()
-
         oseg_params = config.subdict(args, oseg_argspec_keys)
         oseg_params["data3d"] = data3d
         oseg_params["metadata"] = metadata
+        oseg_params['qt_app'] = qt_app
         oseg = OrganSegmentation(**oseg_params)
 
     oseg.interactivity(args["viewermin"], args["viewermax"])
@@ -888,7 +892,6 @@ def main():
     # volume
     #volume_mm3 = np.sum(oseg.segmentation > 0) * np.prod(oseg.voxelsize_mm)
 
-    t1 = time.time()
     audiosupport.beep()
     print(
         "Volume " +
@@ -896,13 +899,13 @@ def main():
     #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour =
     # oseg.segmentation)
     #pyed.show()
-    print("Total time: " + str(oseg.processing_time)) # + str (t1 - t0))
+    print("Total time: " + str(oseg.processing_time))
 
     if args["show_output"]:
         oseg.show_output()
 
     #print savestring
-    save_outputs(args, oseg, t1)
+    save_outputs(args, oseg)
 #    import pdb; pdb.set_trace()
     return
 
