@@ -690,7 +690,9 @@ def save_outputs(args, oseg, qt_app):
     )
     savestring = str(savestring_qt)
     #import pdb; pdb.set_trace()
-    #savestring = raw_input('Save output data? Yes/No/All with input data (y/n/a): ')
+    #savestring = raw_input(
+    #    'Save output data? Yes/No/All with input data (y/n/a): '
+    #)
     if savestring in ['Y', 'y', 'a', 'A']:
         if not os.path.exists(args["output_datapath"]):
             os.makedirs(args['output_datapath'])
@@ -719,7 +721,7 @@ def save_outputs(args, oseg, qt_app):
         filepath = 'organ_iparams.pklz'
         filepath = os.path.join(op, filepath)
         misc.obj_to_file(iparams, filepath, filetype='pklz')
-        #misc.obj_to_file(iparams, 'iparams-'+ filename + '.pkl', filetype='pickle')
+
         data['data3d'] = None
         filepath = 'organ_small-' + filename + '.pklz'
         filepath = os.path.join(op, filepath)
@@ -746,7 +748,7 @@ def main():
         'datapath': None,
         'viewermax': 300,
         'viewermin': -100,
-        'output_datapath':os.path.expanduser("~/lisa_data")
+        'output_datapath': os.path.expanduser("~/lisa_data")
     }
 
     cfg = config.get_default_function_config(OrganSegmentation.__init__)
@@ -783,7 +785,8 @@ def main():
                         help='manual crop before data processing',
                         default=cfg["manualroi"])
 
-    parser.add_argument('-op', '--output_datapath', default=cfg["output_datapath"],
+    parser.add_argument('-op', '--output_datapath',
+                        default=cfg["output_datapath"],
                         help='path for output data')
 
     parser.add_argument('-ol', '--output_label', default=1,
@@ -814,15 +817,16 @@ def main():
                         help='run unittest')
     parser.add_argument('-ed', '--edit_data', action='store_true',
                         help='Run data editor')
-    parser.add_argument('-vmax', '--viewermax', type=eval, #type=int,
+    parser.add_argument(
+        '-vmax', '--viewermax', type=eval,  # type=int,
         help='Maximum of viewer window, set None for automatic maximum.',
         default=cfg["viewermax"])
-        #default='1300')
-    parser.add_argument('-vmin', '--viewermin',type=eval, #type=int,
+    parser.add_argument(
+        '-vmin', '--viewermin', type=eval,  # type=int,
         help='Minimum of viewer window, set None for automatic minimum.',
-        #default='800')
         default=cfg["viewermin"])
-    parser.add_argument('-so', '--show_output', action='store_true',
+    parser.add_argument(
+        '-so', '--show_output', action='store_true',
         help='Show output data in viewer')
     parser.add_argument('-a', '--arg', nargs='+', type=float)
     parser.add_argument(
@@ -852,7 +856,6 @@ def main():
     #args["segparams"] = eval(args["segparams"])
     #args["slab"] = eval(args["slab"])
 
-
     #args["viewermin"] = eval(args["viewermin"])
     #args["viewermax"] = eval(args["viewermax"])
 
@@ -866,7 +869,6 @@ def main():
 
     if args["iparams"] is not None:
         iparams = misc.obj_from_file(args["iparams"], filetype='pickle')
-        t0 = time.time()
         oseg = OrganSegmentation(**iparams)
 
     else:
