@@ -205,7 +205,7 @@ class OrganSegmentationTest(unittest.TestCase):
 
 #seeds
         seeds = np.zeros([32, 64, 64], np.int8)
-        seeds [9:12,13:31,22:25] = 1
+        seeds [9:12,13:29,20:25] = 1
         seeds [9:12,6:9,3:32] = 2
 #[mm]  10 x 10 x 10        #voxelsize_mm = [1,4,3]
         voxelsize_mm = [5,5,5]
@@ -282,8 +282,8 @@ class OrganSegmentationTest(unittest.TestCase):
         dcmdir = os.path.join(path_to_script,'./../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
         oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4, manualroi=False)
 
-        oseg.add_seeds_mm([120],[120],[60], 1, 25)
-        oseg.add_seeds_mm([25],[100],[60], 2, 25)
+        oseg.add_seeds_mm([120],[120],[80], 1, 25)
+        oseg.add_seeds_mm([25],[100],[80], 2, 25)
 
         # pro kontrolu lze odkomentovat
         #oseg.interactivity()
