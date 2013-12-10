@@ -216,9 +216,11 @@ class OrganSegmentation():
 #            pass
 #
 #        self.iparams = iparams
+        # @TODO use logger
         print 'dir ', self.iparams['datapath'], ", series_number",\
             self.iparams['series_number'], 'voxelsize_mm',\
             self.voxelsize_mm
+        self.time_start = time.time()
 
     def process_qt_app(self):
         """
@@ -381,6 +383,7 @@ class OrganSegmentation():
         # set label number
         self.segmentation[self.segmentation == 1] = self.output_label
 #
+        self.processing_time = time.time() - self.time_start
 
     def interactivity(self, min_val=800, max_val=1300):
         #import pdb; pdb.set_trace()
@@ -577,6 +580,7 @@ class OrganSegmentation():
         data['slab'] = slab
         data['voxelsize_mm'] = self.voxelsize_mm
         data['orig_shape'] = self.orig_shape
+        data['processing_time'] = self.processing_time
 # TODO add dcmfilelist
         #data["metadata"] = self.metadata
         #import pdb; pdb.set_trace()
@@ -867,7 +871,6 @@ def main():
         data3d, metadata, qt_app = readData3d(args["datapath"])
         args['datapath'] = metadata['datadir']
 
-
         t0 = time.time()
 
         oseg_params = config.subdict(args, oseg_argspec_keys)
@@ -893,7 +896,7 @@ def main():
     #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour =
     # oseg.segmentation)
     #pyed.show()
-    print("Total time: " + str (t1 - t0))
+    print("Total time: " + str(oseg.processing_time)) # + str (t1 - t0))
 
     if args["show_output"]:
         oseg.show_output()
