@@ -680,17 +680,17 @@ def save_config(cfg, filename):
     misc.obj_to_file(cfg, filename, filetype="yaml")
 
 
-def save_outputs(args, oseg):
+def save_outputs(args, oseg, qt_app):
     from PyQt4.QtGui import QInputDialog
-    #savestring_qt, ok = QInputDialog.getText(
-    #    None,
-    #    "Save",
-    #    'Save output data? Yes/No/All with input data (y/n/a):',
-    #    text="a"
-    #)
-    #savestring = str(savestring_qt)
+    savestring_qt, ok = QInputDialog.getText(
+        None,
+        "Save",
+        'Save output data? Yes/No/All with input data (y/n/a):',
+        text="a"
+    )
+    savestring = str(savestring_qt)
     #import pdb; pdb.set_trace()
-    savestring = raw_input('Save output data? Yes/No/All with input data (y/n/a): ')
+    #savestring = raw_input('Save output data? Yes/No/All with input data (y/n/a): ')
     if savestring in ['Y', 'y', 'a', 'A']:
         if not os.path.exists(args["output_datapath"]):
             os.makedirs(args['output_datapath'])
@@ -905,7 +905,7 @@ def main():
         oseg.show_output()
 
     #print savestring
-    save_outputs(args, oseg)
+    save_outputs(args, oseg, qt_app)
 #    import pdb; pdb.set_trace()
     return
 
