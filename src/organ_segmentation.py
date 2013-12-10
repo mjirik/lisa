@@ -671,6 +671,56 @@ def save_config(cfg, filename):
     misc.obj_to_file(cfg, filename, filetype="yaml")
 
 
+def save_outputs(args, osegi, t1):
+    from PyQt4.QtGui import QInputDialog
+    #savestring_qt, ok = QInputDialog.getText(
+    #    None,
+    #    "Save",
+    #    'Save output data? Yes/No/All with input data (y/n/a):',
+    #    text="a"
+    #)
+    #savestring = str(savestring_qt)
+    #import pdb; pdb.set_trace()
+    savestring = raw_input('Save output data? Yes/No/All with input data (y/n/a): ')
+    if savestring in ['Y', 'y', 'a', 'A']:
+        if not os.path.exists(args["output_datapath"]):
+            os.makedirs(args['output_datapath'])
+
+        op = args['output_datapath']
+# rename
+
+        data = oseg.export()
+        data['version'] = qmisc.getVersionString()
+        #data['organ_segmentation_time'] = t1
+        iparams = oseg.get_iparams()
+        #import pdb; pdb.set_trace()
+        pth, filename = os.path.split(os.path.normpath(args['datapath']))
+        if savestring in ['a', 'A']:
+# save renamed file too
+            filepath = 'organ_big-' + filename + '.pklz'
+            filepath = os.path.join(op, filename)
+            filepath = misc.suggest_filename(filepath)
+            misc.obj_to_file(data, filepath, filetype='pklz')
+
+        filepath = 'organ.pklz'
+        filepath = os.path.join(op, filepath)
+        #filepath = misc.suggest_filename(filepath)
+        misc.obj_to_file(data, filepath, filetype='pklz')
+
+        filepath = 'organ_iparams.pklz'
+        filepath = os.path.join(op, filepath)
+        misc.obj_to_file(iparams, filepath, filetype='pklz')
+        #misc.obj_to_file(iparams, 'iparams-'+ filename + '.pkl', filetype='pickle')
+        data['data3d'] = None
+        filepath = 'organ_small-' + filename + '.pklz'
+        filepath = os.path.join(op, filepath)
+        filepath = misc.suggest_filename(filepath)
+        misc.obj_to_file(data, filepath, filetype='pklz')
+    #output = segmentation.vesselSegmentation(oseg.data3d,
+    # oseg.orig_segmentation)
+#    print "uf"
+
+
 def main():
 
     #logger = logging.getLogger(__name__)
@@ -848,54 +898,8 @@ def main():
     if args["show_output"]:
         oseg.show_output()
 
-    from PyQt4.QtGui import QInputDialog
-    #savestring_qt, ok = QInputDialog.getText(
-    #    None,
-    #    "Save",
-    #    'Save output data? Yes/No/All with input data (y/n/a):',
-    #    text="a"
-    #)
-    #savestring = str(savestring_qt)
-    #import pdb; pdb.set_trace()
     #print savestring
-    savestring = raw_input('Save output data? Yes/No/All with input data (y/n/a): ')
-    print savestring
-    if savestring in ['Y', 'y', 'a', 'A']:
-        if not os.path.exists(args["output_datapath"]):
-            os.makedirs(args['output_datapath'])
-
-        op = args['output_datapath']
-# rename
-
-        data = oseg.export()
-        data['version'] = qmisc.getVersionString()
-        iparams = oseg.get_iparams()
-        #import pdb; pdb.set_trace()
-        pth, filename = os.path.split(os.path.normpath(args['datapath']))
-        if savestring in ['a', 'A']:
-# save renamed file too
-            filepath = 'organ_big-' + filename + '.pklz'
-            filepath = os.path.join(op, filename)
-            filepath = misc.suggest_filename(filepath)
-            misc.obj_to_file(data, filepath, filetype='pklz')
-
-        filepath = 'organ.pklz'
-        filepath = os.path.join(op, filepath)
-        #filepath = misc.suggest_filename(filepath)
-        misc.obj_to_file(data, filepath, filetype='pklz')
-
-        filepath = 'organ_iparams.pklz'
-        filepath = os.path.join(op, filepath)
-        misc.obj_to_file(iparams, filepath, filetype='pklz')
-        #misc.obj_to_file(iparams, 'iparams-'+ filename + '.pkl', filetype='pickle')
-        data['data3d'] = None
-        filepath = 'organ_small-' + filename + '.pklz'
-        filepath = os.path.join(op, filepath)
-        filepath = misc.suggest_filename(filepath)
-        misc.obj_to_file(data, filepath, filetype='pklz')
-    #output = segmentation.vesselSegmentation(oseg.data3d,
-    # oseg.orig_segmentation)
-#    print "uf"
+    save_outputs(args, oseg, t1)
 #    import pdb; pdb.set_trace()
     return
 
