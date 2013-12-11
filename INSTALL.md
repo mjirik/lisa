@@ -12,6 +12,11 @@ Install Mac OS
 
     Install Xcode from appstore. You will need an AppleID.
     Then add terminal tools (http://stackoverflow.com/questions/10265742/how-to-install-make-and-gcc-on-a-mac)
+    * Start XCode
+    * Go to XCode/Preferences.
+    * Click the "Downloads" tab.
+    * Click "Components".
+    * Click "Install" on the command line tools line.
 
  * MacPorts
 
@@ -25,14 +30,14 @@ Install Mac OS
 
         sudo port selfupdate
         sudo port upgrade outdated
-        sudo port install py27-pyqt4 py27-numpy py27-scipy py27-matplotlib py27-ipython +notebook py27-pandas py27-sympy py27-nose  py-scikit-learn py-pydicom
+        sudo port install py27-pyqt4 py27-numpy py27-scipy py27-matplotlib py27-ipython +notebook py27-pandas py27-sympy py27-nose  py-scikit-learn py-pydicom py27-yaml py27-cython
 
  * Select default python
 
 
         sudo port select --set python python27
 
- * Cython
+ * Cython (may work from port)
 
 
         sudo easy_install cython
