@@ -3,7 +3,6 @@
 # Simple program for ITK image read/write in Python
 #import itk
 
-import SimpleITK as sitk
 
 import numpy as np
 
@@ -19,11 +18,11 @@ import dicom
 class DataWriter:
     def Write3DData(self, data3d, path, filetype='dcm', metadata=None):
         mtd = {'voxelsize_mm': [1, 1, 1]}
-        if metadata != None:
+        if metadata is not None:
             mtd.update(metadata)
 
-
         if filetype in ['dcm', 'DCM', 'dicom']:
+            import SimpleITK as sitk
             #pixelType = itk.UC
             #imageType = itk.Image[pixelType, 2]
             dim = sitk.GetImageFromArray(data3d)
@@ -32,7 +31,6 @@ class DataWriter:
             sitk.WriteImage(dim, path)
 
             #data = dicom.read_file(onefile)
-
 
     def DataCopyWithOverlay(self, dcmfilelist, out_dir, overlays):
         """
@@ -44,7 +42,7 @@ class DataWriter:
 
         """
         dcmlist = dcmfilelist
-        data3d = []
+        #data3d = []
 
         for i in range(len(dcmlist)):
             onefile = dcmlist[i]
@@ -54,7 +52,9 @@ class DataWriter:
 
             for i_overlay in overlays.keys():
                 overlay3d = overlays[i_overlay]
-                data = self.encode_overlay_slice(data, overlay3d[-1-i,:,:], i_overlay)
+                data = self.encode_overlay_slice(data,
+                                                 overlay3d[-1 - i, :, :],
+                                                 i_overlay)
 
             # construct output path
             head, tail = os.path.split(os.path.normpath(onefile))
@@ -63,7 +63,6 @@ class DataWriter:
 #save
             data.save_as(filename_out)
             #import pdb; pdb.set_trace()
-
 
     def add_overlay_to_slice_file(
         self,
@@ -74,13 +73,12 @@ class DataWriter:
     ):
         """ Function adds overlay to existing file.
         """
-        if filename_out == None:
+        if filename_out is None:
             filename_out = filename
         data = dicom.read_file(filename)
         data = self.encode_overlay_slice(data, overlay, i_overlay)
         data.save_as(filename_out)
         pass
-
 
     def encode_overlay_slice(self, data, overlay, i_overlay):
         """
@@ -88,15 +86,14 @@ class DataWriter:
         # overlay index
         n_bits = 8
 
-
         # On (60xx,3000) are stored ovelays.
         # First is (6000,3000), second (6002,3000), third (6004,3000),
         # and so on.
-        dicom_tag1 = 0x6000 + 2*i_overlay
+        dicom_tag1 = 0x6000 + 2 * i_overlay
 
         #  data (0x6000, 0x3000)
-        WR = 'OW'
-        WM = 1
+        #WR = 'OW'
+        #WM = 1
 
         # On (60xx,0010) and (60xx,0011) is stored overlay size
         row_el = dicom.dataelem.DataElement(
@@ -114,7 +111,7 @@ class DataWriter:
         data[col_el.tag] = col_el
 
 ## arrange values to bit array
-        overlay_linear = np.reshape(overlay,np.prod(overlay.shape))
+        overlay_linear = np.reshape(overlay, np.prod(overlay.shape))
 
     # allocation of dataspace
         encoded_linear = np.zeros(
@@ -129,7 +126,7 @@ class DataWriter:
             else:
                 bit = 0
 
-            encoded_linear[i/n_bits] |= bit << (i % n_bits)
+            encoded_linear[i / n_bits] |= bit << (i % n_bits)
 
         overlay_raw = encoded_linear.tostring()
 
