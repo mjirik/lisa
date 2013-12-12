@@ -698,7 +698,7 @@ def save_outputs(args, oseg, qt_app):
     #savestring = raw_input(
     #    'Save output data? Yes/No/All with input data (y/n/a): '
     #)
-    if savestring in ['Y', 'y', 'a', 'A']:
+    if savestring in ['Y', 'y', 'a', 'A', 'ad']:
         if not os.path.exists(args["output_datapath"]):
             os.makedirs(args['output_datapath'])
 
