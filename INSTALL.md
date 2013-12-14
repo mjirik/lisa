@@ -57,7 +57,7 @@ Install Mac OS
 
 
 
-Instalace (L)Ubuntu 13.10
+Install (L)Ubuntu 13.10
 =========================
 
 
@@ -81,7 +81,20 @@ You can try following command ff there is a problem "Permission denied"
     sudo chmod a+r /usr/local/lib/python2.7/dist-packages/SimpleITK-0.7.0-py2.7-linux-x86_64.egg/EGG-INFO/top_level.txt
 
 
-Instalace Windows
+Install Windows
+======================
+
+
+* Python XY (http://code.google.com/p/pythonxy/)
+* Git (http://www.git-scm.com/download/win)
+    Select "Run Git from the Windows Command Prompt" or "Run Git and included Unix tools from the Windows Command Prompt"
+
+    Není potřeba nic doinstalovávat.
+    NESTABILNÍ!
+
+
+
+Instalace Windows - starší
 =================
 
 http://www.lfd.uci.edu/~gohlke/pythonlibs/
@@ -164,14 +177,6 @@ ověřeno pro python 2.7 32
 nainstalovat mingw
 
 
-Instalace na Windows 2
-======================
-
-
-* Python XY (http://code.google.com/p/pythonxy/)
-
-    Není potřeba nic doinstalovávat.
-    NESTABILNÍ!
 
 
 
