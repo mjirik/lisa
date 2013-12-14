@@ -83,16 +83,16 @@ Install Windows
 
 * Python XY (http://code.google.com/p/pythonxy/)
 * Git (http://www.git-scm.com/download/win)
+
     Select "Run Git from the Windows Command Prompt" or "Run Git and included Unix tools from the Windows Command Prompt"
 * gco_python
 
-
-    git clone https://github.com/amueller/gco_python.git
-    mkdir gco_src && cd gco_src
-    curl -O http://vision.csd.uwo.ca/code/gco-v3.0.zip
-    uznip gco-v3.0.zip
-    cd ..
-    python setup.py build_ext -i --compiler=mingw32
+        git clone https://github.com/amueller/gco_python.git
+        mkdir gco_src && cd gco_src
+        curl -O http://vision.csd.uwo.ca/code/gco-v3.0.zip
+        uznip gco-v3.0.zip
+        cd ..
+        python setup.py build_ext -i --compiler=mingw32
 
 Problems on Windows:
 
