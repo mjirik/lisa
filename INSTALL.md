@@ -62,22 +62,18 @@ Install (L)Ubuntu 13.10
 
 
     sudo apt-get install python git python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox python-insighttoolkit3 make python-qt4
-    
     git clone git@github.com:mjirik/liver-surgery.git
-    
     git submodule update --init --recursive
-    
     git clone https://github.com/amueller/gco_python.git
-    
     cd gco_python
-    
     make
-    
     python setup.py install
     
-    
-You can try following command ff there is a problem "Permission denied"
-    
+Problems on Linux:
+
+* Permission denied. You can try following command if there is a problem "Permission denied"
+
+
     sudo chmod a+r /usr/local/lib/python2.7/dist-packages/SimpleITK-0.7.0-py2.7-linux-x86_64.egg/EGG-INFO/top_level.txt
 
 
@@ -88,11 +84,19 @@ Install Windows
 * Python XY (http://code.google.com/p/pythonxy/)
 * Git (http://www.git-scm.com/download/win)
     Select "Run Git from the Windows Command Prompt" or "Run Git and included Unix tools from the Windows Command Prompt"
-
-    Není potřeba nic doinstalovávat.
-    NESTABILNÍ!
+* gco_python
 
 
+    git clone https://github.com/amueller/gco_python.git
+    mkdir gco_src && cd gco_src
+    curl -O http://vision.csd.uwo.ca/code/gco-v3.0.zip
+    uznip gco-v3.0.zip
+    cd ..
+    python setup.py build_ext -i --compiler=mingw32
+
+Problems on Windows:
+
+* Cython not found. Install cython from https://code.google.com/p/pythonxy/wiki/Downloads#Plugin_updates
 
 Instalace Windows - starší
 =================
