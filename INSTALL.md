@@ -82,10 +82,15 @@ Install Windows
 
 
 * Python XY (http://code.google.com/p/pythonxy/)
+    
+    Add all packages.
 * Git (http://www.git-scm.com/download/win)
 
     Select "Run Git from the Windows Command Prompt" or "Run Git and included Unix tools from the Windows Command Prompt"
 * gco_python
+    
+    Fallowing lines downloads gco and gco_python. Then it makes build with mingw compiler and install. 
+
 
         git clone https://github.com/amueller/gco_python.git
         mkdir gco_src && cd gco_src
@@ -93,6 +98,8 @@ Install Windows
         uznip gco-v3.0.zip
         cd ..
         python setup.py build_ext -i --compiler=mingw32
+        python.exe setup.py build --compiler=mingw32
+        python.exe setup.py install --skip-build
 
 Problems on Windows:
 
@@ -131,57 +138,62 @@ ověřeno pro python 2.7 32
 1) Python 2.7 pro 32-bit architekturu
 
 2) Zdrojové kódy
-    V zásadě je potřeba mít zdrojové kódy gco a gco_python.  
-    
-        gco_python = "https://github.com/amueller/gco_python/archive/master.zip"
-        gco = "http://vision.csd.uwo.ca/code/gco-v3.0.zip"
 
-    Gco se normálně překládá pomocí matlabu. My to uděláme jinak.
-    Zdrojové kódy uspořádejme tak, že bude adresář gco_python se zdrojovými 
-    kódy gco_python a v něm bude adresář gco_src s kódy gco.
+V zásadě je potřeba mít zdrojové kódy gco a gco_python.  
+    
+  * gco_python (https://github.com/amueller/gco_python/archive/master.zip)
+  * gco (http://vision.csd.uwo.ca/code/gco-v3.0.zip)
+
+Gco se normálně překládá pomocí matlabu. My to uděláme jinak.
+Zdrojové kódy uspořádejme tak, že bude adresář gco_python se zdrojovými 
+kódy gco_python a v něm bude adresář gco_src s kódy gco.
 
 3) Překladač
-    Patrně lze použít jakýkoliv, ale mě to (po mnoha problémech) fungovalo s 
-    32-bitovým mingw
+
+Patrně lze použít jakýkoliv, ale mě to (po mnoha problémech) fungovalo s 
+32-bitovým mingw
 
 4) Moduly Pythonu
-    Musí se jednat o příslušné verze - 32bit
+
+Musí se jednat o příslušné verze - 32bit
     
-    numpy scipy scikit-learn matplotlib cython pydicom pyyaml
+numpy scipy scikit-learn matplotlib cython pydicom pyyaml
 
+lze nainstalovat pomocí pip:
 
-    lze nainstalovat pomocí pip:
     pip install numpy scipy scikit-learn matplotlib cython pydicom pyyaml
 
 5) Oprava konfiguračního souboru v Pythonu
     V konfiguračním souboru je volání gcc se zastaralým parametrem -mno-cygwin.
     Je potřeba odstranit všechny výskyty tohoto slova z konfiguračního souboru:
+
     "C:\Python27\Lib\distutils\cygwinccompiler.py"
 
 6) Kompilace
-    Všechny následující příkazy spouštíme v adresáři gco_python s pythonem 27
+
+Všechny následující příkazy spouštíme v adresáři gco_python s pythonem 27
     
-    Překlad gco_src s překladačem mingw
+Překlad gco_src s překladačem mingw
+
     python.exe setup.py build_ext -i --compiler=mingw32
 
-    Vytvoření knihoven z gco_python
-    python.exe setup.py build --compiler=mingw32
+Vytvoření knihoven z gco_python
 
+    python.exe setup.py build --compiler=mingw32
     python.exe setup.py install --skip-build
-    nakopírování knihoven na příslušná místa. Od teď půjde knihovna gco_python 
-    volat z jakéhokoliv python skriptu.
+
+nakopírování knihoven na příslušná místa. Od teď půjde knihovna gco_python 
+volat z jakéhokoliv python skriptu.
 
 7) Ověření
+
     python example.py
 
-    Výsledek by se měl podobat obrázkům na adrese:
+Výsledek by se měl podobat obrázkům na adrese:
     http://peekaboo-vision.blogspot.cz/2012/05/graphcuts-for-python-pygco.html
     
 
 nainstalovat mingw
-
-
-
 
 
 
