@@ -11,7 +11,6 @@ sys.path.append(os.path.join(path_to_script,
                              "../extern/py3DSeedEditor/"))
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
-import unittest
 
 import logging
 logger = logging.getLogger(__name__)
@@ -23,24 +22,24 @@ logger = logging.getLogger(__name__)
 import numpy as np
 import scipy
 #from scipy import sparse
-import traceback
+#import traceback
 import time
 import audiosupport
 
 # ----------------- my scripts --------
-import py3DSeedEditor
+#import py3DSeedEditor
 #
-#import dcmreaddata as dcmr
+import dcmreaddata as dcmr
 import pycut
 import argparse
 #import py3DSeedEditor
 
-import segmentation
+#import segmentation
 import qmisc
 import misc
 import datareader
 import config
-import numbers
+#import numbers
 
 
 class OrganSegmentation():
@@ -216,9 +215,11 @@ class OrganSegmentation():
 #            pass
 #
 #        self.iparams = iparams
+        # @TODO use logger
         print 'dir ', self.iparams['datapath'], ", series_number",\
             self.iparams['series_number'], 'voxelsize_mm',\
             self.voxelsize_mm
+        self.time_start = time.time()
 
     def process_qt_app(self):
         """
@@ -381,6 +382,7 @@ class OrganSegmentation():
         # set label number
         self.segmentation[self.segmentation == 1] = self.output_label
 #
+        self.processing_time = time.time() - self.time_start
 
     def interactivity(self, min_val=800, max_val=1300):
         #import pdb; pdb.set_trace()
@@ -577,6 +579,7 @@ class OrganSegmentation():
         data['slab'] = slab
         data['voxelsize_mm'] = self.voxelsize_mm
         data['orig_shape'] = self.orig_shape
+        data['processing_time'] = self.processing_time
 # TODO add dcmfilelist
         #data["metadata"] = self.metadata
         #import pdb; pdb.set_trace()
@@ -592,7 +595,7 @@ class OrganSegmentation():
 
         from seed_editor_qt import QTSeedEditor
         from PyQt4.QtGui import QApplication
-        import numpy as np
+        #import numpy as np
 #, QMainWindow
         print ("Select voxels for deletion")
         app = QApplication(sys.argv)
@@ -626,7 +629,7 @@ class OrganSegmentation():
 
         from seed_editor_qt import QTSeedEditor
         from PyQt4.QtGui import QApplication
-        import numpy as np
+        #import numpy as np
 #, QMainWindow
         print ("Select voxels for deletion")
         app = QApplication(sys.argv)
@@ -657,8 +660,14 @@ def readData3d(dcmdir):
     if dcmdir is None:
         from PyQt4 import QtGui
 #QApplication
-# @TODO problems with QApplication
         qt_app = QtGui.QApplication(sys.argv)
+# same as  data_reader_get_dcmdir_qt
+#        from PyQt4.QtGui import QFileDialog, QApplication
+#        dcmdir = QFileDialog.getExistingDirectory(
+#                caption='Select DICOM Folder',
+#                options=QFileDialog.ShowDirsOnly)
+#        dcmdir = "%s" %(dcmdir)
+#        dcmdir = dcmdir.encode("utf8")
         dcmdir = datareader.get_dcmdir_qt(qt_app)
     reader = datareader.DataReader()
     data3d, metadata = reader.Get3DData(dcmdir, qt_app=None)
@@ -669,6 +678,58 @@ def readData3d(dcmdir):
 def save_config(cfg, filename):
     cfg
     misc.obj_to_file(cfg, filename, filetype="yaml")
+
+
+def save_outputs(args, oseg, qt_app):
+    from PyQt4.QtGui import QInputDialog
+    savestring_qt, ok = QInputDialog.getText(
+        None,
+        "Save",
+        'Save output data? Yes/No/All with input data (y/n/a):',
+        text="a"
+    )
+    savestring = str(savestring_qt)
+    #import pdb; pdb.set_trace()
+    #savestring = raw_input(
+    #    'Save output data? Yes/No/All with input data (y/n/a): '
+    #)
+    if savestring in ['Y', 'y', 'a', 'A']:
+        if not os.path.exists(args["output_datapath"]):
+            os.makedirs(args['output_datapath'])
+
+        op = args['output_datapath']
+# rename
+
+        data = oseg.export()
+        data['version'] = qmisc.getVersionString()
+        #data['organ_segmentation_time'] = t1
+        iparams = oseg.get_iparams()
+        #import pdb; pdb.set_trace()
+        pth, filename = os.path.split(os.path.normpath(args['datapath']))
+        if savestring in ['a', 'A']:
+# save renamed file too
+            filepath = 'organ_big-' + filename + '.pklz'
+            filepath = os.path.join(op, filename)
+            filepath = misc.suggest_filename(filepath)
+            misc.obj_to_file(data, filepath, filetype='pklz')
+
+        filepath = 'organ.pklz'
+        filepath = os.path.join(op, filepath)
+        #filepath = misc.suggest_filename(filepath)
+        misc.obj_to_file(data, filepath, filetype='pklz')
+
+        filepath = 'organ_iparams.pklz'
+        filepath = os.path.join(op, filepath)
+        misc.obj_to_file(iparams, filepath, filetype='pklz')
+
+        data['data3d'] = None
+        filepath = 'organ_small-' + filename + '.pklz'
+        filepath = os.path.join(op, filepath)
+        filepath = misc.suggest_filename(filepath)
+        misc.obj_to_file(data, filepath, filetype='pklz')
+    #output = segmentation.vesselSegmentation(oseg.data3d,
+    # oseg.orig_segmentation)
+#    print "uf"
 
 
 def main():
@@ -687,7 +748,7 @@ def main():
         'datapath': None,
         'viewermax': 300,
         'viewermin': -100,
-        'output_datapath':os.path.expanduser("~/lisa_data")
+        'output_datapath': os.path.expanduser("~/lisa_data")
     }
 
     cfg = config.get_default_function_config(OrganSegmentation.__init__)
@@ -695,6 +756,11 @@ def main():
     # now is in cfg default values
 
     cfg = config.get_config("organ_segmentation.config", cfg)
+# read user defined config in user data
+    cfg = config.get_config(
+        os.path.join(cfg['output_datapath'], "organ_segmentation.config"),
+        cfg
+    )
 
     # input parser
     parser = argparse.ArgumentParser(
@@ -724,7 +790,8 @@ def main():
                         help='manual crop before data processing',
                         default=cfg["manualroi"])
 
-    parser.add_argument('-op', '--output_datapath', default=cfg["output_datapath"],
+    parser.add_argument('-op', '--output_datapath',
+                        default=cfg["output_datapath"],
                         help='path for output data')
 
     parser.add_argument('-ol', '--output_label', default=1,
@@ -755,15 +822,16 @@ def main():
                         help='run unittest')
     parser.add_argument('-ed', '--edit_data', action='store_true',
                         help='Run data editor')
-    parser.add_argument('-vmax', '--viewermax', type=eval, #type=int,
+    parser.add_argument(
+        '-vmax', '--viewermax', type=eval,  # type=int,
         help='Maximum of viewer window, set None for automatic maximum.',
         default=cfg["viewermax"])
-        #default='1300')
-    parser.add_argument('-vmin', '--viewermin',type=eval, #type=int,
+    parser.add_argument(
+        '-vmin', '--viewermin', type=eval,  # type=int,
         help='Minimum of viewer window, set None for automatic minimum.',
-        #default='800')
         default=cfg["viewermin"])
-    parser.add_argument('-so', '--show_output', action='store_true',
+    parser.add_argument(
+        '-so', '--show_output', action='store_true',
         help='Show output data in viewer')
     parser.add_argument('-a', '--arg', nargs='+', type=float)
     parser.add_argument(
@@ -793,7 +861,6 @@ def main():
     #args["segparams"] = eval(args["segparams"])
     #args["slab"] = eval(args["slab"])
 
-
     #args["viewermin"] = eval(args["viewermin"])
     #args["viewermax"] = eval(args["viewermax"])
 
@@ -807,7 +874,6 @@ def main():
 
     if args["iparams"] is not None:
         iparams = misc.obj_from_file(args["iparams"], filetype='pickle')
-        t0 = time.time()
         oseg = OrganSegmentation(**iparams)
 
     else:
@@ -817,12 +883,10 @@ def main():
         data3d, metadata, qt_app = readData3d(args["datapath"])
         args['datapath'] = metadata['datadir']
 
-
-        t0 = time.time()
-
         oseg_params = config.subdict(args, oseg_argspec_keys)
         oseg_params["data3d"] = data3d
         oseg_params["metadata"] = metadata
+        oseg_params['qt_app'] = qt_app
         oseg = OrganSegmentation(**oseg_params)
 
     oseg.interactivity(args["viewermin"], args["viewermax"])
@@ -835,7 +899,6 @@ def main():
     # volume
     #volume_mm3 = np.sum(oseg.segmentation > 0) * np.prod(oseg.voxelsize_mm)
 
-    t1 = time.time()
     audiosupport.beep()
     print(
         "Volume " +
@@ -843,59 +906,13 @@ def main():
     #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour =
     # oseg.segmentation)
     #pyed.show()
-    print("Total time: " + str (t1 - t0))
+    print("Total time: " + str(oseg.processing_time))
 
     if args["show_output"]:
         oseg.show_output()
 
-    from PyQt4.QtGui import QInputDialog
-    #savestring_qt, ok = QInputDialog.getText(
-    #    None,
-    #    "Save",
-    #    'Save output data? Yes/No/All with input data (y/n/a):',
-    #    text="a"
-    #)
-    #savestring = str(savestring_qt)
-    #import pdb; pdb.set_trace()
     #print savestring
-    savestring = raw_input('Save output data? Yes/No/All with input data (y/n/a): ')
-    print savestring
-    if savestring in ['Y', 'y', 'a', 'A']:
-        if not os.path.exists(args["output_datapath"]):
-            os.makedirs(args['output_datapath'])
-
-        op = args['output_datapath']
-# rename
-
-        data = oseg.export()
-        data['version'] = qmisc.getVersionString()
-        iparams = oseg.get_iparams()
-        #import pdb; pdb.set_trace()
-        pth, filename = os.path.split(os.path.normpath(args['datapath']))
-        if savestring in ['a', 'A']:
-# save renamed file too
-            filepath = 'organ_big-' + filename + '.pklz'
-            filepath = os.path.join(op, filename)
-            filepath = misc.suggest_filename(filepath)
-            misc.obj_to_file(data, filepath, filetype='pklz')
-
-        filepath = 'organ.pklz'
-        filepath = os.path.join(op, filepath)
-        #filepath = misc.suggest_filename(filepath)
-        misc.obj_to_file(data, filepath, filetype='pklz')
-
-        filepath = 'organ_iparams.pklz'
-        filepath = os.path.join(op, filepath)
-        misc.obj_to_file(iparams, filepath, filetype='pklz')
-        #misc.obj_to_file(iparams, 'iparams-'+ filename + '.pkl', filetype='pickle')
-        data['data3d'] = None
-        filepath = 'organ_small-' + filename + '.pklz'
-        filepath = os.path.join(op, filepath)
-        filepath = misc.suggest_filename(filepath)
-        misc.obj_to_file(data, filepath, filetype='pklz')
-    #output = segmentation.vesselSegmentation(oseg.data3d,
-    # oseg.orig_segmentation)
-#    print "uf"
+    save_outputs(args, oseg, qt_app)
 #    import pdb; pdb.set_trace()
     return
 
