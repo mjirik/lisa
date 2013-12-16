@@ -2,11 +2,13 @@
 # -*- coding: utf-8 -*-
 
 #import sys
-#import os
+import os
+
 
 import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig()
+
 
 def suggest_filename(file_path, exists=None):
     """
@@ -15,9 +17,8 @@ def suggest_filename(file_path, exists=None):
     """
     import os.path
     import re
-    if not isinstance (exists, bool):
+    if not isinstance(exists, bool):
         exists = os.path.exists(file_path)
-
 
     if exists:
         file_path, file_extension = os.path.splitext(file_path)
@@ -25,22 +26,21 @@ def suggest_filename(file_path, exists=None):
         m = re.search(r"\d+$", file_path)
         if m is None:
             #cislo = 2
-            new_cislo_str="2"
+            new_cislo_str = "2"
         else:
             cislostr = (m.group())
             cislo = int(cislostr) + 1
             file_path = file_path[:-len(cislostr)]
             new_cislo_str = str(cislo)
 
-
-        file_path = file_path + new_cislo_str + file_extension#.zfill(2)
+        file_path = file_path + new_cislo_str + file_extension  # .zfill(2)
         # trorcha rekurze
         file_path = suggest_filename(file_path)
 
-
     return file_path
 
-def obj_from_file(filename = 'annotation.yaml', filetype = 'yaml'):
+
+def obj_from_file(filename='annotation.yaml', filetype='yaml'):
     ''' Read object from file '''
 # TODO solution for file extensions
     if filetype == 'yaml':
@@ -76,32 +76,34 @@ def read_pkl_and_pklz(filename):
     return fcontent
 
 
-
-def obj_to_file(obj, filename = 'annotation.yaml', filetype = 'yaml'):
-    '''Writes annotation in file
+def obj_to_file(obj, filename='annotation.yaml', filetype='yaml'):
+    '''Writes annotation in file.
     '''
     #import json
     #with open(filename, mode='w') as f:
     #    json.dump(annotation,f)
 
     # write to yaml
+    d = os.path.dirname(os.path.abspath(filename))
+    if not os.path.exists(d):
+        os.makedirs(d)
 
     if filetype == 'yaml':
         f = open(filename, 'wb')
         import yaml
-        yaml.dump(obj,f)
+        yaml.dump(obj, f)
         f.close
     elif filetype in ('pickle', 'pkl'):
         f = open(filename, 'wb')
         import pickle
-        pickle.dump(obj,f)
+        pickle.dump(obj, f)
         f.close
     elif filetype in ('picklezip', 'pklz'):
         import gzip
         import pickle
         f = gzip.open(filename, 'wb', compresslevel=1)
         #f = open(filename, 'wb')
-        pickle.dump(obj,f)
+        pickle.dump(obj, f)
         f.close
     else:
         logger.error('Unknown filetype ' + filetype)

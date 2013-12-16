@@ -38,7 +38,7 @@ import py3DSeedEditor as se
 
 GAUSSIAN_SIGMA = 1
 fast_debug = False
-fast_debug = True
+#fast_debug = True
 
 
 class HistologyAnalyser:

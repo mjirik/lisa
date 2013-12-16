@@ -645,14 +645,19 @@ class OrganSegmentation():
 
 
 def saveOverlayToDicomCopy(input_dcmfilelist, output_dicom_dir, overlays,
-                           crinfo):
+                           crinfo, orig_shape):
     """ Save overlay to dicom. """
+    import datawriter as dwriter
 
     if not os.path.exists(output_dicom_dir):
         os.mkdir(output_dicom_dir)
 
+    # uncrop all overlays
+    for key in overlays:
+        overlays[key] = qmisc.uncrop(overlays[key], crinfo, orig_shape)
+
     dw = dwriter.DataWriter()
-    dw.DataCopyWithOverlay(metadata['dcmfilelist'], filedir, overlays)
+    dw.DataCopyWithOverlay(input_dcmfilelist, output_dicom_dir, overlays)
 
 
 def readData3d(dcmdir):
@@ -693,7 +698,7 @@ def save_outputs(args, oseg, qt_app):
     #savestring = raw_input(
     #    'Save output data? Yes/No/All with input data (y/n/a): '
     #)
-    if savestring in ['Y', 'y', 'a', 'A']:
+    if savestring in ['Y', 'y', 'a', 'A', 'ad']:
         if not os.path.exists(args["output_datapath"]):
             os.makedirs(args['output_datapath'])
 
@@ -706,7 +711,7 @@ def save_outputs(args, oseg, qt_app):
         iparams = oseg.get_iparams()
         #import pdb; pdb.set_trace()
         pth, filename = os.path.split(os.path.normpath(args['datapath']))
-        if savestring in ['a', 'A']:
+        if savestring in ['a', 'A', 'ad']:
 # save renamed file too
             filepath = 'organ_big-' + filename + '.pklz'
             filepath = os.path.join(op, filename)
@@ -730,6 +735,21 @@ def save_outputs(args, oseg, qt_app):
     #output = segmentation.vesselSegmentation(oseg.data3d,
     # oseg.orig_segmentation)
 #    print "uf"
+
+        if savestring in ['ad']:
+            # save to DICOM
+            filepath = 'dicom-' + filename
+            filepath = os.path.join(op, filepath)
+            filepath = misc.suggest_filename(filepath)
+            output_dicom_dir = filepath
+            #import ipdb; ipdb.set_trace()  # BREAKPOINT
+            overlays = {
+                3:
+                (data['segmentation'] == args['output_label']).astype(np.int8)
+            }
+            saveOverlayToDicomCopy(oseg.metadata['dcmfilelist'],
+                                   output_dicom_dir, overlays,
+                                   data['crinfo'], data['orig_shape'])
 
 
 def main():
