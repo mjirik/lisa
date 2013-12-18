@@ -707,10 +707,13 @@ def save_outputs(args, oseg, qt_app):
 
         data = oseg.export()
         data['version'] = qmisc.getVersionString()
+        data['experiment_caption'] = args['experiment_caption']
+        data['lisa_operator_identifier'] = args['lisa_operator_identifier']
         #data['organ_segmentation_time'] = t1
         iparams = oseg.get_iparams()
         #import pdb; pdb.set_trace()
         pth, filename = os.path.split(os.path.normpath(args['datapath']))
+        filename += "_" + args['experiment_caption']
         if savestring in ['a', 'A', 'ad']:
 # save renamed file too
             filepath = 'organ_big-' + filename + '.pklz'
@@ -866,6 +869,14 @@ def main():
         '-so', '--show_output', action='store_true',
         help='Show output data in viewer')
     parser.add_argument('-a', '--arg', nargs='+', type=float)
+    parser.add_argument(
+        '-ec', '--experiment_caption', type=str,  # type=int,
+        help='Short caption of experiment. No special characters.',
+        default=cfg["experiment_caption"])
+    parser.add_argument(
+        '-oi', '--lisa_operator_identifier', type=str,  # type=int,
+        help='Identifier of Lisa operator.',
+        default=cfg["experiment_caption"])
     parser.add_argument(
         '-ss',
         '--segmentation_smoothing',
