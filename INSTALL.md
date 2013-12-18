@@ -104,6 +104,26 @@ Install Windows
 Problems on Windows:
 
 * Cython not found. Install cython from https://code.google.com/p/pythonxy/wiki/Downloads#Plugin_updates
+* UnicodeDecodeError: 'ascii' codec can't decode byte 0x82 in position 0: ordinal
+not in range(128)
+
+    You can either find and remove the offending font (the best idea) or try to patch your installation using the following procedure:
+
+    * Open the following in a text editor:
+
+            \Users\dafonseca\AppData\Local\Enthought\Canopy\User\lib\site- packages\matplotlib\font_manager.py
+
+    * Search for
+    
+            sfnt4 = sfnt4.decode('ascii').lower()
+            
+    * And replace with 
+    
+            sfnt4 = sfnt4.decode('ascii', 'ignore').lower()
+
+    Note that this bug won't exist in the next release of matplotlib.
+
+    For more information see: http://stackoverflow.com/questions/18689854/enthought-matplotlib-problems-with-plot-function
 
 Instalace Windows - starší
 =================
