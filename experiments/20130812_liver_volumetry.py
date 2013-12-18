@@ -135,7 +135,7 @@ def distance_matrics(vol1, vol2, voxelsize_mm):
 
     border1 = get_border(vol1)
     border2 = get_border(vol2)
-    
+
 
     b1dst = scipy.ndimage.morphology.distance_transform_edt(border1,sampling=voxelsize_mm)
 
@@ -159,12 +159,12 @@ def get_border(image3d):
     conv = conv * image3d
 
     conv = conv > 0
-    
+
 
     #pyed = py3DSeedEditor.py3DSeedEditor(conv, contour =
     #image3d)
     #pyed.show()
-    
+
     return conv
 
 def write_csv(data, filename='20130812_liver_volumetry.csv'):
@@ -192,6 +192,9 @@ def main():
 
     #logger.debug('input params')
 
+
+    default_data_file = os.path.join(path_to_script, "20130812_liver_volumetry.yaml" )
+
     parser = argparse.ArgumentParser(
             description='Compare two segmentation. Evaluation is similar\
             to MICCAI 2007 workshop.  Metrics are described in\
@@ -200,15 +203,19 @@ def main():
             help='generate sample intput data', default=False)
     parser.add_argument('-v', '--visualization',  action='store_true',
             help='Turn on visualization', default=False)
+    parser.add_argument('-i', '--inputfile', help='input yaml file',
+                        default=default_data_file)
+    parser.add_argument('-o', '--outputfile', help='output file',
+                        default='20130812_liver_volumetry.csv')
     args = parser.parse_args()
 
     if args.sampleInput:
         sample_input_data()
     # input parser
-    data_file = os.path.join(path_to_script, "20130812_liver_volumetry.yaml")
+    data_file = args.inputfile
     inputdata = misc.obj_from_file(data_file, filetype='yaml')
-    
-    
+
+
     evaluation_all = {
             'file1': [],
             'file2': [],
@@ -245,7 +252,7 @@ def main():
         data3d_b = (data3d_b > 0).astype(np.int8)
 
         if args.visualization:
-            pyed = py3DSeedEditor.py3DSeedEditor(data3d_a, #+ (4 * data3d_b)#, 
+            pyed = py3DSeedEditor.py3DSeedEditor(data3d_a, #+ (4 * data3d_b)#,
                     contour=data3d_b
                     )
             pyed.show()
@@ -270,7 +277,7 @@ def main():
 
 
     print evaluation_all
-    write_csv(evaluation_all)
+    write_csv(evaluation_all, filename=args.outputfile)
     #import pdb; pdb.set_trace()
 
 

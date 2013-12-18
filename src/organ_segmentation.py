@@ -713,11 +713,11 @@ def save_outputs(args, oseg, qt_app):
         iparams = oseg.get_iparams()
         #import pdb; pdb.set_trace()
         pth, filename = os.path.split(os.path.normpath(args['datapath']))
-        filename += "_" + args['experiment_caption']
+        filename += "-" + args['experiment_caption']
         if savestring in ['a', 'A', 'ad']:
 # save renamed file too
-            filepath = 'organ_big-' + filename + '.pklz'
-            filepath = os.path.join(op, filename)
+            filepath = 'ob-' + filename + '.pklz'
+            filepath = os.path.join(op, filepath)
             filepath = misc.suggest_filename(filepath)
             misc.obj_to_file(data, filepath, filetype='pklz')
 
