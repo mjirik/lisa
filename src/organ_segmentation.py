@@ -768,7 +768,9 @@ def main():
         'datapath': None,
         'viewermax': 300,
         'viewermin': -100,
-        'output_datapath': os.path.expanduser("~/lisa_data")
+        'output_datapath': os.path.expanduser("~/lisa_data"),
+        'lisa_operator_identifier': "",
+        'experiment_caption': ''
     }
 
     cfg = config.get_default_function_config(OrganSegmentation.__init__)
