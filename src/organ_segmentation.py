@@ -846,7 +846,7 @@ def main():
         default=None,
         help='filename of ipars file with stored interactivity')
     parser.add_argument(
-        '-sp', '--segparams',
+        '-sp', '--segparams', type=eval,
         default=cfg["segparams"],
         help='params for segmentation,\
             example -sp "{\'pairwise_alpha_per_mm2\':90}"')
