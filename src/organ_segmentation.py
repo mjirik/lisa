@@ -763,6 +763,16 @@ def main():
 
     #logger.debug('input params')
 
+
+###
+# Configuration is has three sources:
+#  * Default function values
+#  * Config file 'organ_segmentation.config' in directory with application
+#  * Config file 'organ_segmentation.config' in output data directory
+#
+# It is read in this order so the last one has highest priority
+
+###
 ## read confguraton from file, use default values from OrganSegmentation
     cfgplus = {
         'datapath': None,
