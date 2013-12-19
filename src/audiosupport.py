@@ -64,10 +64,11 @@ def beep():# pragma: no cover
     #play(os.path.join(path_to_script, "../sound/beep-1.wav"))
     import subprocess
     from sys import platform
-    if platform == "win32":
-        print '\7'
-    else:
+    if platform.startswith('linux'):
         subprocess.call('play -q -n synth 0.3 sine 880 vol 0.3', shell=True)
+    else:
+    #if platform == "win32":
+        print '\7'
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
