@@ -690,7 +690,7 @@ def save_outputs(args, oseg, qt_app):
     savestring_qt, ok = QInputDialog.getText(
         None,
         "Save",
-        'Save output data? Yes/No/All with input data (y/n/a):',
+        'Save output data? Yes/No/All+Dicom with input data (y/n/a/ad):',
         text="a"
     )
     savestring = str(savestring_qt)
