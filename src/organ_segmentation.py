@@ -766,7 +766,7 @@ def main():
 
     #logger.debug('input params')
 
-
+    print 'version: ', qmisc.getVersionString()
 ###
 # Configuration is has three sources:
 #  * Default function values
