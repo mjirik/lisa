@@ -17,7 +17,8 @@ from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
      QFont, QPixmap, QComboBox
 from PyQt4.Qt import QString
 
-sys.path.append("../extern/pyseg_base/src/")
+path_to_script = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 
 import dcmreaddata as dcmreader
 from seed_editor_qt import QTSeedEditor
@@ -454,7 +455,7 @@ class OrganSegmentationWindow(QMainWindow):
         # font_title.setSize(24)
 
         lisa_title = QLabel('LIver Surgery Analyser v0.9')
-        info = QLabel('Developed by:\n' + 
+        info = QLabel('Developed by:\n' +
                       'University of West Bohemia\n' +
                       'Faculty of Applied Sciences\n' +
                       QString.fromUtf8('M. Jiřík, V. Lukeš - 2013'))
