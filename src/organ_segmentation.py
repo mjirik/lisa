@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 #import scipy.io
 import numpy as np
 import scipy
+import scipy.ndimage
 #from scipy import sparse
 #import traceback
 import time
