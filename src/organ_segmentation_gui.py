@@ -112,7 +112,7 @@ class OrganSegmentation():
                 self.data3d, self.metadata = reader.Get3DData(datapath)
                 #self.iparams['series_number'] = self.metadata['series_number']
                 # self.iparams['datapath'] = datapath
-                self.process_dicom_data()
+                #self.process_dicom_data()
 
         else:
             self.data3d = data3d
@@ -124,6 +124,9 @@ class OrganSegmentation():
 
             # self.iparams['series_number'] = self.metadata['series_number']
             # self.iparams['datapath'] = self.metadata['datapath']
+        self.process_dicom_data()
+        if self.seeds is None:
+            self.seeds = np.zeros(self.data3d.shape, dtype=np.int8)
 
     def process_dicom_data(self):
         # voxelsize processing
@@ -183,9 +186,9 @@ class OrganSegmentation():
         self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
 
         # @TODO use logger
-        print 'dir ', self.datapath, ", series_number",\
-            self.metadata['series_number'], 'voxelsize_mm',\
-            self.voxelsize_mm
+        logger.info('dir ' + self.datapath, ", series_number",\
+            str(self.metadata['series_number']), 'voxelsize_mm',\
+            self.voxelsize_mm)
         self.time_start = time.time()
 
     def crop(self, tmpcrinfo):
@@ -241,7 +244,7 @@ class OrganSegmentation():
         # if self.iparams['seeds'] is not None:
         if self.seeds is not None:
             seeds_res = ndimage.zoom(
-                self.iparams.seeds,
+                self.seeds,
                 self.zoom,
                 mode='nearest',
                 order=0
@@ -371,6 +374,15 @@ class OrganSegmentation():
             self.segmentation = (igc.segmentation == 0).astype(np.int8)
         self._interactivity_end(igc)
 
+    def ninteractivity(self):
+        """Function for automatic (noninteractiv) mode."""
+        #import pdb; pdb.set_trace()
+        igc = self._interactivity_begin()
+        #igc.interactivity()
+        igc.make_gc()
+        self.segmentation = (igc.segmentation == 0).astype(np.int8)
+        self._interactivity_end(igc)
+
     def export(self):
         slab = {}
         slab['none'] = 0
@@ -396,6 +408,71 @@ class OrganSegmentation():
     #     self.iparams['seeds'] = qmisc.SparseMatrix(self.iparams['seeds'])
 
     #     return self.iparams
+
+    def add_seeds_mm(self, x_mm, y_mm, z_mm, label, radius):
+        """
+        Function add circle seeds to one slice with defined radius.
+
+        It is possible set more seeds on one slice with one dimension
+
+        x_mm, y_mm coordinates of circle in mm. It may be array.
+        z_mm = slice coordinates  in mm. It may be array
+        label: one number. 1 is object seed, 2 is background seed
+        radius: is radius of circle in mm
+
+        """
+
+        x_mm = np.array(x_mm)
+        y_mm = np.array(y_mm)
+        z_mm = np.array(z_mm)
+
+        for i in range(0, len(x_mm)):
+
+# xx and yy are 200x200 tables containing the x and y coordinates as values
+# mgrid is a mesh creation helper
+            xx, yy = np.mgrid[
+                :self.seeds.shape[1],
+                :self.seeds.shape[2]
+            ]
+# circles contains the squared distance to the (100, 100) point
+# we are just using the circle equation learnt at school
+            circle = (
+                (xx - x_mm[i] / self.voxelsize_mm[1]) ** 2 +
+                (yy - y_mm[i] / self.voxelsize_mm[2]) ** 2
+            ) ** (0.5)
+# donuts contains 1's and 0's organized in a donut shape
+# you apply 2 thresholds on circle to define the shape
+            # slice jen s jednim kruhem
+            slicecircle = circle < radius
+            slicen = int(z_mm / self.voxelsize_mm[0])
+            # slice s tim co už je v něm nastaveno
+            slicetmp = self.seeds[slicen, :, :]
+            #import pdb; pdb.set_trace()
+
+            slicetmp[slicecircle == 1] = label
+
+            self.seeds[slicen, :, :] = slicetmp
+
+#, QMainWindow
+            #import py3DSeedEditor
+            #rr=py3DSeedEditor.py3DSeedEditor(self.seeds); rr.show()
+
+            #from seed_editor_qt import QTSeedEditor
+            #from PyQt4.QtGui import QApplication
+            #app = QApplication(sys.argv)
+            #pyed = QTSeedEditor(circle)
+            #pyed.exec_()
+
+            #app.exit()
+            #tmpslice = #np.logical_and(
+            #circle < (6400 + 60), circle > (6400 - 60))
+
+    def get_segmented_volume_size_mm3(self):
+        """Compute segmented volume in mm3, based on subsampeled data."""
+
+        voxelvolume_mm3 = np.prod(self.voxelsize_mm)
+        volume_mm3 = np.sum(self.segmentation > 0) * voxelvolume_mm3
+        return volume_mm3
 
     def save_outputs(self):
 

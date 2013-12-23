@@ -16,7 +16,7 @@ import unittest
 import numpy as np
 
 
-import organ_segmentation
+import organ_segmentation_gui as organ_segmentation
 import dcmreaddata as dcmr
 
 
@@ -98,7 +98,8 @@ class OrganSegmentationTest(unittest.TestCase):
 
 
 # @TODO doladit boundary penalties
-    @unittest.skipIf(not interactiveTest, "interactive test")
+    #@unittest.skipIf(not interactiveTest, "interactive test")
+    @unittest.skip("interactivity params are obsolete")
     def test_organ_segmentation_with_boundary_penalties(self):
         """
         Interactivity is stored to file
