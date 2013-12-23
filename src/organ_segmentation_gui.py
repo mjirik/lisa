@@ -5,6 +5,7 @@ LISA - organ segmentation tool
 """
 
 # from scipy.io import loadmat, savemat
+import scipy
 from scipy import ndimage
 import numpy as np
 
@@ -109,7 +110,7 @@ class OrganSegmentation():
             if datapath is not None:
                 reader = datareader.DataReader()
                 self.data3d, self.metadata = reader.Get3DData(datapath)
-                # self.iparams['series_number'] = self.metadata['series_number']
+                #self.iparams['series_number'] = self.metadata['series_number']
                 # self.iparams['datapath'] = datapath
                 self.process_dicom_data()
 
@@ -169,8 +170,9 @@ class OrganSegmentation():
         #self.segparams['pairwise_alpha']=25
 
         if self.roi is not None:
-            self.data3d = qmisc.crop(self.data3d, self.roi)
-            self.crinfo = self.roi
+            self.crop(self.roi)
+            #self.data3d = qmisc.crop(self.data3d, self.roi)
+            #self.crinfo = self.roi
             # self.iparams['roi'] = self.roi
             # self.iparams['manualroi'] = False
 
@@ -186,24 +188,41 @@ class OrganSegmentation():
             self.voxelsize_mm
         self.time_start = time.time()
 
+    def crop(self, tmpcrinfo):
+        """
+        Function makes crop of 3d data and seeds and stores it in crinfo.
+        """
+        self.data3d = qmisc.crop(self.data3d, tmpcrinfo)
+        #print 'sedds ', self.seeds
+        if self.seeds is not None:
+            self.seeds = qmisc.crop(self.seeds, tmpcrinfo)
+
+        if self.segmentation is not None:
+            self.segmentation = qmisc.crop(self.segmentation, tmpcrinfo)
+
+        self.crinfo = qmisc.combinecrinfo(self.crinfo, tmpcrinfo)
+
+
+
+
     def _interactivity_begin(self):
         logger.debug('_interactivity_begin()')
-        # print 'zoom ', self.zoom
-        # print 'svs_mm ', self.working_voxelsize_mm
-        # data3d_res = ndimage.zoom(
-        #     self.data3d,
-        #     self.zoom,
-        #     mode='nearest',
-        #     order=1
-        # )
+        #print 'zoom ', self.zoom
+        #print 'svs_mm ', self.working_voxelsize_mm
+        data3d_res = ndimage.zoom(
+            self.data3d,
+            self.zoom,
+            mode='nearest',
+            order=1
+        ).astype(np.int16)
         # data3d_res = data3d_res.astype(np.int16)
 
         igc = pycut.ImageGraphCut(
-            self.data3d,
-            #           gcparams={'pairwise_alpha': 30},
+            #self.data3d,
+            data3d_res,
             segparams=self.segparams,
-            #voxelsize=self.working_voxelsize_mm
-            voxelsize=self.voxelsize_mm
+            voxelsize=self.working_voxelsize_mm
+            #voxelsize=self.voxelsize_mm
         )
 
         # version comparison
@@ -220,51 +239,48 @@ class OrganSegmentation():
             'params': {cvtype_name: 'full', 'n_components': 3}
         }
         # if self.iparams['seeds'] is not None:
-        #     seeds_res = ndimage.zoom(
-        #         self.iparams['seeds'],
-        #         self.zoom,
-        #         mode='nearest',
-        #         order=0
-        #     )
-        #     igc.set_seeds(seeds_res)
+        if self.seeds is not None:
+            seeds_res = ndimage.zoom(
+                self.iparams.seeds,
+                self.zoom,
+                mode='nearest',
+                order=0
+            )
+            seeds_res = seeds_res.astype(np.int8)
+            igc.set_seeds(seeds_res)
 
         return igc
 
     def _interactivity_end(self, igc):
         logger.debug('_interactivity_end()')
-#        ndimage.zoom(
-#                self.segmentation,
-#                1.0 / self.zoom,
-#                output=segm_orig_scale,
-#                mode='nearest',
-#                order=0
-#                )
 
-        self.processing_time = time.time() - self.time_start
-        return
-        segm_orig_scale = ndimage.zoom(
+        segm_orig_scale = scipy.ndimage.zoom(
             self.segmentation,
             1.0 / self.zoom,
             mode='nearest',
             order=0
         ).astype(np.int8)
-        # seeds = ndimage.zoom(
-        #     igc.seeds,
-        #     1.0 / self.zoom,
-        #     mode='nearest',
-        #     order=0
-        # )
+        seeds = scipy.ndimage.zoom(
+            igc.seeds,
+            1.0 / self.zoom,
+            mode='nearest',
+            order=0
+        )
 
 # @TODO odstranit hack pro oříznutí na stejnou velikost
 # v podstatě je to vyřešeno, ale nechalo by se to dělat elegantněji v zoom
 # tam je bohužel patrně bug
+        #print 'd3d ', self.data3d.shape
+        #print 's orig scale shape ', segm_orig_scale.shape
         shp = [
             np.min([segm_orig_scale.shape[0], self.data3d.shape[0]]),
             np.min([segm_orig_scale.shape[1], self.data3d.shape[1]]),
             np.min([segm_orig_scale.shape[2], self.data3d.shape[2]]),
         ]
         #self.data3d = self.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
+        #import ipdb; ipdb.set_trace() # BREAKPOINT
 
+        self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
         self.segmentation[
             0:shp[0],
             0:shp[1],
@@ -281,19 +297,25 @@ class OrganSegmentation():
         if self.segmentation_smoothing:
             self.segm_smoothing(self.smoothing_mm)
 
-        #print 'crinfo: ', self.crinfo
         #print 'autocrop', self.autocrop
         if self.autocrop is True:
             #print
             #import pdb; pdb.set_trace()
 
-            tmpcrinfo = self._crinfo_from_specific_data(
+            tmpcrinfo = qmisc.crinfo_from_specific_data(
                 self.segmentation,
                 self.autocrop_margin)
-            self.segmentation = self._crop(self.segmentation, tmpcrinfo)
-            self.data3d = self._crop(self.data3d, tmpcrinfo)
 
-            self.crinfo = qmisc.combinecrinfo(self.crinfo, tmpcrinfo)
+            self.crop(tmpcrinfo)
+
+        #oseg = self
+        #print 'ms d3d ', oseg.data3d.shape
+        #print 'ms seg ', oseg.segmentation.shape
+        #print 'crinfo ', oseg.crinfo
+            #self.segmentation = qmisc.crop(self.segmentation, tmpcrinfo)
+            #self.data3d = qmisc.crop(self.data3d, tmpcrinfo)
+
+            #self.crinfo = qmisc.combinecrinfo(self.crinfo, tmpcrinfo)
 
         if self.texture_analysis not in (None, False):
             import texture_analysis
@@ -309,6 +331,7 @@ class OrganSegmentation():
 
         # set label number
 #!!! pomaly!!!
+# @TODO make faster
         self.segmentation[self.segmentation == 1] = self.output_label
 #
         self.processing_time = time.time() - self.time_start
@@ -346,7 +369,7 @@ class OrganSegmentation():
 # tady se to řeší hackem
         if igc.segmentation is not None:
             self.segmentation = (igc.segmentation == 0).astype(np.int8)
-            self._interactivity_end(igc)
+        self._interactivity_end(igc)
 
     def export(self):
         slab = {}
@@ -598,11 +621,12 @@ class OrganSegmentationWindow(QMainWindow):
 
         crinfo = pyed.getROI()
         if crinfo is not None:
-            oseg.crinfo = []
+            tmpcrinfo = []
             for ii in crinfo:
-                oseg.crinfo.append([ii.start, ii.stop])
+                tmpcrinfo.append([ii.start, ii.stop])
 
-            oseg.data3d = qmisc.crop(oseg.data3d, oseg.crinfo)
+            #oseg.data3d = qmisc.crop(oseg.data3d, oseg.crinfo)
+            oseg.crop(tmpcrinfo)
 
         self.setLabelText(self.text_dcm_data, self.getDcmInfo())
         self.statusBar().showMessage('Ready')
@@ -617,6 +641,9 @@ class OrganSegmentationWindow(QMainWindow):
 
     def manualSeg(self):
         oseg = self.oseg
+        #print 'ms d3d ', oseg.data3d.shape
+        #print 'ms seg ', oseg.segmentation.shape
+        #print 'crinfo ', oseg.crinfo
         if  oseg.data3d is None:
             self.statusBar().showMessage('No DICOM data!')
             return
