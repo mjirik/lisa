@@ -87,7 +87,8 @@ class OrganSegmentation():
         self.crinfo = [[0, -1], [0, -1], [0, -1]]
         self.slab = slab
         self.output_label = output_label
-        self.working_voxelsize_mm = working_voxelsize_mm
+        self.working_voxelsize_mm = None
+        self.input_wvx_size = working_voxelsize_mm
         self.segparams = segparams
         self.series_number = series_number
 
@@ -112,7 +113,7 @@ class OrganSegmentation():
                 self.data3d, self.metadata = reader.Get3DData(datapath)
                 #self.iparams['series_number'] = self.metadata['series_number']
                 # self.iparams['datapath'] = datapath
-                #self.process_dicom_data()
+                self.process_dicom_data()
 
         else:
             self.data3d = data3d
@@ -124,13 +125,12 @@ class OrganSegmentation():
 
             # self.iparams['series_number'] = self.metadata['series_number']
             # self.iparams['datapath'] = self.metadata['datapath']
-        self.process_dicom_data()
-        if self.seeds is None:
-            self.seeds = np.zeros(self.data3d.shape, dtype=np.int8)
+        #self.process_dicom_data()
 
-    def process_dicom_data(self):
-        # voxelsize processing
-        vx_size = self.working_voxelsize_mm
+    def process_wvx_size_mm(self):
+
+        #vx_size = self.working_voxelsize_mm
+        vx_size = self.input_wvx_size
         if vx_size == 'orig':
             vx_size = self.metadata['voxelsize_mm']
 
@@ -150,7 +150,28 @@ class OrganSegmentation():
 
         # self.iparams['working_voxelsize_mm'] = vx_size
         self.working_voxelsize_mm = vx_size
+        #return vx_size
+
+    def process_dicom_data(self):
+        # voxelsize processing
         #self.parameters = {}
+
+
+        #self.segparams['pairwise_alpha']=25
+
+        if self.roi is not None:
+            self.crop(self.roi)
+            #self.data3d = qmisc.crop(self.data3d, self.roi)
+            #self.crinfo = self.roi
+            # self.iparams['roi'] = self.roi
+            # self.iparams['manualroi'] = False
+
+        self.voxelsize_mm = np.array(self.metadata['voxelsize_mm'])
+        self.process_wvx_size_mm()
+        self.autocrop_margin = self.autocrop_margin_mm / self.voxelsize_mm
+        self.zoom = self.voxelsize_mm / (1.0 * self.working_voxelsize_mm)
+        self.orig_shape = self.data3d.shape
+        self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
 
         #self.segparams = {'pairwiseAlpha':2, 'use_boundary_penalties':True,
         #'boundary_penalties_sigma':50}
@@ -170,21 +191,8 @@ class OrganSegmentation():
             self.segparams['pairwise_alpha_per_mm2'] / \
             np.mean(self.working_voxelsize_mm)
 
-        #self.segparams['pairwise_alpha']=25
-
-        if self.roi is not None:
-            self.crop(self.roi)
-            #self.data3d = qmisc.crop(self.data3d, self.roi)
-            #self.crinfo = self.roi
-            # self.iparams['roi'] = self.roi
-            # self.iparams['manualroi'] = False
-
-        self.voxelsize_mm = np.array(self.metadata['voxelsize_mm'])
-        self.autocrop_margin = self.autocrop_margin_mm / self.voxelsize_mm
-        self.zoom = self.voxelsize_mm / (1.0 * self.working_voxelsize_mm)
-        self.orig_shape = self.data3d.shape
-        self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
-
+        if self.seeds is None:
+            self.seeds = np.zeros(self.data3d.shape, dtype=np.int8)
         # @TODO use logger
         logger.info('dir ' + str(self.datapath), ", series_number",\
             str(self.metadata['series_number']), 'voxelsize_mm',\
@@ -925,6 +933,7 @@ def main():
     else:
         params = config.subdict(args, oseg_argspec_keys)
 
+    print params
     oseg = OrganSegmentation(**params)
 
     oseg_w = OrganSegmentationWindow(oseg)
