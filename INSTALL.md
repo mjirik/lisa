@@ -61,7 +61,7 @@ Install (L)Ubuntu 13.10
 =========================
 
 
-    sudo apt-get install python git python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox python-insighttoolkit3 make python-qt4
+    sudo apt-get install python git python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox python-insighttoolkit3 make python-qt4 python-vtk
     git clone git@github.com:mjirik/liver-surgery.git
     git submodule update --init --recursive
     git clone https://github.com/amueller/gco_python.git
