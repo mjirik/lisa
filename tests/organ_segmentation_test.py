@@ -98,8 +98,8 @@ class OrganSegmentationTest(unittest.TestCase):
 
 
 # @TODO doladit boundary penalties
-    #@unittest.skipIf(not interactiveTest, "interactive test")
-    @unittest.skip("interactivity params are obsolete")
+    @unittest.skipIf(not interactiveTest, "interactive test")
+    #@unittest.skip("interactivity params are obsolete")
     def test_organ_segmentation_with_boundary_penalties(self):
         """
         Interactivity is stored to file
@@ -123,10 +123,11 @@ class OrganSegmentationTest(unittest.TestCase):
 
         volume = oseg.get_segmented_volume_size_mm3()
 
-        misc.obj_to_file(oseg.get_iparams(),'iparams.pkl',filetype='pickle')
+        #misc.obj_to_file(oseg.get_iparams(),'iparams.pkl',filetype='pickle')
 
         self.assertGreater(volume,1000000)
     #@unittest.skipIf(not interactiveTest, "interactive test")
+    @unittest.skip("interactivity params are obsolete")
     def test_create_iparams(self):
         """
         Interactivity is stored to file

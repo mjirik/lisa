@@ -186,7 +186,7 @@ class OrganSegmentation():
         self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
 
         # @TODO use logger
-        logger.info('dir ' + self.datapath, ", series_number",\
+        logger.info('dir ' + str(self.datapath), ", series_number",\
             str(self.metadata['series_number']), 'voxelsize_mm',\
             self.voxelsize_mm)
         self.time_start = time.time()
@@ -196,7 +196,8 @@ class OrganSegmentation():
         Function makes crop of 3d data and seeds and stores it in crinfo.
         """
         self.data3d = qmisc.crop(self.data3d, tmpcrinfo)
-        #print 'sedds ', self.seeds
+        print 'sedds ', self.seeds.shape, ' se ', self.segmentation.shape,\
+                ' d3d ', self.data3d.shape
         if self.seeds is not None:
             self.seeds = qmisc.crop(self.seeds, tmpcrinfo)
 
