@@ -170,15 +170,24 @@ def get_border(image3d):
 def write_csv(data, filename='20130812_liver_volumetry.csv'):
     import csv
     with open(filename, 'wb') as csvfile:
-        spamwriter = csv.writer(
+        writer = csv.writer(
                 csvfile,
                 delimiter=';',
                 quotechar='"',
                 quoting=csv.QUOTE_MINIMAL
                 )
+        write_sum_to_csv(data, writer)
         for label in data:
-            spamwriter.writerow([label]+data[label])
+            writer.writerow([label]+data[label])
             #spamwriter.writerow(['Spam', 'Lovely Spam', 'Wonderful Spam'])
+
+def write_sum_to_csv(evaluation, writer):
+    var, avg = make_sum(evaluation)
+    key = evaluation.keys()
+    writer. writerow([] + key)
+    writer. writerow(['var'] + var)
+    writer. writerow(['avg'] + avg)
+    writer. writerow([])
 
 
 def main():
@@ -277,6 +286,8 @@ def main():
 
 
     print evaluation_all
+    print 'eval all'
+    print make_sum(evaluation_all)
     write_csv(evaluation_all, filename=args.outputfile)
     #import pdb; pdb.set_trace()
 
@@ -304,6 +315,15 @@ def main():
 #        misc.obj_to_file(oseg.get_ipars(), 'ipars.pkl', filetype='pickle')
 #    #output = segmentation.vesselSegmentation(oseg.data3d,
     # oseg.orig_segmentation)
+
+def make_sum(evaluation):
+    var = []
+    avg = []
+    for key in evaluation.keys():
+        avg.append(np.average(evaluation[key])
+        var.append(np.var(evaluation[key])
+    return avg, var
+
 
 if __name__ == "__main__":
     main()
