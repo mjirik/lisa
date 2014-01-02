@@ -79,6 +79,8 @@ class OrganSegmentation():
         output_label: label for output segmented volume
         slab: aditional label system for description segmented data
         {'none':0, 'liver':1, 'lesions':6}
+        roi: region of interest. [[startx, stopx], [sty, spy], [stz, spz]]
+        seeds: ndimage array with size by roi
 
         """
         self.iparams = {}
@@ -124,7 +126,6 @@ class OrganSegmentation():
                              'voxelsize_mm': 1,
                              'datapath': None}
             self.metadata.update(metadata)
-            print "data3d"
             self.process_dicom_data()
 
             # self.iparams['series_number'] = self.metadata['series_number']
@@ -195,7 +196,6 @@ class OrganSegmentation():
             self.segparams['pairwise_alpha_per_mm2'] / \
             np.mean(self.working_voxelsize_mm)
 
-        print "shp 3d ", self.data3d.shape
         if self.seeds is None:
             self.seeds = np.zeros(self.data3d.shape, dtype=np.int8)
         # @TODO use logger
@@ -211,8 +211,9 @@ class OrganSegmentation():
         #print ('sedds ', str(self.seeds.shape), ' se ',
         #       str(self.segmentation.shape), ' d3d ', str(self.data3d.shape))
         self.data3d = qmisc.crop(self.data3d, tmpcrinfo)
-        if self.seeds is not None:
-            self.seeds = qmisc.crop(self.seeds, tmpcrinfo)
+        # Size of seeds should be same as roi, so there is no need to make crop
+        #if self.seeds is not None:
+        #    self.seeds = qmisc.crop(self.seeds, tmpcrinfo)
 
         if self.segmentation is not None:
             self.segmentation = qmisc.crop(self.segmentation, tmpcrinfo)
@@ -228,7 +229,6 @@ class OrganSegmentation():
         logger.debug('_interactivity_begin()')
         #print 'zoom ', self.zoom
         #print 'svs_mm ', self.working_voxelsize_mm
-        print 'res sz pre', self.data3d.shape
         data3d_res = ndimage.zoom(
             self.data3d,
             self.zoom,
@@ -259,16 +259,13 @@ class OrganSegmentation():
             'params': {cvtype_name: 'full', 'n_components': 3}
         }
         # if self.iparams['seeds'] is not None:
-        print 'res sz ', data3d_res.shape
         if self.seeds is not None:
-            print 'res sz seeds pre', self.seeds.shape
             seeds_res = ndimage.zoom(
                 self.seeds,
                 self.zoom,
                 mode='nearest',
                 order=0
             )
-            print 'res sz seeds ', self.seeds.shape
             seeds_res = seeds_res.astype(np.int8)
             igc.set_seeds(seeds_res)
 
