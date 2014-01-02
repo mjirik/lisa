@@ -199,9 +199,9 @@ class OrganSegmentation():
         if self.seeds is None:
             self.seeds = np.zeros(self.data3d.shape, dtype=np.int8)
         # @TODO use logger
-        logger.info('dir ' + str(self.datapath), ", series_number",\
-            str(self.metadata['series_number']), 'voxelsize_mm',\
-            self.voxelsize_mm)
+        logger.info('dir ' + str(self.datapath) + ", series_number" +\
+            str(self.metadata['series_number']) +'voxelsize_mm' +\
+            str(self.voxelsize_mm))
         self.time_start = time.time()
 
     def crop(self, tmpcrinfo):
