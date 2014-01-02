@@ -41,6 +41,8 @@ src/output.mat
 src/uiThreshold.py.orig
 sample_data
 tmp
+*~
+*.swp
 
 experiments/20130812_liver_volumetry.yaml
 
