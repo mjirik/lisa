@@ -114,6 +114,8 @@ class OrganSegmentation():
                 #self.iparams['series_number'] = self.metadata['series_number']
                 # self.iparams['datapath'] = datapath
                 self.process_dicom_data()
+            else:
+                logger.error('No input path or 3d data')
 
         else:
             self.data3d = data3d
@@ -122,6 +124,8 @@ class OrganSegmentation():
                              'voxelsize_mm': 1,
                              'datapath': None}
             self.metadata.update(metadata)
+            print "data3d"
+            self.process_dicom_data()
 
             # self.iparams['series_number'] = self.metadata['series_number']
             # self.iparams['datapath'] = self.metadata['datapath']
@@ -191,6 +195,7 @@ class OrganSegmentation():
             self.segparams['pairwise_alpha_per_mm2'] / \
             np.mean(self.working_voxelsize_mm)
 
+        print "shp 3d ", self.data3d.shape
         if self.seeds is None:
             self.seeds = np.zeros(self.data3d.shape, dtype=np.int8)
         # @TODO use logger
@@ -203,9 +208,9 @@ class OrganSegmentation():
         """
         Function makes crop of 3d data and seeds and stores it in crinfo.
         """
+        #print ('sedds ', str(self.seeds.shape), ' se ',
+        #       str(self.segmentation.shape), ' d3d ', str(self.data3d.shape))
         self.data3d = qmisc.crop(self.data3d, tmpcrinfo)
-        print 'sedds ', self.seeds.shape, ' se ', self.segmentation.shape,\
-                ' d3d ', self.data3d.shape
         if self.seeds is not None:
             self.seeds = qmisc.crop(self.seeds, tmpcrinfo)
 
@@ -214,6 +219,8 @@ class OrganSegmentation():
 
         self.crinfo = qmisc.combinecrinfo(self.crinfo, tmpcrinfo)
 
+        #print '----sedds ', self.seeds.shape, ' se ', self.segmentation.shape,\
+        #        ' d3d ', self.data3d.shape
 
 
 
@@ -221,6 +228,7 @@ class OrganSegmentation():
         logger.debug('_interactivity_begin()')
         #print 'zoom ', self.zoom
         #print 'svs_mm ', self.working_voxelsize_mm
+        print 'res sz pre', self.data3d.shape
         data3d_res = ndimage.zoom(
             self.data3d,
             self.zoom,
@@ -251,13 +259,16 @@ class OrganSegmentation():
             'params': {cvtype_name: 'full', 'n_components': 3}
         }
         # if self.iparams['seeds'] is not None:
+        print 'res sz ', data3d_res.shape
         if self.seeds is not None:
+            print 'res sz seeds pre', self.seeds.shape
             seeds_res = ndimage.zoom(
                 self.seeds,
                 self.zoom,
                 mode='nearest',
                 order=0
             )
+            print 'res sz seeds ', self.seeds.shape
             seeds_res = seeds_res.astype(np.int8)
             igc.set_seeds(seeds_res)
 
