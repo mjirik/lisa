@@ -176,7 +176,7 @@ class OrganSegmentationTest(unittest.TestCase):
 
 
         roi = [[7,27],[2,29],[0,26]]
-        seeds = seeds[7:27, 2:29, 0:26]
+        #seeds = seeds[7:27, 2:29, 0:26]
         voxelsize_mm = [5,5,5]
         metadata = {'voxelsize_mm': voxelsize_mm}
 

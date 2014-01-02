@@ -19,7 +19,7 @@ from PyQt4.QtGui import QFileDialog, QApplication, QMainWindow
 
 import numpy as np
 import itk
-import SimpleITK as sitk
+#import SimpleITK as sitk
 
 
 import pycut
@@ -61,8 +61,9 @@ class PycutTest(unittest.TestCase):
         """
         This is not working. ITK has 2D thinning algorithm only. :-(
         """
+        import SimpleITK as sitk
         data = self.generate_data()
-        
+
 
         data = data.astype(np.int16)
 
@@ -121,7 +122,7 @@ class PycutTest(unittest.TestCase):
         writer.SetInput( reader.GetOutput() )
         writer.Update()
 
-    
+
     @unittest.skipIf(not interactivetTest, 'interactiveTest')
     def test_se(self):
         pass

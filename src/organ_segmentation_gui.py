@@ -67,6 +67,8 @@ class OrganSegmentation():
         output_label=1,
         slab={},
         output_datapath=None,
+        experiment_caption='',
+        lisa_operator_identifier=''
         ):
 
         """ Segmentation of objects from CT data.
@@ -80,7 +82,9 @@ class OrganSegmentation():
         slab: aditional label system for description segmented data
         {'none':0, 'liver':1, 'lesions':6}
         roi: region of interest. [[startx, stopx], [sty, spy], [stz, spz]]
-        seeds: ndimage array with size by roi
+        seeds: ndimage array with size same as data3d
+        experiment_caption = this caption is used for naming of outputs
+        lisa_operator_identifier: used for logging
 
         """
         self.iparams = {}
@@ -105,6 +109,8 @@ class OrganSegmentation():
         self.seeds = seeds
         self.segmentation = None
         self.processing_time = None
+        self.experiment_caption = experiment_caption
+        self.lisa_operator_identifier = lisa_operator_identifier
 
         if data3d is None or metadata is None:
             # if 'datapath' in self.iparams:
@@ -211,9 +217,9 @@ class OrganSegmentation():
         #print ('sedds ', str(self.seeds.shape), ' se ',
         #       str(self.segmentation.shape), ' d3d ', str(self.data3d.shape))
         self.data3d = qmisc.crop(self.data3d, tmpcrinfo)
-        # Size of seeds should be same as roi, so there is no need to make crop
-        #if self.seeds is not None:
-        #    self.seeds = qmisc.crop(self.seeds, tmpcrinfo)
+# No, size of seeds should be same as data3d
+        if self.seeds is not None:
+            self.seeds = qmisc.crop(self.seeds, tmpcrinfo)
 
         if self.segmentation is not None:
             self.segmentation = qmisc.crop(self.segmentation, tmpcrinfo)
@@ -509,15 +515,20 @@ class OrganSegmentation():
 
         data = self.export()
         data['version'] = qmisc.getVersionString()
+        data['experiment_caption'] = self.experiment_caption
+        data['lisa_operator_identifier'] = self.lisa_operator_identifier
         pth, filename = op.split(op.normpath(self.datapath))
+        filename += "-" + self.experiment_caption
 #        if savestring in ['a', 'A']:
 # save renamed file too
-            # filepath = 'organ_big-' + filename + '.pklz'
-            # filepath = op.join(op, filename)
-            # filepath = misc.suggest_filename(filepath)
-            # misc.obj_to_file(data, filepath, filetype='pklz')
+        filepath = 'org-' + filename + '.pklz'
+        #print filepath
+        #print 'op ', op
+        filepath = op.join(odp, filepath)
+        filepath = misc.suggest_filename(filepath)
+        misc.obj_to_file(data, filepath, filetype='pklz')
 
-        filepath = 'organ.pklz'
+        filepath = 'organ_last.pklz'
         filepath = op.join(odp, filepath)
         #filepath = misc.suggest_filename(filepath)
         misc.obj_to_file(data, filepath, filetype='pklz')
@@ -527,12 +538,30 @@ class OrganSegmentation():
         # filepath = op.join(odp, filepath)
         # misc.obj_to_file(iparams, filepath, filetype='pklz')
 
-        data['data3d'] = None
-        filepath = 'organ_small-' + filename + '.pklz'
-        filepath = op.join(odp, filepath)
-        filepath = misc.suggest_filename(filepath)
-        misc.obj_to_file(data, filepath, filetype='pklz')
+        #if savestring in ['a', 'A']:
+        if False:
+# save renamed file too
+            data['data3d'] = None
+            filepath = 'organ_small-' + filename + '.pklz'
+            filepath = op.join(odp, filepath)
+            filepath = misc.suggest_filename(filepath)
+            misc.obj_to_file(data, filepath, filetype='pklz')
 
+        #if savestring in ['ad']:
+        if False:
+            # save to DICOM
+            filepath = 'dicom-' + filename
+            filepath = os.path.join(op, filepath)
+            filepath = misc.suggest_filename(filepath)
+            output_dicom_dir = filepath
+            #import ipdb; ipdb.set_trace()  # BREAKPOINT
+            overlays = {
+                3:
+                (data['segmentation'] == self.output_label).astype(np.int8)
+            }
+            saveOverlayToDicomCopy(oseg.metadata['dcmfilelist'],
+                                   output_dicom_dir, overlays,
+                                   data['crinfo'], data['orig_shape'])
 # GUI
 class OrganSegmentationWindow(QMainWindow):
 
@@ -816,6 +845,7 @@ class OrganSegmentationWindow(QMainWindow):
         else:
             self.statusBar().showMessage('No segmentation data!')
 
+
 def main():
 
     logger.setLevel(logging.WARNING)
@@ -830,6 +860,8 @@ def main():
         'viewermax': 300,
         'viewermin': -100,
         'output_datapath': os.path.expanduser("~/lisa_data")
+        'lisa_operator_identifier': "",
+        'experiment_caption': ''
     }
 
     cfg = config.get_default_function_config(OrganSegmentation.__init__)
@@ -948,7 +980,7 @@ def main():
 
     #oseg.interactivity(args["viewermin"], args["viewermax"])
 
-    # audiosupport.beep()
+    #audiosupport.beep()
     # print(
     #     "Volume " +
     #     str(oseg.get_segmented_volume_size_mm3() / 1000000.0) + ' [l]')
@@ -960,8 +992,8 @@ def main():
     # if args["show_output"]:
     #     oseg.show_output()
 
-    # #print savestring
-    # save_outputs(args, oseg, qt_app)
+    #print savestring
+    #  save_outputs(args, oseg, qt_app)
 #    import pdb; pdb.set_trace()
     sys.exit(app.exec_())
 
