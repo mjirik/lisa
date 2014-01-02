@@ -857,9 +857,9 @@ def main():
     ## read confguraton from file, use default values from OrganSegmentation
     cfgplus = {
         'datapath': None,
-        'viewermax': 300,
-        'viewermin': -100,
-        'output_datapath': os.path.expanduser("~/lisa_data")
+        'viewermax': 225,
+        'viewermin': -125,
+        'output_datapath': os.path.expanduser("~/lisa_data"),
         'lisa_operator_identifier': "",
         'experiment_caption': ''
     }
