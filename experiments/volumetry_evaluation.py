@@ -182,9 +182,9 @@ def write_csv(data, filename='20130812_liver_volumetry.csv'):
             #spamwriter.writerow(['Spam', 'Lovely Spam', 'Wonderful Spam'])
 
 def write_sum_to_csv(evaluation, writer):
-    var, avg = make_sum(evaluation)
+    avg, var = make_sum(evaluation)
     key = evaluation.keys()
-    writer. writerow([] + key)
+    writer. writerow([' - '] + key)
     writer. writerow(['var'] + var)
     writer. writerow(['avg'] + avg)
     writer. writerow([])
@@ -238,6 +238,7 @@ def main():
             'vd': [],
             'avgd': [],
             'rmsd': [],
+            'processing_time': [],
             'maxd': []
 
             }
@@ -283,10 +284,12 @@ def main():
         evaluation_all['avgd'].append(evaluation_one['avgd'])
         evaluation_all['rmsd'].append(evaluation_one['rmsd'])
         evaluation_all['maxd'].append(evaluation_one['maxd'])
+        evaluation_all['processing_time'].append(obj_b['processing_time'])
 
 
     print evaluation_all
     print 'eval all'
+
     print make_sum(evaluation_all)
     write_csv(evaluation_all, filename=args.outputfile)
     #import pdb; pdb.set_trace()
@@ -320,8 +323,16 @@ def make_sum(evaluation):
     var = []
     avg = []
     for key in evaluation.keys():
-        avg.append(np.average(evaluation[key])
-        var.append(np.var(evaluation[key])
+        avgi = 'nan'
+        vari = 'nan'
+        try:
+            avgi = np.average(evaluation[key])
+            vari = np.var(evaluation[key])
+        except Exception as e:
+            print "problem with key: ", key
+            #print evaluation[key]
+        avg.append(avgi)
+        var.append(vari)
     return avg, var
 
 

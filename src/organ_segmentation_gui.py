@@ -63,13 +63,13 @@ class OrganSegmentation():
         edit_data=False,
         segparams={},
         roi=None,
-        #           iparams=None,
         output_label=1,
         slab={},
         output_datapath=None,
         experiment_caption='',
         lisa_operator_identifier=''
-        ):
+        #           iparams=None,
+    ):
 
         """ Segmentation of objects from CT data.
 
@@ -87,6 +87,9 @@ class OrganSegmentation():
         lisa_operator_identifier: used for logging
 
         """
+        default_segparams = {'pairwise_alpha_per_mm2': 40,
+                     'use_boundary_penalties': False,
+                     'boundary_penalties_sigma': 50}
         self.iparams = {}
         self.datapath = datapath
         self.output_datapath = output_datapath
@@ -95,7 +98,11 @@ class OrganSegmentation():
         self.output_label = output_label
         self.working_voxelsize_mm = None
         self.input_wvx_size = working_voxelsize_mm
-        self.segparams = segparams
+
+        #print segparams
+# @TODO each axis independent alpha
+        self.segparams = default_segparams
+        self.segparams.update(segparams)
         self.series_number = series_number
 
         self.autocrop = autocrop
@@ -188,15 +195,6 @@ class OrganSegmentation():
         #'boundary_penalties_sigma':50}
 
         # for each mm on boundary there will be sum of penalty equal 10
-        segparams = {'pairwise_alpha_per_mm2': 10,
-                     'use_boundary_penalties': False,
-                     'boundary_penalties_sigma': 50}
-        segparams = {'pairwise_alpha_per_mm2': 40,
-                     'use_boundary_penalties': False,
-                     'boundary_penalties_sigma': 50}
-        #print segparams
-# @TODO each axis independent alpha
-        self.segparams.update(segparams)
 
         self.segparams['pairwise_alpha'] = \
             self.segparams['pairwise_alpha_per_mm2'] / \
@@ -860,8 +858,6 @@ def main():
         'viewermax': 225,
         'viewermin': -125,
         'output_datapath': os.path.expanduser("~/lisa_data"),
-        'lisa_operator_identifier': "",
-        'experiment_caption': ''
     }
 
     cfg = config.get_default_function_config(OrganSegmentation.__init__)
@@ -947,6 +943,14 @@ def main():
         help='Show output data in viewer')
     parser.add_argument('-a', '--arg', nargs='+', type=float)
     parser.add_argument(
+        '-ec', '--experiment_caption', type=str,  # type=int,
+        help='Short caption of experiment. No special characters.',
+        default=cfg["experiment_caption"])
+    parser.add_argument(
+        '-oi', '--lisa_operator_identifier', type=str,  # type=int,
+        help='Identifier of Lisa operator.',
+        default=cfg["experiment_caption"])
+    parser.add_argument(
         '-ss',
         '--segmentation_smoothing',
         action='store_true',
@@ -973,6 +977,8 @@ def main():
     else:
         params = config.subdict(args, oseg_argspec_keys)
 
+    print args
+    print oseg_argspec_keys
     print params
     oseg = OrganSegmentation(**params)
 
