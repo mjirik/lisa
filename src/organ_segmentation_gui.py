@@ -87,9 +87,28 @@ class OrganSegmentation():
         lisa_operator_identifier: used for logging
 
         """
+#  Defaultparameters for segmentation
+
+# version comparison
+        from pkg_resources import parse_version
+        import sklearn
+        if parse_version(sklearn.__version__) > parse_version('0.10'):
+            #new versions
+            cvtype_name = 'covariance_type'
+        else:
+            cvtype_name = 'cvtype'
+
+        default_segmodelparams = {
+            'type': 'gmmsame',
+            'params': {cvtype_name: 'full', 'n_components': 3}
+        }
+
         default_segparams = {'pairwise_alpha_per_mm2': 40,
                      'use_boundary_penalties': False,
                      'boundary_penalties_sigma': 50}
+
+# -------.
+
         self.iparams = {}
         self.datapath = datapath
         self.output_datapath = output_datapath
@@ -103,6 +122,7 @@ class OrganSegmentation():
 # @TODO each axis independent alpha
         self.segparams = default_segparams
         self.segparams.update(segparams)
+        self.segmodelparams = default_segmodelparams
         self.series_number = series_number
 
         self.autocrop = autocrop
@@ -249,19 +269,12 @@ class OrganSegmentation():
             #voxelsize=self.voxelsize_mm
         )
 
-        # version comparison
-        from pkg_resources import parse_version
-        import sklearn
-        if parse_version(sklearn.__version__) > parse_version('0.10'):
-            #new versions
-            cvtype_name = 'covariance_type'
-        else:
-            cvtype_name = 'cvtype'
-
-        igc.modelparams = {
-            'type': 'gmmsame',
-            'params': {cvtype_name: 'full', 'n_components': 3}
-        }
+        igc.modelparams = self.segmodelparams
+# @TODO uncomment this for kernel model
+#        igc.modelparams = {
+#            'type': 'kernel',
+#            'params': {}
+#        }
         # if self.iparams['seeds'] is not None:
         if self.seeds is not None:
             seeds_res = ndimage.zoom(
