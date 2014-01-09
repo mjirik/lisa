@@ -961,6 +961,7 @@ def main():
     return
 
 if __name__ == "__main__":
-    main()
+    import organ_segmentation_gui as osegg
+    osegg.main()
     print "Thank you for using Lisa"
     exit()
