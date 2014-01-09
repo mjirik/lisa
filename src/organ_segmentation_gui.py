@@ -269,6 +269,8 @@ class OrganSegmentation():
         ).astype(np.int16)
         # data3d_res = data3d_res.astype(np.int16)
 
+        logger.debug('pycut segparams ' + str(self.segparams) +
+                     '\nmodelparams ' + str(self.segmodelparams))
         igc = pycut.ImageGraphCut(
             #self.data3d,
             data3d_res,
@@ -656,22 +658,26 @@ class OrganSegmentationWindow(QMainWindow):
         btn_dcmdir.clicked.connect(self.loadDcmDir)
         btn_dcmcrop = QPushButton("Crop", self)
         btn_dcmcrop.clicked.connect(self.cropDcm)
-        self.scaling_mode = 'original'
-        combo_vs = QComboBox(self)
-        combo_vs.activated[str].connect(self.changeVoxelSize)
-        keys = scaling_modes.keys()
-        keys.sort()
-        combo_vs.addItems(keys)
-        combo_vs.setCurrentIndex(keys.index(self.scaling_mode))
-        self.text_vs = QLabel('Voxel size:')
+
+        # voxelsize gui comment
+        #self.scaling_mode = 'original'
+        #combo_vs = QComboBox(self)
+        #combo_vs.activated[str].connect(self.changeVoxelSize)
+        #keys = scaling_modes.keys()
+        #keys.sort()
+        #combo_vs.addItems(keys)
+        #combo_vs.setCurrentIndex(keys.index(self.scaling_mode))
+        #self.text_vs = QLabel('Voxel size:')
+        # end-- voxelsize gui
         self.text_dcm_dir = QLabel('DICOM dir:')
         self.text_dcm_data = QLabel('DICOM data:')
         grid.addWidget(hr, rstart + 0, 0, 1, 4)
         grid.addWidget(text_dcm, rstart + 1, 1, 1, 2)
         grid.addWidget(btn_dcmdir, rstart + 2, 1)
         grid.addWidget(btn_dcmcrop, rstart + 2, 2)
-        grid.addWidget(self.text_vs, rstart + 3, 1)
-        grid.addWidget(combo_vs, rstart + 4, 1)
+        # voxelsize gui comment
+        # grid.addWidget(self.text_vs, rstart + 3, 1)
+        # grid.addWidget(combo_vs, rstart + 4, 1)
         grid.addWidget(self.text_dcm_dir, rstart + 5, 1, 1, 2)
         grid.addWidget(self.text_dcm_data, rstart + 6, 1, 1, 2)
         rstart += 8
