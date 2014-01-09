@@ -156,7 +156,9 @@ class OrganSegmentation():
                 # self.iparams['datapath'] = datapath
                 self.process_dicom_data()
             else:
-                logger.error('No input path or 3d data')
+# data will be selected from gui
+                pass
+                #logger.error('No input path or 3d data')
 
         else:
             self.data3d = data3d
