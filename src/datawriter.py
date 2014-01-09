@@ -148,3 +148,19 @@ class DataWriter:
 
         return data
 
+
+def saveOverlayToDicomCopy(input_dcmfilelist, output_dicom_dir, overlays,
+                           crinfo, orig_shape):
+    """ Save overlay to dicom. """
+    import datawriter as dwriter
+    import qmisc
+
+    if not os.path.exists(output_dicom_dir):
+        os.mkdir(output_dicom_dir)
+
+    # uncrop all overlays
+    for key in overlays:
+        overlays[key] = qmisc.uncrop(overlays[key], crinfo, orig_shape)
+
+    dw = dwriter.DataWriter()
+    dw.DataCopyWithOverlay(input_dcmfilelist, output_dicom_dir, overlays)

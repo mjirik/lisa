@@ -30,6 +30,7 @@ import qmisc
 import misc
 import config
 import datareader
+import datawriter
 from seg2mesh import gen_mesh_from_voxels, mesh2vtk, smooth_mesh
 from viewer import QVTKViewer
 
@@ -138,6 +139,7 @@ class OrganSegmentation():
         self.processing_time = None
         self.experiment_caption = experiment_caption
         self.lisa_operator_identifier = lisa_operator_identifier
+        self.version = qmisc.getVersionString()
 
         if data3d is None or metadata is None:
             # if 'datapath' in self.iparams:
@@ -525,7 +527,7 @@ class OrganSegmentation():
             os.makedirs(odp)
 
         data = self.export()
-        data['version'] = qmisc.getVersionString()
+        data['version'] = self.version  # qmisc.getVersionString()
         data['experiment_caption'] = self.experiment_caption
         data['lisa_operator_identifier'] = self.lisa_operator_identifier
         pth, filename = op.split(op.normpath(self.datapath))
@@ -558,21 +560,30 @@ class OrganSegmentation():
             filepath = misc.suggest_filename(filepath)
             misc.obj_to_file(data, filepath, filetype='pklz')
 
+    def save_outputs_dcm(self):
+# TODO add
+        logger.debug('save dcm')
+        from PyQt4.QtCore import pyqtRemoveInputHook
+        pyqtRemoveInputHook()
+        import ipdb; ipdb.set_trace() # BREAKPOINT
+        odp = self.output_datapath
+        pth, filename = op.split(op.normpath(self.datapath))
+        filename += "-" + self.experiment_caption
         #if savestring in ['ad']:
-        if False:
             # save to DICOM
-            filepath = 'dicom-' + filename
-            filepath = os.path.join(op, filepath)
-            filepath = misc.suggest_filename(filepath)
-            output_dicom_dir = filepath
-            #import ipdb; ipdb.set_trace()  # BREAKPOINT
-            overlays = {
-                3:
-                (data['segmentation'] == self.output_label).astype(np.int8)
-            }
-            saveOverlayToDicomCopy(oseg.metadata['dcmfilelist'],
-                                   output_dicom_dir, overlays,
-                                   data['crinfo'], data['orig_shape'])
+        filepath = 'dicom-' + filename
+        filepath = os.path.join(odp, filepath)
+        filepath = misc.suggest_filename(filepath)
+        output_dicom_dir = filepath
+        data = self.export()
+        #import ipdb; ipdb.set_trace()  # BREAKPOINT
+        overlays = {
+            3:
+            (data['segmentation'] == self.output_label).astype(np.int8)
+        }
+        datawriter.saveOverlayToDicomCopy(self.metadata['dcmfilelist'],
+                                output_dicom_dir, overlays,
+                                data['crinfo'], data['orig_shape'])
 # GUI
 class OrganSegmentationWindow(QMainWindow):
 
@@ -611,11 +622,13 @@ class OrganSegmentationWindow(QMainWindow):
         # font_title.setBold(True)
         # font_title.setSize(24)
 
-        lisa_title = QLabel('LIver Surgery Analyser v0.9')
+        lisa_title = QLabel('LIver Surgery Analyser')
         info = QLabel('Developed by:\n' +
                       'University of West Bohemia\n' +
                       'Faculty of Applied Sciences\n' +
-                      QString.fromUtf8('M. Jiřík, V. Lukeš - 2013'))
+                      QString.fromUtf8('M. Jiřík, V. Lukeš - 2013') +
+                      '\n\nVersion: ' + self.oseg.version
+                      )
         info.setFont(font_info)
         lisa_title.setFont(font_label)
         lisa_logo = QLabel()
@@ -679,11 +692,14 @@ class OrganSegmentationWindow(QMainWindow):
         # hr.setFrameShape(QFrame.HLine)
         btn_segsave = QPushButton("Save", self)
         btn_segsave.clicked.connect(self.saveOut)
+        btn_segsavedcm = QPushButton("Save Dicom", self)
+        btn_segsavedcm.clicked.connect(self.saveOutDcm)
         btn_segview = QPushButton("View3D", self)
         btn_segview.clicked.connect(self.view3D)
         grid.addWidget(btn_segsave, rstart + 0, 1)
         grid.addWidget(btn_segview, rstart + 0, 2)
-        rstart += 1
+        grid.addWidget(btn_segsavedcm, rstart + 1, 1)
+        rstart += 2
 
         hr = QFrame()
         hr.setFrameShape(QFrame.HLine)
@@ -842,6 +858,17 @@ class OrganSegmentationWindow(QMainWindow):
         else:
             self.statusBar().showMessage('No segmentation data!')
 
+    def saveOutDcm(self, event=None, filename=None):
+        if self.oseg.segmentation is not None:
+            self.statusBar().showMessage('Saving segmentation data...')
+            QApplication.processEvents()
+
+            self.oseg.save_outputs_dcm()
+            self.statusBar().showMessage('Ready')
+
+        else:
+            self.statusBar().showMessage('No segmentation data!')
+
     def view3D(self):
         oseg = self.oseg
         if oseg.segmentation is not None:
@@ -991,9 +1018,7 @@ def main():
     else:
         params = config.subdict(args, oseg_argspec_keys)
 
-    print args
-    print oseg_argspec_keys
-    print params
+    logger.debug('params ' + str(params))
     oseg = OrganSegmentation(**params)
 
     oseg_w = OrganSegmentationWindow(oseg)
