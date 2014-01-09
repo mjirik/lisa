@@ -51,6 +51,8 @@ class OrganSegmentation():
         self,
         datapath=None,
         working_voxelsize_mm=3,
+        viewermax=None,
+        viewermin=None,
         series_number=None,
         autocrop=True,
         autocrop_margin_mm=[10, 10, 10],
@@ -140,6 +142,8 @@ class OrganSegmentation():
         self.experiment_caption = experiment_caption
         self.lisa_operator_identifier = lisa_operator_identifier
         self.version = qmisc.getVersionString()
+        self.viewermax = viewermax
+        self.viewermin = viewermin
 
         if data3d is None or metadata is None:
             # if 'datapath' in self.iparams:
@@ -787,7 +791,9 @@ class OrganSegmentationWindow(QMainWindow):
             self.statusBar().showMessage('No DICOM data!')
             return
 
-        self.oseg.interactivity()
+        self.oseg.interactivity(
+            min_val=self.oseg.viewermin,
+            max_val=self.oseg.viewermax)
         self.checkSegData('auto. seg., ')
 
     def manualSeg(self):
