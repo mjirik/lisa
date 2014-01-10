@@ -32,6 +32,15 @@ import config
 import datareader
 import datawriter
 
+from seg2mesh import gen_mesh_from_voxels, mesh2vtk, smooth_mesh
+
+try:
+    from viewer import QVTKViewer
+    viewer3D_available = True
+
+except ImportError:
+    viewer3D_available = False
+
 import time
 #import audiosupport
 import argparse
@@ -710,7 +719,12 @@ class OrganSegmentationWindow(QMainWindow):
         btn_segsavedcm = QPushButton("Save Dicom", self)
         btn_segsavedcm.clicked.connect(self.saveOutDcm)
         btn_segview = QPushButton("View3D", self)
-        btn_segview.clicked.connect(self.view3D)
+        if viewer3D_available:
+            btn_segview.clicked.connect(self.view3D)
+
+        else:
+            btn_segview.setEnabled(False)
+
         grid.addWidget(btn_segsave, rstart + 0, 1)
         grid.addWidget(btn_segview, rstart + 0, 2)
         grid.addWidget(btn_segsavedcm, rstart + 1, 1)
@@ -887,8 +901,8 @@ class OrganSegmentationWindow(QMainWindow):
             self.statusBar().showMessage('No segmentation data!')
 
     def view3D(self):
-        from seg2mesh import gen_mesh_from_voxels, mesh2vtk, smooth_mesh
-        from viewer import QVTKViewer
+        #from seg2mesh import gen_mesh_from_voxels, mesh2vtk, smooth_mesh
+        #from viewer import QVTKViewer
         oseg = self.oseg
         if oseg.segmentation is not None:
             pts, els, et = gen_mesh_from_voxels(oseg.segmentation,
