@@ -44,6 +44,26 @@ scaling_modes = {
     '3mm': (None, '3', '3'),
     }
 
+#  Defaultparameters for segmentation
+
+# version comparison
+from pkg_resources import parse_version
+import sklearn
+if parse_version(sklearn.__version__) > parse_version('0.10'):
+    #new versions
+    cvtype_name = 'covariance_type'
+else:
+    cvtype_name = 'cvtype'
+
+default_segmodelparams = {
+    'type': 'gmmsame',
+    'params': {cvtype_name: 'full', 'n_components': 3}
+}
+
+default_segparams = {'pairwise_alpha_per_mm2': 40,
+                'use_boundary_penalties': False,
+                'boundary_penalties_sigma': 50}
+
 class OrganSegmentation():
     def __init__(
         self,
@@ -63,6 +83,7 @@ class OrganSegmentation():
         seeds=None,
         edit_data=False,
         segparams={},
+        segmodelparams=default_segmodelparams,
         roi=None,
         output_label=1,
         slab={},
@@ -88,25 +109,7 @@ class OrganSegmentation():
         lisa_operator_identifier: used for logging
 
         """
-#  Defaultparameters for segmentation
 
-# version comparison
-        from pkg_resources import parse_version
-        import sklearn
-        if parse_version(sklearn.__version__) > parse_version('0.10'):
-            #new versions
-            cvtype_name = 'covariance_type'
-        else:
-            cvtype_name = 'cvtype'
-
-        default_segmodelparams = {
-            'type': 'gmmsame',
-            'params': {cvtype_name: 'full', 'n_components': 3}
-        }
-
-        default_segparams = {'pairwise_alpha_per_mm2': 40,
-                     'use_boundary_penalties': False,
-                     'boundary_penalties_sigma': 50}
 
 # -------.
 
@@ -124,6 +127,7 @@ class OrganSegmentation():
         self.segparams = default_segparams
         self.segparams.update(segparams)
         self.segmodelparams = default_segmodelparams
+        self.segmodelparams.update(segmodelparams)
         self.series_number = series_number
 
         self.autocrop = autocrop
@@ -273,7 +277,8 @@ class OrganSegmentation():
             #self.data3d,
             data3d_res,
             segparams=self.segparams,
-            voxelsize=self.working_voxelsize_mm
+            voxelsize=self.working_voxelsize_mm,
+            modelparams=self.segmodelparams
             #voxelsize=self.voxelsize_mm
         )
 
@@ -1013,7 +1018,11 @@ def main():
         default=cfg["segmentation_smoothing"]
     )
     args_obj = parser.parse_args()
-    args = vars(args_obj)
+
+    # next two lines brings cfg from file over input parser. This is why there
+    # is no need to have cfg param in input arguments
+    args = cfg
+    args.update(vars(args_obj))
     #print args["arg"]
     oseg_argspec_keys = config.get_function_keys(OrganSegmentation.__init__)
 
