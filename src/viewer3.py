@@ -73,9 +73,8 @@ class Viewer():
         self.segmentation = segmentation
         self.voxelsize_mm = voxelsize_mm
     '''
-    def __init__(self, inputfile, mode):
+    def __init__(self, inputfile):
         self.vtk_filename = inputfile
-        self.mode = mode
 
         pass
 
@@ -154,12 +153,16 @@ class Viewer():
         try:
             self.set_normal(self.planew.GetNormal())
             self.set_coordinates(self.planew.GetOrigin())
+            self.cutter()
             #print(self.normal)
             #print(self.coordinates)
         except AttributeError:
             print('Neexistuje rovina rezu - Plane')
 
-    # slouzi k nastaveni velikosti voxelu
+    '''
+    pripravena funkce pro nastavovani voxelu v grafickem okne
+    - pravdepodobne nebude vyuzita :-/
+    '''
     def Set_voxel_size(self):
         '''
         rozmer_x = QtGui.QInputDialog()
@@ -196,7 +199,28 @@ class Viewer():
         print(rozmer_z)
 
         '''
+##------------------------------------------------------------------------------------------
+    def prohlizej(self,data, mode, slab):
+        window = QtGui.QWidget()
+        grid = QtGui.QGridLayout()
+        window.setWindowTitle("3D liver")
+        window.setLayout(grid)
+        mesh = self.generate_mesh(data['segmentation'] == data['slab']['porta'],data['voxelsize_mm'])
+        if mode == 'View' or mode == None:
+            accept = True
+            self.View(mesh,accept)
+        if mode == 'Cut':
+            accept = False
+            self.View(mesh,accept)
+            self.buttons(window,grid)   
             
+        
+        return self
+    
+##------------------------------------------------------------------------------------------
+    def cutter(self):
+        print self.normal
+        print self.coordinates
 ##------------------------------------------------------------------------------------------
     def buttons(self,window,grid):
         '''
@@ -251,7 +275,7 @@ class Viewer():
 
         
 ##-----------------------------------------------------------------------------------------    
-    def View(self,vtk_filename,accept):
+    def View(self,filename,accept):
 
         # Renderer and InteractionStyle
         ren = vtk.vtkRenderer()	
@@ -262,7 +286,7 @@ class Viewer():
         
         # VTK file
         reader = vtk.vtkUnstructuredGridReader()
-        reader.SetFileName(vtk_filename)
+        reader.SetFileName(filename)
         reader.Update()
 
         # VTK surface
@@ -369,10 +393,13 @@ def main():
                       help='Mode for construction plane of resection')
     parser.add_argument('-slab','--slab', default = 'liver',
                       help='liver or porta - view')
+    parser.add_argument('-vs','--voxelsize_mm', default = [1,1,1],
+                      type=eval,
+                      help='Viewer_size')
     args = parser.parse_args()
 
-    #if args.picklefile is None:
-    #   raise IOError('No input data!')
+    if (args.picklefile or args.vtkfile) is None:
+       raise IOError('No input data!')
 
     
     # vytvoreni okna
@@ -381,24 +408,23 @@ def main():
     window.setWindowTitle("3D liver")
     window.setLayout(grid)
     # vytvoreni vieweru a generovani dat
-    viewer = Viewer(args.picklefile,args.mode)
+    viewer = Viewer(args.picklefile)
     accept = False
-    # dotaz na zadani rozmeru voxelu
+    #print args.voxelsize_mm
+    #segmentation = data['segmentation']
+    #print "unique ", np.unique(data['segmentation'])
+    
+    #print 'voxel' , data['voxelsize_mm']
     if args.picklefile:
-        zadani_rozmeru = raw_input('Chcete zadat rozmery voxelu? (A)no, (N)e (standardni rozmer 1x1x1) : ')
-        if zadani_rozmeru == 'A':
-            rozmer_x = float(raw_input('Zadejte rozmer x: '))
-            rozmer_y = float(raw_input('Zadejte rozmer y: '))
-            rozmer_z = float(raw_input('Zadejte rozmer z: '))
-        else:
-            rozmer_x = 1.0
-            rozmer_y = 1.0
-            rozmer_z = 1.0
-        print ('x : ' ,rozmer_x, ' y : ' ,rozmer_y, ' z : ' ,rozmer_z)
-            
         data = misc.obj_from_file(args.picklefile, filetype = 'pickle')
-        #segmentation = data['segmentation']
-        mesh = viewer.generate_mesh(data['segmentation'] == data['slab'][args.slab],nm.array([rozmer_x, rozmer_y, rozmer_z]))
+        try:
+            mesh = viewer.generate_mesh(data['segmentation'] == data['slab'][args.slab],data['voxelsize_mm'])
+        except KeyError:
+            print 'Data bohuzel neobsahuji zadany slab:', args.slab
+            print 'Zobrazena budou pouze dostupna data'
+            mesh = viewer.generate_mesh(data['segmentation'] == data['slab']['liver'],data['voxelsize_mm'])
+            
+        print data['slab']
         if args.mode == 'View' or args.mode == None:
             accept = True
             viewer.View(mesh,accept)
