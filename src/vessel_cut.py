@@ -93,19 +93,17 @@ def cut_editor_old(data):
     return lab, cut_by_user
 
 
-def cut_editor(segmentation, voxelsize_mm = np.ones([3,1]), degrad = 4):
+def cut_editor(data,inputfile):
     #global normal,coordinates
-    window = QtGui.QWidget()
-    grid = QtGui.QGridLayout()
-    window.setWindowTitle("3D liver")
-    window.setLayout(grid)
+    viewer = viewer3.Viewer(inputfile)
+    # zobrazovani jater v kodu 
+    viewer.prohlizej(data,'View')
     
-    viewer = viewer3.Viewer(segmentation,'Cut')
-    mesh = viewer.generate_mesh(segmentation,voxelsize_mm,degrad)
-    viewer.View(mesh,False)
-    viewer.buttons(window,grid)
-    print(viewer.normal)
-    print(viewer.coordinates)
+    #mesh = viewer.generate_mesh(segmentation,voxelsize_mm,degrad)
+    #viewer.View(mesh,False)
+    #viewer.buttons(window,grid)
+    #print(viewer.normal)
+    #print(viewer.coordinates)
     
     '''
     Funkce vrací trojrozměrné porobné jako data['segmentation'] 
@@ -280,6 +278,7 @@ if __name__ == "__main__":
 
     data = misc.obj_from_file(args.inputfile, filetype = 'pickle')
     ds = data['segmentation'] == data['slab']['liver']
+    print "vs ", data['voxelsize_mm']
     #seg = np.zeros([100,100,100])
     #seg [50:80, 50:80, 60:75] = 1
     #seg[58:60, 56:72, 66:68]=2
@@ -289,8 +288,7 @@ if __name__ == "__main__":
     #slab = {'liver':1, 'porta':2, 'portaa':3, 'portab':4}
     #data = {'segmentation':seg, 'data3d':dat, 'slab':slab}
     name = 'porta'
-    segmentation = data['segmentation']
-    cut_editor(segmentation)
+    cut_editor(data,args.inputfile)
     #resection(data,name, use_old_editor=args.use_old_editor)
     #print normal
     #print coordinates
