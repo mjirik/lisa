@@ -262,6 +262,7 @@ class OrganSegmentation():
             self.segmentation = qmisc.crop(self.segmentation, tmpcrinfo)
 
         self.crinfo = qmisc.combinecrinfo(self.crinfo, tmpcrinfo)
+        logger.debug("crinfo " + str(self.crinfo))
 
         #print '----sedds ', self.seeds.shape, ' se ', self.segmentation.shape,\
         #        ' d3d ', self.data3d.shape
@@ -1012,6 +1013,10 @@ def main():
         '-vmin', '--viewermin', type=eval,  # type=int,
         help='Minimum of viewer window, set None for automatic minimum.',
         default=cfg["viewermin"])
+    parser.add_argument(
+        '--roi', type=eval,  # type=int,
+        help='Minimum of viewer window, set None for automatic minimum.',
+        default=cfg["roi"])
     parser.add_argument(
         '-so', '--show_output', action='store_true',
         help='Show output data in viewer')
