@@ -80,26 +80,26 @@ def compare_volumes(vol1, vol2, voxelsize_mm):
     volume2 = np.sum(vol2 > 0)
     volume1_mm3 = volume1 * np.prod(voxelsize_mm)
     volume2_mm3 = volume2 * np.prod(voxelsize_mm)
-    print 'vol1 [mm3]: ', volume1_mm3
-    print 'vol2 [mm3]: ', volume2_mm3
+    logger.debug('vol1 [mm3]: ' + str(volume1_mm3))
+    logger.debug('vol2 [mm3]: ' + str(volume2_mm3))
 
     df = vol1 - vol2
     df1 = np.sum(df == 1) * np.prod(voxelsize_mm)
     df2 = np.sum(df == -1) * np.prod(voxelsize_mm)
 
-    print 'err- [mm3]: ', df1, ' err- [%]: ', df1/volume1_mm3*100
-    print 'err+ [mm3]: ', df2, ' err+ [%]: ', df2/volume1_mm3*100
+    logger.debug('err- [mm3]: ' + str(df1) + ' err- [%]: ' +str(df1/volume1_mm3*100))
+    plogger.debug(rint 'err+ [mm3]: ', df2, ' err+ [%]: ', df2/volume1_mm3*100
 
     #VOE[%]
     intersection = np.sum(df != 0).astype(float)
     union = (np.sum(vol1 > 0) + np.sum(vol2 > 0)).astype(float)
     voe = 100*( (intersection / union))
-    print 'VOE [%]', voe
+    logger.debug('VOE [%]' + str(voe))
 
 
     #VD[%]
-    vd = 100* (volume2-volume1).astype(float)/volume1.astype(float)
-    print 'VD [%]', vd
+    vd = 100 * (volume2-volume1).astype(float)/volume1.astype(float)
+    logger.debug('VD [%]' + str(vd))
     #import pdb; pdb.set_trace()
 
     #pyed = py3DSeedEditor.py3DSeedEditor(vol1, contour=vol2)
@@ -108,9 +108,9 @@ def compare_volumes(vol1, vol2, voxelsize_mm):
 
     #get_border(vol1)
     avgd, rmsd, maxd = distance_matrics(vol1, vol2, voxelsize_mm)
-    print 'AvgD [mm]', avgd
-    print 'RMSD [mm]', rmsd
-    print 'MaxD [mm]', maxd
+    logger.debug('AvgD [mm]' + str(avgd))
+    logger.debug('RMSD [mm]' + str(rmsd))
+    logger.debug('MaxD [mm]' + str(maxd))
     evaluation = {
             'volume1_mm3': volume1_mm3,
             'volume2_mm3': volume2_mm3,
@@ -168,6 +168,7 @@ def get_border(image3d):
     return conv
 
 def write_csv(data, filename='20130812_liver_volumetry.csv'):
+    logger.debug(filename)
     import csv
     with open(filename, 'wb') as csvfile:
         writer = csv.writer(
@@ -208,6 +209,8 @@ def main():
             description='Compare two segmentation. Evaluation is similar\
             to MICCAI 2007 workshop.  Metrics are described in\
             www.sliver07.com/p7.pdf')
+    parser.add_argument('-d', '--debug',  action='store_true',
+            help='run in debug mode', default=False)
     parser.add_argument('-si', '--sampleInput',  action='store_true',
             help='generate sample intput data', default=False)
     parser.add_argument('-v', '--visualization',  action='store_true',
@@ -217,6 +220,11 @@ def main():
     parser.add_argument('-o', '--outputfile', help='output file',
                         default='20130812_liver_volumetry.csv')
     args = parser.parse_args()
+
+
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
+        logger.debug('debug mode logging')
 
     if args.sampleInput:
         sample_input_data()
@@ -287,10 +295,10 @@ def main():
         evaluation_all['processing_time'].append(obj_b['processing_time'])
 
 
-    print evaluation_all
-    print 'eval all'
+    logger.debug(str(evaluation_all))
+    logger.debug('eval all')
 
-    print make_sum(evaluation_all)
+    logger.debug(make_sum(evaluation_all))
     write_csv(evaluation_all, filename=args.outputfile)
     #import pdb; pdb.set_trace()
 
