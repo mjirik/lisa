@@ -3,12 +3,12 @@
 '''
 VTK Viewer pro 3D zobrazeni
 
-# program mozne spustit ve dvou rezimech View a Cut
-# Vstupní soubor může být soubor pickle nebo už vygenerovaný vtk
-# Je mozne zobrazovat cela jatra, nebo hlavni portalni zilu prikazy : liver, porta
-# Priklady :
-# viewer3.py -vtk mesh_new.vtk -mode 'View' -slab 'liver'
-# viewer3.py -pkl vessels002.pkl -mode 'Cut'  -slab 'porta'
+program mozne spustit ve dvou rezimech View a Cut
+Vstupní soubor může být soubor pickle nebo už vygenerovaný vtk
+Je mozne zobrazovat cela jatra, nebo hlavni portalni zilu prikazy : liver, porta
+Priklady :
+viewer3.py -vtk mesh_new.vtk -mode 'View' -slab 'liver'
+viewer3.py -pkl vessels002.pkl -mode 'Cut'  -slab 'porta'
 '''
 
 from optparse import OptionParser
@@ -34,7 +34,7 @@ import py3DSeedEditor
 import show3
 import qmisc
 
-# pouzivane promenne 
+# pouzivane promenne
 plane = vtk.vtkPlane()
 normal = None
 coordinates = None
@@ -50,10 +50,10 @@ okno = QtGui.QWidget()
 
 
 
-        
+
 class Viewer():
-    
-    
+
+
     '''
     QVTKViewer(segmentation)
     QVTKViewer(segmentation, voxelsize_mm) # zobrazí vše, co je větší než nula
@@ -61,7 +61,7 @@ class Viewer():
 
     qv = QVTKViewer(segmentation, voxelsize_mm, slab, mode='select_plane')
     point = qv.getPlane()
-    
+
     #def __init__(self, inputdata, voxelsize_mm=None, slab=None, mode='view', callbackfcn=None):
         self.inputdata = inputdata
         self.voxelsize_mm = voxelsize_mm
@@ -78,10 +78,10 @@ class Viewer():
 
         pass
 
-##------------------------------------------------------------------------------------------    
+##------------------------------------------------------------------------------------------
     def set_normal(self,normal):
         self.normal = normal
-        
+
     def set_coordinates(self,coordinates):
         self.coordinates = coordinates
 ##------------------------------------------------------------------------------------------
@@ -100,7 +100,7 @@ class Viewer():
 ##------------------------------------------------------------------------------------------
     '''
     Args:
-        inputdata: 3D numpy array 
+        inputdata: 3D numpy array
         voxelsize_mm: Array with voxel dimensions (default=None)
         slab: Dictionary with description of labels used in inputdata
         mode: 'view' or 'select_plane'
@@ -109,8 +109,8 @@ class Viewer():
     '''
 ##------------------------------------------------------------------------------------------
     def Plane(self):
-        planeWidget = vtk.vtkImplicitPlaneWidget() 
-        planeWidget.SetInteractor(iren) 
+        planeWidget = vtk.vtkImplicitPlaneWidget()
+        planeWidget.SetInteractor(iren)
         planeWidget.SetPlaceFactor(1.5)
         planeWidget.SetInput(surface.GetOutput())
         planeWidget.PlaceWidget()
@@ -119,12 +119,12 @@ class Viewer():
         planeWidget.ScaleEnabledOff()
         planeWidget.OutlineTranslationOff()
         planeWidget.AddObserver("InteractionEvent", self.Cutter)
-            
+
         planeWidget.On()
         #window.setLayout(grid)
 
         self.planew = planeWidget
-            
+
         #window.show()
         #iren.Initialize()
         #renWin.Render()
@@ -133,7 +133,7 @@ class Viewer():
 
     def callback(self,button):
         print button
-            
+
     def Cutter(self,obj, event):
         global plane, selectActor
         obj.GetPlane(plane)
@@ -179,8 +179,8 @@ class Viewer():
         rozmer_z.setOptions(QInputDialog.NoButtons)
         ok_button = QtGui.QPushButton()
         ok_button.setText('Ok')
-        layout.addWidget(rozmer_x,0,2) 
-        layout.addWidget(rozmer_y,1,2)      
+        layout.addWidget(rozmer_x,0,2)
+        layout.addWidget(rozmer_y,1,2)
         layout.addWidget(rozmer_z,2,2)
         layout.addWidget(ok_button,3,2)
         okno.connect(ok_button, QtCore.SIGNAL("clicked()"),(lambda y:lambda: self.close() )('Stisknuto : ok'))
@@ -188,7 +188,7 @@ class Viewer():
         renWin.Render()
         iren.Start()
         renWin.Finalize()
-   
+
         #promen_z = QInputDialog()
         #winter = QtCore.QStringList()
         #winter = 'December, January, February'
@@ -212,11 +212,11 @@ class Viewer():
         if mode == 'Cut':
             accept = False
             self.View(mesh,accept)
-            self.buttons(window,grid)   
-            
-        
+            self.buttons(window,grid)
+
+
         return self
-    
+
 ##------------------------------------------------------------------------------------------
     def cutter(self):
         print self.normal
@@ -250,7 +250,7 @@ class Viewer():
         #button_vein.clicked.connect(self.vein_view)
         button_vein.show()
         '''
-        
+
         # Button plane
         button_plane = QtGui.QPushButton()
         button_plane.setText(unicode('plane'))
@@ -263,9 +263,9 @@ class Viewer():
         button_cut = QtGui.QPushButton()
         button_cut.setText(unicode('cut'))
         grid.addWidget(button_cut, 4, 0)
-        button_cut.clicked.connect(self.liver_cut) 
+        button_cut.clicked.connect(self.liver_cut)
         button_cut.show()
-        
+
         #iren.Initialize()
         window.show()
         renWin.Render()
@@ -273,17 +273,17 @@ class Viewer():
         # vypina okno View
         renWin.Finalize()
 
-        
-##-----------------------------------------------------------------------------------------    
+
+##-----------------------------------------------------------------------------------------
     def View(self,filename,accept):
 
         # Renderer and InteractionStyle
-        ren = vtk.vtkRenderer()	
+        ren = vtk.vtkRenderer()
         renWin.AddRenderer(ren)
 
         iren.SetRenderWindow(renWin)
         iren.SetInteractorStyle(MyInteractorStyle())
-        
+
         # VTK file
         reader = vtk.vtkUnstructuredGridReader()
         reader.SetFileName(filename)
@@ -309,7 +309,7 @@ class Viewer():
         clipActor.SetMapper(clipMapper)
         clipActor.GetProperty().SetColor(1.0,0.0,0.0)
         clipActor.SetBackfaceProperty(backProp)
-        
+
         cutEdges = vtk.vtkCutter()
         cutEdges.SetInput(surface.GetOutput())
         cutEdges.SetCutFunction(plane)
@@ -325,10 +325,10 @@ class Viewer():
 
         cutTriangles = vtk.vtkTriangleFilter()
         cutTriangles.SetInput(cutPoly)
-        
+
         cutMapper = vtk.vtkPolyDataMapper()
         cutMapper.SetInput(cutTriangles.GetOutput())
-        
+
         cutActor = vtk.vtkActor()
         cutActor.SetMapper(cutMapper)
         cutActor.GetProperty().SetColor(1.0,0.0,0.0)
@@ -336,14 +336,14 @@ class Viewer():
         mapper = vtk.vtkDataSetMapper()
         mapper.SetInput(surface.GetOutput())
         mapper.ScalarVisibilityOff()
-        
+
 
         actor = vtk.vtkActor()
         actor.SetMapper(mapper)
         actor.GetProperty().EdgeVisibilityOn()
         # nastavi barvu linek UnstructuredGrid
         actor.GetProperty().SetColor(0.0,0.0,1.0)
-        #sirka linek u objektu 
+        #sirka linek u objektu
         actor.GetProperty().SetLineWidth(0.1)
         actor.GetProperty().SetRepresentationToWireframe()
         ren.AddActor(clipActor)
@@ -352,7 +352,7 @@ class Viewer():
 
         # pri rezani se nezobrazi okno protoze iren se inicializuje pouze v buttons, nutno
         # ho inicializovat i tady
-        if accept:  
+        if accept:
             iren.Initialize()
             renWin.Render()
             iren.Start()
@@ -366,25 +366,27 @@ class MyInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
             self.parent = parent
             self.AddObserver("LeftButtonPressEvent",self.LeftButtonPressEvent)
             self.AddObserver("RightButtonPressEvent",self.RightButtonPressEvent)
-                 
+
         def LeftButtonPressEvent(self,obj,event):
             print "Left Button pressed"
             self.Rotate()
             self.OnLeftButtonDown()
-            
+
         def RightButtonPressEvent(self,obj,event):
             print "Right Button pressed"
             self.Pan()
             self.OnRightButtonDown()
-        
+
         e = '%prog [options]\n' + __doc__.rstrip()
 help = {
     'in_file': 'input pkl file',
 }
 
-    
+
 def main():
-    parser = argparse.ArgumentParser(description='Simple VTK Viewer')
+
+    parser = argparse.ArgumentParser(description=__doc__) # 'Simple VTK Viewer')
+
     parser.add_argument('-pkl','--picklefile', default=None,
                       help='File as .pkl')
     parser.add_argument('-vtk','--vtkfile', default=None,
@@ -401,7 +403,7 @@ def main():
     if (args.picklefile or args.vtkfile) is None:
        raise IOError('No input data!')
 
-    
+
     # vytvoreni okna
     window = QtGui.QWidget()
     grid = QtGui.QGridLayout()
@@ -413,7 +415,7 @@ def main():
     #print args.voxelsize_mm
     #segmentation = data['segmentation']
     #print "unique ", np.unique(data['segmentation'])
-    
+
     #print 'voxel' , data['voxelsize_mm']
     if args.picklefile:
         data = misc.obj_from_file(args.picklefile, filetype = 'pickle')
@@ -423,7 +425,7 @@ def main():
             print 'Data bohuzel neobsahuji zadany slab:', args.slab
             print 'Zobrazena budou pouze dostupna data'
             mesh = viewer.generate_mesh(data['segmentation'] == data['slab']['liver'],data['voxelsize_mm'])
-            
+
         print data['slab']
         if args.mode == 'View' or args.mode == None:
             accept = True
@@ -434,7 +436,7 @@ def main():
             viewer.Set_voxel_size()
             viewer.View(mesh,accept)
             viewer.buttons(window,grid)
-                        
+
     if args.vtkfile:
         if args.mode == 'View' or args.mode == None:
             accept = True
@@ -446,7 +448,7 @@ def main():
             viewer.View(args.vtkfile,accept)
             viewer.buttons(window,grid)
 
-    
+
     app.exec_()
     sys.exit(app.exec_())
     #print viewer.getPlane()
@@ -455,4 +457,4 @@ if __name__ == "__main__":
     main()
 
 ##------------------------------------------------------------------------------------------
-    
+
