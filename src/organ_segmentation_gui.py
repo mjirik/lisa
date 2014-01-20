@@ -98,7 +98,8 @@ class OrganSegmentation():
         slab={},
         output_datapath=None,
         experiment_caption='',
-        lisa_operator_identifier=''
+        lisa_operator_identifier='',
+        volume_unit='ml'
         #           iparams=None,
     ):
 
@@ -155,6 +156,7 @@ class OrganSegmentation():
         self.version = qmisc.getVersionString()
         self.viewermax = viewermax
         self.viewermin = viewermin
+        self.volume_unit = volume_unit
 
         if data3d is None or metadata is None:
             # if 'datapath' in self.iparams:
@@ -586,7 +588,7 @@ class OrganSegmentation():
         logger.debug('save dcm')
         from PyQt4.QtCore import pyqtRemoveInputHook
         pyqtRemoveInputHook()
-        import ipdb; ipdb.set_trace() # BREAKPOINT
+        #import ipdb; ipdb.set_trace() # BREAKPOINT
         odp = self.output_datapath
         pth, filename = op.split(op.normpath(self.datapath))
         filename += "-" + self.experiment_caption
@@ -851,7 +853,10 @@ class OrganSegmentationWindow(QMainWindow):
         if nn > 0:
             voxelvolume_mm3 = np.prod(oseg.voxelsize_mm)
 
-            aux = 'volume = %.6e mm3' % (nn * voxelvolume_mm3, )
+            if self.oseg.volume_unit == 'ml':
+                aux = 'volume = %.3f [ml]' % (nn * voxelvolume_mm3/ 1000 )
+            else:
+                aux = 'volume = %.6e mm3' % (nn * voxelvolume_mm3, )
             self.setLabelText(self.text_seg_data, msg + aux)
             self.statusBar().showMessage('Ready')
 
