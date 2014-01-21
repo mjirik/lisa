@@ -850,6 +850,7 @@ class OrganSegmentationWindow(QMainWindow):
         pyed.exec_()
 
         oseg.segmentation = pyed.getSeeds()
+        self.oseg.processing_time = time.time() - self.oseg.time_start
         self.checkSegData('manual seg., ')
 
     def checkSegData(self, msg):
@@ -862,9 +863,11 @@ class OrganSegmentationWindow(QMainWindow):
         nn = nzs[0].shape[0]
         if nn > 0:
             voxelvolume_mm3 = np.prod(oseg.voxelsize_mm)
+            tim = self.oseg.processing_time
 
             if self.oseg.volume_unit == 'ml':
-                aux = 'volume = %.3f [ml]' % (nn * voxelvolume_mm3/ 1000 )
+                aux = 'volume = %.2f [ml] , time = %.2f [s]' %\
+                (nn * voxelvolume_mm3/ 1000 ,tim)
             else:
                 aux = 'volume = %.6e mm3' % (nn * voxelvolume_mm3, )
             self.setLabelText(self.text_seg_data, msg + aux)
