@@ -702,6 +702,8 @@ class OrganSegmentationWindow(QMainWindow):
         hr.setFrameShape(QFrame.HLine)
         text_seg = QLabel('Segmentation')
         text_seg.setFont(font_label)
+        btn_mask = QPushButton("Mask region", self)
+        btn_mask.clicked.connect(self.maskRegion)
         btn_segauto = QPushButton("Automatic seg.", self)
         btn_segauto.clicked.connect(self.autoSeg)
         btn_segman = QPushButton("Manual seg.", self)
@@ -709,10 +711,11 @@ class OrganSegmentationWindow(QMainWindow):
         self.text_seg_data = QLabel('segmented data:')
         grid.addWidget(hr, rstart + 0, 0, 1, 4)
         grid.addWidget(text_seg, rstart + 1, 1)
-        grid.addWidget(btn_segauto, rstart + 2, 1)
-        grid.addWidget(btn_segman, rstart + 2, 2)
-        grid.addWidget(self.text_seg_data, rstart + 3, 1, 1, 2)
-        rstart += 4
+        grid.addWidget(btn_mask, rstart + 2, 1)
+        grid.addWidget(btn_segauto, rstart + 3, 1)
+        grid.addWidget(btn_segman, rstart + 3, 2)
+        grid.addWidget(self.text_seg_data, rstart + 4, 1, 1, 2)
+        rstart += 5
 
         # ################ save/view
         # hr = QFrame()
@@ -822,6 +825,30 @@ class OrganSegmentationWindow(QMainWindow):
             oseg.crop(tmpcrinfo)
 
         self.setLabelText(self.text_dcm_data, self.getDcmInfo())
+        self.statusBar().showMessage('Ready')
+
+    def maskRegion(self):
+        if self.oseg.data3d is None:
+            self.statusBar().showMessage('No DICOM data!')
+            return
+
+        self.statusBar().showMessage('Mask region...')
+        QApplication.processEvents()
+
+        pyed = QTSeedEditor(self.oseg.data3d, mode='mask',
+                            voxelSize=self.oseg.voxelsize_mm)
+
+        mx = self.oseg.viewermax
+        mn = self.oseg.viewermin
+        width = mx - mn
+        #center = (float(mx)-float(mn))
+        center = np.average([mx, mn])
+        logger.debug("window params max %f min %f width, %f center %f" %
+                     (mx, mn, width, center))
+        pyed.changeC(center)
+        pyed.changeW(width)
+        pyed.exec_()
+
         self.statusBar().showMessage('Ready')
 
     def autoSeg(self):
