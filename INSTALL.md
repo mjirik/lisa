@@ -95,7 +95,7 @@ Install Windows
         git clone https://github.com/amueller/gco_python.git
         mkdir gco_src && cd gco_src
         curl -O http://vision.csd.uwo.ca/code/gco-v3.0.zip
-        uznip gco-v3.0.zip
+        unzip gco-v3.0.zip
         cd ..
         python setup.py build_ext -i --compiler=mingw32
         python.exe setup.py build --compiler=mingw32
