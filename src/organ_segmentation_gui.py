@@ -800,6 +800,16 @@ class OrganSegmentationWindow(QMainWindow):
 
         pyed = QTSeedEditor(oseg.data3d, mode='crop',
                             voxelSize=oseg.voxelsize_mm)
+        # @TODO
+        mx = self.oseg.viewermax
+        mn = self.oseg.viewermin
+        width = mx - mn
+        #center = (float(mx)-float(mn))
+        center = np.average([mx, mn])
+        logger.debug("window params max %f min %f width, %f center %f" %
+                     (mx, mn, width, center))
+        pyed.changeC(center)
+        pyed.changeW(width)
         pyed.exec_()
 
         crinfo = pyed.getROI()
