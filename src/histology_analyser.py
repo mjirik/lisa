@@ -15,6 +15,9 @@ logger = logging.getLogger(__name__)
 
 import argparse
 
+from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
+     QGridLayout, QLabel, QPushButton, QFrame, QFileDialog,\
+     QFont, QPixmap, QComboBox
 
 import numpy as np
 import scipy.ndimage
@@ -35,6 +38,7 @@ import segmentation
 import misc
 import py3DSeedEditor as se
 
+from seed_editor_qt import QTSeedEditor
 
 GAUSSIAN_SIGMA = 1
 fast_debug = False
@@ -54,56 +58,41 @@ class HistologyAnalyser:
         self.metadata = metadata
 
 
-    def run(self):
-        #self.preprocessing()
+    def remove_area(self):
+
         app = QApplication(sys.argv)
-        if not fast_debug:
+        pyed = QTSeedEditor(
+            self.data3d, mode='mask'
+        )
+        pyed.exec_()
 
-            data3d_thr = segmentation.vesselSegmentation(
-                self.data3d,
-                segmentation=np.ones(self.data3d.shape, dtype='int8'),
-                #segmentation=oseg.orig_scale_segmentation,
-                threshold=-1,
-                inputSigma=0.15,
-                dilationIterations=2,
-                nObj=1,
-                biggestObjects=False,
+    def data_to_binar(self):
+        data3d_thr = segmentation.vesselSegmentation(
+            self.data3d,
+            segmentation=np.ones(self.data3d.shape, dtype='int8'),
+            #segmentation=oseg.orig_scale_segmentation,
+            threshold=-1,
+            inputSigma=0.15,
+            dilationIterations=2,
+            nObj=1,
+            biggestObjects=False,
 #        dataFiltering = True,
-                interactivity=True,
-                binaryClosingIterations=5,
-                binaryOpeningIterations=1)
-            #self.data3d_thri = self.muxImage(
-            #        self.data3d_thr2.astype(np.uint16),
-            #        metadata
-            #        )
-            #sitk.Show(self.data3d_thri)
+            interactivity=True,
+            binaryClosingIterations=5,
+            binaryOpeningIterations=1)
+        return data3d_thr
 
-            #self.data3di = self.muxImage(
-            #        self.data3d.astype(np.uint16),
-            #        metadata
-            #        )
-            #sitk.Show(self.data3di)
+    def binar_to_skeleton(self, data3d_thr):
+        data3d_thr = (data3d_thr > 0).astype(np.int8)
+        data3d_skel = skelet3d.skelet3d(data3d_thr)
+        return data3d_skel
 
+    def data_to_skeleton(self):
+        data3d_thr = self.data_to_binar()
+        data3d_skel = self.binar_to_skeleton(data3d_thr)
+        return data3d_thr, data3d_skel
 
-            #app.exec_()
-
-            print "skelet"
-            data3d_thr = (data3d_thr > 0).astype(np.int8)
-            data3d_skel = skelet3d.skelet3d(data3d_thr)
-
-        # pyed = seqt.QTSeedEditor(
-        #         data3d,
-        #         contours=data3d_thr.astype(np.int8),
-        #         seeds=data3d_skel.astype(np.int8)
-        #         )
-            #app.exec_()
-            struct = {'sk': data3d_skel, 'thr': data3d_thr}
-            misc.obj_to_file(struct, filename='tmp0.pkl', filetype='pickle')
-        else:
-            struct = misc.obj_from_file(filename='tmp0.pkl', filetype='pickle')
-            data3d_skel = struct['sk']
-            data3d_thr = struct['thr']
-
+    def skeleton_to_statistics(self, data3d_thr, data3d_skel):
         skan = SkeletonAnalyser(
             data3d_skel,
             volume_data=data3d_thr,
@@ -130,6 +119,43 @@ class HistologyAnalyser:
         self.sklabel = skan.sklabel
         #data3d_nodes[data3d_nodes==3] = 2
         self.stats = {'Graph':stats}
+
+    def run(self):
+        #self.preprocessing()
+        app = QApplication(sys.argv)
+        if not fast_debug:
+            data3d_thr = self.data_to_binar()
+
+            #self.data3d_thri = self.muxImage(
+            #        self.data3d_thr2.astype(np.uint16),
+            #        metadata
+            #        )
+            #sitk.Show(self.data3d_thri)
+
+            #self.data3di = self.muxImage(
+            #        self.data3d.astype(np.uint16),
+            #        metadata
+            #        )
+            #sitk.Show(self.data3di)
+
+
+            #app.exec_()
+            data3d_skel = self.binar_to_skeleton(data3d_thr)
+
+            print "skelet"
+
+        # pyed = seqt.QTSeedEditor(
+        #         data3d,
+        #         contours=data3d_thr.astype(np.int8),
+        #         seeds=data3d_skel.astype(np.int8)
+        #         )
+            #app.exec_()
+        else:
+            struct = misc.obj_from_file(filename='tmp0.pkl', filetype='pickle')
+            data3d_skel = struct['sk']
+            data3d_thr = struct['thr']
+
+        self.skeleton_to_statistics(data3d_skel)
 
 
 
@@ -716,16 +742,21 @@ if __name__ == "__main__":
     #logger.debug('input params')
 
     # input parser
-    parser = argparse.ArgumentParser(description='\
-            3D visualization of segmentation\n\
-            \npython show_segmentation.py\n\
-            \npython show_segmentation.py -i resection.pkl -l 2 3 4 -d 4')
+    parser = argparse.ArgumentParser(
+        description='Histology analyser'
+    )
     parser.add_argument('-i', '--inputfile',
-            default='organ.pkl',
+            default='histin.tif',
             help='input file')
+    parser.add_argument('-o', '--outputfile',
+            default='histout.pkl',
+            help='output file')
     parser.add_argument('-t', '--threshold', type=int,
             default=6600,
             help='data threshold, default 1')
+    parser.add_argument(
+        '-is', '--input_is_skeleton', action='store_true',
+        help='input file is .pkl file with skeleton')
     parser.add_argument('-cr', '--crop', type=int, metavar='N', nargs='+',
             default=[0,-1,0,-1,0,-1],
             help='segmentation labels, default 1')
@@ -733,21 +764,38 @@ if __name__ == "__main__":
 
     #data = misc.obj_from_file(args.inputfile, filetype = 'pickle')
 
-
-    dr = datareader.DataReader()
-    data3d, metadata = dr.Get3DData(args.inputfile)
+    print args.input_is_skeleton
+    if args.input_is_skeleton:
+        print "input is skeleton"
+        struct = misc.obj_from_file(filename='tmp0.pkl', filetype='pickle')
+        data3d_skel = struct['skel']
+        data3d_thr = struct['thr']
+        data3d = struct['data3d']
+        metadata = struct['metadata']
+        ha = HistologyAnalyser(data3d, metadata, args.threshold)
+        print "end of is skeleton"
+    else:
+        dr = datareader.DataReader()
+        data3d, metadata = dr.Get3DData(args.inputfile)
 # crop data
-    cr = args.crop
-    data3d = data3d[cr[0]:cr[1], cr[2]:cr[3], cr[4]:cr[5]]
+        cr = args.crop
+        data3d = data3d[cr[0]:cr[1], cr[2]:cr[3], cr[4]:cr[5]]
 
 
 
-    ha = HistologyAnalyser(data3d, metadata, args.threshold)
-    ha.run()
+        ha = HistologyAnalyser(data3d, metadata, args.threshold)
+        ha.remove_area()
+        data3d_thr, data3d_skel = ha.data_to_skeleton()
+        struct = {'skel': data3d_skel, 'thr': data3d_thr, 'data3d': data3d, 'metadata':metadata}
+        misc.obj_to_file(struct, filename='tmp0.pkl', filetype='pickle')
+
+    print " #########  statistics"
+    ha.skeleton_to_statistics(data3d_thr, data3d_skel)
+    #ha.run()
     print "              #####    write to file"
     ha.writeStatsToCSV()
     ha.writeStatsToYAML()
-    ha.writeSkeletonToPickle()
+    ha.writeSkeletonToPickle('skel.pkl')
     #ha.show()
 
 
