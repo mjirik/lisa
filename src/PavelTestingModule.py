@@ -12,6 +12,8 @@
 import segmentation as sg
 import numpy as np
 
+import misc
+
 def main1():
 
     ## Vytvorim si vlastni testovaci matici.
@@ -61,7 +63,7 @@ def main2():
     slab = {'none':0, 'liver':1, 'porta':2}
     voxelsize_mm = np.array([1.0, 1.0, 1.2])
 
-    segm = np.zeros([256, 256, 80], dtype = np.int16)
+    segm = np.zeros([256, 256, 80], dtype = np.uint8)
 
     # liver
     segm[70:180, 40:190, 30:60] = slab['liver']
@@ -75,7 +77,7 @@ def main2():
     data3d[segm == slab['porta']] = 206
     #noise = (np.random.rand(segm.shape[0], segm.shape[1], segm.shape[2])*30).astype(np.int16)
     noise = (np.random.normal(0, 30, segm.shape))#.astype(np.int16)
-    data3d = (data3d + noise).astype(np.int16)
+    data3d = (data3d + noise).astype(np.uint8)
 
     # @TODO je tam bug, prohl??e? neum? korektn? pracovat s doubly
     #        app = QApplication(sys.argv)
@@ -96,7 +98,7 @@ def main2():
         dilationIterations = 2,
         nObj = 1,
         interactivity = True,
-        biggestObjects = True,
+        biggestObjects = False,
         binaryClosingIterations = 5,
         binaryOpeningIterations = 1)
 
@@ -152,6 +154,22 @@ def main3():
 
     Tk.mainloop()
 
+def main4():
+
+    data = misc.obj_from_file('c:\_bp_data\d5\org-liver-orig004.mhd-3mm_alpha45.pklz', filetype = 'pickle')
+
+    outputTmp = sg.vesselSegmentation(
+        data['data3d'],
+        segmentation = data['segmentation'],
+        threshold = -1,
+        inputSigma = 0.15,
+        dilationIterations = 2,
+        interactivity = True,
+        biggestObjects = False,
+        binaryClosingIterations = 5,
+        binaryOpeningIterations = 1)
+
+
 if __name__ == '__main__':
 
-    main1()
+    main4()
