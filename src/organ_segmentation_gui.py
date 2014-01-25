@@ -702,6 +702,8 @@ class OrganSegmentationWindow(QMainWindow):
         hr.setFrameShape(QFrame.HLine)
         text_seg = QLabel('Segmentation')
         text_seg.setFont(font_label)
+        btn_mask = QPushButton("Mask region", self)
+        btn_mask.clicked.connect(self.maskRegion)
         btn_segauto = QPushButton("Automatic seg.", self)
         btn_segauto.clicked.connect(self.autoSeg)
         btn_segman = QPushButton("Manual seg.", self)
@@ -709,10 +711,11 @@ class OrganSegmentationWindow(QMainWindow):
         self.text_seg_data = QLabel('segmented data:')
         grid.addWidget(hr, rstart + 0, 0, 1, 4)
         grid.addWidget(text_seg, rstart + 1, 1)
-        grid.addWidget(btn_segauto, rstart + 2, 1)
-        grid.addWidget(btn_segman, rstart + 2, 2)
-        grid.addWidget(self.text_seg_data, rstart + 3, 1, 1, 2)
-        rstart += 4
+        grid.addWidget(btn_mask, rstart + 2, 1)
+        grid.addWidget(btn_segauto, rstart + 3, 1)
+        grid.addWidget(btn_segman, rstart + 3, 2)
+        grid.addWidget(self.text_seg_data, rstart + 4, 1, 1, 2)
+        rstart += 5
 
         # ################ save/view
         # hr = QFrame()
@@ -800,6 +803,16 @@ class OrganSegmentationWindow(QMainWindow):
 
         pyed = QTSeedEditor(oseg.data3d, mode='crop',
                             voxelSize=oseg.voxelsize_mm)
+        # @TODO
+        mx = self.oseg.viewermax
+        mn = self.oseg.viewermin
+        width = mx - mn
+        #center = (float(mx)-float(mn))
+        center = np.average([mx, mn])
+        logger.debug("window params max %f min %f width, %f center %f" %
+                     (mx, mn, width, center))
+        pyed.changeC(center)
+        pyed.changeW(width)
         pyed.exec_()
 
         crinfo = pyed.getROI()
@@ -812,6 +825,30 @@ class OrganSegmentationWindow(QMainWindow):
             oseg.crop(tmpcrinfo)
 
         self.setLabelText(self.text_dcm_data, self.getDcmInfo())
+        self.statusBar().showMessage('Ready')
+
+    def maskRegion(self):
+        if self.oseg.data3d is None:
+            self.statusBar().showMessage('No DICOM data!')
+            return
+
+        self.statusBar().showMessage('Mask region...')
+        QApplication.processEvents()
+
+        pyed = QTSeedEditor(self.oseg.data3d, mode='mask',
+                            voxelSize=self.oseg.voxelsize_mm)
+
+        mx = self.oseg.viewermax
+        mn = self.oseg.viewermin
+        width = mx - mn
+        #center = (float(mx)-float(mn))
+        center = np.average([mx, mn])
+        logger.debug("window params max %f min %f width, %f center %f" %
+                     (mx, mn, width, center))
+        pyed.changeC(center)
+        pyed.changeW(width)
+        pyed.exec_()
+
         self.statusBar().showMessage('Ready')
 
     def autoSeg(self):
@@ -840,6 +877,7 @@ class OrganSegmentationWindow(QMainWindow):
         pyed.exec_()
 
         oseg.segmentation = pyed.getSeeds()
+        self.oseg.processing_time = time.time() - self.oseg.time_start
         self.checkSegData('manual seg., ')
 
     def checkSegData(self, msg):
@@ -852,9 +890,11 @@ class OrganSegmentationWindow(QMainWindow):
         nn = nzs[0].shape[0]
         if nn > 0:
             voxelvolume_mm3 = np.prod(oseg.voxelsize_mm)
+            tim = self.oseg.processing_time
 
             if self.oseg.volume_unit == 'ml':
-                aux = 'volume = %.3f [ml]' % (nn * voxelvolume_mm3/ 1000 )
+                aux = 'volume = %.2f [ml] , time = %.2f [s]' %\
+                (nn * voxelvolume_mm3/ 1000 ,tim)
             else:
                 aux = 'volume = %.6e mm3' % (nn * voxelvolume_mm3, )
             self.setLabelText(self.text_seg_data, msg + aux)
