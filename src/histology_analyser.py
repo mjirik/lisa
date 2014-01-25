@@ -748,9 +748,9 @@ if __name__ == "__main__":
     parser.add_argument('-i', '--inputfile',
             default='histin.tif',
             help='input file')
-    parser.add_argument('-o', '--outputfile',
-            default='histout.pkl',
-            help='output file')
+#    parser.add_argument('-o', '--outputfile',
+#            default='histout.pkl',
+#            help='output file')
     parser.add_argument('-t', '--threshold', type=int,
             default=6600,
             help='data threshold, default 1')
