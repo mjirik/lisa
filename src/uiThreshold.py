@@ -60,9 +60,9 @@ class uiThreshold:
         seeds - matice s kliknutim uzivatele- pokud se maji vracet specifikce objekty
         cmap - grey
     """
-    def __init__(self, data, voxel, threshold = -1, interactivity = True,
-    number = 100.0, inputSigma = -1, nObj = 10, biggestObjects = True, binaryClosingIterations = 1,
-    binaryOpeningIterations = 1, seeds = None, cmap = matplotlib.cm.Greys_r):
+    def __init__(self, data, voxel, threshold=-1, interactivity=True,
+    number=100.0, inputSigma=-1, nObj=10, biggestObjects=True, binaryClosingIterations=1,
+    binaryOpeningIterations=1, seeds=None, cmap=matplotlib.cm.Greys_r):
 
         print('Spoustim prahovani dat...')
 
@@ -113,7 +113,8 @@ class uiThreshold:
 
             self.fig = matpyplot.figure()
 
-            ## Maximalni a minimalni pouzita hodnota prahovani v datech (bud v celych datech nebo vybranych seedu)
+            ## Maximalni a minimalni pouzita hodnota prahovani v datech (bud v
+            ## celych datech nebo vybranych seedu)
             self.min0 = numpy.amin(numpy.amin(self.data, axis = 0))
             if self.seeds == None:
 
@@ -129,25 +130,31 @@ class uiThreshold:
                 tmpSeed = 0
                 dim = numpy.ndim(self.data)
                 for index in range(0, stop):
-                    ## Tady se ukladaji labely na mistech, ve kterych kliknul uzivatel.
+                    ## Tady se ukladaji labely na mistech, ve kterych kliknul
+                    ## uzivatel.
                     if dim == 3:
                         ## 3D data.
-                        tmpSeed = self.data[ self.seeds[0][index], self.seeds[1][index], self.seeds[2][index] ]
+                        tmpSeed = self.data[self.seeds[0][index], self.seeds[1][index], self.seeds[2][index]]
                     elif dim == 2:
                         ## 2D data.
-                        tmpSeed = self.data[ self.seeds[0][index], self.seeds[1][index] ]
+                        tmpSeed = self.data[self.seeds[0][index], self.seeds[1][index]]
 
-                    ## Tady opet pocitam s tim, ze oznaceni nulou pripada cerne oblasti (pozadi).
+                    ## Tady opet pocitam s tim, ze oznaceni nulou pripada cerne
+                    ## oblasti (pozadi).
                     if tmpSeed != 0:
-                        ## Pokud se nejedna o pozadi (cernou oblast), tak se novy seed ulozi do pole "arrSeed"
+                        ## Pokud se nejedna o pozadi (cernou oblast), tak se
+                        ## novy seed ulozi do pole "arrSeed"
                         self.arrSeed.append(tmpSeed)
 
-                ## Pokud existuji vhodne labely, vytvori se nova data k vraceni.
-                ## Pokud ne, vrati se "None" typ. { Deprecated: Pokud ne, vrati se cela nafiltrovana data, ktera do funkce prisla (nedojde k vraceni specifickych objektu). }
+                ## Pokud existuji vhodne labely, vytvori se nova data k
+                ## vraceni.
+                ## Pokud ne, vrati se "None" typ.  { Deprecated: Pokud ne,
+                ## vrati se cela nafiltrovana data, ktera do funkce prisla
+                ## (nedojde k vraceni specifickych objektu).  }
                 if len(self.arrSeed) > 0:
 
                     ## Zbaveni se duplikatu.
-                    self.arrSeed = list( set ( self.arrSeed ) )
+                    self.arrSeed = list(set(self.arrSeed))
                     print 'Hodnoty seedu: '
                     print self.arrSeed
 
@@ -175,7 +182,7 @@ class uiThreshold:
             ## Zalozeni mist pro slidery
             self.axcolor = 'white' # lightgoldenrodyellow
             self.axmin = self.fig.add_axes([0.20, 0.24, 0.55, 0.03], axisbg = self.axcolor)
-            self.axmax  = self.fig.add_axes([0.20, 0.20, 0.55, 0.03], axisbg = self.axcolor)
+            self.axmax = self.fig.add_axes([0.20, 0.20, 0.55, 0.03], axisbg = self.axcolor)
             self.axclosing = self.fig.add_axes([0.20, 0.16, 0.55, 0.03], axisbg = self.axcolor)
             self.axopening = self.fig.add_axes([0.20, 0.12, 0.55, 0.03], axisbg = self.axcolor)
             self.axsigma = self.fig.add_axes([0.20, 0.08, 0.55, 0.03], axisbg = self.axcolor)
@@ -186,26 +193,22 @@ class uiThreshold:
             minBinaryOpening = 0
             minSigma = 0.00
 
-            self.smin = Slider(self.axmin, 'Minimal threshold  ' + str(self.min0), 
+            self.smin = Slider(self.axmin, 'Minimal threshold   ' + str(self.min0), 
                                self.min0, self.max0, valinit = self.min0, dragging = False)
-            self.smax = Slider(self.axmax, 'Maximal threshold  ' + str(self.min0), 
+            self.smax = Slider(self.axmax, 'Maximal threshold   ' + str(self.min0), 
                                self.min0, self.max0, valinit = self.max0, dragging = False)
 
             if(self.ICBinaryClosingIterations >= 1):
-                self.sclose = Slider(self.axclosing, 'Binary closing  ' + str(minBinaryClosing), 
-                                     minBinaryClosing, 100, valinit = self.ICBinaryClosingIterations, dragging = False)
+                self.sclose = Slider(self.axclosing, 'Binary closing', minBinaryClosing, 100, valinit = self.ICBinaryClosingIterations, dragging = False)
             else:
-                self.sclose = Slider(self.axclosing, 'Binary closing  ' + str(minBinaryClosing), 
-                                     minBinaryClosing, 100, valinit = 0, dragging = False)
+                self.sclose = Slider(self.axclosing, 'Binary closing', minBinaryClosing, 100, valinit = 0, dragging = False)
 
             if(self.ICBinaryOpeningIterations >= 1):
-                self.sopen = Slider(self.axopening, 'Binary opening  ' + str(minBinaryOpening),
-                                    minBinaryOpening, 100, valinit = self.ICBinaryOpeningIterations, dragging = False)
+                self.sopen = Slider(self.axopening, 'Binary opening',minBinaryOpening, 100, valinit = self.ICBinaryOpeningIterations, dragging = False)
             else:
-                self.sopen = Slider(self.axopening, 'Binary opening  ' + str(minBinaryOpening), 
-                                    minBinaryOpening, 100, valinit = 0, dragging = False)
+                self.sopen = Slider(self.axopening, 'Binary opening', minBinaryOpening, 100, valinit = 0, dragging = False)
 
-            self.ssigma = Slider(self.axsigma, 'Sigma  ' + str(minSigma), 0.00, self.number, valinit = self.inputSigma, dragging = False)
+            self.ssigma = Slider(self.axsigma, 'Sigma' + str(minSigma), 0.00, self.number, valinit = self.inputSigma, dragging = False)
 
             ## Funkce slideru pri zmene jeho hodnoty
             self.smin.on_changed(self.updateImage)
@@ -317,68 +320,39 @@ class uiThreshold:
         sigmaNew = self.calculateSigma(sigma)
 
         ## Filtrovani
-        if(self.lastSigma != sigma):
-            scipy.ndimage.filters.gaussian_filter(self.imgFiltering, sigmaNew, 0, self.imgFiltering, 'reflect', 0.0)
+        scipy.ndimage.filters.gaussian_filter(self.imgFiltering, sigmaNew, order = 0, output = self.imgFiltering, mode = 'nearest') 
+
+        if (self.lastSigma != sigma) or (self.threshold < 0):
+
             self.calculateAutomaticThreshold()
-            ## Ulozeni posledni hodnoty sigma pro neopakovani stejne operace
             self.lastSigma = sigma
-            self.overrideSigma = True
+
+        else:
+
+            self.threshold = self.smin.val
 
         del(sigmaNew)
 
         ## ====================================
         ## Prahovani (smin, smax)
         ## ====================================
-        
-        if ( self.firstRun == True ) :
 
-            if ( self.threshold < 0 ) :
+        self.imgFiltering = self.imgFiltering * (self.imgFiltering >= self.threshold)
+        self.imgFiltering = self.imgFiltering * (self.imgFiltering <= self.smax.val)
 
-                self.calculateAutomaticThreshold()
+        if (self.interactivity == True) :
 
-            self.imgFiltering = self.imgFiltering * (self.imgFiltering >= self.threshold)
-            self.imgFiltering = self.imgFiltering * (self.imgFiltering <= self.smax.val)
-
-            if ( self.interactivity == True ) :
-
-                self.smin.val = (numpy.round(self.threshold, 2))
-                self.smin.valtext.set_text('{}'.format(self.smin.val))
-                self.smax.valtext.set_text('{}'.format(self.smax.val))
-                self.lastMinThresNum = self.smin.val
-
-            self.overrideThres = True
-
-        else:
-
-            if ( self.newThreshold == True ) :
-
-                if ( (self.lastMinThresNum != self.threshold) or (self.lastMaxThresNum != self.smax.val) or (self.overrideSigma == True) ):
-
-                    self.imgFiltering = self.imgFiltering * (self.imgFiltering >= self.threshold)
-                    self.imgFiltering = self.imgFiltering * (self.imgFiltering <= self.smax.val)
-
-                    if ( self.interactivity == True ) :
-
-                        self.smin.val = (numpy.round(self.threshold, 2))
-                        self.smin.valtext.set_text('{}'.format(self.smin.val))
-
-                    self.lastMinThresNum = self.threshold
-                    self.lastMaxThresNum = self.smax.val
-                    self.overrideThres = True
-
-            elif ( (self.lastMinThresNum != self.smin.val) or (self.lastMaxThresNum != self.smax.val) or (self.overrideSigma == True) ) :
-
-                self.imgFiltering = self.imgFiltering * (self.imgFiltering >= self.smin.val)
-                self.imgFiltering = self.imgFiltering * (self.imgFiltering <= self.smax.val)
-                self.lastMinThresNum = self.smin.val
-                self.lastMaxThresNum = self.smax.val
+            self.smin.val = (numpy.round(self.threshold, 2))
+            self.smin.valtext.set_text('{}'.format(self.smin.val))
+            self.smax.val = (numpy.round(self.smax.val, 2))
+            self.smax.valtext.set_text('{}'.format(self.smax.val))
 
         ## ====================================
         ## Operace binarni otevreni a uzavreni.
         ## ====================================
         
         ## Nastaveni hodnot slideru.
-        if ( self.interactivity == True ) :
+        if (self.interactivity == True) :
 
             closeNum = int(numpy.round(self.sclose.val, 0))
             openNum = int(numpy.round(self.sopen.val, 0))
@@ -391,21 +365,14 @@ class uiThreshold:
             openNum = self.ICBinaryOpeningIterations
 
         ## Vlastni binarni uzavreni.
-        if(self.firstRun == True and self.ICBinaryClosingIterations >= 1) and closeNum > 0:
+        if (closeNum >= 1):
+
             self.imgFiltering = self.imgFiltering * scipy.ndimage.binary_closing(self.imgFiltering, structure = None, iterations = closeNum)
-        else:
-            if( ((closeNum >= 1) and (self.lastCloseNum != closeNum)) or (self.overrideThres == True) ) and closeNum > 0:
-                self.imgFiltering = self.imgFiltering * scipy.ndimage.binary_closing(self.imgFiltering, structure = None, iterations = closeNum)
-        self.lastCloseNum = closeNum
 
         ## Vlastni binarni otevreni.
-        if(self.firstRun == True and self.ICBinaryOpeningIterations >= 1) and openNum > 0:
+        if (openNum >= 1):
+
             self.imgFiltering = self.imgFiltering * scipy.ndimage.binary_opening(self.imgFiltering, structure = None, iterations = openNum)
-        else:
-            if( ((openNum >= 1) and (self.lastOpenNum != openNum)) or (self.overrideThres == True) ) and openNum > 0:
-                self.imgFiltering = self.imgFiltering * scipy.ndimage.binary_opening(self.imgFiltering,
-                    structure = None, iterations = openNum)
-        self.lastOpenNum = openNum
 
         ## ====================================
         ## ====================================
@@ -413,9 +380,6 @@ class uiThreshold:
         ## Zjisteni nejvetsich objektu.
         if (self.biggestObjects == True or self.seeds != None) :
            self.imgFiltering = segmentation.getPriorityObjects(self.imgFiltering, self.nObj, self.seeds)
-
-        if self.imgFiltering != None:
-            print 'Typ dat k vykresleni: ' + str(type(self.imgFiltering[0][0][0]))
 
         if (self.interactivity == True):
 
@@ -428,6 +392,7 @@ class uiThreshold:
 
             else:
 
+                print '(DEBUG) Typ dat k vykresleni: ' + str(type(self.imgFiltering[0][0][0]))
                 self.ax1.imshow(numpy.amax(self.imgFiltering, axis = 0, keepdims = self.numpyAMaxKeepDims), self.cmap)
                 self.ax2.imshow(numpy.amax(self.imgFiltering, axis = 1, keepdims = self.numpyAMaxKeepDims), self.cmap)
                 self.ax3.imshow(numpy.amax(self.imgFiltering, axis = 2, keepdims = self.numpyAMaxKeepDims), self.cmap)
@@ -456,7 +421,7 @@ class uiThreshold:
 
     def calculateSigma(self, input):
 
-        if ( self.voxel[0] == self.voxel[1] == self.voxel[2] ):
+        if (self.voxel[0] == self.voxel[1] == self.voxel[2]):
             return ((5 / self.voxel[0]) * input) / self.voxelV
         else:
             sigmaX = (5.0 / self.voxel[0]) * input
@@ -484,7 +449,8 @@ class uiThreshold:
         pointsTo = 20 #(int)(hist_points * 0.1)
         ## Pocet bodu k preskoceni od konce hist
         pointsSkip = (int)(hist_points * 0.025)
-        ## hledani maxima: zacina se od 'start'*10 procent delky histu (aby se preskocili prvni oscilace)
+        ## hledani maxima: zacina se od 'start'*10 procent delky histu (aby se
+        ## preskocili prvni oscilace)
         start = 0.1
 
         ## hist: funkce(threshold)
@@ -539,7 +505,8 @@ class uiThreshold:
         x2 = []
         y2 = []
         place = 0
-        for index in range(init_index + pointsFrom + pointsSkip, init_index + pointsFrom + pointsSkip + pointsTo): # len(muj_histogram) - 5 - int(0.1 * len(muj_histogram)), len(muj_histogram) - 5
+        for index in range(init_index + pointsFrom + pointsSkip, init_index + pointsFrom + pointsSkip + pointsTo): # len(muj_histogram) - 5 - int(0.1 * len(muj_histogram)), len(muj_histogram) -
+                                                                                                                   # 5
             x2.insert(place, bin_centers[index])
             y2.insert(place, muj_histogram[index])
 ##            print("[ " + str(x2[place]) + ", " + str(y2[place]) + " ]")
@@ -707,17 +674,4 @@ class uiThreshold:
             self.sclose.valtext.set_text('{}'.format(self.sclose.val))
             self.fig.canvas.draw()
             self.updateImage(0)
-
-
-
-
-
-
-
-
-
-
-
-
-
 
