@@ -284,13 +284,15 @@ class OrganSegmentation():
         # data3d_res = data3d_res.astype(np.int16)
 
         logger.debug('pycut segparams ' + str(self.segparams) +
-                     '\nmodelparams ' + str(self.segmodelparams))
+                     '\nmodelparams ' + str(self.segmodelparams)
+                     )
         igc = pycut.ImageGraphCut(
             #self.data3d,
             data3d_res,
             segparams=self.segparams,
             voxelsize=self.working_voxelsize_mm,
-            modelparams=self.segmodelparams
+            modelparams=self.segmodelparams,
+            volume_unit='ml'
             #voxelsize=self.voxelsize_mm
         )
 
@@ -410,7 +412,8 @@ class OrganSegmentation():
         pyed = QTSeedEditor(igc.img,
                             seeds=igc.seeds,
                             modeFun=igc.interactivity_loop,
-                            voxelSize=igc.voxelsize)
+                            voxelSize=igc.voxelsize,
+                            volume_unit='ml')
 
         # set window
         if min_val is None:
@@ -873,7 +876,7 @@ class OrganSegmentationWindow(QMainWindow):
         pyed = QTSeedEditor(oseg.data3d,
                             seeds=oseg.segmentation,
                             mode='draw',
-                            voxelSize=oseg.voxelsize_mm)
+                            voxelSize=oseg.voxelsize_mm, volume_unit='ml')
         pyed.exec_()
 
         oseg.segmentation = pyed.getSeeds()
