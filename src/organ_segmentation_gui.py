@@ -893,8 +893,11 @@ class OrganSegmentationWindow(QMainWindow):
             tim = self.oseg.processing_time
 
             if self.oseg.volume_unit == 'ml':
-                aux = 'volume = %.2f [ml] , time = %.2f [s]' %\
-                (nn * voxelvolume_mm3 / 1000, tim)
+                import datetime
+                timstr = str(datetime.timedelta(seconds=round(tim)))
+                logger.debug('tim = ' + str(tim))
+                aux = 'volume = %.2f [ml] , time = %s' %\
+                (nn * voxelvolume_mm3 / 1000, timstr)
             else:
                 aux = 'volume = %.6e mm3' % (nn * voxelvolume_mm3, )
             self.setLabelText(self.text_seg_data, msg + aux)
