@@ -97,7 +97,7 @@ def cut_editor(data,inputfile):
     #global normal,coordinates
     viewer = viewer3.Viewer(inputfile)
     # zobrazovani jater v kodu 
-    viewer.prohlizej(data,'View')
+    viewer.prohlizej(data,'View','liver')
     
     #mesh = viewer.generate_mesh(segmentation,voxelsize_mm,degrad)
     #viewer.View(mesh,False)
@@ -156,9 +156,9 @@ def resection_old(data):
     print ("Select cut")
     
     print data["slab"]
-    lab = cut_editor(data)#== data['slab']['porta'])
+    #lab = cut_editor(data)#== data['slab']['porta'])
 
-    #lab, cut = cut_editor_old(data)#['segmentation'] == data['slab']['porta'])
+    lab, cut = cut_editor_old(data)#['segmentation'] == data['slab']['porta'])
     
 
     l1 = 1
@@ -288,8 +288,12 @@ if __name__ == "__main__":
     #slab = {'liver':1, 'porta':2, 'portaa':3, 'portab':4}
     #data = {'segmentation':seg, 'data3d':dat, 'slab':slab}
     name = 'porta'
-    cut_editor(data,args.inputfile)
-    #resection(data,name, use_old_editor=args.use_old_editor)
+
+    #cut_editor(data,args.inputfile)
+    if args.use_old_editor:
+        resection(data,name, use_old_editor=args.use_old_editor)
+    else:
+        cut_editor(data,args.inputfile)
     #print normal
     #print coordinates
 
