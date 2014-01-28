@@ -159,12 +159,18 @@ class uiThreshold:
                     print self.arrSeed
 
                     self.max0 = max(self.arrSeed)    
-                    self.max0 = self.max0 + abs(abs(self.min0) - abs(self.max0)) / 10      
+                    self.max0 = self.max0 + abs(abs(self.min0) - abs(self.max0)) / 10    
+                    
+                    # Prahy
+                    print ''
+                    print 'Minimalni doporucena hodnota prahu: ' + str(min(self.arrSeed))
+                    print 'Maximalni doporucena hodnota prahu: ' + str(max(self.arrSeed))  
+                    print ''  
                    
                 else:
                      
                     self.max0 = numpy.amax(numpy.amax(self.data, axis = 0))
-                    self.max0 = self.max0 + abs(abs(self.min0) - abs(self.max0)) / 10           
+                    self.max0 = self.max0 + abs(abs(self.min0) - abs(self.max0)) / 10   
 
             ## Pridani subplotu do okna (do figure)
             self.ax1 = self.fig.add_subplot(131)
@@ -208,14 +214,14 @@ class uiThreshold:
             else:
                 self.sopen = Slider(self.axopening, 'Binary opening', minBinaryOpening, 100, valinit = 0, dragging = False)
 
-            self.ssigma = Slider(self.axsigma, 'Sigma' + str(minSigma), 0.00, self.number, valinit = self.inputSigma, dragging = False)
+            self.ssigma = Slider(self.axsigma, 'Sigma', 0.00, self.number, valinit = self.inputSigma, dragging = False)
 
             ## Funkce slideru pri zmene jeho hodnoty
             self.smin.on_changed(self.updateImage)
             self.smax.on_changed(self.updateImage)
             self.sclose.on_changed(self.updateImage)
             self.sopen.on_changed(self.updateImage)
-            self.ssigma.on_changed(self.updateImage)
+            self.ssigma.on_changed(self.updateImage)        
 
             ## Zalozeni mist pro tlacitka
             self.axbuttnext1 = self.fig.add_axes([0.86, 0.24, 0.04, 0.03], axisbg = self.axcolor)
@@ -242,10 +248,10 @@ class uiThreshold:
             self.bcontinue = Button(self.axbuttcontinue, 'Next UI')
 
             ## Funkce tlacitek pri jejich aktivaci
-            self.bnext1.on_clicked(self.buttonNext1)
-            self.bprev1.on_clicked(self.buttonPrev1)
-            self.bnext2.on_clicked(self.buttonNext2)
-            self.bprev2.on_clicked(self.buttonPrev2)
+            self.bnext1.on_clicked(self.buttonMinNext)
+            self.bprev1.on_clicked(self.buttonMinPrev)
+            self.bnext2.on_clicked(self.buttonMaxNext)
+            self.bprev2.on_clicked(self.buttonMaxPrev)
             self.bnextclosing.on_clicked(self.buttonNextClosing)
             self.bprevclosing.on_clicked(self.buttonPrevClosing)
             self.bnextopening.on_clicked(self.buttonNextOpening)
@@ -300,12 +306,13 @@ class uiThreshold:
 
     def updateImage(self, val):
 
-        garbage.collect()
-
         if (sys.version_info[0] < 3):
+
             import copy
             self.imgFiltering = copy.copy(self.data)
+
         else:
+
             self.imgFiltering = self.data.copy()
 
         ## ====================================
@@ -386,13 +393,14 @@ class uiThreshold:
             ## Predani dat k vykresleni
             if (self.imgFiltering == None) :
             
+                #print '(DEBUG) Typ dat k vykresleni: ' + str(type(self.data[0][0][0]))
                 self.ax1.imshow(numpy.amax(numpy.zeros(self.data.shape), axis = 0, keepdims = self.numpyAMaxKeepDims), self.cmap)
                 self.ax2.imshow(numpy.amax(numpy.zeros(self.data.shape), axis = 1, keepdims = self.numpyAMaxKeepDims), self.cmap)
                 self.ax3.imshow(numpy.amax(numpy.zeros(self.data.shape), axis = 2, keepdims = self.numpyAMaxKeepDims), self.cmap)
 
             else:
 
-                print '(DEBUG) Typ dat k vykresleni: ' + str(type(self.imgFiltering[0][0][0]))
+                #print '(DEBUG) Typ dat k vykresleni: ' + str(type(self.imgFiltering[0][0][0]))
                 self.ax1.imshow(numpy.amax(self.imgFiltering, axis = 0, keepdims = self.numpyAMaxKeepDims), self.cmap)
                 self.ax2.imshow(numpy.amax(self.imgFiltering, axis = 1, keepdims = self.numpyAMaxKeepDims), self.cmap)
                 self.ax3.imshow(numpy.amax(self.imgFiltering, axis = 2, keepdims = self.numpyAMaxKeepDims), self.cmap)
@@ -409,7 +417,7 @@ class uiThreshold:
         self.overrideSigma = False
         self.overrideThres = False
 
-        garbage.collect()
+        #garbage.collect()
 
     """
     ================================================================
@@ -435,8 +443,8 @@ class uiThreshold:
 
         if self.arrSeed != None:
 
-            self.threshold = numpy.round(min(self.arrSeed), 2)
-            print('Zjisten automaticky threshold ze seedu: ' + str(self.threshold))
+            self.threshold = numpy.round(min(self.arrSeed), 2) - 1
+            print('Zjisten automaticky threshold ze seedu (o 1 zmenseny): ' + str(self.threshold))
             return self.threshold
 
         self.imgUsed = self.data
@@ -597,45 +605,61 @@ class uiThreshold:
         matpyplot.clf()
         matpyplot.close()
 
-    def buttonNext1(self, event):
+    def buttonMinNext(self, event):
 
-        if self.smin.val + 1.0 > self.max0:
+        if self.max0 < (self.smin.val + 1.0):
+
             self.smin.val = self.max0
 
-        self.smin.val += 1.0
+        else:
+
+            self.smin.val += 1.0
+
         self.smin.val = (numpy.round(self.smin.val, 2))
         self.smin.valtext.set_text('{}'.format(self.smin.val))
         self.fig.canvas.draw()
         self.updateImage(0)
 
-    def buttonPrev1(self, event):
+    def buttonMinPrev(self, event):
 
-        if self.smin.val - 1.0 > self.min0:
+        if self.min0 > (self.smin.val - 1.0):
+
             self.smin.val = self.min0
 
-        self.smin.val -= 1.0
+        else:
+
+            self.smin.val -= 1.0
+        
         self.smin.val = (numpy.round(self.smin.val, 2))
         self.smin.valtext.set_text('{}'.format(self.smin.val))
         self.fig.canvas.draw()
         self.updateImage(0)
 
-    def buttonNext2(self, event):
+    def buttonMaxNext(self, event):
 
-        if self.smax.val + 1.0 > self.max0:
+        if self.max0 < (self.smax.val + 1.0):
+
             self.smax.val = self.max0
 
-        self.smax.val += 1.0
+        else:
+
+            self.smax.val += 1.0
+
         self.smax.val = (numpy.round(self.smax.val, 2))
         self.smax.valtext.set_text('{}'.format(self.smax.val))
         self.fig.canvas.draw()
         self.updateImage(0)
 
-    def buttonPrev2(self, event):
+    def buttonMaxPrev(self, event):
 
-        if self.smax.val - 1.0 < self.min0:
+        if self.min0 > (self.smax.val - 1.0):
+
             self.smax.val = self.min0
 
-        self.smax.val -= 1.0
+        else:
+
+            self.smax.val -= 1.0
+
         self.smax.val = (numpy.round(self.smax.val, 2))
         self.smax.valtext.set_text('{}'.format(self.smax.val))
         self.fig.canvas.draw()
