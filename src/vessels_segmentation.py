@@ -105,7 +105,7 @@ if __name__ == "__main__":
     #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour = oseg.orig_scale_segmentation)
 
     print 'slab', data['slab']
-    import ipdb; ipdb.set_trace()  # BREAKPOINT
+    #import ipdb; ipdb.set_trace()  # BREAKPOINT
     #pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], contour = data['segmentation'])
     #pyed.show()
     #import pdb; pdb.set_trace()
