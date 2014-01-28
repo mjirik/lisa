@@ -165,8 +165,11 @@ def vesselSegmentation(
 
     ## Vypocet binarni matice.
     if output == None:
+
         print 'Zadna data k vraceni! (output == None)'
+
     else:
+
         output[output != 0] = 1
 
     ## Vraceni matice.

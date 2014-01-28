@@ -99,6 +99,8 @@ class uiThreshold:
             self.data = data.copy()
             self.voxel = voxel.copy()
 
+        self.numpyDataOnes = numpy.ones(self.data.shape, dtype = type(self.data[0][0][0]))
+
         ## Kalkulace objemove jednotky (voxel) (V = a*b*c)
         voxel1 = self.voxel[0]
         voxel2 = self.voxel[1]
@@ -199,10 +201,13 @@ class uiThreshold:
             minBinaryOpening = 0
             minSigma = 0.00
 
+            self.firstRun = True
+            self.calculateAutomaticThreshold()
+
             self.smin = Slider(self.axmin, 'Minimal threshold   ' + str(self.min0), 
-                               self.min0, self.max0, valinit = self.min0, dragging = False)
+                               self.min0, self.max0, valinit = self.threshold, dragging = True)
             self.smax = Slider(self.axmax, 'Maximal threshold   ' + str(self.min0), 
-                               self.min0, self.max0, valinit = self.max0, dragging = False)
+                               self.min0, self.max0, valinit = self.max0, dragging = True)
 
             if(self.ICBinaryClosingIterations >= 1):
                 self.sclose = Slider(self.axclosing, 'Binary closing', minBinaryClosing, 100, valinit = self.ICBinaryClosingIterations, dragging = False)
@@ -331,7 +336,10 @@ class uiThreshold:
 
         if (self.lastSigma != sigma) or (self.threshold < 0):
 
-            self.calculateAutomaticThreshold()
+            if not self.firstRun:
+
+                self.calculateAutomaticThreshold()
+
             self.lastSigma = sigma
 
         else:
@@ -371,15 +379,18 @@ class uiThreshold:
             closeNum = self.ICBinaryClosingIterations
             openNum = self.ICBinaryOpeningIterations
 
-        ## Vlastni binarni uzavreni.
-        if (closeNum >= 1):
+        #print '(DEBUG) Typ dat: ' + str(type(self.imgFiltering[0][0][0]))
+        if (closeNum >= 1) or (openNum >= 1):
 
-            self.imgFiltering = self.imgFiltering * scipy.ndimage.binary_closing(self.imgFiltering, structure = None, iterations = closeNum)
+            ## Vlastni binarni uzavreni.
+            if (closeNum >= 1):
 
-        ## Vlastni binarni otevreni.
-        if (openNum >= 1):
+                self.imgFiltering = self.numpyDataOnes * scipy.ndimage.binary_closing(self.imgFiltering, iterations = closeNum)
 
-            self.imgFiltering = self.imgFiltering * scipy.ndimage.binary_opening(self.imgFiltering, structure = None, iterations = openNum)
+            ## Vlastni binarni otevreni.
+            if (openNum >= 1):
+
+                self.imgFiltering = self.numpyDataOnes * scipy.ndimage.binary_opening(self.imgFiltering, iterations = openNum)
 
         ## ====================================
         ## ====================================
@@ -393,14 +404,14 @@ class uiThreshold:
             ## Predani dat k vykresleni
             if (self.imgFiltering == None) :
             
-                #print '(DEBUG) Typ dat k vykresleni: ' + str(type(self.data[0][0][0]))
+                #print '(DEBUG) Typ dat: ' + str(type(self.data[0][0][0]))
                 self.ax1.imshow(numpy.amax(numpy.zeros(self.data.shape), axis = 0, keepdims = self.numpyAMaxKeepDims), self.cmap)
                 self.ax2.imshow(numpy.amax(numpy.zeros(self.data.shape), axis = 1, keepdims = self.numpyAMaxKeepDims), self.cmap)
                 self.ax3.imshow(numpy.amax(numpy.zeros(self.data.shape), axis = 2, keepdims = self.numpyAMaxKeepDims), self.cmap)
 
             else:
 
-                #print '(DEBUG) Typ dat k vykresleni: ' + str(type(self.imgFiltering[0][0][0]))
+                #print '(DEBUG) Typ dat: ' + str(type(self.imgFiltering[0][0][0]))
                 self.ax1.imshow(numpy.amax(self.imgFiltering, axis = 0, keepdims = self.numpyAMaxKeepDims), self.cmap)
                 self.ax2.imshow(numpy.amax(self.imgFiltering, axis = 1, keepdims = self.numpyAMaxKeepDims), self.cmap)
                 self.ax3.imshow(numpy.amax(self.imgFiltering, axis = 2, keepdims = self.numpyAMaxKeepDims), self.cmap)
