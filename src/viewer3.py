@@ -7,7 +7,12 @@ program mozne spustit ve dvou rezimech View a Cut
 Vstupní soubor může být soubor pickle nebo už vygenerovaný vtk
 Je mozne zobrazovat cela jatra, nebo hlavni portalni zilu prikazy : liver, porta
 Priklady :
+
+viewer3.py -pkl file.pkl
+
 viewer3.py -vtk mesh_new.vtk -mode 'View' -slab 'liver'
+
+
 viewer3.py -pkl vessels002.pkl -mode 'Cut'  -slab 'porta'
 '''
 
@@ -200,12 +205,12 @@ class Viewer():
 
         '''
 ##------------------------------------------------------------------------------------------
-    def prohlizej(self,data, mode, slab):
+    def prohlizej(self,data, mode, slab=None):
         window = QtGui.QWidget()
         grid = QtGui.QGridLayout()
         window.setWindowTitle("3D liver")
         window.setLayout(grid)
-        mesh = self.generate_mesh(data['segmentation'] == data['slab']['porta'],data['voxelsize_mm'])
+        mesh = self.generate_mesh(data['segmentation'] == data['slab'][slab],data['voxelsize_mm'])
         if mode == 'View' or mode == None:
             accept = True
             self.View(mesh,accept)
