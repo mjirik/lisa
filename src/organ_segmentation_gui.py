@@ -14,8 +14,8 @@ import os
 import os.path as op
 
 from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
-     QGridLayout, QLabel, QPushButton, QFrame, QFileDialog,\
-     QFont, QPixmap, QComboBox
+    QGridLayout, QLabel, QPushButton, QFrame, QFileDialog,\
+    QFont, QPixmap, QComboBox
 from PyQt4.Qt import QString
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
@@ -50,7 +50,7 @@ logger = logging.getLogger(__name__)
 scaling_modes = {
     'original': (None, None, None),
     'double': (None, 'x2', 'x2'),
-    '3mm': (None, '3', '3'),
+    '3mm': (None, '3', '3')
     }
 
 #  Defaultparameters for segmentation
@@ -894,7 +894,7 @@ class OrganSegmentationWindow(QMainWindow):
 
             if self.oseg.volume_unit == 'ml':
                 aux = 'volume = %.2f [ml] , time = %.2f [s]' %\
-                (nn * voxelvolume_mm3/ 1000 ,tim)
+                (nn * voxelvolume_mm3 / 1000, tim)
             else:
                 aux = 'volume = %.6e mm3' % (nn * voxelvolume_mm3, )
             self.setLabelText(self.text_seg_data, msg + aux)
@@ -977,7 +977,8 @@ def main():
         'datapath': None,
         'viewermax': 225,
         'viewermin': -125,
-        'output_datapath': os.path.expanduser("~/lisa_data"),
+        'output_datapath': os.path.expanduser("~/lisa_data")
+        #'config_version':[1,1]
     }
 
     cfg = config.get_default_function_config(OrganSegmentation.__init__)

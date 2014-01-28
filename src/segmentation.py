@@ -68,17 +68,31 @@ def vesselSegmentation(
         dilationIterations = 0,
         dilationStructure = None,
         nObj = 1,
-        biggestObjects = True,
+        biggestObjects = False,
         seeds = None,
         interactivity = True,
         binaryClosingIterations = 1,
         binaryOpeningIterations = 1
         ):
 
-    print('Pripravuji data...')
+    dim = numpy.ndim(data)
+    print 'Dimenze vstupnich dat: ' + str(dim)
+    if (dim < 2) or (dim > 3):
+        print 'Nepodporovana dimenze dat!'
+        print 'Ukonceni funkce!'
+        return None
+
+    if seeds == None:
+        print 'Funkce spustena bez prioritnich objektu!'
+
+    if biggestObjects:
+        print 'Funkce spustena s vracenim nejvetsich objektu => nebude mozne vybrat prioritni objekty!'
 
     if ( nObj < 1 ) :
+        print 'K vraceni vybran 1 objekt.'
         nObj = 1
+
+    print('Pripravuji data...')
 
     voxel = numpy.array(voxelsize_mm)
 
@@ -99,15 +113,22 @@ def vesselSegmentation(
 
     ## Ziskani datove oblasti jater (bud pouze jater nebo i jejich okoli - zalezi,
     ## jakym zpusobem bylo nalozeno s operaci dilatace dat).
-    preparedData = data * (segmentation == 1)
+    preparedData = (data * (segmentation == 1))#.astype(numpy.float)
     print 'Typ vstupnich dat: ' + str(preparedData.dtype)
-    if preparedData.dtype != numpy.uint8:
-       print 'Data nejsou typu numpy.uint8 => muze dojit k errorum'
-    if numpy.can_cast(preparedData.dtype, numpy.float):
-       print 'Data nejsou takoveho typu, aby byly preveditelne na numpy.float => muze dojit k errorum'
+
+#    if preparedData.dtype != numpy.uint8:
+#        print 'Data nejsou typu numpy.uint8 => muze dojit k errorum'
+
+    if not numpy.can_cast(preparedData.dtype, numpy.float):
+       print 'ERROR: (debug message) Data nejsou takoveho typu, aby se daly prevest na typ "numpy.float" => muze dojit k errorum'
+       print 'Ukoncuji funkci!'
+       return None
 
     if (preparedData == False).all():
-       print 'ERROR: (debug message) (jsou spatna data nebo segmentacni matice): all is true == data is all false == bad segmentation matrix (if data matrix is ok)'
+       print 'ERROR: (debug message) Jsou spatna data nebo segmentacni matice: all is true == data is all false == bad segmentation matrix (if data matrix is ok)'
+       print 'Ukoncuji funkci!'
+       return None
+
     del(data)
     del(segmentation)
 
@@ -124,11 +145,13 @@ def vesselSegmentation(
         pyed.show()
         seeds = pyed.seeds
 
-        ## Zkontrolovat, jestli uzivatel neco vybral - nejaky item musi byt ruzny od nuly
+        ## Zkontrolovat, jestli uzivatel neco vybral - nejaky item musi byt ruzny od nuly.
         if (seeds != 0).any() == False:
+            print 'Zadne seedy nezvoleny => nejsou prioritni objekty.'
             seeds = None
         else:
-            seeds = seeds.nonzero() ## seeds je n-tice poli indexu nenulovych prvku   =>   item krychle je == krychle[ seeds[0][x], seeds[1][x], seeds[2][x] ]
+            seeds = seeds.nonzero()#seeds * (seeds != 0) ## seeds je n-tice poli indexu nenulovych prvku => item krychle je == krychle[ seeds[0][x], seeds[1][x], seeds[2][x] ]
+            print 'Seedu bez nul: ' + str(len(seeds[0]))
 
     ## Samotne filtrovani.
     uiT = uiThreshold.uiThreshold(preparedData, voxel, threshold,
@@ -140,10 +163,13 @@ def vesselSegmentation(
     del(uiT)
     garbage.collect()
 
-    ## Vypocet binarni matice
-    output[output != 0] = 1
+    ## Vypocet binarni matice.
+    if output == None:
+        print 'Zadna data k vraceni! (output == None)'
+    else:
+        output[output != 0] = 1
 
-    ## Vraceni matice
+    ## Vraceni matice.
     return output
 
 """
@@ -163,7 +189,7 @@ def getPriorityObjects(data, nObj = 1, seeds = None, debug = False):
     ## length - pocet rozdilnych oznaceni.
     dataLabels, length = scipy.ndimage.label(data)
 
-    print 'Oznaceno ' + str(length) + ' oblasti'
+    print 'Olabelovano oblasti: ' + str(length)
 
     if debug:
        print 'data labels:'
@@ -171,8 +197,8 @@ def getPriorityObjects(data, nObj = 1, seeds = None, debug = False):
 
     ## Podminka maximalniho mnozstvi objektu.
     maxN = 250
-    if ( length > maxN ) :
-        print('Varovani: Existuje prilis mnoho objektu! (' + str ( length ) + ')')
+#    if ( length > maxN ) :
+#        print('Varovani: Existuje prilis mnoho objektu! (' + str ( length ) + ')')
 
     ## Uzivatel si nevybral specificke objekty.
     if (seeds == None) :
@@ -185,10 +211,13 @@ def getPriorityObjects(data, nObj = 1, seeds = None, debug = False):
         returning = None
         label = 0
         stop = nObj - 1
+
         ## Budeme postupne prochazet arrayLabels a postupne pridavat jednu oblast za druhou (od te nejvetsi - mimo nuloveho pozadi) dokud nebudeme mit dany pocet objektu (nObj).
         while label <= stop :
+
             if label >= len(arrayLabels):
                 break
+
             if arrayLabels[label] != 0:
                 if returning == None:
                     ## "Prvni" iterace
@@ -199,66 +228,78 @@ def getPriorityObjects(data, nObj = 1, seeds = None, debug = False):
             else:
                 ## Musime prodlouzit hledany interval, protoze jsme narazili na nulove pozadi.
                 stop = stop + 1
+
             label = label + 1
+
             if debug:
                 print (str(label - 1)) + ':'
                 print returning
 
         if returning == None:
-           print 'Zadna validni olabelovana data!'
+           print 'Zadna validni olabelovana data! (DEBUG: returning == None)'
 
         return returning
         # Function exit
+        # Function return: Priority objects
 
-    ## Uzivatel si vybral specificke objekty.
+    ## Uzivatel si vybral specificke objekty (seeds != None).
     else:
 
         ## Zalozeni pole pro ulozeni seedu
-        seed = []
+        arrSeed = []
         ## Zjisteni poctu seedu.
         stop = seeds[0].size
         tmpSeed = 0
+        dim = numpy.ndim(dataLabels)
         for index in range(0, stop):
             ## Tady se ukladaji labely na mistech, ve kterych kliknul uzivatel.
-            if numpy.ndim(dataLabels) == 3:
+            if dim == 3:
                 ## 3D data.
                 tmpSeed = dataLabels[ seeds[0][index], seeds[1][index], seeds[2][index] ]
-            elif numpy.ndim(dataLabels) == 2:
+            elif dim == 2:
                 ## 2D data.
                 tmpSeed = dataLabels[ seeds[0][index], seeds[1][index] ]
+
             ## Tady opet pocitam s tim, ze oznaceni nulou pripada cerne oblasti (pozadi).
             if tmpSeed != 0:
-                ## Pokud se nejedna o pozadi (cernou oblast), tak si seed zapamatuji
-                seed.append(tmpSeed)
+                ## Pokud se nejedna o pozadi (cernou oblast), tak se novy seed ulozi do pole "arrSeed"
+                arrSeed.append(tmpSeed)
 
         ## Pokud existuji vhodne labely, vytvori se nova data k vraceni.
-        ## Pokud ne, vrati se cela nafiltrovana data, ktera do funkce prisla (nedojde k vraceni specifickych objektu).
-        if len ( seed ) > 0:
+        ## Pokud ne, vrati se "None" typ. { Deprecated: Pokud ne, vrati se cela nafiltrovana data, ktera do funkce prisla (nedojde k vraceni specifickych objektu). }
+        if len(arrSeed) > 0:
 
             ## Zbaveni se duplikatu.
-            seed = list( set ( seed ) )
+            arrSeed = list( set ( arrSeed ) )
             if debug:
                 print 'seed list:'
-                print seed
+                print arrSeed
+
+            print 'Ruznych prioritnich objektu k vraceni: ' + str(len(arrSeed))
 
             ## Vytvoreni vystupu - postupne pricitani dat prislunych specif. labelu.
             returning = None
-            for index in range ( 0, len ( seed ) ) :
+            for index in range ( 0, len ( arrSeed ) ) :
+
                 if returning == None:
-                    returning = data * (dataLabels == seed[index])
+                    returning = data * (dataLabels == arrSeed[index])
                 else:
-                    returning = returning + data * (dataLabels == seed[index])
+                    returning = returning + data * (dataLabels == arrSeed[index])
+
                 if debug:
                     print (str(index)) + ':'
                     print returning
 
             return returning
             # Function exit
+            # Function return: Priority objects
 
         else:
 
-            return data
+            print 'Zadna validni data k vraceni - zadne prioritni objekty nenalezeny (DEBUG: function getPriorityObjects: len(arrSeed) == 0)'
+            return None
             # Function exit
+            # Function return: None
 
 """
 Zjisti cetnosti jednotlivych oznacenych ploch (labeled areas)
@@ -334,6 +375,9 @@ class Tests(unittest.TestCase):
 Main
 """
 def _main():
+
+    print('Deprecated - volejte metodu "segmentation.vesselSegmentation()" primo!')
+    return
 
     #print('Byl spusten skript.')
     print('Probiha nastavovani...')
