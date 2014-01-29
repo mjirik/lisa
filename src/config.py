@@ -38,6 +38,54 @@ def get_config(filename, default_cfg):
         # default config
     return cfg_out
 
+def delete_config_records(filename, records_to_save=[]):
+    """
+    All records of config file are deleted except records_to_save.
+    """
+    if os.path.isfile(filename):
+        cfg = misc.obj_from_file(filename, filetype='yaml')
+        new_cfg = subdict(cfg, records_to_save)
+        print cfg
+        misc.obj_to_file(new_cfg, "test_" + filename , filetype='yaml')
+
+
+def update_config_records(filename, new_cfg):
+    """
+    All records of config file are updated exept records_to_save.
+    """
+    if os.path.isfile(filename):
+        cfg = misc.obj_from_file(filename, filetype='yaml')
+        cfg.update(new_cfg)
+        print cfg
+        misc.obj_to_file(new_cfg, "test_" + filename , filetype='yaml')
+
+
+def check_config_version_and_remove_old_records(filename, version,
+                                                records_to_save):
+    """
+    Check if config file version is ok. If it is not all records except
+    records_to_save are deleted and config_version in file is set to version.
+    It is used to update user configuration.
+    """
+    if os.path.isfile(filename):
+        cfg = misc.obj_from_file(filename, filetype='yaml')
+        if ('config_version' in cfg and (cfg['config_version'] == version)):
+# everything is ok, no need to panic
+            return
+        else:
+# older version of config file
+            cfg = misc.obj_from_file(filename, filetype='yaml')
+            misc.obj_to_file(cfg, filename + '.old', filetype='yaml')
+            print 'cfg ', cfg
+            new_cfg = subdict(cfg, records_to_save)
+            new_cfg['config_version'] = version
+            print 'ncfg ', new_cfg
+            misc.obj_to_file(new_cfg, filename, filetype='yaml')
+
+
+
+
+
 
 def get_function_keys(p_fcn):
     #fcn_cfg = {p_fcn.__name__:inspect.getargspec(p_fcn)}

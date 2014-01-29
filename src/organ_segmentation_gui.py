@@ -73,6 +73,9 @@ default_segparams = {'pairwise_alpha_per_mm2': 40,
                 'use_boundary_penalties': False,
                 'boundary_penalties_sigma': 50}
 
+config_version = [1, 0, 0]
+
+
 class OrganSegmentation():
     def __init__(
         self,
@@ -992,10 +995,13 @@ def main():
     # now is in cfg default values
 
     cfg = config.get_config("organ_segmentation.config", cfg)
+    user_config_path = os.path.join(cfg['output_datapath'],
+                                    "organ_segmentation.config")
+    config.check_config_version_and_remove_old_records(
+        user_config_path, version=config_version,
+        records_to_save=['experiment_caption', 'lisa_operator_identifier'])
     # read user defined config in user data
-    cfg = config.get_config(
-        os.path.join(cfg['output_datapath'], "organ_segmentation.config"),
-        cfg)
+    cfg = config.get_config(user_config_path, cfg)
 
     # input parser
     parser = argparse.ArgumentParser(
@@ -1080,7 +1086,7 @@ def main():
     parser.add_argument(
         '-oi', '--lisa_operator_identifier', type=str,  # type=int,
         help='Identifier of Lisa operator.',
-        default=cfg["experiment_caption"])
+        default=cfg["lisa_operator_identifier"])
     parser.add_argument(
         '-ss',
         '--segmentation_smoothing',
