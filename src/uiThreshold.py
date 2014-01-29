@@ -121,7 +121,7 @@ class uiThreshold:
             if self.seeds == None:
 
                 self.max0 = numpy.amax(numpy.amax(self.data, axis = 0))
-                self.max0 = self.max0 + abs(abs(self.min0) - abs(self.max0)) / 10      
+                self.max0 = self.max0 + abs(abs(self.min0) - abs(self.max0)) / 10
 
             else:
 
@@ -160,19 +160,19 @@ class uiThreshold:
                     print 'Hodnoty seedu: '
                     print self.arrSeed
 
-                    self.max0 = max(self.arrSeed)    
-                    self.max0 = self.max0 + abs(abs(self.min0) - abs(self.max0)) / 10    
-                    
+                    self.max0 = max(self.arrSeed)
+                    self.max0 = self.max0 + abs(abs(self.min0) - abs(self.max0)) / 10
+
                     # Prahy
                     print ''
                     print 'Minimalni doporucena hodnota prahu: ' + str(min(self.arrSeed))
-                    print 'Maximalni doporucena hodnota prahu: ' + str(max(self.arrSeed))  
-                    print ''  
-                   
+                    print 'Maximalni doporucena hodnota prahu: ' + str(max(self.arrSeed))
+                    print ''
+
                 else:
-                     
+
                     self.max0 = numpy.amax(numpy.amax(self.data, axis = 0))
-                    self.max0 = self.max0 + abs(abs(self.min0) - abs(self.max0)) / 10   
+                    self.max0 = self.max0 + abs(abs(self.min0) - abs(self.max0)) / 10
 
             ## Pridani subplotu do okna (do figure)
             self.ax1 = self.fig.add_subplot(131)
@@ -204,9 +204,9 @@ class uiThreshold:
             self.firstRun = True
             self.calculateAutomaticThreshold()
 
-            self.smin = Slider(self.axmin, 'Minimal threshold   ' + str(self.min0), 
+            self.smin = Slider(self.axmin, 'Minimal threshold   ' + str(self.min0),
                                self.min0, self.max0, valinit = self.threshold, dragging = True)
-            self.smax = Slider(self.axmax, 'Maximal threshold   ' + str(self.min0), 
+            self.smax = Slider(self.axmax, 'Maximal threshold   ' + str(self.min0),
                                self.min0, self.max0, valinit = self.max0, dragging = True)
 
             if(self.ICBinaryClosingIterations >= 1):
@@ -226,7 +226,7 @@ class uiThreshold:
             self.smax.on_changed(self.updateImage)
             self.sclose.on_changed(self.updateImage)
             self.sopen.on_changed(self.updateImage)
-            self.ssigma.on_changed(self.updateImage)        
+            self.ssigma.on_changed(self.updateImage)
 
             ## Zalozeni mist pro tlacitka
             self.axbuttnext1 = self.fig.add_axes([0.86, 0.24, 0.04, 0.03], axisbg = self.axcolor)
@@ -301,6 +301,8 @@ class uiThreshold:
 
         return self.imgFiltering
 
+
+
     """
     ================================================================
     ================================================================
@@ -332,7 +334,7 @@ class uiThreshold:
         sigmaNew = self.calculateSigma(sigma)
 
         ## Filtrovani
-        scipy.ndimage.filters.gaussian_filter(self.imgFiltering, sigmaNew, order = 0, output = self.imgFiltering, mode = 'nearest') 
+        scipy.ndimage.filters.gaussian_filter(self.imgFiltering, sigmaNew, order = 0, output = self.imgFiltering, mode = 'nearest')
 
         if (self.lastSigma != sigma) or (self.threshold < 0):
 
@@ -365,7 +367,7 @@ class uiThreshold:
         ## ====================================
         ## Operace binarni otevreni a uzavreni.
         ## ====================================
-        
+
         ## Nastaveni hodnot slideru.
         if (self.interactivity == True) :
 
@@ -400,24 +402,7 @@ class uiThreshold:
            self.imgFiltering = segmentation.getPriorityObjects(self.imgFiltering, self.nObj, self.seeds)
 
         if (self.interactivity == True):
-
-            ## Predani dat k vykresleni
-            if (self.imgFiltering == None) :
-            
-                #print '(DEBUG) Typ dat: ' + str(type(self.data[0][0][0]))
-                self.ax1.imshow(numpy.amax(numpy.zeros(self.data.shape), axis = 0, keepdims = self.numpyAMaxKeepDims), self.cmap)
-                self.ax2.imshow(numpy.amax(numpy.zeros(self.data.shape), axis = 1, keepdims = self.numpyAMaxKeepDims), self.cmap)
-                self.ax3.imshow(numpy.amax(numpy.zeros(self.data.shape), axis = 2, keepdims = self.numpyAMaxKeepDims), self.cmap)
-
-            else:
-
-                #print '(DEBUG) Typ dat: ' + str(type(self.imgFiltering[0][0][0]))
-                self.ax1.imshow(numpy.amax(self.imgFiltering, axis = 0, keepdims = self.numpyAMaxKeepDims), self.cmap)
-                self.ax2.imshow(numpy.amax(self.imgFiltering, axis = 1, keepdims = self.numpyAMaxKeepDims), self.cmap)
-                self.ax3.imshow(numpy.amax(self.imgFiltering, axis = 2, keepdims = self.numpyAMaxKeepDims), self.cmap)
-
-            ## Prekresleni
-            self.fig.canvas.draw()
+            self.__draw_visualization()
 
         if (self.firstRun == True) :
             self.firstRun = False
@@ -430,6 +415,41 @@ class uiThreshold:
 
         #garbage.collect()
 
+    def __draw_visualization(self):
+        ## Predani dat k vykresleni
+        if (self.imgFiltering == None) :
+
+            #print '(DEBUG) Typ dat: ' + str(type(self.data[0][0][0]))
+            self.ax1.imshow(numpy.amax(numpy.zeros(self.data.shape), axis = 0, keepdims = self.numpyAMaxKeepDims), self.cmap)
+            self.ax2.imshow(numpy.amax(numpy.zeros(self.data.shape), axis = 1, keepdims = self.numpyAMaxKeepDims), self.cmap)
+            self.ax3.imshow(numpy.amax(numpy.zeros(self.data.shape), axis = 2, keepdims = self.numpyAMaxKeepDims), self.cmap)
+
+        else:
+
+            #print '(DEBUG) Typ dat: ' + str(type(self.imgFiltering[0][0][0]))
+            #import time
+            #t0 = time.time()
+            #im0 = numpy.amax(self.imgFiltering, axis=0, keepdims=self.numpyAMaxKeepDims)
+            #im1 = numpy.amax(self.imgFiltering, axis=1, keepdims=self.numpyAMaxKeepDims)
+            #im2 = numpy.amax(self.imgFiltering, axis=2, keepdims=self.numpyAMaxKeepDims)
+            #t1 = time.time()
+            im0 = numpy.sum(self.imgFiltering, axis=0,
+                            keepdims=self.numpyAMaxKeepDims)
+            im0[im0 > 0] += numpy.max(im0)
+            im1 = numpy.sum(self.imgFiltering, axis=1,
+                            keepdims=self.numpyAMaxKeepDims)
+            im1[im1 > 0] += numpy.max(im1)
+            im2 = numpy.sum(self.imgFiltering, axis=2,
+                            keepdims=self.numpyAMaxKeepDims)
+            im2[im2 > 0] += numpy.max(im2)
+            #t2 = time.time()
+            #print 't1 %f t2 %f ' % (t1 - t0, t2 - t1)
+            self.ax1.imshow(im0, self.cmap)
+            self.ax2.imshow(im1, self.cmap)
+            self.ax3.imshow(im2, self.cmap)
+
+        ## Prekresleni
+        self.fig.canvas.draw()
     """
     ================================================================
     ================================================================
@@ -640,7 +660,7 @@ class uiThreshold:
         else:
 
             self.smin.val -= 1.0
-        
+
         self.smin.val = (numpy.round(self.smin.val, 2))
         self.smin.valtext.set_text('{}'.format(self.smin.val))
         self.fig.canvas.draw()
