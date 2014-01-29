@@ -121,8 +121,8 @@ if __name__ == "__main__":
         biggestObjects = args.biggest,
 #        dataFiltering = True,
         interactivity = True,
-        binaryClosingIterations = 5,
-        binaryOpeningIterations = 1)
+        binaryClosingIterations = 2,
+        binaryOpeningIterations = 0)
 
     # Uvolneni pameti
     garbage.collect()

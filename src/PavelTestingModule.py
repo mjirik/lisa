@@ -166,8 +166,8 @@ def main4():
         dilationIterations = 2,
         interactivity = True,
         biggestObjects = False,
-        binaryClosingIterations = 5,
-        binaryOpeningIterations = 1)
+        binaryClosingIterations = 2,
+        binaryOpeningIterations = 0)
 
 
 if __name__ == '__main__':

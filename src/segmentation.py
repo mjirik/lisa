@@ -1,17 +1,14 @@
-﻿#-------------------------------------------------------------------------------
-# Name:        segmentation
-# Purpose:     ZCU - FAV
-#
-# Author:      Pavel Volkovinsky
-# Email:       volkovinsky.pavel@gmail.com
-#
-# Created:     08/11/2012
-# Copyright:   (c) Pavel Volkovinsky 2013
-#-------------------------------------------------------------------------------
+﻿"""
+-------------------------------------------------------------------------------
+Name:        uiThreshold
+Purpose:     ZCU - FAV
 
-# TODO: Podpora "seeds" - vraceni specifickych objektu
-# TODO: Udelat lepe vraceni nejvetsich (nejvetsiho) objektu (muze vzniknout problem s cernou oblasti)
-# TODO: Bylo by dobre zavest paralelizmus - otazka jak a kde - neda se udelat vsude, casem si to zjistit - urcite pred bakalarskou praci - asi v ramci PRJ5 nebo az mi bude o prazdninach chybet projekt
+Author:      Pavel Volkovinsky
+Email:       volkovinsky.pavel@gmail.com
+
+Created:     08/11/2012
+-------------------------------------------------------------------------------
+"""
 
 import unittest
 import sys
@@ -35,9 +32,16 @@ import argparse
 # Import garbage collector
 import gc as garbage
 
-"""
-Vessel segmentation z jater.
-    input:
+def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsize_mm = [1,1,1], inputSigma = -1, 
+                       dilationIterations = 0, dilationStructure = None, nObj = 10, biggestObjects = False, 
+                       seeds = None, interactivity = True, binaryClosingIterations = 2, 
+                       binaryOpeningIterations = 0, smartInitBinaryOperations = True):
+
+    """
+
+    Vessel segmentation z jater.
+
+    Input:
         data - CT (nebo MRI) 3D data
         segmentation - zakladni oblast pro segmentaci, oznacena struktura se stejnymi rozmery jako "data",
             kde je oznaceni (label) jako:
@@ -55,25 +59,12 @@ Vessel segmentation z jater.
         interactivity - nastavi, zda ma nebo nema byt pouzit interaktivni mod upravy dat
         binaryClosingIterations - vstupni binary closing operations
         binaryOpeningIterations - vstupni binary opening operations
+        smartInitBinaryOperations - logicka hodnota pro smart volbu pocatecnich hodnot binarnich operaci (bin. uzavreni a bin. otevreni)
 
-    returns:
+    Output:
         filtrovana data
-"""
-def vesselSegmentation(
-        data,
-        segmentation = -1,
-        threshold = -1,
-        voxelsize_mm = [1,1,1],
-        inputSigma = -1,
-        dilationIterations = 0,
-        dilationStructure = None,
-        nObj = 1,
-        biggestObjects = False,
-        seeds = None,
-        interactivity = True,
-        binaryClosingIterations = 1,
-        binaryOpeningIterations = 1
-        ):
+
+    """
 
     dim = numpy.ndim(data)
     print 'Dimenze vstupnich dat: ' + str(dim)
@@ -153,10 +144,25 @@ def vesselSegmentation(
             seeds = seeds.nonzero()#seeds * (seeds != 0) ## seeds je n-tice poli indexu nenulovych prvku => item krychle je == krychle[ seeds[0][x], seeds[1][x], seeds[2][x] ]
             print 'Seedu bez nul: ' + str(len(seeds[0]))
 
+    closing = binaryClosingIterations
+    opening = binaryOpeningIterations
+
+    if (smartInitBinaryOperations):
+
+        if (seeds == None):
+
+            closing = 5
+            opening = 1
+
+        else:
+
+            closing = 2
+            opening = 0
+
     ## Samotne filtrovani.
     uiT = uiThreshold.uiThreshold(preparedData, voxel, threshold,
-        interactivity, number, inputSigma, nObj, biggestObjects, binaryClosingIterations,
-        binaryOpeningIterations, seeds)
+        interactivity, number, inputSigma, nObj, biggestObjects, closing,
+        opening, seeds)
     output = uiT.run()
 
     del(preparedData)
@@ -175,17 +181,20 @@ def vesselSegmentation(
     ## Vraceni matice.
     return output
 
-"""
-Vraceni N nejvetsich objektu.
-    input:
-        data - data, ve kterych chceme zachovat pouze nejvetsi objekty
-        nObj - pocet nejvetsich objektu k vraceni
-        seeds - dvourozmerne pole s umistenim pixelu, ktere chce uzivatel vratit (odpovidaji matici "data")
-
-    returns:
-        data s nejvetsimi objekty
-"""
 def getPriorityObjects(data, nObj = 1, seeds = None, debug = False):
+
+    """
+
+    Vraceni N nejvetsich objektu.
+        input:
+            data - data, ve kterych chceme zachovat pouze nejvetsi objekty
+            nObj - pocet nejvetsich objektu k vraceni
+            seeds - dvourozmerne pole s umistenim pixelu, ktere chce uzivatel vratit (odpovidaji matici "data")
+
+        returns:
+            data s nejvetsimi objekty
+
+    """
 
     ## Oznaceni dat.
     ## labels - oznacena data.
@@ -304,16 +313,19 @@ def getPriorityObjects(data, nObj = 1, seeds = None, debug = False):
             # Function exit
             # Function return: None
 
-"""
-Zjisti cetnosti jednotlivych oznacenych ploch (labeled areas)
-    input:
-        labels - data s aplikovanymi oznacenimi
-        num - pocet pouzitych oznaceni
-
-    returns:
-        dve pole - prvni sumy, druhe indexy
-"""
 def areaIndexes(labels, num):
+
+    """
+
+    Zjisti cetnosti jednotlivych oznacenych ploch (labeled areas)
+        input:
+            labels - data s aplikovanymi oznacenimi
+            num - pocet pouzitych oznaceni
+
+        returns:
+            dve pole - prvni sumy, druhe indexy
+
+    """
 
     arrayLabelsSum = []
     arrayLabels = []
@@ -324,16 +336,17 @@ def areaIndexes(labels, num):
 
     return arrayLabelsSum, arrayLabels
 
-"""
-Razeni 2 poli najednou (list) pomoci metody select sort
-    input:
-        list1 - prvni pole (hlavni pole pro razeni)
-        list2 - druhe pole (vedlejsi pole) (kopirujici pozice pro razeni podle hlavniho pole list1)
-
-    returns:
-        dve serazena pole - hodnoty se ridi podle prvniho pole, druhe "kopiruje" razeni
-"""
 def selectSort(list1, list2):
+
+    """
+    Razeni 2 poli najednou (list) pomoci metody select sort
+        input:
+            list1 - prvni pole (hlavni pole pro razeni)
+            list2 - druhe pole (vedlejsi pole) (kopirujici pozice pro razeni podle hlavniho pole list1)
+
+        returns:
+            dve serazena pole - hodnoty se ridi podle prvniho pole, druhe "kopiruje" razeni
+    """
 
     length = len(list1)
     for index in range(0, length):
@@ -374,10 +387,13 @@ class Tests(unittest.TestCase):
         self.assertRaises(Exception, vesselSegmentation, (self.rnddata, self.segmcube[2:,:,:]) )
 """
 
-"""
-Main
-"""
 def _main():
+
+    """
+
+    Main
+
+    """
 
     print('Deprecated - volejte metodu "segmentation.vesselSegmentation()" primo!')
     return
@@ -416,7 +432,7 @@ def _main():
         unittest.main()
 
 
-	print('Nacitam vstup...')
+    print('Nacitam vstup...')
 
     op3D = True
 

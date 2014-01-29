@@ -1,15 +1,17 @@
-#-------------------------------------------------------------------------------
-# Name:        uiThreshold
-# Purpose:     ZCU - FAV
-#
-# Author:      Pavel Volkovinsky
-# Email:       volkovinsky.pavel@gmail.com
-#
-# Created:     08/11/2012
-# Copyright:   (c) Pavel Volkovinsky 2013
-#-------------------------------------------------------------------------------
+"""
+-------------------------------------------------------------------------------
+Name:        uiThreshold
+Purpose:     ZCU - FAV
+
+Author:      Pavel Volkovinsky
+Email:       volkovinsky.pavel@gmail.com
+
+Created:     08/11/2012
+-------------------------------------------------------------------------------
+"""
 
 import sys
+from imageio.util import im1
 sys.path.append("../src/")
 sys.path.append("../extern/")
 
@@ -38,31 +40,36 @@ from matplotlib.widgets import Slider, Button#, RadioButtons
 # Import garbage collector
 import gc as garbage
 
-"""
-================================================================================
-uiThreshold
-================================================================================
-"""
 class uiThreshold:
+    
+    """
+
+    UI pro prahovani 3D dat.
 
     """
-    Metoda init.
-        data - data pro prahovani, se kterymi se pracuje
-        voxel - velikost voxelu
-        threshold
-        interactivity - zapnuti / vypnuti gui
-        number - maximalni hodnota slideru pro gauss. filtrovani (max sigma)
-        inputSigma - pocatecni hodnota pro gauss. filtr
-        nObj - pocet nejvetsich objektu k vraceni
-        biggestObjects - oznacuje, zda se maji vracet nejvetsi objekty
-        binaryClosingIterations - iterace binary closing
-        binaryOpeningIterations - iterace binary opening
-        seeds - matice s kliknutim uzivatele- pokud se maji vracet specifikce objekty
-        cmap - grey
-    """
-    def __init__(self, data, voxel, threshold=-1, interactivity=True,
-    number=100.0, inputSigma=-1, nObj=10, biggestObjects=True, binaryClosingIterations=1,
-    binaryOpeningIterations=1, seeds=None, cmap=matplotlib.cm.Greys_r):
+    
+    def __init__(self, data, voxel, threshold = -1, interactivity = True, number = 100.0, inputSigma = -1, 
+                 nObj = 10,  biggestObjects = True, binaryClosingIterations = 2, binaryOpeningIterations = 0, 
+                 seeds = None, cmap = matplotlib.cm.Greys_r):
+
+        """
+
+        Inicialitacni metoda.
+        Input:
+            data - data pro prahovani, se kterymi se pracuje
+            voxel - velikost voxelu
+            threshold
+            interactivity - zapnuti / vypnuti gui
+            number - maximalni hodnota slideru pro gauss. filtrovani (max sigma)
+            inputSigma - pocatecni hodnota pro gauss. filtr
+            nObj - pocet nejvetsich objektu k vraceni
+            biggestObjects - oznacuje, zda se maji vracet nejvetsi objekty
+            binaryClosingIterations - iterace binary closing
+            binaryOpeningIterations - iterace binary opening
+            seeds - matice s kliknutim uzivatele- pokud se maji vracet specifikce objekty
+            cmap - grey
+
+        """
 
         print('Spoustim prahovani dat...')
 
@@ -269,6 +276,12 @@ class uiThreshold:
 
     def run(self):
 
+        """
+
+            Spusteni UI.
+
+        """
+
         if(self.errorsOccured == True):
 
             return self.data
@@ -301,17 +314,14 @@ class uiThreshold:
 
         return self.imgFiltering
 
-
-
-    """
-    ================================================================
-    ================================================================
-    Update metoda.
-    ================================================================
-    ================================================================
-    """
-
     def updateImage(self, val):
+
+        """
+
+        Hlavni update metoda.
+        Cinny kod pro gaussovske filtrovani, prahovani, binarni uzavreni a otevreni a vraceni nejvetsich nebo oznacenych objektu.
+
+        """
 
         if (sys.version_info[0] < 3):
 
@@ -322,9 +332,38 @@ class uiThreshold:
 
             self.imgFiltering = self.data.copy()
 
-        ## ====================================
         ## Filtrovani
-        ## ====================================
+        self.gaussFilter()
+
+        ## Prahovani (smin, smax)
+        self.thresholding()
+
+        ## Operace binarni otevreni a uzavreni.
+        #print '(DEBUG) Typ dat: ' + str(type(self.imgFiltering[0][0][0]))
+        self.binaryClosingOpening()
+
+        ## Zjisteni nejvetsich objektu.
+        self.getBiggestObjects()
+
+        ## Vykresleni dat
+        if (self.interactivity == True):
+            self.drawVisualization()
+
+        ## Nastaveni kontrolnich hodnot
+        self.firstRun = False
+        self.newThreshold = False
+        self.overrideSigma = False
+        self.overrideThres = False
+
+        #garbage.collect()
+
+    def gaussFilter(self):
+
+        """
+
+        Aplikace gaussova filtru.
+
+        """
 
         ## Zjisteni jakou sigmu pouzit
         if(self.firstRun == True and self.inputSigma >= 0):
@@ -350,9 +389,13 @@ class uiThreshold:
 
         del(sigmaNew)
 
-        ## ====================================
-        ## Prahovani (smin, smax)
-        ## ====================================
+    def thresholding(self):
+
+        """
+
+        Prahovani podle minimalniho a maximalniho prahu.
+
+        """
 
         self.imgFiltering = self.imgFiltering * (self.imgFiltering >= self.threshold)
         self.imgFiltering = self.imgFiltering * (self.imgFiltering <= self.smax.val)
@@ -364,9 +407,13 @@ class uiThreshold:
             self.smax.val = (numpy.round(self.smax.val, 2))
             self.smax.valtext.set_text('{}'.format(self.smax.val))
 
-        ## ====================================
-        ## Operace binarni otevreni a uzavreni.
-        ## ====================================
+    def binaryClosingOpening(self):
+
+        """
+
+        Aplikace binarniho uzavreni a pote binarniho otevreni.
+
+        """
 
         ## Nastaveni hodnot slideru.
         if (self.interactivity == True) :
@@ -381,7 +428,7 @@ class uiThreshold:
             closeNum = self.ICBinaryClosingIterations
             openNum = self.ICBinaryOpeningIterations
 
-        #print '(DEBUG) Typ dat: ' + str(type(self.imgFiltering[0][0][0]))
+        
         if (closeNum >= 1) or (openNum >= 1):
 
             ## Vlastni binarni uzavreni.
@@ -394,32 +441,30 @@ class uiThreshold:
 
                 self.imgFiltering = self.numpyDataOnes * scipy.ndimage.binary_opening(self.imgFiltering, iterations = openNum)
 
-        ## ====================================
-        ## ====================================
+    def getBiggestObjects(self):
 
-        ## Zjisteni nejvetsich objektu.
+        """
+
+        Vraceni nejvetsich objektu (nebo objektu, ktere obsahuji prioritni seedy).
+
+        """
+
         if (self.biggestObjects == True or self.seeds != None) :
            self.imgFiltering = segmentation.getPriorityObjects(self.imgFiltering, self.nObj, self.seeds)
 
-        if (self.interactivity == True):
-            self.__draw_visualization()
+    def drawVisualization(self):
 
-        if (self.firstRun == True) :
-            self.firstRun = False
+        """
 
-        if (self.newThreshold == True) :
-            self.newThreshold = False
+        Vykresleni dat.
 
-        self.overrideSigma = False
-        self.overrideThres = False
+        """
 
-        #garbage.collect()
-
-    def __draw_visualization(self):
         ## Predani dat k vykresleni
         if (self.imgFiltering == None) :
 
             #print '(DEBUG) Typ dat: ' + str(type(self.data[0][0][0]))
+
             self.ax1.imshow(numpy.amax(numpy.zeros(self.data.shape), axis = 0, keepdims = self.numpyAMaxKeepDims), self.cmap)
             self.ax2.imshow(numpy.amax(numpy.zeros(self.data.shape), axis = 1, keepdims = self.numpyAMaxKeepDims), self.cmap)
             self.ax3.imshow(numpy.amax(numpy.zeros(self.data.shape), axis = 2, keepdims = self.numpyAMaxKeepDims), self.cmap)
@@ -427,38 +472,40 @@ class uiThreshold:
         else:
 
             #print '(DEBUG) Typ dat: ' + str(type(self.imgFiltering[0][0][0]))
+
             #import time
             #t0 = time.time()
             #im0 = numpy.amax(self.imgFiltering, axis=0, keepdims=self.numpyAMaxKeepDims)
             #im1 = numpy.amax(self.imgFiltering, axis=1, keepdims=self.numpyAMaxKeepDims)
             #im2 = numpy.amax(self.imgFiltering, axis=2, keepdims=self.numpyAMaxKeepDims)
             #t1 = time.time()
-            im0 = numpy.sum(self.imgFiltering, axis=0,
-                            keepdims=self.numpyAMaxKeepDims)
-            im0[im0 > 0] += numpy.max(im0)
-            im1 = numpy.sum(self.imgFiltering, axis=1,
-                            keepdims=self.numpyAMaxKeepDims)
-            im1[im1 > 0] += numpy.max(im1)
-            im2 = numpy.sum(self.imgFiltering, axis=2,
-                            keepdims=self.numpyAMaxKeepDims)
-            im2[im2 > 0] += numpy.max(im2)
+
+            img0 = numpy.sum(self.imgFiltering, axis = 0, keepdims = self.numpyAMaxKeepDims)
+            img0[img0 > 0] += numpy.max(img0)
+
+            img1 = numpy.sum(self.imgFiltering, axis = 1, keepdims = self.numpyAMaxKeepDims)
+            img1[img1 > 0] += numpy.max(img1)
+
+            img2 = numpy.sum(self.imgFiltering, axis = 2, keepdims = self.numpyAMaxKeepDims)
+            img2[img2 > 0] += numpy.max(img2)
+
             #t2 = time.time()
             #print 't1 %f t2 %f ' % (t1 - t0, t2 - t1)
-            self.ax1.imshow(im0, self.cmap)
-            self.ax2.imshow(im1, self.cmap)
-            self.ax3.imshow(im2, self.cmap)
+
+            self.ax1.imshow(img0, self.cmap)
+            self.ax2.imshow(img1, self.cmap)
+            self.ax3.imshow(img2, self.cmap)
 
         ## Prekresleni
         self.fig.canvas.draw()
-    """
-    ================================================================
-    ================================================================
-    Vypocetni metody.
-    ================================================================
-    ================================================================
-    """
 
     def calculateSigma(self, input):
+
+        """
+
+        Spocita novou hodnotu sigma pro gaussovo filtr.
+
+        """
 
         if (self.voxel[0] == self.voxel[1] == self.voxel[2]):
             return ((5 / self.voxel[0]) * input) / self.voxelV
@@ -469,8 +516,14 @@ class uiThreshold:
 
             return (sigmaX, sigmaY, sigmaZ) / self.voxelV
 
-    ## Automaticky vypocet vhodneho prahu
     def calculateAutomaticThreshold(self):
+
+        """
+
+        Automaticky vypocet prahu - pokud jsou data bez oznacenych objektu, tak vraci nekolik nejvetsich objektu. 
+        Pokud jsou ale definovany prioritni seedy, tak je na jejich zaklade vypocitan prah.
+
+        """
 
         if self.arrSeed != None:
 
@@ -610,14 +663,6 @@ class uiThreshold:
         """
 
         self.newThreshold = True
-
-    """
-    ================================================================
-    ================================================================
-    Obsluha udalosti (buttons).
-    ================================================================
-    ================================================================
-    """
 
     def buttonReset(self, event):
 
