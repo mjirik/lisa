@@ -1,3 +1,34 @@
+
+Install (L)Ubuntu 13.10
+=========================
+
+Use package manager
+
+    sudo apt-get install python git python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox python-insighttoolkit3 make python-qt4 python-vtk python-setuptools
+    
+SimpleITK is not in ubuntu packages. You can use easy_install
+
+    sudo easy_install -U SimpleITK
+    
+For pygco use following (more info https://github.com/mjirik/pyseg_base/blob/master/INSTALL)
+
+    git clone git@github.com:mjirik/liver-surgery.git
+    git submodule update --init --recursive
+    git clone https://github.com/amueller/gco_python.git
+    cd gco_python
+    make
+    python setup.py install
+    
+Problems on Linux:
+
+* Permission denied. You can try following command if there is a problem "Permission denied"
+
+
+    sudo chmod a+r /usr/local/lib/python2.7/dist-packages/SimpleITK-0.7.0-py2.7-linux-x86_64.egg/EGG-INFO/top_level.txt
+
+
+
+
 Install Mac OS
 ==============
 
@@ -56,33 +87,6 @@ Install Mac OS
 
 
 
-
-Install (L)Ubuntu 13.10
-=========================
-
-Use package manager
-
-    sudo apt-get install python git python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox python-insighttoolkit3 make python-qt4 python-vtk python-setuptools
-    
-SimpleITK is not in ubuntu packages. You can use easy_install
-
-    sudo easy_install -U SimpleITK
-    
-For pygco use following (more info https://github.com/mjirik/pyseg_base/blob/master/INSTALL)
-
-    git clone git@github.com:mjirik/liver-surgery.git
-    git submodule update --init --recursive
-    git clone https://github.com/amueller/gco_python.git
-    cd gco_python
-    make
-    python setup.py install
-    
-Problems on Linux:
-
-* Permission denied. You can try following command if there is a problem "Permission denied"
-
-
-    sudo chmod a+r /usr/local/lib/python2.7/dist-packages/SimpleITK-0.7.0-py2.7-linux-x86_64.egg/EGG-INFO/top_level.txt
 
 
 Install Windows
