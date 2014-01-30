@@ -21,43 +21,17 @@ Installing requires you to have installed:
 * pydicom - package for working with DICOM files
 (http://code.google.com/p/pydicom)
 * pyqt - QT4 for python (https://wiki.python.org/moin/PyQt)
-
-Simple install instructions fallows. In case of problem see (https://github.com/mjirik/lisa/blob/master/INSTALL.md)
-
-Linux:
-
-use package manager of your distribution
-
-    sudo apt-get install python git python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox python-insighttoolkit3 python-qt4 python-setuptools make
-
-SimpleITK is not in ubuntu packages. You can use easy_install
-
-    sudo easy_install -U SimpleITK
-    
-For pygco use following (more info https://github.com/mjirik/pyseg_base/blob/master/INSTALL)
-
-    git clone https://github.com/amueller/gco_python.git
-    cd gco_python
-    make
-    sudo python setup.py install
-
-
-On Window, you can use Python XY (http://code.google.com/p/pythonxy/) and
-packages by Christoph Gohlke (http://www.lfd.uci.edu/~gohlke/pythonlibs/)
-
-On Mac, see notes.txt 
-(https://github.com/mjirik/liver-surgery/blob/master/notes.txt)  
-and pyseg_base install notes 
-(https://github.com/mjirik/pyseg_base/blob/master/INSTALL)
-
-
+* ITK (optional) - Package for medical image analysis (http://www.itk.org/)
 
 
 
 Install
 -------
 
-For stable branche
+See our install notes for Linux, Mac OS and Windows (https://github.com/mjirik/lisa/blob/master/INSTALL.md)
+
+
+Get stable branche
 
     git clone --recursive -b stable https://github.com/mjirik/lisa.git
 
