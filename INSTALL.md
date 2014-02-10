@@ -1,4 +1,3 @@
-
 Install (L)Ubuntu 13.10
 =========================
 
@@ -61,7 +60,8 @@ Install Mac OS
 
         sudo port selfupdate
         sudo port upgrade outdated
-        sudo port install py27-pyqt4 py27-numpy py27-scipy py27-matplotlib py27-ipython +notebook py27-pandas py27-sympy py27-nose  py-scikit-learn py-pydicom py27-yaml py27-cython
+        sudo port install py27-pyqt4 py27-numpy py27-scipy py27-matplotlib py27-ipython +notebook py27-pandas py27-sympy py27-nose  py-scikit-learn py-pydicom py27-yaml py27-cython vtk5 +qt4_mac +python27
+ 
 
  * Select default python
 
