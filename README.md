@@ -22,6 +22,7 @@ Installing requires you to have installed:
 (http://code.google.com/p/pydicom)
 * pyqt - QT4 for python (https://wiki.python.org/moin/PyQt)
 * ITK (optional) - Package for medical image analysis (http://www.itk.org/)
+* VTK (optional) - The Visualization Toolkit (http://www.vtk.org/)
 
 
 
@@ -38,7 +39,6 @@ Get stable branche
 or for current developement
 
     git clone --recursive git@github.com:mjirik/lisa.git
-    python ./mysetup.py
 
 or
 
@@ -61,11 +61,15 @@ Run
 
 Object (usualy liver) extraction is started by organ_segmentation script
 
-    python python/organ_segmentation.py 
+    ./lisa.sh
 
-Segmentation use two types of seeds wich are setted by left and right mouse 
-button. For better volume measurement control use additional parameters 
-for example "-mroi" and "-vs 0.8". If "-mroi" parameter is used you can 
+or
+
+    python lisa.py
+
+Segmentation use two types of seeds wich are setted by left and right mouse
+button. For better volume measurement control use additional parameters
+for example "-mroi" and "-vs 0.8". If "-mroi" parameter is used you can
 select region of interest.
 
 
