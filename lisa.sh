@@ -4,7 +4,7 @@ cd `dirname ${SCRIPT_PATH}` > /dev/null
 #cd ../../../../
 
 python src/update_stable.py
-python lisa.py
+python lisa.py $@
 
 #git pull
 #git submodule update --init --recursive
