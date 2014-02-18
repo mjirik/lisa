@@ -26,11 +26,19 @@ import py3DSeedEditor
 
 def show(data3d_a_path, data3d_b_path, ourSegmentation):
     reader = datareader.DataReader()
+    #data3d_a_path = os.path.join(path_to_script, data3d_a_path)
     data3d_a, metadata_a = reader.Get3DData(data3d_a_path)
 
-    data3d_b, metadata_b = reader.Get3DData(data3d_b_path)
+    if data3d_b_path is not None:
+        data3d_b_path = os.path.join(path_to_script, data3d_b_path)
+        data3d_b, metadata_b = reader.Get3DData(data3d_b_path)
+
+        pyed = py3DSeedEditor.py3DSeedEditor(data3d_a, contour =
+        data3d_b)
+        pyed.show()
 
     if ourSegmentation != None:
+        ourSegmentation= os.path.join(path_to_script, ourSegmentation)
         data_our = misc.obj_from_file(ourSegmentation, 'pickle')
         #data3d_our = data_our['segmentation']
         data3d_our = qmisc.uncrop(data_our['segmentation'], data_our['crinfo'],data3d_a.shape)
@@ -48,9 +56,6 @@ def show(data3d_a_path, data3d_b_path, ourSegmentation):
     #data3d_b = (data3d_b > 0).astype(np.int8)
 
     #if args.visualization:
-    pyed = py3DSeedEditor.py3DSeedEditor(data3d_a, contour =
-    data3d_b)
-    pyed.show()
 
     if ourSegmentation != None:
         pyed = py3DSeedEditor.py3DSeedEditor(data3d_a, contour =
@@ -67,8 +72,8 @@ def main():
 
     #logger.debug('input params')
 
-    data3d_a_path = os.path.join(path_to_script, '../../../data/medical/data_orig/sliver07/training-part1/liver-orig001.mhd')
-    data3d_b_path = os.path.join(path_to_script, '../../../data/medical/data_orig/sliver07/training-part1/liver-seg001.mhd')
+    data3d_a_path = None # os.path.join(path_to_script, '../../../data/medical/data_orig/sliver07/training-part1/liver-orig001.mhd')
+    data3d_b_path = None #os.path.join(path_to_script, '../../../data/medical/data_orig/sliver07/training-part1/liver-seg001.mhd')
     parser = argparse.ArgumentParser(
             description='Visualization of sliver data and our segmentation')
     parser.add_argument('-sd', '--sliverData',
