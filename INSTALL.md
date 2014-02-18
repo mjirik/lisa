@@ -110,10 +110,12 @@ Install Windows
         curl -O http://vision.csd.uwo.ca/code/gco-v3.0.zip
         unzip gco-v3.0.zip
         cd ..
+        curl -O https://raw2.github.com/mjirik/pyseg_base/master/distr/gco_python.pyx.patch
+        patch gco_python.pyx < gco_python.pyx.patch
         python setup.py build_ext -i --compiler=mingw32
         python.exe setup.py build --compiler=mingw32
         python.exe setup.py install --skip-build
-
+   
 Problems on Windows:
 
 * Cython not found. Install cython from https://code.google.com/p/pythonxy/wiki/Downloads#Plugin_updates
