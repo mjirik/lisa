@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-LISA - organ segmentation tool
-"""
+""" LISA - organ segmentation tool. """
 
 # from scipy.io import loadmat, savemat
 import scipy
@@ -51,7 +49,7 @@ scaling_modes = {
     'original': (None, None, None),
     'double': (None, 'x2', 'x2'),
     '3mm': (None, '3', '3')
-    }
+}
 
 #  Defaultparameters for segmentation
 
@@ -70,8 +68,8 @@ default_segmodelparams = {
 }
 
 default_segparams = {'pairwise_alpha_per_mm2': 40,
-                'use_boundary_penalties': False,
-                'boundary_penalties_sigma': 50}
+                     'use_boundary_penalties': False,
+                     'boundary_penalties_sigma': 50}
 
 config_version = [1, 0, 0]
 
@@ -100,12 +98,12 @@ class OrganSegmentation():
         output_label=1,
         slab={},
         output_datapath=None,
+        input_datapath_start='',
         experiment_caption='',
         lisa_operator_identifier='',
         volume_unit='ml'
         #           iparams=None,
     ):
-
         """ Segmentation of objects from CT data.
 
         datapath: path to directory with dicom files
@@ -120,15 +118,15 @@ class OrganSegmentation():
         seeds: ndimage array with size same as data3d
         experiment_caption = this caption is used for naming of outputs
         lisa_operator_identifier: used for logging
+        input_datapath_start: Path where user directory selection dialog
+            starts.
 
         """
-
-
-# -------.
 
         self.iparams = {}
         self.datapath = datapath
         self.output_datapath = output_datapath
+        self.input_datapath_start = input_datapath_start
         self.crinfo = [[0, -1], [0, -1], [0, -1]]
         self.slab = slab
         self.output_label = output_label
@@ -218,7 +216,6 @@ class OrganSegmentation():
         # voxelsize processing
         #self.parameters = {}
 
-
         #self.segparams['pairwise_alpha']=25
 
         if self.roi is not None:
@@ -246,15 +243,17 @@ class OrganSegmentation():
 
         if self.seeds is None:
             self.seeds = np.zeros(self.data3d.shape, dtype=np.int8)
-        # @TODO use logger
-        logger.info('dir ' + str(self.datapath) + ", series_number" +\
-            str(self.metadata['series_number']) +'voxelsize_mm' +\
-            str(self.voxelsize_mm))
+        logger.info('dir ' + str(self.datapath) + ", series_number" +
+                    str(self.metadata['series_number']) + 'voxelsize_mm' +
+                    str(self.voxelsize_mm))
         self.time_start = time.time()
 
     def crop(self, tmpcrinfo):
         """
         Function makes crop of 3d data and seeds and stores it in crinfo.
+
+        tmpcrinfo: temporary crop information
+
         """
         #print ('sedds ', str(self.seeds.shape), ' se ',
         #       str(self.segmentation.shape), ' d3d ', str(self.data3d.shape))
@@ -269,10 +268,9 @@ class OrganSegmentation():
         self.crinfo = qmisc.combinecrinfo(self.crinfo, tmpcrinfo)
         logger.debug("crinfo " + str(self.crinfo))
 
-        #print '----sedds ', self.seeds.shape, ' se ', self.segmentation.shape,\
+        #print '----sedds ', self.seeds.shape, ' se ',
+#self.segmentation.shape,\
         #        ' d3d ', self.data3d.shape
-
-
 
     def _interactivity_begin(self):
         logger.debug('_interactivity_begin()')
@@ -402,7 +400,6 @@ class OrganSegmentation():
         self.segmentation[self.segmentation == 1] = self.output_label
 #
         self.processing_time = time.time() - self.time_start
-
 
 #    def interactivity(self, min_val=800, max_val=1300):
     def interactivity(self, min_val=None, max_val=None):
@@ -611,8 +608,10 @@ class OrganSegmentation():
             (data['segmentation'] == self.output_label).astype(np.int8)
         }
         datawriter.saveOverlayToDicomCopy(self.metadata['dcmfilelist'],
-                                output_dicom_dir, overlays,
-                                data['crinfo'], data['orig_shape'])
+                                          output_dicom_dir, overlays,
+                                          data['crinfo'], data['orig_shape'])
+
+
 # GUI
 class OrganSegmentationWindow(QMainWindow):
 
@@ -661,7 +660,7 @@ class OrganSegmentationWindow(QMainWindow):
         info.setFont(font_info)
         lisa_title.setFont(font_label)
         lisa_logo = QLabel()
-        logopath = os.path.join(path_to_script,"../applications/LISA256.png")
+        logopath = os.path.join(path_to_script, "../applications/LISA256.png")
         logo = QPixmap(logopath)
         lisa_logo.setPixmap(logo)
         grid.addWidget(lisa_title, 0, 1)
@@ -781,7 +780,10 @@ class OrganSegmentationWindow(QMainWindow):
 
         oseg = self.oseg
         if oseg.datapath is None:
-           oseg.datapath = dcmreader.get_dcmdir_qt(app=True)
+            oseg.datapath = dcmreader.get_dcmdir_qt(
+                app=True,
+                directory=self.oseg.input_datapath_start
+            )
 
         if oseg.datapath is None:
             self.statusBar().showMessage('No DICOM directory specified!')
@@ -872,7 +874,7 @@ class OrganSegmentationWindow(QMainWindow):
         #print 'ms d3d ', oseg.data3d.shape
         #print 'ms seg ', oseg.segmentation.shape
         #print 'crinfo ', oseg.crinfo
-        if  oseg.data3d is None:
+        if oseg.data3d is None:
             self.statusBar().showMessage('No DICOM data!')
             return
 
@@ -903,7 +905,7 @@ class OrganSegmentationWindow(QMainWindow):
                 timstr = str(datetime.timedelta(seconds=round(tim)))
                 logger.debug('tim = ' + str(tim))
                 aux = 'volume = %.2f [ml] , time = %s' %\
-                (nn * voxelvolume_mm3 / 1000, timstr)
+                      (nn * voxelvolume_mm3 / 1000, timstr)
             else:
                 aux = 'volume = %.6e mm3' % (nn * voxelvolume_mm3, )
             self.setLabelText(self.text_seg_data, msg + aux)
@@ -981,16 +983,20 @@ def main():
 
     #logger.debug('input params')
 
-    ## read confguraton from file, use default values from OrganSegmentation
+    # read confguraton from file, use default values from OrganSegmentation
+    cfg = config.get_default_function_config(OrganSegmentation.__init__)
+
+    # for parameters without support in OrganSegmentation or to overpower
+    # default OrganSegmentation values use cfgplus
     cfgplus = {
         'datapath': None,
         'viewermax': 225,
         'viewermin': -125,
-        'output_datapath': os.path.expanduser("~/lisa_data")
+        'output_datapath': os.path.expanduser("~/lisa_data"),
+        'input_datapath_start': os.path.expanduser("~/lisa_data")
         #'config_version':[1,1]
     }
 
-    cfg = config.get_default_function_config(OrganSegmentation.__init__)
     cfg.update(cfgplus)
     # now is in cfg default values
 
@@ -1083,6 +1089,10 @@ def main():
         '-ec', '--experiment_caption', type=str,  # type=int,
         help='Short caption of experiment. No special characters.',
         default=cfg["experiment_caption"])
+    parser.add_argument(
+        '-ids', '--input_datapath_start', type=str,  # type=int,
+        help='Start datapath for input dialog.',
+        default=cfg["input_datapath_start"])
     parser.add_argument(
         '-oi', '--lisa_operator_identifier', type=str,  # type=int,
         help='Identifier of Lisa operator.',

@@ -11,7 +11,7 @@ Created:     08/11/2012
 """
 
 import sys
-from imageio.util import im1
+#from imageio.util import im1
 sys.path.append("../src/")
 sys.path.append("../extern/")
 
@@ -41,15 +41,15 @@ from matplotlib.widgets import Slider, Button#, RadioButtons
 import gc as garbage
 
 class uiThreshold:
-    
+
     """
 
     UI pro prahovani 3D dat.
 
     """
-    
-    def __init__(self, data, voxel, threshold = -1, interactivity = True, number = 100.0, inputSigma = -1, 
-                 nObj = 10,  biggestObjects = True, binaryClosingIterations = 2, binaryOpeningIterations = 0, 
+
+    def __init__(self, data, voxel, threshold = -1, interactivity = True, number = 100.0, inputSigma = -1,
+                 nObj = 10,  biggestObjects = True, binaryClosingIterations = 2, binaryOpeningIterations = 0,
                  seeds = None, cmap = matplotlib.cm.Greys_r):
 
         """
@@ -428,7 +428,7 @@ class uiThreshold:
             closeNum = self.ICBinaryClosingIterations
             openNum = self.ICBinaryOpeningIterations
 
-        
+
         if (closeNum >= 1) or (openNum >= 1):
 
             ## Vlastni binarni uzavreni.
@@ -520,7 +520,7 @@ class uiThreshold:
 
         """
 
-        Automaticky vypocet prahu - pokud jsou data bez oznacenych objektu, tak vraci nekolik nejvetsich objektu. 
+        Automaticky vypocet prahu - pokud jsou data bez oznacenych objektu, tak vraci nekolik nejvetsich objektu.
         Pokud jsou ale definovany prioritni seedy, tak je na jejich zaklade vypocitan prah.
 
         """
