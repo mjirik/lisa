@@ -13,9 +13,6 @@ Copyright:   (c) Pavel Volkovinsky
 
 import sys
 
-# // Nevim, co to je!? # Pavel Volkovinský
-# from imageio.util import im1
-
 sys.path.append("../src/")
 sys.path.append("../extern/")
 
@@ -792,4 +789,3 @@ class uiThreshold:
             self.sclose.valtext.set_text('{}'.format(self.sclose.val))
             self.fig.canvas.draw()
             self.updateImage(0)
-

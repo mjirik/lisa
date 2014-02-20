@@ -53,12 +53,12 @@ class inspector:
 
             import copy
             self.dataOrig = copy.copy(data)
-            self.data = copy.copy(dataOrig)
+            self.data = copy.copy(self.dataOrig)
 
         else:
 
             self.dataOrig = data.copy()
-            self.data = dataOrig.copy()
+            self.data = self.dataOrig.copy()
         
 
         self.cmap = cmap
