@@ -1,17 +1,21 @@
+# -*- coding: utf-8 -*-
 """
 -------------------------------------------------------------------------------
-Name:        uiThreshold
-Purpose:     ZCU - FAV
+Purpose:     (CZE-ZCU-FAV-KKY) Liver medical project
 
 Author:      Pavel Volkovinsky
 Email:       volkovinsky.pavel@gmail.com
 
-Created:     08/11/2012
+Created:     2012/11/08
+Copyright:   (c) Pavel Volkovinsky
 -------------------------------------------------------------------------------
 """
 
 import sys
-#from imageio.util import im1
+
+# // Nevim, co to je!? # Pavel Volkovinský
+# from imageio.util import im1
+
 sys.path.append("../src/")
 sys.path.append("../extern/")
 
@@ -356,6 +360,20 @@ class uiThreshold:
         self.overrideThres = False
 
         #garbage.collect()
+
+        self.debugInfo()
+
+    def debugInfo(self):
+
+        print '======'
+        print '!Debug'
+        print '\tUpdate cycle:' 
+        print '\t\tThreshold min: ' + str(numpy.round(self.threshold, 2))
+        print '\t\tThreshold max: ' + str(numpy.round(self.smax.val, 2))
+        print '\t\tBinary closing: ' + str(numpy.round(self.sclose.val, 0))
+        print '\t\tBinary opening: ' + str(numpy.round(self.sopen.val, 0))
+        print '\t\tSigma filter param: ' + str(numpy.round(self.ssigma.val, 2))
+        print '======'
 
     def gaussFilter(self):
 

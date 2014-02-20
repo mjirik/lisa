@@ -1,12 +1,13 @@
-﻿"""
+﻿# -*- coding: utf-8 -*-
+"""
 -------------------------------------------------------------------------------
-Name:        uiThreshold
-Purpose:     ZCU - FAV
+Purpose:     (CZE-ZCU-FAV-KKY) Liver medical project
 
 Author:      Pavel Volkovinsky
 Email:       volkovinsky.pavel@gmail.com
 
-Created:     08/11/2012
+Created:     2012/11/08
+Copyright:   (c) Pavel Volkovinsky
 -------------------------------------------------------------------------------
 """
 

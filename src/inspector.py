@@ -2,13 +2,12 @@
 # -*- coding: utf-8 -*-
 """
 ================================================================================
-Name:        inspector
 Purpose:     (CZE-ZCU-FAV-KKY) Liver medical project
 
 Author:      Pavel Volkovinsky
 Email:		 volkovinsky.pavel@gmail.com
 
-Created:     16.02.2013
+Created:     2013/02/16
 Copyright:   (c) Pavel Volkovinsky
 ================================================================================
 """
@@ -50,7 +49,18 @@ class inspector:
 
         print('Spoustim inspektor dat...')
 
-        self.data = data
+        if (sys.version_info[0] < 3):
+
+            import copy
+            self.dataOrig = copy.copy(data)
+            self.data = copy.copy(dataOrig)
+
+        else:
+
+            self.dataOrig = data.copy()
+            self.data = dataOrig.copy()
+        
+
         self.cmap = cmap
         self.axcolor = 'white' # lightgoldenrodyellow
 
@@ -69,7 +79,7 @@ class inspector:
         self.im2 = self.ax2.imshow(numpy.amax(self.data, 1), self.cmap)
         self.im3 = self.ax3.imshow(numpy.amax(self.data, 2), self.cmap)
 
-       ## Zalozeni mist pro slidery
+        ## Zalozeni mist pro slidery
         # ...
 
         ## Vlastni vytvoreni slideru
@@ -94,10 +104,7 @@ class inspector:
 
         matpyplot.show()
 
-        """================="""
-        """!!!!!!!!=POZOR=!!!!!!!!!!"""
         self.output = self.data
-        """================="""
 
         garbage.collect()
 

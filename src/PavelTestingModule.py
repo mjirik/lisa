@@ -1,13 +1,15 @@
-#-------------------------------------------------------------------------------
-# Name:        PavelTestingModule
-# Purpose:     ZCU - FAV
-#
-# Author:      Pavel Volkovinsky
-# Email:       volkovinsky.pavel@gmail.com
-#
-# Created:     14/10/2013
-# Copyright:   (c) Pavel Volkovinsky 2013
-#-------------------------------------------------------------------------------
+# -*- coding: utf-8 -*-
+"""
+-------------------------------------------------------------------------------
+Purpose:     (CZE-ZCU-FAV-KKY) Liver medical project
+
+Author:      Pavel Volkovinsky
+Email:       volkovinsky.pavel@gmail.com
+
+Created:     2013/10/14
+Copyright:   (c) Pavel Volkovinsky
+-------------------------------------------------------------------------------
+"""
 
 import segmentation as sg
 import numpy as np
