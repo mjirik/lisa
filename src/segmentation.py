@@ -47,7 +47,7 @@ def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsize_mm = [
         dilationIterations - pocet operaci dilation nad zakladni oblasti pro segmentaci ("segmantation")
         dilationStructure - struktura pro operaci dilation
         nObj - oznacuje, kolik nejvetsich objektu se ma vyhledat - pokud je rovno 0 (nule), vraci cela data
-        getBiggestObjects - moznost, zda se maji vracet nejvetsi objekty nebo ne
+        biggestObjects - moznost, zda se maji vracet nejvetsi objekty nebo ne
         seeds - moznost zadat pocatecni body segmentace na vstupu. Je to matice o rozmerech jako data. Vsude nuly, tam kde je oznaceni jsou jednicky.
         interactivity - nastavi, zda ma nebo nema byt pouzit interaktivni mod upravy dat
         binaryClosingIterations - vstupni binary closing operations
