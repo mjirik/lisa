@@ -18,7 +18,6 @@ sys.path.append("../extern/")
 
 import numpy
 import scipy.ndimage
-from scipy import stats
 
 import thresholding_functions
 
@@ -94,8 +93,6 @@ class uiThreshold:
             self.data = data.copy()
             self.voxel = voxel.copy()
 
-        self.numpyDataOnes = numpy.ones(self.data.shape, dtype = type(self.data[0][0][0]))
-
         ## Kalkulace objemove jednotky (voxel) (V = a*b*c)
         voxel1 = self.voxel[0]
         voxel2 = self.voxel[1]
@@ -120,28 +117,7 @@ class uiThreshold:
 
             else:
 
-                ## Zalozeni pole pro ulozeni seedu
-                self.arrSeed = []
-                ## Zjisteni poctu seedu.
-                stop = self.seeds[0].size
-                tmpSeed = 0
-                dim = numpy.ndim(self.data)
-                for index in range(0, stop):
-                    ## Tady se ukladaji labely na mistech, ve kterych kliknul
-                    ## uzivatel.
-                    if dim == 3:
-                        ## 3D data.
-                        tmpSeed = self.data[self.seeds[0][index], self.seeds[1][index], self.seeds[2][index]]
-                    elif dim == 2:
-                        ## 2D data.
-                        tmpSeed = self.data[self.seeds[0][index], self.seeds[1][index]]
-
-                    ## Tady opet pocitam s tim, ze oznaceni nulou pripada cerne
-                    ## oblasti (pozadi).
-                    if tmpSeed != 0:
-                        ## Pokud se nejedna o pozadi (cernou oblast), tak se
-                        ## novy seed ulozi do pole "arrSeed"
-                        self.arrSeed.append(tmpSeed)
+                self.arrSeed = thresholding_functions.getSeeds(data, self.seeds)
 
                 ## Pokud existuji vhodne labely, vytvori se nova data k
                 ## vraceni.
@@ -197,10 +173,10 @@ class uiThreshold:
             minSigma = 0.00
 
             self.firstRun = True
-            self.calculateAutomaticThreshold()
+            thres = thresholding_functions.calculateAutomaticThreshold(self.data, self.arrSeed)
 
             self.smin = Slider(self.axmin, 'Minimal threshold   ' + str(self.min0),
-                               self.min0, self.max0, valinit = self.threshold, dragging = True)
+                               self.min0, self.max0, valinit = thres, dragging = True)
             self.smax = Slider(self.axmax, 'Maximal threshold   ' + str(self.min0),
                                self.min0, self.max0, valinit = self.max0, dragging = True)
 
@@ -274,25 +250,16 @@ class uiThreshold:
 
             return self.data
 
-        self.lastSigma = -42
-        self.lastCloseNum = -42
-        self.lastOpenNum = -42
-        self.lastMinThresNum = -42
-
-        self.overrideSigma = False
-        self.overrideThres = False
-
         self.firstRun = True
-        self.newThreshold = False
 
         if self.interactivity == False:
 
-             self.updateImage(0)
+             self.updateImage(-1)
              garbage.collect()
 
         else:
 
-             self.updateImage(0)
+             self.updateImage(-1)
              garbage.collect()
              matpyplot.show()
 
@@ -321,14 +288,55 @@ class uiThreshold:
             self.imgFiltering = self.data.copy()
 
         ## Filtrovani
-        self.gaussFilter()
+
+        ## Zjisteni jakou sigmu pouzit
+        if(self.firstRun == True and self.inputSigma >= 0):
+            sigma = numpy.round(self.inputSigma, 2)
+        else:
+            sigma = numpy.round(self.ssigma.val, 2)
+        sigmaNew = thresholding_functions.calculateSigma(self.voxel, sigma)
+
+        self.imgFiltering = thresholding_functions.gaussFilter(self.imgFiltering, sigmaNew)
+
+        del(sigmaNew)
 
         ## Prahovani (smin, smax)
-        self.thresholding()
+
+        max_threshold = -1
+        min_threshold = self.threshold
+
+        if self.interactivity:
+
+            self.smin.val = (numpy.round(self.smin.val, 2))
+            self.smin.valtext.set_text('{}'.format(self.smin.val))
+            self.smax.val = (numpy.round(self.smax.val, 2))
+            self.smax.valtext.set_text('{}'.format(self.smax.val))
+
+            min_threshold = self.smin.val
+            max_threshold = self.smax.val
+
+        if (self.threshold == -1) and self.firstRun:
+
+            min_threshold = thresholding_functions.calculateAutomaticThreshold(self.imgFiltering, self.arrSeed)
+
+        self.imgFiltering = thresholding_functions.thresholding(self.imgFiltering, min_threshold, max_threshold, True, self.interactivity)
 
         ## Operace binarni otevreni a uzavreni.
-        #print '(DEBUG) Typ dat: ' + str(type(self.imgFiltering[0][0][0]))
-        self.binaryClosingOpening()
+        
+        ## Nastaveni hodnot slideru.
+        if (self.interactivity == True) :
+
+            closeNum = int(numpy.round(self.sclose.val, 0))
+            openNum = int(numpy.round(self.sopen.val, 0))
+            self.sclose.valtext.set_text('{}'.format(closeNum))
+            self.sopen.valtext.set_text('{}'.format(openNum))
+
+        else:
+
+            closeNum = self.ICBinaryClosingIterations
+            openNum = self.ICBinaryOpeningIterations
+
+        self.imgFiltering = thresholding_functions.binaryClosingOpening(self.imgFiltering, closeNum, openNum, True)
 
         ## Zjisteni nejvetsich objektu.
         self.getBiggestObjects()
@@ -339,11 +347,8 @@ class uiThreshold:
 
         ## Nastaveni kontrolnich hodnot
         self.firstRun = False
-        self.newThreshold = False
-        self.overrideSigma = False
-        self.overrideThres = False
 
-        #garbage.collect()
+        garbage.collect()
 
         self.debugInfo()
 
@@ -353,10 +358,11 @@ class uiThreshold:
         print '!Debug'
         print '\tUpdate cycle:' 
         print '\t\tThreshold min: ' + str(numpy.round(self.threshold, 2))
-        print '\t\tThreshold max: ' + str(numpy.round(self.smax.val, 2))
-        print '\t\tBinary closing: ' + str(numpy.round(self.sclose.val, 0))
-        print '\t\tBinary opening: ' + str(numpy.round(self.sopen.val, 0))
-        print '\t\tSigma filter param: ' + str(numpy.round(self.ssigma.val, 2))
+        if (self.interactivity == True):
+            print '\t\tThreshold max: ' + str(numpy.round(self.smax.val, 2))
+            print '\t\tBinary closing: ' + str(numpy.round(self.sclose.val, 0))
+            print '\t\tBinary opening: ' + str(numpy.round(self.sopen.val, 0))
+            print '\t\tSigma filter param: ' + str(numpy.round(self.ssigma.val, 2))
         print '======'
 
     def getBiggestObjects(self):
@@ -398,14 +404,7 @@ class uiThreshold:
             #im2 = numpy.amax(self.imgFiltering, axis=2, keepdims=self.numpyAMaxKeepDims)
             #t1 = time.time()
 
-            img0 = numpy.sum(self.imgFiltering, axis = 0, keepdims = self.numpyAMaxKeepDims)
-            img0[img0 > 0] += numpy.max(img0)
-
-            img1 = numpy.sum(self.imgFiltering, axis = 1, keepdims = self.numpyAMaxKeepDims)
-            img1[img1 > 0] += numpy.max(img1)
-
-            img2 = numpy.sum(self.imgFiltering, axis = 2, keepdims = self.numpyAMaxKeepDims)
-            img2[img2 > 0] += numpy.max(img2)
+            img0, img1, img2 = thresholding_functions.prepareVisualization(self.imgFiltering)
 
             #t2 = time.time()
             #print 't1 %f t2 %f ' % (t1 - t0, t2 - t1)
@@ -413,6 +412,10 @@ class uiThreshold:
             self.ax1.imshow(img0, self.cmap)
             self.ax2.imshow(img1, self.cmap)
             self.ax3.imshow(img2, self.cmap)
+
+            #del(img0)
+            #del(img1)
+            #del(img2)
 
         ## Prekresleni
         self.fig.canvas.draw()

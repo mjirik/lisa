@@ -14,8 +14,22 @@ Copyright:   (c) Pavel Volkovinsky
 import numpy
 import scipy
 import scipy.ndimage
+from scipy import stats
 
-def gaussFilter(self):
+def prepareVisualization(data):
+
+    img0 = numpy.sum(data, axis = 0)
+    img0[img0 > 0] += numpy.max(img0)
+
+    img1 = numpy.sum(data, axis = 1)
+    img1[img1 > 0] += numpy.max(img1)
+
+    img2 = numpy.sum(data, axis = 2)
+    img2[img2 > 0] += numpy.max(img2)
+
+    return img0, img1, img2
+
+def gaussFilter(data, sigma):
 
         """
 
@@ -23,31 +37,12 @@ def gaussFilter(self):
 
         """
 
-        ## Zjisteni jakou sigmu pouzit
-        if(self.firstRun == True and self.inputSigma >= 0):
-            sigma = numpy.round(self.inputSigma, 2)
-        else:
-            sigma = numpy.round(self.ssigma.val, 2)
-        sigmaNew = self.calculateSigma(sigma)
-
         ## Filtrovani
-        scipy.ndimage.filters.gaussian_filter(self.imgFiltering, sigmaNew, order = 0, output = self.imgFiltering, mode = 'nearest')
+        scipy.ndimage.filters.gaussian_filter(data, sigma, order = 0, output = data, mode = 'nearest')
 
-        if (self.lastSigma != sigma) or (self.threshold < 0):
-
-            if not self.firstRun:
-
-                self.calculateAutomaticThreshold()
-
-            self.lastSigma = sigma
-
-        else:
-
-            self.threshold = self.smin.val
-
-        del(sigmaNew)
-
-def thresholding(self):
+        return data
+        
+def thresholding(data, min_threshold, max_threshold, use_min_threshold = True, use_max_Threshold = True):
 
         """
 
@@ -55,17 +50,17 @@ def thresholding(self):
 
         """
 
-        self.imgFiltering = self.imgFiltering * (self.imgFiltering >= self.threshold)
-        self.imgFiltering = self.imgFiltering * (self.imgFiltering <= self.smax.val)
+        if use_min_threshold:
+            
+            data = data * (data >= min_threshold)
 
-        if (self.interactivity == True) :
+        if use_max_Threshold:
 
-            self.smin.val = (numpy.round(self.threshold, 2))
-            self.smin.valtext.set_text('{}'.format(self.smin.val))
-            self.smax.val = (numpy.round(self.smax.val, 2))
-            self.smax.valtext.set_text('{}'.format(self.smax.val))
+            data = data * (data <= max_threshold)
 
-def binaryClosingOpening(self):
+        return data
+
+def binaryClosingOpening(data, closeNum, openNum, firstClosing = True):
 
         """
 
@@ -73,33 +68,37 @@ def binaryClosingOpening(self):
 
         """
 
-        ## Nastaveni hodnot slideru.
-        if (self.interactivity == True) :
-
-            closeNum = int(numpy.round(self.sclose.val, 0))
-            openNum = int(numpy.round(self.sopen.val, 0))
-            self.sclose.valtext.set_text('{}'.format(closeNum))
-            self.sopen.valtext.set_text('{}'.format(openNum))
-
-        else:
-
-            closeNum = self.ICBinaryClosingIterations
-            openNum = self.ICBinaryOpeningIterations
-
-
         if (closeNum >= 1) or (openNum >= 1):
 
-            ## Vlastni binarni uzavreni.
-            if (closeNum >= 1):
+            numpyDataOnes = numpy.ones(data.shape, dtype = type(data[0][0][0]))
 
-                self.imgFiltering = self.numpyDataOnes * scipy.ndimage.binary_closing(self.imgFiltering, iterations = closeNum)
+            if firstClosing:
 
-            ## Vlastni binarni otevreni.
-            if (openNum >= 1):
+                ## Vlastni binarni uzavreni.
+                if (closeNum >= 1):
 
-                self.imgFiltering = self.numpyDataOnes * scipy.ndimage.binary_opening(self.imgFiltering, iterations = openNum)
+                    data = numpyDataOnes * scipy.ndimage.binary_closing(data, iterations = closeNum)
 
-def calculateSigma(self, input):
+                ## Vlastni binarni otevreni.
+                if (openNum >= 1):
+
+                    data = numpyDataOnes * scipy.ndimage.binary_opening(data, iterations = openNum)
+
+            else:          
+
+                ## Vlastni binarni otevreni.
+                if (openNum >= 1):
+
+                    data = numpyDataOnes * scipy.ndimage.binary_opening(data, iterations = openNum)
+
+                ## Vlastni binarni uzavreni.
+                if (closeNum >= 1):
+
+                    data = numpyDataOnes * scipy.ndimage.binary_closing(data, iterations = closeNum)
+
+        return data
+
+def calculateSigma(voxel, input):
 
         """
 
@@ -107,16 +106,21 @@ def calculateSigma(self, input):
 
         """
 
-        if (self.voxel[0] == self.voxel[1] == self.voxel[2]):
-            return ((5 / self.voxel[0]) * input) / self.voxelV
+        voxelV = voxel[0] * voxel[1] * voxel[2]
+
+        if (voxel[0] == voxel[1] == voxel[2]):
+
+            return ((5 / voxel[0]) * input) / voxelV
+
         else:
-            sigmaX = (5.0 / self.voxel[0]) * input
-            sigmaY = (5.0 / self.voxel[1]) * input
-            sigmaZ = (5.0 / self.voxel[2]) * input
 
-            return (sigmaX, sigmaY, sigmaZ) / self.voxelV
+            sigmaX = (5.0 / voxel[0]) * input
+            sigmaY = (5.0 / voxel[1]) * input
+            sigmaZ = (5.0 / voxel[2]) * input
 
-def calculateAutomaticThreshold(self):
+            return (sigmaX, sigmaY, sigmaZ) / voxelV
+         
+def calculateAutomaticThreshold(data, arrSeed = None):
 
         """
 
@@ -125,28 +129,32 @@ def calculateAutomaticThreshold(self):
 
         """
 
-        if self.arrSeed != None:
+        if arrSeed != None:
 
-            self.threshold = numpy.round(min(self.arrSeed), 2) - 1
-            print('Zjisten automaticky threshold ze seedu (o 1 zmenseny): ' + str(self.threshold))
-            return self.threshold
-
-        self.imgUsed = self.data
+            threshold = numpy.round(min(arrSeed), 2) - 1
+            print('Zjisten automaticky threshold ze seedu (o 1 zmenseny): ' + str(threshold))
+            return threshold
 
         ## Hustota hist
         hist_points = 1300
+
         ## Pocet bodu v primce 1 ( klesajici od maxima )
         pointsFrom = 20 #(int)(hist_points * 0.05)
+
         ## Pocet bodu v primce 2 ( stoupajici k okoli spravneho thresholdu)
         pointsTo = 20 #(int)(hist_points * 0.1)
+
         ## Pocet bodu k preskoceni od konce hist
         pointsSkip = (int)(hist_points * 0.025)
+
         ## hledani maxima: zacina se od 'start'*10 procent delky histu (aby se
         ## preskocili prvni oscilace)
         start = 0.1
 
+
+
         ## hist: funkce(threshold)
-        hist, bin_edges = numpy.histogram(self.imgUsed, bins = hist_points)
+        hist, bin_edges = numpy.histogram(data, bins = hist_points)
         ## bin_centers: threshold
         bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
 
@@ -239,10 +247,10 @@ def calculateAutomaticThreshold(self):
 
         """
 
-        self.threshold = (intercept2 - intercept1) / (slope1 - slope2)
-        self.threshold = numpy.round(self.threshold, 2)
+        threshold = (intercept2 - intercept1) / (slope1 - slope2)
+        threshold = numpy.round(threshold, 2)
 
-        print('Zjisten threshold: ' + str(self.threshold))
+        print('Zjisten threshold: ' + str(threshold))
 
         """
         muj_histogram_graph = []
@@ -262,7 +270,34 @@ def calculateAutomaticThreshold(self):
         matpyplot.show()
         """
 
-        self.newThreshold = True
+        return threshold
+
+def getSeeds(data, seeds):
+
+    ## Zalozeni pole pro ulozeni seedu
+    arrSeed = []
+    ## Zjisteni poctu seedu.
+    stop = seeds[0].size
+    tmpSeed = 0
+    dim = numpy.ndim(data)
+    for index in range(0, stop):
+        ## Tady se ukladaji labely na mistech, ve kterych kliknul
+        ## uzivatel.
+        if dim == 3:
+            ## 3D data.
+            tmpSeed = data[seeds[0][index], seeds[1][index], seeds[2][index]]
+        elif dim == 2:
+            ## 2D data.
+            tmpSeed = data[seeds[0][index], seeds[1][index]]
+
+        ## Tady opet pocitam s tim, ze oznaceni nulou pripada cerne
+        ## oblasti (pozadi).
+        if tmpSeed != 0:
+            ## Pokud se nejedna o pozadi (cernou oblast), tak se
+            ## novy seed ulozi do pole "arrSeed"
+            arrSeed.append(tmpSeed)
+
+    return arrSeed
 
 def getPriorityObjects(data, nObj = 1, seeds = None, debug = False):
 
