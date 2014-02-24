@@ -16,6 +16,9 @@ import scipy
 import scipy.ndimage
 from scipy import stats
 
+import matplotlib
+import matplotlib.pyplot as matpyplot
+
 def prepareVisualization(data):
 
     img0 = numpy.sum(data, axis = 0)
@@ -68,33 +71,31 @@ def binaryClosingOpening(data, closeNum, openNum, firstClosing = True):
 
         """
 
-        if (closeNum >= 1) or (openNum >= 1):
+        numpyDataOnes = numpy.ones(data.shape, dtype = type(data[0][0][0]))
 
-            numpyDataOnes = numpy.ones(data.shape, dtype = type(data[0][0][0]))
+        if firstClosing:
 
-            if firstClosing:
+            ## Vlastni binarni uzavreni.
+            if (closeNum >= 1):
 
-                ## Vlastni binarni uzavreni.
-                if (closeNum >= 1):
+                data = data * scipy.ndimage.binary_closing(data, iterations = closeNum)
 
-                    data = numpyDataOnes * scipy.ndimage.binary_closing(data, iterations = closeNum)
+            ## Vlastni binarni otevreni.
+            if (openNum >= 1):
 
-                ## Vlastni binarni otevreni.
-                if (openNum >= 1):
+                data = data * scipy.ndimage.binary_opening(data, iterations = openNum)
 
-                    data = numpyDataOnes * scipy.ndimage.binary_opening(data, iterations = openNum)
+        else:          
 
-            else:          
+            ## Vlastni binarni otevreni.
+            if (openNum >= 1):
 
-                ## Vlastni binarni otevreni.
-                if (openNum >= 1):
+                data = data * scipy.ndimage.binary_opening(data, iterations = openNum)
 
-                    data = numpyDataOnes * scipy.ndimage.binary_opening(data, iterations = openNum)
+            ## Vlastni binarni uzavreni.
+            if (closeNum >= 1):
 
-                ## Vlastni binarni uzavreni.
-                if (closeNum >= 1):
-
-                    data = numpyDataOnes * scipy.ndimage.binary_closing(data, iterations = closeNum)
+                data = data * scipy.ndimage.binary_closing(data, iterations = closeNum)
 
         return data
 
@@ -167,7 +168,7 @@ def calculateAutomaticThreshold(data, arrSeed = None):
                 last = hist[index] ## maximum histu
                 init_index = index ## pozice maxima histu
 
-        ## muj_histogram_temp(x+1) == { f(x+1) = hist[x+1] + hist[x] }
+        ## muj_histogram_temp == { f(x+1) = hist[x+1] + hist[x] }
         ## stoupajici tendence histogramu
         muj_histogram_temp = []
         muj_histogram_temp.insert(0, hist[0])
@@ -272,6 +273,66 @@ def calculateAutomaticThreshold(data, arrSeed = None):
 
         return threshold
 
+def histogram(data, interactivity, histogram_points = 1000, start = -1, end = -1, line = -1):
+
+    ## hist: funkce(threshold)
+    hist, bin_edges = numpy.histogram(data, bins = histogram_points)
+    ## bin_centers: threshold
+    bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
+
+    if (start >= 0) or (end >= 0):
+
+        start_index = 0
+        end_index = len(hist)
+
+        if start >= 0:
+        
+            start_index = -1
+
+        if end >= 0:
+
+            end_index = -1
+
+        for i in range( 0, len(hist)):
+
+            if (bin_centers[i] >= start_index) and (start_index == -1):
+
+                start_index = i
+
+            if (bin_centers[i] >= end_index) and (end_index == -1):
+
+                end_index = i
+
+        if end_index == -1:
+
+            end_index = len(hist)
+
+        histogram = []
+        centers = []
+
+        for i in range( start_index, end_index):
+
+            histogram.append(hist[i])
+            centers.append(bin_centers[i])
+
+    else:
+
+        histogram = hist
+        centers = bin_centers
+
+    if interactivity:
+
+        matpyplot.figure(figsize = (11, 4))
+        matpyplot.plot(centers, histogram, lw = 2)
+        #matpyplot.plot([1100*slope1], [1200*slope1], label='one', color='green')
+        #matpyplot.plot([1100*slope2], [1200*slope2], label='two', color='blue')
+
+        if line != -1:
+
+            matpyplot.axvline(line, color = 'r', ls = '--', lw = 2)
+
+        matpyplot.show()
+
 def getSeeds(data, seeds):
 
     ## Zalozeni pole pro ulozeni seedu
@@ -280,9 +341,9 @@ def getSeeds(data, seeds):
     stop = seeds[0].size
     tmpSeed = 0
     dim = numpy.ndim(data)
+
     for index in range(0, stop):
-        ## Tady se ukladaji labely na mistech, ve kterych kliknul
-        ## uzivatel.
+        ## Tady se ukladaji labely na mistech, ve kterych kliknul uzivatel.
         if dim == 3:
             ## 3D data.
             tmpSeed = data[seeds[0][index], seeds[1][index], seeds[2][index]]
@@ -333,6 +394,9 @@ def getPriorityObjects(data, nObj = 1, seeds = None, debug = False):
     ## Uzivatel si nevybral specificke objekty.
     if (seeds == None) :
 
+        print 'Vraceni bez seedu'
+        print 'Objekty: ' + str(nObj)
+
         ## Zjisteni nejvetsich objektu.
         arrayLabelsSum, arrayLabels = areaIndexes(dataLabels, length)
         ## Serazeni labelu podle velikosti oznacenych dat (prvku / ploch).
@@ -372,6 +436,8 @@ def getPriorityObjects(data, nObj = 1, seeds = None, debug = False):
 
     ## Uzivatel si vybral specificke objekty (seeds != None).
     else:
+
+        print 'Vraceni se seedy'
 
         ## Zalozeni pole pro ulozeni seedu
         arrSeed = []

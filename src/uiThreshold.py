@@ -173,7 +173,10 @@ class uiThreshold:
             minSigma = 0.00
 
             self.firstRun = True
-            thres = thresholding_functions.calculateAutomaticThreshold(self.data, self.arrSeed)
+
+            thres = self.threshold
+            if thres == -1:
+                thres = thresholding_functions.calculateAutomaticThreshold(self.data, self.arrSeed)
 
             self.smin = Slider(self.axmin, 'Minimal threshold   ' + str(self.min0),
                                self.min0, self.max0, valinit = thres, dragging = True)
@@ -269,6 +272,10 @@ class uiThreshold:
 
         return self.imgFiltering
 
+    def returnLastThreshold(self):
+
+        return self.threshold
+
     def updateImage(self, val):
 
         """
@@ -314,6 +321,8 @@ class uiThreshold:
 
             min_threshold = self.smin.val
             max_threshold = self.smax.val
+
+            self.threshold = min_threshold
 
         if (self.threshold == -1) and self.firstRun:
 
@@ -374,6 +383,7 @@ class uiThreshold:
         """
 
         if (self.biggestObjects == True or self.seeds != None) :
+
            self.imgFiltering = thresholding_functions.getPriorityObjects(self.imgFiltering, self.nObj, self.seeds)
 
     def drawVisualization(self):

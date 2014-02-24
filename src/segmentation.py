@@ -28,7 +28,8 @@ import gc as garbage
 def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsize_mm = [1,1,1], inputSigma = -1, 
                        dilationIterations = 0, dilationStructure = None, nObj = 10, biggestObjects = False, 
                        seeds = None, interactivity = True, binaryClosingIterations = 2, 
-                       binaryOpeningIterations = 0, smartInitBinaryOperations = True):
+                       binaryOpeningIterations = 0, smartInitBinaryOperations = True,
+                       returnThreshold = False, binaryOutput = True):
 
     """
 
@@ -53,6 +54,8 @@ def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsize_mm = [
         binaryClosingIterations - vstupni binary closing operations
         binaryOpeningIterations - vstupni binary opening operations
         smartInitBinaryOperations - logicka hodnota pro smart volbu pocatecnich hodnot binarnich operaci (bin. uzavreni a bin. otevreni)
+        returnThreshold - jako druhy parametr funkce vrati posledni hodnotu prahu
+        binaryOutput - zda ma byt vystup vracen binarne nebo ne (binarnim vystupem se rozumi: cokoliv jineho nez hodnota 0 je hodnota 1)
 
     Output:
         filtrovana data
@@ -73,8 +76,10 @@ def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsize_mm = [
         print 'Funkce spustena s vracenim nejvetsich objektu => nebude mozne vybrat prioritni objekty!'
 
     if ( nObj < 1 ) :
-        print 'K vraceni vybran 1 objekt.'
         nObj = 1
+
+    if biggestObjects:
+        print 'Vybrano objektu k vraceni: ' + str(nObj)
 
     print('Pripravuji data...')
 
@@ -122,7 +127,9 @@ def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsize_mm = [
     if(inputSigma > number):
         inputSigma = number
 
-    if biggestObjects == False and seeds == None:
+    seeds = None
+    if biggestObjects == False and seeds == None and interactivity == True:
+
         print('Nyni si levym nebo pravym tlacitkem mysi (klepnutim nebo tazenim) oznacte specificke oblasti k vraceni.')
         import py3DSeedEditor
         pyed = py3DSeedEditor.py3DSeedEditor(preparedData)
@@ -131,16 +138,19 @@ def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsize_mm = [
 
         ## Zkontrolovat, jestli uzivatel neco vybral - nejaky item musi byt ruzny od nuly.
         if (seeds != 0).any() == False:
-            print 'Zadne seedy nezvoleny => nejsou prioritni objekty.'
+
             seeds = None
+            print 'Zadne seedy nezvoleny => nejsou prioritni objekty.'
+
         else:
+
             seeds = seeds.nonzero()#seeds * (seeds != 0) ## seeds je n-tice poli indexu nenulovych prvku => item krychle je == krychle[ seeds[0][x], seeds[1][x], seeds[2][x] ]
             print 'Seedu bez nul: ' + str(len(seeds[0]))
 
     closing = binaryClosingIterations
     opening = binaryOpeningIterations
 
-    if (smartInitBinaryOperations):
+    if (smartInitBinaryOperations and interactivity):
 
         if (seeds == None):
 
@@ -158,19 +168,21 @@ def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsize_mm = [
         opening, seeds)
     output = uiT.run()
 
-    del(preparedData)
-    del(uiT)
-    garbage.collect()
-
     ## Vypocet binarni matice.
     if output == None:
 
         print 'Zadna data k vraceni! (output == None)'
 
-    else:
+    elif binaryOutput:
 
         output[output != 0] = 1
 
     ## Vraceni matice.
-    return output
+    if returnThreshold:
+
+        return output, uiT.returnLastThreshold()
+
+    else:
+
+        return output
 
