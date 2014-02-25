@@ -276,62 +276,27 @@ def calculateAutomaticThreshold(data, arrSeed = None):
 def histogram(data, interactivity, histogram_points = 1000, start = -1, end = -1, line = -1):
 
     ## hist: funkce(threshold)
-    hist, bin_edges = numpy.histogram(data, bins = histogram_points)
+    hist, bin_edges = numpy.histogram(data, bins = histogram_points, range = (start, end))
     ## bin_centers: threshold
     bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
-
-    if (start >= 0) or (end >= 0):
-
-        start_index = 0
-        end_index = len(hist)
-
-        if start >= 0:
-        
-            start_index = -1
-
-        if end >= 0:
-
-            end_index = -1
-
-        for i in range( 0, len(hist)):
-
-            if (bin_centers[i] >= start_index) and (start_index == -1):
-
-                start_index = i
-
-            if (bin_centers[i] >= end_index) and (end_index == -1):
-
-                end_index = i
-
-        if end_index == -1:
-
-            end_index = len(hist)
-
-        histogram = []
-        centers = []
-
-        for i in range( start_index, end_index):
-
-            histogram.append(hist[i])
-            centers.append(bin_centers[i])
-
-    else:
-
-        histogram = hist
-        centers = bin_centers
 
     if interactivity:
 
         matpyplot.figure(figsize = (11, 4))
-        matpyplot.plot(centers, histogram, lw = 2)
+        matpyplot.plot(bin_centers, hist, lw = 2)
         #matpyplot.plot([1100*slope1], [1200*slope1], label='one', color='green')
         #matpyplot.plot([1100*slope2], [1200*slope2], label='two', color='blue')
 
         if line != -1:
 
-            matpyplot.axvline(line, color = 'r', ls = '--', lw = 2)
+            matpyplot.axvline(line, color = 'purple', ls = '--', lw = 2)
 
         matpyplot.show()
+
+    ## Return values:
+    ## centers = x
+    ## histogram = f(x) = f(centers)
+    return bin_centers, hist
 
 def getSeeds(data, seeds):
 
