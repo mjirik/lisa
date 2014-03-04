@@ -212,6 +212,26 @@ class OrganSegmentation():
         self.working_voxelsize_mm = vx_size
         #return vx_size
 
+    def segm_smoothing(self, sigma_mm):
+        """
+        Shape of output segmentation is smoothed with gaussian filter.
+
+        Sigma is computed in mm
+
+        """
+        #print "smoothing"
+        sigma = float(sigma_mm) / np.array(self.voxelsize_mm)
+
+        #print sigma
+        #import pdb; pdb.set_trace()
+        self.segmentation = scipy.ndimage.filters.gaussian_filter(
+            self.segmentation.astype(np.float32), sigma)
+        #import pdb; pdb.set_trace()
+        #pyed = py3DSeedEditor.py3DSeedEditor(self.orig_scale_segmentation)
+        #pyed.show()
+
+        self.segmentation = (1.0 * (self.segmentation > 0.5)).astype(np.int8)
+
     def process_dicom_data(self):
         # voxelsize processing
         #self.parameters = {}
