@@ -29,7 +29,7 @@ def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsize_mm = [
                        dilationIterations = 0, dilationStructure = None, nObj = 10, biggestObjects = False, 
                        seeds = None, interactivity = True, binaryClosingIterations = 2, 
                        binaryOpeningIterations = 0, smartInitBinaryOperations = True,
-                       returnThreshold = False, binaryOutput = True):
+                       returnThreshold = False, binaryOutput = True, returnUsedData = False):
 
     """
 
@@ -56,6 +56,7 @@ def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsize_mm = [
         smartInitBinaryOperations - logicka hodnota pro smart volbu pocatecnich hodnot binarnich operaci (bin. uzavreni a bin. otevreni)
         returnThreshold - jako druhy parametr funkce vrati posledni hodnotu prahu
         binaryOutput - zda ma byt vystup vracen binarne nebo ne (binarnim vystupem se rozumi: cokoliv jineho nez hodnota 0 je hodnota 1)
+        returnUsedData - vrati pouzita data
 
     Output:
         filtrovana data
@@ -180,9 +181,21 @@ def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsize_mm = [
     ## Vraceni matice.
     if returnThreshold:
 
-        return output, uiT.returnLastThreshold()
+        if returnUsedData:
+
+            return preparedData, output, uiT.returnLastThreshold()
+
+        else:
+
+            return output, uiT.returnLastThreshold()
 
     else:
 
-        return output
+        if returnUsedData:
+
+            return preparedData, output
+
+        else:
+
+            return output
 
