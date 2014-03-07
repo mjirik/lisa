@@ -158,6 +158,7 @@ class OrganSegmentation():
         self.viewermax = viewermax
         self.viewermin = viewermin
         self.volume_unit = volume_unit
+        self.organ_interactivity_counter = 0
 
         if data3d is None or metadata is None:
             # if 'datapath' in self.iparams:
@@ -351,6 +352,7 @@ class OrganSegmentation():
             mode='nearest',
             order=0
         )
+        self.organ_interactivity_counter = igc.interactivity_counter
 
 # @TODO odstranit hack pro oříznutí na stejnou velikost
 # v podstatě je to vyřešeno, ale nechalo by se to dělat elegantněji v zoom
@@ -576,6 +578,7 @@ class OrganSegmentation():
         data['version'] = self.version  # qmisc.getVersionString()
         data['experiment_caption'] = self.experiment_caption
         data['lisa_operator_identifier'] = self.lisa_operator_identifier
+        data['organ_interactivity_counter'] = self.organ_interactivity_counter
         pth, filename = op.split(op.normpath(self.datapath))
         filename += "-" + self.experiment_caption
 #        if savestring in ['a', 'A']:
