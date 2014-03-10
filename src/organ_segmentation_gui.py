@@ -160,6 +160,14 @@ class OrganSegmentation():
         self.volume_unit = volume_unit
         self.organ_interactivity_counter = 0
 
+#
+        oseg_input_params = locals()
+        oseg_input_params = self.__clean_oseg_input_params(oseg_input_params)
+
+        logger.debug("oseg_input_params")
+        logger.debug(str(oseg_input_params))
+        self.oseg_input_params = oseg_input_params
+
         if data3d is None or metadata is None:
             # if 'datapath' in self.iparams:
             #     datapath = self.iparams['datapath']
@@ -187,6 +195,16 @@ class OrganSegmentation():
             # self.iparams['series_number'] = self.metadata['series_number']
             # self.iparams['datapath'] = self.metadata['datapath']
         #self.process_dicom_data()
+
+    def __clean_oseg_input_params(self, oseg_params):
+        """
+        Used for storing input params of organ segmentation. Big data are not
+        stored due to big  memory usage.
+        """
+        oseg_params['data3d'] = None
+        oseg_params['segmentation'] = None
+        oseg_params.pop('self')
+        return oseg_params
 
     def process_wvx_size_mm(self):
 
@@ -483,6 +501,7 @@ class OrganSegmentation():
         data['voxelsize_mm'] = self.voxelsize_mm
         data['orig_shape'] = self.orig_shape
         data['processing_time'] = self.processing_time
+        data['oseg_input_params'] = self.oseg_input_params
 # TODO add dcmfilelist
         #data["metadata"] = self.metadata
         #import pdb; pdb.set_trace()
