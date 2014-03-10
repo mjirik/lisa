@@ -1,8 +1,6 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
 
-
-
 # import funkcí z jiného adresáře
 import sys
 import os.path
@@ -20,7 +18,6 @@ import logging
 logger = logging.getLogger(__name__)
 import argparse
 
-import numpy as np
 import scipy
 
 # ----------------- my scripts --------
@@ -30,24 +27,28 @@ import dcmreaddata
 import show3
 import vessel_cut
 import scipy.ndimage.measurements as scimeas
-from skimage.morphology import remove_small_objects
+# from skimage.morphology import remove_small_objects
+import skimage.morphology as skimor
 from skimage.segmentation import random_walker
+import skimage.filter as skifil
 from skimage import measure as skmeasure
 import scipy.ndimage.morphology as scimorph
 from scipy.ndimage import generate_binary_structure
 import cv2
-from mayavi import mlab
-import pymorph as pm
+import tools
+# from mayavi import mlab
+# import pymorph as pm
 
 # version-dependent imports ---------------------------------
 from pkg_resources import parse_version
 
-#importing distance transform
+# importing distance transform
 if parse_version(scipy.__version__) > parse_version('0.9'):
     from scipy.ndimage.morphology import distance_transform_edt
 else:
     from scipy.ndimage import distance_transform_edt
 # -----------------------------------------------------------
+
 
 class Lesions:
     """
@@ -66,16 +67,16 @@ class Lesions:
 
     """
 
-
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
     def __init__(self, data3d=None, voxelsize_mm=None, segmentation=None, slab=None):
         self.data3d = data3d
+        self.data = None
         self.segmentation = segmentation
         self.slab = slab
         self.voxelsize_mm = voxelsize_mm
-        self.min_size_of_comp = 200 #minimal size of object to be considered as lession
-
+        # self.min_size_of_comp = 200 #minimal size of object to be considered as lession
+        self.min_size_of_comp = 50  # minimal size of object to be considered as lession
 
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
@@ -86,7 +87,6 @@ class Lesions:
         self.slab = data['slab']
         self.voxelsize_mm = data['voxelsize_mm']
 
-
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
     def automatic_localization(self):
@@ -94,13 +94,7 @@ class Lesions:
         Automatic localization of lesions. Params from constructor
         or import_data() function.
         """
-        self.segmentation, self.slab = self._automatic_localization(
-                self.data3d,
-                self.voxelsize_mm,
-                self.segmentation,
-                self.slab
-                )
-
+        self._automatic_localization()
 
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
@@ -108,156 +102,150 @@ class Lesions:
         self.data['segmentation'] = self.segmentation
         pass
 
-
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
-    def _automatic_localization(self, data3d, voxelsize_mm, segmentation, slab):
+    def _automatic_localization(self):
         """
-        Automatic localization made by Tomas Ryba
+        Automatic localization made by Tomas Ryba.
         """
 
-        #vessels = data3d[segmentation==slab['porta']]
-        # print slab
-        # pyed = py3DSeedEditor.py3DSeedEditor(data3d, contour=segmentation, seeds=(segmentation==2))
-        # pyed.show()
-        #
-        # segmentation[153:180,70:106,42:55] = slab['lesions']
-        class1 = self.analyseHistogram( debug=False )
-        seeds = self.getSeedsUsingClass1(class1)
-
+        # seeds = self.get_seeds_using_class_1(class1)
         liver = self.data3d * (self.segmentation != 0)
+        print 'analyzing histogram...'
+        class1 = tools.analyse_histogram(self.data3d, roi=self.segmentation!=0)
+        # py3DSeedEditor.py3DSeedEditor(self.data3d, seeds=class1).show()
+        print 'getting seeds...'
+        seeds = self.get_seeds_using_prob_class1(liver, class1, thresholdType='percOfMaxDist', percT=0.3)
+
+        # py3DSeedEditor.py3DSeedEditor(self.data3d, seeds=seeds).show()
+
         print('Starting random walker...')
         rw = random_walker(liver, seeds, mode='cg_mg')
         print('...finished.')
 
-        #self.segmentation = np.where(class1, self.data['slab']['lesions'], self.segmentation)
         label_l = self.data['slab']['lesions']
-        label_v = self.data['slab']['porta']
 
-        #self.segmentation = np.where(np.logical_and(rw==2, self.segmentation!=label_v), label_l, self.segmentation)
-        #les1 = np.where(np.logical_and(rw==2, self.segmentation!=label_v), label_l, self.segmentation)
-
-        #py3DSeedEditor.py3DSeedEditor(self.data3d, contour=(rw==2))
-        #py3DSeedEditor.py3DSeedEditor(self.data3d, contour=(self.segmentation==self.data['slab']['lesions']))
-        #plt.show()
-
-        lessions = self.filterObjects(rw==2)
+        lessions = rw == 2
+        py3DSeedEditor.py3DSeedEditor(self.data3d, contour=lessions).show()
+        lessions = self.filter_objects(lessions)
 
         self.segmentation = np.where(lessions, label_l, self.segmentation)
 
-        #py3DSeedEditor.py3DSeedEditor(self.data3d, contour=lessions, windowW=350, windowC=50).show()
-        self.mayavi3dVisualization()
-
-        return segmentation, slab
-
+        # self.mayavi3dVisualization()
 
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
-    def removeObjectsWithLabel(self, objects, label):
+    def remove_objects_with_label(self, objects, label):
         """
         This function removes all objects from <objects> that contains a voxel that is labeled as <label>.
         """
-        labels, nlabels = self.getObjects(objects)
-        labeledObjs = self.segmentation == label
-        notVesselObjects = np.zeros_like(self.segmentation)
+        labels, nlabels = self.get_objects(objects)
+        labeled_objs = self.segmentation == label
+        not_vessel_objects = np.zeros_like(self.segmentation)
 
         #iterates through all founded objects
         for l in range(1, nlabels+1):
             obj = labels == l
             #count number of voxels that are also labeled ass vessels
-            sameVoxs = np.logical_and(labeledObjs, obj).sum()
+            same_voxs = np.logical_and(labeled_objs, obj).sum()
             #if there are no vessel voxels, then this object is taken into account
-            if sameVoxs == 0:
-                notVesselObjects += obj
+            if same_voxs == 0:
+                not_vessel_objects += obj
 
-        return notVesselObjects
-
+        return not_vessel_objects
 
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
-    def getObjects(self, objects = np.zeros((1),dtype=np.bool)):
+    def get_objects(self, objects=np.zeros(1, dtype=np.bool)):
         if not objects.any():
-            label_l = self.data['slab']['lesions']
-            objects = self.segmentation==label_l
+            label_l = self.data['slab']['l esions']
+            objects = self.segmentation == label_l
 
         only_big = remove_small_objects(objects, min_size=self.min_size_of_comp, connectivity=1, in_place=False)
         labels, nlabels = scimeas.label(only_big)
 
         return labels, nlabels
 
-
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
-    def getFeatures(self, labels, nlabels):
+    def get_features(self, labels, nlabels):
         features = np.zeros((nlabels, 2))
         for lab in range(1, nlabels+1):
-            obj = (labels==lab)
+            obj = labels == lab
             size = obj.sum()
-            strel = np.ones((3,3,3), dtype=np.bool)
+            strel = np.ones((3, 3, 3), dtype=np.bool)
             #obj = scimorph.binary_closing(obj, generate_binary_structure(3,3))
             obj = scimorph.binary_closing(obj, strel)
-            compactness = self.getZunicsCompatness(obj)
-            features[lab-1,0] = size
-            features[lab-1,1] = compactness
+            compactness = self.get_zunics_compatness(obj)
+            features[lab-1, 0] = size
+            features[lab-1, 1] = compactness
 
-            print 'size = %i'%(size)
-            print 'compactness = %.3f'%(compactness)
+            print 'size = %i' % size
+            print 'compactness = %.3f' % compactness
             #py3DSeedEditor.py3DSeedEditor(self.data3d, contour=(labels==lab)).show()
-        print features[:,1]
+        print features[:, 1]
         return features
 
-
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
-    def filterObjects(self, objects, minComp=0.3):
+    def filter_objects(self, objects, min_comp=0.3):
         """
         This function removes objects that aren't lessions.
         Firstly, it removes objects, that contains voxels labeled as vessels. Then it filters out to small objects and
         finally it calculates object features and removes objects with bad features (e.g. to non-compact etc.).
         """
-        #TODO: If lession is near a vessel, it is possible that the lession will have a voxel labeled as vessel and will be filtered out.
-        #removing objects that contains voxels labeled as porta
-        objects = self.removeObjectsWithLabel(objects, label=self.data['slab']['porta'])
-        #removing to small objects
-        objects = remove_small_objects(objects, min_size=self.min_size_of_comp, connectivity=1, in_place=False)
-        #computing object features
-        labels, nlabels = scimeas.label(objects)
-        features = self.getFeatures(labels, nlabels)
-        #filtering objects with respect to their features
-        featuresOK = features[:,1] >= minComp
-        objsOK = np.zeros_like(objects)
-        for i in np.argwhere(featuresOK>0):
-            objsOK += labels == (i+1)
+        # TODO: If a lession is near a vessel, it is possible that the lession will have a voxel labeled as vessel and will be filtered out.
+        # removing objects that contains voxels labeled as porta
+        if 'porta' in self.data['slab']:
+            objects = self.remove_objects_with_label(objects, label=self.data['slab']['porta'])
 
-        return objsOK
+        # removing to small objects
+        print 'Small objects removal:'
+        _, nlabels = scimeas.label(objects)
+        print '    before: nlabels = %i' % nlabels
+        objects = skimor.remove_small_objects(objects, min_size=self.min_size_of_comp, connectivity=1, in_place=False)
+        _, n_labels = scimeas.label(objects)
+        print '    after: nlabels = %i' % nlabels
 
+        # computing object features
+        labels, n_labels = scimeas.label(objects)
+        features = self.get_features(labels, n_labels)
+
+        print 'Non-compact objects removal:'
+        print '    before: nlabels = %i' % n_labels
+        # filtering objects with respect to their features
+        features_ok = features[:, 1] >= min_comp
+        objs_ok = np.zeros_like(objects)
+        for i in np.argwhere(features_ok > 0):
+            objs_ok += labels == (i + 1)
+        print '\tafter: nlabels = %i' % features_ok.sum()
+
+        return objs_ok
 
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
-    def getBounds(self, obj):
+    def get_bounds(self, obj):
         obj_er = scimorph.binary_erosion(obj)
         bounds = obj - obj_er
         return bounds
 
-
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
-    def getMoment(self, obj, p, q, r):
+    def get_moment(self, obj, p, q, r):
         elems = np.argwhere(obj)
         mom = 0
         for el in elems:
             mom += el[0]**p + el[1]**q + el[2]**r
         return mom
 
-
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
-    def getCentralMoment(self, obj, p, q, r):
+    def get_central_moment(self, obj, p, q, r):
         elems = np.argwhere(obj)
         m000 = obj.sum()
-        m100 = (elems[:,0]).sum()
-        m010 = (elems[:,1]).sum()
-        m001 = (elems[:,2]).sum()
+        m100 = (elems[:, 0]).sum()
+        m010 = (elems[:, 1]).sum()
+        m001 = (elems[:, 2]).sum()
         xc = m100 / m000
         yc = m010 / m000
         zc = m001 / m000
@@ -273,129 +261,136 @@ class Lesions:
         #    mom += (el[0] - cent[0])**p + (el[1] - cent[1])**q + (el[2] - cent[2])**r
         return mom
 
-
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
-    def getZunicsCompatness(self, obj):
+    def get_zunics_compatness(self, obj):
         m000 = obj.sum()
-        m200 = self.getCentralMoment(obj, 2, 0, 0)
-        m020 = self.getCentralMoment(obj, 0, 2, 0)
-        m002 = self.getCentralMoment(obj, 0, 0, 2)
-        term1 = (3**(5./3)) / (5 * (4*np.pi)**(2./3))
-        term2 = m000**(5./3) / (m200 + m020 + m002)
-        K = term1 * term2
-        return K
-
+        m200 = self.get_central_moment(obj, 2, 0, 0)
+        m020 = self.get_central_moment(obj, 0, 2, 0)
+        m002 = self.get_central_moment(obj, 0, 0, 2)
+        term_1 = (3**(5./3)) / (5 * (4*np.pi)**(2./3))
+        term_2 = m000**(5./3) / (m200 + m020 + m002)
+        k = term_1 * term_2
+        return k
 
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
-    def mayavi3dVisualization(self, objs = 'pvl'):
-        data = np.zeros_like(self.data3d)
-        srcs = list()
-        colors = list()
-        if 'p' in objs:
-            #liver = self.segmentation == self.data['slab']['liver']
-            #parenchym = np.logical_or(liver, vessels)
-            parenchym = self.segmentation > 0
-            data = np.where(parenchym, 1, 0)
-            data = data.T
-            srcs.append(mlab.pipeline.scalar_field(data))
-            colors.append((0,1,0))
-        if 'v' in objs:
-            vessels = self.segmentation == self.data['slab']['porta']
-            data = np.where(vessels, 1, 0)
-            data = data.T
-            srcs.append(mlab.pipeline.scalar_field(data))
-            colors.append((1,0,0))
-        if 'l' in objs:
-            lessions = self.segmentation == self.data['slab']['lesions']
-            data = np.where(lessions, 1, 0)
-            data = data.T
-            srcs.append(mlab.pipeline.scalar_field(data))
-            colors.append((0,0,1))
-
-        for src, col in zip(srcs, colors):
-            src.spacing = [.62, .62, 5]
-            mlab.pipeline.iso_surface(src, contours=2, opacity=0.1, color=col)
-
-        mlab.show()
-
+    # def mayavi3dVisualization(self, objs = 'pvl'):
+    #     data = np.zeros_like(self.data3d)
+    #     srcs = list()
+    #     colors = list()
+    #     if 'p' in objs:
+    #         #liver = self.segmentation == self.data['slab']['liver']
+    #         #parenchym = np.logical_or(liver, vessels)
+    #         parenchym = self.segmentation > 0
+    #         data = np.where(parenchym, 1, 0)
+    #         data = data.T
+    #         srcs.append(mlab.pipeline.scalar_field(data))
+    #         colors.append((0,1,0))
+    #     if 'v' in objs:
+    #         vessels = self.segmentation == self.data['slab']['porta']
+    #         data = np.where(vessels, 1, 0)
+    #         data = data.T
+    #         srcs.append(mlab.pipeline.scalar_field(data))
+    #         colors.append((1,0,0))
+    #     if 'l' in objs:
+    #         lessions = self.segmentation == self.data['slab']['lesions']
+    #         data = np.where(lessions, 1, 0)
+    #         data = data.T
+    #         srcs.append(mlab.pipeline.scalar_field(data))
+    #         colors.append((0,0,1))
+    #
+    #     for src, col in zip(srcs, colors):
+    #         src.spacing = [.62, .62, 5]
+    #         mlab.pipeline.iso_surface(src, contours=2, opacity=0.1, color=col)
+    #
+    #     mlab.show()
 
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
     def visualization(self):
-        pyed = py3DSeedEditor.py3DSeedEditor(self.segmentation==self.data['slab']['lesions'])
+        pyed = py3DSeedEditor.py3DSeedEditor(self.segmentation == self.data['slab']['lesions'])
         pyed.show()
 
-
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
-    def analyseHistogram(self, debug=False):
-        voxels = self.data3d[np.nonzero(self.segmentation)]
-        hist, bins = skexp.histogram(voxels)
-        max_peakIdx = hist.argmax()
-
-        minT = 0.95 * hist[max_peakIdx]
-        maxT = 1.05 * hist[max_peakIdx]
-        histTIdxs = (hist >= minT) * (hist <= maxT)
-        histTIdxs = np.nonzero(histTIdxs)[0]
-        histTIdxs = histTIdxs.astype(np.int)
-
-        class1TMin = bins[histTIdxs[0]]
-        class1TMax = bins[histTIdxs[-1]]
-
-        liver = self.data3d * (self.segmentation > 0)
-        class1 = np.where( (liver >= class1TMin) * (liver <= class1TMax), 1, 0)
-
-        if debug:
-            plt.figure()
-            plt.plot(bins, hist)
-            plt.hold(True)
-
-            plt.plot(bins[max_peakIdx], hist[max_peakIdx], 'ro')
-            plt.plot(bins[histTIdxs], hist[histTIdxs], 'r')
-            plt.plot(bins[histTIdxs[0]], hist[histTIdxs[0]], 'rx')
-            plt.plot(bins[histTIdxs[-1]], hist[histTIdxs[-1]], 'rx')
-            plt.title('Histogram of liver density and its class1 = maximal peak (red dot) +-5% of its density (red line).')
-            plt.show()
-
-        return class1
-
-
-#----------------------------------------------------------------------------------------------------------------------
-#----------------------------------------------------------------------------------------------------------------------
-    def getSeedsUsingClass1(self, class1):
-        distData = np.where(class1 == 1, False, True)
-        distData *= self.segmentation > 0
-        dists = distance_transform_edt(distData)
+    def get_seeds_using_class_1(self, class1):
+        dist_data = np.where(class1 == 1, False, True)
+        dist_data *= self.segmentation > 0
+        dists = distance_transform_edt(dist_data)
 
         seeds = dists > 0.5 * dists.max()
 
-        allSeeds = np.zeros(self.data3d.shape, dtype=np.int)
+        all_seeds = np.zeros(self.data3d.shape, dtype=np.int)
         # allSeeds[np.nonzero(self.segmentation)] = 80
-        allSeeds[np.nonzero(class1)] = 1 #zdrava tkan
-        allSeeds[np.nonzero(seeds)] = 2 #outliers
+        all_seeds[np.nonzero(class1)] = 1  # zdrava tkan
+        all_seeds[np.nonzero(seeds)] = 2  # outliers
+        # kvuli segmentaci pomoci random walkera se omezi obraz pouze na segmentovana jatra a cevy
+        all_seeds = np.where(self.segmentation == 0, -1, all_seeds)
+
+        return all_seeds
+
+#----------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------
+    def get_seeds_using_prob_class1(self, data, class1, roi=None, dens_min=20, dens_max=255, thresholdType='percOfMaxDist', percT=0.5):
+        # calculates probability based on similarity of intensities
+        probs = tools.intensity_probability(data, std=10)
+        # py3DSeedEditor.py3DSeedEditor(data).show()
+        # py3DSeedEditor.py3DSeedEditor(probs).show()
+        # normalizing and calculating reciprocal values
+        # weights_ints = skexp.rescale_intensity(probs, in_range=(0,probs.max()), out_range=(1,0))
+        weights_ints = np.exp(-probs)
+        # py3DSeedEditor.py3DSeedEditor(weights_ints).show()
+
+        if roi is None:
+            roi = np.logical_and(data >= dens_min, data <= dens_max)
+        dist_data = np.where(class1 == 1, False, True)
+        dist_data *= roi > 0
+        dists = distance_transform_edt(dist_data)
+        # py3DSeedEditor.py3DSeedEditor(dists).show()
+
+        # print 'dists max = %i' % dists.max()
+        # print 'dists min = %i' % dists.min()
+        # print 'weights_ints max = %.4f' % weights_ints.max()
+        # print 'weights_ints min = %.4f' % weights_ints.min()
+        # print 'probs max = %.4f' % probs.max()
+        # print 'probs min = %.4f' % probs.min()
+
+        # energy = dists * weights_ints
+        energy = weights_ints
+        # py3DSeedEditor.py3DSeedEditor(energy).show()
+
+        seeds = np.zeros(data.shape, dtype=np.bool)
+        if thresholdType == 'percOfMaxDist':
+            seeds = energy > (percT * energy.max())
+        elif thresholdType == 'mean':
+            seeds = energy > 2 * (energy[np.nonzero(energy)]).mean()
+
+        # TODO: tady je problem, ze energy je v intervalu <0.961, 1> - hrozne maly rozsah
+        print 'energy max = %.4f' % energy.max()
+        print 'energy min = %.4f' % energy.min()
+        print 'thresh = %.4f' % (percT * energy.max())
+        print seeds.min()
+        print seeds.max()
+        print 'seed perc = %.2f' % ((energy > percT * energy.max()).sum()/np.float(energy.nbytes))
+        py3DSeedEditor.py3DSeedEditor(seeds).show()
+
+        #removing to small objects
+        min_size_of_seed_area = 60
+        print 'before removing: %i' % seeds.sum()
+        seeds = skimor.remove_small_objects(seeds, min_size=min_size_of_seed_area, connectivity=1, in_place=False)
+        print 'after removing: %i' % seeds.sum()
+
+        all_seeds = np.zeros(data.shape, dtype=np.int)
+        # allSeeds[np.nonzero(self.segmentation)] = 80
+        all_seeds[np.nonzero(class1)] = 1  # zdrava tkan
+        all_seeds[np.nonzero(seeds)] = 2  # outliers
         #kvuli segmentaci pomoci random walkera se omezi obraz pouze na segmentovana jatra a cevy
-        allSeeds = np.where(self.segmentation == 0, -1, allSeeds)
+        all_seeds = np.where(roi == 0, -1, all_seeds)
 
-        return allSeeds
+        py3DSeedEditor.py3DSeedEditor(all_seeds).show()
 
-
-#----------------------------------------------------------------------------------------------------------------------
-#----------------------------------------------------------------------------------------------------------------------
-    def windowing(self, im, level=50, width=300):
-        #srovnani na standardni skalu = odecteni 1024HU
-        im -= 1024
-
-        #zjisteni minimalni a maximalni density
-        minHU = level - width
-        maxHU = level + width
-
-        #rescalovani intenzity tak, aby skala <minHU, maxHU> odpovidala intervalu <0,255>
-        imw = skexp.rescale_intensity(im, in_range=(minHU, maxHU), out_range=(0, 255))
-
-        return imw
-
+        return all_seeds
 
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
@@ -408,31 +403,19 @@ class Lesions:
         dcr = dcmreaddata.DicomReader(filename)
         data3d = dcr.get_3Ddata()
         overlay = dcr.get_overlay()
-        winW = 350
-        winC = 50
-        minW = winC - (winW / 2.)
-        maxW = winC + (winW / 2.)
+        win_w = 350
+        win_c = 50
+        min_w = win_c - (win_w / 2.)
+        max_w = win_c + (win_w / 2.)
 
         for key in overlay.keys():
             overlay = overlay[key]
 
             for i in range(overlay.shape[0]):
                 plt.figure(), plt.gray()
-                plt.subplot(121), plt.imshow(data3d[i,:,:], vmin=minW, vmax=maxW)
-                plt.subplot(122), plt.imshow(overlay[i,:,:])
-                cv2.imwrite(filename+'/overlay_%i.png'%(i), data3d[i,:,:])
-                #filled = scimorph.binary_dilation(overlay[i,:,:]>0, np.ones((3,3),dtype=np.bool))
-                #filled = scimorph.binary_fill_holes(filled, np.ones((3,3),dtype=np.bool))#pm.close_holes(overlay[i,:,:]>0, np.ones((3,3),dtype=np.bool))
-                #filled = scimorph.binary_erosion(filled, np.ones((3,3),dtype=np.bool))
-                #plt.imshow(filled)
-                #pts = plt.ginput(0)
-                #labels, nlabels = scimeas.label(filled)
-                #overlay[i,:,:] = np.zeros_like(filled)
-                #for pt in pts:
-                #    label = labels[pt[1],pt[0]]
-                #    overlay[i,:,:] += labels == label
-                #    print label
-                #plt.imshow(overlay[i,:,:])
+                plt.subplot(121), plt.imshow(data3d[i, :, :], vmin=min_w, vmax=max_w)
+                plt.subplot(122), plt.imshow(overlay[i, :, :])
+                cv2.imwrite(filename + '/overlay_%i.png' % i, data3d[i, :, :])
 
         plt.show()
 
@@ -440,34 +423,52 @@ class Lesions:
 #----------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------
 def main():
+
     logger = logging.getLogger()
 
     logger.setLevel(logging.WARNING)
     ch = logging.StreamHandler()
     logger.addHandler(ch)
 
-    #logger.debug('input params')
+    # logger.debug('input params')
 
     # input parser
-    parser = argparse.ArgumentParser(
-            description='Module for segmentation of simple anatomical structures')
-    parser.add_argument('-i', '--inputfile',
-            default='vessels.pkl',
-            help='path to data dir')
+    parser = argparse.ArgumentParser(description='Module for segmentation of simple anatomical structures')
+    parser.add_argument('-i', '--inputfile', default='vessels.pkl', help='path to data dir')
 
-    args = parser.parse_args()
-    #datapath = os.path.join(path_to_script, "../vessels1.pkl") #horsi kvalita segmentace
-    #datapath = os.path.join(path_to_script, args.inputfile) #hypodenzni meta
-    #datapath = os.path.join(path_to_script, "../organ.pkl") #horsi kvalita segmentace
-    data = misc.obj_from_file(args.inputfile, filetype = 'pickle')
-    #ds = data['segmentation'] == data['slab']['liver']
-    #pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
-    #pyed.show()
+    # args = parser.parse_args()
+    # datapath = os.path.join(path_to_script, "../vessels1.pkl") #horsi kvalita segmentace
+    # datapath = os.path.join(path_to_script, args.inputfile) #hypodenzni meta
+    # datapath = os.path.join(path_to_script, "../organ.pkl") #horsi kvalita segmentace
+
+    # data = misc.obj_from_file(args.inputfile, filetype = 'pickle')
+
+    dcmdir = '/home/tomas/Dropbox/Work/Data/medical/org-38289898-export1.pklz'
+    data = misc.obj_from_file(dcmdir, filetype='pickle')
+
+    # windowing
+    data['data3d'] = tools.windowing(data['data3d'], level=50, width=350)
+    # data['data3d'] = smoothing(data['data3d'], sliceId=0)
+
+    # smoothing ----------------
+    # bilateral
+    # data['data3d'] = tools.smoothing_bilateral(data['data3d'], sigma_space=15, sigma_color=0.05, sliceId=0)
+    # more bilateral
+    # data['data3d'] = tools.smoothing_bilateral(data['data3d'], sigma_space=15, sigma_color=0.1, sliceId=0)
+    # total-variation
+    data['data3d'] = tools.smoothing_tv(data['data3d'], weight=0.05, sliceId=0)
+    # more total-variation
+    # data['data3d'] = tools.smoothing_tv(data['data3d'], weight=0.2, multichannel=False, sliceId=0)
+    # py3DSeedEditor.py3DSeedEditor(data['data3d']).show()
+    #---------------------------gym
+
     tumory = Lesions()
-    tumory.overlay_test()
+    # tumory.overlay_test()
+    tumory.import_data(data)
+    tumory.automatic_localization()
 
-    #tumory.import_data(data)
-    #tumory.automatic_localization()
+    tumors = tumory.segmentation == tumory.data['slab']['lesions']
+    py3DSeedEditor.py3DSeedEditor(tumory.data3d, contour=tumors).show()
 
 #    SectorDisplay2__()
 
