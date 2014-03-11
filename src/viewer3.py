@@ -38,6 +38,7 @@ import misc
 import py3DSeedEditor
 import show3
 import qmisc
+import pdb
 
 # pouzivane promenne
 plane = vtk.vtkPlane()
@@ -93,11 +94,22 @@ class Viewer():
     def generate_mesh(self,segmentation,voxelsize_mm,degrad = 4):
         segmentation = segmentation[::degrad,::degrad,::degrad]
         segmentation = segmentation[:,::-1,:]
+        self.segment = segmentation
+        print self.segment.shape
+        print 'Voxelsize_mm'
+        print voxelsize_mm
         print("Generuji data...")
-        mesh_data = seg2fem.gen_mesh_from_voxels_mc(segmentation, voxelsize_mm*degrad)
+        self.new_vox = voxelsize_mm*degrad
+        print 'self_new'
+        print self.new_vox
+        mesh_data = seg2fem.gen_mesh_from_voxels_mc(self.segment, self.new_vox)
+        print 'Voxer'
+        print voxelsize_mm
+
         if True:
-            for x in xrange (10):
+            for x in xrange (100):
                 mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
+
         print("Done")
         vtk_file = "mesh_new.vtk"
         mesh_data.write(vtk_file)
@@ -159,10 +171,12 @@ class Viewer():
             self.set_normal(self.planew.GetNormal())
             self.set_coordinates(self.planew.GetOrigin())
             self.cutter()
+            self.Rezani()
             #print(self.normal)
             #print(self.coordinates)
         except AttributeError:
-            print('Neexistuje rovina rezu - Plane')
+            print('Neexistuje rovina rezu')
+            print('Nejdrive vytvorte rovinu stisknutim tlacitka Plane')
 
     '''
     pripravena funkce pro nastavovani voxelu v grafickem okne
@@ -205,6 +219,102 @@ class Viewer():
 
         '''
 ##------------------------------------------------------------------------------------------
+    def Rez(self,a,b,c,d):
+        mensi = 0
+        vetsi = 0
+        mensi_objekt = 0
+        vetsi_objekt = 0
+        print 'x: ',a,' y: ',b,' z: ',c
+        print('Pocitani rezu...')
+        data = (self.segment == 1)
+        dimension = data.shape
+        for x in range(dimension[0]):
+            for y in range(dimension[1]):
+                for z in range(dimension[2]):
+                    rovnice = (a*x + b*y + c*z + d)
+                    #print self.data['segmentation'][x][y][z]
+                    #pdb.set_trace()
+                    if(rovnice < 0):
+                        mensi = mensi+1
+                        if(data[x][y][z] == 1):
+                            mensi_objekt = mensi_objekt+1
+                        data[x][y][z] = 0
+                    else:
+                        vetsi = vetsi+1
+                        if(data[x][y][z] == 1):
+                            vetsi_objekt = vetsi_objekt+1
+                        #self.data['segmentation'][x][y][z] = False
+
+                            
+        print 'Mensi: ',mensi
+        print 'Vetsi: ',vetsi
+        print 'Mensi_objekt: ',mensi_objekt
+        print 'Vetsi_objekt: ',vetsi_objekt
+        print("Generuji data...")
+        mesh_data = seg2fem.gen_mesh_from_voxels_mc(data, self.new_vox)
+        
+        if True:
+            for x in xrange (100):
+                mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
+        print("Done")
+        vtk_file = "mesh_new.vtk"
+        mesh_data.write(vtk_file)
+        self.View(vtk_file,True)
+                
+        
+            
+##------------------------------------------------------------------------------------------
+    def Rovina(self,x,y,z,d):
+        rovnice = (self.normal[0]*x + self.normal[1]*y + self.normal[2]*z + d)
+        
+        if (rovnice < 0):
+            print('hodnota:',rovnice,' nalevo')
+        if (rovnice > 0):
+            print('hodnota:',rovnice,' napravo')
+        
+##------------------------------------------------------------------------------------------
+    def Rezani(self):
+        # vzorec roviny ax + by + cz + d = 0;
+
+        a = self.normal[0]/self.new_vox[0]
+        b = self.normal[1]/self.new_vox[1]
+        c = self.normal[2]/self.new_vox[2]
+        xx = self.coordinates[0]/self.new_vox[0]
+        yy = self.coordinates[1]/self.new_vox[1]
+        zz = self.coordinates[2]/self.new_vox[2]
+        
+
+        '''
+        a = self.normal[0]
+        b = self.normal[1]
+        c = self.normal[2]
+        xx = self.coordinates[0]/self.new_vox[0]
+        yy = self.coordinates[1]/self.new_vox[1]
+        zz = self.coordinates[2]/self.new_vox[2]
+        '''
+
+        d = -(a*xx)-(b*yy)-(c*zz)
+        print d
+        self.Rez(a,b,c,d)
+        '''
+        print('Generuji rez')
+        
+        with open('mesh_new.vtk') as f:
+            for line in f:
+                if(pocet >=2):
+                    break
+                try:
+                    bod = map(float, line.split())
+                    if(bod) == []:
+                        pocet = pocet+1
+                        continue
+                    self.Rovina(bod[0],bod[1],bod[2],d)
+                except(ValueError):
+                    continue
+        '''
+
+        
+##------------------------------------------------------------------------------------------
     def prohlizej(self,data, mode, slab=None):
         window = QtGui.QWidget()
         grid = QtGui.QGridLayout()
@@ -224,7 +334,9 @@ class Viewer():
 
 ##------------------------------------------------------------------------------------------
     def cutter(self):
+        print 'Normal: '
         print self.normal
+        print 'Coordinates: '
         print self.coordinates
 ##------------------------------------------------------------------------------------------
     def buttons(self,window,grid):
@@ -418,18 +530,23 @@ def main():
     viewer = Viewer(args.picklefile)
     accept = False
     #print args.voxelsize_mm
-    #segmentation = data['segmentation']
-    #print "unique ", np.unique(data['segmentation'])
 
-    #print 'voxel' , data['voxelsize_mm']
     if args.picklefile:
         data = misc.obj_from_file(args.picklefile, filetype = 'pickle')
+        print np.where(data['segmentation'] == 1)
+        #print "unique ", np.unique(data['segmentation'])
+        #print 'voxel' , data['voxelsize_mm']
+        #data['voxelsize_mm'] = [1,1,1]
+        viewer.data = data
+        #np.squeeze([1,1,1])
+        print data['segmentation']
+        print (data['segmentation'] == data['slab'][args.slab]).shape
         try:
             mesh = viewer.generate_mesh(data['segmentation'] == data['slab'][args.slab],data['voxelsize_mm'])
         except KeyError:
             print 'Data bohuzel neobsahuji zadany slab:', args.slab
             print 'Zobrazena budou pouze dostupna data'
-            mesh = viewer.generate_mesh(data['segmentation'] == data['slab']['liver'],data['voxelsize_mm'])
+            mesh = viewer.generate_mesh(data['segmentation'] == data['slab']['liver'],np.squeeze([1,1,1]))
 
         print data['slab']
         if args.mode == 'View' or args.mode == None:
@@ -441,17 +558,19 @@ def main():
             viewer.Set_voxel_size()
             viewer.View(mesh,accept)
             viewer.buttons(window,grid)
+            #viewer.Rez()
 
     if args.vtkfile:
         if args.mode == 'View' or args.mode == None:
             accept = True
-            viewer.View(args.vtkfile,accept)
+            viewer.View(args.vtkfile,accept);
         if args.mode == 'Cut':
             accept = False
             #viewer = QVTKViewer(data['segmentation'], data['voxelsize_mm'], data['slab'])
             viewer.Set_voxel_size()
             viewer.View(args.vtkfile,accept)
             viewer.buttons(window,grid)
+            #viewer.Rezani();
 
 
     app.exec_()
