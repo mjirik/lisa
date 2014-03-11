@@ -111,9 +111,9 @@ class PycutTest(unittest.TestCase):
         filtered = scipy.ndimage.filters.sobel(data,0)
         #filtered = scipy.ndimage.filters.gaussian_filter1d(data,sigma=0.6,axis=0, order=1)
 
-# Oproti Boykov2001b tady nedělím dvojkou. Ta je tam jen proto, 
+# Oproti Boykov2001b tady nedělím dvojkou. Ta je tam jen proto,
 # aby to slušně vycházelo
-        filtered2 = (-np.power(filtered,2)/(512*np.var(data))) 
+        filtered2 = (-np.power(filtered,2)/(512*np.var(data)))
 # Přičítám tu 1024 což je empiricky zjištěná hodnota - aby to dobře vyšlo
         filtered2 = filtered2 + 0 # - np.min(filtered2) + 1e-30
         print 'max '  , np.max(filtered2)
@@ -185,13 +185,13 @@ class PycutTest(unittest.TestCase):
 #        #import pdb; pdb.set_trace()
 #        #plt.imshow(overlay[1][:,:,0])
 #        #plt.show()
-#        
+#
 #        self. assertEqual(overlay[1][200,200],1)
 #        self. assertEqual(overlay[1][100,100],0)
 #    def test_read_volumetry_overlay_with_dicom_module(self):
 #        """
 #        pydicom module is used for load dicom data. Dicom overlay
-#        is saved on (60xx,3000) bit after bit. Data are decoded and 
+#        is saved on (60xx,3000) bit after bit. Data are decoded and
 #        each bit is stored as array element.
 #        """
 #        import dicom
@@ -201,14 +201,14 @@ class PycutTest(unittest.TestCase):
 #        data = dicom.read_file(dcmfile)
 #
 #
-#        
-#        # overlay index 
+#
+#        # overlay index
 #        i_overlay = 1
 #        n_bits = 8
 #
 #
-#        # On (60xx,3000) are stored ovelays. 
-#        # First is (6000,3000), second (6002,3000), third (6004,3000),  
+#        # On (60xx,3000) are stored ovelays.
+#        # First is (6000,3000), second (6002,3000), third (6004,3000),
 #        # and so on.
 #        dicom_tag1 = 0x6000 + 2*i_overlay
 #
@@ -223,7 +223,7 @@ class PycutTest(unittest.TestCase):
 #        # Decoding data. Each bit is stored as array element
 #        for i in range(1,len(overlay_raw)):
 #            for k in range (0,n_bits):
-#                byte_as_int = ord(overlay_raw[i]) 
+#                byte_as_int = ord(overlay_raw[i])
 #                decoded_linear[i*n_bits + k] = (byte_as_int >> k) & 0b1
 #
 #        #overlay = np.array(pol)
@@ -238,10 +238,10 @@ class PycutTest(unittest.TestCase):
 #        #pyed = py3DSeedEditor.py3DSeedEditor(overlay)
 #        #pyed.show()
 #        #import pdb; pdb.set_trace()
-#        
 #
 #
-#        
+#
+#
 #
 #
 #
