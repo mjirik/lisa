@@ -12,8 +12,8 @@ import os
 import os.path as op
 
 from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
-    QGridLayout, QLabel, QPushButton, QFrame, QFileDialog,\
-    QFont, QPixmap, QComboBox
+    QGridLayout, QLabel, QPushButton, QFrame, \
+    QFont, QPixmap
 from PyQt4.Qt import QString
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
@@ -371,6 +371,8 @@ class OrganSegmentation():
             order=0
         )
         self.organ_interactivity_counter = igc.interactivity_counter
+        logger.debug("org inter counter " +
+                     str(self.organ_interactivity_counter))
 
 # @TODO odstranit hack pro oříznutí na stejnou velikost
 # v podstatě je to vyřešeno, ale nechalo by se to dělat elegantněji v zoom
@@ -395,9 +397,10 @@ class OrganSegmentation():
 
         # self.iparams['seeds'] = np.zeros(self.data3d.shape, dtype=np.int8)
         # self.iparams['seeds'][
-        #     0:shp[0],
-        #     0:shp[1],
-        #     0:shp[2]] = seeds[0:shp[0], 0:shp[1], 0:shp[2]]
+        self.seeds[
+            0:shp[0],
+            0:shp[1],
+            0:shp[2]] = seeds[0:shp[0], 0:shp[1], 0:shp[2]]
 
         if self.segmentation_smoothing:
             self.segm_smoothing(self.smoothing_mm)
@@ -502,7 +505,11 @@ class OrganSegmentation():
         data['orig_shape'] = self.orig_shape
         data['processing_time'] = self.processing_time
         data['oseg_input_params'] = self.oseg_input_params
+        data['organ_interactivity_counter'] = self.organ_interactivity_counter
 # TODO add dcmfilelist
+        logger.debug("export()")
+        #logger.debug(str(data))
+        logger.debug("org int ctr " + str(data['organ_interactivity_counter']))
         #data["metadata"] = self.metadata
         #import pdb; pdb.set_trace()
         return data
@@ -597,7 +604,7 @@ class OrganSegmentation():
         data['version'] = self.version  # qmisc.getVersionString()
         data['experiment_caption'] = self.experiment_caption
         data['lisa_operator_identifier'] = self.lisa_operator_identifier
-        data['organ_interactivity_counter'] = self.organ_interactivity_counter
+ #       data['organ_interactivity_counter'] = self.organ_interactivity_counter
         pth, filename = op.split(op.normpath(self.datapath))
         filename += "-" + self.experiment_caption
 #        if savestring in ['a', 'A']:
@@ -1173,11 +1180,11 @@ def main():
     logger.debug('params ' + str(params))
     oseg = OrganSegmentation(**params)
 
-    oseg_w = OrganSegmentationWindow(oseg)
+    #oseg_w = OrganSegmentationWindow(oseg)
+    OrganSegmentationWindow(oseg)
 
     #oseg.interactivity(args["viewermin"], args["viewermax"])
 
-    #audiosupport.beep()
     # print(
     #     "Volume " +
     #     str(oseg.get_segmented_volume_size_mm3() / 1000000.0) + ' [l]')
