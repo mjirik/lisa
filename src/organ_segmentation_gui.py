@@ -1180,8 +1180,9 @@ def main():
     logger.debug('params ' + str(params))
     oseg = OrganSegmentation(**params)
 
-    #oseg_w = OrganSegmentationWindow(oseg)
-    OrganSegmentationWindow(oseg)
+
+    oseg_w = OrganSegmentationWindow(oseg) # noqa
+    #OrganSegmentationWindow(oseg)
 
     #oseg.interactivity(args["viewermin"], args["viewermax"])
 
