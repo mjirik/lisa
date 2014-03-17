@@ -12,6 +12,7 @@ sys.path.append(os.path.join(path_to_script,
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
 import argparse
+import numpy as np
 
 import logging
 logger = logging.getLogger(__name__)
@@ -23,25 +24,42 @@ import qmisc
 import py3DSeedEditor
 
 
-
-def show(data3d_a_path, data3d_b_path, ourSegmentation):
+def show(data3d_a_path, sliver_seg_path, ourSegmentation):
     reader = datareader.DataReader()
     #data3d_a_path = os.path.join(path_to_script, data3d_a_path)
     data3d_a, metadata_a = reader.Get3DData(data3d_a_path)
 
-    if data3d_b_path is not None:
-        data3d_b_path = os.path.join(path_to_script, data3d_b_path)
-        data3d_b, metadata_b = reader.Get3DData(data3d_b_path)
+    if sliver_seg_path is not None:
+        sliver_seg_path = os.path.join(path_to_script, sliver_seg_path)
+        sliver_seg, metadata_b = reader.Get3DData(sliver_seg_path)
 
-        pyed = py3DSeedEditor.py3DSeedEditor(data3d_a, contour =
-        data3d_b)
+        pyed = py3DSeedEditor.py3DSeedEditor(data3d_a, contour=sliver_seg)
+        print "Sliver07 segmentation"
         pyed.show()
 
     if ourSegmentation != None:
-        ourSegmentation= os.path.join(path_to_script, ourSegmentation)
+        ourSegmentation = os.path.join(path_to_script, ourSegmentation)
         data_our = misc.obj_from_file(ourSegmentation, 'pickle')
         #data3d_our = data_our['segmentation']
-        data3d_our = qmisc.uncrop(data_our['segmentation'], data_our['crinfo'],data3d_a.shape)
+        our_seg = qmisc.uncrop(data_our['segmentation'], data_our['crinfo'],
+                               data3d_a.shape)
+
+    if ourSegmentation != None:
+        pyed = py3DSeedEditor.py3DSeedEditor(data3d_a, contour =
+        our_seg)
+        print "Our segmentation"
+        pyed.show()
+
+    if (ourSegmentation is not None) and (sliver_seg_path is not None):
+        diff = (our_seg.astype(np.int8) - sliver_seg)
+        diff[diff==-1] = 2
+        #import ipdb; ipdb.set_trace() # BREAKPOINT
+        pyed = py3DSeedEditor.py3DSeedEditor(data3d_a, contour=our_seg,
+                                             seeds=diff)
+        print "Sliver07 and our segmentation differences"
+        pyed.show()
+
+
 #@TODO dodělat uncrop  a podobné kratochvíle
 
     #data3d_b_path = os.path.join(inputdata['basedir'], inputdata['data'][i]['ourseg'])
@@ -57,10 +75,6 @@ def show(data3d_a_path, data3d_b_path, ourSegmentation):
 
     #if args.visualization:
 
-    if ourSegmentation != None:
-        pyed = py3DSeedEditor.py3DSeedEditor(data3d_a, contour =
-        data3d_our)
-        pyed.show()
 
 def main():
 
