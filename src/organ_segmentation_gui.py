@@ -88,6 +88,7 @@ class OrganSegmentation():
         texture_analysis=None,
         segmentation_smoothing=False,
         smoothing_mm=4,
+        volume_blowup=1.00,
         data3d=None,
         metadata=None,
         seeds=None,
@@ -120,6 +121,8 @@ class OrganSegmentation():
         lisa_operator_identifier: used for logging
         input_datapath_start: Path where user directory selection dialog
             starts.
+        volume_blowup: Blow up volume is computed in smoothing so it is working
+            only if smoothing is turned on.
 
         """
 
@@ -146,6 +149,7 @@ class OrganSegmentation():
         self.texture_analysis = texture_analysis
         self.segmentation_smoothing = segmentation_smoothing
         self.smoothing_mm = smoothing_mm
+        self.volume_blowup = volume_blowup
         self.edit_data = edit_data
         self.roi = roi
         self.data3d = data3d
@@ -231,6 +235,15 @@ class OrganSegmentation():
         self.working_voxelsize_mm = vx_size
         #return vx_size
 
+    def __volume_blowup_criterial_funcion(self, threshold, wanted_volume,
+                                          segmentation_smooth
+                                          ):
+
+        segm = (1.0 * segmentation_smooth > threshold).astype(np.int8)
+        vol2 = np.sum(segm)
+        criterium = (wanted_volume - vol2) ** 2
+        return criterium
+
     def segm_smoothing(self, sigma_mm):
         """
         Shape of output segmentation is smoothed with gaussian filter.
@@ -238,18 +251,32 @@ class OrganSegmentation():
         Sigma is computed in mm
 
         """
-        #print "smoothing"
+        import scipy.ndimage
         sigma = float(sigma_mm) / np.array(self.voxelsize_mm)
 
         #print sigma
-        #import pdb; pdb.set_trace()
-        self.segmentation = scipy.ndimage.filters.gaussian_filter(
+        #from PyQt4.QtCore import pyqtRemoveInputHook
+        #pyqtRemoveInputHook()
+        vol1 = np.sum(self.segmentation)
+        wvol = vol1 * self.volume_blowup
+        segsmooth = scipy.ndimage.filters.gaussian_filter(
             self.segmentation.astype(np.float32), sigma)
+        #import ipdb; ipdb.set_trace()
         #import pdb; pdb.set_trace()
         #pyed = py3DSeedEditor.py3DSeedEditor(self.orig_scale_segmentation)
         #pyed.show()
 
-        self.segmentation = (1.0 * (self.segmentation > 0.5)).astype(np.int8)
+        critf = lambda x: self.__volume_blowup_criterial_funcion(x, wvol,
+                                                                 segsmooth)
+
+        thr = scipy.optimize.fmin(critf, x0=0.5, disp=False)[0]
+
+        self.segmentation = (1.0 *
+                             (segsmooth > thr)  # self.volume_blowup)
+                             ).astype(np.int8)
+        vol2 = np.sum(self.segmentation)
+        logger.debug("volume ratio " + str(vol2 / float(vol1)))
+        #import ipdb; ipdb.set_trace()
 
     def process_dicom_data(self):
         # voxelsize processing
