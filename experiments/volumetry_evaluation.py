@@ -194,10 +194,10 @@ def write_csv(data, filename='20130812_liver_volumetry.csv'):
 def write_sum_to_csv(evaluation, writer):
     avg, var = make_sum(evaluation)
     key = evaluation.keys()
-    writer. writerow([' - '] + key)
-    writer. writerow(['var'] + var)
-    writer. writerow(['avg'] + avg)
-    writer. writerow([])
+    writer.writerow([' - '] + key)
+    writer.writerow(['var'] + var)
+    writer.writerow(['avg'] + avg)
+    writer.writerow([])
 
 
 def eval_all(inputdata, visualization=False):
@@ -292,8 +292,9 @@ def main():
                         help='Turn on visualization', default=False)
     parser.add_argument('-i', '--inputfile', help='input yaml file',
                         default=default_data_file)
-    parser.add_argument('-o', '--outputfile', help='output file',
-                        default='20130812_liver_volumetry.csv')
+    parser.add_argument('-o', '--outputfile',
+                        help='output file without extension',
+                        default='20130812_liver_volumetry')
     args = parser.parse_args()
 
     if args.debug:
@@ -312,7 +313,8 @@ def main():
     logger.debug('eval all')
 
     logger.debug(make_sum(evaluation_all))
-    write_csv(evaluation_all, filename=args.outputfile)
+    write_csv(evaluation_all, filename=args.outputfile+'.csv')
+    misc.obj_to_file(evaluation_all, args.outputfile+'.pkl', filetype='pkl')
     #import pdb; pdb.set_trace()
 
     # volume
