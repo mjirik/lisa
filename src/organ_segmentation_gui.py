@@ -817,10 +817,36 @@ class OrganSegmentationWindow(QMainWindow):
         grid.addWidget(btn_segsavedcm, rstart + 1, 1)
         rstart += 2
 
+        # ######Virtual resection
+
+        hr = QFrame()
+        hr.setFrameShape(QFrame.HLine)
+        rstart += 1
+
+        hr = QFrame()
+        hr.setFrameShape(QFrame.HLine)
+        text_resection = QLabel('Virtual resection')
+        text_resection.setFont(font_label)
+
+        grid.addWidget(hr, rstart + 0, 0, 1, 4)
+        grid.addWidget(text_resection, rstart + 1, 1)
+
+        btn_vesselseg = QPushButton("Vessel segmentation", self)
+        btn_vesselseg.clicked.connect(self.btnVesselSegmentation)
+
+        btn_resection = QPushButton("Virtual resection", self)
+        btn_resection.clicked.connect(self.btnVirtualResection)
+
+        grid.addWidget(btn_vesselseg, rstart + 2, 1)
+        grid.addWidget(btn_resection, rstart + 2, 2)
+
+        ##############
+
         hr = QFrame()
         hr.setFrameShape(QFrame.HLine)
         grid.addWidget(hr, rstart + 0, 0, 1, 4)
 
+        rstart += 3
         # quit
         btn_quit = QPushButton("Quit", self)
         btn_quit.clicked.connect(self.quit)
@@ -1032,6 +1058,37 @@ class OrganSegmentationWindow(QMainWindow):
 
         else:
             self.statusBar().showMessage('No segmentation data!')
+
+    def btnVirtualResection(self):
+        pass
+
+    def btnVesselSegmentation(self):
+        """
+        Function calls segmentation.vesselSegmentation function.
+        """
+        import segmentation
+
+        outputSegmentation = segmentation.vesselSegmentation(
+            self.oseg.data3d,
+            self.oseg.segmentation,
+            threshold=-1,
+            inputSigma=0.15,
+            dilationIterations=2,
+            nObj=1,
+            biggestObjects=False,
+            interactivity=True,
+            binaryClosingIterations=2,
+            binaryOpeningIterations=0)
+        #print outputSegmentation
+        #print np.unique(outputSegmentation)
+        #print self.oseg.slab
+        slab = {'porta': 2}
+        slab.update(self.oseg.slab)
+        #from PyQt4.QtCore import pyqtRemoveInputHook
+        #pyqtRemoveInputHook()
+        #import ipdb; ipdb.set_trace() # BREAKPOINT
+        self.oseg.slab = slab
+        self.oseg.segmentation[outputSegmentation == 1] = slab['porta']
 
     def view3D(self):
         #from seg2mesh import gen_mesh_from_voxels, mesh2vtk, smooth_mesh
