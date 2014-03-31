@@ -29,6 +29,7 @@ import misc
 import config
 import datareader
 import datawriter
+import segmentation
 import vessel_cut
 
 from seg2mesh import gen_mesh_from_voxels, mesh2vtk, smooth_mesh
@@ -1062,6 +1063,8 @@ class OrganSegmentationWindow(QMainWindow):
             self.statusBar().showMessage('No segmentation data!')
 
     def btnVirtualResection(self):
+        #import vessel_cut
+
         data = {'data3d': self.oseg.data3d,
                 'segmentation': self.oseg.segmentation,
                 'slab': self.oseg.slab,
@@ -1077,7 +1080,6 @@ class OrganSegmentationWindow(QMainWindow):
         """
         Function calls segmentation.vesselSegmentation function.
         """
-        import segmentation
 
         outputSegmentation = segmentation.vesselSegmentation(
             self.oseg.data3d,
