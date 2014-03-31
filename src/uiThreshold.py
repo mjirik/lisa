@@ -16,6 +16,8 @@ import sys
 sys.path.append("../src/")
 sys.path.append("../extern/")
 
+import logging as logger
+
 import numpy
 import scipy.ndimage
 
@@ -58,12 +60,12 @@ class uiThreshold:
 
         """
 
-        print('Spoustim prahovani dat...')
+        logger.debug('Spoustim prahovani dat...')
 
         self.inputDimension = numpy.ndim(data)
         if(self.inputDimension != 3):
 
-            print('Vstup nema 3 dimenze! Ma jich ' + str(self.inputDimension) + '.')
+            logger.debug('Vstup nema 3 dimenze! Ma jich ' + str(self.inputDimension) + '.')
             self.errorsOccured = True
             return
 
@@ -128,17 +130,17 @@ class uiThreshold:
 
                     ## Zbaveni se duplikatu.
                     self.arrSeed = list(set(self.arrSeed))
-                    print 'Hodnoty seedu: '
-                    print self.arrSeed
+                    logger.debug( 'Hodnoty seedu: ')
+                    logger.debug( self.arrSeed)
 
                     self.max0 = max(self.arrSeed)
                     self.max0 = self.max0 + abs(abs(self.min0) - abs(self.max0)) / 10
 
                     # Prahy
-                    print ''
-                    print 'Minimalni doporucena hodnota prahu: ' + str(min(self.arrSeed))
-                    print 'Maximalni doporucena hodnota prahu: ' + str(max(self.arrSeed))
-                    print ''
+                    logger.debug( '')
+                    logger.debug( 'Minimalni doporucena hodnota prahu: ' + str(min(self.arrSeed)))
+                    logger.debug( 'Maximalni doporucena hodnota prahu: ' + str(max(self.arrSeed)))
+                    logger.debug( '')
 
                 else:
 
@@ -363,16 +365,16 @@ class uiThreshold:
 
     def debugInfo(self):
 
-        print '======'
-        print '!Debug'
-        print '\tUpdate cycle:' 
-        print '\t\tThreshold min: ' + str(numpy.round(self.threshold, 2))
+        logger.debug( '======')
+        logger.debug( '!Debug')
+        logger.debug( '\tUpdate cycle:' )
+        logger.debug( '\t\tThreshold min: ' + str(numpy.round(self.threshold, 2)))
         if (self.interactivity == True):
-            print '\t\tThreshold max: ' + str(numpy.round(self.smax.val, 2))
-            print '\t\tBinary closing: ' + str(numpy.round(self.sclose.val, 0))
-            print '\t\tBinary opening: ' + str(numpy.round(self.sopen.val, 0))
-            print '\t\tSigma filter param: ' + str(numpy.round(self.ssigma.val, 2))
-        print '======'
+            logger.debug( '\t\tThreshold max: ' + str(numpy.round(self.smax.val, 2)))
+            logger.debug( '\t\tBinary closing: ' + str(numpy.round(self.sclose.val, 0)))
+            logger.debug( '\t\tBinary opening: ' + str(numpy.round(self.sopen.val, 0)))
+            logger.debug( '\t\tSigma filter param: ' + str(numpy.round(self.ssigma.val, 2)))
+        logger.debug( '======')
 
     def getBiggestObjects(self):
 
