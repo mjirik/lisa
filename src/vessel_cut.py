@@ -183,8 +183,14 @@ def resection_old(data):
     l2 = 2
 
     # dist se tady počítá od nul jenom v jedničkách
-    dist1 = scipy.ndimage.distance_transform_edt(lab != l1)
-    dist2 = scipy.ndimage.distance_transform_edt(lab != l2)
+    dist1 = scipy.ndimage.distance_transform_edt(
+        lab != l1,
+        sampling=data['voxelsize_mm']
+    )
+    dist2 = scipy.ndimage.distance_transform_edt(
+        lab != l2,
+        sampling=data['voxelsize_mm']
+    )
 
     #from PyQt4.QtCore import pyqtRemoveInputHook
     #pyqtRemoveInputHook()
