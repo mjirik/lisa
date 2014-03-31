@@ -1,8 +1,6 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
 
-
-
 # import funkcí z jiného adresáře
 import sys
 import os.path
@@ -10,30 +8,34 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
 sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
 #import featurevector
-import unittest
 
 import logging
 logger = logging.getLogger(__name__)
 
 import numpy as np
 import scipy.ndimage
-import seg2fem
-import viewer3
+#import seg2fem
 #import vtk
 import argparse
 
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtGui import *
-from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
-     QGridLayout, QLabel, QPushButton, QFrame, QFileDialog,\
-     QFont, QInputDialog, QComboBox, QRadioButton, QButtonGroup
+
+#from PyQt4 import QtCore, QtGui
+#from PyQt4.QtGui import *
+#from PyQt4.QtCore import Qt
+#from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
+#     QGridLayout, QLabel, QPushButton, QFrame, QFileDialog,\
+#     QFont, QInputDialog, QComboBox, QRadioButton, QButtonGroup
 
 # ----------------- my scripts --------
 import misc
 import py3DSeedEditor
-import show3
+#import show3
 import qmisc
+
+# @TODO ošetřit modul viewer viz issue #69
+#import viewer3
+
+
 normal = 0
 coordinates = None
 
@@ -181,8 +183,14 @@ def resection_old(data):
     l2 = 2
 
     # dist se tady počítá od nul jenom v jedničkách
-    dist1 = scipy.ndimage.distance_transform_edt(lab != l1)
-    dist2 = scipy.ndimage.distance_transform_edt(lab != l2)
+    dist1 = scipy.ndimage.distance_transform_edt(
+        lab != l1,
+        sampling=data['voxelsize_mm']
+    )
+    dist2 = scipy.ndimage.distance_transform_edt(
+        lab != l2,
+        sampling=data['voxelsize_mm']
+    )
 
     #from PyQt4.QtCore import pyqtRemoveInputHook
     #pyqtRemoveInputHook()
@@ -210,6 +218,15 @@ def resection_old(data):
 
     #show3.show3(data['segmentation'])
 
+    slab = {
+        'liver': 1,
+        'porta': 2,
+        'resected_liver': 3,
+        'resected_porta': 4}
+
+    slab.update(data['slab'])
+
+    data['slab'] = slab
 
     data['slab']['resected_liver'] = 3
     data['slab']['resected_porta'] = 4
