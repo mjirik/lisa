@@ -47,13 +47,13 @@ def cut_editor_old(data):
     split_obj = split_obj0.copy()
     vessels = data['segmentation'] == data['slab']['porta']
     vesselstmp = vessels
-
     sumall = np.sum(vessels==1)
 
     #split_obj = scipy.ndimage.binary_dilation(split_obj, iterations = 5 )
     #vesselstmp = vessels * (1 - split_obj)
 
     lab, n_obj = scipy.ndimage.label(vesselstmp)
+    print(n_obj)
 
     print 'sumall ', sumall
     #while n_obj < 2 :
@@ -278,7 +278,12 @@ if __name__ == "__main__":
 
     data = misc.obj_from_file(args.inputfile, filetype = 'pickle')
     ds = data['segmentation'] == data['slab']['liver']
-    print "vs ", data['voxelsize_mm']
+    pozice = np.where(ds == 1)
+    a = pozice[0][0]
+    b = pozice[1][0]
+    c = pozice[2][0]
+    ds = False
+    #print "vs ", data['voxelsize_mm']
     #seg = np.zeros([100,100,100])
     #seg [50:80, 50:80, 60:75] = 1
     #seg[58:60, 56:72, 66:68]=2
