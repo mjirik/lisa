@@ -86,7 +86,6 @@ def generate_input_yaml(sliver_dir, pklz_dir,
         misc.obj_to_file(inputdata, yaml_filename, filetype='yaml')
 
 
-
 def sample_input_data():
     inputdata = {'basedir':'/home/mjirik/data/medical/', # noqa
             'data': [
@@ -352,8 +351,8 @@ def main():
     logger.debug('eval all')
 
     logger.debug(make_sum(evaluation_all))
-    write_csv(evaluation_all, filename=args.outputfile+'.csv')
-    misc.obj_to_file(evaluation_all, args.outputfile+'.pkl', filetype='pkl')
+    write_csv(evaluation_all, filename=args.outputfile + '.csv')
+    misc.obj_to_file(evaluation_all, args.outputfile + '.pkl', filetype='pkl')
     #import pdb; pdb.set_trace()
 
     # volume
