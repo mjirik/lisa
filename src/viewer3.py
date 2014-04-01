@@ -49,15 +49,59 @@ iren = vtk.vtkRenderWindowInteractor()
 renWin = vtk.vtkRenderWindow()
 surface = vtk.vtkDataSetSurfaceFilter()
 app = QApplication(sys.argv)
-window = QtGui.QWidget()
-okno = QtGui.QWidget()
+label = QtGui.QLabel()
+myLayout = QGridLayout()
 
 
 
+try:
+    _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
+
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName(_fromUtf8("MainWindow"))
+        MainWindow.resize(800, 600)
+        self.centralwidget = QtGui.QWidget(MainWindow)
+        self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
+        self.widget = QtGui.QWidget(self.centralwidget)
+        self.widget.setGeometry(QtCore.QRect(370, 49, 401, 441))
+        self.widget.setObjectName(_fromUtf8("widget"))
+        self.toolButton = QtGui.QToolButton(self.centralwidget)
+        self.toolButton.setGeometry(QtCore.QRect(140, 140, 71, 41))
+        self.toolButton.setObjectName(_fromUtf8("toolButton"))
+        self.toolButton_2 = QtGui.QToolButton(self.centralwidget)
+        self.toolButton_2.setGeometry(QtCore.QRect(140, 210, 71, 41))
+        self.toolButton_2.setObjectName(_fromUtf8("toolButton_2"))
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QtGui.QMenuBar(MainWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
+        self.menubar.setObjectName(_fromUtf8("menubar"))
+        MainWindow.setMenuBar(self.menubar)
+        self.statusbar = QtGui.QStatusBar(MainWindow)
+        self.statusbar.setObjectName(_fromUtf8("statusbar"))
+        MainWindow.setStatusBar(self.statusbar)
+
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+    def retranslateUi(self, MainWindow):
+        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow", None))
+        self.toolButton.setText(_translate("MainWindow", "CUT", None))
+        self.toolButton_2.setText(_translate("MainWindow", "PLANE", None))
 
 
-
-class Viewer():
+class Viewer(object):
 
 
     '''
@@ -79,6 +123,9 @@ class Viewer():
         self.segmentation = segmentation
         self.voxelsize_mm = voxelsize_mm
     '''
+##------------------------------------------------------------------------------------------
+
+        
     def __init__(self, inputfile):
         self.vtk_filename = inputfile
 
@@ -91,7 +138,7 @@ class Viewer():
     def set_coordinates(self,coordinates):
         self.coordinates = coordinates
 ##------------------------------------------------------------------------------------------
-    def generate_mesh(self,segmentation,voxelsize_mm,degrad = 4):
+    def generate_mesh(self,segmentation,voxelsize_mm,degrad = 5):
         segmentation = segmentation[::degrad,::degrad,::degrad]
         segmentation = segmentation[:,::-1,:]
         self.segment = segmentation
@@ -99,7 +146,7 @@ class Viewer():
         print 'Voxelsize_mm'
         print voxelsize_mm
         print("Generuji data...")
-        self.new_vox = voxelsize_mm*degrad
+        self.new_vox = voxelsize_mm * degrad
         print 'self_new'
         print self.new_vox
         mesh_data = seg2fem.gen_mesh_from_voxels_mc(self.segment, self.new_vox)
@@ -226,12 +273,14 @@ class Viewer():
         vetsi_objekt = 0
         print 'x: ',a,' y: ',b,' z: ',c
         print('Pocitani rezu...')
-        data = (self.segment == 1)
+        data = self.segment
+        print 'dimension'
+        print data.shape
         dimension = data.shape
         for x in range(dimension[0]):
             for y in range(dimension[1]):
                 for z in range(dimension[2]):
-                    rovnice = (a*x + b*y + c*z + d)
+                    rovnice = a*x + b*y + c*z + d
                     #print self.data['segmentation'][x][y][z]
                     #pdb.set_trace()
                     if(rovnice < 0):
@@ -261,24 +310,13 @@ class Viewer():
         mesh_data.write(vtk_file)
         self.View(vtk_file,True)
                 
-        
-            
-##------------------------------------------------------------------------------------------
-    def Rovina(self,x,y,z,d):
-        rovnice = (self.normal[0]*x + self.normal[1]*y + self.normal[2]*z + d)
-        
-        if (rovnice < 0):
-            print('hodnota:',rovnice,' nalevo')
-        if (rovnice > 0):
-            print('hodnota:',rovnice,' napravo')
-        
 ##------------------------------------------------------------------------------------------
     def Rezani(self):
         # vzorec roviny ax + by + cz + d = 0;
 
-        a = self.normal[0]/self.new_vox[0]
-        b = self.normal[1]/self.new_vox[1]
-        c = self.normal[2]/self.new_vox[2]
+        a = self.normal[0]*self.new_vox[0]
+        b = self.normal[1]*self.new_vox[1]
+        c = self.normal[2]*self.new_vox[2]
         xx = self.coordinates[0]/self.new_vox[0]
         yy = self.coordinates[1]/self.new_vox[1]
         zz = self.coordinates[2]/self.new_vox[2]
@@ -522,15 +560,24 @@ def main():
 
 
     # vytvoreni okna
+
+    viewer = Ui_MainWindow()
+    viw = QtGui.QMainWindow()
+    viewer.setupUi(viw)
+
+    viw.show()
     window = QtGui.QWidget()
     grid = QtGui.QGridLayout()
     window.setWindowTitle("3D liver")
     window.setLayout(grid)
-    # vytvoreni vieweru a generovani dat
+    
+    window.setWindowTitle("3D liver")
+    window.setLayout(grid)
+    
     viewer = Viewer(args.picklefile)
     accept = False
     #print args.voxelsize_mm
-
+    
     if args.picklefile:
         data = misc.obj_from_file(args.picklefile, filetype = 'pickle')
         print np.where(data['segmentation'] == 1)
@@ -547,7 +594,6 @@ def main():
             print 'Data bohuzel neobsahuji zadany slab:', args.slab
             print 'Zobrazena budou pouze dostupna data'
             mesh = viewer.generate_mesh(data['segmentation'] == data['slab']['liver'],np.squeeze([1,1,1]))
-
         print data['slab']
         if args.mode == 'View' or args.mode == None:
             accept = True
