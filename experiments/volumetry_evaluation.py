@@ -48,6 +48,45 @@ import datareader
 CROP_MARGIN = [20]
 
 
+def generate_input_yaml(sliver_dir, pklz_dir,
+                        sliver_ext='.mhd', pklz_ext='.pklz',
+                        yaml_filename=None):
+    """
+    Function pair files from different directory by numer in format 0XX
+    If there is given some yaml_filename, it is created.
+    """
+    import glob
+    import re
+
+    onlyfiles1 = glob.glob(os.path.join(sliver_dir, '*0*' + sliver_ext))
+    onlyfiles2 = glob.glob(os.path.join(pklz_dir, '*0*' + pklz_ext))
+
+    data = []
+    for flns in onlyfiles1:
+        pattern = re.search('(0[0-9]{2})', flns)
+        if pattern:
+            pattern = pattern.group(1)
+
+        for flnp in onlyfiles2:
+            pt = re.match('.*' + pattern + '.*', flnp)
+            if pt:
+                data.append({
+                    'sliverseg': flns,
+                    'ourseg': flnp
+                })
+
+    inputdata = {
+        'basedir': '',
+        'data': data
+    }
+
+    if yaml_filename is None:
+        return inputdata
+    else:
+        misc.obj_to_file(inputdata, yaml_filename, filetype='yaml')
+
+
+
 def sample_input_data():
     inputdata = {'basedir':'/home/mjirik/data/medical/', # noqa
             'data': [

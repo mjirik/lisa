@@ -18,6 +18,7 @@ import numpy as np
 
 #import dcmreaddata as dcmr
 import experiments
+import volumetry_evaluation
 
 
 class ExperimentsTest(unittest.TestCase):
@@ -92,7 +93,65 @@ class ExperimentsTest(unittest.TestCase):
 
         eval1 = ve.distance_matrics(vol1, vol2, [0.5, 0.5, 0.5])
         #print eval1
-        self.assertAlmostEquals(eval1[2], np.sqrt(2) )
+        self.assertAlmostEquals(eval1[2], np.sqrt(2))
+
+    def test_volumetry_evaluation_yaml_generator(self):
+        """
+        Test creates two directories and some empty files. Based on this
+        structure a yaml file data are constructed.
+        """
+        import os
+        import shutil
+
+# Creating directory structure
+
+        sliver_dir = '__test_sliver_dir'
+        pklz_dir = '__test_pklz_dir'
+
+        #d = os.path.dirname(sliver_dir)
+        d = sliver_dir
+        if os.path.exists(d):
+            shutil.rmtree(d)
+        #if not os.path.exists(d):
+        os.makedirs(d)
+
+        #d = os.path.dirname(pklz_dir)
+        d = pklz_dir
+        if os.path.exists(d):
+            shutil.rmtree(d)
+        #if not os.path.exists(d):
+        os.makedirs(d)
+
+        filelist1 = ['liver-seg001.mhd', 'liver-seg002.mhd',
+                     'liver-seg006.mhd']
+        for fl in filelist1:
+            open(os.path.join(sliver_dir, fl), 'a').close()
+
+        filelist2 = ['soubor001to.pklz', 'soubor002.pklz',
+                     'so003.pklz', 'so002tre3.pklz', 'ijij.pklz']
+        for fl in filelist2:
+            open(os.path.join(pklz_dir, fl), 'a').close()
+
+# construct yaml data
+        yamldata = volumetry_evaluation.generate_input_yaml(
+            sliver_dir, pklz_dir)
+
+# assert
+
+        fls0 = os.path.join(sliver_dir, filelist1[0])
+        flp0 = os.path.join(pklz_dir, filelist2[0])
+        # we only hope, that this will be first record
+        self.assertEqual(yamldata['data'][0]['sliverseg'], fls0)
+        self.assertEqual(yamldata['data'][0]['ourseg'], flp0)
+
+# Clean
+        d = sliver_dir
+        if os.path.exists(d):
+            shutil.rmtree(d)
+        d = pklz_dir
+        if os.path.exists(d):
+            shutil.rmtree(d)
+
 
 if __name__ == "__main__":
     unittest.main()
