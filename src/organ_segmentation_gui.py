@@ -12,8 +12,8 @@ import os
 import os.path as op
 
 from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
-    QGridLayout, QLabel, QPushButton, QFrame, QFileDialog,\
-    QFont, QPixmap, QComboBox
+    QGridLayout, QLabel, QPushButton, QFrame, \
+    QFont, QPixmap
 from PyQt4.Qt import QString
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
@@ -29,6 +29,8 @@ import misc
 import config
 import datareader
 import datawriter
+import segmentation
+import vessel_cut
 
 from seg2mesh import gen_mesh_from_voxels, mesh2vtk, smooth_mesh
 
@@ -88,6 +90,7 @@ class OrganSegmentation():
         texture_analysis=None,
         segmentation_smoothing=False,
         smoothing_mm=4,
+        volume_blowup=1.00,
         data3d=None,
         metadata=None,
         seeds=None,
@@ -120,6 +123,8 @@ class OrganSegmentation():
         lisa_operator_identifier: used for logging
         input_datapath_start: Path where user directory selection dialog
             starts.
+        volume_blowup: Blow up volume is computed in smoothing so it is working
+            only if smoothing is turned on.
 
         """
 
@@ -146,6 +151,7 @@ class OrganSegmentation():
         self.texture_analysis = texture_analysis
         self.segmentation_smoothing = segmentation_smoothing
         self.smoothing_mm = smoothing_mm
+        self.volume_blowup = volume_blowup
         self.edit_data = edit_data
         self.roi = roi
         self.data3d = data3d
@@ -231,6 +237,15 @@ class OrganSegmentation():
         self.working_voxelsize_mm = vx_size
         #return vx_size
 
+    def __volume_blowup_criterial_funcion(self, threshold, wanted_volume,
+                                          segmentation_smooth
+                                          ):
+
+        segm = (1.0 * segmentation_smooth > threshold).astype(np.int8)
+        vol2 = np.sum(segm)
+        criterium = (wanted_volume - vol2) ** 2
+        return criterium
+
     def segm_smoothing(self, sigma_mm):
         """
         Shape of output segmentation is smoothed with gaussian filter.
@@ -238,18 +253,32 @@ class OrganSegmentation():
         Sigma is computed in mm
 
         """
-        #print "smoothing"
+        import scipy.ndimage
         sigma = float(sigma_mm) / np.array(self.voxelsize_mm)
 
         #print sigma
-        #import pdb; pdb.set_trace()
-        self.segmentation = scipy.ndimage.filters.gaussian_filter(
+        #from PyQt4.QtCore import pyqtRemoveInputHook
+        #pyqtRemoveInputHook()
+        vol1 = np.sum(self.segmentation)
+        wvol = vol1 * self.volume_blowup
+        segsmooth = scipy.ndimage.filters.gaussian_filter(
             self.segmentation.astype(np.float32), sigma)
+        #import ipdb; ipdb.set_trace()
         #import pdb; pdb.set_trace()
         #pyed = py3DSeedEditor.py3DSeedEditor(self.orig_scale_segmentation)
         #pyed.show()
 
-        self.segmentation = (1.0 * (self.segmentation > 0.5)).astype(np.int8)
+        critf = lambda x: self.__volume_blowup_criterial_funcion(x, wvol,
+                                                                 segsmooth)
+
+        thr = scipy.optimize.fmin(critf, x0=0.5, disp=False)[0]
+
+        self.segmentation = (1.0 *
+                             (segsmooth > thr)  # self.volume_blowup)
+                             ).astype(np.int8)
+        vol2 = np.sum(self.segmentation)
+        logger.debug("volume ratio " + str(vol2 / float(vol1)))
+        #import ipdb; ipdb.set_trace()
 
     def process_dicom_data(self):
         # voxelsize processing
@@ -371,6 +400,8 @@ class OrganSegmentation():
             order=0
         )
         self.organ_interactivity_counter = igc.interactivity_counter
+        logger.debug("org inter counter " +
+                     str(self.organ_interactivity_counter))
 
 # @TODO odstranit hack pro oříznutí na stejnou velikost
 # v podstatě je to vyřešeno, ale nechalo by se to dělat elegantněji v zoom
@@ -395,9 +426,10 @@ class OrganSegmentation():
 
         # self.iparams['seeds'] = np.zeros(self.data3d.shape, dtype=np.int8)
         # self.iparams['seeds'][
-        #     0:shp[0],
-        #     0:shp[1],
-        #     0:shp[2]] = seeds[0:shp[0], 0:shp[1], 0:shp[2]]
+        self.seeds[
+            0:shp[0],
+            0:shp[1],
+            0:shp[2]] = seeds[0:shp[0], 0:shp[1], 0:shp[2]]
 
         if self.segmentation_smoothing:
             self.segm_smoothing(self.smoothing_mm)
@@ -502,7 +534,11 @@ class OrganSegmentation():
         data['orig_shape'] = self.orig_shape
         data['processing_time'] = self.processing_time
         data['oseg_input_params'] = self.oseg_input_params
+        data['organ_interactivity_counter'] = self.organ_interactivity_counter
 # TODO add dcmfilelist
+        logger.debug("export()")
+        #logger.debug(str(data))
+        logger.debug("org int ctr " + str(data['organ_interactivity_counter']))
         #data["metadata"] = self.metadata
         #import pdb; pdb.set_trace()
         return data
@@ -597,7 +633,7 @@ class OrganSegmentation():
         data['version'] = self.version  # qmisc.getVersionString()
         data['experiment_caption'] = self.experiment_caption
         data['lisa_operator_identifier'] = self.lisa_operator_identifier
-        data['organ_interactivity_counter'] = self.organ_interactivity_counter
+ #       data['organ_interactivity_counter'] = self.organ_interactivity_counter
         pth, filename = op.split(op.normpath(self.datapath))
         filename += "-" + self.experiment_caption
 #        if savestring in ['a', 'A']:
@@ -783,10 +819,36 @@ class OrganSegmentationWindow(QMainWindow):
         grid.addWidget(btn_segsavedcm, rstart + 1, 1)
         rstart += 2
 
+        # ######Virtual resection
+
+        hr = QFrame()
+        hr.setFrameShape(QFrame.HLine)
+        rstart += 1
+
+        hr = QFrame()
+        hr.setFrameShape(QFrame.HLine)
+        text_resection = QLabel('Virtual resection')
+        text_resection.setFont(font_label)
+
+        grid.addWidget(hr, rstart + 0, 0, 1, 4)
+        grid.addWidget(text_resection, rstart + 1, 1)
+
+        btn_vesselseg = QPushButton("Vessel segmentation", self)
+        btn_vesselseg.clicked.connect(self.btnVesselSegmentation)
+
+        btn_resection = QPushButton("Virtual resection", self)
+        btn_resection.clicked.connect(self.btnVirtualResection)
+
+        grid.addWidget(btn_vesselseg, rstart + 2, 1)
+        grid.addWidget(btn_resection, rstart + 2, 2)
+
+        ##############
+
         hr = QFrame()
         hr.setFrameShape(QFrame.HLine)
         grid.addWidget(hr, rstart + 0, 0, 1, 4)
 
+        rstart += 3
         # quit
         btn_quit = QPushButton("Quit", self)
         btn_quit.clicked.connect(self.quit)
@@ -919,9 +981,10 @@ class OrganSegmentationWindow(QMainWindow):
         if oseg.data3d is None:
             self.statusBar().showMessage('No DICOM data!')
             return
+        sgm = (oseg.segmentation == 1).astype(np.uint8)
 
         pyed = QTSeedEditor(oseg.data3d,
-                            seeds=oseg.segmentation,
+                            seeds=sgm,
                             mode='draw',
                             voxelSize=oseg.voxelsize_mm, volume_unit='ml')
         pyed.exec_()
@@ -998,6 +1061,49 @@ class OrganSegmentationWindow(QMainWindow):
 
         else:
             self.statusBar().showMessage('No segmentation data!')
+
+    def btnVirtualResection(self):
+        #import vessel_cut
+
+        data = {'data3d': self.oseg.data3d,
+                'segmentation': self.oseg.segmentation,
+                'slab': self.oseg.slab,
+                'voxelsize_mm': self.oseg.voxelsize_mm
+                }
+        cut = vessel_cut.resection(data, None, use_old_editor=True)
+        self.oseg.segmentation = cut['segmentation']
+        self.oseg.slab = cut['slab']
+        #from PyQt4.QtCore import pyqtRemoveInputHook
+        #pyqtRemoveInputHook()
+        #import ipdb; ipdb.set_trace() # BREAKPOINT
+        #pass
+
+    def btnVesselSegmentation(self):
+        """
+        Function calls segmentation.vesselSegmentation function.
+        """
+
+        outputSegmentation = segmentation.vesselSegmentation(
+            self.oseg.data3d,
+            self.oseg.segmentation,
+            threshold=-1,
+            inputSigma=0.15,
+            dilationIterations=2,
+            nObj=1,
+            biggestObjects=False,
+            interactivity=True,
+            binaryClosingIterations=2,
+            binaryOpeningIterations=0)
+        #print outputSegmentation
+        #print np.unique(outputSegmentation)
+        #print self.oseg.slab
+        slab = {'porta': 2}
+        slab.update(self.oseg.slab)
+        #from PyQt4.QtCore import pyqtRemoveInputHook
+        #pyqtRemoveInputHook()
+        #import ipdb; ipdb.set_trace() # BREAKPOINT
+        self.oseg.slab = slab
+        self.oseg.segmentation[outputSegmentation == 1] = slab['porta']
 
     def view3D(self):
         #from seg2mesh import gen_mesh_from_voxels, mesh2vtk, smooth_mesh
@@ -1173,11 +1279,12 @@ def main():
     logger.debug('params ' + str(params))
     oseg = OrganSegmentation(**params)
 
-    oseg_w = OrganSegmentationWindow(oseg)
+
+    oseg_w = OrganSegmentationWindow(oseg) # noqa
+    #OrganSegmentationWindow(oseg)
 
     #oseg.interactivity(args["viewermin"], args["viewermax"])
 
-    #audiosupport.beep()
     # print(
     #     "Volume " +
     #     str(oseg.get_segmented_volume_size_mm3() / 1000000.0) + ' [l]')

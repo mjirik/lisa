@@ -48,6 +48,48 @@ import datareader
 CROP_MARGIN = [20]
 
 
+def generate_input_yaml(sliver_dir, pklz_dir,
+                        sliver_ext='*seg0*.mhd', pklz_ext='*0*.pklz',
+                        yaml_filename=None):
+    """
+    Function pair files from different directory by numer in format g0XX
+    If there is given some yaml_filename, it is created.
+    """
+    import glob
+    import re
+
+    onlyfiles1 = glob.glob(os.path.join(sliver_dir, sliver_ext))
+    onlyfiles2 = glob.glob(os.path.join(pklz_dir, pklz_ext))
+    onlyfiles1.sort()
+    onlyfiles2.sort()
+
+    data = []
+    for flns in onlyfiles1:
+        base, flnsh = os.path.split(os.path.normpath(flns))
+        pattern = re.search('(g0[0-9]{2})', flnsh)
+        if pattern:
+            pattern = pattern.group(1)
+
+        for flnp in onlyfiles2:
+            base, flnph = os.path.split(os.path.normpath(flnp))
+            pt = re.match('.*' + pattern + '.*', flnph)
+            if pt:
+                data.append({
+                    'sliverseg': flns,
+                    'ourseg': flnp
+                })
+
+    inputdata = {
+        'basedir': '',
+        'data': data
+    }
+
+    if yaml_filename is None:
+        return inputdata
+    else:
+        misc.obj_to_file(inputdata, yaml_filename, filetype='yaml')
+
+
 def sample_input_data():
     inputdata = {'basedir':'/home/mjirik/data/medical/', # noqa
             'data': [
@@ -194,10 +236,10 @@ def write_csv(data, filename='20130812_liver_volumetry.csv'):
 def write_sum_to_csv(evaluation, writer):
     avg, var = make_sum(evaluation)
     key = evaluation.keys()
-    writer. writerow([' - '] + key)
-    writer. writerow(['var'] + var)
-    writer. writerow(['avg'] + avg)
-    writer. writerow([])
+    writer.writerow([' - '] + key)
+    writer.writerow(['var'] + var)
+    writer.writerow(['avg'] + avg)
+    writer.writerow([])
 
 
 def eval_all(inputdata, visualization=False):
@@ -290,10 +332,17 @@ def main():
                         help='generate sample intput data', default=False)
     parser.add_argument('-v', '--visualization',  action='store_true',
                         help='Turn on visualization', default=False)
-    parser.add_argument('-i', '--inputfile', help='input yaml file',
+    parser.add_argument('-y', '--inputYamlFile', help='input yaml file',
                         default=default_data_file)
-    parser.add_argument('-o', '--outputfile', help='output file',
-                        default='20130812_liver_volumetry.csv')
+    parser.add_argument('-ds', '--directorySliver',
+                        help='input SLiver directory. If this and\
+                        directoryPklz is not None, yaml file is generated',
+                        default=None)
+    parser.add_argument('-dp', '--directoryPklz', help='input pklz directory',
+                        default=None)
+    parser.add_argument('-o', '--outputfile',
+                        help='output file without extension',
+                        default='20130812_liver_volumetry')
     args = parser.parse_args()
 
     if args.debug:
@@ -302,17 +351,44 @@ def main():
 
     if args.sampleInput:
         sample_input_data()
+
+    evaluateAndWriteToFile(
+        args.inputYamlFile,
+        args.directoryPklz,
+        args.directorySliver,
+        args.outputfile,
+        args.visualization)
+
+
+def evaluateAndWriteToFile(
+    inputYamlFile,
+    directoryPklz,
+    directorySliver,
+    outputfile,
+    visualization
+):
+    """
+    Function computes yaml file (if there are given input sliver and pklz
+    directories). Based on yaml file are compared sliver segmentations and
+    our pklz files.
+    """
+    if (directoryPklz is not None) and (directorySliver is not None):
+        generate_input_yaml(directorySliver,
+                            directoryPklz,
+                            yaml_filename=inputYamlFile)
+
     # input parser
-    data_file = args.inputfile
+    data_file = inputYamlFile
     inputdata = misc.obj_from_file(data_file, filetype='yaml')
 
-    evaluation_all = eval_all(inputdata, args.visualization)
+    evaluation_all = eval_all(inputdata, visualization)
 
     logger.debug(str(evaluation_all))
     logger.debug('eval all')
 
     logger.debug(make_sum(evaluation_all))
-    write_csv(evaluation_all, filename=args.outputfile)
+    write_csv(evaluation_all, filename=outputfile + '.csv')
+    misc.obj_to_file(evaluation_all, outputfile + '.pkl', filetype='pkl')
     #import pdb; pdb.set_trace()
 
     # volume

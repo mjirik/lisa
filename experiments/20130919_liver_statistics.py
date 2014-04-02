@@ -25,7 +25,6 @@ sys.path.append(os.path.join(path_to_script,
                              "../extern/lbp/"))
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
-import unittest
 
 import logging
 logger = logging.getLogger(__name__)
@@ -35,15 +34,15 @@ logger = logging.getLogger(__name__)
 #  apdb.set_trace();
 #import scipy.io
 import numpy as np
-import scipy
+#import scipy
 #from scipy import sparse
-import traceback
+#import traceback
 import itertools
 
 # ----------------- my scripts --------
 import py3DSeedEditor
 #import dcmreaddata1 as dcmr
-import dcmreaddata as dcmr
+#import dcmreaddata as dcmr
 import argparse
 #import py3DSeedEditor
 
@@ -121,7 +120,6 @@ def get_features_in_tiles(data3d_orig, data3d_seg, tile_shape, feature_fcn):
     """
 # @TODO here
     cindexes = cutter_indexes(data3d_orig.shape, tile_shape)
-    output = {}
 # create empty list of defined length
     features_t = [None] * len(cindexes)
     seg_cover_t = [None] * len(cindexes)
@@ -130,7 +128,8 @@ def get_features_in_tiles(data3d_orig, data3d_seg, tile_shape, feature_fcn):
         cindex = cindexes[i]
         tile_orig = experiments.getArea(data3d_orig, cindex, tile_shape)
         tile_seg = experiments.getArea(data3d_seg, cindex, tile_shape)
-        tf = get_features(tile_orig, tile_seg, feature_fcn, visualization=False)
+        tf = get_features(tile_orig, tile_seg, feature_fcn,
+                          visualization=False)
         sc = np.sum(tile_seg > 0).astype(np.float) / np.prod(tile_shape)
         features_t[i] = tf
         seg_cover_t[i] = sc
@@ -163,7 +162,7 @@ def cut_tile(data3d, cindex, tile_shape):
 
     upper_corner = cindex + np.array(tile_shape)
     print cindex, "    tile shaoe ", tile_shape, ' uc ', upper_corner,\
-          ' dsh ', data3d.shape
+        ' dsh ', data3d.shape
 
     return data3d[cindex[0]:upper_corner[0],
                   cindex[1]:upper_corner[1],
@@ -183,13 +182,18 @@ def arrange_to_tiled_data(cindexes, tile_shape, data3d_shape, labels_lin):
     return labels
 
 
+def generate_input_yaml_metadata():
+    pass
+
+
 def sample_input_data():
-    inputdata = {'basedir': '/home/mjirik/data/medical/',
-            'data': [
-                {'sliverseg': 'data_orig/sliver07/training-part1/liver-seg001.mhd', 'sliverorig':'data_orig/sliver07/training-part1/liver-orig001.mhd'},
-                {'sliverseg': 'data_orig/sliver07/training-part1/liver-seg002.mhd', 'sliverorig':'data_orig/sliver07/training-part1/liver-orig002.mhd'},
-                ]
-            }
+    inputdata = {
+        'basedir': '/home/mjirik/data/medical/',
+        'data': [
+            {'sliverseg': 'data_orig/sliver07/training-part1/liver-seg001.mhd', 'sliverorig': 'data_orig/sliver07/training-part1/liver-orig001.mhd'},
+            {'sliverseg': 'data_orig/sliver07/training-part1/liver-seg002.mhd', 'sliverorig': 'data_orig/sliver07/training-part1/liver-orig002.mhd'},
+        ]
+    }
 
     sample_data_file = os.path.join(path_to_script,
                                     "20130919_liver_statistics.yaml")
@@ -239,8 +243,9 @@ def experiment(path_to_yaml, list_of_feature_fcn, list_of_classifiers,
     inputdata = misc.obj_from_file(path_to_yaml, filetype='yaml')
 
 #   TODO work with list_of_feature_fcn and list_of_classifiers
-    featrs_plus_classifs = itertools.product(list_of_feature_fcn, list_of_classifiers)
-    import ipdb; ipdb.set_trace()  # BREAKPOINT
+    featrs_plus_classifs = itertools.product(list_of_feature_fcn,
+                                             list_of_classifiers)
+    import ipdb; ipdb.set_trace()  # noqa BREAKPOINT
 
     results = []
 
@@ -272,8 +277,8 @@ def experiment(path_to_yaml, list_of_feature_fcn, list_of_classifiers,
 
             labels_train_lin_float = np.array(seg_cover_t)
             labels_train_lin = labels_train_lin_float > 0.5
-            from sklearn import svm
 
+            #from sklearn import svm
             #clf = svm.SVC()
             clf = fpc[1]()
             clf.fit(features_t, labels_train_lin)
@@ -281,21 +286,23 @@ def experiment(path_to_yaml, list_of_feature_fcn, list_of_classifiers,
 
             d_shp = data3d_orig.shape
 
-            labels = arrange_to_tiled_data(cidxs, tile_shape, d_shp, labels_lin)
-            ltl = (labels_train_lin_float * 10).astype(np.int8)
-            labels_train = arrange_to_tiled_data(cidxs, tile_shape, d_shp, ltl)
+            labels = arrange_to_tiled_data(cidxs, tile_shape, d_shp,
+                                           labels_lin)
+            #ltl = (labels_train_lin_float * 10).astype(np.int8)
+            #labels_train = arrange_to_tiled_data(cidxs, tile_shape,
+            #                                     d_shp, ltl)
 
             #pyed = py3DSeedEditor.py3DSeedEditor(labels_train, contour=labels)
             pyed = py3DSeedEditor.py3DSeedEditor(data3d_seg, contour=labels)
             pyed.show()
             fv_tiles.insert(i, fv_t)
 
-        result = {'params': str(fpc), 'fvall':fvall}
+        result = {'params': str(fpc), 'fvall': fvall}
         results.append(result)
         print results
 
-
     return results
+
 
 def main():
 
@@ -309,11 +316,11 @@ def main():
     #logger.debug('input params')
 
     parser = argparse.ArgumentParser(
-            description='Compute features on liver and other tissue.')
+        description='Compute features on liver and other tissue.')
     parser.add_argument('-si', '--sampleInput', action='store_true',
-            help='generate sample intput data', default=False)
+                        help='generate sample intput data', default=False)
     parser.add_argument('-v', '--visualization',  action='store_true',
-            help='Turn on visualization', default=False)
+                        help='Turn on visualization', default=False)
     parser.add_argument('-i', '--input', help='input yaml file',
                         default="20130919_liver_statistics.yaml")
     parser.add_argument('-o', '--output', help='output file',
@@ -333,11 +340,11 @@ def main():
     list_of_classifiers = [svm.SVC, GaussianNB]
     tile_shape = [1, 100, 100]
     result = experiment(path_to_yaml, list_of_feature_fcn, list_of_classifiers,
-               tile_shape=tile_shape, visualization=args.visualization)
+                        tile_shape=tile_shape,
+                        visualization=args.visualization)
 
 # Ukládání výsledku do souboru
-    output_file = os.path.join(path_to_script, args.output
-)
+    output_file = os.path.join(path_to_script, args.output)
     misc.obj_to_file(result, output_file, filetype='pickle')
 
 if __name__ == "__main__":
