@@ -316,18 +316,15 @@ if __name__ == "__main__":
 
     data = misc.obj_from_file(args.inputfile, filetype = 'pickle')
     ds = data['segmentation'] == data['slab']['liver']
-<<<<<<< HEAD
     pozice = np.where(ds == 1)
     a = pozice[0][0]
     b = pozice[1][0]
     c = pozice[2][0]
     ds = False
     #print "vs ", data['voxelsize_mm']
-=======
     print "vs ", data['voxelsize_mm']
     if args.debug:
         logger.setLevel(logging.DEBUG)
->>>>>>> b4b86c513789d35d444b2e3fb9cece816b3c6838
     #seg = np.zeros([100,100,100])
     #seg [50:80, 50:80, 60:75] = 1
     #seg[58:60, 56:72, 66:68]=2

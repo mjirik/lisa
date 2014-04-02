@@ -35,7 +35,7 @@ from Tkinter import *
 import seg2fem
 
 import misc
-import py3DSeedEditor
+nimport py3DSeedEditor
 import show3
 import qmisc
 import pdb
