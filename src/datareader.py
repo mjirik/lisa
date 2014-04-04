@@ -13,8 +13,6 @@ sys.path.append(os.path.join(path_to_script,
                              "../extern/py3DSeedEditor/"))
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
-import unittest
-import numpy as np
 
 import logging
 logger = logging.getLogger(__name__)
@@ -22,6 +20,7 @@ logger = logging.getLogger(__name__)
 # -------------------- my scripts ------------
 
 import dcmreaddata as dcmr
+
 
 class DataReader:
 
@@ -45,15 +44,22 @@ class DataReader:
             path, ext = os.path.splitext(datapath)
             if ext in ('.pklz', '.pkl'):
                 import misc
-                data = misc.obj_from_file(datapath)
+                data = misc.obj_from_file(datapath, filetype='pkl')
                 data3d = data.pop('data3d')
-                metadata = data
+                #metadata must have series_number
+                metadata = {
+                    'series_number': 0,
+                    'datadir': datapath
+                }
+                metadata.update(data)
+
+                print 'mkeys ', metadata.keys()
 
             else:
 # reading raw file
                 import SimpleITK as sitk
                 image = sitk.ReadImage(datapath)
-                #image = sitk.ReadImage('/home/mjirik/data/medical/data_orig/sliver07/01/liver-orig001.mhd')
+                #image = sitk.ReadImage('/home/mjirik/data/medical/data_orig/sliver07/01/liver-orig001.mhd') #noqa
                 #sz = image.GetSize()
 
                 #data3d = sitk.Image(sz[0],sz[1],sz[2], sitk.sitkInt16)

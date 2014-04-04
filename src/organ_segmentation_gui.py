@@ -19,7 +19,7 @@ from PyQt4.Qt import QString
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 
-import dcmreaddata as dcmreader
+#import dcmreaddata as dcmreader
 from seed_editor_qt import QTSeedEditor
 import pycut
 #from seg2fem import gen_mesh_from_voxels, gen_mesh_from_voxels_mc
@@ -201,6 +201,19 @@ class OrganSegmentation():
             # self.iparams['series_number'] = self.metadata['series_number']
             # self.iparams['datapath'] = self.metadata['datapath']
         #self.process_dicom_data()
+
+    def importDataPlus(self, datap):
+        """
+        Function for input data
+        """
+        self.data3d = datap['data3d']
+        self.crinfo = datap['crinfo']
+        self.segmentation = datap['segmentation']
+        self.slab = datap['slab']
+        self.voxelsize_mm = datap['voxelsize_mm']
+        self.orig_shape = datap['orig_shape']
+        self.seeds = datap[
+            'processing_information']['organ_segmentation']['seeds']
 
     def __clean_oseg_input_params(self, oseg_params):
         """
@@ -532,13 +545,20 @@ class OrganSegmentation():
         data['slab'] = slab
         data['voxelsize_mm'] = self.voxelsize_mm
         data['orig_shape'] = self.orig_shape
-        data['processing_time'] = self.processing_time
-        data['oseg_input_params'] = self.oseg_input_params
-        data['organ_interactivity_counter'] = self.organ_interactivity_counter
+        processing_information = {
+            'organ_segmentation': {
+                'processing_time': self.processing_time,
+                'oseg_input_params': self.oseg_input_params,
+                'organ_interactivity_counter':
+                self.organ_interactivity_counter,
+                'seeds': self.seeds  # qmisc.SparseMatrix(self.seeds)
+            }
+        }
+        data['processing_information'] = processing_information
 # TODO add dcmfilelist
         logger.debug("export()")
         #logger.debug(str(data))
-        logger.debug("org int ctr " + str(data['organ_interactivity_counter']))
+        logger.debug("org int ctr " + str(self.organ_interactivity_counter))
         #data["metadata"] = self.metadata
         #import pdb; pdb.set_trace()
         return data
@@ -892,14 +912,14 @@ class OrganSegmentationWindow(QMainWindow):
         if app:
             dcmdir = QFileDialog.getOpenFileName(
                 caption='Select DICOM Folder',
-#                options=QFileDialog.ShowDirsOnly,
                 directory=directory
+                #options=QFileDialog.ShowDirsOnly,
             )
         else:
             app = QApplication(sys.argv)
             dcmdir = QFileDialog.getOpenFileName(
                 caption='Select DICOM Folder',
-#                options=QFileDialog.ShowDirsOnly,
+                #options=QFileDialog.ShowDirsOnly,
                 directory=directory
             )
             #app.exec_()
@@ -911,6 +931,7 @@ class OrganSegmentationWindow(QMainWindow):
         else:
             dcmdir = None
         return dcmdir
+
     def __get_datadir(self, app=False, directory=''):
         """
         Draw a dialog for directory selection.
@@ -958,7 +979,7 @@ class OrganSegmentationWindow(QMainWindow):
         if oseg.datapath is None:
             self.statusBar().showMessage('No data path specified!')
             return
-        self.importData()
+        self.importDataWithGui()
 
     def loadDataDir(self):
         self.statusBar().showMessage('Reading DICOM directory...')
@@ -979,9 +1000,9 @@ class OrganSegmentationWindow(QMainWindow):
             self.statusBar().showMessage('No DICOM directory specified!')
             return
 
-        self.importData()
+        self.importDataWithGui()
 
-    def importData(self):
+    def importDataWithGui(self):
         oseg = self.oseg
 
         reader = datareader.DataReader()
