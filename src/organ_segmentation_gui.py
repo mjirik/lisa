@@ -105,6 +105,7 @@ class OrganSegmentation():
         experiment_caption='',
         lisa_operator_identifier='',
         volume_unit='ml'
+
         #           iparams=None,
     ):
         """ Segmentation of objects from CT data.
@@ -165,6 +166,7 @@ class OrganSegmentation():
         self.viewermin = viewermin
         self.volume_unit = volume_unit
         self.organ_interactivity_counter = 0
+        self.dcmfilelist = None
 
 #
         oseg_input_params = locals()
@@ -180,10 +182,10 @@ class OrganSegmentation():
 
             if datapath is not None:
                 reader = datareader.DataReader()
-                self.data3d, self.metadata = reader.Get3DData(datapath)
-                #self.iparams['series_number'] = self.metadata['series_number']
+                self.data3d, metadata = reader.Get3DData(datapath)
+                #self.iparams['series_number'] = metadata['series_number']
                 # self.iparams['datapath'] = datapath
-                self.process_dicom_data()
+                self.process_dicom_data(metadata)
             else:
 # data will be selected from gui
                 pass
@@ -192,11 +194,11 @@ class OrganSegmentation():
         else:
             self.data3d = data3d
             # default values are updated in next line
-            self.metadata = {'series_number': -1,
-                             'voxelsize_mm': 1,
-                             'datapath': None}
-            self.metadata.update(metadata)
-            self.process_dicom_data()
+            minmetadata = {'series_number': -1,
+                           'voxelsize_mm': 1,
+                           'datapath': None}
+            minmetadata.update(metadata)
+            self.process_dicom_data(minmetadata)
 
             # self.iparams['series_number'] = self.metadata['series_number']
             # self.iparams['datapath'] = self.metadata['datapath']
@@ -225,18 +227,18 @@ class OrganSegmentation():
         oseg_params.pop('self')
         return oseg_params
 
-    def process_wvx_size_mm(self):
+    def process_wvx_size_mm(self, metadata):
 
         #vx_size = self.working_voxelsize_mm
         vx_size = self.input_wvx_size
         if vx_size == 'orig':
-            vx_size = self.metadata['voxelsize_mm']
+            vx_size = metadata['voxelsize_mm']
 
         elif vx_size == 'orig*2':
-            vx_size = np.array(self.metadata['voxelsize_mm']) * 2
+            vx_size = np.array(metadata['voxelsize_mm']) * 2
 
         elif vx_size == 'orig*4':
-            vx_size = np.array(self.metadata['voxelsize_mm']) * 4
+            vx_size = np.array(metadata['voxelsize_mm']) * 4
 
         if np.isscalar(vx_size):
             vx_size = ([vx_size] * 3)
@@ -293,7 +295,7 @@ class OrganSegmentation():
         logger.debug("volume ratio " + str(vol2 / float(vol1)))
         #import ipdb; ipdb.set_trace()
 
-    def process_dicom_data(self):
+    def process_dicom_data(self, metadata):
         # voxelsize processing
         #self.parameters = {}
 
@@ -306,13 +308,13 @@ class OrganSegmentation():
             # self.iparams['roi'] = self.roi
             # self.iparams['manualroi'] = False
 
-        self.voxelsize_mm = np.array(self.metadata['voxelsize_mm'])
-        self.process_wvx_size_mm()
+        self.voxelsize_mm = np.array(metadata['voxelsize_mm'])
+        self.process_wvx_size_mm(metadata)
         self.autocrop_margin = self.autocrop_margin_mm / self.voxelsize_mm
         self.zoom = self.voxelsize_mm / (1.0 * self.working_voxelsize_mm)
         self.orig_shape = self.data3d.shape
         self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
-
+        self.dcmfilelist = metadata['dcmfilelist']
         #self.segparams = {'pairwiseAlpha':2, 'use_boundary_penalties':True,
         #'boundary_penalties_sigma':50}
 
@@ -325,7 +327,7 @@ class OrganSegmentation():
         if self.seeds is None:
             self.seeds = np.zeros(self.data3d.shape, dtype=np.int8)
         logger.info('dir ' + str(self.datapath) + ", series_number" +
-                    str(self.metadata['series_number']) + 'voxelsize_mm' +
+                    str(metadata['series_number']) + 'voxelsize_mm' +
                     str(self.voxelsize_mm))
         self.time_start = time.time()
 
@@ -705,9 +707,11 @@ class OrganSegmentation():
             3:
             (data['segmentation'] == self.output_label).astype(np.int8)
         }
-        datawriter.saveOverlayToDicomCopy(self.metadata['dcmfilelist'],
-                                          output_dicom_dir, overlays,
-                                          data['crinfo'], data['orig_shape'])
+        if self.dcmfilelist is not None:
+            datawriter.saveOverlayToDicomCopy(
+                self.dcmfilelist,
+                output_dicom_dir, overlays,
+                data['crinfo'], data['orig_shape'])
 
 
 # GUI
@@ -1007,10 +1011,10 @@ class OrganSegmentationWindow(QMainWindow):
 
         reader = datareader.DataReader()
 
-        oseg.data3d, oseg.metadata = reader.Get3DData(oseg.datapath)
+        oseg.data3d, metadata = reader.Get3DData(oseg.datapath)
         # self.iparams['series_number'] = self.metadata['series_number']
         # self.iparams['datapath'] = self.datapath
-        oseg.process_dicom_data()
+        oseg.process_dicom_data(metadata)
         self.setLabelText(self.text_dcm_dir, oseg.datapath)
         self.setLabelText(self.text_dcm_data, self.getDcmInfo())
         self.statusBar().showMessage('Ready')
