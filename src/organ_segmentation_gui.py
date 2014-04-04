@@ -753,7 +753,11 @@ class OrganSegmentationWindow(QMainWindow):
         text_dcm = QLabel('DICOM reader')
         text_dcm.setFont(font_label)
         btn_dcmdir = QPushButton("Load DICOM", self)
-        btn_dcmdir.clicked.connect(self.loadDcmDir)
+        btn_dcmdir.clicked.connect(self.loadDataDir)
+
+        btn_datafile = QPushButton("Load file", self)
+        btn_datafile.clicked.connect(self.loadDataFile)
+
         btn_dcmcrop = QPushButton("Crop", self)
         btn_dcmcrop.clicked.connect(self.cropDcm)
 
@@ -772,13 +776,14 @@ class OrganSegmentationWindow(QMainWindow):
         grid.addWidget(hr, rstart + 0, 0, 1, 4)
         grid.addWidget(text_dcm, rstart + 1, 1, 1, 2)
         grid.addWidget(btn_dcmdir, rstart + 2, 1)
-        grid.addWidget(btn_dcmcrop, rstart + 2, 2)
+        grid.addWidget(btn_datafile, rstart + 3, 1)
+        grid.addWidget(btn_dcmcrop, rstart + 3, 2)
         # voxelsize gui comment
         # grid.addWidget(self.text_vs, rstart + 3, 1)
         # grid.addWidget(combo_vs, rstart + 4, 1)
-        grid.addWidget(self.text_dcm_dir, rstart + 5, 1, 1, 2)
-        grid.addWidget(self.text_dcm_data, rstart + 6, 1, 1, 2)
-        rstart += 8
+        grid.addWidget(self.text_dcm_dir, rstart + 6, 1, 1, 2)
+        grid.addWidget(self.text_dcm_data, rstart + 7, 1, 1, 2)
+        rstart += 9
 
         # ################ segmentation
         hr = QFrame()
@@ -878,20 +883,106 @@ class OrganSegmentationWindow(QMainWindow):
     # def setVoxelVolume(self, vxs):
     #     self.voxel_volume = np.prod(vxs)
 
-    def loadDcmDir(self):
+    def __get_datafile(self, app=False, directory=''):
+        """
+        Draw a dialog for directory selection.
+        """
+
+        from PyQt4.QtGui import QFileDialog
+        if app:
+            dcmdir = QFileDialog.getOpenFileName(
+                caption='Select DICOM Folder',
+#                options=QFileDialog.ShowDirsOnly,
+                directory=directory
+            )
+        else:
+            app = QApplication(sys.argv)
+            dcmdir = QFileDialog.getOpenFileName(
+                caption='Select DICOM Folder',
+#                options=QFileDialog.ShowDirsOnly,
+                directory=directory
+            )
+            #app.exec_()
+            app.exit(0)
+        if len(dcmdir) > 0:
+
+            dcmdir = "%s" % (dcmdir)
+            dcmdir = dcmdir.encode("utf8")
+        else:
+            dcmdir = None
+        return dcmdir
+    def __get_datadir(self, app=False, directory=''):
+        """
+        Draw a dialog for directory selection.
+        """
+
+        from PyQt4.QtGui import QFileDialog
+        if app:
+            dcmdir = QFileDialog.getExistingDirectory(
+                caption='Select DICOM Folder',
+                options=QFileDialog.ShowDirsOnly,
+                directory=directory
+            )
+        else:
+            app = QApplication(sys.argv)
+            dcmdir = QFileDialog.getExistingDirectory(
+                caption='Select DICOM Folder',
+                options=QFileDialog.ShowDirsOnly,
+                directory=directory
+            )
+            #app.exec_()
+            app.exit(0)
+        if len(dcmdir) > 0:
+
+            dcmdir = "%s" % (dcmdir)
+            dcmdir = dcmdir.encode("utf8")
+        else:
+            dcmdir = None
+        return dcmdir
+
+    def loadDataFile(self):
+        self.statusBar().showMessage('Reading data file...')
+        QApplication.processEvents()
+
+        oseg = self.oseg
+        #if oseg.datapath is None:
+            #oseg.datapath = dcmreader.get_dcmdir_qt(
+            #    app=True,
+            #    directory=self.oseg.input_datapath_start
+            #)
+        oseg.datapath = self.__get_datafile(
+            app=True,
+            directory=self.oseg.input_datapath_start
+        )
+
+        if oseg.datapath is None:
+            self.statusBar().showMessage('No data path specified!')
+            return
+        self.importData()
+
+    def loadDataDir(self):
         self.statusBar().showMessage('Reading DICOM directory...')
         QApplication.processEvents()
 
         oseg = self.oseg
-        if oseg.datapath is None:
-            oseg.datapath = dcmreader.get_dcmdir_qt(
-                app=True,
-                directory=self.oseg.input_datapath_start
-            )
+        #if oseg.datapath is None:
+            #oseg.datapath = dcmreader.get_dcmdir_qt(
+            #    app=True,
+            #    directory=self.oseg.input_datapath_start
+            #)
+        oseg.datapath = self.__get_datadir(
+            app=True,
+            directory=self.oseg.input_datapath_start
+        )
 
         if oseg.datapath is None:
             self.statusBar().showMessage('No DICOM directory specified!')
             return
+
+        self.importData()
+
+    def importData(self):
+        oseg = self.oseg
 
         reader = datareader.DataReader()
 
