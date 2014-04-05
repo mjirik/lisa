@@ -28,15 +28,15 @@ class DataReader:
 
         self.overlay_fcn = None
 
-    def Get3DData(self, datapath, qt_app=None, datap_format=True):
+    def Get3DData(self, datapath, qt_app=None, dataplus_format=False):
         """
         :datapath directory with input data
         :qt_app if it is set to None (as default) all dialogs for series
         selection are performed in terminal. If qt_app is set to
         QtGui.QApplication() dialogs are in Qt.
 
-        :datap_format is new data format. Metadata and data are returned in one
-        structure.
+        :dataplus_format is new data format. Metadata and data are returned in
+        one structure.
         """
 
         datapath = os.path.normpath(datapath)
@@ -93,17 +93,24 @@ class DataReader:
             metadata['datadir'] = datapath
             self.overlay_fcn = reader.get_overlay
 
-        if datap_format:
-            return data3d, metadata
-        else:
+        print "dataplus_format ", dataplus_format
+        if dataplus_format:
+            print "jsem in"
+            logger.debug('ahoj')
+            print metadata
+            print data3d
             datap = metadata
             datap['data3d'] = data3d
+            logger.debug('datap keys () : ' + str(datap.keys()))
+            return datap
+        else:
+            return data3d, metadata
 
     def GetOverlay(self):
         """ Generates dictionary of ovelays
         """
 
-        if self.overlay_fcn == None:
+        if self.overlay_fcn == None:  # noqa
             return {}
         else:
             return self.overlay_fcn()

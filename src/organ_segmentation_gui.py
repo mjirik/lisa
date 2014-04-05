@@ -44,6 +44,8 @@ except ImportError:
 import time
 #import audiosupport
 import argparse
+import skimage
+import skimage.transform
 import logging
 logger = logging.getLogger(__name__)
 
@@ -185,7 +187,7 @@ class OrganSegmentation():
                 self.data3d, metadata = reader.Get3DData(datapath)
                 #self.iparams['series_number'] = metadata['series_number']
                 # self.iparams['datapath'] = datapath
-                self.process_dicom_data(metadata)
+                self.import_dataplus(metadata)
             else:
 # data will be selected from gui
                 pass
@@ -198,24 +200,24 @@ class OrganSegmentation():
                            'voxelsize_mm': 1,
                            'datapath': None}
             minmetadata.update(metadata)
-            self.process_dicom_data(minmetadata)
+            self.import_dataplus(minmetadata)
 
             # self.iparams['series_number'] = self.metadata['series_number']
             # self.iparams['datapath'] = self.metadata['datapath']
-        #self.process_dicom_data()
+        #self.import_dataplus()
 
-    def importDataPlus(self, datap):
-        """
-        Function for input data
-        """
-        self.data3d = datap['data3d']
-        self.crinfo = datap['crinfo']
-        self.segmentation = datap['segmentation']
-        self.slab = datap['slab']
-        self.voxelsize_mm = datap['voxelsize_mm']
-        self.orig_shape = datap['orig_shape']
-        self.seeds = datap[
-            'processing_information']['organ_segmentation']['seeds']
+    #def importDataPlus(self, datap):
+    #    """
+    #    Function for input data
+    #    """
+    #    self.data3d = datap['data3d']
+    #    self.crinfo = datap['crinfo']
+    #    self.segmentation = datap['segmentation']
+    #    self.slab = datap['slab']
+    #    self.voxelsize_mm = datap['voxelsize_mm']
+    #    self.orig_shape = datap['orig_shape']
+    #    self.seeds = datap[
+    #        'processing_information']['organ_segmentation']['seeds']
 
     def __clean_oseg_input_params(self, oseg_params):
         """
@@ -295,11 +297,17 @@ class OrganSegmentation():
         logger.debug("volume ratio " + str(vol2 / float(vol1)))
         #import ipdb; ipdb.set_trace()
 
-    def process_dicom_data(self, metadata):
+    def import_dataplus(self, dataplus):
+        datap = {
+            'dcmfilelist': None,
+        }
+        datap.update(dataplus)
         # voxelsize processing
         #self.parameters = {}
 
+        dpkeys = datap.keys()
         #self.segparams['pairwise_alpha']=25
+        self.data3d = datap['data3d']
 
         if self.roi is not None:
             self.crop(self.roi)
@@ -308,15 +316,33 @@ class OrganSegmentation():
             # self.iparams['roi'] = self.roi
             # self.iparams['manualroi'] = False
 
-        self.voxelsize_mm = np.array(metadata['voxelsize_mm'])
-        self.process_wvx_size_mm(metadata)
+        self.voxelsize_mm = np.array(datap['voxelsize_mm'])
+        self.process_wvx_size_mm(datap)
         self.autocrop_margin = self.autocrop_margin_mm / self.voxelsize_mm
         self.zoom = self.voxelsize_mm / (1.0 * self.working_voxelsize_mm)
-        self.orig_shape = self.data3d.shape
-        self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
-        self.dcmfilelist = metadata['dcmfilelist']
+        if 'orig_shape' in dpkeys:
+            self.orig_shape = datap['orig_shape']
+        else:
+            self.orig_shape = self.data3d.shape
+
+        if 'crinfo' in dpkeys:
+            self.crinfo = datap['crinfo']
+        if 'slab' in dpkeys:
+            self.slab = datap['slab']
+
+        if ('segmentation' in dpkeys) and datap['segmentation'] is not None:
+            self.segmentation = datap['segmentation']
+        else:
+            self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
+
+        self.dcmfilelist = datap['dcmfilelist']
         #self.segparams = {'pairwiseAlpha':2, 'use_boundary_penalties':True,
         #'boundary_penalties_sigma':50}
+
+        try:
+            self.seeds = datap['processing_information']['organ_segmentation']['seeds']
+        except:
+            logger.debug('seeds not found in dataplus')
 
         # for each mm on boundary there will be sum of penalty equal 10
 
@@ -327,7 +353,7 @@ class OrganSegmentation():
         if self.seeds is None:
             self.seeds = np.zeros(self.data3d.shape, dtype=np.int8)
         logger.info('dir ' + str(self.datapath) + ", series_number" +
-                    str(metadata['series_number']) + 'voxelsize_mm' +
+                    str(datap['series_number']) + 'voxelsize_mm' +
                     str(self.voxelsize_mm))
         self.time_start = time.time()
 
@@ -399,53 +425,64 @@ class OrganSegmentation():
 
         return igc
 
+
     def _interactivity_end(self, igc):
         logger.debug('_interactivity_end()')
+# Now we need reshape  seeds and segmentation to original size
 
-        segm_orig_scale = scipy.ndimage.zoom(
-            self.segmentation,
-            1.0 / self.zoom,
-            mode='nearest',
-            order=0
-        ).astype(np.int8)
-        seeds = scipy.ndimage.zoom(
-            igc.seeds,
-            1.0 / self.zoom,
-            mode='nearest',
-            order=0
-        )
-        self.organ_interactivity_counter = igc.interactivity_counter
-        logger.debug("org inter counter " +
-                     str(self.organ_interactivity_counter))
+        segm_orig_scale = skimage.transform.resize(
+            self.segmentation, self.data3d.shape, order=0)
 
-# @TODO odstranit hack pro oříznutí na stejnou velikost
-# v podstatě je to vyřešeno, ale nechalo by se to dělat elegantněji v zoom
-# tam je bohužel patrně bug
-        #print 'd3d ', self.data3d.shape
-        #print 's orig scale shape ', segm_orig_scale.shape
-        shp = [
-            np.min([segm_orig_scale.shape[0], self.data3d.shape[0]]),
-            np.min([segm_orig_scale.shape[1], self.data3d.shape[1]]),
-            np.min([segm_orig_scale.shape[2], self.data3d.shape[2]]),
-        ]
-        #self.data3d = self.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
-        #import ipdb; ipdb.set_trace() # BREAKPOINT
+        seeds = skimage.transform.resize(
+            igc.seeds, self.data3d.shape, order=0)
 
-        self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
-        self.segmentation[
-            0:shp[0],
-            0:shp[1],
-            0:shp[2]] = segm_orig_scale[0:shp[0], 0:shp[1], 0:shp[2]]
+        self.segmentation = segm_orig_scale
+        self.seeds = seeds
 
-        del segm_orig_scale
-
-        # self.iparams['seeds'] = np.zeros(self.data3d.shape, dtype=np.int8)
-        # self.iparams['seeds'][
-        self.seeds[
-            0:shp[0],
-            0:shp[1],
-            0:shp[2]] = seeds[0:shp[0], 0:shp[1], 0:shp[2]]
-
+#        segm_orig_scale = scipy.ndimage.zoom(
+#            self.segmentation,
+#            1.0 / self.zoom,
+#            mode='nearest',
+#            order=0
+#        ).astype(np.int8)
+#        seeds = scipy.ndimage.zoom(
+#            igc.seeds,
+#            1.0 / self.zoom,
+#            mode='nearest',
+#            order=0
+#        )
+#        self.organ_interactivity_counter = igc.interactivity_counter
+#        logger.debug("org inter counter " +
+#                     str(self.organ_interactivity_counter))
+#
+## @TODO odstranit hack pro oříznutí na stejnou velikost
+## v podstatě je to vyřešeno, ale nechalo by se to dělat elegantněji v zoom
+## tam je bohužel patrně bug
+#        #print 'd3d ', self.data3d.shape
+#        #print 's orig scale shape ', segm_orig_scale.shape
+#        shp = [
+#            np.min([segm_orig_scale.shape[0], self.data3d.shape[0]]),
+#            np.min([segm_orig_scale.shape[1], self.data3d.shape[1]]),
+#            np.min([segm_orig_scale.shape[2], self.data3d.shape[2]]),
+#        ]
+#        #self.data3d = self.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
+#        #import ipdb; ipdb.set_trace() # BREAKPOINT
+#
+#        self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
+#        self.segmentation[
+#            0:shp[0],
+#            0:shp[1],
+#            0:shp[2]] = segm_orig_scale[0:shp[0], 0:shp[1], 0:shp[2]]
+#
+#        del segm_orig_scale
+#
+#        # self.iparams['seeds'] = np.zeros(self.data3d.shape, dtype=np.int8)
+#        # self.iparams['seeds'][
+#        self.seeds[
+#            0:shp[0],
+#            0:shp[1],
+#            0:shp[2]] = seeds[0:shp[0], 0:shp[1], 0:shp[2]]
+#
         if self.segmentation_smoothing:
             self.segm_smoothing(self.smoothing_mm)
 
@@ -1011,10 +1048,12 @@ class OrganSegmentationWindow(QMainWindow):
 
         reader = datareader.DataReader()
 
-        oseg.data3d, metadata = reader.Get3DData(oseg.datapath)
+        #oseg.data3d, metadata =
+        datap = reader.Get3DData(oseg.datapath, dataplus_format=True)
+        print datap.keys()
         # self.iparams['series_number'] = self.metadata['series_number']
         # self.iparams['datapath'] = self.datapath
-        oseg.process_dicom_data(metadata)
+        oseg.import_dataplus(datap)
         self.setLabelText(self.text_dcm_dir, oseg.datapath)
         self.setLabelText(self.text_dcm_data, self.getDcmInfo())
         self.statusBar().showMessage('Ready')
