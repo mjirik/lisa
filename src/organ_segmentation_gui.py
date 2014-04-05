@@ -4,7 +4,7 @@
 
 # from scipy.io import loadmat, savemat
 import scipy
-from scipy import ndimage
+import scipy.ndimage
 import numpy as np
 
 import sys
@@ -184,23 +184,26 @@ class OrganSegmentation():
 
             if datapath is not None:
                 reader = datareader.DataReader()
-                self.data3d, metadata = reader.Get3DData(datapath)
+                datap = reader.Get3DData(datapath, dataplus_format=True)
                 #self.iparams['series_number'] = metadata['series_number']
                 # self.iparams['datapath'] = datapath
-                self.import_dataplus(metadata)
+                self.import_dataplus(datap)
             else:
 # data will be selected from gui
                 pass
                 #logger.error('No input path or 3d data')
 
         else:
-            self.data3d = data3d
+            #self.data3d = data3d
             # default values are updated in next line
-            minmetadata = {'series_number': -1,
-                           'voxelsize_mm': 1,
-                           'datapath': None}
-            minmetadata.update(metadata)
-            self.import_dataplus(minmetadata)
+            mindatap = {'series_number': -1,
+                        'voxelsize_mm': 1,
+                        'datapath': None,
+                        'data3d': data3d
+                        }
+
+            mindatap.update(metadata)
+            self.import_dataplus(mindatap)
 
             # self.iparams['series_number'] = self.metadata['series_number']
             # self.iparams['datapath'] = self.metadata['datapath']
@@ -270,7 +273,7 @@ class OrganSegmentation():
         Sigma is computed in mm
 
         """
-        import scipy.ndimage
+        #import scipy.ndimage
         sigma = float(sigma_mm) / np.array(self.voxelsize_mm)
 
         #print sigma
@@ -340,7 +343,8 @@ class OrganSegmentation():
         #'boundary_penalties_sigma':50}
 
         try:
-            self.seeds = datap['processing_information']['organ_segmentation']['seeds']
+            self.seeds = datap['processing_information'][
+                'organ_segmentation']['seeds']
         except:
             logger.debug('seeds not found in dataplus')
 
@@ -385,7 +389,7 @@ class OrganSegmentation():
         logger.debug('_interactivity_begin()')
         #print 'zoom ', self.zoom
         #print 'svs_mm ', self.working_voxelsize_mm
-        data3d_res = ndimage.zoom(
+        data3d_res = scipy.ndimage.zoom(
             self.data3d,
             self.zoom,
             mode='nearest',
@@ -414,7 +418,7 @@ class OrganSegmentation():
 #        }
         # if self.iparams['seeds'] is not None:
         if self.seeds is not None:
-            seeds_res = ndimage.zoom(
+            seeds_res = scipy.ndimage.zoom(
                 self.seeds,
                 self.zoom,
                 mode='nearest',
@@ -424,7 +428,6 @@ class OrganSegmentation():
             igc.set_seeds(seeds_res)
 
         return igc
-
 
     def _interactivity_end(self, igc):
         logger.debug('_interactivity_end()')
