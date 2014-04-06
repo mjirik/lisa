@@ -93,7 +93,6 @@ class DataReader:
             metadata['datadir'] = datapath
             self.overlay_fcn = reader.get_overlay
 
-        print "dataplus_format ", dataplus_format
         if dataplus_format:
             print "jsem in"
             logger.debug('ahoj')
