@@ -49,7 +49,7 @@ CROP_MARGIN = [20]
 
 
 def generate_input_yaml(sliver_dir, pklz_dir,
-                        sliver_ext='*g0*.mhd', pklz_ext='*0*.pklz',
+                        sliver_ext='*seg0*.mhd', pklz_ext='*0*.pklz',
                         yaml_filename=None,
                         return_dir_lists=False
                         ):
