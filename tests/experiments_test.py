@@ -13,6 +13,9 @@ sys.path.append(os.path.join(path_to_script, "../src/"))
 sys.path.append(os.path.join(path_to_script, "../experiments/"))
 import unittest
 
+import logging
+logger = logging.getLogger(__name__)
+
 import numpy as np
 
 
@@ -127,8 +130,8 @@ class ExperimentsTest(unittest.TestCase):
         for fl in filelist1:
             open(os.path.join(sliver_dir, fl), 'a').close()
 
-        filelist2 = ['soubor001to.pklz', 'soubor002.pklz',
-                     'so003.pklz', 'so002tre3.pklz', 'ijij.pklz']
+        filelist2 = ['soubor_seg001to.pklz', 'soubor_seg002.pklz',
+                     'sao_seg003.pklz', 'so_seg002tre3.pklz', 'ijij.pklz']
         for fl in filelist2:
             open(os.path.join(pklz_dir, fl), 'a').close()
 
@@ -145,13 +148,13 @@ class ExperimentsTest(unittest.TestCase):
         self.assertEqual(yamldata['data'][0]['ourseg'], flp0)
 
 # Clean
-        d = sliver_dir
-        if os.path.exists(d):
-            shutil.rmtree(d)
-        d = pklz_dir
-        if os.path.exists(d):
-            shutil.rmtree(d)
+        #if os.path.exists(d):
+        shutil.rmtree(sliver_dir)
+        #if os.path.exists(d):
+        shutil.rmtree(pklz_dir)
 
 
 if __name__ == "__main__":
+    logging.basicConfig(stream=sys.stderr)
+    logger.setLevel(logging.DEBUG)
     unittest.main()

@@ -52,7 +52,7 @@ def generate_input_yaml(sliver_dir, pklz_dir,
                         sliver_ext='*seg0*.mhd', pklz_ext='*0*.pklz',
                         yaml_filename=None):
     """
-    Function pair files from different directory by numer in format g0XX
+    Function pair files from different directory by numer in format seg0XX
     If there is given some yaml_filename, it is created.
     """
     import glob
@@ -62,13 +62,16 @@ def generate_input_yaml(sliver_dir, pklz_dir,
     onlyfiles2 = glob.glob(os.path.join(pklz_dir, pklz_ext))
     onlyfiles1.sort()
     onlyfiles2.sort()
+    logger.debug('sliver files \n' + str(onlyfiles1))
+    logger.debug('pklz files \n' + str(onlyfiles2))
 
     data = []
     for flns in onlyfiles1:
         base, flnsh = os.path.split(os.path.normpath(flns))
-        pattern = re.search('(g0[0-9]{2})', flnsh)
+        pattern = re.search('(seg0[0-9]{2})', flnsh)
         if pattern:
             pattern = pattern.group(1)
+        logger.debug('pattern1 ' + pattern)
 
         for flnp in onlyfiles2:
             base, flnph = os.path.split(os.path.normpath(flnp))
