@@ -1,5 +1,8 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
+"""
+Module for visualizaion of 3d data and multiple segmentation.
+"""
 
 import sys
 import os.path
@@ -19,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 import datareader
-import misc
+#import misc
 import qmisc
 import py3DSeedEditor
 
@@ -27,11 +30,28 @@ import py3DSeedEditor
 def show(data3d_a_path, sliver_seg_path, ourSegmentation):
     reader = datareader.DataReader()
     #data3d_a_path = os.path.join(path_to_script, data3d_a_path)
-    data3d_a, metadata_a = reader.Get3DData(data3d_a_path)
+    datap_a = reader.Get3DData(data3d_a_path,
+                               dataplus_format=True)
+
+    if 'orig_shape' in datap_a.keys():
+# pklz
+        data3d_a = qmisc.uncrop(datap_a['data3d'], datap_a['crinfo'],
+                                datap_a['orig_shape'])
+    else:
+#dicom
+        data3d_a = datap_a['data3d']
 
     if sliver_seg_path is not None:
         sliver_seg_path = os.path.join(path_to_script, sliver_seg_path)
-        sliver_seg, metadata_b = reader.Get3DData(sliver_seg_path)
+        sliver_datap = reader.Get3DData(sliver_seg_path,
+                                        dataplus_format=True)
+        if 'segmentation' in sliver_datap.keys():
+            sliver_seg = sliver_datap['segmentation']
+            sliver_seg = qmisc.uncrop(sliver_datap['segmentation'],
+                                      sliver_datap['crinfo'],
+                                      data3d_a.shape)
+        else:
+            sliver_seg = sliver_datap['data3d']
 
         pyed = py3DSeedEditor.py3DSeedEditor(data3d_a, contour=sliver_seg)
         print "Sliver07 segmentation"
@@ -39,14 +59,14 @@ def show(data3d_a_path, sliver_seg_path, ourSegmentation):
 
     if ourSegmentation != None:
         ourSegmentation = os.path.join(path_to_script, ourSegmentation)
-        data_our = misc.obj_from_file(ourSegmentation, 'pickle')
+        datap_our = reader.Get3DData(ourSegmentation, dataplus_format=True)
+        #data_our = misc.obj_from_file(ourSegmentation, 'pickle')
         #data3d_our = data_our['segmentation']
-        our_seg = qmisc.uncrop(data_our['segmentation'], data_our['crinfo'],
+        our_seg = qmisc.uncrop(datap_our['segmentation'], datap_our['crinfo'],
                                data3d_a.shape)
 
     if ourSegmentation != None:
-        pyed = py3DSeedEditor.py3DSeedEditor(data3d_a, contour =
-        our_seg)
+        pyed = py3DSeedEditor.py3DSeedEditor(data3d_a, contour=our_seg)
         print "Our segmentation"
         pyed.show()
 
@@ -62,11 +82,13 @@ def show(data3d_a_path, sliver_seg_path, ourSegmentation):
 
 #@TODO dodělat uncrop  a podobné kratochvíle
 
-    #data3d_b_path = os.path.join(inputdata['basedir'], inputdata['data'][i]['ourseg'])
+    #data3d_b_path = os.path.join(inputdata['basedir'],
+    #                             inputdata['data'][i]['ourseg'])
     #obj_b = misc.obj_from_file(data3d_b_path, filetype='pickle')
     #data_b, metadata_b = reader.Get3DData(data3d_b_path)
 
-    #data3d_b = qmisc.uncrop(obj_b['segmentation'], obj_b['crinfo'],data3d_a.shape)
+    #data3d_b = qmisc.uncrop(obj_b['segmentation'],
+    #                        obj_b['crinfo'],data3d_a.shape)
 
 
     #import pdb; pdb.set_trace()
@@ -90,15 +112,20 @@ def main():
     data3d_b_path = None #os.path.join(path_to_script, '../../../data/medical/data_orig/sliver07/training-part1/liver-seg001.mhd')
     parser = argparse.ArgumentParser(
             description='Visualization of sliver data and our segmentation')
-    parser.add_argument('-sd', '--sliverData',
-            help='path to input sliver data', default=data3d_a_path)
-    parser.add_argument('-ss', '--sliverSegmentation',
-            help='path to input sliver segmentation', default=data3d_b_path)
-    parser.add_argument('-os', '--ourSegmentation',
-            help='path to out pklz or pkl segmentation', default=None)
+    parser.add_argument(
+        '-dd', '--densityData',
+        help='path to input data with density. It can be Dicom or pklz',
+        default=data3d_a_path)
+    parser.add_argument(
+        '-sa', '--segmentationA',
+        help='path to input (sliver) segmentation Dicom or pklz', default=data3d_b_path)
+    parser.add_argument(
+        '-sb', '--segmentationB',
+        help='path to out pklz or pkl segmentation. Dicom is not supported.',
+        default=None)
     args = parser.parse_args()
 
-    show(args.sliverData, args.sliverSegmentation, args.ourSegmentation)
+    show(args.densityData, args.segmentationA, args.segmentationB)
 
 
 
