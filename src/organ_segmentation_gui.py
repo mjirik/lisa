@@ -4,7 +4,7 @@
 
 # from scipy.io import loadmat, savemat
 import scipy
-from scipy import ndimage
+import scipy.ndimage
 import numpy as np
 
 import sys
@@ -19,7 +19,7 @@ from PyQt4.Qt import QString
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 
-import dcmreaddata as dcmreader
+#import dcmreaddata as dcmreader
 from seed_editor_qt import QTSeedEditor
 import pycut
 #from seg2fem import gen_mesh_from_voxels, gen_mesh_from_voxels_mc
@@ -44,6 +44,8 @@ except ImportError:
 import time
 #import audiosupport
 import argparse
+import skimage
+import skimage.transform
 import logging
 logger = logging.getLogger(__name__)
 
@@ -105,6 +107,7 @@ class OrganSegmentation():
         experiment_caption='',
         lisa_operator_identifier='',
         volume_unit='ml'
+
         #           iparams=None,
     ):
         """ Segmentation of objects from CT data.
@@ -165,6 +168,7 @@ class OrganSegmentation():
         self.viewermin = viewermin
         self.volume_unit = volume_unit
         self.organ_interactivity_counter = 0
+        self.dcmfilelist = None
 
 #
         oseg_input_params = locals()
@@ -180,27 +184,43 @@ class OrganSegmentation():
 
             if datapath is not None:
                 reader = datareader.DataReader()
-                self.data3d, self.metadata = reader.Get3DData(datapath)
-                #self.iparams['series_number'] = self.metadata['series_number']
+                datap = reader.Get3DData(datapath, dataplus_format=True)
+                #self.iparams['series_number'] = metadata['series_number']
                 # self.iparams['datapath'] = datapath
-                self.process_dicom_data()
+                self.import_dataplus(datap)
             else:
 # data will be selected from gui
                 pass
                 #logger.error('No input path or 3d data')
 
         else:
-            self.data3d = data3d
+            #self.data3d = data3d
             # default values are updated in next line
-            self.metadata = {'series_number': -1,
-                             'voxelsize_mm': 1,
-                             'datapath': None}
-            self.metadata.update(metadata)
-            self.process_dicom_data()
+            mindatap = {'series_number': -1,
+                        'voxelsize_mm': 1,
+                        'datapath': None,
+                        'data3d': data3d
+                        }
+
+            mindatap.update(metadata)
+            self.import_dataplus(mindatap)
 
             # self.iparams['series_number'] = self.metadata['series_number']
             # self.iparams['datapath'] = self.metadata['datapath']
-        #self.process_dicom_data()
+        #self.import_dataplus()
+
+    #def importDataPlus(self, datap):
+    #    """
+    #    Function for input data
+    #    """
+    #    self.data3d = datap['data3d']
+    #    self.crinfo = datap['crinfo']
+    #    self.segmentation = datap['segmentation']
+    #    self.slab = datap['slab']
+    #    self.voxelsize_mm = datap['voxelsize_mm']
+    #    self.orig_shape = datap['orig_shape']
+    #    self.seeds = datap[
+    #        'processing_information']['organ_segmentation']['seeds']
 
     def __clean_oseg_input_params(self, oseg_params):
         """
@@ -212,18 +232,18 @@ class OrganSegmentation():
         oseg_params.pop('self')
         return oseg_params
 
-    def process_wvx_size_mm(self):
+    def process_wvx_size_mm(self, metadata):
 
         #vx_size = self.working_voxelsize_mm
         vx_size = self.input_wvx_size
         if vx_size == 'orig':
-            vx_size = self.metadata['voxelsize_mm']
+            vx_size = metadata['voxelsize_mm']
 
         elif vx_size == 'orig*2':
-            vx_size = np.array(self.metadata['voxelsize_mm']) * 2
+            vx_size = np.array(metadata['voxelsize_mm']) * 2
 
         elif vx_size == 'orig*4':
-            vx_size = np.array(self.metadata['voxelsize_mm']) * 4
+            vx_size = np.array(metadata['voxelsize_mm']) * 4
 
         if np.isscalar(vx_size):
             vx_size = ([vx_size] * 3)
@@ -253,7 +273,7 @@ class OrganSegmentation():
         Sigma is computed in mm
 
         """
-        import scipy.ndimage
+        #import scipy.ndimage
         sigma = float(sigma_mm) / np.array(self.voxelsize_mm)
 
         #print sigma
@@ -280,11 +300,17 @@ class OrganSegmentation():
         logger.debug("volume ratio " + str(vol2 / float(vol1)))
         #import ipdb; ipdb.set_trace()
 
-    def process_dicom_data(self):
+    def import_dataplus(self, dataplus):
+        datap = {
+            'dcmfilelist': None,
+        }
+        datap.update(dataplus)
         # voxelsize processing
         #self.parameters = {}
 
+        dpkeys = datap.keys()
         #self.segparams['pairwise_alpha']=25
+        self.data3d = datap['data3d']
 
         if self.roi is not None:
             self.crop(self.roi)
@@ -293,15 +319,34 @@ class OrganSegmentation():
             # self.iparams['roi'] = self.roi
             # self.iparams['manualroi'] = False
 
-        self.voxelsize_mm = np.array(self.metadata['voxelsize_mm'])
-        self.process_wvx_size_mm()
+        self.voxelsize_mm = np.array(datap['voxelsize_mm'])
+        self.process_wvx_size_mm(datap)
         self.autocrop_margin = self.autocrop_margin_mm / self.voxelsize_mm
         self.zoom = self.voxelsize_mm / (1.0 * self.working_voxelsize_mm)
-        self.orig_shape = self.data3d.shape
-        self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
+        if 'orig_shape' in dpkeys:
+            self.orig_shape = datap['orig_shape']
+        else:
+            self.orig_shape = self.data3d.shape
 
+        if 'crinfo' in dpkeys:
+            self.crinfo = datap['crinfo']
+        if 'slab' in dpkeys:
+            self.slab = datap['slab']
+
+        if ('segmentation' in dpkeys) and datap['segmentation'] is not None:
+            self.segmentation = datap['segmentation']
+        else:
+            self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
+
+        self.dcmfilelist = datap['dcmfilelist']
         #self.segparams = {'pairwiseAlpha':2, 'use_boundary_penalties':True,
         #'boundary_penalties_sigma':50}
+
+        try:
+            self.seeds = datap['processing_information'][
+                'organ_segmentation']['seeds']
+        except:
+            logger.debug('seeds not found in dataplus')
 
         # for each mm on boundary there will be sum of penalty equal 10
 
@@ -312,7 +357,7 @@ class OrganSegmentation():
         if self.seeds is None:
             self.seeds = np.zeros(self.data3d.shape, dtype=np.int8)
         logger.info('dir ' + str(self.datapath) + ", series_number" +
-                    str(self.metadata['series_number']) + 'voxelsize_mm' +
+                    str(datap['series_number']) + 'voxelsize_mm' +
                     str(self.voxelsize_mm))
         self.time_start = time.time()
 
@@ -344,7 +389,7 @@ class OrganSegmentation():
         logger.debug('_interactivity_begin()')
         #print 'zoom ', self.zoom
         #print 'svs_mm ', self.working_voxelsize_mm
-        data3d_res = ndimage.zoom(
+        data3d_res = scipy.ndimage.zoom(
             self.data3d,
             self.zoom,
             mode='nearest',
@@ -373,7 +418,7 @@ class OrganSegmentation():
 #        }
         # if self.iparams['seeds'] is not None:
         if self.seeds is not None:
-            seeds_res = ndimage.zoom(
+            seeds_res = scipy.ndimage.zoom(
                 self.seeds,
                 self.zoom,
                 mode='nearest',
@@ -386,51 +431,61 @@ class OrganSegmentation():
 
     def _interactivity_end(self, igc):
         logger.debug('_interactivity_end()')
+# Now we need reshape  seeds and segmentation to original size
 
-        segm_orig_scale = scipy.ndimage.zoom(
-            self.segmentation,
-            1.0 / self.zoom,
-            mode='nearest',
-            order=0
-        ).astype(np.int8)
-        seeds = scipy.ndimage.zoom(
-            igc.seeds,
-            1.0 / self.zoom,
-            mode='nearest',
-            order=0
-        )
-        self.organ_interactivity_counter = igc.interactivity_counter
-        logger.debug("org inter counter " +
-                     str(self.organ_interactivity_counter))
+        segm_orig_scale = skimage.transform.resize(
+            self.segmentation, self.data3d.shape, order=0)
 
-# @TODO odstranit hack pro oříznutí na stejnou velikost
-# v podstatě je to vyřešeno, ale nechalo by se to dělat elegantněji v zoom
-# tam je bohužel patrně bug
-        #print 'd3d ', self.data3d.shape
-        #print 's orig scale shape ', segm_orig_scale.shape
-        shp = [
-            np.min([segm_orig_scale.shape[0], self.data3d.shape[0]]),
-            np.min([segm_orig_scale.shape[1], self.data3d.shape[1]]),
-            np.min([segm_orig_scale.shape[2], self.data3d.shape[2]]),
-        ]
-        #self.data3d = self.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
-        #import ipdb; ipdb.set_trace() # BREAKPOINT
+        seeds = skimage.transform.resize(
+            igc.seeds, self.data3d.shape, order=0)
 
-        self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
-        self.segmentation[
-            0:shp[0],
-            0:shp[1],
-            0:shp[2]] = segm_orig_scale[0:shp[0], 0:shp[1], 0:shp[2]]
+        self.segmentation = segm_orig_scale
+        self.seeds = seeds
 
-        del segm_orig_scale
-
-        # self.iparams['seeds'] = np.zeros(self.data3d.shape, dtype=np.int8)
-        # self.iparams['seeds'][
-        self.seeds[
-            0:shp[0],
-            0:shp[1],
-            0:shp[2]] = seeds[0:shp[0], 0:shp[1], 0:shp[2]]
-
+#        segm_orig_scale = scipy.ndimage.zoom(
+#            self.segmentation,
+#            1.0 / self.zoom,
+#            mode='nearest',
+#            order=0
+#        ).astype(np.int8)
+#        seeds = scipy.ndimage.zoom(
+#            igc.seeds,
+#            1.0 / self.zoom,
+#            mode='nearest',
+#            order=0
+#        )
+#        self.organ_interactivity_counter = igc.interactivity_counter
+#        logger.debug("org inter counter " +
+#                     str(self.organ_interactivity_counter))
+#
+## @TODO odstranit hack pro oříznutí na stejnou velikost
+## v podstatě je to vyřešeno, ale nechalo by se to dělat elegantněji v zoom
+## tam je bohužel patrně bug
+#        #print 'd3d ', self.data3d.shape
+#        #print 's orig scale shape ', segm_orig_scale.shape
+#        shp = [
+#            np.min([segm_orig_scale.shape[0], self.data3d.shape[0]]),
+#            np.min([segm_orig_scale.shape[1], self.data3d.shape[1]]),
+#            np.min([segm_orig_scale.shape[2], self.data3d.shape[2]]),
+#        ]
+#        #self.data3d = self.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
+#        #import ipdb; ipdb.set_trace() # BREAKPOINT
+#
+#        self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
+#        self.segmentation[
+#            0:shp[0],
+#            0:shp[1],
+#            0:shp[2]] = segm_orig_scale[0:shp[0], 0:shp[1], 0:shp[2]]
+#
+#        del segm_orig_scale
+#
+#        # self.iparams['seeds'] = np.zeros(self.data3d.shape, dtype=np.int8)
+#        # self.iparams['seeds'][
+#        self.seeds[
+#            0:shp[0],
+#            0:shp[1],
+#            0:shp[2]] = seeds[0:shp[0], 0:shp[1], 0:shp[2]]
+#
         if self.segmentation_smoothing:
             self.segm_smoothing(self.smoothing_mm)
 
@@ -532,13 +587,20 @@ class OrganSegmentation():
         data['slab'] = slab
         data['voxelsize_mm'] = self.voxelsize_mm
         data['orig_shape'] = self.orig_shape
-        data['processing_time'] = self.processing_time
-        data['oseg_input_params'] = self.oseg_input_params
-        data['organ_interactivity_counter'] = self.organ_interactivity_counter
+        processing_information = {
+            'organ_segmentation': {
+                'processing_time': self.processing_time,
+                'oseg_input_params': self.oseg_input_params,
+                'organ_interactivity_counter':
+                self.organ_interactivity_counter,
+                'seeds': self.seeds  # qmisc.SparseMatrix(self.seeds)
+            }
+        }
+        data['processing_information'] = processing_information
 # TODO add dcmfilelist
         logger.debug("export()")
         #logger.debug(str(data))
-        logger.debug("org int ctr " + str(data['organ_interactivity_counter']))
+        logger.debug("org int ctr " + str(self.organ_interactivity_counter))
         #data["metadata"] = self.metadata
         #import pdb; pdb.set_trace()
         return data
@@ -685,9 +747,11 @@ class OrganSegmentation():
             3:
             (data['segmentation'] == self.output_label).astype(np.int8)
         }
-        datawriter.saveOverlayToDicomCopy(self.metadata['dcmfilelist'],
-                                          output_dicom_dir, overlays,
-                                          data['crinfo'], data['orig_shape'])
+        if self.dcmfilelist is not None:
+            datawriter.saveOverlayToDicomCopy(
+                self.dcmfilelist,
+                output_dicom_dir, overlays,
+                data['crinfo'], data['orig_shape'])
 
 
 # GUI
@@ -753,7 +817,11 @@ class OrganSegmentationWindow(QMainWindow):
         text_dcm = QLabel('DICOM reader')
         text_dcm.setFont(font_label)
         btn_dcmdir = QPushButton("Load DICOM", self)
-        btn_dcmdir.clicked.connect(self.loadDcmDir)
+        btn_dcmdir.clicked.connect(self.loadDataDir)
+
+        btn_datafile = QPushButton("Load file", self)
+        btn_datafile.clicked.connect(self.loadDataFile)
+
         btn_dcmcrop = QPushButton("Crop", self)
         btn_dcmcrop.clicked.connect(self.cropDcm)
 
@@ -772,13 +840,14 @@ class OrganSegmentationWindow(QMainWindow):
         grid.addWidget(hr, rstart + 0, 0, 1, 4)
         grid.addWidget(text_dcm, rstart + 1, 1, 1, 2)
         grid.addWidget(btn_dcmdir, rstart + 2, 1)
-        grid.addWidget(btn_dcmcrop, rstart + 2, 2)
+        grid.addWidget(btn_datafile, rstart + 3, 1)
+        grid.addWidget(btn_dcmcrop, rstart + 3, 2)
         # voxelsize gui comment
         # grid.addWidget(self.text_vs, rstart + 3, 1)
         # grid.addWidget(combo_vs, rstart + 4, 1)
-        grid.addWidget(self.text_dcm_dir, rstart + 5, 1, 1, 2)
-        grid.addWidget(self.text_dcm_data, rstart + 6, 1, 1, 2)
-        rstart += 8
+        grid.addWidget(self.text_dcm_dir, rstart + 6, 1, 1, 2)
+        grid.addWidget(self.text_dcm_data, rstart + 7, 1, 1, 2)
+        rstart += 9
 
         # ################ segmentation
         hr = QFrame()
@@ -878,27 +947,116 @@ class OrganSegmentationWindow(QMainWindow):
     # def setVoxelVolume(self, vxs):
     #     self.voxel_volume = np.prod(vxs)
 
-    def loadDcmDir(self):
+    def __get_datafile(self, app=False, directory=''):
+        """
+        Draw a dialog for directory selection.
+        """
+
+        from PyQt4.QtGui import QFileDialog
+        if app:
+            dcmdir = QFileDialog.getOpenFileName(
+                caption='Select DICOM Folder',
+                directory=directory
+                #options=QFileDialog.ShowDirsOnly,
+            )
+        else:
+            app = QApplication(sys.argv)
+            dcmdir = QFileDialog.getOpenFileName(
+                caption='Select DICOM Folder',
+                #options=QFileDialog.ShowDirsOnly,
+                directory=directory
+            )
+            #app.exec_()
+            app.exit(0)
+        if len(dcmdir) > 0:
+
+            dcmdir = "%s" % (dcmdir)
+            dcmdir = dcmdir.encode("utf8")
+        else:
+            dcmdir = None
+        return dcmdir
+
+    def __get_datadir(self, app=False, directory=''):
+        """
+        Draw a dialog for directory selection.
+        """
+
+        from PyQt4.QtGui import QFileDialog
+        if app:
+            dcmdir = QFileDialog.getExistingDirectory(
+                caption='Select DICOM Folder',
+                options=QFileDialog.ShowDirsOnly,
+                directory=directory
+            )
+        else:
+            app = QApplication(sys.argv)
+            dcmdir = QFileDialog.getExistingDirectory(
+                caption='Select DICOM Folder',
+                options=QFileDialog.ShowDirsOnly,
+                directory=directory
+            )
+            #app.exec_()
+            app.exit(0)
+        if len(dcmdir) > 0:
+
+            dcmdir = "%s" % (dcmdir)
+            dcmdir = dcmdir.encode("utf8")
+        else:
+            dcmdir = None
+        return dcmdir
+
+    def loadDataFile(self):
+        self.statusBar().showMessage('Reading data file...')
+        QApplication.processEvents()
+
+        oseg = self.oseg
+        #if oseg.datapath is None:
+            #oseg.datapath = dcmreader.get_dcmdir_qt(
+            #    app=True,
+            #    directory=self.oseg.input_datapath_start
+            #)
+        oseg.datapath = self.__get_datafile(
+            app=True,
+            directory=self.oseg.input_datapath_start
+        )
+
+        if oseg.datapath is None:
+            self.statusBar().showMessage('No data path specified!')
+            return
+        self.importDataWithGui()
+
+    def loadDataDir(self):
         self.statusBar().showMessage('Reading DICOM directory...')
         QApplication.processEvents()
 
         oseg = self.oseg
-        if oseg.datapath is None:
-            oseg.datapath = dcmreader.get_dcmdir_qt(
-                app=True,
-                directory=self.oseg.input_datapath_start
-            )
+        #if oseg.datapath is None:
+            #oseg.datapath = dcmreader.get_dcmdir_qt(
+            #    app=True,
+            #    directory=self.oseg.input_datapath_start
+            #)
+        oseg.datapath = self.__get_datadir(
+            app=True,
+            directory=self.oseg.input_datapath_start
+        )
 
         if oseg.datapath is None:
             self.statusBar().showMessage('No DICOM directory specified!')
             return
 
+        self.importDataWithGui()
+
+    def importDataWithGui(self):
+        oseg = self.oseg
+
         reader = datareader.DataReader()
 
-        oseg.data3d, oseg.metadata = reader.Get3DData(oseg.datapath)
+        #oseg.data3d, metadata =
+        datap = reader.Get3DData(oseg.datapath, dataplus_format=True)
+        print datap.keys()
         # self.iparams['series_number'] = self.metadata['series_number']
         # self.iparams['datapath'] = self.datapath
-        oseg.process_dicom_data()
+        oseg.import_dataplus(datap)
         self.setLabelText(self.text_dcm_dir, oseg.datapath)
         self.setLabelText(self.text_dcm_data, self.getDcmInfo())
         self.statusBar().showMessage('Ready')

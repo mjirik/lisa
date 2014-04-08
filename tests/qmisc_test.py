@@ -72,17 +72,20 @@ class QmiscTest(unittest.TestCase):
     #    self.assertRaises(misc.obj_to_file(test_object, filename ,'yaml'))
 
     def test_obj_to_and_from_file_with_directories(self):
+        import shutil
         testdata = np.random.random([4, 4, 3])
         test_object = {'a': 1, 'data': testdata}
 
-        filename = 'tests_write_and_read/test_obj_to_and_from_file.pkl'
+        dirname = '__test_write_and_read'
+        filename = '__test_write_and_read/test_obj_to_and_from_file.pkl'
+
         misc.obj_to_file(test_object, filename, 'pickle')
         saved_object = misc.obj_from_file(filename, 'pickle')
 
         self.assertTrue(saved_object['a'] == 1)
         self.assertTrue(saved_object['data'][1, 1, 1] == testdata[1, 1, 1])
 
-        os.remove(filename)
+        shutil.rmtree(dirname)
 
     def test_crop_and_uncrop(self):
         shape = [10, 10, 5]

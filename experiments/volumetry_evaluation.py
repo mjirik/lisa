@@ -50,9 +50,12 @@ CROP_MARGIN = [20]
 
 def generate_input_yaml(sliver_dir, pklz_dir,
                         sliver_ext='*seg0*.mhd', pklz_ext='*0*.pklz',
-                        yaml_filename=None):
+                        yaml_filename=None,
+                        return_dir_lists=False
+                        ):
     """
-    Function pair files from different directory by numer in format g0XX
+    Function pair files from different directory by numer in format g0XX.
+    It is ok for seg001 and orig001 too.
     If there is given some yaml_filename, it is created.
     """
     import glob
@@ -62,6 +65,8 @@ def generate_input_yaml(sliver_dir, pklz_dir,
     onlyfiles2 = glob.glob(os.path.join(pklz_dir, pklz_ext))
     onlyfiles1.sort()
     onlyfiles2.sort()
+    logger.debug('sliver files \n' + str(onlyfiles1))
+    logger.debug('pklz files \n' + str(onlyfiles2))
 
     data = []
     for flns in onlyfiles1:
@@ -69,6 +74,7 @@ def generate_input_yaml(sliver_dir, pklz_dir,
         pattern = re.search('(g0[0-9]{2})', flnsh)
         if pattern:
             pattern = pattern.group(1)
+        logger.debug('pattern1 ' + pattern)
 
         for flnp in onlyfiles2:
             base, flnph = os.path.split(os.path.normpath(flnp))
@@ -84,10 +90,21 @@ def generate_input_yaml(sliver_dir, pklz_dir,
         'data': data
     }
 
+    retval = []
+
     if yaml_filename is None:
-        return inputdata
+        retval.append(inputdata)
     else:
         misc.obj_to_file(inputdata, yaml_filename, filetype='yaml')
+
+    if return_dir_lists:
+        retval.append(onlyfiles1)
+        retval.append(onlyfiles2)
+
+    if len(retval) > 1:
+        return tuple(retval)
+    elif len(retval) == 1:
+        return retval[0]
 
 
 def sample_input_data():
@@ -301,11 +318,88 @@ def eval_all(inputdata, visualization=False):
         evaluation_all['avgd'].append(evaluation_one['avgd'])
         evaluation_all['rmsd'].append(evaluation_one['rmsd'])
         evaluation_all['maxd'].append(evaluation_one['maxd'])
-        evaluation_all['processing_time'].append(obj_b['processing_time'])
+        if 'processing_time' in obj_b.keys():
+            #this is only for compatibility with march2014 data
+            processing_time = obj_b['processing_time']
+            organ_interactivity_counter = obj_b['organ_interactivity_counter']
+        else:
+            processing_time = obj_b['processing_information']['organ_segmentation']['processing_time']  # noqa
+            organ_interactivity_counter = obj_b['processing_information']['organ_segmentation']['organ_interactivity_counter']  # noqa
+        evaluation_all['processing_time'].append(processing_time)
         evaluation_all['organ_interactivity_counter'].append(
-            obj_b['organ_interactivity_counter'])
+            organ_interactivity_counter)
 
     return evaluation_all
+
+
+def sliverScore(measure, metric_type):
+    """
+    Based on sliver metodics
+    http://sliver07.org/p7.pdf
+
+    Slope and intercept comutations:
+    https://docs.google.com/spreadsheet/ccc?key=0AkBzbxly5bqfdEJaOWJJUEh5ajVJM05YWGdaX1k5aFE#gid=0   # noqa
+
+    """
+    slope = -1
+    intercept = 100
+
+    if metric_type is 'vd':
+        slope = -3.90625
+    elif metric_type is 'voe':
+        slope = -5.31914893617021
+    elif metric_type is 'avgd':
+        slope = -25
+    elif metric_type is 'rmsdd':
+        slope = -14.7058823529412
+    elif metric_type is 'maxdd':
+        slope = -1.31578947368421
+
+    score = intercept + np.abs(measure) * slope
+    score[score < 0] = 0
+
+    return score
+
+
+def sliverScoreAll(data):
+    """
+    Computers score by Sliver07
+    http://sliver07.org/p7.pdf
+
+    input: dataset = [{'vd':[1.1, ..., 0.1], 'voe':[...], 'avgd':[...], ...}
+                      {'vd':[...], 'voe':[...], ...}
+                     ]
+    return: scoreTotal, scoreMetrics, scoreAll
+        Order of scoreMetrics is [vd, voe, avgd, rmsd, maxd]
+
+
+    """
+
+    scoreAll = []
+    scoreTotal = []
+    scoreMetrics = []
+    for dat in data:
+        score = {
+            'vd': sliverScore(dat['vd'], 'vd'),
+            'voe': sliverScore(dat['voe'], 'voe'),
+            'avgd': sliverScore(dat['avgd'], 'avgd'),
+            'rmsd': sliverScore(dat['rmsd'], 'rmsd'),
+            'maxd': sliverScore(dat['maxd'], 'maxd'),
+        }
+        scoreAll.append(score)
+
+        metrics = [np.mean(score['vd']),
+                   np.mean(score['voe']),
+                   np.mean(score['avgd']),
+                   np.mean(score['rmsd']),
+                   np.mean(score['maxd'])
+                   ]
+        scoreMetrics.append(metrics)
+
+        total = np.mean(metrics)
+        scoreTotal.append(total)
+
+    return scoreTotal, scoreMetrics, scoreAll
 
 
 def main():
@@ -365,7 +459,8 @@ def evaluateAndWriteToFile(
     directoryPklz,
     directorySliver,
     outputfile,
-    visualization
+    visualization,
+    return_dir_lists
 ):
     """
     Function computes yaml file (if there are given input sliver and pklz
@@ -373,9 +468,12 @@ def evaluateAndWriteToFile(
     our pklz files.
     """
     if (directoryPklz is not None) and (directorySliver is not None):
-        generate_input_yaml(directorySliver,
-                            directoryPklz,
-                            yaml_filename=inputYamlFile)
+        dirlists = generate_input_yaml(
+            directorySliver,
+            directoryPklz,
+            yaml_filename=inputYamlFile,
+            return_dir_lists=return_dir_lists
+        )
 
     # input parser
     data_file = inputYamlFile
@@ -389,6 +487,9 @@ def evaluateAndWriteToFile(
     logger.debug(make_sum(evaluation_all))
     write_csv(evaluation_all, filename=outputfile + '.csv')
     misc.obj_to_file(evaluation_all, outputfile + '.pkl', filetype='pkl')
+
+    if return_dir_lists:
+        return dirlists
     #import pdb; pdb.set_trace()
 
     # volume
