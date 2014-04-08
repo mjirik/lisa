@@ -153,6 +153,14 @@ class ExperimentsTest(unittest.TestCase):
         #if os.path.exists(d):
         shutil.rmtree(pklz_dir)
 
+    def test_volumetry_evaluation_sliver_score(self):
+        """
+        Testing Volume Difference score. Score for negative values must be
+        equal. Score for far high values must be 0.
+        """
+        score = volumetry_evaluation.sliverScore([1, -1, 30, 50, 100], 'vd')
+        self.assertAlmostEquals(score[0], score[1])
+        self.assertEqual(score[2], 0)
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stderr)

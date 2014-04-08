@@ -101,8 +101,10 @@ def generate_input_yaml(sliver_dir, pklz_dir,
         retval.append(onlyfiles1)
         retval.append(onlyfiles2)
 
-    if len(retval) > 0:
-        return retval
+    if len(retval) > 1:
+        return tuple(retval)
+    elif len(retval) == 1:
+        return retval[0]
 
 
 def sample_input_data():
@@ -328,6 +330,76 @@ def eval_all(inputdata, visualization=False):
             organ_interactivity_counter)
 
     return evaluation_all
+
+
+def sliverScore(measure, metric_type):
+    """
+    Based on sliver metodics
+    http://sliver07.org/p7.pdf
+
+    Slope and intercept comutations:
+    https://docs.google.com/spreadsheet/ccc?key=0AkBzbxly5bqfdEJaOWJJUEh5ajVJM05YWGdaX1k5aFE#gid=0   # noqa
+
+    """
+    slope = -1
+    intercept = 100
+
+    if metric_type is 'vd':
+        slope = -3.90625
+    elif metric_type is 'voe':
+        slope = -5.31914893617021
+    elif metric_type is 'avgd':
+        slope = -25
+    elif metric_type is 'rmsdd':
+        slope = -14.7058823529412
+    elif metric_type is 'maxdd':
+        slope = -1.31578947368421
+
+    score = intercept + np.abs(measure) * slope
+    score[score < 0] = 0
+
+    return score
+
+
+def sliverScoreAll(data):
+    """
+    Computers score by Sliver07
+    http://sliver07.org/p7.pdf
+
+    input: dataset = [{'vd':[1.1, ..., 0.1], 'voe':[...], 'avgd':[...], ...}
+                      {'vd':[...], 'voe':[...], ...}
+                     ]
+    return: scoreTotal, scoreMetrics, scoreAll
+        Order of scoreMetrics is [vd, voe, avgd, rmsd, maxd]
+
+
+    """
+
+    scoreAll = []
+    scoreTotal = []
+    scoreMetrics = []
+    for dat in data:
+        score = {
+            'vd': sliverScore(dat['vd'], 'vd'),
+            'voe': sliverScore(dat['voe'], 'voe'),
+            'avgd': sliverScore(dat['avgd'], 'avgd'),
+            'rmsd': sliverScore(dat['rmsd'], 'rmsd'),
+            'maxd': sliverScore(dat['maxd'], 'maxd'),
+        }
+        scoreAll.append(score)
+
+        metrics = [np.mean(score['vd']),
+                   np.mean(score['voe']),
+                   np.mean(score['avgd']),
+                   np.mean(score['rmsd']),
+                   np.mean(score['maxd'])
+                   ]
+        scoreMetrics.append(metrics)
+
+        total = np.mean(metrics)
+        scoreTotal.append(total)
+
+    return scoreTotal, scoreMetrics, scoreAll
 
 
 def main():
