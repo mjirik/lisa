@@ -40,7 +40,6 @@ normal = 0
 coordinates = None
 
 
-
 def cut_editor_old(data):
 
     pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
@@ -49,7 +48,7 @@ def cut_editor_old(data):
     split_obj = split_obj0.copy()
     vessels = data['segmentation'] == data['slab']['porta']
     vesselstmp = vessels
-    sumall = np.sum(vessels==1)
+    sumall = np.sum(vessels == 1)
 
     #split_obj = scipy.ndimage.binary_dilation(split_obj, iterations = 5 )
     #vesselstmp = vessels * (1 - split_obj)
@@ -59,7 +58,7 @@ def cut_editor_old(data):
 
     #while n_obj < 2 :
 # dokud neni z celkoveho objektu ustipnuto alespon 80 procent
-    while np.sum(lab == qmisc.max_area_index(lab,n_obj)) > (0.95*sumall) :
+    while np.sum(lab == qmisc.max_area_index(lab, n_obj)) > (0.95 * sumall):
 
         split_obj = scipy.ndimage.binary_dilation(split_obj, iterations=3)
         vesselstmp = vessels * (1 - split_obj)
@@ -94,28 +93,27 @@ def cut_editor_old(data):
     obj1 = get_biggest_object(lab)
 
 # vymaz nejvetsiho
-    lab[obj1==1] = 0
+    lab[obj1 == 1] = 0
     obj2 = get_biggest_object(lab)
     #from PyQt4.QtCore import pyqtRemoveInputHook
     #pyqtRemoveInputHook()
     #import ipdb; ipdb.set_trace() # BREAKPOINT
 
-    lab = obj1 + 2*obj2
+    lab = obj1 + 2 * obj2
     #print "baf"
-    spl_vis = (split_obj*2 - split_obj0).astype(np.int8)
-    #spl_vis[]
-    logger.debug("visualization")
-    pyed = py3DSeedEditor.py3DSeedEditor(lab, seeds=spl_vis)
-    pyed.show()
+    #logger.debug("visualization")
+    #spl_vis = (split_obj*2 - split_obj0).astype(np.int8)
+    #pyed = py3DSeedEditor.py3DSeedEditor(lab, seeds=spl_vis)
+    #pyed.show()
     cut_by_user = split_obj0
     return lab, cut_by_user
 
 
-def cut_editor(data,inputfile):
+def cut_editor(data, inputfile):
     #global normal,coordinates
     viewer = viewer3.Viewer(inputfile)
     # zobrazovani jater v kodu
-    viewer.prohlizej(data,'View','liver')
+    viewer.prohlizej(data, 'View', 'liver')
 
     #mesh = viewer.generate_mesh(segmentation,voxelsize_mm,degrad)
     #viewer.View(mesh,False)
@@ -130,7 +128,8 @@ def cut_editor(data,inputfile):
     segmentation = segmentation[::degrad,::degrad,::degrad]
     print("Generuji data...")
     segmentation = segmentation[:,::-1,:]
-    mesh_data = seg2fem.gen_mesh_from_voxels_mc(segmentation, voxelsize_mm*degrad)
+    mesh_data = seg2fem.gen_mesh_from_voxels_mc(segmentation,
+        voxelsize_mm*degrad)
     print("Done")
     if True:
         mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
@@ -140,45 +139,49 @@ def cut_editor(data,inputfile):
     #view = viewer3.QVTKViewer(vtk_file,'Cut')
     '''
 
-
-
-
     #normal = viewer3.normal_and_coordinates().set_normal()
     #coordinates = viewer3.normal_and_coordinates().set_coordinates()
     #return normal,coordinates
     pass
 
 
-def change(data,name):
-    #vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
+def change(data, name):
     #data['segmentation'][vessels == 2] = data['slab']['porta']
     segmentation = data['segmentation']
     cut_editor(segmentation == data['slab'][name])
 
 
-
-def resection(data,name, use_old_editor = False):
+def resection(data, name, use_old_editor=False):
     if use_old_editor:
         return resection_old(data)
     else:
         return resection_new(data, name)
 
+
 def resection_old(data):
-    vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
+    #vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
 # ostranění porty z více kusů, nastaví se jim hodnota liver
     #data['segmentation'][data['segmentation'] == data['slab']['porta']] = data['slab']['liver']
     #show3.show3(data['segmentation'])
 
     #data['segmentation'][vessels == 1] = data['slab']['porta']
-    segmentation = data['segmentation']
+    #segmentation = data['segmentation']
     print ("Select cut")
 
     print data["slab"]
     #lab = cut_editor(data)#== data['slab']['porta'])
 
-    lab, cut = cut_editor_old(data)#['segmentation'] == data['slab']['porta'])
+    lab, cut = cut_editor_old(data)
+    segm, dist1, dist2 = split_organ_by_two_vessels(data, lab)
+    data = virtual_resection_visualization(data, segm, dist1, dist2, cut)
+    return data
 
 
+def split_organ_by_two_vessels(data, lab):
+    """
+    Input of function is ndarray with 2 labeled vessels and data.
+    Output is segmented organ by vessls using minimum distance criterium.
+    """
     l1 = 1
     l2 = 2
 
@@ -197,9 +200,15 @@ def resection_old(data):
     #import ipdb; ipdb.set_trace() # BREAKPOINT
 
     #segm = (dist1 < dist2) * (data['segmentation'] != data['slab']['none'])
-    segm = (((data['segmentation'] != 0) * (dist1 < dist2)).astype('int8') + (data['segmentation'] != 0).astype('int8'))
+    segm = (((data['segmentation'] != 0) * (dist1 < dist2)).astype('int8') +
+            (data['segmentation'] != 0).astype('int8'))
 
+    return segm, dist1, dist2
+
+
+def virtual_resection_visualization(data, segm, dist1, dist2, cut):
     v1, v2 = liver_spit_volume_mm3(segm, data['voxelsize_mm'])
+
     print "Liver volume: %.4g l" % ((v1 + v2) * 1e-6)
     print "volume1: %.4g l  (%.3g %%)" % ((v1) * 1e-6, 100 * v1 / (v1 + v2))
     print "volume2: %.4g l  (%.3g %%)" % ((v2) * 1e-6, 100 * v2 / (v1 + v2))
@@ -207,11 +216,14 @@ def resection_old(data):
     #pyed = py3DSeedEditor.py3DSeedEditor(segm)
     #pyed.show()
     #import pdb; pdb.set_trace()
-    linie = (((data['segmentation'] != 0) * (np.abs(dist1 - dist2) < 1))).astype(np.int8)
+    linie = (((data['segmentation'] != 0) *
+              (np.abs(dist1 - dist2) < 1))).astype(np.int8)
     linie_vis = 2 * linie
     linie_vis[cut == 1] = 1
-    linie_vis= linie_vis.astype(np.int8)
-    pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], seeds=linie_vis, contour=(data['segmentation'] != 0))
+    linie_vis = linie_vis.astype(np.int8)
+    pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'],
+                                         seeds=linie_vis,
+                                         contour=(data['segmentation'] != 0))
     pyed.show()
 
     #import pdb; pdb.set_trace()
@@ -231,10 +243,10 @@ def resection_old(data):
     data['slab']['resected_liver'] = 3
     data['slab']['resected_porta'] = 4
 
-    mask_resected_liver = ((segm == 1) &
-            (data['segmentation'] == data['slab']['liver']))
-    mask_resected_porta = ((segm == 1) &
-            (data['segmentation'] == data['slab']['porta']))
+    mask_resected_liver = (
+        (segm == 1) & (data['segmentation'] == data['slab']['liver']))
+    mask_resected_porta = (
+        (segm == 1) & (data['segmentation'] == data['slab']['porta']))
 
     data['segmentation'][mask_resected_liver] = \
             data['slab']['resected_liver']
@@ -243,6 +255,7 @@ def resection_old(data):
 
     logger.debug('resection_old() end')
     return data
+
 
 def resection_new(data, name):
     #vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])

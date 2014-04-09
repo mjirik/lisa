@@ -1231,6 +1231,23 @@ class OrganSegmentationWindow(QMainWindow):
         cut = vessel_cut.resection(data, None, use_old_editor=True)
         self.oseg.segmentation = cut['segmentation']
         self.oseg.slab = cut['slab']
+
+        #print
+
+        voxelvolume_mm3 = np.prod(self.oseg.voxelsize_mm)
+        v1 = np.sum(cut['segmentation'] == self.oseg.slab['liver'])
+        v2 = np.sum(cut['segmentation'] == self.oseg.slab['resected_liver'])
+        v1 = (v1) * voxelvolume_mm3
+        v2 = (v2) * voxelvolume_mm3
+        aux = "volume = %.4g l, %.4g/%.4g (%.3g/%.3g %% )" % (
+            (v1 + v2) * 1e-6,
+            (v1) * 1e-6,
+            (v2) * 1e-6,
+            100 * v1 / (v1 + v2),
+            100 * v2 / (v1 + v2)
+        )
+        self.setLabelText(self.text_seg_data, aux)
+
         #from PyQt4.QtCore import pyqtRemoveInputHook
         #pyqtRemoveInputHook()
         #import ipdb; ipdb.set_trace() # BREAKPOINT
