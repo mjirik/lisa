@@ -955,7 +955,7 @@ class OrganSegmentationWindow(QMainWindow):
         from PyQt4.QtGui import QFileDialog
         if app:
             dcmdir = QFileDialog.getOpenFileName(
-                caption='Select DICOM Folder',
+                caption='Select Data File',
                 directory=directory
                 #options=QFileDialog.ShowDirsOnly,
             )
@@ -1053,7 +1053,7 @@ class OrganSegmentationWindow(QMainWindow):
 
         #oseg.data3d, metadata =
         datap = reader.Get3DData(oseg.datapath, dataplus_format=True)
-        print datap.keys()
+        #print datap.keys()
         # self.iparams['series_number'] = self.metadata['series_number']
         # self.iparams['datapath'] = self.datapath
         oseg.import_dataplus(datap)

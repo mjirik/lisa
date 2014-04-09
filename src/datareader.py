@@ -53,7 +53,6 @@ class DataReader:
                 }
                 metadata.update(data)
 
-                print 'mkeys ', metadata.keys()
 
             else:
 # reading raw file
