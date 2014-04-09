@@ -94,10 +94,7 @@ class DataReader:
             self.overlay_fcn = reader.get_overlay
 
         if dataplus_format:
-            print "jsem in"
-            logger.debug('ahoj')
-            print metadata
-            print data3d
+            logger.debug('dataplus format')
             datap = metadata
             datap['data3d'] = data3d
             logger.debug('datap keys () : ' + str(datap.keys()))
