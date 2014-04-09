@@ -734,11 +734,49 @@ def generate_sample_data():
     Generate sample vessel system.
     J. Kunes
     """
-    data3d = None
-    #data3d = np.zeros
-    #data[20:50,] = 1
-
-    return data3d
+    data3d = np.zeros((100,100,100), dtype=np.int)
+    
+    # size 8
+    data3d_new = np.ones((100,100,100), dtype=np.int)
+    data3d_new[0:30,20,20] = 0
+    data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 8] = 0
+    data3d[data3d_new == 0] += 1
+    # size 7
+    data3d_new = np.ones((100,100,100), dtype=np.int)
+    data3d_new[31:70,20,20] = 0
+    data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 7] = 0
+    data3d[data3d_new == 0] += 1
+    # size 6
+    data3d_new = np.ones((100,100,100), dtype=np.int)
+    data3d_new[70,20:50,20] = 0
+    data3d_new[31,20,20:70] = 0
+    data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 6] = 0
+    data3d[data3d_new == 0] += 1
+    # size 5
+    data3d_new = np.ones((100,100,100), dtype=np.int)
+    data3d_new[70:95,20,20] = 0
+    data3d_new[31:60,20,70] = 0
+    data3d_new[70:90,50,20] = 0
+    data3d_new[70,50,20:50] = 0
+    data3d_new[31,20:45,20] = 0
+    data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 5] = 0
+    data3d[data3d_new == 0] += 1
+    # size 4
+    data3d_new = np.ones((100,100,100), dtype=np.int)
+    data3d_new[31,20:50,70] = 0
+    data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 4] = 0
+    data3d[data3d_new == 0] += 1
+    # size 3
+    data3d_new = np.ones((100,100,100), dtype=np.int)
+    data3d_new[31:50,50,70] = 0
+    data3d_new[31:50,45,20] = 0
+    data3d_new[70,50:70,50] = 0
+    data3d_new[70:80,50,50] = 0
+    data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 3] = 0
+    data3d[data3d_new == 0] += 1
+    
+    data3d[data3d >= 1] = 1
+    return (data3d*10)
 
 
 if __name__ == "__main__":
