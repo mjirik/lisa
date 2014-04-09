@@ -729,6 +729,16 @@ class SkeletonAnalyser:
 
         return edg_stats
 
+def generate_sample_data():
+    """
+    Generate sample vessel system.
+    J. Kunes
+    """
+    data3d = None
+    #data3d = np.zeros
+    #data[20:50,] = 1
+
+    return data3d
 
 
 if __name__ == "__main__":
@@ -746,8 +756,8 @@ if __name__ == "__main__":
         description='Histology analyser'
     )
     parser.add_argument('-i', '--inputfile',
-            default='histin.tif',
-            help='input file')
+            default=None,
+            help='input file, .tif file')
 #    parser.add_argument('-o', '--outputfile',
 #            default='histout.pkl',
 #            help='output file')
@@ -765,29 +775,39 @@ if __name__ == "__main__":
     #data = misc.obj_from_file(args.inputfile, filetype = 'pickle')
 
     print args.input_is_skeleton
-    if args.input_is_skeleton:
-        print "input is skeleton"
-        struct = misc.obj_from_file(filename='tmp0.pkl', filetype='pickle')
-        data3d_skel = struct['skel']
-        data3d_thr = struct['thr']
-        data3d = struct['data3d']
-        metadata = struct['metadata']
-        ha = HistologyAnalyser(data3d, metadata, args.threshold)
-        print "end of is skeleton"
-    else:
-        dr = datareader.DataReader()
-        data3d, metadata = dr.Get3DData(args.inputfile)
-# crop data
-        cr = args.crop
-        data3d = data3d[cr[0]:cr[1], cr[2]:cr[3], cr[4]:cr[5]]
-
-
-
+    if args.inputfile is None:
+        metadata = {'voxelsize_mm': [1, 1, 1]}
+        data3d = generate_sample_data()
         ha = HistologyAnalyser(data3d, metadata, args.threshold)
         ha.remove_area()
         data3d_thr, data3d_skel = ha.data_to_skeleton()
         struct = {'skel': data3d_skel, 'thr': data3d_thr, 'data3d': data3d, 'metadata':metadata}
         misc.obj_to_file(struct, filename='tmp0.pkl', filetype='pickle')
+# default sample data
+    else:
+        if args.input_is_skeleton:
+            print "input is skeleton"
+            struct = misc.obj_from_file(filename='tmp0.pkl', filetype='pickle')
+            data3d_skel = struct['skel']
+            data3d_thr = struct['thr']
+            data3d = struct['data3d']
+            metadata = struct['metadata']
+            ha = HistologyAnalyser(data3d, metadata, args.threshold)
+            print "end of is skeleton"
+        else:
+            dr = datareader.DataReader()
+            data3d, metadata = dr.Get3DData(args.inputfile)
+# crop data
+            cr = args.crop
+            data3d = data3d[cr[0]:cr[1], cr[2]:cr[3], cr[4]:cr[5]]
+
+
+
+            ha = HistologyAnalyser(data3d, metadata, args.threshold)
+            ha.remove_area()
+            data3d_thr, data3d_skel = ha.data_to_skeleton()
+            struct = {'skel': data3d_skel, 'thr': data3d_thr, 'data3d': data3d, 'metadata':metadata}
+            misc.obj_to_file(struct, filename='tmp0.pkl', filetype='pickle')
 
     print " #########  statistics"
     ha.skeleton_to_statistics(data3d_thr, data3d_skel)
