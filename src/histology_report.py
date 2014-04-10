@@ -2,11 +2,13 @@
 # -*- coding: utf-8 -*-
 
 """
-python src/histology_analyser.py -i ~/data/medical/data_orig/jatra_mikro_data/Nejlepsi_rozliseni_nevycistene -t 6800 -cr 0 -1 100 300 100 300
+Generator of histology report
 
 """
 import logging
 logger = logging.getLogger(__name__)
+
+import argparse
 
 
 class HistologyReport:
@@ -58,12 +60,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='Histology analyser reporter'
     )
-    parser.add_argument('-i', '--inputfile',
-            default=None,
-            help='input file, yaml file')
-#    parser.add_argument('-o', '--outputfile',
-#            default='histout.pkl',
-#            help='output file')
+    parser.add_argument(
+        '-i', '--inputfile',
+        default=None,
+        help='input file, yaml file'
+    )
     parser.add_argument(
         '-d', '--debug', action='store_true',
         help='Debug mode')
