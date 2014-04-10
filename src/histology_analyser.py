@@ -284,7 +284,7 @@ class SkeletonAnalyser:
                 edgst.update(self.__edge_vectors(edg_number, edgst))
                 #edgst = edge_analysis(sklabel, i)
                 if self.volume_data is not None:
-                    edgst['radius'] = float(self.__radius_analysis(skdst, edg_number))
+                    edgst['radius_mm'] = float(self.__radius_analysis(edg_number,skdst))
                 stats[edgst['id']] = edgst
 
 #save data for faster debug
@@ -678,6 +678,8 @@ class SkeletonAnalyser:
                     self.volume_data,
                     sampling=self.voxelsize_mm
                     )
+
+            # import ipdb; ipdb.set_trace() # BREAKPOINT
             dst = dst * (self.sklabel != 0)
 
             return dst
@@ -691,6 +693,7 @@ class SkeletonAnalyser:
         """
         return smaller radius of tube
         """
+        #import ipdb; ipdb.set_trace() # BREAKPOINT
         edg_skdst = skdst * (self.sklabel == edg_number)
         return np.mean(edg_skdst[edg_skdst != 0])
 
@@ -735,7 +738,7 @@ def generate_sample_data():
     J. Kunes
     """
     data3d = np.zeros((100,100,100), dtype=np.int)
-    
+
     # size 8
     data3d_new = np.ones((100,100,100), dtype=np.int)
     data3d_new[0:30,20,20] = 0
@@ -774,7 +777,7 @@ def generate_sample_data():
     data3d_new[70:80,50,50] = 0
     data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 3] = 0
     data3d[data3d_new == 0] += 1
-    
+
     data3d[data3d >= 1] = 1
     return (data3d*10)
 
