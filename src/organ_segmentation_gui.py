@@ -488,14 +488,12 @@ class OrganSegmentation():
                 0:shp[1],
                 0:shp[2]] = segm_orig_scale[0:shp[0], 0:shp[1], 0:shp[2]]
 
-        del segm_orig_scale
+            del segm_orig_scale
 
-        # self.iparams['seeds'] = np.zeros(self.data3d.shape, dtype=np.int8)
-        # self.iparams['seeds'][
-        self.seeds[
-            0:shp[0],
-            0:shp[1],
-            0:shp[2]] = seeds[0:shp[0], 0:shp[1], 0:shp[2]]
+            self.seeds[
+                0:shp[0],
+                0:shp[1],
+                0:shp[2]] = seeds[0:shp[0], 0:shp[1], 0:shp[2]]
 
         if self.segmentation_smoothing:
             self.segm_smoothing(self.smoothing_mm)
@@ -1309,163 +1307,173 @@ class OrganSegmentationWindow(QMainWindow):
             self.statusBar().showMessage('No segmentation data!')
 
 
+def logger_init():
+    logger.setLevel(logging.WARNING)
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.ERROR)
+    fh = logging.FileHandler('lisa.log')
+
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    fh.setFormatter(formatter)
+    fh.setLevel(logging.DEBUG)
+    logger.addHandler(ch)
+    logger.addHandler(fh)
+
+    logger.debug('logger started')
+
+
+def lisa_config_init():
+    # read confguraton from file, use default values from OrganSegmentation
+    cfg = config.get_default_function_config(OrganSegmentation.__init__)
+
+    # for parameters without support in OrganSegmentation or to overpower
+    # default OrganSegmentation values use cfgplus
+    cfgplus = {
+        'datapath': None,
+        'viewermax': 225,
+        'viewermin': -125,
+        'output_datapath': os.path.expanduser("~/lisa_data"),
+        'input_datapath_start': os.path.expanduser("~/lisa_data")
+        #'config_version':[1,1]
+    }
+
+    cfg.update(cfgplus)
+    # now is in cfg default values
+
+    cfg = config.get_config("organ_segmentation.config", cfg)
+    user_config_path = os.path.join(cfg['output_datapath'],
+                                    "organ_segmentation.config")
+    config.check_config_version_and_remove_old_records(
+        user_config_path, version=config_version,
+        records_to_save=['experiment_caption', 'lisa_operator_identifier'])
+    # read user defined config in user data
+    cfg = config.get_config(user_config_path, cfg)
+    return cfg
+
+
+def parser_init(cfg):
+    # input parser
+    parser = argparse.ArgumentParser(
+        description='Segment vessels from liver \n\
+                \npython organ_segmentation.py\n\
+                \npython organ_segmentation.py -mroi -vs 0.6')
+    parser.add_argument('-dd', '--datapath',
+                        default=cfg["datapath"],
+                        help='path to data dir')
+    parser.add_argument('-d', '--debug', action='store_true',
+                        help='run in debug mode')
+    parser.add_argument(
+        '-vs', '--working_voxelsize_mm',
+        default=cfg["working_voxelsize_mm"],
+        type=eval,  # type=str,
+        help='Insert working voxelsize. It can be number or \
+        array of three numbers. It is possible use original \n \
+        resolution or half of original resolution. \n \
+        -vs 3 \n \
+        -vs [3,3,5] \n \
+        -vs orig \n \
+        -vs orig*2 \n \
+        -vs orig*4 \n \
+        '
+    )
+    parser.add_argument('-mroi', '--manualroi', action='store_true',
+                        help='manual crop before data processing',
+                        default=cfg["manualroi"])
+
+    parser.add_argument('-op', '--output_datapath',
+                        default=cfg["output_datapath"],
+                        help='path for output data')
+
+    parser.add_argument('-ol', '--output_label', default=1,
+                        help='label for segmented data')
+    parser.add_argument(
+        '--slab',
+        default=cfg["slab"],
+        type=eval,
+        help='labels for segmentation,\
+            example -slab "{\'liver\':1, \'lesions\':6}"')
+    parser.add_argument(
+        '-acr', '--autocrop',
+        help='automatic crop after data processing',
+        default=cfg["autocrop"])
+    parser.add_argument(
+        '-iparams', '--iparams',
+        default=None,
+        help='filename of ipars file with stored interactivity')
+    parser.add_argument(
+        '-sp', '--segparams',
+        default=cfg["segparams"],
+        help='params for segmentation,\
+            example -sp "{\'pairwise_alpha_per_mm2\':90}"')
+    parser.add_argument(
+        '-tx', '--texture_analysis', action='store_true',
+        help='run with texture analysis')
+    parser.add_argument('-ed', '--edit_data', action='store_true',
+                        help='Run data editor')
+    parser.add_argument(
+        '-vmax', '--viewermax', type=eval,  # type=int,
+        help='Maximum of viewer window, set None for automatic maximum.',
+        default=cfg["viewermax"])
+    parser.add_argument(
+        '-vmin', '--viewermin', type=eval,  # type=int,
+        help='Minimum of viewer window, set None for automatic minimum.',
+        default=cfg["viewermin"])
+    parser.add_argument(
+        '--roi', type=eval,  # type=int,
+        help='Minimum of viewer window, set None for automatic minimum.',
+        default=cfg["roi"])
+    parser.add_argument(
+        '-so', '--show_output', action='store_true',
+        help='Show output data in viewer')
+    parser.add_argument(
+        '-ni', '--no_interactivity', action='store_true',
+        help='run in no interactivity mode, seeds must be defined')
+    parser.add_argument('-a', '--arg', nargs='+', type=float)
+    parser.add_argument(
+        '-ec', '--experiment_caption', type=str,  # type=int,
+        help='Short caption of experiment. No special characters.',
+        default=cfg["experiment_caption"])
+    parser.add_argument(
+        '-ids', '--input_datapath_start', type=str,  # type=int,
+        help='Start datapath for input dialog.',
+        default=cfg["input_datapath_start"])
+    parser.add_argument(
+        '-oi', '--lisa_operator_identifier', type=str,  # type=int,
+        help='Identifier of Lisa operator.',
+        default=cfg["lisa_operator_identifier"])
+    parser.add_argument(
+        '-ss',
+        '--segmentation_smoothing',
+        action='store_true',
+        help='Smoothing of output segmentation',
+        default=cfg["segmentation_smoothing"]
+    )
+    args_obj = parser.parse_args()
+
+    # next two lines brings cfg from file over input parser. This is why there
+    # is no need to have cfg param in input arguments
+    args = cfg
+    args.update(vars(args_obj))
+    return args
+
+
 def main():
 
     try:
-        logger.setLevel(logging.WARNING)
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.ERROR)
-        fh = logging.FileHandler('lisa.log')
+        logger_init()
+        cfg = lisa_config_init()
+        args = parser_init(cfg)
 
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        )
-        fh.setFormatter(formatter)
-        fh.setLevel(logging.DEBUG)
-        logger.addHandler(ch)
-        logger.addHandler(fh)
-
-        logger.debug('logger started')
-
-        # read confguraton from file, use default values from OrganSegmentation
-        cfg = config.get_default_function_config(OrganSegmentation.__init__)
-
-        # for parameters without support in OrganSegmentation or to overpower
-        # default OrganSegmentation values use cfgplus
-        cfgplus = {
-            'datapath': None,
-            'viewermax': 225,
-            'viewermin': -125,
-            'output_datapath': os.path.expanduser("~/lisa_data"),
-            'input_datapath_start': os.path.expanduser("~/lisa_data")
-            #'config_version':[1,1]
-        }
-
-        cfg.update(cfgplus)
-        # now is in cfg default values
-
-        cfg = config.get_config("organ_segmentation.config", cfg)
-        user_config_path = os.path.join(cfg['output_datapath'],
-                                        "organ_segmentation.config")
-        config.check_config_version_and_remove_old_records(
-            user_config_path, version=config_version,
-            records_to_save=['experiment_caption', 'lisa_operator_identifier'])
-        # read user defined config in user data
-        cfg = config.get_config(user_config_path, cfg)
-
-        # input parser
-        parser = argparse.ArgumentParser(
-            description='Segment vessels from liver \n\
-                    \npython organ_segmentation.py\n\
-                    \npython organ_segmentation.py -mroi -vs 0.6')
-        parser.add_argument('-dd', '--datapath',
-                            default=cfg["datapath"],
-                            help='path to data dir')
-        parser.add_argument('-d', '--debug', action='store_true',
-                            help='run in debug mode')
-        parser.add_argument(
-            '-vs', '--working_voxelsize_mm',
-            default=cfg["working_voxelsize_mm"],
-            type=eval,  # type=str,
-            help='Insert working voxelsize. It can be number or \
-            array of three numbers. It is possible use original \n \
-            resolution or half of original resolution. \n \
-            -vs 3 \n \
-            -vs [3,3,5] \n \
-            -vs orig \n \
-            -vs orig*2 \n \
-            -vs orig*4 \n \
-            '
-        )
-        parser.add_argument('-mroi', '--manualroi', action='store_true',
-                            help='manual crop before data processing',
-                            default=cfg["manualroi"])
-
-        parser.add_argument('-op', '--output_datapath',
-                            default=cfg["output_datapath"],
-                            help='path for output data')
-
-        parser.add_argument('-ol', '--output_label', default=1,
-                            help='label for segmented data')
-        parser.add_argument(
-            '--slab',
-            default=cfg["slab"],
-            type=eval,
-            help='labels for segmentation,\
-                example -slab "{\'liver\':1, \'lesions\':6}"')
-        parser.add_argument(
-            '-acr', '--autocrop',
-            help='automatic crop after data processing',
-            default=cfg["autocrop"])
-        parser.add_argument(
-            '-iparams', '--iparams',
-            default=None,
-            help='filename of ipars file with stored interactivity')
-        parser.add_argument(
-            '-sp', '--segparams',
-            default=cfg["segparams"],
-            help='params for segmentation,\
-                example -sp "{\'pairwise_alpha_per_mm2\':90}"')
-        parser.add_argument(
-            '-tx', '--texture_analysis', action='store_true',
-            help='run with texture analysis')
-        parser.add_argument('-exd', '--exampledata', action='store_true',
-                            help='run unittest')
-        parser.add_argument('-ed', '--edit_data', action='store_true',
-                            help='Run data editor')
-        parser.add_argument(
-            '-vmax', '--viewermax', type=eval,  # type=int,
-            help='Maximum of viewer window, set None for automatic maximum.',
-            default=cfg["viewermax"])
-        parser.add_argument(
-            '-vmin', '--viewermin', type=eval,  # type=int,
-            help='Minimum of viewer window, set None for automatic minimum.',
-            default=cfg["viewermin"])
-        parser.add_argument(
-            '--roi', type=eval,  # type=int,
-            help='Minimum of viewer window, set None for automatic minimum.',
-            default=cfg["roi"])
-        parser.add_argument(
-            '-so', '--show_output', action='store_true',
-            help='Show output data in viewer')
-        parser.add_argument('-a', '--arg', nargs='+', type=float)
-        parser.add_argument(
-            '-ec', '--experiment_caption', type=str,  # type=int,
-            help='Short caption of experiment. No special characters.',
-            default=cfg["experiment_caption"])
-        parser.add_argument(
-            '-ids', '--input_datapath_start', type=str,  # type=int,
-            help='Start datapath for input dialog.',
-            default=cfg["input_datapath_start"])
-        parser.add_argument(
-            '-oi', '--lisa_operator_identifier', type=str,  # type=int,
-            help='Identifier of Lisa operator.',
-            default=cfg["lisa_operator_identifier"])
-        parser.add_argument(
-            '-ss',
-            '--segmentation_smoothing',
-            action='store_true',
-            help='Smoothing of output segmentation',
-            default=cfg["segmentation_smoothing"]
-        )
-        args_obj = parser.parse_args()
-
-        # next two lines brings cfg from file over input parser. This is why there
-        # is no need to have cfg param in input arguments
-        args = cfg
-        args.update(vars(args_obj))
         #print args["arg"]
-        oseg_argspec_keys = config.get_function_keys(OrganSegmentation.__init__)
+        oseg_argspec_keys = config.get_function_keys(
+            OrganSegmentation.__init__)
 
         if args["debug"]:
             logger.setLevel(logging.DEBUG)
 
-        if args["exampledata"]:
-            args["datapath"] = \
-                '../sample_data/matlab/examples/sample_data/DICOM/digest_article/'
-
         app = QApplication(sys.argv)
-
 
         if args["iparams"] is not None:
             params = misc.obj_from_file(args["iparams"], filetype='pickle')
@@ -1476,31 +1484,20 @@ def main():
         logger.debug('params ' + str(params))
         oseg = OrganSegmentation(**params)
 
-
-        oseg_w = OrganSegmentationWindow(oseg) # noqa
-        #OrganSegmentationWindow(oseg)
-
-        #oseg.interactivity(args["viewermin"], args["viewermax"])
-
-        # print(
-        #     "Volume " +
-        #     str(oseg.get_segmented_volume_size_mm3() / 1000000.0) + ' [l]')
-        # #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour =
-        # # oseg.segmentation)
-        # #pyed.show()
-        # print("Total time: " + str(oseg.processing_time))
-
-        # if args["show_output"]:
-        #     oseg.show_output()
-
-        #print savestring
-        #  save_outputs(args, oseg, qt_app)
+        if args["no_interactivity"]:
+            oseg.ninteractivity()
+            oseg.save_outputs()
+        else:
+            oseg_w = OrganSegmentationWindow(oseg) # noqa
 #    import pdb; pdb.set_trace()
-        sys.exit(app.exec_())
+            sys.exit(app.exec_())
+
     except Exception as e:
+        import traceback
         #import exceptionProcessing
         exceptionProcessing.reportException(e)
-        raise e
+        print traceback.format_exc()
+        #raise e
 
 if __name__ == "__main__":
     main()
