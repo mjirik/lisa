@@ -44,8 +44,8 @@ except ImportError:
 import time
 #import audiosupport
 import argparse
-import skimage
-import skimage.transform
+#import skimage
+#import skimage.transform
 import logging
 logger = logging.getLogger(__name__)
 
@@ -431,61 +431,66 @@ class OrganSegmentation():
 
     def _interactivity_end(self, igc):
         logger.debug('_interactivity_end()')
+        # @TODO remove old code in except part
+        try:
+            import skimage
+            import skimage.transform
 # Now we need reshape  seeds and segmentation to original size
 
-        segm_orig_scale = skimage.transform.resize(
-            self.segmentation, self.data3d.shape, order=0)
+            segm_orig_scale = skimage.transform.resize(
+                self.segmentation, self.data3d.shape, order=0)
 
-        seeds = skimage.transform.resize(
-            igc.seeds, self.data3d.shape, order=0)
+            seeds = skimage.transform.resize(
+                igc.seeds, self.data3d.shape, order=0)
 
-        self.segmentation = segm_orig_scale
-        self.seeds = seeds
+            self.segmentation = segm_orig_scale
+            self.seeds = seeds
+        except:
 
-#        segm_orig_scale = scipy.ndimage.zoom(
-#            self.segmentation,
-#            1.0 / self.zoom,
-#            mode='nearest',
-#            order=0
-#        ).astype(np.int8)
-#        seeds = scipy.ndimage.zoom(
-#            igc.seeds,
-#            1.0 / self.zoom,
-#            mode='nearest',
-#            order=0
-#        )
-#        self.organ_interactivity_counter = igc.interactivity_counter
-#        logger.debug("org inter counter " +
-#                     str(self.organ_interactivity_counter))
-#
-## @TODO odstranit hack pro oříznutí na stejnou velikost
-## v podstatě je to vyřešeno, ale nechalo by se to dělat elegantněji v zoom
-## tam je bohužel patrně bug
-#        #print 'd3d ', self.data3d.shape
-#        #print 's orig scale shape ', segm_orig_scale.shape
-#        shp = [
-#            np.min([segm_orig_scale.shape[0], self.data3d.shape[0]]),
-#            np.min([segm_orig_scale.shape[1], self.data3d.shape[1]]),
-#            np.min([segm_orig_scale.shape[2], self.data3d.shape[2]]),
-#        ]
-#        #self.data3d = self.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
-#        #import ipdb; ipdb.set_trace() # BREAKPOINT
-#
-#        self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
-#        self.segmentation[
-#            0:shp[0],
-#            0:shp[1],
-#            0:shp[2]] = segm_orig_scale[0:shp[0], 0:shp[1], 0:shp[2]]
-#
-#        del segm_orig_scale
-#
-#        # self.iparams['seeds'] = np.zeros(self.data3d.shape, dtype=np.int8)
-#        # self.iparams['seeds'][
-#        self.seeds[
-#            0:shp[0],
-#            0:shp[1],
-#            0:shp[2]] = seeds[0:shp[0], 0:shp[1], 0:shp[2]]
-#
+            segm_orig_scale = scipy.ndimage.zoom(
+                self.segmentation,
+                1.0 / self.zoom,
+                mode='nearest',
+                order=0
+            ).astype(np.int8)
+            seeds = scipy.ndimage.zoom(
+                igc.seeds,
+                1.0 / self.zoom,
+                mode='nearest',
+                order=0
+            )
+            self.organ_interactivity_counter = igc.interactivity_counter
+            logger.debug("org inter counter " +
+                         str(self.organ_interactivity_counter))
+
+# @TODO odstranit hack pro oříznutí na stejnou velikost
+# v podstatě je to vyřešeno, ale nechalo by se to dělat elegantněji v zoom
+# tam je bohužel patrně bug
+            #print 'd3d ', self.data3d.shape
+            #print 's orig scale shape ', segm_orig_scale.shape
+            shp = [
+                np.min([segm_orig_scale.shape[0], self.data3d.shape[0]]),
+                np.min([segm_orig_scale.shape[1], self.data3d.shape[1]]),
+                np.min([segm_orig_scale.shape[2], self.data3d.shape[2]]),
+            ]
+            #self.data3d = self.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
+            #import ipdb; ipdb.set_trace() # BREAKPOINT
+
+            self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
+            self.segmentation[
+                0:shp[0],
+                0:shp[1],
+                0:shp[2]] = segm_orig_scale[0:shp[0], 0:shp[1], 0:shp[2]]
+
+        del segm_orig_scale
+
+        # self.iparams['seeds'] = np.zeros(self.data3d.shape, dtype=np.int8)
+        # self.iparams['seeds'][
+        self.seeds[
+            0:shp[0],
+            0:shp[1],
+            0:shp[2]] = seeds[0:shp[0], 0:shp[1], 0:shp[2]]
+
         if self.segmentation_smoothing:
             self.segm_smoothing(self.smoothing_mm)
 
