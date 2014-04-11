@@ -6,6 +6,7 @@ import sys
 import os.path
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
+#from ..extern.py3DSeedEditor import py3DSeedEditor
 sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
 #import featurevector
 
