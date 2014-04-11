@@ -23,7 +23,17 @@ def get_cylinder(upper, height, radius,
     u = nm.abs(nm.sin(fi))
     rot2 = vtk.vtkTransform()
     if u > 1.0e-6:
-        psi = nm.arccos(direction[0] / u)
+
+# sometimes d[0]/u little bit is over 1
+        d0_over_u = direction[0] / u
+        if d0_over_u > 1:
+            psi = 0
+        elif d0_over_u < -1:
+            psi = 2 * nm.pi
+        else:
+            psi = nm.arccos(direction[0] / u)
+
+        print 'd0 ', direction[0], '  u ', u, ' psi ', psi
         if direction[2] < 0:
             psi = 2 * nm.pi - psi
 
@@ -81,15 +91,30 @@ def gen_tree(tree_data):
     return polyData
 
 def process_tree(indata):
+    scale = 1e-3
+    scale = 1
 
     outdata = []
-    for ii in indata:
+    for key in indata:
+        ii = indata[key]
+        print ii
         br = {}
-        br['upperVertex'] = nm.array(ii['upperVertexXYZmm']) * 1e-3
-        br['radius'] = ii['radius'] * 1e-3
-        br['real_length'] = ii['length'] * 1e-3
+        try:
+            vA = ii['upperVertexXYZmm']
+            vB = ii['lowerVertexXYZmm']
+            radi = ii['radius']
+            lengthEstimation = ii['length']
+        except:
+            vA = ii['nodeA_XYZ_mm']
+            vB = ii['nodeB_XYZ_mm']
+            radi = ii['radius_mm']
+            lengthEstimation = ii['lengthEstimation']
 
-        vv = nm.array(ii['lowerVertexXYZmm']) * 1e-3 - br['upperVertex']
+        br['upperVertex'] = nm.array(vA) * scale
+        br['radius'] = radi * scale
+        br['real_length'] =  lengthEstimation* scale
+
+        vv = nm.array(vB) * scale - br['upperVertex']
         br['direction'] = vv / nm.linalg.norm(vv)
         br['length'] = nm.linalg.norm(vv)
         outdata.append(br)
