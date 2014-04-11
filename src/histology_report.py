@@ -42,7 +42,7 @@ class HistologyReport:
             'Length histogram': None,
 
         }
-        
+
         radius_array = []
         length_array = []
         for key in self.data['Graph']:
@@ -54,7 +54,7 @@ class HistologyReport:
         stats['Avg radius mm'] = sum(radius_array)/float(num_of_entries)
         stats['Radius histogram'] = np.histogram(radius_array)
         stats['Length histogram'] = np.histogram(length_array)
-        
+
         logger.debug(stats)
         self.stats = stats
 
@@ -64,8 +64,8 @@ if __name__ == "__main__":
     logger = logging.getLogger()
 
     logger.setLevel(logging.WARNING)
-    ch = logging.StreamHandler()
-    logger.addHandler(ch)
+    #ch = logging.StreamHandler()
+    #logger.addHandler(ch)
 
     #logger.debug('input params')
 
@@ -86,6 +86,7 @@ if __name__ == "__main__":
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
+    #logger.error("pokus")
     hr = HistologyReport()
     hr.importFromYaml(args.inputfile)
     hr.generateStats()
