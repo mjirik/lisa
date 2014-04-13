@@ -17,6 +17,12 @@ import dicom
 
 class DataWriter:
     def Write3DData(self, data3d, path, filetype='dcm', metadata=None):
+        """
+        data3d: input ndarray data
+        path: output path
+        metadata: {'voxelsize_mm': [1, 1, 1]}
+
+        """
         mtd = {'voxelsize_mm': [1, 1, 1]}
         if metadata is not None:
             mtd.update(metadata)
