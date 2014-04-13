@@ -8,9 +8,17 @@ Generator of histology report
 import logging
 logger = logging.getLogger(__name__)
 
+import sys
+import os.path
+path_to_script = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
+
+
 import argparse
 import numpy as np
 import datawriter
+
+import py3DSeedEditor as se
 
 
 class TreeVolumeGenerator:
@@ -84,4 +92,8 @@ if __name__ == "__main__":
     hr.voxelsize_mm = args.voxelsize
     hr.shape = args.datashape
     hr.generateTree()
+#vizualizace
+    se.py3DSeedEditor(hr.data3d)
+    se.show()
+#ukládání do souboru
     hr.saveToFile(args.outputfile)
