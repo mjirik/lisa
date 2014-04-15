@@ -732,54 +732,55 @@ class SkeletonAnalyser:
 
         return edg_stats
 
-def generate_sample_data():
+def generate_sample_data(m=1):
     """
     Generate sample vessel system.
     J. Kunes
     """
-    data3d = np.zeros((100,100,100), dtype=np.int)
+    
+    data3d = np.zeros((100*m,100*m,100*m), dtype=np.int)
 
     # size 8
-    data3d_new = np.ones((100,100,100), dtype=np.int)
-    data3d_new[0:30,20,20] = 0
-    data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 8] = 0
+    data3d_new = np.ones((100*m,100*m,100*m), dtype=np.int)
+    data3d_new[0:30*m,20*m,20*m] = 0
+    data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 8*m] = 0
     data3d[data3d_new == 0] += 1
     # size 7
-    data3d_new = np.ones((100,100,100), dtype=np.int)
-    data3d_new[31:70,20,20] = 0
-    data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 7] = 0
+    data3d_new = np.ones((100*m,100*m,100*m), dtype=np.int)
+    data3d_new[31*m:70*m,20*m,20*m] = 0
+    data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 7*m] = 0
     data3d[data3d_new == 0] += 1
     # size 6
-    data3d_new = np.ones((100,100,100), dtype=np.int)
-    data3d_new[70,20:50,20] = 0
-    data3d_new[31,20,20:70] = 0
-    data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 6] = 0
+    data3d_new = np.ones((100*m,100*m,100*m), dtype=np.int)
+    data3d_new[70*m,20*m:50*m,20*m] = 0
+    data3d_new[31*m,20*m,20*m:70*m] = 0
+    data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 6*m] = 0
     data3d[data3d_new == 0] += 1
     # size 5
-    data3d_new = np.ones((100,100,100), dtype=np.int)
-    data3d_new[70:95,20,20] = 0
-    data3d_new[31:60,20,70] = 0
-    data3d_new[70:90,50,20] = 0
-    data3d_new[70,50,20:50] = 0
-    data3d_new[31,20:45,20] = 0
-    data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 5] = 0
+    data3d_new = np.ones((100*m,100*m,100*m), dtype=np.int)
+    data3d_new[70*m:95*m,20*m,20*m] = 0
+    data3d_new[31*m:60*m,20*m,70*m] = 0
+    data3d_new[70*m:90*m,50*m,20*m] = 0
+    data3d_new[70*m,50*m,20*m:50*m] = 0
+    data3d_new[31*m,20*m:45*m,20*m] = 0
+    data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 5*m] = 0
     data3d[data3d_new == 0] += 1
     # size 4
-    data3d_new = np.ones((100,100,100), dtype=np.int)
-    data3d_new[31,20:50,70] = 0
-    data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 4] = 0
+    data3d_new = np.ones((100*m,100*m,100*m), dtype=np.int)
+    data3d_new[31*m,20*m:50*m,70*m] = 0
+    data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 4*m] = 0
     data3d[data3d_new == 0] += 1
     # size 3
-    data3d_new = np.ones((100,100,100), dtype=np.int)
-    data3d_new[31:50,50,70] = 0
-    data3d_new[31:50,45,20] = 0
-    data3d_new[70,50:70,50] = 0
-    data3d_new[70:80,50,50] = 0
-    data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 3] = 0
+    data3d_new = np.ones((100*m,100*m,100*m), dtype=np.int)
+    data3d_new[31*m:50*m,50*m,70*m] = 0
+    data3d_new[31*m:50*m,45*m,20*m] = 0
+    data3d_new[70*m,50*m:70*m,50*m] = 0
+    data3d_new[70*m:80*m,50*m,50*m] = 0
+    data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 3*m] = 0
     data3d[data3d_new == 0] += 1
 
     data3d[data3d >= 1] = 1
-    return (data3d*10)
+    return (data3d*255)
 
 
 if __name__ == "__main__":
@@ -818,7 +819,7 @@ if __name__ == "__main__":
     print args.input_is_skeleton
     if args.inputfile is None:
         metadata = {'voxelsize_mm': [1, 1, 1]}
-        data3d = generate_sample_data()
+        data3d = generate_sample_data(2)
         ha = HistologyAnalyser(data3d, metadata, args.threshold)
         ha.remove_area()
         data3d_thr, data3d_skel = ha.data_to_skeleton()
