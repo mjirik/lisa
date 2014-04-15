@@ -40,9 +40,9 @@ class TreeVolumeGenerator:
         data = misc.obj_from_file(filename=filename, filetype='yaml')
         self.data = data
     
-    def add_cylinder(self, cyl_id): # TODO - otestovat zda spravne zpracuje velikost voxelu
+    def add_cylinder(self, cyl_id):
         """
-        Funkce na vygenerovani 3d dat jednoho segmentu do 3D dat
+        Funkce na vykresleni jednoho segmentu do 3D dat
         """
         cyl_data = self.data['Graph'][cyl_id]
         cyl_data3d = np.ones(self.shape, dtype=np.int)
@@ -54,11 +54,11 @@ class TreeVolumeGenerator:
         p1 = [p1[0]/self.voxelsize_mm[0],p1[1]/self.voxelsize_mm[1],p1[2]/self.voxelsize_mm[2]]
         p2 = [p2[0]/self.voxelsize_mm[0],p2[1]/self.voxelsize_mm[1],p2[2]/self.voxelsize_mm[2]]
         
-        # vzdalenost mezi prvnim a koncovim bodem
-        pdiff = [p1[0]-p2[0],p1[1]-p2[1],p1[2]-p2[2]] 
+        # absolutni vzdalenosti mezi prvnim a koncovim bodem
+        pdiff = [abs(p1[0]-p2[0]),abs(p1[1]-p2[1]),abs(p1[2]-p2[2])] 
         
         # generovani hodnot pro osu segmentu
-        num_points = max(pdiff)*10 # na jeden "pixel" je 10 bodu primky
+        num_points = max(pdiff)*3 # na jeden "pixel nejdelsi osy" je 3 bodu primky (shannon)
         xvalues = np.linspace(p1[0], p2[0], num_points)
         yvalues = np.linspace(p1[1], p2[1], num_points)
         zvalues = np.linspace(p1[2], p2[2], num_points)
@@ -67,13 +67,12 @@ class TreeVolumeGenerator:
         for i in range(0,len(xvalues)):
             cyl_data3d[int(xvalues[i])][int(yvalues[i])][int(zvalues[i])] = 0
             
-        # drawinf a segment to data3d
-        self.data3d[scipy.ndimage.distance_transform_edt(cyl_data3d,self.voxelsize_mm) <= cyl_data['radius_mm']] = 1
+        # drawing a segment to data3d
+        self.data3d[scipy.ndimage.distance_transform_edt(cyl_data3d,self.voxelsize_mm) < cyl_data['radius_mm']] = 1
 
     def generateTree(self):
         """
         Funkce na vygenerování objemu stromu ze zadaných dat.
-
 
         """
         self.data3d = np.zeros(self.shape, dtype=np.int)
@@ -85,7 +84,8 @@ class TreeVolumeGenerator:
     def generateTree_vtk(self):
         """
         Funkce na vygenerování objemu stromu ze zadaných dat.
-        Veze pro generování pomocí VTK -> funguje špatně
+        Veze pro generování pomocí VTK
+        !!! funguje špatně -> vstupní data musí být pouze povrchové body, jinak generuje ve výstupních datech dutiny
 
         """
         #get vtkPolyData
@@ -113,7 +113,7 @@ class TreeVolumeGenerator:
         pol2stencil = vtk.vtkPolyDataToImageStencil()
         pol2stencil.SetInput(polyData)
         
-        #pol2stencil.SetOutputOrigin(origin) # TOHLE S TIM DELA BORDEL
+        #pol2stencil.SetOutputOrigin(origin) # TOHLE BLBNE
         pol2stencil.SetOutputSpacing(self.voxelsize_mm)
         pol2stencil.SetOutputWholeExtent(white_image.GetExtent())
         pol2stencil.Update()
@@ -167,7 +167,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '-vs', '--voxelsize',
         default=[1.0, 1.0, 1.0],
-        type=int,
+        type=float,
         metavar='N',
         nargs='+',
         help='size of voxel'
