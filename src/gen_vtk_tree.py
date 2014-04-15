@@ -125,6 +125,9 @@ def process_tree(indata):
     return outdata
 
 def main():
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    
     infile = sys.argv[1]
     if len(sys.argv) >= 3:
         outfile = sys.argv[2]
