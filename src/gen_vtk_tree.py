@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import logging
+logger = logging.getLogger(__name__)
+
 import vtk
 import numpy as nm
 import yaml
@@ -33,7 +36,7 @@ def get_cylinder(upper, height, radius,
         else:
             psi = nm.arccos(direction[0] / u)
 
-        print 'd0 ', direction[0], '  u ', u, ' psi ', psi
+        logger.debug('d0 '+str(direction[0])+'  u '+str(u)+' psi '+str(psi))
         if direction[2] < 0:
             psi = 2 * nm.pi - psi
 
@@ -97,7 +100,7 @@ def process_tree(indata):
     outdata = []
     for key in indata:
         ii = indata[key]
-        print ii
+        logger.debug(ii)
         br = {}
         try:
             vA = ii['upperVertexXYZmm']
@@ -122,6 +125,9 @@ def process_tree(indata):
     return outdata
 
 def main():
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    
     infile = sys.argv[1]
     if len(sys.argv) >= 3:
         outfile = sys.argv[2]
