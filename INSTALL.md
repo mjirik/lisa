@@ -17,7 +17,7 @@ For pygco use following (more info https://github.com/mjirik/pyseg_base/blob/mas
 
     git clone git@github.com:mjirik/liver-surgery.git
     git submodule update --init --recursive
-    git clone https://github.com/amueller/gco_python.git
+    https://github.com/mjirik/gco_python.git
     cd gco_python
     make
     python setup.py install
