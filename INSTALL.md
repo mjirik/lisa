@@ -15,7 +15,7 @@ SimpleITK is not in ubuntu packages. You can use easy_install
     
 For pygco use following (more info https://github.com/mjirik/pyseg_base/blob/master/INSTALL)
 
-    git clone git@github.com:mjirik/liver-surgery.git
+    git clone https://github.com/mjirik/lisa.git
     git submodule update --init --recursive
     https://github.com/mjirik/gco_python.git
     cd gco_python
