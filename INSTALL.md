@@ -17,10 +17,10 @@ For pygco use following (more info https://github.com/mjirik/pyseg_base/blob/mas
 
     git clone https://github.com/mjirik/lisa.git
     git submodule update --init --recursive
-    https://github.com/mjirik/gco_python.git
+    git clone https://github.com/mjirik/gco_python.git
     cd gco_python
     make
-    python setup.py install
+    sudo python setup.py install
 
 
 
