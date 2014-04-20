@@ -1,10 +1,6 @@
 Install (L)Ubuntu 14.04
 =========================
 
-Enable Canonical partners in Software Sources
-
-    sed -i "/^# deb .*partner/ s/^# //" /etc/apt/sources.list && apt-get update
-
 Use package manager
 
     sudo apt-get install python git python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools
@@ -15,17 +11,25 @@ SimpleITK is not in ubuntu packages. You can use easy_install
     
 For pygco use following (more info https://github.com/mjirik/pyseg_base/blob/master/INSTALL)
 
-    git clone https://github.com/mjirik/lisa.git
-    git submodule update --init --recursive
     git clone https://github.com/mjirik/gco_python.git
     cd gco_python
     make
     sudo python setup.py install
 
+Get stable branche
+
+    mkdir ~/projects
+    cd ~/projects
+    git clone --recursive -b stable https://github.com/mjirik/lisa.git
+
+or for current developement (if you want to participate)
+
+    mkdir ~/projects
+    cd ~/projects
+    git clone --recursive git@github.com:mjirik/lisa.git
 
 
-
-Install (L)Ubuntu 13.10
+Install (L)Ubuntu 12.04 (13.10)
 =========================
 
 Use package manager
@@ -38,12 +42,17 @@ SimpleITK is not in ubuntu packages. You can use easy_install
     
 For pygco use following (more info https://github.com/mjirik/pyseg_base/blob/master/INSTALL)
 
-    git clone git@github.com:mjirik/liver-surgery.git
-    git submodule update --init --recursive
     git clone https://github.com/amueller/gco_python.git
     cd gco_python
     make
     python setup.py install
+
+Get stable branche
+
+    mkdir ~/projects
+    cd ~/projects
+    git clone --recursive -b stable https://github.com/mjirik/lisa.git
+
     
 Problems on Linux:
 
