@@ -1,3 +1,30 @@
+Install (L)Ubuntu 14.04
+=========================
+
+Enable Canonical partners in Software Sources
+
+    sed -i "/^# deb .*partner/ s/^# //" /etc/apt/sources.list && apt-get update
+
+Use package manager
+
+    sudo apt-get install python git python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools
+    
+SimpleITK is not in ubuntu packages. You can use easy_install
+
+    sudo easy_install -U SimpleITK
+    
+For pygco use following (more info https://github.com/mjirik/pyseg_base/blob/master/INSTALL)
+
+    git clone https://github.com/mjirik/lisa.git
+    git submodule update --init --recursive
+    git clone https://github.com/mjirik/gco_python.git
+    cd gco_python
+    make
+    sudo python setup.py install
+
+
+
+
 Install (L)Ubuntu 13.10
 =========================
 
