@@ -1,3 +1,24 @@
+Requirements
+=========================
+
+Installing requires you to have installed:
+
+* GIT - distributed version control system (http://git-scm.com)
+* numpy (http://www.numpy.org)
+* scipy (http://scipy.org)
+* scikit-learn (http://scikit-learn.org)
+* Cython - C-extension for Python (http://cython.org)
+* pyqt - Python bindings for Qt application framework
+(http://www.riverbankcomputing.com/software/pyqt)
+* pygco - Graphcuts for Python (https://github.com/amueller/gco_python)
+* pydicom - package for working with DICOM files
+(http://code.google.com/p/pydicom)
+* pyqt - QT4 for python (https://wiki.python.org/moin/PyQt)
+* ITK (optional) - Package for medical image analysis (http://www.itk.org/)
+* VTK (optional) - The Visualization Toolkit (http://www.vtk.org/)
+
+
+
 Install (L)Ubuntu 14.04
 =========================
 
