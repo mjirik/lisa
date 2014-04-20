@@ -1325,6 +1325,11 @@ def logger_init():
 
 
 def lisa_config_init():
+    """
+    Generate default config from function paramteres.
+    Specific config given by command line argument is implemented in
+    parser_init() function.
+    """
     # read confguraton from file, use default values from OrganSegmentation
     cfg = config.get_default_function_config(OrganSegmentation.__init__)
 
@@ -1359,6 +1364,16 @@ def parser_init(cfg):
         description='Segment vessels from liver \n\
                 \npython organ_segmentation.py\n\
                 \npython organ_segmentation.py -mroi -vs 0.6')
+    parser.add_argument('-cf', '--configfile', default=None,
+                        help="Use another config. It is loaded after default \
+config and user config.")
+# Read alternative config file. First is loaded default config. Then user
+# config in lisa_data directory. After that is readed config defined by
+# --configfile parameter
+    knownargs, unknownargs = parser.parse_known_args()
+    if knownargs.configfile is not None:
+        cfg = config.get_config(knownargs.configfile, cfg)
+
     parser.add_argument('-dd', '--datapath',
                         default=cfg["datapath"],
                         help='path to data dir')
