@@ -45,8 +45,15 @@ def cut_editor_old(data):
 
     pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
     pyed.show()
-    split_obj0 = pyed.seeds
+
+    return pyed.seeds
+
+
+def split_vessel(data, seeds):
+
+    split_obj0 = seeds
     split_obj = split_obj0.copy()
+
     vessels = data['segmentation'] == data['slab']['porta']
     vesselstmp = vessels
     sumall = np.sum(vessels == 1)
@@ -66,28 +73,6 @@ def cut_editor_old(data):
 
         lab, n_obj = scipy.ndimage.label(vesselstmp)
 
-#  optimalization. If there are many objects, there are
-        #if n_obj > 10:
-        #    try:
-        #        import skimage
-        #        vesselstmp = skimage.morphology.remove_small_objects(
-        #            vesselstmp,
-        #            10
-        #        )
-        #        lab, n_obj = scipy.ndimage.label(vesselstmp)
-        #        print "n_obj optimalized", n_obj
-        #    except Exception as e:
-        #        print e
-
-        #print 'sum biggest ', np.sum(lab == qmisc.max_area_index(lab, n_obj))
-        #print "n_obj  ",  n_obj
-        #import pdb; pdb.set_trace()
-        #print 'max ', np.sum(lab == max_area_index(lab,n_obj))
-
-#    print ("Zjistete si, ktere objekty jsou nejvets a nastavte l1 a l2")
-
-#    print ("np.sum(lab==3)")
-
     # všechny objekty, na které se to rozpadlo
     #pyed = py3DSeedEditor.py3DSeedEditor(lab)
     #pyed.show()
@@ -101,11 +86,6 @@ def cut_editor_old(data):
     #import ipdb; ipdb.set_trace() # BREAKPOINT
 
     lab = obj1 + 2 * obj2
-    #print "baf"
-    #logger.debug("visualization")
-    #spl_vis = (split_obj*2 - split_obj0).astype(np.int8)
-    #pyed = py3DSeedEditor.py3DSeedEditor(lab, seeds=spl_vis)
-    #pyed.show()
     cut_by_user = split_obj0
     return lab, cut_by_user
 
@@ -171,8 +151,8 @@ def resection_old(data):
 
     print data["slab"]
     #lab = cut_editor(data)#== data['slab']['porta'])
-
-    lab, cut = cut_editor_old(data)
+    seeds = cut_editor_old(data)
+    lab, cut = split_vessel(data, seeds)
     segm, dist1, dist2 = split_organ_by_two_vessels(data, lab)
     data = virtual_resection_visualization(data, segm, dist1, dist2, cut)
     return data
