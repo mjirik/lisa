@@ -1,5 +1,8 @@
 #! /opt/local/bin/python
 # -*- coding: utf-8 -*-
+"""
+Show dicom data with overlay
+"""
 
 # import funkcí z jiného adresáře
 import sys
@@ -20,17 +23,17 @@ logger = logging.getLogger(__name__)
 #  apdb.set_trace();
 #import scipy.io
 import numpy as np
-import scipy
+#import scipy
 #from scipy import sparse
 #import traceback
-import time
-import audiosupport
+#import time
+#import audiosupport
 
 # ----------------- my scripts --------
 #import py3DSeedEditor
 #
-import dcmreaddata as dcmr
-import pycut
+#import dcmreaddata as dcmr
+#import pycut
 import argparse
 import py3DSeedEditor
 
@@ -38,10 +41,8 @@ import py3DSeedEditor
 import qmisc
 import misc
 import datareader
-import config
+#import config
 #import numbers
-
-
 
 
 def saveOverlayToDicomCopy(input_dcmfilelist, output_dicom_dir, overlays,
@@ -85,8 +86,6 @@ def save_config(cfg, filename):
     misc.obj_to_file(cfg, filename, filetype="yaml")
 
 
-
-
 def main():
 
     #logger = logging.getLogger(__name__)
@@ -114,6 +113,7 @@ def main():
     data3d, metadata = reader.Get3DData(args['inputdatapath'], qt_app=None)
     overlays = reader.GetOverlay()
     overlay = np.zeros(data3d.shape, dtype=np.int8)
+    print "overlays ", overlays.keys()
     for key in overlays:
         overlay += overlays[key]
 

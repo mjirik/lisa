@@ -28,7 +28,8 @@ class DataReader:
 
         self.overlay_fcn = None
 
-    def Get3DData(self, datapath, qt_app=None, dataplus_format=False):
+    def Get3DData(self, datapath, qt_app=None, gui=True,
+                  dataplus_format=False):
         """
         :datapath directory with input data
         :qt_app if it is set to None (as default) all dialogs for series
@@ -38,6 +39,10 @@ class DataReader:
         :dataplus_format is new data format. Metadata and data are returned in
         one structure.
         """
+
+        if qt_app is None and gui is True:
+            from PyQt4.QtGui import QApplication
+            qt_app = QApplication(sys.argv)
 
         datapath = os.path.normpath(datapath)
         if os.path.isfile(datapath):
@@ -52,7 +57,6 @@ class DataReader:
                     'datadir': datapath
                 }
                 metadata.update(data)
-
 
             else:
 # reading raw file
