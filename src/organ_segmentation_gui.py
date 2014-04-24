@@ -532,7 +532,7 @@ class OrganSegmentation():
 
 #    def interactivity(self, min_val=800, max_val=1300):
     def interactivity(self, min_val=None, max_val=None):
-        from PyQt4 import QTSeedEditor
+        from seed_editor_qt import QTSeedEditor
         import_gui()
         logger.debug('interactivity')
         # if self.edit_data:
