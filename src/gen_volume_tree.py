@@ -45,30 +45,57 @@ class TreeVolumeGenerator:
         Funkce na vykresleni jednoho segmentu do 3D dat
         """
         cyl_data = self.data['Graph'][cyl_id]
-        cyl_data3d = np.ones(self.shape, dtype=np.int)
+        cyl_data3d = np.ones(self.shape, dtype=np.bool)
         
-        # prvni a koncovy bod, v mm
-        p1 = cyl_data['nodeA_XYZ_mm']
-        p2 = cyl_data['nodeB_XYZ_mm']
+        # prvni a koncovy bod, v mm + radius v mm
+        try:
+            p1m = cyl_data['nodeA_XYZ_mm'] # souradnice ulozeny [Z,Y,X]
+            p2m = cyl_data['nodeB_XYZ_mm']
+            rad = cyl_data['radius_mm']
+        except:
+            logger.error("Segment id "+str(cyl_id)+": Error reading data from yaml!")
+            return
+            
         # prvni a koncovy bod, ve pixelech
-        p1 = [p1[0]/self.voxelsize_mm[0],p1[1]/self.voxelsize_mm[1],p1[2]/self.voxelsize_mm[2]]
-        p2 = [p2[0]/self.voxelsize_mm[0],p2[1]/self.voxelsize_mm[1],p2[2]/self.voxelsize_mm[2]]
+        p1 = [p1m[0]/self.voxelsize_mm[0],p1m[1]/self.voxelsize_mm[1],p1m[2]/self.voxelsize_mm[2]]
+        p2 = [p2m[0]/self.voxelsize_mm[0],p2m[1]/self.voxelsize_mm[1],p2m[2]/self.voxelsize_mm[2]]
+        logger.debug("p1_px: "+str(p1[0])+" "+str(p1[1])+" "+str(p1[2]))
+        logger.debug("p2_px: "+str(p2[0])+" "+str(p2[1])+" "+str(p2[2]))
+        logger.debug("radius_mm:"+str(rad))
         
-        # absolutni vzdalenosti mezi prvnim a koncovim bodem
+        # vzdalenosti mezi prvnim a koncovim bodem (pro jednotlive osy)
         pdiff = [abs(p1[0]-p2[0]),abs(p1[1]-p2[1]),abs(p1[2]-p2[2])] 
         
         # generovani hodnot pro osu segmentu
-        num_points = max(pdiff)*3 # na jeden "pixel nejdelsi osy" je 3 bodu primky (shannon)
-        xvalues = np.linspace(p1[0], p2[0], num_points)
+        num_points = max(pdiff)*2 # na jeden "pixel nejdelsi osy" je 2 bodu primky (shannon)
+        zvalues = np.linspace(p1[0], p2[0], num_points)
         yvalues = np.linspace(p1[1], p2[1], num_points)
-        zvalues = np.linspace(p1[2], p2[2], num_points)
+        xvalues = np.linspace(p1[2], p2[2], num_points)
         
         # drawing a line
         for i in range(0,len(xvalues)):
-            cyl_data3d[int(xvalues[i])][int(yvalues[i])][int(zvalues[i])] = 0
+            cyl_data3d[int(zvalues[i])][int(yvalues[i])][int(xvalues[i])] = 0
             
-        # drawing a segment to data3d
-        self.data3d[scipy.ndimage.distance_transform_edt(cyl_data3d,self.voxelsize_mm) < cyl_data['radius_mm']] = 1
+        # cuting size of 3d space needed for calculating distances (smaller == a lot faster)
+        cut_up = max(0,round(min(p1[0],p2[0])-(rad/min(self.voxelsize_mm))-2)) # ta 2 je kuli tomu abyh omylem nurizl
+        cut_down = min(self.shape[0],round(max(p1[0],p2[0])+(rad/min(self.voxelsize_mm))+2))
+        cut_yu = max(0,round(min(p1[1],p2[1])-(rad/min(self.voxelsize_mm))-2))
+        cut_yd = min(self.shape[1],round(max(p1[1],p2[1])+(rad/min(self.voxelsize_mm))+2))
+        cut_xl = max(0,round(min(p1[2],p2[2])-(rad/min(self.voxelsize_mm))-2))
+        cut_xr = min(self.shape[2],round(max(p1[2],p2[2])+(rad/min(self.voxelsize_mm))+2))
+        logger.debug("cutter_px: z_up-"+str(cut_up)+" z_down-"+str(cut_down)+" y_up-"+str(cut_yu)+" y_down-"+str(cut_yd)+" x_left-"+str(cut_xl)+" x_right-"+str(cut_xr))
+        cyl_data3d_cut = cyl_data3d[cut_up:cut_down,cut_yu:cut_yd,cut_xl:cut_xr]
+        
+        # calculating distances
+        # spotrebovava naprostou vetsinu casu (pro 200^3  je to kolem 1.2 sekundy, proto jsou data osekana)
+        lineDst = scipy.ndimage.distance_transform_edt(cyl_data3d_cut,self.voxelsize_mm) 
+        
+        # zkopirovani vyrezu zpet do celeho rozsahu dat
+        for z in xrange(0,len(cyl_data3d_cut)):
+            for y in xrange(0,len(cyl_data3d_cut[z])):
+                for x in xrange(0,len(cyl_data3d_cut[z][y])):
+                    if lineDst[z][y][x] <= rad:
+                        self.data3d[z+cut_up][y+cut_yu][x+cut_xl] = 1
 
     def generateTree(self):
         """
@@ -170,7 +197,7 @@ if __name__ == "__main__":
         type=float,
         metavar='N',
         nargs='+',
-        help='size of voxel'
+        help='size of voxel (ZYX)'
     )
     parser.add_argument(
         '-ds', '--datashape',
@@ -178,7 +205,7 @@ if __name__ == "__main__":
         type=int,
         metavar='N',
         nargs='+',
-        help='size of output data in pixels for each axis'
+        help='size of output data in pixels for each axis (ZYX)'
     )
     parser.add_argument(
         '-d', '--debug', action='store_true',
@@ -196,11 +223,28 @@ if __name__ == "__main__":
     hr.shape = args.datashape
     hr.generateTree()
     
-    logger.debug("TimeUsed:"+str(datetime.now()-startTime))
+    logger.info("TimeUsed:"+str(datetime.now()-startTime))
+    volume_px = sum(sum(sum(hr.data3d)))
+    volume_mm3 = volume_px*(hr.voxelsize_mm[0]*hr.voxelsize_mm[1]*hr.voxelsize_mm[2])
+    logger.info("Volume px:"+str(volume_px))
+    logger.info("Volume mm3:"+str(volume_mm3))
     
 #vizualizace
     pyed = se.py3DSeedEditor(hr.data3d)
     pyed.show()
+# 3d vizualizace (debug)
+    if args.debug:
+        try:
+            from vtk_point_cloud import VtkPointCloud
+            pointCloud = VtkPointCloud(None,0,51,True)
+            for z in xrange(0,len(hr.data3d)):
+                for y in xrange(0,len(hr.data3d[z])):
+                    for x in xrange(0,len(hr.data3d[z][y])):
+                        if hr.data3d[z][y][x] == 1:
+                            pointCloud.addPoint([x,y,z])
+            pointCloud.rander()
+        except:
+            logger.error("pointCloud 3d debug error: cant find vtk_point_cloud.py")
 #ukládání do souboru
     if args.outputfile is not None:
         hr.saveToFile(args.outputfile)

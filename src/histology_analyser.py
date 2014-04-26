@@ -699,7 +699,6 @@ class SkeletonAnalyser:
 
 
 
-
     def __connection_analysis(self, edg_number):
         """
         Analysis of which edge is connected
@@ -741,45 +740,44 @@ def generate_sample_data(m=1):
     data3d = np.zeros((100*m,100*m,100*m), dtype=np.int)
 
     # size 8
-    data3d_new = np.ones((100*m,100*m,100*m), dtype=np.int)
+    data3d_new = np.ones((100*m,100*m,100*m), dtype=np.bool)
     data3d_new[0:30*m,20*m,20*m] = 0
     data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 8*m] = 0
-    data3d[data3d_new == 0] += 1
+    data3d[data3d_new == 0] = 1
     # size 7
-    data3d_new = np.ones((100*m,100*m,100*m), dtype=np.int)
+    data3d_new = np.ones((100*m,100*m,100*m), dtype=np.bool)
     data3d_new[31*m:70*m,20*m,20*m] = 0
     data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 7*m] = 0
-    data3d[data3d_new == 0] += 1
+    data3d[data3d_new == 0] = 1
     # size 6
-    data3d_new = np.ones((100*m,100*m,100*m), dtype=np.int)
+    data3d_new = np.ones((100*m,100*m,100*m), dtype=np.bool)
     data3d_new[70*m,20*m:50*m,20*m] = 0
     data3d_new[31*m,20*m,20*m:70*m] = 0
     data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 6*m] = 0
-    data3d[data3d_new == 0] += 1
+    data3d[data3d_new == 0] = 1
     # size 5
-    data3d_new = np.ones((100*m,100*m,100*m), dtype=np.int)
+    data3d_new = np.ones((100*m,100*m,100*m), dtype=np.bool)
     data3d_new[70*m:95*m,20*m,20*m] = 0
     data3d_new[31*m:60*m,20*m,70*m] = 0
     data3d_new[70*m:90*m,50*m,20*m] = 0
     data3d_new[70*m,50*m,20*m:50*m] = 0
     data3d_new[31*m,20*m:45*m,20*m] = 0
     data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 5*m] = 0
-    data3d[data3d_new == 0] += 1
+    data3d[data3d_new == 0] = 1
     # size 4
-    data3d_new = np.ones((100*m,100*m,100*m), dtype=np.int)
+    data3d_new = np.ones((100*m,100*m,100*m), dtype=np.bool)
     data3d_new[31*m,20*m:50*m,70*m] = 0
     data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 4*m] = 0
-    data3d[data3d_new == 0] += 1
+    data3d[data3d_new == 0] = 1
     # size 3
-    data3d_new = np.ones((100*m,100*m,100*m), dtype=np.int)
+    data3d_new = np.ones((100*m,100*m,100*m), dtype=np.bool)
     data3d_new[31*m:50*m,50*m,70*m] = 0
     data3d_new[31*m:50*m,45*m,20*m] = 0
     data3d_new[70*m,50*m:70*m,50*m] = 0
     data3d_new[70*m:80*m,50*m,50*m] = 0
     data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 3*m] = 0
-    data3d[data3d_new == 0] += 1
+    data3d[data3d_new == 0] = 1
 
-    data3d[data3d >= 1] = 1
     return (data3d*255)
 
 
