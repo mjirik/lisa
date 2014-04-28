@@ -28,8 +28,8 @@ class DataReader:
 
         self.overlay_fcn = None
 
-    def Get3DData(self, datapath, qt_app=None, gui=True,
-                  dataplus_format=False):
+    def Get3DData(self, datapath, qt_app=None,
+                  dataplus_format=False, gui=False):
         """
         :datapath directory with input data
         :qt_app if it is set to None (as default) all dialogs for series
@@ -41,6 +41,7 @@ class DataReader:
         """
 
         if qt_app is None and gui is True:
+            print "---- delam qtapplication"
             from PyQt4.QtGui import QApplication
             qt_app = QApplication(sys.argv)
 
