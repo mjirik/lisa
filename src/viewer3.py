@@ -3,27 +3,36 @@
 '''
 VTK Viewer pro 3D zobrazeni
 
-program mozne spustit ve dvou rezimech View a Cut
-Vstupní soubor může být soubor pickle nebo už vygenerovaný vtk
-Je mozne zobrazovat cela jatra, nebo hlavni portalni zilu prikazy : liver, porta
-Priklady :
+program mozne spustit ve dvou rezimech View a Cut. Pokud neni zvolen zadny mod, tak
+prohlizec pracuje v rezimu View
 
-viewer3.py -pkl file.pkl
+Mod Cut :
+Priklady spusteni:
+viewer3.py -vtk mesh_new.vtk -mode 'Cut' -slab 'liver'
+viewer3.py -pkl out -mode 'Cut'
+viewer3.py -pkl out -mode 'Cut' -slab 'porta'
 
+Spusti se editor volby resekcni linie. V nem je mozno volit rez pomoci roviny a to
+stisknutim tlacitka Plane. Rez se provede stisknutim tlacitka Cut. Tlacitko
+Point zatim nefunkcni
+
+Mod View :
+Priklady spusteni:
+viewer3.py -pkl file.pkl -mode 'View'
 viewer3.py -vtk mesh_new.vtk -mode 'View' -slab 'liver'
+viewer3.py -pkl vessels002.pkl -mode 'View' 
 
 
-viewer3.py -pkl vessels002.pkl -mode 'Cut'  -slab 'porta'
+Spusti prohlizec slouzici pouze pro vizualizaci jater
+
 '''
 
-from optparse import OptionParser
 import sys
-import vessel_cut
+import virtual_resection
 import numpy as np
 import numpy as nm
 import scipy.ndimage
 import argparse
-import time
 
 from PyQt4 import QtCore, QtGui
 from PyQt4 import *
@@ -36,22 +45,18 @@ from Tkinter import *
 import seg2fem
 
 import misc
-import py3DSeedEditor
-import show3
-import qmisc
-import pdb
 
 # pouzivane promenne
 plane = vtk.vtkPlane()
 normal = None
 coordinates = None
 iren = vtk.vtkRenderWindowInteractor()
-renWin = vtk.vtkRenderWindow()
 surface = vtk.vtkDataSetSurfaceFilter()
 app = QApplication(sys.argv)
 label = QtGui.QLabel()
 myLayout = QGridLayout()
 widget = vtk.vtkSphereSource()
+planeWidget = vtk.vtkImplicitPlaneWidget()
 
 
 
@@ -85,12 +90,17 @@ class Ui_MainWindow(object):
         QtCore.QObject.connect(self.toolButton, QtCore.SIGNAL("clicked()"), MainWindow.liver_cut )
         
         self.toolButton_2 = QtGui.QPushButton(self.centralwidget)
-        self.toolButton_2.setGeometry(QtCore.QRect(140, 210, 71, 41))
+        self.toolButton_2.setGeometry(QtCore.QRect(140, 280, 71, 41))
         self.toolButton_2.setObjectName(_fromUtf8("toolButton_2"))
         QtCore.QObject.connect(self.toolButton_2, QtCore.SIGNAL("clicked()"), MainWindow.Plane )
 
+        self.toolButton_3 = QtGui.QPushButton(self.centralwidget)
+        self.toolButton_3.setGeometry(QtCore.QRect(140, 210, 71, 41))
+        self.toolButton_3.setObjectName(_fromUtf8("toolButton_3"))
+        QtCore.QObject.connect(self.toolButton_3, QtCore.SIGNAL("clicked()"), MainWindow.Point )
+
         self.info_text = QtGui.QPlainTextEdit(self.centralwidget)
-        self.info_text.setGeometry(QtCore.QRect(20, 350, 331, 100))
+        self.info_text.setGeometry(QtCore.QRect(20, 350, 280, 100))
         self.info_text.setObjectName(_fromUtf8("lineEdit"))
         self.info_text.setReadOnly(True)
 
@@ -120,6 +130,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "Nástroj pro volbu resekční linie", None))
         self.toolButton.setText(_translate("MainWindow", "CUT", None))
         self.toolButton_2.setText(_translate("MainWindow", "PLANE", None))
+        self.toolButton_3.setText(_translate("MainWindow", "POINT", None))
 
 
 class Viewer(QMainWindow):
@@ -147,18 +158,36 @@ class Viewer(QMainWindow):
 ##------------------------------------------------------------------------------------------
 
         
-    def __init__(self, inputfile,parent = None):
-        QtGui.QMainWindow.__init__(self, parent)
-        self.vtk_filename = inputfile
-
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
-        self.iren = self.ui.vtkWidget.GetRenderWindow().GetInteractor()
-        self.info_text = self.ui.info_text
-        self.liver_text = self.ui.liver_text
-        self.planew = None
-        self.oriznuti_jater = 0
-        
+    def __init__(self, inputfile,mode,parent = None):
+        self.ren = vtk.vtkRenderer()
+        if mode == 'Cut':
+            QtGui.QMainWindow.__init__(self, parent)
+            self.vtk_filename = inputfile
+            self.ui = Ui_MainWindow()
+            self.ui.setupUi(self)
+            self.info_text = self.ui.info_text
+            self.liver_text = self.ui.liver_text
+            self.planew = None
+            self.cut_point = None
+            self.oriznuti_jater = 0
+            self.iren = self.ui.vtkWidget.GetRenderWindow().GetInteractor()
+            self.ui.vtkWidget.GetRenderWindow().AddRenderer(self.ren)
+            
+        if mode == 'View':
+            QMainWindow.__init__(self,parent)
+            self.renWin = vtk.vtkRenderWindow()
+            self.renWin.AddRenderer(self.ren)
+            self.iren = vtk.vtkRenderWindowInteractor()
+            self.iren.SetRenderWindow(self.renWin)
+            '''
+            self.setGeometry(QtCore.QRect(500, 500, 500, 500))
+            
+            self.vtkWidget = QVTKRenderWindowInteractor(self)
+            self.gridlayout = QtGui.QGridLayout(self.vtkWidget)
+            self.vtkWidget.GetRenderWindow().AddRenderer(self.ren)
+            self.iren = self.vtkWidget.GetRenderWindow().GetInteractor()
+            self.gridlayout.addWidget(self, 0, 0, 1, 1)
+            '''
         '''
         # Create source
         source = vtk.vtkSphereSource()
@@ -192,6 +221,7 @@ class Viewer(QMainWindow):
         print 'Voxelsize_mm'
         print voxelsize_mm
         print("Generuji data...")
+        self.voxelsize_mm = voxelsize_mm
         self.new_vox = voxelsize_mm * degrad
         print 'self_new'
         print self.new_vox
@@ -200,7 +230,7 @@ class Viewer(QMainWindow):
         print voxelsize_mm
 
         if True:
-            for x in xrange (15):
+            for x in xrange (50):
                 mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
 
         print("Done")
@@ -221,7 +251,7 @@ class Viewer(QMainWindow):
     def Plane(self):
         if(self.planew != None):
             self.info_text.appendPlainText (_fromUtf8("Nelze použít více rovin najednou. Nejdříve proveďte řez"))
-        else: 
+        else:
             planeWidget = vtk.vtkImplicitPlaneWidget()
             planeWidget.SetInteractor(self.iren)
             planeWidget.SetPlaceFactor(1.5)
@@ -235,11 +265,30 @@ class Viewer(QMainWindow):
 
             planeWidget.On()
             self.planew = planeWidget
+            self.planew.SetNormal(2.0,0.0,0.0)
+            print self.planew.GetNormal()
 
         #window.show()
         #self.iren.Initialize()
         #renWin.Render()
         #iren.Start()
+##------------------------------------------------------------------------------------------
+
+    def Point(self):
+            print 'Point'
+            self.cut_point = vtk.vtkPointWidget()
+            self.cut_point.SetInput(surface.GetOutput())
+            self.cut_point.AllOff()
+            self.cut_point.PlaceWidget()
+            self.cut_point.SetInteractor(self.iren)
+            self.cut_point.On()
+            print (self.cut_point.GetPosition())
+            point = vtk.vtkPolyData()
+            self.cut_point.GetPolyData(point);
+        #window.show()
+            self.iren.Initialize()
+        #renWin.Render()
+            self.iren.Start()
 ##------------------------------------------------------------------------------------------
 
     def callback(self,button):
@@ -261,59 +310,45 @@ class Viewer(QMainWindow):
         global normal
         global coordinates
         self.info_text.appendPlainText (_fromUtf8("Provádění řezu. Prosím čekejte"))
-        try:
-            self.set_normal(self.planew.GetNormal())
-            self.set_coordinates(self.planew.GetOrigin())
-            self.cutter()
-            self.Rezani()
-            #print(self.normal)
-            #print(self.coordinates)
-        except AttributeError:
-            self.info_text.appendPlainText (_fromUtf8("Neexistuje rovina řezu"))
-            self.info_text.appendPlainText (_fromUtf8('Nejdříve vytvořte rovinu stisknutím tlačítka Plane'))
-            print('Neexistuje rovina rezu')
-            print('Nejdrive vytvorte rovinu stisknutim tlacitka Plane')
+        if self.planew != None:
+            try:
+                self.set_normal(self.planew.GetNormal())
+                self.set_coordinates(self.planew.GetOrigin())
+                self.cutter()
+                self.Rezani()
+                #print(self.normal)
+                #print(self.coordinates)
+            except AttributeError:
+                self.info_text.appendPlainText (_fromUtf8("Neexistuje rovina řezu"))
+                self.info_text.appendPlainText (_fromUtf8('Nejdříve vytvořte rovinu stisknutím tlačítka Plane'))
+                print('Neexistuje rovina rezu')
+                print('Nejdrive vytvorte rovinu stisknutim tlacitka Plane')
+        if self.cut_point != None:
+            print('Souradnice bodu')
+            print (self.cut_point.GetPosition())
+            pozice = self.cut_point.GetPosition()
+            self.data['segmentation'] = self.data['segmentation'][::self.degrad,::self.degrad,::self.degrad]
+            self.data['data3d'] = self.data['data3d'][::self.degrad,::self.degrad,::self.degrad]
+            #self.data['voxelsize_mm'] = self.voxelsize_mm
+            seeds = np.zeros((self.data['segmentation'].shape[0],(self.data['segmentation'].shape[1]),(self.data['segmentation'].shape[2])))
+            seeds[pozice[0]/self.new_vox[0]][pozice[1]/self.new_vox[1]][pozice[2]/self.new_vox[2]] = 1
+            print 'Seedu'
+            print seeds.shape
+            
+            self.data = virtual_resection.cut_for_3D_Viewer(self.data,seeds)
+            self.data['segmentation'] = self.data['segmentation'][::self.degrad,::self.degrad,::self.degrad]
+            print (self.data['segmentation'] == self.data['slab']['liver']).shape
+            mesh_data = seg2fem.gen_mesh_from_voxels_mc(self.data['segmentation'] == self.data['slab']['liver'], self.new_vox)
+            if True:
+                for x in xrange (15):
+                    mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
+            print("Done")
+            vtk_file = "mesh_new.vtk"
+            mesh_data.write(vtk_file)
+            self.cut_point.Off()
+            #self.cut_point = None
+            self.View(vtk_file)
 
-    '''
-    pripravena funkce pro nastavovani voxelu v grafickem okne
-    - pravdepodobne nebude vyuzita :-/
-    '''
-    def Set_voxel_size(self):
-        '''
-        rozmer_x = QtGui.QInputDialog()
-        rozmer_y = QtGui.QInputDialog()
-        rozmer_z= QtGui.QInputDialog()
-        #.rozmer_x.getInteger(window,'Voxel_size', 'Rozmer voxelu v x:', QLineEdit.Normal)
-        #rozmer_y.getInteger(window, 'Voxel_size', 'Rozmer voxelu v y:', QLineEdit.Normal)
-        #rozmer_z.getInteger(window, 'Voxel_size', 'Rozmer voxelu v z:', QLineEdit.Normal)
-        okno.setWindowTitle("Voxel_size")
-        layout = QtGui.QGridLayout()
-        okno.setLayout(layout)
-        rozmer_x.setOptions(QInputDialog.NoButtons)
-        rozmer_y.setOptions(QInputDialog.NoButtons)
-        rozmer_z.setOptions(QInputDialog.NoButtons)
-        ok_button = QtGui.QPushButton()
-        ok_button.setText('Ok')
-        layout.addWidget(rozmer_x,0,2)
-        layout.addWidget(rozmer_y,1,2)
-        layout.addWidget(rozmer_z,2,2)
-        layout.addWidget(ok_button,3,2)
-        okno.connect(ok_button, QtCore.SIGNAL("clicked()"),(lambda y:lambda: self.close() )('Stisknuto : ok'))
-        okno.show()
-        renWin.Render()
-        iren.Start()
-        renWin.Finalize()
-
-        #promen_z = QInputDialog()
-        #winter = QtCore.QStringList()
-        #winter = 'December, January, February'
-        #print winter
-        #promen_z.setComboBoxItems(winter)
-        print(rozmer_x)
-        print(rozmer_y)
-        print(rozmer_z)
-
-        '''
 ##------------------------------------------------------------------------------------------
     def Rez(self,a,b,c,d):
         mensi = 0
@@ -323,27 +358,27 @@ class Viewer(QMainWindow):
         print 'x: ',a,' y: ',b,' z: ',c
         print('Pocitani rezu...')
         data = self.segment
-        print 'dimension'
-        print data.shape
+        prava_strana = np.ones((data.shape[0],data.shape[1],data.shape[2]))
+        leva_strana = np.ones((data.shape[0],data.shape[1],data.shape[2]))
         dimension = data.shape
         for x in range(dimension[0]):
-            self.iren.Initialize()
             for y in range(dimension[1]):
                 for z in range(dimension[2]):
                     rovnice = a*x + b*y + c*z + d
                     #print self.data['segmentation'][x][y][z]
                     #pdb.set_trace()
-                    if(rovnice < 0):
+                    if((rovnice) <= 0):
                         mensi = mensi+1
                         if(data[x][y][z] == 1):
                             mensi_objekt = mensi_objekt+1
-                        data[x][y][z] = 0
+                        prava_strana[x][y][z] = 0
                     else:
                         vetsi = vetsi+1
                         if(data[x][y][z] == 1):
                             vetsi_objekt = vetsi_objekt+1
+                        leva_strana[x][y][z] = 0
                         #self.data['segmentation'][x][y][z] = False
-
+        prava_strana = prava_strana * data
         objekt = mensi_objekt + vetsi_objekt
         procenta = ((100*mensi_objekt)/objekt)
         self.oriznuti_jater += procenta
@@ -357,17 +392,17 @@ class Viewer(QMainWindow):
         print 'Mensi_objekt: ',mensi_objekt
         print 'Vetsi_objekt: ',vetsi_objekt
         print("Generuji data...")
-        mesh_data = seg2fem.gen_mesh_from_voxels_mc(data, self.new_vox)
+        mesh_data = seg2fem.gen_mesh_from_voxels_mc(prava_strana, self.new_vox)
         
         if True:
-            for x in xrange (100):
+            for x in xrange (15):
                 mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
         print("Done")
         vtk_file = "mesh_new.vtk"
         mesh_data.write(vtk_file)
         self.planew.Off()
         self.planew = None
-        self.View(vtk_file,True)
+        self.View(vtk_file)
                 
 ##------------------------------------------------------------------------------------------
     def Rezani(self):
@@ -379,20 +414,22 @@ class Viewer(QMainWindow):
         xx = self.coordinates[0]/self.new_vox[0]
         yy = self.coordinates[1]/self.new_vox[1]
         zz = self.coordinates[2]/self.new_vox[2]
-        
 
         '''
         a = self.normal[0]
         b = self.normal[1]
         c = self.normal[2]
-        xx = self.coordinates[0]/self.new_vox[0]
-        yy = self.coordinates[1]/self.new_vox[1]
-        zz = self.coordinates[2]/self.new_vox[2]
+        xx = self.coordinates[0]
+        yy = self.coordinates[1]
+        zz = self.coordinates[2]
+
         '''
 
+        
         d = -(a*xx)-(b*yy)-(c*zz)
         print d
         self.Rez(a,b,c,d)
+
         '''
         print('Generuji rez')
         
@@ -413,18 +450,20 @@ class Viewer(QMainWindow):
         
 ##------------------------------------------------------------------------------------------
     def prohlizej(self,data, mode, slab=None):
-        window = QtGui.QWidget()
-        grid = QtGui.QGridLayout()
-        window.setWindowTitle("3D liver")
-        window.setLayout(grid)
-        mesh = self.generate_mesh(data['segmentation'] == data['slab'][slab],data['voxelsize_mm'])
-        if mode == 'View' or mode == None:
-            accept = True
-            self.View(mesh,accept)
-        if mode == 'Cut':
-            accept = False
-            self.View(mesh,accept)
-            self.buttons(window,grid)
+        self.iren.Initialize()
+        self.show()
+        
+        if slab == 'liver':
+            degrad = 4
+        else:
+            degrad = 2
+        mesh = self.generate_mesh(data['segmentation'] == data['slab'][slab],data['voxelsize_mm'],degrad)
+        #if mode == 'View' or mode == None:
+        #if mode == 'Cut':
+        self.View(mesh)
+        self.iren.Initialize()
+        app.exec_()
+        sys.exit(app.exec_())
 
 
         return self
@@ -435,69 +474,13 @@ class Viewer(QMainWindow):
         print self.normal
         print 'Coordinates: '
         print self.coordinates
-##------------------------------------------------------------------------------------------
-    def buttons(self,window,grid):
-        '''
-        window.resize(80,55)
-        layout = QtGui.QVBoxLayout()
-        buttons = QtGui.QDialogButtonBox(window)
-        buttons.setGeometry(QtCore.QRect(0, 0, 100, 100))
-        buttons.setOrientation(QtCore.Qt.Vertical)
-        buttons.setStandardButtons(QtGui.QDialogButtonBox.Close|QtGui.QDialogButtonBox.Ok)
-        buttons.setObjectName(("buttonBox"))
-        grid.addWidget(buttons)
-        '''
-        '''
-        # Button liver
-        button_liver = QtGui.QPushButton()
-        button_liver.setText(unicode('liver'))
-        grid.addWidget(button_liver, 1, 0)
-        window.connect(button_liver, QtCore.SIGNAL("clicked()"),(lambda y:lambda: self.callback(y) )('Stisknuto : liver'))
-        #button_liver.clicked.connect(self.liver_view)
-        button_liver.show()
-
-        # Button vein
-        button_vein = QtGui.QPushButton()
-        button_vein.setText(unicode('vein'))
-        grid.addWidget(button_vein, 2, 0)
-        window.connect(button_vein, QtCore.SIGNAL("clicked()"),(lambda y:lambda: self.callback(y) )('Stisknuto : vein'))
-        #button_vein.clicked.connect(self.vein_view)
-        button_vein.show()
-        '''
-
-        # Button plane
-        button_plane = QtGui.QPushButton()
-        button_plane.setText(unicode('plane'))
-        grid.addWidget(button_plane, 3, 0)
-        window.connect(button_plane, QtCore.SIGNAL("clicked()"),(lambda y:lambda: self.callback(y) )('Stisknuto : plane'))
-        button_plane.clicked.connect(self.Plane)
-        button_plane.show()
-
-        # Button cut
-        button_cut = QtGui.QPushButton()
-        button_cut.setText(unicode('cut'))
-        grid.addWidget(button_cut, 4, 0)
-        button_cut.clicked.connect(self.liver_cut)
-        button_cut.show()
-
-        #iren.Initialize()
-        window.show()
-        renWin.Render()
-        iren.Start()
-        # vypina okno View
-        renWin.Finalize()
 
 
 ##-----------------------------------------------------------------------------------------
-    def View(self,filename,accept):
+    def View(self,filename):
 
-        # Definice renderu, prirazeni renderovaciho okna renderu
-        self.ren = vtk.vtkRenderer()
-        renwin = self.ui.vtkWidget.GetRenderWindow()
-        self.ui.vtkWidget.GetRenderWindow().AddRenderer(self.ren)
-
-        # Nastaveni vlastniho interaktoru pro pohyb s objektem
-        self.iren.SetInteractorStyle(MyInteractorStyle())
+        # Nastaveni interaktoru pro pohyb s objektem
+        self.iren.SetInteractorStyle(vtk.vtkInteractorStyleTrackballCamera())
 
         # VTK file
         reader = vtk.vtkUnstructuredGridReader()
@@ -505,6 +488,7 @@ class Viewer(QMainWindow):
         reader.Update()
 
         # VTK surface
+        
         surface.SetInput(reader.GetOutput())
         surface.Update()
 
@@ -518,13 +502,11 @@ class Viewer(QMainWindow):
         clipMapper = vtk.vtkPolyDataMapper()
         clipMapper.SetInput(clipper.GetOutput())
 
-        backProp = vtk.vtkProperty()
-
         clipActor = vtk.vtkActor()
         clipActor.SetMapper(clipMapper)
-        clipActor.GetProperty().SetColor(1.0,0.0,0.0)
-        clipActor.SetBackfaceProperty(backProp)
 
+        '''
+    
         cutEdges = vtk.vtkCutter()
         cutEdges.SetInput(surface.GetOutput())
         cutEdges.SetCutFunction(plane)
@@ -548,9 +530,11 @@ class Viewer(QMainWindow):
         cutActor.SetMapper(cutMapper)
         cutActor.GetProperty().SetColor(1.0,0.0,0.0)
 
+        '''
         mapper = vtk.vtkDataSetMapper()
         mapper.SetInput(surface.GetOutput())
         mapper.ScalarVisibilityOff()
+        
 
 
         actor = vtk.vtkActor()
@@ -565,48 +549,33 @@ class Viewer(QMainWindow):
         #ren.AddActor(cutActor)
         self.ren.AddActor(actor)
 
-        # pri rezani se nezobrazi okno protoze iren se inicializuje pouze v buttons, nutno
-        # ho inicializovat i tady
-        if accept:
-            self.iren.Initialize()
-            #renWin.Render()
-            self.iren.Start()
-            #renWin.vtkWidget.Finalize()
+        self.iren.Initialize()
+        self.iren.Start()
+        try:
+            w2i = vtk.vtkWindowToImageFilter()
+            writer = vtk.vtkTIFFWriter()
+            w2i.SetInput(self.renWin)
+            w2i.Update()
+            writer.SetInputConnection(w2i.GetOutputPort())
+            writer.SetFileName("image.tif")
+            self.renWin.Render()
+            writer.Write()
+            self.renWin.Render()
+            self.renWin.Finalize()
+        except(AttributeError):
+            print()
+
 
 ##------------------------------------------------------------------------------------------
-
-
-class MyInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
-        def __init__(self,parent=None):
-            self.parent = parent
-            self.AddObserver("LeftButtonPressEvent",self.LeftButtonPressEvent)
-            self.AddObserver("RightButtonPressEvent",self.RightButtonPressEvent)
-
-        def LeftButtonPressEvent(self,obj,event):
-            print "Left Button pressed"
-            self.Rotate()
-            self.OnLeftButtonDown()
-
-        def RightButtonPressEvent(self,obj,event):
-            print "Right Button pressed"
-            self.Pan()
-            self.OnRightButtonDown()
-
-        e = '%prog [options]\n' + __doc__.rstrip()
-help = {
-    'in_file': 'input pkl file',
-}
-
-
 def main():
 
-    parser = argparse.ArgumentParser(description=__doc__) # 'Simple VTK Viewer')
+    parser = argparse.ArgumentParser(description='Simple VTK Viewer')
 
     parser.add_argument('-pkl','--picklefile', default=None,
                       help='File as .pkl')
     parser.add_argument('-vtk','--vtkfile', default=None,
                       help='File as .vtk')
-    parser.add_argument('-mode','--mode', default=None,
+    parser.add_argument('-mode','--mode', default='View',
                       help='Mode for construction plane of resection')
     parser.add_argument('-slab','--slab', default = 'liver',
                       help='liver or porta - view')
@@ -621,38 +590,44 @@ def main():
 
     # vytvoreni okna
 
-    viewer = Viewer(args.picklefile)
-    viewer.iren.Initialize()
-    viewer.show()
+    viewer = Viewer(args.picklefile,args.mode)
     if args.picklefile:
         if args.slab == 'porta':
-            degrad = 2
+            viewer.degrad = 2
         else:
-            degrad = 4
+            viewer.degrad = 5
         data = misc.obj_from_file(args.picklefile, filetype = 'pickle')
         viewer.data = data
         #np.squeeze([1,1,1])
 
         try:
-            mesh = viewer.generate_mesh(data['segmentation'] == data['slab'][args.slab],data['voxelsize_mm'],degrad)        
+            mesh = viewer.generate_mesh(data['segmentation'] == data['slab'][args.slab],data['voxelsize_mm'],viewer.degrad)        
         except KeyError:
             try:
-                degrad = 4
-                mesh = viewer.generate_mesh(data['segmentation'] == data['slab']['liver'],data['voxelsize_mm'],degrad)
-                viewer.info_text.appendPlainText (_fromUtf8('Data bohužel neobsahují zadanou část jater'))
-                viewer.info_text.appendPlainText (_fromUtf8('Zobrazena budou pouze dostupná data'))
                 print 'Data bohuzel neobsahuji zadany slab:', args.slab
                 print 'Zobrazena budou pouze dostupna data'
+                #degrad = 5
+                mesh = viewer.generate_mesh(data['segmentation'] == data['slab']['liver'],data['voxelsize_mm'],viewer.degrad)
+                viewer.info_text.appendPlainText (_fromUtf8('Data bohužel neobsahují zadanou část jater'))
+                viewer.info_text.appendPlainText (_fromUtf8('Zobrazena budou pouze dostupná data'))
+                
             except KeyError:
-                mesh = viewer.generate_mesh(data['segmentation'] == data['slab'][args.slab],np.squeeze([1,1,1]),degrad)
+                data['voxelsize_mm'] = np.squeeze([1,1,1])
+                mesh = viewer.generate_mesh(data['segmentation'] == data['slab'][args.slab],data['voxelsize_mm'],viewer.degrad)
 
         if args.mode == 'View' or args.mode == None:
-            accept = True
-            viewer.View(mesh,accept)
+            viewer.View(mesh)
         if args.mode == 'Cut':
-            accept = False
-            viewer.View(mesh,accept)
-            #viewer.buttons(self.ui.centralwidget,grid)
+            viewer.show()
+            viewer.View(mesh)
+
+    if args.vtkfile:
+        if args.mode == 'View' or args.mode == None:
+            viewer.View(args.vtkfile);
+        if args.mode == 'Cut':
+            viewer.show()
+            viewer.View(args.vtkfile)
+
 
     '''
     window = QtGui.QWidget()
