@@ -89,6 +89,12 @@ def split_vessel(data, seeds):
     cut_by_user = split_obj0
     return lab, cut_by_user
 
+def cut_for_3D_Viewer(data,seeds):
+    lab, cut = split_vessel(data, seeds)
+    segm, dist1, dist2 = split_organ_by_two_vessels(data, lab)
+    data = virtual_resection_visualization(data, segm, dist1, dist2, cut)
+    return data
+    
 
 def cut_editor(data, inputfile):
     #global normal,coordinates
@@ -149,9 +155,14 @@ def resection_old(data):
     #segmentation = data['segmentation']
     print ("Select cut")
 
-    print data["slab"]
+    #print data["slab"]
     #lab = cut_editor(data)#== data['slab']['porta'])
+    #data['voxelsize_mm'] = np.squeeze([1,1,1])
+    #data['segmentation'] = data['segmentation'][::degrad,::degrad,::degrad]
+    #data['data3d'] = data['data3d'][::degrad,::degrad,::degrad]
     seeds = cut_editor_old(data)
+    #seeds = np.zeros((data['segmentation'].shape[0],(data['segmentation'].shape[1]),(data['segmentation'].shape[2])))
+    #seeds[56][60][78] = 1
     lab, cut = split_vessel(data, seeds)
     segm, dist1, dist2 = split_organ_by_two_vessels(data, lab)
     data = virtual_resection_visualization(data, segm, dist1, dist2, cut)
@@ -316,7 +327,7 @@ if __name__ == "__main__":
     c = pozice[2][0]
     ds = False
     #print "vs ", data['voxelsize_mm']
-    print "vs ", data['voxelsize_mm']
+    #print "vs ", data['voxelsize_mm']
     if args.debug:
         logger.setLevel(logging.DEBUG)
     #seg = np.zeros([100,100,100])
