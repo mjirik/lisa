@@ -21,8 +21,6 @@ import dcmreaddata as dcmr
 
 class HistologyTest(unittest.TestCase):
 
-    # @TODO znovu zprovoznit test
-    @unittest.skip("Cekame, az to Tomas opravi")
 
     def test_synthetic_data_vessel_tree_evaluation(self):
         """
@@ -31,16 +29,29 @@ class HistologyTest(unittest.TestCase):
 
 
         """
-        import lesions
+        import gen_volume_tree
         expected_length = 10
         evaluated_length = 10
 
-        data = {'data':{1:{'X', 'Y'}}}
+# nacteni dat
+
+        #tvg = gen_volume_tree.TreeVolumeGenerator()
+
+        #yaml_path = os.path.join(path_to_script, "./hist_tree_test.yaml")
+        #tvg.importFromYaml(yaml_path)
 
 
+# histology analyser
 
-        self.assertGreater(evaluated_length, expected_length)
-        self.assertLess(evaluated_length, expected_length)
+        #ha = HistologyAnalyser(data3d, metadata, args.threshold)
+
+
+# histology report
+        #hr = HistologyReport()
+
+
+        self.assertGreater(evaluated_length, expected_length * 0.9  )
+        self.assertLess(evaluated_length, expected_length * 1.1 )
 
 
 
