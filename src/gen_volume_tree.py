@@ -18,6 +18,7 @@ import argparse
 import numpy as np
 import scipy.ndimage
 import datawriter
+import misc
 
 import datareader
 import py3DSeedEditor as se
@@ -167,7 +168,6 @@ class TreeVolumeGenerator:
 
 
 if __name__ == "__main__":
-    import misc
     logger = logging.getLogger()
 
     logger.setLevel(logging.WARNING)

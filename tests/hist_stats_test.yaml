@@ -1,0 +1,22 @@
+Graph:
+  1:
+    nodeA_XYZ_mm: [10, 20, 20]
+    nodeB_XYZ_mm: [30, 20, 20]
+    lengthEstimation: 20.0
+    radius_mm: 7
+  2:
+    nodeA_XYZ_mm: [30, 20, 20]
+    nodeB_XYZ_mm: [30, 50, 20]
+    lengthEstimation: 30.0
+    radius_mm: 5
+  3:
+    nodeA_XYZ_mm: [30, 20, 20]
+    nodeB_XYZ_mm: [30, 50, 50]
+    lengthEstimation: 42.4264
+    radius_mm: 4
+  4:
+    nodeA_XYZ_mm: [30, 20, 20]
+    nodeB_XYZ_mm: [60, 20, 20]
+    lengthEstimation: 30.0
+    radius_mm: 7
+

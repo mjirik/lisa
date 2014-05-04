@@ -11,6 +11,8 @@ logger = logging.getLogger(__name__)
 import argparse
 import numpy as np
 
+import misc
+
 class HistologyReport:
     def __init__(self):
         self.data = None
@@ -60,7 +62,6 @@ class HistologyReport:
 
 
 if __name__ == "__main__":
-    import misc
     logger = logging.getLogger()
 
     logger.setLevel(logging.WARNING)

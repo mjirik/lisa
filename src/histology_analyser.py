@@ -92,11 +92,11 @@ class HistologyAnalyser:
         data3d_skel = self.binar_to_skeleton(data3d_thr)
         return data3d_thr, data3d_skel
 
-    def skeleton_to_statistics(self, data3d_thr, data3d_skel):
+    def skeleton_to_statistics(self, data3d_thr, data3d_skel,showResult=True):
         skan = SkeletonAnalyser(
             data3d_skel,
             volume_data=data3d_thr,
-            voxelsize_mm=metadata['voxelsize_mm'])
+            voxelsize_mm=self.metadata['voxelsize_mm'])
         data3d_nodes_vis = skan.sklabel.copy()
 # edges
         data3d_nodes_vis[data3d_nodes_vis > 0] = 1
@@ -109,12 +109,13 @@ class HistologyAnalyser:
         #    contours=data3d_thr.astype(np.int8)
         #)
         #app.exec_()
-        pyed = se.py3DSeedEditor(
-            data3d,
-            seeds=(data3d_nodes_vis).astype(np.int8),
-            contour=data3d_thr.astype(np.int8)
-        )
-        pyed.show()
+        if showResult:
+            pyed = se.py3DSeedEditor(
+                self.data3d,
+                seeds=(data3d_nodes_vis).astype(np.int8),
+                contour=data3d_thr.astype(np.int8)
+            )
+            pyed.show()
         stats = skan.skeleton_analysis()
         self.sklabel = skan.sklabel
         #data3d_nodes[data3d_nodes==3] = 2
