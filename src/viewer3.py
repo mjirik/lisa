@@ -20,13 +20,16 @@ Mod View :
 Priklady spusteni:
 viewer3.py -pkl file.pkl -mode 'View'
 viewer3.py -vtk mesh_new.vtk -mode 'View' -slab 'liver'
-viewer3.py -pkl vessels002.pkl -mode 'View' 
+viewer3.py -pkl vessels002.pkl -mode 'View' -deg 5
 
 
 Spusti prohlizec slouzici pouze pro vizualizaci jater
 
 '''
 
+'''
+Importování potřebných knihoven a skriptů
+'''
 import sys
 import virtual_resection
 import numpy as np
@@ -46,7 +49,9 @@ import seg2fem
 
 import misc
 
-# pouzivane promenne
+'''
+Používané globální proměnné
+'''
 plane = vtk.vtkPlane()
 normal = None
 coordinates = None
@@ -59,7 +64,10 @@ widget = vtk.vtkSphereSource()
 planeWidget = vtk.vtkImplicitPlaneWidget()
 
 
-
+'''
+Kód grafického editoru resekční linie. Tento kód byl automaticky vygenerován pomocí programu Qt Designer
+'''
+##------------------------------------------------------------------------------------------
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -76,6 +84,9 @@ except AttributeError:
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
+        '''
+        Zde se vytvoří hlavní okno editoru. Nastaví se jeho velikost a název
+        '''
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
         MainWindow.resize(1000, 800)
         self.centralwidget = QtGui.QWidget(MainWindow)
@@ -83,33 +94,45 @@ class Ui_MainWindow(object):
         self.widget = QtGui.QWidget(self.centralwidget)
         self.widget.setGeometry(QtCore.QRect(370, 49, 401, 411))
         self.widget.setObjectName(_fromUtf8("widget"))
-        
+        '''
+        Vytvoření tlačítka CUT, které při stisku spouští metodu liver_cut (zvolený resekční algoritmus)
+        '''
         self.toolButton = QtGui.QPushButton(self.centralwidget)
         self.toolButton.setGeometry(QtCore.QRect(140, 140, 71, 41))
         self.toolButton.setObjectName(_fromUtf8("toolButton"))
         QtCore.QObject.connect(self.toolButton, QtCore.SIGNAL("clicked()"), MainWindow.liver_cut )
-        
+        '''
+        Vytvoření tlačítka PLANE, které při stisku volá metodu Plane  
+        '''
         self.toolButton_2 = QtGui.QPushButton(self.centralwidget)
         self.toolButton_2.setGeometry(QtCore.QRect(140, 280, 71, 41))
         self.toolButton_2.setObjectName(_fromUtf8("toolButton_2"))
         QtCore.QObject.connect(self.toolButton_2, QtCore.SIGNAL("clicked()"), MainWindow.Plane )
-
+        '''
+        Vytvoření tlačítka POINT, které při stisku volá metodu Point
+        '''
         self.toolButton_3 = QtGui.QPushButton(self.centralwidget)
         self.toolButton_3.setGeometry(QtCore.QRect(140, 210, 71, 41))
         self.toolButton_3.setObjectName(_fromUtf8("toolButton_3"))
         QtCore.QObject.connect(self.toolButton_3, QtCore.SIGNAL("clicked()"), MainWindow.Point )
-
+        '''
+        Vytvoření textového pole pro uživatelské výpisy
+        '''
         self.info_text = QtGui.QPlainTextEdit(self.centralwidget)
         self.info_text.setGeometry(QtCore.QRect(20, 350, 280, 100))
         self.info_text.setObjectName(_fromUtf8("lineEdit"))
         self.info_text.setReadOnly(True)
-
+        '''
+        Vytvoření textového pole pro výpisy informací o velikosti odstraněné části jater
+        '''
         self.liver_text = QtGui.QPlainTextEdit(self.centralwidget)
         self.liver_text.setGeometry(QtCore.QRect(380, 490, 380, 50))
         self.liver_text.setObjectName(_fromUtf8("lineEdit"))
         self.liver_text.setReadOnly(True)
         
-        
+        '''
+        Vytvoření vizualizačního okna
+        '''
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
@@ -131,33 +154,16 @@ class Ui_MainWindow(object):
         self.toolButton.setText(_translate("MainWindow", "CUT", None))
         self.toolButton_2.setText(_translate("MainWindow", "PLANE", None))
         self.toolButton_3.setText(_translate("MainWindow", "POINT", None))
-
-
+##------------------------------------------------------------------------------------------
+'''
+Hlavní třída pro vytvoření prohlížeče
+'''
 class Viewer(QMainWindow):
 
-
     '''
-    QVTKViewer(segmentation)
-    QVTKViewer(segmentation, voxelsize_mm) # zobrazí vše, co je větší než nula
-    QVTKViewer(segmentation, voxelsize_mm, slab) # umožňuje přepínat mezi více rovinami
-
-    qv = QVTKViewer(segmentation, voxelsize_mm, slab, mode='select_plane')
-    point = qv.getPlane()
-
-    #def __init__(self, inputdata, voxelsize_mm=None, slab=None, mode='view', callbackfcn=None):
-        self.inputdata = inputdata
-        self.voxelsize_mm = voxelsize_mm
-        self.slab = slab
-        self.mode = mode
-        self.callbackfcn = callbackfcn
-
-    #def __init__(self,segmentation,voxelsize_mm):
-        self.segmentation = segmentation
-        self.voxelsize_mm = voxelsize_mm
+    Konstruktor pro vytvoření objektu prohlížeče
+    Pokud je zvolen resekční režim, nejdříve se vytvoří editor resekční linie a poté se nastaví interaktor
     '''
-##------------------------------------------------------------------------------------------
-
-        
     def __init__(self, inputfile,mode,parent = None):
         self.ren = vtk.vtkRenderer()
         if mode == 'Cut':
@@ -169,66 +175,37 @@ class Viewer(QMainWindow):
             self.liver_text = self.ui.liver_text
             self.planew = None
             self.cut_point = None
-            self.oriznuti_jater = 0
             self.iren = self.ui.vtkWidget.GetRenderWindow().GetInteractor()
             self.ui.vtkWidget.GetRenderWindow().AddRenderer(self.ren)
-            
+        '''
+        Pokud je zvolen prohlížecí režim, musíme vytvořit jak renderovací okna tak samotný interaktor 
+        '''
         if mode == 'View':
             QMainWindow.__init__(self,parent)
             self.renWin = vtk.vtkRenderWindow()
             self.renWin.AddRenderer(self.ren)
             self.iren = vtk.vtkRenderWindowInteractor()
             self.iren.SetRenderWindow(self.renWin)
-            '''
-            self.setGeometry(QtCore.QRect(500, 500, 500, 500))
-            
-            self.vtkWidget = QVTKRenderWindowInteractor(self)
-            self.gridlayout = QtGui.QGridLayout(self.vtkWidget)
-            self.vtkWidget.GetRenderWindow().AddRenderer(self.ren)
-            self.iren = self.vtkWidget.GetRenderWindow().GetInteractor()
-            self.gridlayout.addWidget(self, 0, 0, 1, 1)
-            '''
-        '''
-        # Create source
-        source = vtk.vtkSphereSource()
-        widget = source
-        source.SetCenter(0, 0, 0)
-        source.SetRadius(5.0)
- 
-        # Create a mapper
-        mapper = vtk.vtkPolyDataMapper()
-        mapper.SetInputConnection(source.GetOutputPort())
- 
-        # Create an actor
-        actor = vtk.vtkActor()
-        actor.SetMapper(mapper)
- 
-        self.ren.AddActor(actor)
-        '''
 
 ##------------------------------------------------------------------------------------------
-    def set_normal(self,normal):
-        self.normal = normal
-
-    def set_coordinates(self,coordinates):
-        self.coordinates = coordinates
-##------------------------------------------------------------------------------------------
-    def generate_mesh(self,segmentation,voxelsize_mm,degrad):
-        segmentation = segmentation[::degrad,::degrad,::degrad]
-        segmentation = segmentation[:,::-1,:]
+    '''
+    Tato metoda slouží pro vygenerování vtk souboru ze segmentovaných dat. Této metodě jsou tedy
+    předána segmentovaná data společně s velikostí voxelu. 
+    '''
+    def generate_mesh(self,segmentation,voxelsize_mm):
         self.segment = segmentation
-        print self.segment.shape
-        print 'Voxelsize_mm'
-        print voxelsize_mm
         print("Generuji data...")
         self.voxelsize_mm = voxelsize_mm
-        self.new_vox = voxelsize_mm * degrad
-        print 'self_new'
-        print self.new_vox
+        '''
+        Nahrazuje původní velikost voxelu, velikostí vexoelů zvětšenou o hodnotu degradace
+        '''
+        self.new_vox = voxelsize_mm * self.degrad
+        '''
+        Zde je použita metoda ze skriptu seg2fem, která ze zadaných dat a velikosti voxelu vytvoří vtk soubor 
+        Data se před vytvořením vtk souboru ještě vyhlazují,aby měla hladší povrch
+        Výsledný soubor je uložen pod názvem mesh_new.vtk
+        '''
         mesh_data = seg2fem.gen_mesh_from_voxels_mc(self.segment, self.new_vox)
-        print 'Voxer'
-        print voxelsize_mm
-
         if True:
             for x in xrange (50):
                 mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
@@ -237,24 +214,21 @@ class Viewer(QMainWindow):
         vtk_file = "mesh_new.vtk"
         mesh_data.write(vtk_file)
         return vtk_file
-##------------------------------------------------------------------------------------------
-    '''
-    Args:
-        inputdata: 3D numpy array
-        voxelsize_mm: Array with voxel dimensions (default=None)
-        slab: Dictionary with description of labels used in inputdata
-        mode: 'view' or 'select_plane'
-        callbackfcn: function which may affect segmentation
 
-    '''
 ##------------------------------------------------------------------------------------------
+    '''
+    Tato metoda slouží pro vytvoření virtuální roviny. K tomu je využita třída z VTK vtkImlicitPlaneWidget()
+    '''
     def Plane(self):
         if(self.planew != None):
             self.info_text.appendPlainText (_fromUtf8("Nelze použít více rovin najednou. Nejdříve proveďte řez"))
         else:
             planeWidget = vtk.vtkImplicitPlaneWidget()
+            # předaní interaktoru objektu roviny
             planeWidget.SetInteractor(self.iren)
+            # nastavení velikosti prostoru ve kterém se může rovina pohybovat
             planeWidget.SetPlaceFactor(1.5)
+            # nastavení vstupních dat
             planeWidget.SetInput(surface.GetOutput())
             planeWidget.PlaceWidget()
             planeWidget.TubingOff()
@@ -266,198 +240,98 @@ class Viewer(QMainWindow):
             planeWidget.On()
             self.planew = planeWidget
             self.planew.SetNormal(2.0,0.0,0.0)
-            print self.planew.GetNormal()
-
-        #window.show()
-        #self.iren.Initialize()
-        #renWin.Render()
-        #iren.Start()
+            
 ##------------------------------------------------------------------------------------------
-
+    '''
+    Tato metoda slouží pro vytvoření virtuálního bodu. K tomu je využita třída z VTK vtkPointWidget()
+    '''
     def Point(self):
             print 'Point'
             self.cut_point = vtk.vtkPointWidget()
             self.cut_point.SetInput(surface.GetOutput())
             self.cut_point.AllOff()
             self.cut_point.PlaceWidget()
+            # nastavení interaktoru
             self.cut_point.SetInteractor(self.iren)
             self.cut_point.On()
-            print (self.cut_point.GetPosition())
             point = vtk.vtkPolyData()
             self.cut_point.GetPolyData(point);
-        #window.show()
-            self.iren.Initialize()
-        #renWin.Render()
-            self.iren.Start()
-##------------------------------------------------------------------------------------------
 
-    def callback(self,button):
-        print button
+##------------------------------------------------------------------------------------------
 
     def Cutter(self,obj, event):
         global plane, selectActor
         obj.GetPlane(plane)
 
-    def liver_view(self):
-        print('Zobrazuji liver')
-        vessel_cut.View('liver')
-
-    def vein_view(self):
-        print('Zobrazuji vein')
-        vessel_cut.View('porta')
-
+    '''
+    Tato metoda obsluhuje spouštění resekčních algoritmů. 
+    '''
     def liver_cut(self):
-        global normal
-        global coordinates
-        self.info_text.appendPlainText (_fromUtf8("Provádění řezu. Prosím čekejte"))
+        '''
+        Pokud není zvolené kriterium pro provádění resekční linie, program zahlásí chybu
+        '''
+        if (self.planew == None) & (self.cut_point == None):
+            self.info_text.appendPlainText (_fromUtf8("Neexistuje rovina řezu"))
+            self.info_text.appendPlainText (_fromUtf8('Nejdříve vytvořte rovinu(Plane), nebo bod(Point)'))
+        '''
+        Pokud je zvoleno jako resekční kritérium rovina spustí se metoda Rez_podle_roviny ze skriptu virtual_resection 
+        '''
         if self.planew != None:
-            try:
-                self.set_normal(self.planew.GetNormal())
-                self.set_coordinates(self.planew.GetOrigin())
-                self.cutter()
-                self.Rezani()
-                #print(self.normal)
-                #print(self.coordinates)
-            except AttributeError:
-                self.info_text.appendPlainText (_fromUtf8("Neexistuje rovina řezu"))
-                self.info_text.appendPlainText (_fromUtf8('Nejdříve vytvořte rovinu stisknutím tlačítka Plane'))
-                print('Neexistuje rovina rezu')
-                print('Nejdrive vytvorte rovinu stisknutim tlacitka Plane')
+            self.info_text.appendPlainText (_fromUtf8("Provádění řezu. Prosím čekejte"))
+            data_z_resekce,odstraneni_procenta = virtual_resection.Rez_podle_roviny(self.planew,self.segment,self.new_vox)
+            '''
+            Zde se provádí výpis velikosti (v procentech) odříznuté části jater do editoru pro uživatele
+            Pokud je z jater odříznuto příliš mnoho, algoritmus někdy přepočítá jejich hodnotu nad hranici sta procent, proto
+            je to zde ošetřeno podmínkou
+            '''
+            if (odstraneni_procenta > 100):
+                self.liver_text.appendPlainText(_fromUtf8("Odstraněno příliš mnoho. Nelze spočítat"))
+            else:
+                self.liver_text.appendPlainText(_fromUtf8("Bylo ostraněno cca "+str(odstraneni_procenta)+" % jater"))
+            '''
+            Zde je vypnuta vytvořená rovina, což je provedeno z toho důvodu, aby mohlo být prováděno více řezů za sebou 
+            '''
+            self.planew.Off()
+        '''
+        Pokud je zvoleno jako resekční kritérium bod spustí metoda. Tato metoda nejdříve vytvoří metici nul o stejné velikosti jako je matice
+        původních dat. V této matici je na pozici bodu, který zvolí uživatel nula naahrazena jedničkou. Celá tato matice je společně s maticí
+        původních dat předána resekčnímu algoritmu podle bodu ze skriptu virtual_resection
+        '''
         if self.cut_point != None:
-            print('Souradnice bodu')
-            print (self.cut_point.GetPosition())
+            self.info_text.appendPlainText (_fromUtf8("Provádění řezu. Prosím čekejte"))
             pozice = self.cut_point.GetPosition()
-            self.data['segmentation'] = self.data['segmentation'][::self.degrad,::self.degrad,::self.degrad]
             self.data['data3d'] = self.data['data3d'][::self.degrad,::self.degrad,::self.degrad]
-            #self.data['voxelsize_mm'] = self.voxelsize_mm
             seeds = np.zeros((self.data['segmentation'].shape[0],(self.data['segmentation'].shape[1]),(self.data['segmentation'].shape[2])))
             seeds[pozice[0]/self.new_vox[0]][pozice[1]/self.new_vox[1]][pozice[2]/self.new_vox[2]] = 1
-            print 'Seedu'
-            print seeds.shape
-            
-            self.data = virtual_resection.cut_for_3D_Viewer(self.data,seeds)
-            self.data['segmentation'] = self.data['segmentation'][::self.degrad,::self.degrad,::self.degrad]
-            print (self.data['segmentation'] == self.data['slab']['liver']).shape
-            mesh_data = seg2fem.gen_mesh_from_voxels_mc(self.data['segmentation'] == self.data['slab']['liver'], self.new_vox)
-            if True:
-                for x in xrange (15):
-                    mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
-            print("Done")
-            vtk_file = "mesh_new.vtk"
-            mesh_data.write(vtk_file)
+            self.data = virtual_resection.Resekce_podle_bodu(self.data,seeds)
+            data_z_resekce = self.data['segmentation'] == self.data['slab']['liver']
             self.cut_point.Off()
-            #self.cut_point = None
-            self.View(vtk_file)
-
-##------------------------------------------------------------------------------------------
-    def Rez(self,a,b,c,d):
-        mensi = 0
-        vetsi = 0
-        mensi_objekt = 0
-        vetsi_objekt = 0
-        print 'x: ',a,' y: ',b,' z: ',c
-        print('Pocitani rezu...')
-        data = self.segment
-        prava_strana = np.ones((data.shape[0],data.shape[1],data.shape[2]))
-        leva_strana = np.ones((data.shape[0],data.shape[1],data.shape[2]))
-        dimension = data.shape
-        for x in range(dimension[0]):
-            for y in range(dimension[1]):
-                for z in range(dimension[2]):
-                    rovnice = a*x + b*y + c*z + d
-                    #print self.data['segmentation'][x][y][z]
-                    #pdb.set_trace()
-                    if((rovnice) <= 0):
-                        mensi = mensi+1
-                        if(data[x][y][z] == 1):
-                            mensi_objekt = mensi_objekt+1
-                        prava_strana[x][y][z] = 0
-                    else:
-                        vetsi = vetsi+1
-                        if(data[x][y][z] == 1):
-                            vetsi_objekt = vetsi_objekt+1
-                        leva_strana[x][y][z] = 0
-                        #self.data['segmentation'][x][y][z] = False
-        prava_strana = prava_strana * data
-        objekt = mensi_objekt + vetsi_objekt
-        procenta = ((100*mensi_objekt)/objekt)
-        self.oriznuti_jater += procenta
-        if (self.oriznuti_jater > 100):
-            self.liver_text.appendPlainText(_fromUtf8("Odstraněno příliš mnoho. Nelze spočítat"))
-        else:
-            self.liver_text.appendPlainText(_fromUtf8("Bylo ostraněno cca "+str(self.oriznuti_jater)+" % jater"))
-            
-        print 'Mensi: ',mensi
-        print 'Vetsi: ',vetsi
-        print 'Mensi_objekt: ',mensi_objekt
-        print 'Vetsi_objekt: ',vetsi_objekt
-        print("Generuji data...")
-        mesh_data = seg2fem.gen_mesh_from_voxels_mc(prava_strana, self.new_vox)
-        
+        '''
+        Následně je vytvořen soubor VTK obsahující část jater, bez uříznuté části. 
+        '''
+        mesh_data = seg2fem.gen_mesh_from_voxels_mc(data_z_resekce, self.new_vox)
         if True:
             for x in xrange (15):
                 mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
         print("Done")
+        self.planew = None
+        self.cut_point = None
         vtk_file = "mesh_new.vtk"
         mesh_data.write(vtk_file)
-        self.planew.Off()
-        self.planew = None
         self.View(vtk_file)
-                
+
+
 ##------------------------------------------------------------------------------------------
-    def Rezani(self):
-        # vzorec roviny ax + by + cz + d = 0;
-
-        a = self.normal[0]*self.new_vox[0]
-        b = self.normal[1]*self.new_vox[1]
-        c = self.normal[2]*self.new_vox[2]
-        xx = self.coordinates[0]/self.new_vox[0]
-        yy = self.coordinates[1]/self.new_vox[1]
-        zz = self.coordinates[2]/self.new_vox[2]
-
-        '''
-        a = self.normal[0]
-        b = self.normal[1]
-        c = self.normal[2]
-        xx = self.coordinates[0]
-        yy = self.coordinates[1]
-        zz = self.coordinates[2]
-
-        '''
-
-        
-        d = -(a*xx)-(b*yy)-(c*zz)
-        print d
-        self.Rez(a,b,c,d)
-
-        '''
-        print('Generuji rez')
-        
-        with open('mesh_new.vtk') as f:
-            for line in f:
-                if(pocet >=2):
-                    break
-                try:
-                    bod = map(float, line.split())
-                    if(bod) == []:
-                        pocet = pocet+1
-                        continue
-                    self.Rovina(bod[0],bod[1],bod[2],d)
-                except(ValueError):
-                    continue
-        '''
-
-        
-##------------------------------------------------------------------------------------------
+    '''
+    Tato metoda slouží pro práci s editorem a prohlížečem v jiném programu bez použítí příkazové řádky (Zatím ve zkušebním provozu, ještě není plně funkční!)
+    '''
     def prohlizej(self,data, mode, slab=None):
-        self.iren.Initialize()
-        self.show()
-        
+
         if slab == 'liver':
-            degrad = 4
+            self.degrad = 5
         else:
-            degrad = 2
-        mesh = self.generate_mesh(data['segmentation'] == data['slab'][slab],data['voxelsize_mm'],degrad)
+            self.degrad = 5
+        mesh = self.generate_mesh(data['segmentation'] == data['slab'][slab],data['voxelsize_mm'])
         #if mode == 'View' or mode == None:
         #if mode == 'Cut':
         self.View(mesh)
@@ -468,35 +342,40 @@ class Viewer(QMainWindow):
 
         return self
 
-##------------------------------------------------------------------------------------------
-    def cutter(self):
-        print 'Normal: '
-        print self.normal
-        print 'Coordinates: '
-        print self.coordinates
-
 
 ##-----------------------------------------------------------------------------------------
+    '''
+    Tato metoda slouží pro vizualizaci dat pomocí knihoven a tříd z VTK
+    '''
+    
     def View(self,filename):
 
-        # Nastaveni interaktoru pro pohyb s objektem
+        '''
+        Nastavení interaktoru pro pohyb s objektem. Třída vtkInteractorStyleTrackballCamera(), nám umožní nastavit na levé tlačítko
+        myši funkce pohybu s vizualizovaným objektem a na pravé možnost zoomu
+        '''
         self.iren.SetInteractorStyle(vtk.vtkInteractorStyleTrackballCamera())
 
-        # VTK file
+        '''
+        Nastavení readeru pro čtení vtk souboru v podobě nestrukturované mřížky
+        '''
         reader = vtk.vtkUnstructuredGridReader()
         reader.SetFileName(filename)
         reader.Update()
 
-        # VTK surface
-        
+        '''
+        Jako filtr je použit objekt třídy vtkDataSetSurfaceFilter(), který nám z dat vyextrahuje vnější povrch
+        '''
         surface.SetInput(reader.GetOutput())
         surface.Update()
 
-        # Cutter
+        '''
+        Dále použijeme třídu vtkClipPolyData(), ta nám při pohybu roviny způsobí, že za ní bude nechávat pouze obrysy spojení
+        buněk bez vyplnění povrchu, tím snadno poznáme kde jsme s rovinou po objektu již přejeli a kde ne
+        '''
         clipper = vtk.vtkClipPolyData()
         clipper.SetInput(surface.GetOutput())
         clipper.SetClipFunction(plane)
-        #clipper.GenerateClipScalarsOn()
         clipper.GenerateClippedOutputOn()
 
         clipMapper = vtk.vtkPolyDataMapper()
@@ -505,52 +384,25 @@ class Viewer(QMainWindow):
         clipActor = vtk.vtkActor()
         clipActor.SetMapper(clipMapper)
 
-        '''
-    
-        cutEdges = vtk.vtkCutter()
-        cutEdges.SetInput(surface.GetOutput())
-        cutEdges.SetCutFunction(plane)
-        cutEdges.GenerateCutScalarsOn()
-
-        cutStrips = vtk.vtkStripper()
-        cutStrips.SetInput(cutEdges.GetOutput())
-        cutStrips.Update()
-
-        cutPoly = vtk.vtkPolyData()
-        cutPoly.SetPoints(cutStrips.GetOutput().GetPoints())
-        cutPoly.SetPolys(cutStrips.GetOutput().GetLines())
-
-        cutTriangles = vtk.vtkTriangleFilter()
-        cutTriangles.SetInput(cutPoly)
-
-        cutMapper = vtk.vtkPolyDataMapper()
-        cutMapper.SetInput(cutTriangles.GetOutput())
-
-        cutActor = vtk.vtkActor()
-        cutActor.SetMapper(cutMapper)
-        cutActor.GetProperty().SetColor(1.0,0.0,0.0)
-
-        '''
         mapper = vtk.vtkDataSetMapper()
         mapper.SetInput(surface.GetOutput())
-        mapper.ScalarVisibilityOff()
+
+
         
-
-
         actor = vtk.vtkActor()
         actor.SetMapper(mapper)
         actor.GetProperty().EdgeVisibilityOn()
-        # nastavi barvu linek UnstructuredGrid
-        actor.GetProperty().SetColor(0.0,0.0,1.0)
-        #sirka linek u objektu
+        # nastavuje šířku linek ohraničující buňky
         actor.GetProperty().SetLineWidth(0.1)
         actor.GetProperty().SetRepresentationToWireframe()
         self.ren.AddActor(clipActor)
-        #ren.AddActor(cutActor)
         self.ren.AddActor(actor)
 
         self.iren.Initialize()
         self.iren.Start()
+        '''
+        Třídu vtkWindowToImageFilter použijeme pro uložení vizualizace z prohlížecího režimu ve formátu tif
+        '''
         try:
             w2i = vtk.vtkWindowToImageFilter()
             writer = vtk.vtkTIFFWriter()
@@ -568,119 +420,99 @@ class Viewer(QMainWindow):
 
 ##------------------------------------------------------------------------------------------
 def main():
-
+    '''
+    Parser slouží pro zadávání vstupních parametrů přes příkazovou řádku. Je možné zadat celkem 6 parametrů.
+    K čemu jednotlivé parametry slouží, se můžeme dočíst při zadání příkazu (viewer3.py --help) do příkazové řádky
+    '''
+    
     parser = argparse.ArgumentParser(description='Simple VTK Viewer')
 
     parser.add_argument('-pkl','--picklefile', default=None,
-                      help='File as .pkl')
+                      help='Zadání vstupního zdroje dat. Soubor .pkl jsou zpravidla segmentovaná data')
     parser.add_argument('-vtk','--vtkfile', default=None,
-                      help='File as .vtk')
+                      help='Zadání vstupního zdroje dat. Soubor .vtk je soubor vygenerovaný programem VTK')
     parser.add_argument('-mode','--mode', default='View',
-                      help='Mode for construction plane of resection')
+                      help='Zadání resekčního, nebo zobrazovacího režimu')
     parser.add_argument('-slab','--slab', default = 'liver',
-                      help='liver or porta - view')
+                      help='Zde zadáváme zda chceme zobrazit játra, nebo portální žílu')
     parser.add_argument('-vs','--voxelsize_mm', default = [1,1,1],
                       type=eval,
                       help='Viewer_size')
+    parser.add_argument('-deg','--degradace', default = None, type=int,
+                      help='Hodnota degradace (snizeni poctu dat)')
+
     args = parser.parse_args()
 
+    '''
+    Pokud programu nezadáme data vyhlásí chybu, že nemá data
+    '''
     if (args.picklefile or args.vtkfile) is None:
        raise IOError('No input data!')
 
-
-    # vytvoreni okna
-
-    viewer = Viewer(args.picklefile,args.mode)
+    '''
+    Zde se program větví na dvě možnosti podle toho, jaký druh zdroje dat jsme zvolili
+    Pokud jsme zvolili jako zdroj dat pickle soubor (segmentovaná data) vytvoří se objekt
+    prohlížeče (Viewer) a předá se mu tento zdro, společně s informací zda chceme program
+    spustit v resekčním, nebo prohlížecím režimu.
+    '''
     if args.picklefile:
-        if args.slab == 'porta':
-            viewer.degrad = 2
-        else:
-            viewer.degrad = 5
+        viewer = Viewer(args.picklefile,args.mode)
         data = misc.obj_from_file(args.picklefile, filetype = 'pickle')
-        viewer.data = data
-        #np.squeeze([1,1,1])
 
+        '''
+        Zde programu zadáme hodnotu degradace (pokud není změněna parametrem deg) 
+        '''
+        if (args.slab == 'porta') &  (args.degradace is None):
+            viewer.degrad = 2
+        if (args.slab == 'liver') &  (args.degradace is None):
+            viewer.degrad = 4
+        if args.degradace != None:
+            viewer.degrad = args.degradace
+
+        '''
+        Data jsou zmenšována degradací v každém rozměru
+        '''
+        viewer.data = data
+        viewer.data['segmentation'] = viewer.data['segmentation'][::viewer.degrad,::viewer.degrad,::viewer.degrad]
+        viewer.data['segmentation'] = viewer.data['segmentation'][:,::-1,:]
+        '''
+        Pokud data neobsahují portální žílu je zahlášena chyba a program dále pracuje s celými játry 
+        '''
         try:
-            mesh = viewer.generate_mesh(data['segmentation'] == data['slab'][args.slab],data['voxelsize_mm'],viewer.degrad)        
+            mesh = viewer.generate_mesh(viewer.data['segmentation'] == viewer.data['slab'][args.slab],viewer.data['voxelsize_mm'])        
         except KeyError:
             try:
                 print 'Data bohuzel neobsahuji zadany slab:', args.slab
                 print 'Zobrazena budou pouze dostupna data'
-                #degrad = 5
-                mesh = viewer.generate_mesh(data['segmentation'] == data['slab']['liver'],data['voxelsize_mm'],viewer.degrad)
                 viewer.info_text.appendPlainText (_fromUtf8('Data bohužel neobsahují zadanou část jater'))
                 viewer.info_text.appendPlainText (_fromUtf8('Zobrazena budou pouze dostupná data'))
-                
+                mesh = viewer.generate_mesh(viewer.data['segmentation'] == viewer.data['slab']['liver'],viewer.data['voxelsize_mm'])
+                '''
+                Pokud data navíc neobsahují parametr rozměr voxelu (velmi vyjímečná záležitost) jsou programu předány jednotkové
+                rozměry voxelu (1,1,1)
+                '''
             except KeyError:
                 data['voxelsize_mm'] = np.squeeze([1,1,1])
-                mesh = viewer.generate_mesh(data['segmentation'] == data['slab'][args.slab],data['voxelsize_mm'],viewer.degrad)
+                mesh = viewer.generate_mesh(viewer.data['segmentation'] == viewer.data['slab'][args.slab],viewer.data['voxelsize_mm'])
 
-        if args.mode == 'View' or args.mode == None:
-            viewer.View(mesh)
+        '''
+        Pokud je zadán mód Cut(prohlížecí režim) nejdříve zobrazíme editor, abychom mohli začít vypisovat
+        informace pro uživatele
+        '''
         if args.mode == 'Cut':
             viewer.show()
-            viewer.View(mesh)
-
-    if args.vtkfile:
-        if args.mode == 'View' or args.mode == None:
-            viewer.View(args.vtkfile);
-        if args.mode == 'Cut':
-            viewer.show()
-            viewer.View(args.vtkfile)
-
+        viewer.View(mesh)
 
     '''
-    window = QtGui.QWidget()
-    grid = QtGui.QGridLayout()
-    window.setWindowTitle("3D liver")
-    window.setLayout(grid)
-    
-    window.setWindowTitle("3D liver")
-    window.setLayout(grid)
-    
-    viewer = Viewer(args.picklefile)
-    accept = False
-    #print args.voxelsize_mm
-    if args.picklefile:
-        data = misc.obj_from_file(args.picklefile, filetype = 'pickle')
-        print np.where(data['segmentation'] == 1)
-        #print "unique ", np.unique(data['segmentation'])
-        #print 'voxel' , data['voxelsize_mm']
-        #data['voxelsize_mm'] = [1,1,1]
-        viewer.data = data
-        #np.squeeze([1,1,1])
-        print data['segmentation']
-        print (data['segmentation'] == data['slab'][args.slab]).shape
-        try:
-            mesh = viewer.generate_mesh(data['segmentation'] == data['slab'][args.slab],data['voxelsize_mm'])
-        except KeyError:
-            print 'Data bohuzel neobsahuji zadany slab:', args.slab
-            print 'Zobrazena budou pouze dostupna data'
-            mesh = viewer.generate_mesh(data['segmentation'] == data['slab']['liver'],np.squeeze([1,1,1]))
-        print data['slab']
-        if args.mode == 'View' or args.mode == None:
-            accept = True
-            viewer.View(mesh,accept)
-        if args.mode == 'Cut':
-            #viewer = QVTKViewer(data['segmentation'], data['voxelsize_mm'], data['slab'])
-            accept = False
-            viewer.Set_voxel_size()
-            viewer.View(mesh,accept)
-            viewer.buttons(window,grid)
-            #viewer.Rez()
-
+    Pokud je zadán jako vstupní zdroj dat soubor vtk. Je vytvořen objekt prohlížeče(Viewer) a je mu předán vstupní soubor
+    společně se zvoleným módem
+    '''
     if args.vtkfile:
-        if args.mode == 'View' or args.mode == None:
-            accept = True
-            viewer.View(args.vtkfile,accept);
+        viewer = Viewer(args.vtkfile,args.mode)
         if args.mode == 'Cut':
-            accept = False
-            #viewer = QVTKViewer(data['segmentation'], data['voxelsize_mm'], data['slab'])
-            viewer.Set_voxel_size()
-            viewer.View(args.vtkfile,accept)
-            viewer.buttons(window,grid)
-            #viewer.Rezani();
-'''
+            viewer.show()
+        viewer.View(args.vtkfile)
+
     viewer.iren.Initialize()
     app.exec_()
     sys.exit(app.exec_())
