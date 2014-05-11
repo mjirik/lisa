@@ -15,17 +15,17 @@ logger = logging.getLogger(__name__)
 
 import numpy as np
 import scipy.ndimage
-#import seg2fem
-#import vtk
+import seg2fem
+import vtk
 import argparse
 
 
-#from PyQt4 import QtCore, QtGui
-#from PyQt4.QtGui import *
-#from PyQt4.QtCore import Qt
-#from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
-#     QGridLayout, QLabel, QPushButton, QFrame, QFileDialog,\
-#     QFont, QInputDialog, QComboBox, QRadioButton, QButtonGroup
+from PyQt4 import QtCore, QtGui
+from PyQt4.QtGui import *
+from PyQt4.QtCore import Qt
+from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
+     QGridLayout, QLabel, QPushButton, QFrame, QFileDialog,\
+     QFont, QInputDialog, QComboBox, QRadioButton, QButtonGroup
 
 # ----------------- my scripts --------
 import misc
@@ -34,13 +34,57 @@ import py3DSeedEditor
 import qmisc
 
 # @TODO ošetřit modul viewer viz issue #69
-#import viewer3
+import viewer3
 
 
-normal = 0
-coordinates = None
+
+def Rez_podle_roviny(plane,data,voxel):
+
+    a = plane.GetNormal()[0]*voxel[0]
+    b = plane.GetNormal()[1]*voxel[1]
+    c = plane.GetNormal()[2]*voxel[2]
+    xx = plane.GetOrigin()[0]/voxel[0]
+    yy = plane.GetOrigin()[1]/voxel[1]
+    zz = plane.GetOrigin()[2]/voxel[2]
+    d = -(a*xx)-(b*yy)-(c*zz)
+    mensi = 0
+    vetsi = 0
+    mensi_objekt = 0
+    vetsi_objekt = 0
+    print 'x: ',a,' y: ',b,' z: ',c
+    print('Pocitani rezu...')
+    prava_strana = np.ones((data.shape[0],data.shape[1],data.shape[2]))
+    leva_strana = np.ones((data.shape[0],data.shape[1],data.shape[2]))
+    dimension = data.shape
+    for x in range(dimension[0]):
+        for y in range(dimension[1]):
+            for z in range(dimension[2]):
+                rovnice = a*x + b*y + c*z + d
+                if((rovnice) <= 0):
+                    mensi = mensi+1
+                    if(data[x][y][z] == 1):
+                        mensi_objekt = mensi_objekt+1
+                    leva_strana[x][y][z] = 0
+                else:
+                    vetsi = vetsi+1
+                    if(data[x][y][z] == 1):
+                        vetsi_objekt = vetsi_objekt+1
+                    prava_strana[x][y][z] = 0
+    leva_strana = leva_strana * data
+    objekt = mensi_objekt + vetsi_objekt
+    odstraneni_procenta = ((100*mensi_objekt)/objekt)
+    print leva_strana
+
+    return leva_strana, odstraneni_procenta
 
 
+
+
+
+
+
+
+#---------------------------------------------------------------
 def cut_editor_old(data):
 
     pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
@@ -89,7 +133,7 @@ def split_vessel(data, seeds):
     cut_by_user = split_obj0
     return lab, cut_by_user
 
-def cut_for_3D_Viewer(data,seeds):
+def Resekce_podle_bodu(data,seeds):
     lab, cut = split_vessel(data, seeds)
     segm, dist1, dist2 = split_organ_by_two_vessels(data, lab)
     data = virtual_resection_visualization(data, segm, dist1, dist2, cut)
@@ -98,7 +142,7 @@ def cut_for_3D_Viewer(data,seeds):
 
 def cut_editor(data, inputfile):
     #global normal,coordinates
-    viewer = viewer3.Viewer(inputfile)
+    viewer = viewer3.Viewer(inputfile,'View')
     # zobrazovani jater v kodu
     viewer.prohlizej(data, 'View', 'liver')
 
@@ -304,10 +348,8 @@ if __name__ == "__main__":
 
     # input parser
     parser = argparse.ArgumentParser(description='Segment vessels from liver')
-    parser.add_argument('-i', '--inputfile',
+    parser.add_argument('-pkl', '--picklefile',
             help='input file from organ_segmentation')
-    parser.add_argument('-ii', '--defaultinputfile',  action='store_true',
-            help='"organ.pkl" as input file from organ_segmentation')
     parser.add_argument('-oe', '--use_old_editor',  action='store_true',
             help='use an old editor for vessel cut')
     parser.add_argument('-o', '--outputfile',  default=None,
@@ -318,8 +360,11 @@ if __name__ == "__main__":
             help='Debug mode')
     args = parser.parse_args()
 
+    if (args.picklefile or args.vtkfile) is None:
+       raise IOError('No input data!')
 
-    data = misc.obj_from_file(args.inputfile, filetype = 'pickle')
+
+    data = misc.obj_from_file(args.picklefile, filetype = 'pickle')
     ds = data['segmentation'] == data['slab']['liver']
     pozice = np.where(ds == 1)
     a = pozice[0][0]
@@ -344,7 +389,7 @@ if __name__ == "__main__":
     if args.use_old_editor:
         resection(data,name, use_old_editor=args.use_old_editor)
     else:
-        cut_editor(data,args.inputfile)
+        cut_editor(data,args.picklefile)
     #print normal
     #print coordinates
 
@@ -353,9 +398,6 @@ if __name__ == "__main__":
     defaultoutputfile =  "05-resection.pkl"
     if args.defaultoutputfile:
         args.outputfile = defaultoutputfile
-
-    if args.defaultinputfile:
-        args.inputfile = "out"
 
     if args.outputfile == None:
 
