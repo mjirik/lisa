@@ -238,7 +238,7 @@ def read_data_orig_and_seg(inputdata, i):
 
 
 def experiment(path_to_yaml, list_of_feature_fcn, list_of_classifiers,
-               tile_shape, visualization=False, test=False):
+               tile_shape, visualization=False, train=False):
 
     inputdata = misc.obj_from_file(path_to_yaml, filetype='yaml')
 
@@ -275,27 +275,27 @@ def experiment(path_to_yaml, list_of_feature_fcn, list_of_classifiers,
                                          feature_fcn)
             cidxs, features_t, seg_cover_t = fv_t
 
-            labels_train_lin_float = np.array(seg_cover_t)
-            labels_train_lin = labels_train_lin_float > 0.5
+            if(train == True):
+              labels_train_lin_float = np.array(seg_cover_t)
+              labels_train_lin = labels_train_lin_float > 0.5
 
             #from sklearn import svm
             #clf = svm.SVC()
-						if(test == True)
-              clf = fpc[1]()
-              clf.fit(features_t, labels_train_lin)
-              labels_lin = clf.predict(features_t)
+            clf = fpc[1]()
+            clf.fit(features_t, labels_train_lin)
+            labels_lin = clf.predict(features_t)
 
-              d_shp = data3d_orig.shape
+            d_shp = data3d_orig.shape
 
-              labels = arrange_to_tiled_data(cidxs, tile_shape, d_shp,
+            labels = arrange_to_tiled_data(cidxs, tile_shape, d_shp,
                                            labels_lin)
               #ltl = (labels_train_lin_float * 10).astype(np.int8)
               #labels_train = arrange_to_tiled_data(cidxs, tile_shape,
               #                                     d_shp, ltl)
 
               #pyed = py3DSeedEditor.py3DSeedEditor(labels_train, contour=labels)
-              pyed = py3DSeedEditor.py3DSeedEditor(data3d_seg, contour=labels)
-              pyed.show()
+            pyed = py3DSeedEditor.py3DSeedEditor(data3d_seg, contour=labels)
+            pyed.show()
             fv_tiles.insert(i, fv_t)
 
         result = {'params': str(fpc), 'fvall': fvall}
@@ -326,7 +326,7 @@ def main():
                         default="20130919_liver_statistics.yaml")
     parser.add_argument('-o', '--output', help='output file',
                         default="20130919_liver_statistics_results.pkl")
-		parser.add_argument('-t', '--test', help='Testing', default=False)
+		parser.add_argument('-t', '--train', help='Training', default=False)
     args = parser.parse_args()
 
     if args.sampleInput:
@@ -343,7 +343,7 @@ def main():
     tile_shape = [1, 100, 100]
     result = experiment(path_to_yaml, list_of_feature_fcn, list_of_classifiers,
                         tile_shape=tile_shape,
-                        visualization=args.visualization, test=args.test)
+                        visualization=args.visualization, train=args.train)
 
 # Ukládání výsledku do souboru
     output_file = os.path.join(path_to_script, args.output)
