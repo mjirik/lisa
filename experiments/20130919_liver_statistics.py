@@ -161,7 +161,7 @@ def cut_tile(data3d, cindex, tile_shape):
     """ Function is similar to experiments.getArea(). """
 
     upper_corner = cindex + np.array(tile_shape)
-    print cindex, "    tile shaoe ", tile_shape, ' uc ', upper_corner,\
+    print cindex, "    tile shape ", tile_shape, ' uc ', upper_corner,\
         ' dsh ', data3d.shape
 
     return data3d[cindex[0]:upper_corner[0],
@@ -238,7 +238,7 @@ def read_data_orig_and_seg(inputdata, i):
 
 
 def experiment(path_to_yaml, list_of_feature_fcn, list_of_classifiers,
-               tile_shape, visualization=False):
+               tile_shape, visualization=False, test=False):
 
     inputdata = misc.obj_from_file(path_to_yaml, filetype='yaml')
 
@@ -280,21 +280,22 @@ def experiment(path_to_yaml, list_of_feature_fcn, list_of_classifiers,
 
             #from sklearn import svm
             #clf = svm.SVC()
-            clf = fpc[1]()
-            clf.fit(features_t, labels_train_lin)
-            labels_lin = clf.predict(features_t)
+						if(test == True)
+              clf = fpc[1]()
+              clf.fit(features_t, labels_train_lin)
+              labels_lin = clf.predict(features_t)
 
-            d_shp = data3d_orig.shape
+              d_shp = data3d_orig.shape
 
-            labels = arrange_to_tiled_data(cidxs, tile_shape, d_shp,
+              labels = arrange_to_tiled_data(cidxs, tile_shape, d_shp,
                                            labels_lin)
-            #ltl = (labels_train_lin_float * 10).astype(np.int8)
-            #labels_train = arrange_to_tiled_data(cidxs, tile_shape,
-            #                                     d_shp, ltl)
+              #ltl = (labels_train_lin_float * 10).astype(np.int8)
+              #labels_train = arrange_to_tiled_data(cidxs, tile_shape,
+              #                                     d_shp, ltl)
 
-            #pyed = py3DSeedEditor.py3DSeedEditor(labels_train, contour=labels)
-            pyed = py3DSeedEditor.py3DSeedEditor(data3d_seg, contour=labels)
-            pyed.show()
+              #pyed = py3DSeedEditor.py3DSeedEditor(labels_train, contour=labels)
+              pyed = py3DSeedEditor.py3DSeedEditor(data3d_seg, contour=labels)
+              pyed.show()
             fv_tiles.insert(i, fv_t)
 
         result = {'params': str(fpc), 'fvall': fvall}
@@ -325,6 +326,7 @@ def main():
                         default="20130919_liver_statistics.yaml")
     parser.add_argument('-o', '--output', help='output file',
                         default="20130919_liver_statistics_results.pkl")
+		parser.add_argument('-t', '--test', help='Testing', default=False)
     args = parser.parse_args()
 
     if args.sampleInput:
@@ -341,7 +343,7 @@ def main():
     tile_shape = [1, 100, 100]
     result = experiment(path_to_yaml, list_of_feature_fcn, list_of_classifiers,
                         tile_shape=tile_shape,
-                        visualization=args.visualization)
+                        visualization=args.visualization, test=args.test)
 
 # Ukládání výsledku do souboru
     output_file = os.path.join(path_to_script, args.output)
