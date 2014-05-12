@@ -90,13 +90,6 @@ Problems on Linux:
 Install Mac OS
 ==============
 
-
- * GIT
- 
-    Use mac installer  (http://git-scm.com/download/mac)
-    There is a need to allow install applications from unknown developers
-    (Settings - Security & Privacy - General - Allow applications downloaded from)
-
  * Xcode, gcc and make
 
     Install Xcode from appstore. You will need an AppleID.
@@ -107,12 +100,24 @@ Install Mac OS
     * Click "Components".
     * Click "Install" on the command line tools line.
 
+
  * MacPorts
 
     Use standard pkg package. (http://www.macports.org/install.php)
-    Tested on Mountain Lion installer 
-    (https://distfiles.macports.org/MacPorts/MacPorts-2.2.1-10.8-MountainLion.pkg
+    
+    Tested on [OS X 10.8 Mountain Lion installer](https://distfiles.macports.org/MacPorts/MacPorts-2.2.1-10.8-MountainLion.pkg)
+    and [OSX 10.9 Mavericks installer](https://distfiles.macports.org/MacPorts/MacPorts-2.2.1-10.9-Mavericks.pkg)
 
+
+ * GIT
+
+    Use mac ports
+
+        sudo port install git-core +svn +doc +bash_completion +gitweb
+
+    Use mac installer  (http://git-scm.com/download/mac)
+    There is a need to allow install applications from unknown developers
+    (Settings - Security & Privacy - General - Allow applications downloaded from)
 
  * Numpy, Scipy, ...
 
@@ -153,8 +158,9 @@ Install Windows
 
 
 * Python XY (http://code.google.com/p/pythonxy/)
-    
+
     Add all packages.
+
 * Git (http://www.git-scm.com/download/win)
 
     Select "Run Git from the Windows Command Prompt" or "Run Git and included Unix tools from the Windows Command Prompt"
