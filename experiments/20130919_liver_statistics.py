@@ -87,7 +87,17 @@ def lbp(data3d_orig, data3d_seg, visualization=True):
     lbpRef = np.zeros([1, 256])
     lbpRef = real_lib.realTimeLbpImNp(realLbp, data3d_orig[:, :, 1])
     return lbpRef
-
+    
+def lbp3d(data3d_orig, data3d_seg, visualization=True):
+    import lbpLibrary3d as lbp3d
+    lib3d = lbp3d.loadLibrary()
+   	f = open(filename, 'r')
+    maskJSON = json.load(f)    
+    mask['maskCoef'] = maskJSON['mask']['coefs']
+    mask['center'] = maskJSON['mask']['center']	
+    mask['mask'] = coordToPoints(maskJSON['mask']['coordx'],maskJSON['mask']['coordy'],maskJSON['mask']['coordz'], data3d_orig.shape[2], data3d_orig.shape[1]) 	 
+    res = lbp3d.compute(lib3d, data3d_orig, maskJSON['mask']['pointsNum'], mask, maskJSON['mask']['size'][0])
+    return 
 
 def get_features(data3d_orig, data3d_seg, feature_fcn, visualization=True):
     u"""
