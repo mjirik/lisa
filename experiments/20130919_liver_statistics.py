@@ -87,17 +87,29 @@ def lbp(data3d_orig, data3d_seg, visualization=True):
     lbpRef = np.zeros([1, 256])
     lbpRef = real_lib.realTimeLbpImNp(realLbp, data3d_orig[:, :, 1])
     return lbpRef
-    
+
+
 def lbp3d(data3d_orig, data3d_seg, visualization=True):
     import lbpLibrary3d as lbp3d
     lib3d = lbp3d.loadLibrary()
-   	f = open(filename, 'r')
-    maskJSON = json.load(f)    
+    f = open(filename, 'r')
+    maskJSON = json.load(f)
     mask['maskCoef'] = maskJSON['mask']['coefs']
-    mask['center'] = maskJSON['mask']['center']	
-    mask['mask'] = coordToPoints(maskJSON['mask']['coordx'],maskJSON['mask']['coordy'],maskJSON['mask']['coordz'], data3d_orig.shape[2], data3d_orig.shape[1]) 	 
-    res = lbp3d.compute(lib3d, data3d_orig, maskJSON['mask']['pointsNum'], mask, maskJSON['mask']['size'][0])
-    return 
+    mask['center'] = maskJSON['mask']['center']
+    mask['mask'] = coordToPoints(
+        maskJSON['mask']['coordx'],
+        maskJSON['mask']['coordy'],
+        maskJSON['mask']['coordz'],
+        data3d_orig.shape[2],
+        data3d_orig.shape[1])
+    res = lbp3d.compute(
+        lib3d,
+        data3d_orig,
+        maskJSON['mask']['pointsNum'],
+        mask,
+        maskJSON['mask']['size'][0])
+    return
+
 
 def get_features(data3d_orig, data3d_seg, feature_fcn, visualization=True):
     u"""
@@ -247,6 +259,60 @@ def read_data_orig_and_seg(inputdata, i):
     return data3d_orig, data3d_seg
 
 
+def one_experiment_setting_for_whole_dataset(inputdata, tile_shape,
+                                             feature_fcn, classif_fcn, train,
+                                             visualization=False):
+    fvall = []
+    fv_tiles = []
+    indata_len = len(inputdata['data'])
+    indata_len = 3
+
+    for i in range(0, indata_len):
+        data3d_orig, data3d_seg = read_data_orig_and_seg(inputdata, i)
+
+        if visualization:
+            pyed = py3DSeedEditor.py3DSeedEditor(data3d_orig,
+                                                 contour=data3d_seg)
+            pyed.show()
+            #import pdb; pdb.set_trace()
+        #fvall.insert(i, get_features(
+        #    data3d_orig,
+        #    data3d_seg,
+        #    visualization=args.visualization
+        #    ))
+        #feature_fcn = feat_hist
+        fv_t = get_features_in_tiles(data3d_orig, data3d_seg, tile_shape,
+                                     feature_fcn)
+        cidxs, features_t, seg_cover_t = fv_t
+
+        if train is True:
+            labels_train_lin_float = np.array(seg_cover_t)
+            labels_train_lin = labels_train_lin_float > 0.5
+
+        #from sklearn import svm
+        #clf = svm.SVC()
+
+        clf = classif_fcn()
+        clf.fit(features_t, labels_train_lin)
+        labels_lin = clf.predict(features_t)
+
+        d_shp = data3d_orig.shape
+
+        labels = arrange_to_tiled_data(cidxs, tile_shape, d_shp,
+                                        labels_lin)
+            #ltl = (labels_train_lin_float * 10).astype(np.int8)
+            #labels_train = arrange_to_tiled_data(cidxs, tile_shape,
+            #                                     d_shp, ltl)
+
+            #pyed = py3DSeedEditor.py3DSeedEditor(labels_train, contour=labels)
+        pyed = py3DSeedEditor.py3DSeedEditor(data3d_seg, contour=labels)
+        pyed.show()
+        fv_tiles.insert(i, fv_t)
+
+# @TODO vracet něco inteligentního, fvall je prázdný
+    return fvall
+
+
 def experiment(path_to_yaml, list_of_feature_fcn, list_of_classifiers,
                tile_shape, visualization=False, train=False):
 
@@ -255,58 +321,17 @@ def experiment(path_to_yaml, list_of_feature_fcn, list_of_classifiers,
 #   TODO work with list_of_feature_fcn and list_of_classifiers
     featrs_plus_classifs = itertools.product(list_of_feature_fcn,
                                              list_of_classifiers)
-    import ipdb; ipdb.set_trace()  # noqa BREAKPOINT
+    #import ipdb; ipdb.set_trace()  # noqa BREAKPOINT
 
     results = []
 
     for fpc in featrs_plus_classifs:
-        fpc
-        fvall = []
-        fv_tiles = []
-        indata_len = len(inputdata['data'])
-        indata_len = 3
+        feature_fcn = fpc[0]
+        classif_fcn = fpc[1]
 
-        for i in range(0, indata_len):
-            data3d_orig, data3d_seg = read_data_orig_and_seg(inputdata, i)
-
-            if visualization:
-                pyed = py3DSeedEditor.py3DSeedEditor(data3d_orig,
-                                                     contour=data3d_seg)
-                pyed.show()
-                #import pdb; pdb.set_trace()
-            #fvall.insert(i, get_features(
-            #    data3d_orig,
-            #    data3d_seg,
-            #    visualization=args.visualization
-            #    ))
-            #feature_fcn = feat_hist
-            feature_fcn = fpc[0]
-            fv_t = get_features_in_tiles(data3d_orig, data3d_seg, tile_shape,
-                                         feature_fcn)
-            cidxs, features_t, seg_cover_t = fv_t
-
-            if(train == True):
-              labels_train_lin_float = np.array(seg_cover_t)
-              labels_train_lin = labels_train_lin_float > 0.5
-
-            #from sklearn import svm
-            #clf = svm.SVC()
-            clf = fpc[1]()
-            clf.fit(features_t, labels_train_lin)
-            labels_lin = clf.predict(features_t)
-
-            d_shp = data3d_orig.shape
-
-            labels = arrange_to_tiled_data(cidxs, tile_shape, d_shp,
-                                           labels_lin)
-              #ltl = (labels_train_lin_float * 10).astype(np.int8)
-              #labels_train = arrange_to_tiled_data(cidxs, tile_shape,
-              #                                     d_shp, ltl)
-
-              #pyed = py3DSeedEditor.py3DSeedEditor(labels_train, contour=labels)
-            pyed = py3DSeedEditor.py3DSeedEditor(data3d_seg, contour=labels)
-            pyed.show()
-            fv_tiles.insert(i, fv_t)
+        fvall = one_experiment_setting_for_whole_dataset(
+            inputdata, tile_shape,
+            feature_fcn, classif_fcn, train)
 
         result = {'params': str(fpc), 'fvall': fvall}
         results.append(result)
@@ -336,13 +361,16 @@ def main():
                         default="20130919_liver_statistics.yaml")
     parser.add_argument('-o', '--output', help='output file',
                         default="20130919_liver_statistics_results.pkl")
-		parser.add_argument('-t', '--train', help='Training', default=False)
+    parser.add_argument('-t', '--train', help='Training', default=False,
+                        action='store_true'
+                        )
     args = parser.parse_args()
 
     if args.sampleInput:
         sample_input_data()
     # input parser
-    path_to_yaml = os.path.join(path_to_script, args.input)
+    #path_to_yaml = os.path.join(path_to_script, args.input)
+    path_to_yaml = args.input
 
     #write_csv(fvall)
     list_of_feature_fcn = [feat_hist]
