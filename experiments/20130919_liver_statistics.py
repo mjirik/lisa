@@ -299,7 +299,7 @@ def one_experiment_setting_for_whole_dataset(inputdata, tile_shape,
         d_shp = data3d_orig.shape
 
         labels = arrange_to_tiled_data(cidxs, tile_shape, d_shp,
-                                        labels_lin)
+                                       labels_lin)
             #ltl = (labels_train_lin_float * 10).astype(np.int8)
             #labels_train = arrange_to_tiled_data(cidxs, tile_shape,
             #                                     d_shp, ltl)
@@ -313,14 +313,18 @@ def one_experiment_setting_for_whole_dataset(inputdata, tile_shape,
     return fvall
 
 
-def experiment(path_to_yaml, list_of_feature_fcn, list_of_classifiers,
+def make_product_list(list_of_feature_fcn, list_of_classifiers):
+#   TODO work with list_of_feature_fcn and list_of_classifiers
+    featrs_plus_classifs = itertools.product(list_of_feature_fcn,
+                                             list_of_classifiers)
+    return featrs_plus_classifs
+
+
+def experiment(path_to_yaml, featrs_plus_classifs,
                tile_shape, visualization=False, train=False):
 
     inputdata = misc.obj_from_file(path_to_yaml, filetype='yaml')
 
-#   TODO work with list_of_feature_fcn and list_of_classifiers
-    featrs_plus_classifs = itertools.product(list_of_feature_fcn,
-                                             list_of_classifiers)
     #import ipdb; ipdb.set_trace()  # noqa BREAKPOINT
 
     results = []
@@ -379,7 +383,10 @@ def main():
 
     list_of_classifiers = [svm.SVC, GaussianNB]
     tile_shape = [1, 100, 100]
-    result = experiment(path_to_yaml, list_of_feature_fcn, list_of_classifiers,
+    featrs_plus_classifs = make_product_list(list_of_feature_fcn,
+                                             list_of_classifiers)
+
+    result = experiment(path_to_yaml, featrs_plus_classifs,
                         tile_shape=tile_shape,
                         visualization=args.visualization, train=args.train)
 
