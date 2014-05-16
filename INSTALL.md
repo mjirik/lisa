@@ -34,21 +34,20 @@ SimpleITK is not in ubuntu packages. You can use easy_install
     
 For pygco use following (more info https://github.com/mjirik/pyseg_base/blob/master/INSTALL)
 
+    mkdir ~/projects
+    cd ~/projects
     git clone https://github.com/mjirik/gco_python.git
     cd gco_python
     make
     sudo python setup.py install
+    cd ..
 
 Get stable branche
 
-    mkdir ~/projects
-    cd ~/projects
     git clone --recursive -b stable https://github.com/mjirik/lisa.git
 
 or for current developement (if you want to participate)
 
-    mkdir ~/projects
-    cd ~/projects
     git clone --recursive git@github.com:mjirik/lisa.git
 
 
