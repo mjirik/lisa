@@ -26,7 +26,7 @@ Tested with Ubuntu 14.04 32-bit
 
 Use package manager to satisfy requirements
 
-    sudo apt-get install python git python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools
+    sudo apt-get install python git python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools curl
     
 SimpleITK is not in ubuntu packages. You can use easy_install
 
