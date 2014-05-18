@@ -296,12 +296,31 @@ def make_icon():
     import fileinput
     import shutil
 
-    in_path = os.path.join(path_to_script, "/application/lisa.desktop.in")
-    out_path = os.path.expanduser("~/Desktop/lisa.desktop")
+    print path_to_script
+
+
+    in_path = os.path.join(path_to_script, "applications/lisa.desktop.in")
+    print in_path
+    home_path = os.path.expanduser('~')
+    if os.path.exists(os.path.join(home_path, 'Desktop')):
+        desktop_path = os.path.join(home_path, 'Desktop')
+    elif os.path.exists(os.path.join(home_path, 'Plocha')):
+        desktop_path = os.path.join(home_path, 'Plocha')
+    else:
+        print "Cannot find desktop directory"
+    out_path = os.path.join(desktop_path, "lisa.desktop")
     shutil.copy2(in_path, out_path)
 
-    for line in fileinput.input(fileToSearch, inplace=True):
-        print(line.replace(textToSearch, textToReplace), end='')
+    lisa_path = os.path.abspath(path_to_script)
+
+    #fi = fileinput.input(out_path, inplace=True)
+    print out_path
+
+    for line in fileinput.input(out_path, inplace=True):
+        #coma on end makes no linebreak
+        print line.replace("@{LISA_PATH}", lisa_path),
+#        print(line.replace("@", lisa_path), end='')
+    #fi.close()
 
 
 def main():
@@ -337,11 +356,11 @@ def main():
             default = False, help='Build gco_python in windows. Problematic step.')
     args = parser.parse_args()
 
-    if args.get_sample_data == False and args.install == False and args.build_gco == False:
-# default setup is install and get sample data
-        args.get_sample_data = True
-        args.install = True
-        args.build_gco = False
+#    if args.get_sample_data == False and args.install == False and args.build_gco == False:
+## default setup is install and get sample data
+#        args.get_sample_data = True
+#        args.install = True
+#        args.build_gco = False
 
     if args.get_sample_data:
         get_sample_data()
