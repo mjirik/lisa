@@ -11,16 +11,16 @@ logger = logging.getLogger(__name__)
 
 import argparse
 
-if sys.version_info < (3,0):
+if sys.version_info < (3, 0):
     import urllib as urllibr
 else:
     import urllib.request as urllibr
 
 
+# import funkcí z jiného adresáře
+import os.path
 
-
-
-
+path_to_script = os.path.dirname(os.path.abspath(__file__))
 
 
 def submodule_update():
@@ -34,15 +34,18 @@ def submodule_update():
     except:
         print ('Probem with git submodules')
 
+
 def check_python_architecture(pythondir, target_arch_str):
     """
-    functions check architecture of target python 
+    functions check architecture of target python
     """
-    pyth_str = subprocess.check_output([pythondir+'python', '-c','import platform; print platform.architecture()[0]'])
-    if pyth_str [:2] != target_arch_str:
-        raise Exception("Wrong architecture of target python. Expected arch is" + target_arch_str)
-
-
+    pyth_str = subprocess.check_output(
+        [pythondir + 'python', '-c',
+         'import platform; print platform.architecture()[0]'])
+    if pyth_str[:2] != target_arch_str:
+        raise Exception(
+            "Wrong architecture of target python. Expected arch is"
+            + target_arch_str)
 
 
 def definitions_win64_py32():
@@ -61,8 +64,8 @@ def definitions_win64_py32():
     pythondir = "c:/python32/"
     pythonversion = (3,2)
     target_arch_str = '64'
-    
-    
+
+
 def definitions_win32_py27():
     global urlpython, urlmsysgit, urlmingw, urlnumpy, urlscipy, urlsklearn, urlmatplotlib, urlcython, urlgco_python, urlgco, urlcompiler, pythondir, pythonversion, target_arch_str
     urlpython = "http://www.python.org/ftp/python/2.7.3/python-2.7.3.msi"
@@ -79,25 +82,25 @@ def definitions_win32_py27():
     pythondir = "c:/python27/"
     pythonversion = (2,7)
     target_arch_str = '32'
-    
-    
+
+
 def windows_install():
     try:
         os.mkdir("tmp")
     except:
         pass
-    
+
     # problems with 64 bit version and mingw
     #definitions_win64_py32()
     definitions_win32_py27()
-    
 
     # check correct python version
     if (sys.version_info[0:2] != pythonversion):
-        
-        print ("Different python required \n installing python " + str(pythonversion))
+
+        print ("Different python required \n installing python "
+               + str(pythonversion))
         print (sys.version_info)
-        
+
         local_file_name = 'tmp\python.msi'
         urllibr.urlretrieve(urlpython, local_file_name)
         a = "msiexec /i " + local_file_name
@@ -110,13 +113,7 @@ def windows_install():
         subprocess.call(pythondir + "python.exe mysetup.py")
         return
     else:
-        print ("You have python " + str (pythonversion))
-
-    
-    
-
-
-
+        print("You have python " + str(pythonversion))
 
     # install distribute and pip
     # this is not necessary for numpy, scipy etc., because we have binaries
@@ -131,15 +128,16 @@ def windows_install():
     urllibr.urlretrieve(urlpip, local_file_name)
     subprocess.call(pythondir + "python.exe get-pip.py", cwd="./tmp/")
 
-
-
-
     # numpy, scipy, matplotlib, scikit-learn, cython
     print ("numpy, scipy, matplotlib, scikit-learn, cython install")
     #import pdb; pdb.set_trace()
     try:
 
-        subprocess.call(pythondir + "Scripts/pip.exe install numpy scipy scikit-learn matplotlib cython nose", cwd="./tmp/")
+        subprocess.call(
+            pythondir +
+            "Scripts/pip.exe install numpy scipy scikit-learn"
+            + " matplotlib cython nose",
+            cwd="./tmp/")
     except:
         print ("alternative installation ")
         download_and_run(urlnumpy, "./tmp/numpy.exe")
@@ -148,24 +146,24 @@ def windows_install():
         download_and_run(urlmatplotlib, "./tmp/matplotlib.exe")
         download_and_run(urlcython, "./tmp/cython.exe")
 
-
-    
     # install pydicom
-    subprocess.call(pythondir + "Scripts/pip.exe install pydicom", cwd="./tmp/")
+    subprocess.call(pythondir + "Scripts/pip.exe install pydicom",
+                    cwd="./tmp/")
     subprocess.call(pythondir + "Scripts/pip.exe install pyyaml", cwd="./tmp/")
-    
+
+
 def windows_get_git():
 
     # instalace msys gitu
     print ("MSYS Git install")
     #import pdb; pdb.set_trace()
-    download_and_run(url = urlmsysgit, local_file_name = './tmp/msysgit.exe' )
+    download_and_run(url=urlmsysgit, local_file_name='./tmp/msysgit.exe')
 
 
 def windows_build_gco():
     # install MinGW
     print ("MinGW install")
-    download_and_run(url = urlmingw, local_file_name = './tmp/mingw.exe')
+    download_and_run(url=urlmingw, local_file_name='./tmp/mingw.exe')
 
     # install gco_python
     print ("gco_python install")
@@ -174,7 +172,7 @@ def windows_build_gco():
     #    os.mkdir("tmp/gco_python")
     #except:
     #    pass
-    
+
     local_file_name = './tmp/gco_python.zip'
     urllibr.urlretrieve(urlgco_python, local_file_name)
     datafile = zipfile.ZipFile(local_file_name)
@@ -185,7 +183,7 @@ def windows_build_gco():
         os.mkdir("tmp/gco_python-master/gco_src")
     except:
         pass
-    
+
     local_file_name = './tmp/gco_src.zip'
     urllibr.urlretrieve(urlgco, local_file_name)
     datafile = zipfile.ZipFile(local_file_name)
@@ -193,19 +191,19 @@ def windows_build_gco():
 
     # --- now compile
     print ("gco compilation")
-    
+
     # there is a bug in python mingw compiler with -mno-cygwin, so here is simple patch
-    
+
     local_file_name = pythondir + "Lib\distutils\cygwinccompiler.py"
     urllibr.urlretrieve(urlcompiler, local_file_name)
-    
+
     # compilation with mingw
     subprocess.call(pythondir + "python.exe setup.py build_ext -i --compiler=mingw32", cwd="./tmp/gco_python-master/")
     # parametr -i by to mel nainstalovat sam, ale nedala to
-    subprocess.call(pythondir + "python.exe setup.py build --compiler=mingw32", cwd="./tmp/gco_python-master/")    
-    subprocess.call(pythondir + "python.exe setup.py install --skip-build", cwd="./tmp/gco_python-master/")    
+    subprocess.call(pythondir + "python.exe setup.py build --compiler=mingw32", cwd="./tmp/gco_python-master/")
+    subprocess.call(pythondir + "python.exe setup.py install --skip-build", cwd="./tmp/gco_python-master/")
 
-    
+
 
     #subprocess.call('envinstall\envwindows.bat')
 
@@ -294,6 +292,36 @@ def download_and_run(url, local_file_name):
     subprocess.call(local_file_name)
 
 
+def make_icon():
+    import fileinput
+    import shutil
+
+    print path_to_script
+
+
+    in_path = os.path.join(path_to_script, "applications/lisa.desktop.in")
+    print in_path
+    home_path = os.path.expanduser('~')
+    if os.path.exists(os.path.join(home_path, 'Desktop')):
+        desktop_path = os.path.join(home_path, 'Desktop')
+    elif os.path.exists(os.path.join(home_path, 'Plocha')):
+        desktop_path = os.path.join(home_path, 'Plocha')
+    else:
+        print "Cannot find desktop directory"
+    out_path = os.path.join(desktop_path, "lisa.desktop")
+    shutil.copy2(in_path, out_path)
+
+    lisa_path = os.path.abspath(path_to_script)
+
+    #fi = fileinput.input(out_path, inplace=True)
+    print out_path
+
+    for line in fileinput.input(out_path, inplace=True):
+        #coma on end makes no linebreak
+        print line.replace("@{LISA_PATH}", lisa_path),
+#        print(line.replace("@", lisa_path), end='')
+    #fi.close()
+
 
 def main():
     logger = logging.getLogger()
@@ -305,14 +333,21 @@ def main():
     #logger.debug('input params')
 
     # input parser
-    parser = argparse.ArgumentParser(description=
-            'Segment vessels from liver \n \npython organ_segmentation.py\n \n python organ_segmentation.py -mroi -vs 0.6')
-    parser.add_argument('-d','--get_sample_data', action='store_true',
+    parser = argparse.ArgumentParser(
+        description=
+        'Segment vessels from liver \n \npython organ_segmentation.py\n \n\
+        python organ_segmentation.py -mroi -vs 0.6')
+    parser.add_argument(
+        '-d', '--get_sample_data', action='store_true',
+        default=False,
+        help='Get sample data')
+    parser.add_argument(
+        '-i','--install', action='store_true',
+        default=False,
+        help='Install')
+    parser.add_argument('-icn','--make_icon', action='store_true',
             default=False,
-            help='Get sample data')
-    parser.add_argument('-i','--install', action='store_true',
-            default=False,
-            help='Install')
+            help='Creates desktop icon, works only in ubuntu')
     parser.add_argument('-g','--get_git', action='store_true',
             default=False,
             help='Get git in windows')
@@ -321,19 +356,22 @@ def main():
             default = False, help='Build gco_python in windows. Problematic step.')
     args = parser.parse_args()
 
-    if args.get_sample_data == False and args.install == False and args.build_gco == False:
-# default setup is install and get sample data
-        args.get_sample_data = True
-        args.install = True 
-        args.build_gco = False
-    
+#    if args.get_sample_data == False and args.install == False and args.build_gco == False:
+## default setup is install and get sample data
+#        args.get_sample_data = True
+#        args.install = True
+#        args.build_gco = False
+
     if args.get_sample_data:
         get_sample_data()
-    
+
+    if args.make_icon:
+        make_icon()
+
     if args.install:
         print('Installing system environment')
         if sys.platform.startswith('linux'):
-            
+
             subprocess.call('./envinstall/envubuntu.sh')
             #submodule_update()
         elif sys.platform.startswith('win'):
@@ -345,7 +383,7 @@ def main():
             if args.get_git:
                 windows_get_git()
                 #submodule_update()
-        
-                        
+
+
 if __name__ == "__main__":
     main()
