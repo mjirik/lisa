@@ -149,7 +149,23 @@ Install Mac OS
         git submodule update --init --recursive
 
 
+### Known problems on Mac OS 
 
+ * Cython installation fail
+
+        command 'cc' failed with exit status 1
+        
+    or
+    
+        import Cython.Distutils
+
+    Install cython with easy_install 
+    
+        sudo -E easy_install cython
+    
+    
+ * 
+   
 
 
 Install Windows
