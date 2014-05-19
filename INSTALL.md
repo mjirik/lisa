@@ -123,7 +123,7 @@ Install Mac OS
 
         sudo port selfupdate
         sudo port upgrade outdated
-        sudo port install py27-pyqt4 py27-numpy py27-scipy py27-matplotlib py27-ipython +notebook py27-pandas py27-sympy py27-nose  py-scikit-learn py-pydicom py27-yaml py27-cython vtk5 +qt4_mac +python27
+        sudo port install py27-pyqt4 py27-numpy py27-scipy py27-matplotlib py27-ipython +notebook py27-pandas py27-sympy py27-nose  py-scikit-learn py-pydicom py27-yaml py27-cython vtk5 +qt4_mac +python27 py27-distutils-extra
  
 
  * Select default python
@@ -149,7 +149,23 @@ Install Mac OS
         git submodule update --init --recursive
 
 
+### Known problems on Mac OS 
 
+ * Cython installation fail
+
+        command 'cc' failed with exit status 1
+        
+    or
+    
+        import Cython.Distutils
+
+    Install cython with easy_install 
+    
+        sudo -E easy_install cython
+    
+    
+ * 
+   
 
 
 Install Windows
