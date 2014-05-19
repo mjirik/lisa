@@ -70,9 +70,6 @@ def feat_hist_by_segmentation(data3d_orig, data3d_seg, visualization=True):
                }
     return fv_hist
 
-def super_feat_hist(data3d_orig, parameter):
-    feat_hist(data3d_orig)
-    print parameter
 
 def feat_hist(data3d_orig):
     bins = range(-1024, 1024, 1)
@@ -83,6 +80,9 @@ def feat_hist(data3d_orig):
     hist1, bin_edges1 = np.histogram(data3d_orig, bins=bins)
     return hist1
 
+def super_feat_hist(data3d_orig, parameter):
+    feat_hist(data3d_orig)
+    print parameter
 
 def lbp(data3d_orig, data3d_seg, visualization=True):
     import realtime_lbp as real_lib
