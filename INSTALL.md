@@ -135,8 +135,21 @@ Install Mac OS
 
 
         sudo easy_install cython
+        
+    or
+
+        sudo -E easy_install cython
 
  * gco_python
+
+    Try this
+
+        git clone https://github.com/amueller/gco_python.git
+        cd gco_python
+        make
+        sudo -E python setup.py install
+
+    or this
 
     See install notes to pyseg_base (https://github.com/mjirik/pyseg_base/blob/master/INSTALL).
     If there is a problem with clang compiler, you are should edit gco 
