@@ -70,6 +70,9 @@ def feat_hist_by_segmentation(data3d_orig, data3d_seg, visualization=True):
                }
     return fv_hist
 
+def super_feat_hist(data3d_orig, parameter):
+    feat_hist(data3d_orig)
+    print parameter
 
 def feat_hist(data3d_orig):
     bins = range(-1024, 1024, 1)
@@ -361,6 +364,8 @@ def main():
                         help='generate sample intput data', default=False)
     parser.add_argument('-v', '--visualization',  action='store_true',
                         help='Turn on visualization', default=False)
+    parser.add_argument('-fc', '--features_classifs',  action='store_true',
+                        help='Read features and classifs list from file', default=False)
     parser.add_argument('-i', '--input', help='input yaml file',
                         default="20130919_liver_statistics.yaml")
     parser.add_argument('-o', '--output', help='output file',
@@ -383,8 +388,13 @@ def main():
 
     list_of_classifiers = [svm.SVC, GaussianNB]
     tile_shape = [1, 100, 100]
-    featrs_plus_classifs = make_product_list(list_of_feature_fcn,
-                                             list_of_classifiers)
+
+    if args.features_classifs:
+        import features_classifs
+        featrs_plus_classifs = features_classifs.fc
+    else:
+        featrs_plus_classifs = make_product_list(list_of_feature_fcn,
+                                                list_of_classifiers)
 
     result = experiment(path_to_yaml, featrs_plus_classifs,
                         tile_shape=tile_shape,
