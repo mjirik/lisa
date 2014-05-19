@@ -62,14 +62,6 @@ class HistologyReport:
 
 
 if __name__ == "__main__":
-    logger = logging.getLogger()
-
-    logger.setLevel(logging.WARNING)
-    #ch = logging.StreamHandler()
-    #logger.addHandler(ch)
-
-    #logger.debug('input params')
-
     # input parser
     parser = argparse.ArgumentParser(
         description='Histology analyser reporter'
@@ -83,6 +75,11 @@ if __name__ == "__main__":
         '-d', '--debug', action='store_true',
         help='Debug mode')
     args = parser.parse_args()
+
+    logger = logging.getLogger()
+    logger.setLevel(logging.WARNING)
+    #ch = logging.StreamHandler()
+    #logger.addHandler(ch)
 
     if args.debug:
         logger.setLevel(logging.DEBUG)

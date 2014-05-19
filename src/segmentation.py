@@ -19,7 +19,8 @@ sys.path.append("../extern/")
 import uiThreshold
 import thresholding_functions
 
-import logging as logger
+import logging
+logger = logging.getLogger(__name__)
 
 import numpy
 import scipy
