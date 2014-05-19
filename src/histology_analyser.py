@@ -733,11 +733,21 @@ class SkeletonAnalyser:
 
         return edg_stats
 
-def generate_sample_data(m=1):
+def generate_sample_data(m=1, noise_level=0.02, gauss_sigma=0.15):
     """
     Generate sample vessel system.
     J. Kunes
+    
+    Input:
+        m - output will be (100*m)^3 numpy array
+        noise_level - noise power, disable noise with -1
+        gauss_sigma - gauss filter sigma, disable filter with -1
+        
+    Output:
+        (100*m)^3 numpy array
+            voxel size = [1,1,1]
     """
+    import thresholding_functions
     
     data3d = np.zeros((100*m,100*m,100*m), dtype=np.int)
 
@@ -782,6 +792,15 @@ def generate_sample_data(m=1):
     
     data3d = data3d*3030
     data3d += 5920
+    
+    if gauss_sigma>=0:
+        sigma = np.round(gauss_sigma, 2)
+        sigmaNew = thresholding_functions.calculateSigma([1,1,1], sigma)
+        data3d = thresholding_functions.gaussFilter(data3d, sigmaNew)
+    
+    if noise_level>=0:
+        noise = np.random.normal(1,noise_level,(100*m,100*m,100*m))
+        data3d = data3d*noise
     
     return data3d
 
@@ -844,6 +863,7 @@ if __name__ == "__main__":
         logger.info("end of is skeleton")
     else: 
         if args.inputfile is None: # using generated sample data
+            logger.info('Generating sample data...')
             metadata = {'voxelsize_mm': [1, 1, 1]}
             data3d = generate_sample_data(2)
         else: # normal runtime
