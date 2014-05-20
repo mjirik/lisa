@@ -81,8 +81,8 @@ def feat_hist(data3d_orig):
     return hist1
 
 def super_feat_hist(data3d_orig, parameter):
-    feat_hist(data3d_orig)
-    print parameter
+    return feat_hist(data3d_orig)
+    #print parameter
 
 def lbp(data3d_orig, data3d_seg, visualization=True):
     import realtime_lbp as real_lib
@@ -268,7 +268,7 @@ def one_experiment_setting_for_whole_dataset(inputdata, tile_shape,
     fvall = []
     fv_tiles = []
     indata_len = len(inputdata['data'])
-    indata_len = 3
+    #indata_len = 3
 
     for i in range(0, indata_len):
         data3d_orig, data3d_seg = read_data_orig_and_seg(inputdata, i)
@@ -308,8 +308,9 @@ def one_experiment_setting_for_whole_dataset(inputdata, tile_shape,
             #                                     d_shp, ltl)
 
             #pyed = py3DSeedEditor.py3DSeedEditor(labels_train, contour=labels)
-        pyed = py3DSeedEditor.py3DSeedEditor(data3d_seg, contour=labels)
-        pyed.show()
+        if visualization:
+          pyed = py3DSeedEditor.py3DSeedEditor(data3d_seg, contour=labels)
+          pyed.show()
         fv_tiles.insert(i, fv_t)
 
 # @TODO vracet něco inteligentního, fvall je prázdný
