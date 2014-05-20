@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 import numpy as np
 import scipy.ndimage
 import seg2fem
-import vtk
+#import vtk
 import argparse
 
 
@@ -33,8 +33,6 @@ import py3DSeedEditor
 #import show3
 import qmisc
 
-# @TODO ošetřit modul viewer viz issue #69
-import viewer3
 
 
 
@@ -138,9 +136,11 @@ def Resekce_podle_bodu(data,seeds):
     segm, dist1, dist2 = split_organ_by_two_vessels(data, lab)
     data = virtual_resection_visualization(data, segm, dist1, dist2, cut)
     return data
-    
+
 
 def cut_editor(data, inputfile):
+# @TODO ošetřit modul viewer viz issue #69
+    import viewer3
     #global normal,coordinates
     viewer = viewer3.Viewer(inputfile,'View')
     # zobrazovani jater v kodu

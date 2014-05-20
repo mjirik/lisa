@@ -42,8 +42,8 @@ from PyQt4 import *
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
-from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 import vtk
+from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from Tkinter import *
 import seg2fem
 
@@ -102,7 +102,7 @@ class Ui_MainWindow(object):
         self.toolButton.setObjectName(_fromUtf8("toolButton"))
         QtCore.QObject.connect(self.toolButton, QtCore.SIGNAL("clicked()"), MainWindow.liver_cut )
         '''
-        Vytvoření tlačítka PLANE, které při stisku volá metodu Plane  
+        Vytvoření tlačítka PLANE, které při stisku volá metodu Plane
         '''
         self.toolButton_2 = QtGui.QPushButton(self.centralwidget)
         self.toolButton_2.setGeometry(QtCore.QRect(140, 280, 71, 41))
@@ -129,7 +129,7 @@ class Ui_MainWindow(object):
         self.liver_text.setGeometry(QtCore.QRect(380, 490, 380, 50))
         self.liver_text.setObjectName(_fromUtf8("lineEdit"))
         self.liver_text.setReadOnly(True)
-        
+
         '''
         Vytvoření vizualizačního okna
         '''
@@ -143,7 +143,7 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
         self.gridlayout = QtGui.QGridLayout(self.widget)
         self.vtkWidget = QVTKRenderWindowInteractor(self.widget)
-        
+
         self.gridlayout.addWidget(self.vtkWidget, 0, 0, 1, 1)
 
         self.retranslateUi(MainWindow)
@@ -178,7 +178,7 @@ class Viewer(QMainWindow):
             self.iren = self.ui.vtkWidget.GetRenderWindow().GetInteractor()
             self.ui.vtkWidget.GetRenderWindow().AddRenderer(self.ren)
         '''
-        Pokud je zvolen prohlížecí režim, musíme vytvořit jak renderovací okna tak samotný interaktor 
+        Pokud je zvolen prohlížecí režim, musíme vytvořit jak renderovací okna tak samotný interaktor
         '''
         if mode == 'View':
             QMainWindow.__init__(self,parent)
@@ -190,7 +190,7 @@ class Viewer(QMainWindow):
 ##------------------------------------------------------------------------------------------
     '''
     Tato metoda slouží pro vygenerování vtk souboru ze segmentovaných dat. Této metodě jsou tedy
-    předána segmentovaná data společně s velikostí voxelu. 
+    předána segmentovaná data společně s velikostí voxelu.
     '''
     def generate_mesh(self,segmentation,voxelsize_mm):
         self.segment = segmentation
@@ -201,7 +201,7 @@ class Viewer(QMainWindow):
         '''
         self.new_vox = voxelsize_mm * self.degrad
         '''
-        Zde je použita metoda ze skriptu seg2fem, která ze zadaných dat a velikosti voxelu vytvoří vtk soubor 
+        Zde je použita metoda ze skriptu seg2fem, která ze zadaných dat a velikosti voxelu vytvoří vtk soubor
         Data se před vytvořením vtk souboru ještě vyhlazují,aby měla hladší povrch
         Výsledný soubor je uložen pod názvem mesh_new.vtk
         '''
@@ -240,7 +240,7 @@ class Viewer(QMainWindow):
             planeWidget.On()
             self.planew = planeWidget
             self.planew.SetNormal(2.0,0.0,0.0)
-            
+
 ##------------------------------------------------------------------------------------------
     '''
     Tato metoda slouží pro vytvoření virtuálního bodu. K tomu je využita třída z VTK vtkPointWidget()
@@ -264,7 +264,7 @@ class Viewer(QMainWindow):
         obj.GetPlane(plane)
 
     '''
-    Tato metoda obsluhuje spouštění resekčních algoritmů. 
+    Tato metoda obsluhuje spouštění resekčních algoritmů.
     '''
     def liver_cut(self):
         '''
@@ -274,7 +274,7 @@ class Viewer(QMainWindow):
             self.info_text.appendPlainText (_fromUtf8("Neexistuje rovina řezu"))
             self.info_text.appendPlainText (_fromUtf8('Nejdříve vytvořte rovinu(Plane), nebo bod(Point)'))
         '''
-        Pokud je zvoleno jako resekční kritérium rovina spustí se metoda Rez_podle_roviny ze skriptu virtual_resection 
+        Pokud je zvoleno jako resekční kritérium rovina spustí se metoda Rez_podle_roviny ze skriptu virtual_resection
         '''
         if self.planew != None:
             self.info_text.appendPlainText (_fromUtf8("Provádění řezu. Prosím čekejte"))
@@ -289,7 +289,7 @@ class Viewer(QMainWindow):
             else:
                 self.liver_text.appendPlainText(_fromUtf8("Bylo ostraněno cca "+str(odstraneni_procenta)+" % jater"))
             '''
-            Zde je vypnuta vytvořená rovina, což je provedeno z toho důvodu, aby mohlo být prováděno více řezů za sebou 
+            Zde je vypnuta vytvořená rovina, což je provedeno z toho důvodu, aby mohlo být prováděno více řezů za sebou
             '''
             self.planew.Off()
         '''
@@ -307,7 +307,7 @@ class Viewer(QMainWindow):
             data_z_resekce = self.data['segmentation'] == self.data['slab']['liver']
             self.cut_point.Off()
         '''
-        Následně je vytvořen soubor VTK obsahující část jater, bez uříznuté části. 
+        Následně je vytvořen soubor VTK obsahující část jater, bez uříznuté části.
         '''
         mesh_data = seg2fem.gen_mesh_from_voxels_mc(data_z_resekce, self.new_vox)
         if True:
@@ -347,7 +347,7 @@ class Viewer(QMainWindow):
     '''
     Tato metoda slouží pro vizualizaci dat pomocí knihoven a tříd z VTK
     '''
-    
+
     def View(self,filename):
 
         '''
@@ -388,7 +388,7 @@ class Viewer(QMainWindow):
         mapper.SetInput(surface.GetOutput())
 
 
-        
+
         actor = vtk.vtkActor()
         actor.SetMapper(mapper)
         actor.GetProperty().EdgeVisibilityOn()
@@ -424,7 +424,7 @@ def main():
     Parser slouží pro zadávání vstupních parametrů přes příkazovou řádku. Je možné zadat celkem 6 parametrů.
     K čemu jednotlivé parametry slouží, se můžeme dočíst při zadání příkazu (viewer3.py --help) do příkazové řádky
     '''
-    
+
     parser = argparse.ArgumentParser(description='Simple VTK Viewer')
 
     parser.add_argument('-pkl','--picklefile', default=None,
@@ -460,7 +460,7 @@ def main():
         data = misc.obj_from_file(args.picklefile, filetype = 'pickle')
 
         '''
-        Zde programu zadáme hodnotu degradace (pokud není změněna parametrem deg) 
+        Zde programu zadáme hodnotu degradace (pokud není změněna parametrem deg)
         '''
         if (args.slab == 'porta') &  (args.degradace is None):
             viewer.degrad = 2
@@ -476,10 +476,10 @@ def main():
         viewer.data['segmentation'] = viewer.data['segmentation'][::viewer.degrad,::viewer.degrad,::viewer.degrad]
         viewer.data['segmentation'] = viewer.data['segmentation'][:,::-1,:]
         '''
-        Pokud data neobsahují portální žílu je zahlášena chyba a program dále pracuje s celými játry 
+        Pokud data neobsahují portální žílu je zahlášena chyba a program dále pracuje s celými játry
         '''
         try:
-            mesh = viewer.generate_mesh(viewer.data['segmentation'] == viewer.data['slab'][args.slab],viewer.data['voxelsize_mm'])        
+            mesh = viewer.generate_mesh(viewer.data['segmentation'] == viewer.data['slab'][args.slab],viewer.data['voxelsize_mm'])
         except KeyError:
             try:
                 print 'Data bohuzel neobsahuji zadany slab:', args.slab
