@@ -26,7 +26,7 @@ Tested with Ubuntu 14.04 32-bit
 
 Use package manager to satisfy requirements
 
-    sudo apt-get install python git python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools
+    sudo apt-get install python git python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools curl
     
 SimpleITK is not in ubuntu packages. You can use easy_install
 
@@ -34,21 +34,20 @@ SimpleITK is not in ubuntu packages. You can use easy_install
     
 For pygco use following (more info https://github.com/mjirik/pyseg_base/blob/master/INSTALL)
 
+    mkdir ~/projects
+    cd ~/projects
     git clone https://github.com/mjirik/gco_python.git
     cd gco_python
     make
     sudo python setup.py install
+    cd ..
 
 Get stable branche
 
-    mkdir ~/projects
-    cd ~/projects
     git clone --recursive -b stable https://github.com/mjirik/lisa.git
 
 or for current developement (if you want to participate)
 
-    mkdir ~/projects
-    cd ~/projects
     git clone --recursive git@github.com:mjirik/lisa.git
 
 
@@ -124,7 +123,7 @@ Install Mac OS
 
         sudo port selfupdate
         sudo port upgrade outdated
-        sudo port install py27-pyqt4 py27-numpy py27-scipy py27-matplotlib py27-ipython +notebook py27-pandas py27-sympy py27-nose  py-scikit-learn py-pydicom py27-yaml py27-cython vtk5 +qt4_mac +python27
+        sudo port install py27-pyqt4 py27-numpy py27-scipy py27-matplotlib py27-ipython +notebook py27-pandas py27-sympy py27-nose  py-scikit-learn py-pydicom py27-yaml py27-cython vtk5 +qt4_mac +python27 py27-distutils-extra
  
 
  * Select default python
@@ -136,8 +135,21 @@ Install Mac OS
 
 
         sudo easy_install cython
+        
+    or
+
+        sudo -E easy_install cython
 
  * gco_python
+
+    Try this
+
+        git clone https://github.com/amueller/gco_python.git
+        cd gco_python
+        make
+        sudo -E python setup.py install
+
+    or this
 
     See install notes to pyseg_base (https://github.com/mjirik/pyseg_base/blob/master/INSTALL).
     If there is a problem with clang compiler, you are should edit gco 
@@ -150,7 +162,23 @@ Install Mac OS
         git submodule update --init --recursive
 
 
+### Known problems on Mac OS 
 
+ * Cython installation fail
+
+        command 'cc' failed with exit status 1
+        
+    or
+    
+        import Cython.Distutils
+
+    Install cython with easy_install 
+    
+        sudo -E easy_install cython
+    
+    
+ * 
+   
 
 
 Install Windows

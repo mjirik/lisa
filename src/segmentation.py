@@ -19,7 +19,8 @@ sys.path.append("../extern/")
 import uiThreshold
 import thresholding_functions
 
-import logging as logger
+import logging
+logger = logging.getLogger(__name__)
 
 import numpy
 import scipy
@@ -131,7 +132,7 @@ def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsize_mm = [
         inputSigma = number
 
     seeds = None
-    if biggestObjects == False and seeds == None and interactivity == True:
+    if biggestObjects == False and seeds == None and interactivity == True and threshold==-1:
 
         logger.debug(('Nyni si levym nebo pravym tlacitkem mysi (klepnutim nebo tazenim) oznacte specificke oblasti k vraceni.'))
         import py3DSeedEditor

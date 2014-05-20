@@ -1,7 +1,7 @@
 basedir: /home/mjirik/data/medical/
 data:
-- {sliverorig: data_orig/sliver07/training-part1/liver-orig001.mhd, sliverseg: data_orig/sliver07/training-part1/liver-seg001.mhd}
-- {sliverorig: data_orig/sliver07/training-part1/liver-orig002.mhd, sliverseg: data_orig/sliver07/training-part1/liver-seg002.mhd}
-- {sliverorig: data_orig/sliver07/training-part1/liver-orig003.mhd, sliverseg: data_orig/sliver07/training-part1/liver-seg003.mhd}
-- {sliverorig: data_orig/sliver07/training-part1/liver-orig004.mhd, sliverseg: data_orig/sliver07/training-part1/liver-seg004.mhd}
-- {sliverorig: data_orig/sliver07/training-part1/liver-orig005.mhd, sliverseg: data_orig/sliver07/training-part1/liver-seg005.mhd}
+- {sliverorig: orig/sliver07/training/liver-orig001.mhd, sliverseg: orig/sliver07/training/liver-seg001.mhd}
+- {sliverorig: orig/sliver07/training/liver-orig002.mhd, sliverseg: orig/sliver07/training/liver-seg002.mhd}
+- {sliverorig: orig/sliver07/training/liver-orig003.mhd, sliverseg: orig/sliver07/training/liver-seg003.mhd}
+- {sliverorig: orig/sliver07/training/liver-orig004.mhd, sliverseg: orig/sliver07/training/liver-seg004.mhd}
+- {sliverorig: orig/sliver07/training/liver-orig005.mhd, sliverseg: orig/sliver07/training/liver-seg005.mhd}

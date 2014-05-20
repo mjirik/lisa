@@ -46,9 +46,10 @@ fast_debug = False
 
 
 class HistologyAnalyser:
-    def __init__(self, data3d, metadata, threshold):
+    def __init__(self, data3d, metadata, threshold, nogui=False):
         self.data3d = data3d
         self.threshold = threshold
+        self.nogui = nogui
 
         print metadata
         if 'voxelsize_mm' not in metadata.keys():
@@ -59,25 +60,25 @@ class HistologyAnalyser:
 
 
     def remove_area(self):
-
-        app = QApplication(sys.argv)
-        pyed = QTSeedEditor(
-            self.data3d, mode='mask'
-        )
-        pyed.exec_()
+        if not self.nogui:
+            app = QApplication(sys.argv)
+            pyed = QTSeedEditor(
+                self.data3d, mode='mask'
+            )
+            pyed.exec_()
 
     def data_to_binar(self):
         data3d_thr = segmentation.vesselSegmentation(
             self.data3d,
             segmentation=np.ones(self.data3d.shape, dtype='int8'),
             #segmentation=oseg.orig_scale_segmentation,
-            threshold=-1,
+            threshold=self.threshold, #-1,
             inputSigma=0.15,
             dilationIterations=2,
             nObj=1,
             biggestObjects=False,
-#        dataFiltering = True,
-            interactivity=True,
+            #dataFiltering = True,
+            interactivity= not self.nogui,
             binaryClosingIterations=5,
             binaryOpeningIterations=1)
         return data3d_thr
@@ -92,7 +93,7 @@ class HistologyAnalyser:
         data3d_skel = self.binar_to_skeleton(data3d_thr)
         return data3d_thr, data3d_skel
 
-    def skeleton_to_statistics(self, data3d_thr, data3d_skel,showResult=True):
+    def skeleton_to_statistics(self, data3d_thr, data3d_skel):
         skan = SkeletonAnalyser(
             data3d_skel,
             volume_data=data3d_thr,
@@ -109,7 +110,7 @@ class HistologyAnalyser:
         #    contours=data3d_thr.astype(np.int8)
         #)
         #app.exec_()
-        if showResult:
+        if not self.nogui:
             pyed = se.py3DSeedEditor(
                 self.data3d,
                 seeds=(data3d_nodes_vis).astype(np.int8),
@@ -732,11 +733,21 @@ class SkeletonAnalyser:
 
         return edg_stats
 
-def generate_sample_data(m=1):
+def generate_sample_data(m=1, noise_level=0.02, gauss_sigma=0.15):
     """
     Generate sample vessel system.
     J. Kunes
+    
+    Input:
+        m - output will be (100*m)^3 numpy array
+        noise_level - noise power, disable noise with -1
+        gauss_sigma - gauss filter sigma, disable filter with -1
+        
+    Output:
+        (100*m)^3 numpy array
+            voxel size = [1,1,1]
     """
+    import thresholding_functions
     
     data3d = np.zeros((100*m,100*m,100*m), dtype=np.int)
 
@@ -778,82 +789,102 @@ def generate_sample_data(m=1):
     data3d_new[70*m:80*m,50*m,50*m] = 0
     data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 3*m] = 0
     data3d[data3d_new == 0] = 1
-
-    return (data3d*255)
+    
+    data3d = data3d*3030
+    data3d += 5920
+    
+    if gauss_sigma>=0:
+        sigma = np.round(gauss_sigma, 2)
+        sigmaNew = thresholding_functions.calculateSigma([1,1,1], sigma)
+        data3d = thresholding_functions.gaussFilter(data3d, sigmaNew)
+    
+    if noise_level>=0:
+        noise = np.random.normal(1,noise_level,(100*m,100*m,100*m))
+        data3d = data3d*noise
+    
+    return data3d
 
 
 if __name__ == "__main__":
     import misc
-    logger = logging.getLogger()
-
-    logger.setLevel(logging.WARNING)
-    ch = logging.StreamHandler()
-    logger.addHandler(ch)
-
-    #logger.debug('input params')
 
     # input parser
     parser = argparse.ArgumentParser(
         description='Histology analyser'
     )
     parser.add_argument('-i', '--inputfile',
-            default=None,
-            help='input file, .tif file')
+        default=None,
+        help='Input file, .tif file')
 #    parser.add_argument('-o', '--outputfile',
-#            default='histout.pkl',
-#            help='output file')
+#        default='histout.pkl',
+#        help='output file')
     parser.add_argument('-t', '--threshold', type=int,
-            default=6600,
-            help='data threshold, default 1')
+        default=-1, #6600,
+        help='data threshold, default -1 (gui/automatic selection)')
     parser.add_argument(
         '-is', '--input_is_skeleton', action='store_true',
-        help='input file is .pkl file with skeleton')
+        help='Input file is .pkl file with skeleton')
     parser.add_argument('-cr', '--crop', type=int, metavar='N', nargs='+',
-            default=[0,-1,0,-1,0,-1],
-            help='segmentation labels, default 1')
+        default=[0,-1,0,-1,0,-1],
+        help='Segmentation labels, default 1')
+    parser.add_argument(
+        '--nogui', action='store_true',
+        help='Disable GUI')
+    parser.add_argument(
+        '-d', '--debug', action='store_true',
+        help='Debug mode')
     args = parser.parse_args()
 
-    #data = misc.obj_from_file(args.inputfile, filetype = 'pickle')
+    logger = logging.getLogger()
+    logger.setLevel(logging.WARNING)
+    #ch = logging.StreamHandler() #https://docs.python.org/2/howto/logging.html#configuring-logging
+    #logger.addHandler(ch)
 
-    print args.input_is_skeleton
-    if args.inputfile is None:
-        metadata = {'voxelsize_mm': [1, 1, 1]}
-        data3d = generate_sample_data(2)
-        ha = HistologyAnalyser(data3d, metadata, args.threshold)
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
+        
+    if args.nogui:
+        logger.info('Running without GUI')
+        logger.info('Input file -> %s', args.inputfile)
+        logger.info('Data crop -> %s', str(args.crop))
+        logger.info('Threshold -> %s', args.threshold)
+        
+    logger.debug('input is skeleton -> %s', args.input_is_skeleton)
+    #data = misc.obj_from_file(args.inputfile, filetype = 'pickle')
+    
+    if args.input_is_skeleton: # when input is just skeleton
+        logger.info("input is skeleton")
+        struct = misc.obj_from_file(filename='tmp0.pkl', filetype='pickle')
+        data3d_skel = struct['skel']
+        data3d_thr = struct['thr']
+        data3d = struct['data3d']
+        metadata = struct['metadata']
+        ha = HistologyAnalyser(data3d, metadata, args.threshold, nogui=args.nogui)
+        logger.info("end of is skeleton")
+    else: 
+        if args.inputfile is None: # using generated sample data
+            logger.info('Generating sample data...')
+            metadata = {'voxelsize_mm': [1, 1, 1]}
+            data3d = generate_sample_data(2)
+        else: # normal runtime
+            dr = datareader.DataReader()
+            data3d, metadata = dr.Get3DData(args.inputfile)
+        
+        # crop data
+        cr = args.crop
+        data3d = data3d[cr[0]:cr[1], cr[2]:cr[3], cr[4]:cr[5]]
+
+        ha = HistologyAnalyser(data3d, metadata, args.threshold, nogui=args.nogui)
         ha.remove_area()
         data3d_thr, data3d_skel = ha.data_to_skeleton()
         struct = {'skel': data3d_skel, 'thr': data3d_thr, 'data3d': data3d, 'metadata':metadata}
         misc.obj_to_file(struct, filename='tmp0.pkl', filetype='pickle')
-# default sample data
-    else:
-        if args.input_is_skeleton:
-            print "input is skeleton"
-            struct = misc.obj_from_file(filename='tmp0.pkl', filetype='pickle')
-            data3d_skel = struct['skel']
-            data3d_thr = struct['thr']
-            data3d = struct['data3d']
-            metadata = struct['metadata']
-            ha = HistologyAnalyser(data3d, metadata, args.threshold)
-            print "end of is skeleton"
-        else:
-            dr = datareader.DataReader()
-            data3d, metadata = dr.Get3DData(args.inputfile)
-# crop data
-            cr = args.crop
-            data3d = data3d[cr[0]:cr[1], cr[2]:cr[3], cr[4]:cr[5]]
 
-
-
-            ha = HistologyAnalyser(data3d, metadata, args.threshold)
-            ha.remove_area()
-            data3d_thr, data3d_skel = ha.data_to_skeleton()
-            struct = {'skel': data3d_skel, 'thr': data3d_thr, 'data3d': data3d, 'metadata':metadata}
-            misc.obj_to_file(struct, filename='tmp0.pkl', filetype='pickle')
-
-    print " #########  statistics"
+    logger.info("######### statistics")
     ha.skeleton_to_statistics(data3d_thr, data3d_skel)
     #ha.run()
-    print "              #####    write to file"
+    
+    logger.info("##### write to file")
     ha.writeStatsToCSV()
     ha.writeStatsToYAML()
     ha.writeSkeletonToPickle('skel.pkl')

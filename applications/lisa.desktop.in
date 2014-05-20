@@ -4,9 +4,11 @@
 Name=LISA
 GenericName=LISA
 Comment=LIver Surgery Analyser
-Exec=python ../src/organ_segmentation.py
+Exec=@{LISA_PATH}/applications/lisa.sh
 Terminal=false
 Type=Application
-Icon=/home/mjirik/projects/liver-surgery/applications/LISA256.png
+Icon=@{LISA_PATH}/applications/LISA256.png
 Categories=Network;FileTransfer;
 StartupNotify=false
+
+
