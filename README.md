@@ -26,6 +26,8 @@ or
     git clone git@github.com:mjirik/lisa.git
     git submodule update --init --recursive
 
+or use [Lisa in Ubuntu for VirtualBox](http://147.228.240.61/queetech/install/lisa_ubuntu14.04.vdi)
+
 
 
 Get sample data
