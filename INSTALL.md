@@ -22,11 +22,11 @@ Installing requires you to have installed:
 Install (L)Ubuntu 14.04
 =======================
 
-Tested with Ubuntu 14.04 32-bit 
+Tested with Ubuntu 14.04 32-bit and Linux Mint 16 Petra
 
 Use package manager to satisfy requirements
 
-    sudo apt-get install python git python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools curl
+    sudo apt-get install python git python-dev g++ python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools curl
     
 SimpleITK is not in ubuntu packages. You can use easy_install
 
