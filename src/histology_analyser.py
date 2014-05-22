@@ -10,6 +10,7 @@ import sys
 import os.path
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -44,9 +45,10 @@ GAUSSIAN_SIGMA = 1
 fast_debug = False
 #fast_debug = True
 
+import histology_analyser_gui as HA_GUI
 
 class HistologyAnalyser:
-    def __init__(self, data3d, metadata, threshold, nogui=False):
+    def __init__(self, data3d, metadata, threshold, nogui=True):
         self.data3d = data3d
         self.threshold = threshold
         self.nogui = nogui
@@ -92,8 +94,19 @@ class HistologyAnalyser:
         data3d_thr = self.data_to_binar()
         data3d_skel = self.binar_to_skeleton(data3d_thr)
         return data3d_thr, data3d_skel
-
+    
     def skeleton_to_statistics(self, data3d_thr, data3d_skel):
+        skan = SkeletonAnalyser(
+            data3d_skel,
+            volume_data=data3d_thr,
+            voxelsize_mm=self.metadata['voxelsize_mm'])
+
+        stats = skan.skeleton_analysis()
+        self.sklabel = skan.sklabel
+        #data3d_nodes[data3d_nodes==3] = 2
+        self.stats = {'Graph':stats}
+        
+    def showSegmentedData(self, data3d_thr, data3d_skel):
         skan = SkeletonAnalyser(
             data3d_skel,
             volume_data=data3d_thr,
@@ -117,10 +130,6 @@ class HistologyAnalyser:
                 contour=data3d_thr.astype(np.int8)
             )
             pyed.show()
-        stats = skan.skeleton_analysis()
-        self.sklabel = skan.sklabel
-        #data3d_nodes[data3d_nodes==3] = 2
-        self.stats = {'Graph':stats}
 
     def run(self):
         #self.preprocessing()
@@ -804,10 +813,7 @@ def generate_sample_data(m=1, noise_level=0.02, gauss_sigma=0.15):
     
     return data3d
 
-
-if __name__ == "__main__":
-    import misc
-
+def parser_init():
     # input parser
     parser = argparse.ArgumentParser(
         description='Histology analyser'
@@ -825,8 +831,12 @@ if __name__ == "__main__":
         '-is', '--input_is_skeleton', action='store_true',
         help='Input file is .pkl file with skeleton')
     parser.add_argument('-cr', '--crop', type=int, metavar='N', nargs='+',
-        default=[0,-1,0,-1,0,-1],
+        #default=[0,-1,0,-1,0,-1],
+        default=None,
         help='Segmentation labels, default 1')
+    parser.add_argument(
+        '--crgui', action='store_true',
+        help='GUI crop')
     parser.add_argument(
         '--nogui', action='store_true',
         help='Disable GUI')
@@ -834,6 +844,63 @@ if __name__ == "__main__":
         '-d', '--debug', action='store_true',
         help='Debug mode')
     args = parser.parse_args()
+    
+    return args
+
+# Processing data without gui
+def processData(inputfile=None,threshold=None,skeleton=False,crop=None):
+    ### when input is just skeleton
+    if skeleton:
+        logger.info("input is skeleton")
+        struct = misc.obj_from_file(filename='tmp0.pkl', filetype='pickle')
+        data3d_skel = struct['skel']
+        data3d_thr = struct['thr']
+        data3d = struct['data3d']
+        metadata = struct['metadata']
+        ha = HistologyAnalyser(data3d, metadata, threshold, nogui=True)
+        logger.info("end of is skeleton")
+    else: 
+        ### Reading/Generating data
+        if inputfile is None: ## Using generated sample data
+            logger.info('Generating sample data...')
+            metadata = {'voxelsize_mm': [1, 1, 1]}
+            data3d = generate_sample_data(2)
+        else: ## Normal runtime
+            dr = datareader.DataReader()
+            data3d, metadata = dr.Get3DData(inputfile)
+        
+        ### Crop data
+        if crop is not None:
+            logger.debug('Croping data: %s', str(crop))
+            data3d = data3d[crop[0]:crop[1], crop[2]:crop[3], crop[4]:crop[5]]
+        
+        ### Init HistologyAnalyser object
+        logger.debug('Init HistologyAnalyser object')
+        ha = HistologyAnalyser(data3d, metadata, threshold, nogui=True)
+        
+        ### No GUI == No Remove Area
+        
+        ### Segmentation
+        logger.debug('Segmentation')
+        data3d_thr, data3d_skel = ha.data_to_skeleton()
+        
+    ### Computing statistics
+    logger.info("######### statistics")
+    ha.skeleton_to_statistics(data3d_thr, data3d_skel)
+    
+    ### Saving files
+    logger.info("##### write to file")
+    ha.writeStatsToCSV()
+    ha.writeStatsToYAML()
+    ha.writeSkeletonToPickle('skel.pkl')
+    #struct = {'skel': data3d_skel, 'thr': data3d_thr, 'data3d': data3d, 'metadata':metadata}
+    #misc.obj_to_file(struct, filename='tmp0.pkl', filetype='pickle')
+    
+    ### End
+    logger.info('Finished')
+
+def main():
+    args = parser_init()
 
     logger = logging.getLogger()
     logger.setLevel(logging.WARNING)
@@ -842,52 +909,17 @@ if __name__ == "__main__":
 
     if args.debug:
         logger.setLevel(logging.DEBUG)
-        
+    
     if args.nogui:
         logger.info('Running without GUI')
         logger.info('Input file -> %s', args.inputfile)
         logger.info('Data crop -> %s', str(args.crop))
         logger.info('Threshold -> %s', args.threshold)
+        processData(inputfile=args.inputfile,threshold=args.threshold,skeleton=args.input_is_skeleton,crop=args.crop)
+    else:
+        app = QApplication(sys.argv)
+        gui = HA_GUI.HistologyAnalyserWindow(inputfile=args.inputfile,threshold=args.threshold,skeleton=args.input_is_skeleton,crop=args.crop,crgui=args.crgui)
+        sys.exit(app.exec_())
         
-    logger.debug('input is skeleton -> %s', args.input_is_skeleton)
-    #data = misc.obj_from_file(args.inputfile, filetype = 'pickle')
-    
-    if args.input_is_skeleton: # when input is just skeleton
-        logger.info("input is skeleton")
-        struct = misc.obj_from_file(filename='tmp0.pkl', filetype='pickle')
-        data3d_skel = struct['skel']
-        data3d_thr = struct['thr']
-        data3d = struct['data3d']
-        metadata = struct['metadata']
-        ha = HistologyAnalyser(data3d, metadata, args.threshold, nogui=args.nogui)
-        logger.info("end of is skeleton")
-    else: 
-        if args.inputfile is None: # using generated sample data
-            logger.info('Generating sample data...')
-            metadata = {'voxelsize_mm': [1, 1, 1]}
-            data3d = generate_sample_data(2)
-        else: # normal runtime
-            dr = datareader.DataReader()
-            data3d, metadata = dr.Get3DData(args.inputfile)
-        
-        # crop data
-        cr = args.crop
-        data3d = data3d[cr[0]:cr[1], cr[2]:cr[3], cr[4]:cr[5]]
-
-        ha = HistologyAnalyser(data3d, metadata, args.threshold, nogui=args.nogui)
-        ha.remove_area()
-        data3d_thr, data3d_skel = ha.data_to_skeleton()
-        struct = {'skel': data3d_skel, 'thr': data3d_thr, 'data3d': data3d, 'metadata':metadata}
-        misc.obj_to_file(struct, filename='tmp0.pkl', filetype='pickle')
-
-    logger.info("######### statistics")
-    ha.skeleton_to_statistics(data3d_thr, data3d_skel)
-    #ha.run()
-    
-    logger.info("##### write to file")
-    ha.writeStatsToCSV()
-    ha.writeStatsToYAML()
-    ha.writeSkeletonToPickle('skel.pkl')
-    #ha.show()
-
-
+if __name__ == "__main__":
+    main()
