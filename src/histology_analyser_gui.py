@@ -13,10 +13,9 @@ import os.path
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
 
-from PyQt4 import QtCore, Qt
-from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
-    QGridLayout, QLabel, QPushButton, QFrame, \
-    QFont, QPixmap, QDialog, QVBoxLayout
+from PyQt4 import QtCore
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
 from PyQt4.Qt import QString
 
 import numpy as np
@@ -73,10 +72,11 @@ class HistologyAnalyserWindow(QMainWindow):
         """
         sys.exit(0)
     
-    def processDataGUI(self):
+    def processDataGUI(self,inputfile=None):
         """
         GUI version of histology analysation algorithm
         """
+        self.args_inputfile = inputfile
         
         ### when input is just skeleton
         if self.args_skeleton:  #!!!!! NOT TESTED!!!!
@@ -183,11 +183,14 @@ class HistologyAnalyserWindow(QMainWindow):
         
         self.fixWindow()
     
-    def fixWindow(self):
+    def fixWindow(self,w=None,h=None):
         """
         Resets Main window size, and makes sure all events (gui changes) were processed
         """
-        self.resize(self.WIDTH, self.HEIGHT)
+        if (w is not None) and (h is not None):
+            self.resize(w, h)
+        else:    
+            self.resize(self.WIDTH, self.HEIGHT)
         QtCore.QCoreApplication.processEvents() # this is very important
     
     def showMessage(self, text="Default"):
@@ -221,9 +224,9 @@ class HistologyAnalyserWindow(QMainWindow):
         return newapp.img
         
     def loadData(self):
-        newapp = LoadDialog(self)
+        newapp = LoadDialog(mainWindow=self, inputfile=self.args_inputfile)
         self.embedWidget(newapp)
-        
+        self.fixWindow(self.WIDTH,300)
         newapp.exec_()
         
 class MessageDialog(QDialog):
@@ -250,31 +253,179 @@ class MessageDialog(QDialog):
         self.show()
         
 class LoadDialog(QDialog):
-    def __init__(self,mainWindow=None):
+    def __init__(self, mainWindow=None, inputfile=None):
         self.mainWindow = mainWindow
+        self.inputfile = inputfile
         
         QDialog.__init__(self)
         self.initUI()
+        
+        self.importDataWithGui()
     
     def initUI(self):
-        vbox_app = QVBoxLayout()
+        self.ui_gridLayout = QGridLayout()
+        self.ui_gridLayout.setSpacing(15)
+
+        #self.ui_gridLayout.setColumnMinimumWidth(1, 500)
+
+        rstart = 0
         
+        ### Title
+        font_label = QFont()
+        font_label.setBold(True)        
+        ha_title = QLabel('Histology analyser')
+        ha_title.setFont(font_label)
+        ha_title.setAlignment(Qt.AlignCenter)
+        
+        self.ui_gridLayout.addWidget(ha_title, rstart + 0, 1)
+        rstart +=1
+        
+        ### Load files buttons etc.
+        hr = QFrame()
+        hr.setFrameShape(QFrame.HLine)
         font_info = QFont()
-        font_info.setBold(True)
-        font_info.setPixelSize(20)
-        info = QLabel('Load Data window is not yet implemented\nSorry...')
+        font_info.setBold(True)   
+        info = QLabel('Load Data:')
         info.setFont(font_info)
+        
+        btn_dcmdir = QPushButton("Load DICOM", self)
+        btn_dcmdir.clicked.connect(self.loadDataDir)
+        btn_datafile = QPushButton("Load file", self)
+        btn_datafile.clicked.connect(self.loadDataFile)
+        btn_dataclear = QPushButton("Clear data", self)
+        btn_dataclear.clicked.connect(self.loadDataClear)
+        
+        self.text_dcm_dir = QLabel('Data path: ')
+        self.text_dcm_data = QLabel('Data info: ')
+        
         btn_process = QPushButton("OK", self)
-        btn_process.clicked.connect(self.mainWindow.processDataGUI)
-       
+        btn_process.clicked.connect(self.finished)
         
-        vbox_app.addWidget(info)
-        vbox_app.addStretch(1) # misto ktery se muze natahovat
-        vbox_app.addWidget(btn_process)
+        self.ui_gridLayout.addWidget(hr, rstart + 0, 0, 1, 3)
+        self.ui_gridLayout.addWidget(info, rstart + 1, 0, 1, 3)
+        self.ui_gridLayout.addWidget(btn_dcmdir, rstart + 2, 0)
+        self.ui_gridLayout.addWidget(btn_datafile, rstart + 2, 1)
+        self.ui_gridLayout.addWidget(btn_dataclear, rstart + 2, 2)
+        self.ui_gridLayout.addWidget(self.text_dcm_dir, rstart + 3, 0, 1, 3)
+        self.ui_gridLayout.addWidget(self.text_dcm_data, rstart + 4, 0, 1, 3)
+        self.ui_gridLayout.addWidget(btn_process, rstart + 5, 1,)
+        rstart +=6
         
-        #vbox_app.setAlignment(Qt.AlignCenter)
-        self.setLayout(vbox_app)
+        ### Stretcher
+        self.ui_gridLayout.addItem(QSpacerItem(0,0), rstart + 0, 0,)
+        self.ui_gridLayout.setRowStretch(rstart + 0, 1)
+        rstart +=1
+        
+        ### Setup layout
+        self.setLayout(self.ui_gridLayout)
         self.show()
+    
+    def finished(self,event):
+        self.mainWindow.processDataGUI(self.inputfile)
+    
+    def loadDataDir(self,event):
+        self.mainWindow.setStatusBarText('Reading DICOM directory...')
+        self.inputfile = self.__get_datadir(
+            app=True,
+            directory=''
+        )
+        if self.inputfile is None:
+            self.mainWindow.setStatusBarText('No DICOM directory specified!')
+            return
+        self.importDataWithGui()
+    
+    def loadDataFile(self,event):
+        self.mainWindow.setStatusBarText('Reading data file...')
+        self.inputfile = self.__get_datafile(
+            app=True,
+            directory=''
+        )
+        if self.inputfile is None:
+            self.mainWindow.setStatusBarText('No data path specified!')
+            return
+        self.importDataWithGui()
+    
+    def loadDataClear(self,event):
+        self.inputfile=None
+        self.importDataWithGui()
+        self.mainWindow.setStatusBarText('Ready')
+        
+    def __get_datafile(self, app=False, directory=''):
+        """
+        Draw a dialog for directory selection.
+        """
+
+        from PyQt4.QtGui import QFileDialog
+        if app:
+            dcmdir = QFileDialog.getOpenFileName(
+                caption='Select Data File',
+                directory=directory
+                #options=QFileDialog.ShowDirsOnly,
+            )
+        else:
+            app = QApplication(sys.argv)
+            dcmdir = QFileDialog.getOpenFileName(
+                caption='Select DICOM Folder',
+                #options=QFileDialog.ShowDirsOnly,
+                directory=directory
+            )
+            #app.exec_()
+            app.exit(0)
+        if len(dcmdir) > 0:
+
+            dcmdir = "%s" % (dcmdir)
+            dcmdir = dcmdir.encode("utf8")
+        else:
+            dcmdir = None
+        return dcmdir
+        
+    def __get_datadir(self, app=False, directory=''):
+        """
+        Draw a dialog for directory selection.
+        """
+
+        from PyQt4.QtGui import QFileDialog
+        if app:
+            dcmdir = QFileDialog.getExistingDirectory(
+                caption='Select DICOM Folder',
+                options=QFileDialog.ShowDirsOnly,
+                directory=directory
+            )
+        else:
+            app = QApplication(sys.argv)
+            dcmdir = QFileDialog.getExistingDirectory(
+                caption='Select DICOM Folder',
+                options=QFileDialog.ShowDirsOnly,
+                directory=directory
+            )
+            #app.exec_()
+            app.exit(0)
+        if len(dcmdir) > 0:
+
+            dcmdir = "%s" % (dcmdir)
+            dcmdir = dcmdir.encode("utf8")
+        else:
+            dcmdir = None
+        return dcmdir
+        
+    def importDataWithGui(self):
+        if self.inputfile is None:
+            self.text_dcm_dir.setText('Data path: '+'Generated sample data')
+            self.text_dcm_data.setText('Data info: '+'200x200x200, [1.0,1.0,1.0]')
+        else:
+            try:
+                reader = datareader.DataReader()
+                datap = reader.Get3DData(self.inputfile, dataplus_format=True)
+            except Exception:
+                self.mainWindow.setStatusBarText('Bad file/folder!!!')
+                return
+            
+            voxelsize = datap['voxelsize_mm']
+            shape = datap['data3d'].shape
+            self.text_dcm_dir.setText('Data path: '+str(self.inputfile))
+            self.text_dcm_data.setText('Data info: '+str(shape[0])+'x'+str(shape[1])+'x'+str(shape[2])+', '+str(voxelsize))
+            
+            self.mainWindow.setStatusBarText('Ready')
         
 if __name__ == "__main__":
     HA.main()
