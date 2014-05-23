@@ -117,15 +117,15 @@ class OrganSegmentationWindow(QMainWindow):
         self.text_dcm_dir = QLabel('DICOM dir:')
         self.text_dcm_data = QLabel('DICOM data:')
         grid.addWidget(hr, rstart + 0, 0, 1, 4)
-        grid.addWidget(text_dcm, rstart + 1, 1, 1, 2)
+        grid.addWidget(text_dcm, rstart + 1, 1, 1, 3)
         grid.addWidget(btn_dcmdir, rstart + 2, 1)
         grid.addWidget(btn_datafile, rstart + 2, 2)
         grid.addWidget(btn_dcmcrop, rstart + 2, 3)
         # voxelsize gui comment
         # grid.addWidget(self.text_vs, rstart + 3, 1)
         # grid.addWidget(combo_vs, rstart + 4, 1)
-        grid.addWidget(self.text_dcm_dir, rstart + 6, 1, 1, 2)
-        grid.addWidget(self.text_dcm_data, rstart + 7, 1, 1, 2)
+        grid.addWidget(self.text_dcm_dir, rstart + 6, 1, 1, 3)
+        grid.addWidget(self.text_dcm_data, rstart + 7, 1, 1, 3)
         rstart += 9
 
         # ################ segmentation
