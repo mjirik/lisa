@@ -81,11 +81,13 @@ class OrganSegmentationWindow(QMainWindow):
         lisa_logo = QLabel()
         logopath = os.path.join(path_to_script, "../applications/LISA256.png")
         logo = QPixmap(logopath)
-        lisa_logo.setPixmap(logo)
+        lisa_logo.setPixmap(logo)#.scaledToWidth(128))
         grid.addWidget(lisa_title, 0, 1)
         grid.addWidget(info, 1, 1)
-        grid.addWidget(lisa_logo, 0, 2, 2, 1)
-        grid.setColumnMinimumWidth(1, logo.width())
+        grid.addWidget(lisa_logo, 0, 2, 2, 2)
+        #grid.setColumnMinimumWidth(1, logo.width()/2)
+        #grid.setColumnMinimumWidth(2, logo.width()/2)
+        #grid.setColumnMinimumWidth(3, logo.width()/2)
 
         ### dicom reader
         rstart = 2
@@ -117,8 +119,8 @@ class OrganSegmentationWindow(QMainWindow):
         grid.addWidget(hr, rstart + 0, 0, 1, 4)
         grid.addWidget(text_dcm, rstart + 1, 1, 1, 2)
         grid.addWidget(btn_dcmdir, rstart + 2, 1)
-        grid.addWidget(btn_datafile, rstart + 3, 1)
-        grid.addWidget(btn_dcmcrop, rstart + 3, 2)
+        grid.addWidget(btn_datafile, rstart + 2, 2)
+        grid.addWidget(btn_dcmcrop, rstart + 2, 3)
         # voxelsize gui comment
         # grid.addWidget(self.text_vs, rstart + 3, 1)
         # grid.addWidget(combo_vs, rstart + 4, 1)
@@ -141,10 +143,10 @@ class OrganSegmentationWindow(QMainWindow):
         grid.addWidget(hr, rstart + 0, 0, 1, 4)
         grid.addWidget(text_seg, rstart + 1, 1)
         grid.addWidget(btn_mask, rstart + 2, 1)
-        grid.addWidget(btn_segauto, rstart + 3, 1)
-        grid.addWidget(btn_segman, rstart + 3, 2)
-        grid.addWidget(self.text_seg_data, rstart + 4, 1, 1, 2)
-        rstart += 5
+        grid.addWidget(btn_segauto, rstart + 2, 2)
+        grid.addWidget(btn_segman, rstart + 2, 3)
+        grid.addWidget(self.text_seg_data, rstart + 3, 1, 1, 2)
+        rstart += 4
 
         # ################ save/view
         # hr = QFrame()
@@ -161,8 +163,8 @@ class OrganSegmentationWindow(QMainWindow):
             btn_segview.setEnabled(False)
 
         grid.addWidget(btn_segsave, rstart + 0, 1)
-        grid.addWidget(btn_segview, rstart + 0, 2)
-        grid.addWidget(btn_segsavedcm, rstart + 1, 1)
+        grid.addWidget(btn_segview, rstart + 0, 3)
+        grid.addWidget(btn_segsavedcm, rstart + 0, 2)
         rstart += 2
 
         # ######Virtual resection
