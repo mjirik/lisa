@@ -52,7 +52,7 @@ class OrganSegmentationWindow(QMainWindow):
         cw = QWidget()
         self.setCentralWidget(cw)
         grid = QGridLayout()
-        grid.setSpacing(15)
+        grid.setSpacing(10)
 
         # status bar
         self.statusBar().showMessage('Ready')
@@ -116,11 +116,11 @@ class OrganSegmentationWindow(QMainWindow):
         # end-- voxelsize gui
         self.text_dcm_dir = QLabel('DICOM dir:')
         self.text_dcm_data = QLabel('DICOM data:')
-        grid.addWidget(hr, rstart + 0, 0, 1, 4)
-        grid.addWidget(text_dcm, rstart + 1, 1, 1, 3)
-        grid.addWidget(btn_dcmdir, rstart + 2, 1)
-        grid.addWidget(btn_datafile, rstart + 2, 2)
-        grid.addWidget(btn_dcmcrop, rstart + 2, 3)
+        grid.addWidget(hr, rstart + 0, 2, 1, 4)
+        grid.addWidget(text_dcm, rstart + 0, 1, 1, 3)
+        grid.addWidget(btn_dcmdir, rstart + 1, 1)
+        grid.addWidget(btn_datafile, rstart + 1, 2)
+        grid.addWidget(btn_dcmcrop, rstart + 1, 3)
         # voxelsize gui comment
         # grid.addWidget(self.text_vs, rstart + 3, 1)
         # grid.addWidget(combo_vs, rstart + 4, 1)
@@ -140,13 +140,13 @@ class OrganSegmentationWindow(QMainWindow):
         btn_segman = QPushButton("Manual seg.", self)
         btn_segman.clicked.connect(self.manualSeg)
         self.text_seg_data = QLabel('segmented data:')
-        grid.addWidget(hr, rstart + 0, 0, 1, 4)
-        grid.addWidget(text_seg, rstart + 1, 1)
-        grid.addWidget(btn_mask, rstart + 2, 1)
-        grid.addWidget(btn_segauto, rstart + 2, 2)
-        grid.addWidget(btn_segman, rstart + 2, 3)
-        grid.addWidget(self.text_seg_data, rstart + 3, 1, 1, 2)
-        rstart += 4
+        grid.addWidget(hr, rstart + 0, 2, 1, 4)
+        grid.addWidget(text_seg, rstart + 0, 1)
+        grid.addWidget(btn_mask, rstart + 1, 1)
+        grid.addWidget(btn_segauto, rstart + 1, 2)
+        grid.addWidget(btn_segman, rstart + 1, 3)
+        grid.addWidget(self.text_seg_data, rstart + 2, 1, 1, 2)
+        rstart += 3
 
         # ################ save/view
         # hr = QFrame()
@@ -178,8 +178,8 @@ class OrganSegmentationWindow(QMainWindow):
         text_resection = QLabel('Virtual resection')
         text_resection.setFont(font_label)
 
-        grid.addWidget(hr, rstart + 0, 0, 1, 4)
-        grid.addWidget(text_resection, rstart + 1, 1)
+        grid.addWidget(hr, rstart + 0, 2, 1, 4)
+        grid.addWidget(text_resection, rstart + 0, 1)
 
         btn_vesselseg = QPushButton("Vessel segmentation", self)
         btn_vesselseg.clicked.connect(self.btnVesselSegmentation)
@@ -187,14 +187,14 @@ class OrganSegmentationWindow(QMainWindow):
         btn_resection = QPushButton("Virtual resection", self)
         btn_resection.clicked.connect(self.btnVirtualResection)
 
-        grid.addWidget(btn_vesselseg, rstart + 2, 1)
-        grid.addWidget(btn_resection, rstart + 2, 2)
+        grid.addWidget(btn_vesselseg, rstart + 1, 1)
+        grid.addWidget(btn_resection, rstart + 1, 2)
 
         ##############
 
         hr = QFrame()
         hr.setFrameShape(QFrame.HLine)
-        grid.addWidget(hr, rstart + 0, 0, 1, 4)
+        #grid.addWidget(hr, rstart + 0, 0, 1, 4)
 
         rstart += 3
         # quit
