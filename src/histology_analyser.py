@@ -70,16 +70,17 @@ class HistologyAnalyser:
             pyed.exec_()
 
     def data_to_binar(self):
+        filteredData = scipy.ndimage.filters.median_filter(self.data3d, size=2)
+        #filteredData = self.data3d
+        
         data3d_thr = segmentation.vesselSegmentation(
-            self.data3d,
+            filteredData, #self.data3d,
             segmentation=np.ones(self.data3d.shape, dtype='int8'),
-            #segmentation=oseg.orig_scale_segmentation,
             threshold=self.threshold, #-1,
-            inputSigma=0.15,
+            inputSigma=0, #0.15,
             dilationIterations=2,
             nObj=1,
             biggestObjects=False,
-            #dataFiltering = True,
             interactivity= not self.nogui,
             binaryClosingIterations=5,
             binaryOpeningIterations=1)
