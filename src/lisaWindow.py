@@ -145,7 +145,7 @@ class OrganSegmentationWindow(QMainWindow):
         grid.addWidget(btn_mask, rstart + 2, 1)
         grid.addWidget(btn_segauto, rstart + 2, 2)
         grid.addWidget(btn_segman, rstart + 2, 3)
-        grid.addWidget(self.text_seg_data, rstart + 3, 1, 1, 2)
+        grid.addWidget(self.text_seg_data, rstart + 3, 1, 1, 3)
         rstart += 4
 
         # ################ save/view
