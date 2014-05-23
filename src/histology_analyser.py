@@ -742,7 +742,7 @@ class SkeletonAnalyser:
 
         return edg_stats
 
-def generate_sample_data(m=1, noise_level=0.02, gauss_sigma=0.15):
+def generate_sample_data(m=1, noise_level=0.005, gauss_sigma=0.1):
     """
     Generate sample vessel system.
     J. Kunes
@@ -799,15 +799,15 @@ def generate_sample_data(m=1, noise_level=0.02, gauss_sigma=0.15):
     data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 3*m] = 0
     data3d[data3d_new == 0] = 1
     
-    data3d = data3d*3030
-    data3d += 5920
+    data3d = data3d*3030   # 3030+5920 = vessel value
+    data3d += 5920         # 5920 = background value
     
-    if gauss_sigma>=0:
+    if gauss_sigma>0:
         sigma = np.round(gauss_sigma, 2)
         sigmaNew = thresholding_functions.calculateSigma([1,1,1], sigma)
         data3d = thresholding_functions.gaussFilter(data3d, sigmaNew)
     
-    if noise_level>=0:
+    if noise_level>0:
         noise = np.random.normal(1,noise_level,(100*m,100*m,100*m))
         data3d = data3d*noise
     
