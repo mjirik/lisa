@@ -1,5 +1,7 @@
 basedir: /home/mjirik/data/medical/
+#basedir: /home/petr/Dokumenty/statistics/sliver07/
 data:
+#- {sliverorig: training-part1/liver-orig001.mhd, sliverseg: training-part1/liver-seg001.mhd}
 - {sliverorig: orig/sliver07/training/liver-orig001.mhd, sliverseg: orig/sliver07/training/liver-seg001.mhd}
 - {sliverorig: orig/sliver07/training/liver-orig002.mhd, sliverseg: orig/sliver07/training/liver-seg002.mhd}
 - {sliverorig: orig/sliver07/training/liver-orig003.mhd, sliverseg: orig/sliver07/training/liver-seg003.mhd}

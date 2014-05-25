@@ -29,7 +29,7 @@ sys.path.append(os.path.join(path_to_script,
 import logging
 logger = logging.getLogger(__name__)
 
-
+import json
 #import apdb
 #  apdb.set_trace();
 #import scipy.io
@@ -92,11 +92,12 @@ def lbp(data3d_orig, data3d_seg, visualization=True):
     return lbpRef
 
 
-def lbp3d(data3d_orig, data3d_seg, visualization=True):
+def lbp3d(data3d_orig, filename, visualization=True):
     import lbpLibrary3d as lbp3d
     lib3d = lbp3d.loadLibrary()
     f = open(filename, 'r')
     maskJSON = json.load(f)
+    mask = {}
     mask['maskCoef'] = maskJSON['mask']['coefs']
     mask['center'] = maskJSON['mask']['center']
     mask['mask'] = coordToPoints(
@@ -111,8 +112,10 @@ def lbp3d(data3d_orig, data3d_seg, visualization=True):
         maskJSON['mask']['pointsNum'],
         mask,
         maskJSON['mask']['size'][0])
-    return
+    return res
 
+def f_lbp3d(data3d_orig):
+	return lbp3d(data3d_orig, '/home/petr/Dokumenty/git/lbpLibrary/masks/mask3D_8_4.json', True)	
 
 def get_features(data3d_orig, data3d_seg, feature_fcn, visualization=True):
     u"""
