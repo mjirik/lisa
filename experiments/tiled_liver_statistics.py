@@ -100,7 +100,7 @@ def lbp3d(data3d_orig, filename, visualization=True):
     mask = {}
     mask['maskCoef'] = maskJSON['mask']['coefs']
     mask['center'] = maskJSON['mask']['center']
-    mask['mask'] = coordToPoints(
+    mask['mask'] = lbp3d.coordToPoints(
         maskJSON['mask']['coordx'],
         maskJSON['mask']['coordy'],
         maskJSON['mask']['coordz'],
