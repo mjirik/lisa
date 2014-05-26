@@ -29,7 +29,8 @@ class DataReader:
         self.overlay_fcn = None
 
     def Get3DData(self, datapath, qt_app=None,
-                  dataplus_format=False, gui=False):
+                  dataplus_format=False, gui=False,
+                  start=0, stop=None, step=1):
         """
         :datapath directory with input data
         :qt_app if it is set to None (as default) all dialogs for series
@@ -91,7 +92,7 @@ class DataReader:
 #reading dicom
 
             reader = dcmr.DicomReader(datapath, qt_app=None, gui=True)
-            data3d = reader.get_3Ddata()
+            data3d = reader.get_3Ddata(start, stop, step)
             metadata = reader.get_metaData()
             metadata['series_number'] = reader.series_number
             metadata['datadir'] = datapath
