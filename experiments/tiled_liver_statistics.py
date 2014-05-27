@@ -80,9 +80,11 @@ def feat_hist(data3d_orig):
     hist1, bin_edges1 = np.histogram(data3d_orig, bins=bins)
     return hist1
 
+
 def super_feat_hist(data3d_orig, parameter):
     return feat_hist(data3d_orig)
     #print parameter
+
 
 def lbp(data3d_orig, data3d_seg, visualization=True):
     import realtime_lbp as real_lib
@@ -114,8 +116,13 @@ def lbp3d(data3d_orig, filename, visualization=True):
         maskJSON['mask']['size'][0])
     return res
 
+
 def f_lbp3d(data3d_orig):
-	return lbp3d(data3d_orig, '/home/petr/Dokumenty/git/lbpLibrary/masks/mask3D_8_4.json', True)	
+    return lbp3d(
+        data3d_orig,
+        '/home/petr/Dokumenty/git/lbpLibrary/masks/mask3D_8_4.json',
+        True)
+
 
 def get_features(data3d_orig, data3d_seg, feature_fcn, visualization=True):
     u"""
@@ -218,8 +225,8 @@ def sample_input_data():
     inputdata = {
         'basedir': '/home/mjirik/data/medical/',
         'data': [
-            {'sliverseg': 'data_orig/sliver07/training-part1/liver-seg001.mhd', 'sliverorig': 'data_orig/sliver07/training-part1/liver-orig001.mhd'},
-            {'sliverseg': 'data_orig/sliver07/training-part1/liver-seg002.mhd', 'sliverorig': 'data_orig/sliver07/training-part1/liver-orig002.mhd'},
+            {'sliverseg': 'data_orig/sliver07/training-part1/liver-seg001.mhd', 'sliverorig': 'data_orig/sliver07/training-part1/liver-orig001.mhd'}, # noqa
+            {'sliverseg': 'data_orig/sliver07/training-part1/liver-seg002.mhd', 'sliverorig': 'data_orig/sliver07/training-part1/liver-orig002.mhd'}, # noqa
         ]
     }
 
@@ -262,7 +269,7 @@ def read_data_orig_and_seg(inputdata, i):
     data3d_seg = (data3d_a > 0).astype(np.int8)
     data3d_orig = data3d_b
 
-    return data3d_orig, data3d_seg
+    return data3d_orig, data3d_seg, metadata_a['voxelsize_mm']
 
 
 def one_experiment_setting_for_whole_dataset(inputdata, tile_shape,
@@ -274,7 +281,8 @@ def one_experiment_setting_for_whole_dataset(inputdata, tile_shape,
     #indata_len = 3
 
     for i in range(0, indata_len):
-        data3d_orig, data3d_seg = read_data_orig_and_seg(inputdata, i)
+        data3d_orig, data3d_seg, voxelsize_mm = read_data_orig_and_seg(
+            inputdata, i)
 
         if visualization:
             pyed = py3DSeedEditor.py3DSeedEditor(data3d_orig,
@@ -312,8 +320,8 @@ def one_experiment_setting_for_whole_dataset(inputdata, tile_shape,
 
             #pyed = py3DSeedEditor.py3DSeedEditor(labels_train, contour=labels)
         if visualization:
-          pyed = py3DSeedEditor.py3DSeedEditor(data3d_seg, contour=labels)
-          pyed.show()
+            pyed = py3DSeedEditor.py3DSeedEditor(data3d_seg, contour=labels)
+            pyed.show()
         fv_tiles.insert(i, fv_t)
 
 # @TODO vracet něco inteligentního, fvall je prázdný
@@ -369,7 +377,8 @@ def main():
     parser.add_argument('-v', '--visualization',  action='store_true',
                         help='Turn on visualization', default=False)
     parser.add_argument('-fc', '--features_classifs',  action='store_true',
-                        help='Read features and classifs list from file', default=False)
+                        help='Read features and classifs list from file',
+                        default=False)
     parser.add_argument('-i', '--input', help='input yaml file',
                         default="20130919_liver_statistics.yaml")
     parser.add_argument('-o', '--output', help='output file',
@@ -398,7 +407,7 @@ def main():
         featrs_plus_classifs = features_classifs.fc
     else:
         featrs_plus_classifs = make_product_list(list_of_feature_fcn,
-                                                list_of_classifiers)
+                                                 list_of_classifiers)
 
     result = experiment(path_to_yaml, featrs_plus_classifs,
                         tile_shape=tile_shape,
