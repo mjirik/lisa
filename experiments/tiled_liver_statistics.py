@@ -350,7 +350,7 @@ def experiment(path_to_yaml, featrs_plus_classifs,
 
         fvall = one_experiment_setting_for_whole_dataset(
             inputdata, tile_shape,
-            feature_fcn, classif_fcn, train)
+            feature_fcn, classif_fcn, train, visualization)
 
         result = {'params': str(fpc), 'fvall': fvall}
         results.append(result)
@@ -400,7 +400,7 @@ def main():
     from sklearn.naive_bayes import GaussianNB
 
     list_of_classifiers = [svm.SVC, GaussianNB]
-    tile_shape = [1, 100, 100]
+    tile_shape = [10, 100, 100]
 
     if args.features_classifs:
         import features_classifs
