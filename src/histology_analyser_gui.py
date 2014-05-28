@@ -72,13 +72,14 @@ class HistologyAnalyserWindow(QMainWindow):
         """
         sys.exit(0)
     
-    def processDataGUI(self,inputfile=None):
+    def processDataGUI(self, data3d=None, metadata=None):
         """
         GUI version of histology analysation algorithm
         """
-        self.args_inputfile = inputfile
+        self.data3d = data3d
+        self.metadata = metadata
         
-        ### when input is just skeleton
+        ### when input is just skeleton !!! NEEDS TO BE EDITED
         if self.args_skeleton:  #!!!!! NOT TESTED!!!!
             logger.info("input is skeleton")
             struct = misc.obj_from_file(filename='tmp0.pkl', filetype='pickle')
@@ -90,15 +91,12 @@ class HistologyAnalyserWindow(QMainWindow):
             logger.info("end of is skeleton")
             self.fixWindow() # just to be sure
         else:
-            ### Reading/Generating data
-            if self.args_inputfile is None: ## Using generated sample data
+            ### Generating data if no input file
+            if (self.data3d is None) or (self.metadata is None):
                 logger.info('Generating sample data...')
                 self.setStatusBarText('Generating sample data...')
                 self.metadata = {'voxelsize_mm': [1, 1, 1]}
                 self.data3d = HA.generate_sample_data(2)
-            else: ## Normal runtime
-                dr = datareader.DataReader()
-                self.data3d, self.metadata = dr.Get3DData(self.args_inputfile)
                 
             ### Crop data
             self.setStatusBarText('Crop Data')
@@ -321,7 +319,7 @@ class LoadDialog(QDialog):
         self.show()
     
     def finished(self,event):
-        self.mainWindow.processDataGUI(self.inputfile)
+        self.mainWindow.processDataGUI(self.data3d, self.metadata)
     
     def loadDataDir(self,event):
         self.mainWindow.setStatusBarText('Reading DICOM directory...')
@@ -415,13 +413,13 @@ class LoadDialog(QDialog):
         else:
             try:
                 reader = datareader.DataReader()
-                datap = reader.Get3DData(self.inputfile, dataplus_format=True)
+                self.data3d, self.metadata = reader.Get3DData(self.inputfile)
             except Exception:
                 self.mainWindow.setStatusBarText('Bad file/folder!!!')
                 return
             
-            voxelsize = datap['voxelsize_mm']
-            shape = datap['data3d'].shape
+            voxelsize = self.metadata['voxelsize_mm']
+            shape = self.data3d.shape
             self.text_dcm_dir.setText('Data path: '+str(self.inputfile))
             self.text_dcm_data.setText('Data info: '+str(shape[0])+'x'+str(shape[1])+'x'+str(shape[2])+', '+str(voxelsize))
             
