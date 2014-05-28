@@ -22,6 +22,10 @@ class HistologyReport:
     def importFromYaml(self, filename):
         data = misc.obj_from_file(filename=filename, filetype='yaml')
         self.data = data
+        
+    def writeReportToYAML(self, filename='hist_report.yaml'):
+        logger.debug('write report to yaml')
+        misc.obj_to_file(self.stats, filename=filename, filetype='yaml')
 
     def generateStats(self):
         """
@@ -54,11 +58,13 @@ class HistologyReport:
         stats['Total length mm'] = sum(length_array)
         stats['Avg length mm'] = stats['Total length mm']/float(num_of_entries)
         stats['Avg radius mm'] = sum(radius_array)/float(num_of_entries)
-        stats['Radius histogram'] = np.histogram(radius_array)
-        stats['Length histogram'] = np.histogram(length_array)
+        radiusHistogram = np.histogram(radius_array)
+        stats['Radius histogram'] = [radiusHistogram[0].tolist(),radiusHistogram[1].tolist()]
+        lengthHistogram = np.histogram(length_array)
+        stats['Length histogram'] = [lengthHistogram[0].tolist(),lengthHistogram[1].tolist()]
 
+        self.stats = {'Report':stats}
         logger.debug(stats)
-        self.stats = stats
 
 
 if __name__ == "__main__":
@@ -72,6 +78,11 @@ if __name__ == "__main__":
         help='input file, yaml file'
     )
     parser.add_argument(
+        '-o', '--outputfile',
+        default='hist_report.yaml',
+        help='output file, yaml file'
+    )
+    parser.add_argument(
         '-d', '--debug', action='store_true',
         help='Debug mode')
     args = parser.parse_args()
@@ -83,12 +94,11 @@ if __name__ == "__main__":
 
     if args.debug:
         logger.setLevel(logging.DEBUG)
-
-    #logger.error("pokus")
+    
+    # get report
     hr = HistologyReport()
     hr.importFromYaml(args.inputfile)
     hr.generateStats()
-
-    #data = misc.obj_from_file(args.inputfile, filetype = 'pickle')
-
-    #print args.input_is_skeleton
+    
+    # save report to file
+    hr.writeReportToYAML(args.outputfile)
