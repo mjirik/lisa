@@ -12,6 +12,7 @@ import argparse
 import numpy as np
 
 import misc
+import csv
 
 class HistologyReport:
     def __init__(self):
@@ -25,7 +26,28 @@ class HistologyReport:
         
     def writeReportToYAML(self, filename='hist_report.yaml'):
         logger.debug('write report to yaml')
+        filename = filename+'.yaml'
         misc.obj_to_file(self.stats, filename=filename, filetype='yaml')
+        
+    def writeReportToCSV(self, filename='hist_report'):
+        logger.debug('write report to csv')
+        filename = filename+'.csv'
+        data = self.stats['Report']
+
+        with open(filename, 'wb') as csvfile:
+            writer = csv.writer(
+                    csvfile,
+                    delimiter=';',
+                    quotechar='"',
+                    quoting=csv.QUOTE_MINIMAL
+                    )                    
+            writer.writerow([data['Avg length mm']])
+            writer.writerow([data['Total length mm']])
+            writer.writerow([data['Avg radius mm']])
+            writer.writerow(data['Radius histogram'][0])
+            writer.writerow(data['Radius histogram'][1])
+            writer.writerow(data['Length histogram'][0])
+            writer.writerow(data['Length histogram'][1])
 
     def generateStats(self):
         """
@@ -79,8 +101,8 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         '-o', '--outputfile',
-        default='hist_report.yaml',
-        help='output file, yaml file'
+        default='hist_report',
+        help='output file, yaml,csv file (without file extension)'
     )
     parser.add_argument(
         '-d', '--debug', action='store_true',
@@ -100,5 +122,6 @@ if __name__ == "__main__":
     hr.importFromYaml(args.inputfile)
     hr.generateStats()
     
-    # save report to file
+    # save report to files
     hr.writeReportToYAML(args.outputfile)
+    hr.writeReportToCSV(args.outputfile)
