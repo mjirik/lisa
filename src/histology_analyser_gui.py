@@ -25,6 +25,7 @@ from seed_editor_qt import QTSeedEditor
 import py3DSeedEditor
 
 import histology_analyser as HA
+from histology_report import HistologyReport
 
 class HistologyAnalyserWindow(QMainWindow): 
     HEIGHT = 600
@@ -150,8 +151,18 @@ class HistologyAnalyserWindow(QMainWindow):
         #struct = {'skel': self.data3d_skel, 'thr': self.data3d_thr, 'data3d': self.data3d, 'metadata':self.metadata}
         #misc.obj_to_file(struct, filename='tmp0.pkl', filetype='pickle')
         
-        ### End
-        self.showMessage('Finished')
+        ### Finished - Show report
+        hr = HistologyReport()
+        hr.data = self.ha.stats
+        hr.generateStats()
+        report = hr.stats['Report']
+        self.showMessage('Finished:'+'\n'
+                        +'Total length mm: '+str(report['Total length mm'])+'\n'
+                        +'Avg length mm: '+str(report['Avg length mm'])+'\n'
+                        +'Avg radius mm: '+str(report['Avg radius mm'])+'\n'
+                        #+'Radius histogram: '+str(report['Radius histogram'])+'\n'
+                        #+'Length histogram: '+str(report['Length histogram'])+'\n'
+                        )
         self.setStatusBarText('Finished')
         
     def setStatusBarText(self,text=""):
@@ -254,6 +265,8 @@ class LoadDialog(QDialog):
     def __init__(self, mainWindow=None, inputfile=None):
         self.mainWindow = mainWindow
         self.inputfile = inputfile
+        self.data3d = None
+        self.metadata = None
         
         QDialog.__init__(self)
         self.initUI()
