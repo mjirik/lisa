@@ -73,15 +73,17 @@ class HistologyAnalyserWindow(QMainWindow):
         """
         sys.exit(0)
     
-    def processDataGUI(self, data3d=None, metadata=None):
+    def processDataGUI(self, data3d=None, metadata=None, crgui=True):
         """
         GUI version of histology analysation algorithm
         """
         self.data3d = data3d
         self.metadata = metadata
+        self.crgui = crgui
         
-        ### when input is just skeleton !!! NEEDS TO BE EDITED
-        if self.args_skeleton:  #!!!!! NOT TESTED!!!!
+        ### when input is just skeleton
+        # TODO - edit input_is_skeleton mode to run in gui + test if it works
+        if self.args_skeleton: 
             logger.info("input is skeleton")
             struct = misc.obj_from_file(filename='tmp0.pkl', filetype='pickle')
             self.data3d_skel = struct['skel']
@@ -100,30 +102,36 @@ class HistologyAnalyserWindow(QMainWindow):
                 self.data3d = HA.generate_sample_data(2)
                 
             ### Crop data
+            # TODO - info about what is happening on top of window (or somewhere else)
             self.setStatusBarText('Crop Data')
-            if (self.args_crop is None) and (self.args_crgui is True):
-                self.data3d = self.cropData(self.data3d)
-            elif self.args_crop is not None:    
+            if self.args_crop is not None: # --crop cli parameter crop
                 crop = self.args_crop
                 logger.debug('Croping data: %s', str(crop))
                 self.data3d = self.data3d[crop[0]:crop[1], crop[2]:crop[3], crop[4]:crop[5]]
+            if self.crgui is True: # --crgui gui crop
+                logger.debug('Gui data crop')
+                self.data3d = self.cropData(self.data3d)
             
             ### Init HistologyAnalyser object
             logger.debug('Init HistologyAnalyser object')
             self.ha = HA.HistologyAnalyser(self.data3d, self.metadata, self.args_threshold, nogui=False)
             
             ### Remove Area
+            # TODO - info about what is happening on top of window (or somewhere else)
             logger.debug('Remove area')
             self.setStatusBarText('Remove area')
             self.removeArea(self.ha.data3d)
 
             ### Segmentation
+            # TODO - more detailed info about what is happening + suggest default segmentations parameters
             logger.debug('Segmentation')
             self.setStatusBarText('Segmentation')
             self.showMessage('Segmentation\n1. Select segmentation Area\n2. Select finer segmentation settings\n3. Wait until segmentation is finished')
             
             self.data3d_thr, self.data3d_skel = self.ha.data_to_skeleton()
             self.fixWindow()
+        
+        # TODO - pause with dialog (preview segmented data, contiune to compute statistics, go back to segmentation/crop/mask...)
         
         ### Show Segmented Data
         logger.debug('Preview of segmented data')
@@ -133,17 +141,19 @@ class HistologyAnalyserWindow(QMainWindow):
         self.fixWindow()
         
         ### Computing statistics
+        # TODO - maybe run in separate thread and send info to main window (% completed)
         logger.info("######### statistics")
         self.setStatusBarText('Computing Statistics')
         self.showMessage('Computing Statistics\nPlease wait... (it can take very long)')
         
-        self.ha.skeleton_to_statistics(self.data3d_thr, self.data3d_skel)
+        self.ha.skeleton_to_statistics(self.data3d_thr, self.data3d_skel) 
         self.fixWindow()
         
         ### Saving files
+        # TODO - file save dialog (maybe show together with "run histology report" button etc..)
         logger.info("##### write to file")
         self.setStatusBarText('Statistics - write file')
-        self.showMessage('Writing files\nPlease wait...') ### TO DO!! - file save dialog
+        self.showMessage('Writing files\nPlease wait...') 
         
         self.ha.writeStatsToCSV()
         self.ha.writeStatsToYAML()
@@ -152,6 +162,7 @@ class HistologyAnalyserWindow(QMainWindow):
         #misc.obj_to_file(struct, filename='tmp0.pkl', filetype='pickle')
         
         ### Finished - Show report
+        # TODO - display nicely histology report
         hr = HistologyReport()
         hr.data = self.ha.stats
         hr.generateStats()
@@ -233,7 +244,7 @@ class HistologyAnalyserWindow(QMainWindow):
         return newapp.img
         
     def loadData(self):
-        newapp = LoadDialog(mainWindow=self, inputfile=self.args_inputfile)
+        newapp = LoadDialog(mainWindow=self, inputfile=self.args_inputfile, crgui=self.args_crgui)
         self.embedWidget(newapp)
         self.fixWindow(self.WIDTH,300)
         newapp.exec_()
@@ -262,9 +273,10 @@ class MessageDialog(QDialog):
         self.show()
         
 class LoadDialog(QDialog):
-    def __init__(self, mainWindow=None, inputfile=None):
+    def __init__(self, mainWindow=None, inputfile=None, crgui=False):
         self.mainWindow = mainWindow
         self.inputfile = inputfile
+        self.crgui = crgui
         self.data3d = None
         self.metadata = None
         
@@ -276,8 +288,6 @@ class LoadDialog(QDialog):
     def initUI(self):
         self.ui_gridLayout = QGridLayout()
         self.ui_gridLayout.setSpacing(15)
-
-        #self.ui_gridLayout.setColumnMinimumWidth(1, 500)
 
         rstart = 0
         
@@ -303,14 +313,24 @@ class LoadDialog(QDialog):
         btn_dcmdir.clicked.connect(self.loadDataDir)
         btn_datafile = QPushButton("Load file", self)
         btn_datafile.clicked.connect(self.loadDataFile)
-        btn_dataclear = QPushButton("Clear data", self)
+        btn_dataclear = QPushButton("Generated data", self)
         btn_dataclear.clicked.connect(self.loadDataClear)
         
         self.text_dcm_dir = QLabel('Data path: ')
         self.text_dcm_data = QLabel('Data info: ')
         
-        btn_process = QPushButton("OK", self)
+        crop_box = QCheckBox('Crop data', self)
+        if self.crgui:
+            crop_box.setCheckState(Qt.Checked)
+        else:
+            crop_box.setCheckState(Qt.Unchecked)
+        crop_box.stateChanged.connect(self.cropBox)
+        
+        btn_process = QPushButton("Continue", self)
         btn_process.clicked.connect(self.finished)
+        
+        hr2 = QFrame()
+        hr2.setFrameShape(QFrame.HLine)
         
         self.ui_gridLayout.addWidget(hr, rstart + 0, 0, 1, 3)
         self.ui_gridLayout.addWidget(info, rstart + 1, 0, 1, 3)
@@ -319,8 +339,10 @@ class LoadDialog(QDialog):
         self.ui_gridLayout.addWidget(btn_dataclear, rstart + 2, 2)
         self.ui_gridLayout.addWidget(self.text_dcm_dir, rstart + 3, 0, 1, 3)
         self.ui_gridLayout.addWidget(self.text_dcm_data, rstart + 4, 0, 1, 3)
-        self.ui_gridLayout.addWidget(btn_process, rstart + 5, 1,)
-        rstart +=6
+        self.ui_gridLayout.addWidget(crop_box, rstart + 5, 0)
+        self.ui_gridLayout.addWidget(hr2, rstart + 6, 0, 1, 3)
+        self.ui_gridLayout.addWidget(btn_process, rstart + 7, 1)
+        rstart +=8
         
         ### Stretcher
         self.ui_gridLayout.addItem(QSpacerItem(0,0), rstart + 0, 0,)
@@ -332,7 +354,13 @@ class LoadDialog(QDialog):
         self.show()
     
     def finished(self,event):
-        self.mainWindow.processDataGUI(self.data3d, self.metadata)
+        self.mainWindow.processDataGUI(self.data3d, self.metadata, self.crgui)
+        
+    def cropBox(self, state):
+        if state == QtCore.Qt.Checked:
+            self.crgui = True
+        else:
+            self.crgui = False
     
     def loadDataDir(self,event):
         self.mainWindow.setStatusBarText('Reading DICOM directory...')
@@ -380,14 +408,13 @@ class LoadDialog(QDialog):
                 #options=QFileDialog.ShowDirsOnly,
                 directory=directory
             )
-            #app.exec_()
             app.exit(0)
         if len(dcmdir) > 0:
-
             dcmdir = "%s" % (dcmdir)
             dcmdir = dcmdir.encode("utf8")
         else:
             dcmdir = None
+            
         return dcmdir
         
     def __get_datadir(self, app=False, directory=''):
@@ -409,14 +436,13 @@ class LoadDialog(QDialog):
                 options=QFileDialog.ShowDirsOnly,
                 directory=directory
             )
-            #app.exec_()
             app.exit(0)
         if len(dcmdir) > 0:
-
             dcmdir = "%s" % (dcmdir)
             dcmdir = dcmdir.encode("utf8")
         else:
             dcmdir = None
+            
         return dcmdir
         
     def importDataWithGui(self):
