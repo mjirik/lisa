@@ -124,10 +124,9 @@ class HistologyAnalyserWindow(QMainWindow):
             self.removeArea(self.ha.data3d)
 
             ### Segmentation
-            # TODO - more detailed info about what is happening + suggest default segmentations parameters
             logger.debug('Segmentation')
             self.setStatusBarText('Segmentation')
-            self.showMessage('Segmentation\n1. Select segmentation Area\n2. Select finer segmentation settings\n3. Wait until segmentation is finished')
+            self.segmentationWaitDialog()
             
             self.data3d_thr, self.data3d_skel = self.ha.data_to_skeleton()
             self.fixWindow()
@@ -197,6 +196,12 @@ class HistologyAnalyserWindow(QMainWindow):
     def showMessage(self, text="Default"):
         newapp = MessageDialog(text)
         self.embedWidget(newapp)
+        
+    def segmentationWaitDialog(self):
+        newapp = SegmentationWaitDialog(self)
+        self.embedWidget(newapp)
+        self.fixWindow()
+        #newapp.exec_()
     
     def previewDialog(self):
         newapp = PreviewDialog(self, 
@@ -270,48 +275,62 @@ class MessageDialog(QDialog):
         
         self.setLayout(vbox_app)
         self.show()
-
-class EmbededWidgetDialog(QDialog):
+        
+# TODO - everything
+class SegmentationQueryDialog(QDialog):
     def __init__(self, mainWindow=None):
         self.mainWindow = mainWindow
-        self.ui_embeddedAppWindow = None
-        self.ui_embeddedAppWindow_pos = None
         
         QDialog.__init__(self)
         self.initUI()
-    
+        
     def initUI(self):
         self.ui_gridLayout = QGridLayout()
         self.ui_gridLayout.setSpacing(15)
 
         rstart = 0
         
-        ### embeddedAppWindow
-        self.ui_embeddedAppWindow = MessageDialog('Default window')  
-        self.ui_embeddedAppWindow_pos = rstart + 1
-        self.ui_gridLayout.addWidget(self.ui_embeddedAppWindow, self.ui_embeddedAppWindow_pos, 1, 1, 2)
-        rstart +=2
-
+        info_label = QLabel('Default segmentation settings?\n'+'YES/NO')
+        
+        self.ui_gridLayout.addWidget(info_label, rstart + 0, 0,)
+        rstart +=1
+        
+        ### Stretcher
+        self.ui_gridLayout.addItem(QSpacerItem(0,0), rstart + 0, 0,)
+        self.ui_gridLayout.setRowStretch(rstart + 0, 1)
+        rstart +=1
+        
+        ### Setup layout
         self.setLayout(self.ui_gridLayout)
         self.show()
-    
-    def embedWidget(self, widget=None):     
-        """
-        Replaces widget embedded that is in gui
-        """
-        # removes old widget
-        self.ui_gridLayout.removeWidget(self.ui_embeddedAppWindow)
-        self.ui_embeddedAppWindow.close()
+
+# TODO - more detailed info about what is happening + suggest default segmentations parameters + nicer look
+class SegmentationWaitDialog(QDialog):
+    def __init__(self, mainWindow=None):
+        self.mainWindow = mainWindow
         
-        # init new widget
-        if widget is None:
-            self.ui_embeddedAppWindow = MessageDialog()
-        else:
-            self.ui_embeddedAppWindow = widget
+        QDialog.__init__(self)
+        self.initUI()
         
-        # add new widget to layout and update
-        self.ui_gridLayout.addWidget(self.ui_embeddedAppWindow, self.ui_embeddedAppWindow_pos, 1, 1, 2)
-        self.ui_gridLayout.update()
+    def initUI(self):
+        self.ui_gridLayout = QGridLayout()
+        self.ui_gridLayout.setSpacing(15)
+
+        rstart = 0
+        
+        info_label = QLabel('Segmentation\n1. Select segmentation Area\n2. Select finer segmentation settings\n3. Wait until segmentation is finished')
+        
+        self.ui_gridLayout.addWidget(info_label, rstart + 0, 0)
+        rstart +=1
+        
+        ### Stretcher
+        self.ui_gridLayout.addItem(QSpacerItem(0,0), rstart + 0, 0)
+        self.ui_gridLayout.setRowStretch(rstart + 0, 1)
+        rstart +=1
+        
+        ### Setup layout
+        self.setLayout(self.ui_gridLayout)
+        self.show()
 
 # TODO - go back to segmentation/crop/mask...
 class PreviewDialog(QDialog):
@@ -352,7 +371,7 @@ class PreviewDialog(QDialog):
         rstart += 3
         
         ### Stretcher
-        self.ui_gridLayout.addItem(QSpacerItem(0,0), rstart + 0, 0,)
+        self.ui_gridLayout.addItem(QSpacerItem(0,0), rstart + 0, 0)
         self.ui_gridLayout.setRowStretch(rstart + 0, 1)
         rstart +=1
         
