@@ -23,6 +23,7 @@ import numpy as np
 import datareader
 from seed_editor_qt import QTSeedEditor
 import py3DSeedEditor
+import misc
 
 import histology_analyser as HA
 from histology_report import HistologyReport
@@ -130,16 +131,12 @@ class HistologyAnalyserWindow(QMainWindow):
             
             self.data3d_thr, self.data3d_skel = self.ha.data_to_skeleton()
             self.fixWindow()
+            self.setStatusBarText('Ready')
         
-        # TODO - pause with dialog (preview segmented data, contiune to compute statistics, go back to segmentation/crop/mask...)
+        ### Show segmented data
+        self.previewDialog()
         
-        ### Show Segmented Data
-        logger.debug('Preview of segmented data')
-        self.showMessage('Preview of segmented data')
-        self.setStatusBarText('Ready')
-        self.ha.showSegmentedData(self.data3d_thr, self.data3d_skel)
-        self.fixWindow()
-        
+    def computeStatistics(self):
         ### Computing statistics
         # TODO - maybe run in separate thread and send info to main window (% completed)
         logger.info("######### statistics")
@@ -150,31 +147,15 @@ class HistologyAnalyserWindow(QMainWindow):
         self.fixWindow()
         
         ### Saving files
-        # TODO - file save dialog (maybe show together with "run histology report" button etc..)
-        logger.info("##### write to file")
-        self.setStatusBarText('Statistics - write file')
-        self.showMessage('Writing files\nPlease wait...') 
-        
-        self.ha.writeStatsToCSV()
-        self.ha.writeStatsToYAML()
-        self.ha.writeSkeletonToPickle('skel.pkl')
-        #struct = {'skel': self.data3d_skel, 'thr': self.data3d_thr, 'data3d': self.data3d, 'metadata':self.metadata}
-        #misc.obj_to_file(struct, filename='tmp0.pkl', filetype='pickle')
-        
+        # TODO - move this somewhere else / or delete
+        #logger.info("##### write to file")
+        #self.setStatusBarText('Statistics - write file')
+        #self.showMessage('Writing files (Pickle) \nPlease wait...') 
+        #self.ha.writeSkeletonToPickle('skel.pkl')
+
         ### Finished - Show report
-        # TODO - display nicely histology report
-        hr = HistologyReport()
-        hr.data = self.ha.stats
-        hr.generateStats()
-        report = hr.stats['Report']
-        self.showMessage('Finished:'+'\n'
-                        +'Total length mm: '+str(report['Total length mm'])+'\n'
-                        +'Avg length mm: '+str(report['Avg length mm'])+'\n'
-                        +'Avg radius mm: '+str(report['Avg radius mm'])+'\n'
-                        #+'Radius histogram: '+str(report['Radius histogram'])+'\n'
-                        #+'Length histogram: '+str(report['Length histogram'])+'\n'
-                        )
-        self.setStatusBarText('Finished')
+        self.finishedDialog()
+        
         
     def setStatusBarText(self,text=""):
         """
@@ -182,6 +163,16 @@ class HistologyAnalyserWindow(QMainWindow):
         """
         self.statusBar().showMessage(text)
         QtCore.QCoreApplication.processEvents()
+    
+    def fixWindow(self,w=None,h=None):
+        """
+        Resets Main window size, and makes sure all events (gui changes) were processed
+        """
+        if (w is not None) and (h is not None):
+            self.resize(w, h)
+        else:    
+            self.resize(self.WIDTH, self.HEIGHT)
+        QtCore.QCoreApplication.processEvents() # this is very important
         
     def embedWidget(self, widget=None):     
         """
@@ -203,28 +194,35 @@ class HistologyAnalyserWindow(QMainWindow):
         
         self.fixWindow()
     
-    def fixWindow(self,w=None,h=None):
-        """
-        Resets Main window size, and makes sure all events (gui changes) were processed
-        """
-        if (w is not None) and (h is not None):
-            self.resize(w, h)
-        else:    
-            self.resize(self.WIDTH, self.HEIGHT)
-        QtCore.QCoreApplication.processEvents() # this is very important
-    
     def showMessage(self, text="Default"):
         newapp = MessageDialog(text)
         self.embedWidget(newapp)
+    
+    def previewDialog(self):
+        newapp = PreviewDialog(self, 
+                            histologyAnalyser=self.ha,
+                            data3d_thr=self.data3d_thr,
+                            data3d_skel=self.data3d_skel
+                            )
+        self.embedWidget(newapp)
+        self.fixWindow(500,250)
+        newapp.exec_()
+    
+    def finishedDialog(self,histologyAnalyser=None):
+        newapp = FinishedDialog(self,
+                                histologyAnalyser=self.ha
+                                )
+        self.embedWidget(newapp)
+        newapp.exec_()
         
     def removeArea(self, data3d=None):
         if data3d is None:
             data3d=self.ha.data3d
             
         newapp = QTSeedEditor(data3d, mode='mask')
+        newapp.status_bar.hide()
         self.embedWidget(newapp)
-        self.ui_embeddedAppWindow.status_bar.hide()
-        
+
         newapp.exec_()
         
         self.fixWindow()
@@ -234,8 +232,8 @@ class HistologyAnalyserWindow(QMainWindow):
             data3d=self.data3d
             
         newapp = QTSeedEditor(data3d, mode='crop')
+        newapp.status_bar.hide()
         self.embedWidget(newapp)
-        self.ui_embeddedAppWindow.status_bar.hide()
         
         newapp.exec_()
         
@@ -249,7 +247,8 @@ class HistologyAnalyserWindow(QMainWindow):
         self.fixWindow(self.WIDTH,300)
         newapp.exec_()
         
-class MessageDialog(QDialog):
+# TODO - create specific classes so this wont be needed
+class MessageDialog(QDialog): 
     def __init__(self,text=None):
         self.text = text
         
@@ -271,6 +270,177 @@ class MessageDialog(QDialog):
         
         self.setLayout(vbox_app)
         self.show()
+
+class EmbededWidgetDialog(QDialog):
+    def __init__(self, mainWindow=None):
+        self.mainWindow = mainWindow
+        self.ui_embeddedAppWindow = None
+        self.ui_embeddedAppWindow_pos = None
+        
+        QDialog.__init__(self)
+        self.initUI()
+    
+    def initUI(self):
+        self.ui_gridLayout = QGridLayout()
+        self.ui_gridLayout.setSpacing(15)
+
+        rstart = 0
+        
+        ### embeddedAppWindow
+        self.ui_embeddedAppWindow = MessageDialog('Default window')  
+        self.ui_embeddedAppWindow_pos = rstart + 1
+        self.ui_gridLayout.addWidget(self.ui_embeddedAppWindow, self.ui_embeddedAppWindow_pos, 1, 1, 2)
+        rstart +=2
+
+        self.setLayout(self.ui_gridLayout)
+        self.show()
+    
+    def embedWidget(self, widget=None):     
+        """
+        Replaces widget embedded that is in gui
+        """
+        # removes old widget
+        self.ui_gridLayout.removeWidget(self.ui_embeddedAppWindow)
+        self.ui_embeddedAppWindow.close()
+        
+        # init new widget
+        if widget is None:
+            self.ui_embeddedAppWindow = MessageDialog()
+        else:
+            self.ui_embeddedAppWindow = widget
+        
+        # add new widget to layout and update
+        self.ui_gridLayout.addWidget(self.ui_embeddedAppWindow, self.ui_embeddedAppWindow_pos, 1, 1, 2)
+        self.ui_gridLayout.update()
+
+# TODO - go back to segmentation/crop/mask...
+class PreviewDialog(QDialog):
+    def __init__(self, mainWindow=None, histologyAnalyser=None, data3d_thr=None, data3d_skel=None):
+        self.mainWindow = mainWindow
+        self.ha = histologyAnalyser
+        self.data3d_thr=data3d_thr
+        self.data3d_skel=data3d_skel
+        
+        QDialog.__init__(self)
+        self.initUI()
+    
+    def initUI(self):
+        self.ui_gridLayout = QGridLayout()
+        self.ui_gridLayout.setSpacing(15)
+
+        rstart = 0
+        
+        font_info = QFont()
+        font_info.setBold(True)
+        font_info.setPixelSize(20)
+        info_label = QLabel('Segmentation finished')
+        info_label.setFont(font_info)
+        
+        self.ui_gridLayout.addWidget(info_label, rstart + 0, 0)
+        rstart += 1
+        
+        btn_preview = QPushButton("Show segmented data", self)
+        btn_preview.clicked.connect(self.showSegmentedData)
+        btn_write = QPushButton("Write segmented data to file", self)
+        btn_write.clicked.connect(self.writeSegmentedData)
+        btn_stats = QPushButton("Compute Statistics", self)
+        btn_stats.clicked.connect(self.computeStatistics)
+        
+        self.ui_gridLayout.addWidget(btn_preview, rstart + 0, 0)
+        self.ui_gridLayout.addWidget(btn_write, rstart + 1, 0)
+        self.ui_gridLayout.addWidget(btn_stats, rstart + 2, 0)
+        rstart += 3
+        
+        ### Stretcher
+        self.ui_gridLayout.addItem(QSpacerItem(0,0), rstart + 0, 0,)
+        self.ui_gridLayout.setRowStretch(rstart + 0, 1)
+        rstart +=1
+        
+        ### Setup layout
+        self.setLayout(self.ui_gridLayout)
+        self.show()
+        
+    def computeStatistics(self):
+        self.mainWindow.computeStatistics()
+        
+    def writeSegmentedData(self): # TODO - choose save path + or maybe just remove
+        logger.debug("Writing pickle file")
+        self.mainWindow.setStatusBarText('Writing pickle file')
+        struct = {'skel': self.data3d_skel, 'thr': self.data3d_thr, 'data3d': self.mainWindow.data3d, 'metadata':self.mainWindow.metadata}
+        misc.obj_to_file(struct, filename='tmp0.pkl', filetype='pickle')
+        self.mainWindow.setStatusBarText('Ready')
+    
+    def showSegmentedData(self):
+        logger.debug('Preview of segmented data')
+        self.ha.showSegmentedData(self.data3d_thr, self.data3d_skel)
+
+# TODO - display nicely histology report
+class FinishedDialog(QDialog):
+    def __init__(self, mainWindow=None, histologyAnalyser=None):
+        self.mainWindow = mainWindow
+        self.ha = histologyAnalyser
+        
+        self.hr = HistologyReport()
+        self.hr.data = self.ha.stats
+        self.hr.generateStats()
+        
+        QDialog.__init__(self)
+        self.initUI()
+        
+        self.mainWindow.setStatusBarText('Finished')
+    
+    def initUI(self):
+        self.ui_gridLayout = QGridLayout()
+        self.ui_gridLayout.setSpacing(15)
+
+        rstart = 0
+        
+        label = QLabel('Finished')
+        self.ui_gridLayout.addWidget(label, rstart + 0, 0, 1, 1)
+        rstart +=1
+        
+        report = self.hr.stats['Report']
+        report_label = QLabel('Total length mm: '+str(report['Total length mm'])+'\n'
+                        +'Avg length mm: '+str(report['Avg length mm'])+'\n'
+                        +'Avg radius mm: '+str(report['Avg radius mm'])+'\n'
+                        #+'Radius histogram: '+str(report['Radius histogram'])+'\n'
+                        #+'Length histogram: '+str(report['Length histogram'])+'\n'
+                        )
+        self.ui_gridLayout.addWidget(report_label, rstart + 0, 0, 1, 3)
+        rstart +=1
+        
+        btn_yaml = QPushButton("Write YAML", self)
+        btn_yaml.clicked.connect(self.writeYAML)
+        btn_csv = QPushButton("Write CSV", self)
+        btn_csv.clicked.connect(self.writeCSV)
+        
+        self.ui_gridLayout.addWidget(btn_yaml, rstart + 0, 1)
+        self.ui_gridLayout.addWidget(btn_csv, rstart + 1, 1)
+        
+        rstart +=2
+        
+        ### Stretcher
+        self.ui_gridLayout.addItem(QSpacerItem(0,0), rstart + 0, 0,)
+        self.ui_gridLayout.setRowStretch(rstart + 0, 1)
+        rstart +=1
+        
+        ### Setup layout
+        self.setLayout(self.ui_gridLayout)
+        self.show()
+    
+    def writeYAML(self):
+        # TODO - choose save path
+        logger.info("Writing YAML file")
+        self.mainWindow.setStatusBarText('Statistics - writing YAML file')
+        self.ha.writeStatsToYAML()
+        self.mainWindow.setStatusBarText('Ready')
+    
+    def writeCSV(self):
+        # TODO - choose save path
+        logger.info("Writing CSV file")
+        self.mainWindow.setStatusBarText('Statistics - writing CSV file')
+        self.ha.writeStatsToCSV()
+        self.mainWindow.setStatusBarText('Ready')
         
 class LoadDialog(QDialog):
     def __init__(self, mainWindow=None, inputfile=None, crgui=False):
