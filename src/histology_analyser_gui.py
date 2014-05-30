@@ -42,7 +42,7 @@ class HistologyAnalyserWindow(QMainWindow):
         QMainWindow.__init__(self)   
         self.initUI()
         
-        self.loadData()
+        self.showLoadDialog()
         
     def initUI(self):
         cw = QWidget()
@@ -111,7 +111,7 @@ class HistologyAnalyserWindow(QMainWindow):
                 self.data3d = self.data3d[crop[0]:crop[1], crop[2]:crop[3], crop[4]:crop[5]]
             if self.crgui is True: # --crgui gui crop
                 logger.debug('Gui data crop')
-                self.data3d = self.cropData(self.data3d)
+                self.data3d = self.showCropDialog(self.data3d)
             
             ### Init HistologyAnalyser object
             logger.debug('Init HistologyAnalyser object')
@@ -121,19 +121,19 @@ class HistologyAnalyserWindow(QMainWindow):
             # TODO - info about what is happening on top of window (or somewhere else)
             logger.debug('Remove area')
             self.setStatusBarText('Remove area')
-            self.removeArea(self.ha.data3d)
+            self.showRemoveDialog(self.ha.data3d)
 
             ### Segmentation
             logger.debug('Segmentation')
             self.setStatusBarText('Segmentation')
-            self.segmentationWaitDialog()
+            self.showSegmWaitDialog()
             
-            self.data3d_thr, self.data3d_skel = self.ha.data_to_skeleton()
+            self.data3d_thr, self.data3d_skel = self.ha.data_to_skeleton() # TODO - maybe move to segmentation dialog class
             self.fixWindow()
             self.setStatusBarText('Ready')
         
         ### Show segmented data
-        self.previewDialog()
+        self.showSegmResultDialog()
         
     def computeStatistics(self):
         ### Computing statistics
@@ -153,7 +153,7 @@ class HistologyAnalyserWindow(QMainWindow):
         #self.ha.writeSkeletonToPickle('skel.pkl')
 
         ### Finished - Show report
-        self.finishedDialog()
+        self.showStatsResultDialog()
         
         
     def setStatusBarText(self,text=""):
@@ -197,14 +197,14 @@ class HistologyAnalyserWindow(QMainWindow):
         newapp = MessageDialog(text)
         self.embedWidget(newapp)
         
-    def segmentationWaitDialog(self):
-        newapp = SegmentationWaitDialog(self)
+    def showSegmWaitDialog(self):
+        newapp = SegmWaitDialog(self)
         self.embedWidget(newapp)
         self.fixWindow()
         #newapp.exec_()
     
-    def previewDialog(self):
-        newapp = PreviewDialog(self, 
+    def showSegmResultDialog(self):
+        newapp = SegmResultDialog(self, 
                             histologyAnalyser=self.ha,
                             data3d_thr=self.data3d_thr,
                             data3d_skel=self.data3d_skel
@@ -213,14 +213,14 @@ class HistologyAnalyserWindow(QMainWindow):
         self.fixWindow(500,250)
         newapp.exec_()
     
-    def finishedDialog(self,histologyAnalyser=None):
-        newapp = FinishedDialog(self,
+    def showStatsResultDialog(self,histologyAnalyser=None):
+        newapp = StatsResultDialog(self,
                                 histologyAnalyser=self.ha
                                 )
         self.embedWidget(newapp)
         newapp.exec_()
         
-    def removeArea(self, data3d=None):
+    def showRemoveDialog(self, data3d=None):
         if data3d is None:
             data3d=self.ha.data3d
             
@@ -232,7 +232,7 @@ class HistologyAnalyserWindow(QMainWindow):
         
         self.fixWindow()
         
-    def cropData(self,data3d=None):
+    def showCropDialog(self,data3d=None):
         if data3d is None:
             data3d=self.data3d
             
@@ -246,7 +246,7 @@ class HistologyAnalyserWindow(QMainWindow):
         
         return newapp.img
         
-    def loadData(self):
+    def showLoadDialog(self):
         newapp = LoadDialog(mainWindow=self, inputfile=self.args_inputfile, crgui=self.args_crgui)
         self.embedWidget(newapp)
         self.fixWindow(self.WIDTH,300)
@@ -305,7 +305,7 @@ class SegmentationQueryDialog(QDialog):
         self.show()
 
 # TODO - more detailed info about what is happening + suggest default segmentations parameters + nicer look
-class SegmentationWaitDialog(QDialog):
+class SegmWaitDialog(QDialog):
     def __init__(self, mainWindow=None):
         self.mainWindow = mainWindow
         
@@ -333,7 +333,7 @@ class SegmentationWaitDialog(QDialog):
         self.show()
 
 # TODO - go back to segmentation/crop/mask...
-class PreviewDialog(QDialog):
+class SegmResultDialog(QDialog):
     def __init__(self, mainWindow=None, histologyAnalyser=None, data3d_thr=None, data3d_skel=None):
         self.mainWindow = mainWindow
         self.ha = histologyAnalyser
@@ -394,7 +394,7 @@ class PreviewDialog(QDialog):
         self.ha.showSegmentedData(self.data3d_thr, self.data3d_skel)
 
 # TODO - display nicely histology report
-class FinishedDialog(QDialog):
+class StatsResultDialog(QDialog):
     def __init__(self, mainWindow=None, histologyAnalyser=None):
         self.mainWindow = mainWindow
         self.ha = histologyAnalyser
