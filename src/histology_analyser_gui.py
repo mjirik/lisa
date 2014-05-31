@@ -60,9 +60,12 @@ class HistologyAnalyserWindow(QMainWindow):
         rstart = 0
         
         ### embeddedAppWindow
-        self.ui_embeddedAppWindow = MessageDialog('Default window')  
+        self.ui_helpWidget = None
+        self.ui_helpWidget_pos = rstart
+        self.ui_embeddedAppWindow = QLabel('Default window')  
         self.ui_embeddedAppWindow_pos = rstart + 1
-        self.ui_gridLayout.addWidget(self.ui_embeddedAppWindow, rstart + 1, 1, 1, 2)
+        
+        self.ui_gridLayout.addWidget(self.ui_embeddedAppWindow, rstart + 1, 1)
         rstart +=2
 
         cw.setLayout(self.ui_gridLayout)
@@ -126,25 +129,43 @@ class HistologyAnalyserWindow(QMainWindow):
             self.showRemoveDialog(self.ha.data3d)
 
             ### Segmentation
-            logger.debug('Segmentation')
-            self.setStatusBarText('Segmentation')
-            self.showSegmWaitDialog()
-            
-            self.data3d_thr, self.data3d_skel = self.ha.data_to_skeleton() # TODO - maybe move to segmentation dialog class
-            self.fixWindow()
-            self.setStatusBarText('Ready')
+            logger.debug('Segmentation Query Dialog')
+            self.showSegmQueryDialog()
+        
+    def runSegmentation(self, default=False):
+        logger.debug('Segmentation')
+        
+        # show segmentation wait screen
+        self.setStatusBarText('Segmentation')
+        self.showSegmWaitDialog()
+        
+        # use default segmentation parameters
+        if default is True:
+            self.ha.nogui = True
+            self.ha.threshold = 7000
+        
+        # run segmentation
+        self.data3d_thr, self.data3d_skel = self.ha.data_to_skeleton()
+        
+        if default is True:
+            self.ha.nogui = False
+        self.fixWindow()
+        self.setStatusBarText('Ready')
         
         ### Show segmented data
-        self.showSegmResultDialog()
+        self.showSegmResultDialog()  
         
     def computeStatistics(self):
         ### Computing statistics
-        # TODO - maybe run in separate thread and send info to main window (% completed)
+        # TODO - run in separate thread and send info to main window (% completed)
         logger.info("######### statistics")
         self.setStatusBarText('Computing Statistics')
         self.showMessage('Computing Statistics\nPlease wait... (it can take very long)')
         
-        self.ha.skeleton_to_statistics(self.data3d_thr, self.data3d_skel) 
+        def updatefunction(p,c): # TODO - just placeholder, replace with GUI update function
+            print str(p)+'/'+str(c)+' processed'
+        
+        self.ha.skeleton_to_statistics(self.data3d_thr, self.data3d_skel, guiUpdateFunction=updatefunction) 
         self.fixWindow()
         
         ### Saving files
@@ -185,19 +206,45 @@ class HistologyAnalyserWindow(QMainWindow):
         
         # init new widget
         if widget is None:
-            self.ui_embeddedAppWindow = MessageDialog()
+            self.ui_embeddedAppWindow = QLabel()
         else:
             self.ui_embeddedAppWindow = widget
         
         # add new widget to layout and update
-        self.ui_gridLayout.addWidget(self.ui_embeddedAppWindow, self.ui_embeddedAppWindow_pos, 1, 1, 2)
+        self.ui_gridLayout.addWidget(self.ui_embeddedAppWindow, self.ui_embeddedAppWindow_pos, 1)
         self.ui_gridLayout.update()
+        
+        self.fixWindow()
+        
+    def changeHelpWidget(self, widget=None):
+        # removes old widget
+        if self.ui_helpWidget is not None:
+            self.ui_gridLayout.removeWidget(self.ui_helpWidget)
+            self.ui_helpWidget.close()
+        
+        # init new widget
+        if widget is None:
+            self.ui_helpWidget = None
+        else:
+            self.ui_helpWidget = widget
+        
+        # add new widget to layout and update
+        if self.ui_helpWidget is not None:
+            self.ui_gridLayout.addWidget(self.ui_helpWidget, self.ui_helpWidget_pos, 1)
+            self.ui_gridLayout.update()
         
         self.fixWindow()
     
     def showMessage(self, text="Default"):
         newapp = MessageDialog(text)
         self.embedWidget(newapp)
+    
+    def showSegmQueryDialog(self):
+        newapp = SegmQueryDialog(self)
+        self.embedWidget(newapp)
+        self.fixWindow()
+        
+        newapp.exec_()
         
     def showSegmWaitDialog(self):
         newapp = SegmWaitDialog(self)
@@ -226,11 +273,15 @@ class HistologyAnalyserWindow(QMainWindow):
         if data3d is None:
             data3d=self.ha.data3d
             
+        helpW = QLabel('Remove unneeded data')
+        self.changeHelpWidget(widget=helpW)
+        
         newapp = QTSeedEditor(data3d, mode='mask')
         newapp.status_bar.hide()
         self.embedWidget(newapp)
 
         newapp.exec_()
+        self.changeHelpWidget(widget=None) # removes help
         
         self.fixWindow()
         
@@ -238,11 +289,15 @@ class HistologyAnalyserWindow(QMainWindow):
         if data3d is None:
             data3d=self.data3d
             
+        helpW = QLabel('Crop data')
+        self.changeHelpWidget(widget=helpW)
+            
         newapp = QTSeedEditor(data3d, mode='crop')
         newapp.status_bar.hide()
         self.embedWidget(newapp)
         
         newapp.exec_()
+        self.changeHelpWidget(widget=None) # removes help
         
         self.fixWindow()
         
@@ -278,8 +333,8 @@ class MessageDialog(QDialog):
         self.setLayout(vbox_app)
         self.show()
         
-# TODO - everything
-class SegmentationQueryDialog(QDialog):
+# TODO - nicer look
+class SegmQueryDialog(QDialog):
     def __init__(self, mainWindow=None):
         self.mainWindow = mainWindow
         
@@ -292,10 +347,20 @@ class SegmentationQueryDialog(QDialog):
 
         rstart = 0
         
-        info_label = QLabel('Default segmentation settings?\n'+'YES/NO')
+        info_label = QLabel('Default segmentation settings?')
         
         self.ui_gridLayout.addWidget(info_label, rstart + 0, 0,)
         rstart +=1
+        
+        ### Buttons
+        btn_default = QPushButton("Use default parameters", self)
+        btn_default.clicked.connect(self.runSegmDefault)
+        btn_manual = QPushButton("Set segmentation parameters manualy", self)
+        btn_manual.clicked.connect(self.runSegmManual)
+        
+        self.ui_gridLayout.addWidget(btn_default, rstart + 0, 0)
+        self.ui_gridLayout.addWidget(btn_manual, rstart + 1, 0)
+        rstart +=2
         
         ### Stretcher
         self.ui_gridLayout.addItem(QSpacerItem(0,0), rstart + 0, 0,)
@@ -305,8 +370,14 @@ class SegmentationQueryDialog(QDialog):
         ### Setup layout
         self.setLayout(self.ui_gridLayout)
         self.show()
+        
+    def runSegmDefault(self):
+        self.mainWindow.runSegmentation(default=True)
+        
+    def runSegmManual(self):
+        self.mainWindow.runSegmentation(default=False)
 
-# TODO - more detailed info about what is happening + suggest default segmentations parameters + nicer look
+# TODO - more detailed info about what is happening + dont show help when using default parameters + nicer look
 class SegmWaitDialog(QDialog):
     def __init__(self, mainWindow=None):
         self.mainWindow = mainWindow

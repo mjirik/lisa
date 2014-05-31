@@ -53,7 +53,6 @@ class HistologyAnalyser:
         self.threshold = threshold
         self.nogui = nogui
 
-        print metadata
         if 'voxelsize_mm' not in metadata.keys():
 # @TODO resolve problem with voxelsize
             metadata['voxelsize_mm'] = [0.1, 0.2, 0.3]
@@ -82,8 +81,9 @@ class HistologyAnalyser:
             nObj=1,
             biggestObjects=False,
             interactivity= not self.nogui,
-            binaryClosingIterations=5,
-            binaryOpeningIterations=1)
+            binaryClosingIterations=2, #5,
+            binaryOpeningIterations=0 #1
+            )
         return data3d_thr
 
     def binar_to_skeleton(self, data3d_thr):
@@ -96,13 +96,13 @@ class HistologyAnalyser:
         data3d_skel = self.binar_to_skeleton(data3d_thr)
         return data3d_thr, data3d_skel
     
-    def skeleton_to_statistics(self, data3d_thr, data3d_skel):
+    def skeleton_to_statistics(self, data3d_thr, data3d_skel, guiUpdateFunction=None):
         skan = SkeletonAnalyser(
             data3d_skel,
             volume_data=data3d_thr,
             voxelsize_mm=self.metadata['voxelsize_mm'])
 
-        stats = skan.skeleton_analysis()
+        stats = skan.skeleton_analysis(guiUpdateFunction=guiUpdateFunction)
         self.sklabel = skan.sklabel
         #data3d_nodes[data3d_nodes==3] = 2
         self.stats = {'Graph':stats}
@@ -201,7 +201,7 @@ class HistologyAnalyser:
 
 
     def writeStatsToYAML(self, filename='hist_stats.yaml'):
-        print 'write to yaml'
+        logger.debug('writeStatsToYAML')
         misc.obj_to_file(self.stats, filename=filename, filetype='yaml')
 
         #sitk.
@@ -272,7 +272,7 @@ class SkeletonAnalyser:
         self.__generate_sklabel(skelet_nodes)
 
 
-    def skeleton_analysis(self):
+    def skeleton_analysis(self, guiUpdateFunction = None):
         """
         Glossary:
         element: line structure of skeleton connected to node on both ends
@@ -288,8 +288,11 @@ class SkeletonAnalyser:
             stats = {}
             len_edg = np.max(self.sklabel)
             #len_edg = 30
-
-            for edg_number in range (1,len_edg):
+            
+            if guiUpdateFunction is not None:
+                guiUpdateFunction(0,len_edg)
+                
+            for edg_number in range(1,len_edg+1):
                 edgst = self.__connection_analysis(edg_number)
                 edgst.update(self.__edge_length(edg_number))
                 edgst.update(self.__edge_curve(edg_number, edgst, self.voxelsize_mm))
@@ -298,6 +301,9 @@ class SkeletonAnalyser:
                 if self.volume_data is not None:
                     edgst['radius_mm'] = float(self.__radius_analysis(edg_number,skdst))
                 stats[edgst['id']] = edgst
+                
+                if guiUpdateFunction is not None:
+                    guiUpdateFunction(edg_number,len_edg)
 
 #save data for faster debug
             struct = {'sVD':self.volume_data, 'stats':stats, 'len_edg':len_edg}
@@ -310,7 +316,7 @@ class SkeletonAnalyser:
 
 
         #@TODO dokončit
-        for edg_number in range (1,len_edg):
+        for edg_number in range (1,len_edg+1):
             edgst = stats[edg_number]
             edgst.update(self.__connected_edge_angle(edg_number, stats))
 
@@ -865,7 +871,7 @@ def processData(inputfile=None,threshold=None,skeleton=False,crop=None):
         if inputfile is None: ## Using generated sample data
             logger.info('Generating sample data...')
             metadata = {'voxelsize_mm': [1, 1, 1]}
-            data3d = generate_sample_data(2)
+            data3d = generate_sample_data(1)
         else: ## Normal runtime
             dr = datareader.DataReader()
             data3d, metadata = dr.Get3DData(inputfile)
