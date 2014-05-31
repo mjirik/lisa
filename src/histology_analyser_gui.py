@@ -816,6 +816,8 @@ class LoadDialog(QDialog):
         if self.inputfile is None:
             self.text_dcm_dir.setText('Data path: '+'Generated sample data')
             self.text_dcm_data.setText('Data info: '+'200x200x200, [1.0,1.0,1.0]')
+            self.data3d = None
+            self.metadata = None
         else:
             try:
                 reader = datareader.DataReader()

@@ -79,9 +79,9 @@ class HistologyAnalyser:
             inputSigma=0, #0.15,
             dilationIterations=2,
             nObj=1,
-            biggestObjects=False,
+            biggestObjects= self.nogui,
             interactivity= not self.nogui,
-            binaryClosingIterations=2, #5,
+            binaryClosingIterations=2, #5,  # TODO !!! - vytvari na stranach oblasti ktere se pak nenasegmentuji
             binaryOpeningIterations=0 #1
             )
         return data3d_thr
