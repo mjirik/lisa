@@ -19,6 +19,8 @@ from PyQt4.QtGui import *
 from PyQt4.Qt import QString
 
 import numpy as np
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
 
 import datareader
 from seed_editor_qt import QTSeedEditor
@@ -100,7 +102,7 @@ class HistologyAnalyserWindow(QMainWindow):
                 logger.info('Generating sample data...')
                 self.setStatusBarText('Generating sample data...')
                 self.metadata = {'voxelsize_mm': [1, 1, 1]}
-                self.data3d = HA.generate_sample_data(2)
+                self.data3d = HA.generate_sample_data(1)
                 
             ### Crop data
             # TODO - info about what is happening on top of window (or somewhere else)
@@ -393,7 +395,6 @@ class SegmResultDialog(QDialog):
         logger.debug('Preview of segmented data')
         self.ha.showSegmentedData(self.data3d_thr, self.data3d_skel)
 
-# TODO - display nicely histology report
 class StatsResultDialog(QDialog):
     def __init__(self, mainWindow=None, histologyAnalyser=None):
         self.mainWindow = mainWindow
@@ -414,28 +415,53 @@ class StatsResultDialog(QDialog):
 
         rstart = 0
         
+        font_info = QFont()
+        font_info.setBold(True)
+        font_info.setPixelSize(20)
         label = QLabel('Finished')
+        label.setFont(font_info)
+        
         self.ui_gridLayout.addWidget(label, rstart + 0, 0, 1, 1)
         rstart +=1
         
+        ### histology report
         report = self.hr.stats['Report']
         report_label = QLabel('Total length mm: '+str(report['Total length mm'])+'\n'
                         +'Avg length mm: '+str(report['Avg length mm'])+'\n'
-                        +'Avg radius mm: '+str(report['Avg radius mm'])+'\n'
-                        #+'Radius histogram: '+str(report['Radius histogram'])+'\n'
-                        #+'Length histogram: '+str(report['Length histogram'])+'\n'
+                        +'Avg radius mm: '+str(report['Avg radius mm'])
                         )
+        histogram_radius = HistogramMplCanvas(report['Radius histogram'][0],
+                                        report['Radius histogram'][1],
+                                        title='Radius histogram',
+                                        xlabel="Blood-vessel radius [mm]",
+                                        ylabel="Number"
+                                        )
+        histogram_length = HistogramMplCanvas(report['Length histogram'][0],
+                                        report['Length histogram'][1],
+                                        title='Length histogram',
+                                        xlabel="Blood-vessel length [mm]",
+                                        ylabel="Number"
+                                        )
+        
         self.ui_gridLayout.addWidget(report_label, rstart + 0, 0, 1, 3)
-        rstart +=1
+        self.ui_gridLayout.addWidget(histogram_radius, rstart + 1, 0, 1, 3)
+        self.ui_gridLayout.addWidget(histogram_length, rstart + 2, 0, 1, 3)
+        rstart +=3
         
-        btn_yaml = QPushButton("Write YAML", self)
+        ### buttons
+        btn_yaml = QPushButton("Write statistics to YAML", self)
         btn_yaml.clicked.connect(self.writeYAML)
-        btn_csv = QPushButton("Write CSV", self)
+        btn_csv = QPushButton("Write statistics to CSV", self)
         btn_csv.clicked.connect(self.writeCSV)
+        btn_rep_yaml = QPushButton("Write report to YAML", self)
+        btn_rep_yaml.clicked.connect(self.writeReportYAML)
+        btn_rep_csv = QPushButton("Write report to CSV", self)
+        btn_rep_csv.clicked.connect(self.writeReportCSV)
         
-        self.ui_gridLayout.addWidget(btn_yaml, rstart + 0, 1)
-        self.ui_gridLayout.addWidget(btn_csv, rstart + 1, 1)
-        
+        self.ui_gridLayout.addWidget(btn_yaml, rstart + 0, 0)
+        self.ui_gridLayout.addWidget(btn_csv, rstart + 0, 1)
+        self.ui_gridLayout.addWidget(btn_rep_yaml, rstart + 1, 0)
+        self.ui_gridLayout.addWidget(btn_rep_csv, rstart + 1, 1)
         rstart +=2
         
         ### Stretcher
@@ -449,17 +475,98 @@ class StatsResultDialog(QDialog):
     
     def writeYAML(self):
         # TODO - choose save path
-        logger.info("Writing YAML file")
+        logger.info("Writing statistics YAML file")
         self.mainWindow.setStatusBarText('Statistics - writing YAML file')
         self.ha.writeStatsToYAML()
         self.mainWindow.setStatusBarText('Ready')
     
     def writeCSV(self):
         # TODO - choose save path
-        logger.info("Writing CSV file")
+        logger.info("Writing statistics CSV file")
         self.mainWindow.setStatusBarText('Statistics - writing CSV file')
         self.ha.writeStatsToCSV()
         self.mainWindow.setStatusBarText('Ready')
+        
+    def writeReportYAML(self):
+        # TODO - choose save path
+        logger.info("Writing report YAML file")
+        self.mainWindow.setStatusBarText('Report - writing YAML file')
+        self.hr.writeReportToYAML()
+        self.mainWindow.setStatusBarText('Ready')
+        
+    def writeReportCSV(self):
+        # TODO - choose save path
+        logger.info("Writing report CSV file")
+        self.mainWindow.setStatusBarText('Report - writing CSV file')
+        self.hr.writeReportToCSV()
+        self.mainWindow.setStatusBarText('Ready')
+
+class HistogramMplCanvas(FigureCanvas):
+    def __init__(self, histogramNumbers, histogramBins, title='', xlabel='', ylabel=''):
+        self.histNum =  histogramNumbers
+        self.histBins = histogramBins
+        self.text_title = title
+        self.text_xlabel = xlabel
+        self.text_ylabel = ylabel
+        
+        # init figure
+        fig = Figure(figsize=(5, 2.5))
+        self.axes = fig.add_subplot(111)
+        
+        # We want the axes cleared every time plot() is called
+        self.axes.hold(False)
+        
+        # plot data
+        self.compute_initial_figure()
+
+        # init canvas (figure -> canvas)
+        FigureCanvas.__init__(self, fig)
+        #self.setParent(parent)
+        
+        # setup
+        fig.tight_layout()
+        FigureCanvas.setSizePolicy(self,
+                                   QSizePolicy.Expanding,
+                                   QSizePolicy.Expanding)
+        FigureCanvas.updateGeometry(self)
+
+    def compute_initial_figure(self):
+        # width of bar
+        width = self.histBins[1] - self.histBins[0]
+        
+        # start values of bars
+        pos = np.round(self.histBins,2)
+        pos = pos[:-1]  # end value is redundant
+        
+        # heights of bars
+        height = self.histNum
+        
+        # plot data to figure
+        self.axes.bar(pos, height=height, width=width, align='edge')
+        
+        # set better x axis size
+        xaxis_min = np.round(min(self.histBins),2)
+        xaxis_max = np.round(max(self.histBins),2)
+        self.axes.set_xlim([xaxis_min,xaxis_max])
+        
+        # better x axis numbering
+        spacing = width*4
+        start = np.ceil(xaxis_min) + spacing
+        end = np.ceil(xaxis_max) + 0.1
+        
+        xticks_values = np.arange(start,end, spacing)
+        xticks_values = np.round(xticks_values, 2)
+        xticks = [xaxis_min] + xticks_values.tolist()
+
+        self.axes.set_xticks(xticks)
+        
+        # labels
+        if self.text_title is not '':
+            self.axes.set_title(self.text_title)
+        if self.text_xlabel is not '':
+            self.axes.set_xlabel(self.text_xlabel)
+        if self.text_ylabel is not '':
+            self.axes.set_ylabel(self.text_ylabel)
         
 class LoadDialog(QDialog):
     def __init__(self, mainWindow=None, inputfile=None, crgui=False):

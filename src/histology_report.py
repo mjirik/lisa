@@ -24,7 +24,7 @@ class HistologyReport:
         data = misc.obj_from_file(filename=filename, filetype='yaml')
         self.data = data
         
-    def writeReportToYAML(self, filename='hist_report.yaml'):
+    def writeReportToYAML(self, filename='hist_report'):
         logger.debug('write report to yaml')
         filename = filename+'.yaml'
         misc.obj_to_file(self.stats, filename=filename, filetype='yaml')
@@ -49,7 +49,7 @@ class HistologyReport:
             writer.writerow(data['Length histogram'][0])
             writer.writerow(data['Length histogram'][1])
 
-    def generateStats(self):
+    def generateStats(self,binNum=40):
         """
         Funkce na vygenerování statistik.
 
@@ -80,9 +80,9 @@ class HistologyReport:
         stats['Total length mm'] = sum(length_array)
         stats['Avg length mm'] = stats['Total length mm']/float(num_of_entries)
         stats['Avg radius mm'] = sum(radius_array)/float(num_of_entries)
-        radiusHistogram = np.histogram(radius_array)
+        radiusHistogram = np.histogram(radius_array,bins=binNum)
         stats['Radius histogram'] = [radiusHistogram[0].tolist(),radiusHistogram[1].tolist()]
-        lengthHistogram = np.histogram(length_array)
+        lengthHistogram = np.histogram(length_array,bins=binNum)
         stats['Length histogram'] = [lengthHistogram[0].tolist(),lengthHistogram[1].tolist()]
 
         self.stats = {'Report':stats}
