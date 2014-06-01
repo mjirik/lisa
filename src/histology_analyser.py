@@ -312,9 +312,6 @@ class SkeletonAnalyser:
             stats = {}
             len_edg = np.max(self.sklabel)
             #len_edg = 30
-            
-            if guiUpdateFunction is not None:
-                guiUpdateFunction(0,len_edg)
                 
             for edg_number in range(1,len_edg+1):
                 edgst = self.__connection_analysis(edg_number)
@@ -326,7 +323,7 @@ class SkeletonAnalyser:
                     edgst['radius_mm'] = float(self.__radius_analysis(edg_number,skdst))
                 stats[edgst['id']] = edgst
                 
-                if guiUpdateFunction is not None:
+                if guiUpdateFunction is not None: # update gui progress
                     guiUpdateFunction(edg_number,len_edg)
 
 #save data for faster debug

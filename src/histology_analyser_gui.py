@@ -155,6 +155,7 @@ class HistologyAnalyserWindow(QMainWindow):
         ### Show segmented data
         self.showSegmResultDialog()  
         
+    # TODO - get rid of this
     def computeStatistics(self):
         ### Computing statistics
         # TODO - run in separate thread and send info to main window (% completed)
@@ -162,11 +163,11 @@ class HistologyAnalyserWindow(QMainWindow):
         self.setStatusBarText('Computing Statistics')
         self.showStatsRunDialog()
         
-        def updatefunction(p,c): # TODO - just placeholder, replace with GUI update function
-            print str(p)+'/'+str(c)+' processed'
+        #def updatefunction(p,c): # TODO - just placeholder, replace with GUI update function
+            #print str(p)+'/'+str(c)+' processed'
         
-        self.ha.skeleton_to_statistics(self.data3d_thr, self.data3d_skel, guiUpdateFunction=updatefunction) 
-        self.fixWindow()
+        #self.ha.skeleton_to_statistics(self.data3d_thr, self.data3d_skel, guiUpdateFunction=updatefunction) 
+        #self.fixWindow()
         
         ### Saving files
         # TODO - move this somewhere else / or delete
@@ -176,7 +177,7 @@ class HistologyAnalyserWindow(QMainWindow):
         #self.ha.writeSkeletonToPickle('skel.pkl')
 
         ### Finished - Show report
-        self.showStatsResultDialog()
+        #self.showStatsResultDialog()
         
         
     def setStatusBarText(self,text=""):
@@ -246,13 +247,12 @@ class HistologyAnalyserWindow(QMainWindow):
         newapp = SegmWaitDialog(self)
         self.embedWidget(newapp)
         self.fixWindow()
-        #newapp.exec_()
         
     def showStatsRunDialog(self):
-        newapp = StatsRunDialog(self)
+        newapp = StatsRunDialog(self.ha, self.data3d_thr, self.data3d_skel, mainWindow=self)
         self.embedWidget(newapp)
         self.fixWindow()
-        #newapp.exec_()
+        newapp.start()
     
     def showSegmResultDialog(self):
         newapp = SegmResultDialog(self, 
@@ -444,13 +444,41 @@ class SegmResultDialog(QDialog):
         logger.debug('Preview of segmented data')
         self.ha.showSegmentedData(self.data3d_thr, self.data3d_skel)
 
-# TODO - finish this (update info from different thread)
+# Worker signals for computing statistics
+class StatsWorkerSignals(QObject):
+    update = pyqtSignal(int,int)
+    finished = pyqtSignal()
+
+# Worker for computing statistics
+class StatsWorker(QRunnable):
+    signal_update = pyqtSignal(int,int)
+    signal_finished = pyqtSignal()
+        
+    def __init__(self, ha, data3d_thr, data3d_skel):
+        super(StatsWorker, self).__init__()
+        self.ha = ha
+        self.data3d_thr = data3d_thr
+        self.data3d_skel = data3d_skel
+        
+        self.signals = StatsWorkerSignals()
+
+    def run(self):        
+        self.ha.skeleton_to_statistics(self.data3d_thr, self.data3d_skel, guiUpdateFunction=self.signals.update.emit) 
+        self.signals.finished.emit()
+
+# TODO - nicer look
 class StatsRunDialog(QDialog):
-    def __init__(self, mainWindow=None):
+    def __init__(self, ha, data3d_thr, data3d_skel, mainWindow=None):
         self.mainWindow = mainWindow
+        self.ha = ha
+        self.data3d_thr = data3d_thr
+        self.data3d_skel = data3d_skel
         
         QDialog.__init__(self)
         self.initUI()
+        
+        self.pool = QThreadPool()
+        self.pool.setMaxThreadCount(1)
     
     def initUI(self):
         self.ui_gridLayout = QGridLayout()
@@ -458,10 +486,14 @@ class StatsRunDialog(QDialog):
 
         rstart = 0
         
-        info_label=QLabel('Computing Statistics\nPlease wait... (it can take very long)')
+        info_label=QLabel('Computing Statistics\nPlease wait... ')
+        self.pbar=QProgressBar(self)
+        self.pbar.setValue(0)
+        self.pbar.setGeometry(30, 40, 200, 25)
         
         self.ui_gridLayout.addWidget(info_label, rstart + 0, 0)
-        rstart +=1
+        self.ui_gridLayout.addWidget(self.pbar, rstart + 1, 0)
+        rstart +=2
         
         ### Stretcher
         self.ui_gridLayout.addItem(QSpacerItem(0,0), rstart + 0, 0)
@@ -471,15 +503,24 @@ class StatsRunDialog(QDialog):
         ### Setup layout
         self.setLayout(self.ui_gridLayout)
         self.show()
+        
+    def start(self):
+        worker = StatsWorker(self.ha, self.data3d_thr, self.data3d_skel)
+        worker.signals.update.connect(self.updateInfo)
+        worker.signals.finished.connect(self.finished)
+
+        self.pool.start(worker)
+        
+        #self.pool.waitForDone()
     
     def updateInfo(self, part=0, whole=1):
-        # TODO - everything
-        pass
+        logger.debug('processed - '+str(part)+'/'+str(whole))
+        step = int((part/float(whole))*100)
+        self.pbar.setValue(step)
         
     def finished(self):
-        # TODO - finish this (emit signal? + send segmented data)
-        #self.mainWindow.showStatsResultDialog()
-        pass
+        # TODO - edit this (emit signal?)
+        self.mainWindow.showStatsResultDialog()
 
 class StatsResultDialog(QDialog):
     def __init__(self, mainWindow=None, histologyAnalyser=None):
