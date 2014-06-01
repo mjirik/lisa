@@ -34,9 +34,8 @@ class HistologyAnalyserWindow(QMainWindow):
     HEIGHT = 350 #600
     WIDTH = 800
     
-    def __init__(self,inputfile=None,threshold=None,skeleton=False,crop=None,crgui=False):
+    def __init__(self,inputfile=None,skeleton=False,crop=None,crgui=False):
         self.args_inputfile=inputfile
-        self.args_threshold=threshold
         self.args_skeleton=skeleton
         self.args_crop=crop
         self.args_crgui=crgui
@@ -96,17 +95,10 @@ class HistologyAnalyserWindow(QMainWindow):
             self.data3d_thr = struct['thr']
             self.data3d = struct['data3d']
             self.metadata = struct['metadata']
-            self.ha = HA.HistologyAnalyser(self.data3d, self.metadata, self.args_threshold, nogui=False)
+            self.ha = HA.HistologyAnalyser(self.data3d, self.metadata, nogui=False)
             logger.info("end of is skeleton")
             self.fixWindow() # just to be sure
         else:
-            ### Generating data if no input file
-            if (self.data3d is None) or (self.metadata is None):
-                logger.info('Generating sample data...')
-                self.setStatusBarText('Generating sample data...')
-                self.metadata = {'voxelsize_mm': [1, 1, 1]}
-                self.data3d = HA.generate_sample_data(1)
-                
             ### Crop data
             self.setStatusBarText('Crop Data')
             if self.args_crop is not None: # --crop cli parameter crop
@@ -119,7 +111,7 @@ class HistologyAnalyserWindow(QMainWindow):
             
             ### Init HistologyAnalyser object
             logger.debug('Init HistologyAnalyser object')
-            self.ha = HA.HistologyAnalyser(self.data3d, self.metadata, self.args_threshold, nogui=False)
+            self.ha = HA.HistologyAnalyser(self.data3d, self.metadata, nogui=False)
             
             ### Remove Area
             logger.debug('Remove area')
@@ -707,7 +699,8 @@ class LoadDialog(QDialog):
         QDialog.__init__(self)
         self.initUI()
         
-        self.importDataWithGui()
+        if self.inputfile is not None:
+            self.importDataWithGui()
     
     def initUI(self):
         self.ui_gridLayout = QGridLayout()
@@ -741,8 +734,8 @@ class LoadDialog(QDialog):
         btn_dataclear = QPushButton("Generated data", self)
         btn_dataclear.clicked.connect(self.loadDataClear)
         
-        self.text_dcm_dir = QLabel('Data path: ')
-        self.text_dcm_data = QLabel('Data info: ')
+        self.text_dcm_dir = QLabel('Data path: -')
+        self.text_dcm_data = QLabel('Data info: -')
         
         crop_box = QCheckBox('Crop data', self)
         if self.crgui:
@@ -779,7 +772,8 @@ class LoadDialog(QDialog):
         self.show()
     
     def finished(self,event):
-        self.mainWindow.processDataGUI(self.data3d, self.metadata, self.crgui)
+        if (self.data3d is not None) and (self.metadata is not None):
+            self.mainWindow.processDataGUI(self.data3d, self.metadata, self.crgui)
         
     def cropBox(self, state):
         if state == QtCore.Qt.Checked:
@@ -872,10 +866,12 @@ class LoadDialog(QDialog):
         
     def importDataWithGui(self):
         if self.inputfile is None:
+            ### Generating data if no input file
+            logger.info('Generating sample data...')
+            self.mainWindow.setStatusBarText('Generating sample data...')
+            self.metadata = {'voxelsize_mm': [1, 1, 1]}
+            self.data3d = HA.generate_sample_data(1)
             self.text_dcm_dir.setText('Data path: '+'Generated sample data')
-            self.text_dcm_data.setText('Data info: '+'100x100x100, [1.0,1.0,1.0]')
-            self.data3d = None
-            self.metadata = None
         else:
             try:
                 reader = datareader.DataReader()
@@ -884,12 +880,13 @@ class LoadDialog(QDialog):
                 self.mainWindow.setStatusBarText('Bad file/folder!!!')
                 return
             
-            voxelsize = self.metadata['voxelsize_mm']
-            shape = self.data3d.shape
             self.text_dcm_dir.setText('Data path: '+str(self.inputfile))
-            self.text_dcm_data.setText('Data info: '+str(shape[0])+'x'+str(shape[1])+'x'+str(shape[2])+', '+str(voxelsize))
             
-            self.mainWindow.setStatusBarText('Ready')
+        voxelsize = self.metadata['voxelsize_mm']
+        shape = self.data3d.shape
+        self.text_dcm_data.setText('Data info: '+str(shape[0])+'x'+str(shape[1])+'x'+str(shape[2])+', '+str(voxelsize))
+            
+        self.mainWindow.setStatusBarText('Ready')
         
 if __name__ == "__main__":
     HA.main()
