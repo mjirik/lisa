@@ -160,7 +160,7 @@ class HistologyAnalyserWindow(QMainWindow):
         # TODO - run in separate thread and send info to main window (% completed)
         logger.info("######### statistics")
         self.setStatusBarText('Computing Statistics')
-        self.showMessage('Computing Statistics\nPlease wait... (it can take very long)')
+        self.showStatsRunDialog()
         
         def updatefunction(p,c): # TODO - just placeholder, replace with GUI update function
             print str(p)+'/'+str(c)+' processed'
@@ -235,10 +235,6 @@ class HistologyAnalyserWindow(QMainWindow):
         
         self.fixWindow()
     
-    def showMessage(self, text="Default"):
-        newapp = MessageDialog(text)
-        self.embedWidget(newapp)
-    
     def showSegmQueryDialog(self):
         newapp = SegmQueryDialog(self)
         self.embedWidget(newapp)
@@ -248,6 +244,12 @@ class HistologyAnalyserWindow(QMainWindow):
         
     def showSegmWaitDialog(self):
         newapp = SegmWaitDialog(self)
+        self.embedWidget(newapp)
+        self.fixWindow()
+        #newapp.exec_()
+        
+    def showStatsRunDialog(self):
+        newapp = StatsRunDialog(self)
         self.embedWidget(newapp)
         self.fixWindow()
         #newapp.exec_()
@@ -308,30 +310,6 @@ class HistologyAnalyserWindow(QMainWindow):
         self.embedWidget(newapp)
         self.fixWindow(self.WIDTH,300)
         newapp.exec_()
-        
-# TODO - create specific classes so this wont be needed
-class MessageDialog(QDialog): 
-    def __init__(self,text=None):
-        self.text = text
-        
-        QDialog.__init__(self)
-        self.initUI()
-    
-    def initUI(self):
-        vbox_app = QVBoxLayout()
-        
-        font_info = QFont()
-        font_info.setBold(True)
-        font_info.setPixelSize(20)
-        info = QLabel(str(self.text))
-        info.setFont(font_info)
-        
-        vbox_app.addWidget(info)
-        vbox_app.addStretch(1) # misto ktery se muze natahovat
-        #####vbox_app.addWidget(...) nejakej dalsi objekt
-        
-        self.setLayout(vbox_app)
-        self.show()
         
 # TODO - nicer look
 class SegmQueryDialog(QDialog):
@@ -465,6 +443,43 @@ class SegmResultDialog(QDialog):
     def showSegmentedData(self):
         logger.debug('Preview of segmented data')
         self.ha.showSegmentedData(self.data3d_thr, self.data3d_skel)
+
+# TODO - finish this (update info from different thread)
+class StatsRunDialog(QDialog):
+    def __init__(self, mainWindow=None):
+        self.mainWindow = mainWindow
+        
+        QDialog.__init__(self)
+        self.initUI()
+    
+    def initUI(self):
+        self.ui_gridLayout = QGridLayout()
+        self.ui_gridLayout.setSpacing(15)
+
+        rstart = 0
+        
+        info_label=QLabel('Computing Statistics\nPlease wait... (it can take very long)')
+        
+        self.ui_gridLayout.addWidget(info_label, rstart + 0, 0)
+        rstart +=1
+        
+        ### Stretcher
+        self.ui_gridLayout.addItem(QSpacerItem(0,0), rstart + 0, 0)
+        self.ui_gridLayout.setRowStretch(rstart + 0, 1)
+        rstart +=1
+        
+        ### Setup layout
+        self.setLayout(self.ui_gridLayout)
+        self.show()
+    
+    def updateInfo(self, part=0, whole=1):
+        # TODO - everything
+        pass
+        
+    def finished(self):
+        # TODO - finish this (emit signal? + send segmented data)
+        #self.mainWindow.showStatsResultDialog()
+        pass
 
 class StatsResultDialog(QDialog):
     def __init__(self, mainWindow=None, histologyAnalyser=None):
@@ -815,7 +830,7 @@ class LoadDialog(QDialog):
     def importDataWithGui(self):
         if self.inputfile is None:
             self.text_dcm_dir.setText('Data path: '+'Generated sample data')
-            self.text_dcm_data.setText('Data info: '+'200x200x200, [1.0,1.0,1.0]')
+            self.text_dcm_data.setText('Data info: '+'100x100x100, [1.0,1.0,1.0]')
             self.data3d = None
             self.metadata = None
         else:

@@ -38,6 +38,7 @@ import skelet3d
 import segmentation
 import misc
 import py3DSeedEditor as se
+import thresholding_functions
 
 from seed_editor_qt import QTSeedEditor
 
@@ -69,9 +70,11 @@ class HistologyAnalyser:
             pyed.exec_()
 
     def data_to_binar(self):
+        ### Median filter
         filteredData = scipy.ndimage.filters.median_filter(self.data3d, size=2)
         #filteredData = self.data3d
         
+        ### Segmentation
         data3d_thr = segmentation.vesselSegmentation(
             filteredData, #self.data3d,
             segmentation=np.ones(self.data3d.shape, dtype='int8'),
@@ -79,11 +82,32 @@ class HistologyAnalyser:
             inputSigma=0, #0.15,
             dilationIterations=2,
             nObj=1,
-            biggestObjects= self.nogui,
+            biggestObjects= False,
             interactivity= not self.nogui,
             binaryClosingIterations=2, #5,  # TODO !!! - vytvari na stranach oblasti ktere se pak nenasegmentuji
             binaryOpeningIterations=0 #1
             )
+        
+        ## Zalepeni der
+        data3d_thr = scipy.ndimage.morphology.binary_fill_holes(data3d_thr)
+    
+        if self.nogui:
+            # Get seed that is inside of big object
+            seed_data = scipy.ndimage.morphology.binary_erosion(data3d_thr, iterations=2) # hledam pouze velke cevy
+            seed = None
+            for i in xrange(seed_data.shape[0]/4,seed_data.shape[0]-1): # shape/4 aby se zaclo hledat az kousek od kraje
+                for n in xrange(seed_data.shape[1]/4,seed_data.shape[1]-1): 
+                    for j in xrange(seed_data.shape[2]/4,seed_data.shape[2]-1):
+                        if seed_data[i][n][j]==1:
+                            seed = (np.array([i]),np.array([n]),np.array([j]))
+                            logger.debug('automatic seed -> '+str(seed)+' value -> '+str(seed_data[i][n][j]))
+                            break
+                    if seed is not None:
+                        break
+                if seed is not None:
+                        break
+            data3d_thr = thresholding_functions.getPriorityObjects(data3d_thr, nObj=1, seeds=seed)
+        
         return data3d_thr
 
     def binar_to_skeleton(self, data3d_thr):
