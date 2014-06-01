@@ -95,9 +95,9 @@ class HistologyAnalyser:
             # Get seed that is inside of big object
             seed_data = scipy.ndimage.morphology.binary_erosion(data3d_thr, iterations=2) # hledam pouze velke cevy
             seed = None
-            for i in xrange(seed_data.shape[0]/4,seed_data.shape[0]-1): # shape/4 aby se zaclo hledat az kousek od kraje
-                for n in xrange(seed_data.shape[1]/4,seed_data.shape[1]-1): 
-                    for j in xrange(seed_data.shape[2]/4,seed_data.shape[2]-1):
+            for i in xrange(seed_data.shape[0]/3,seed_data.shape[0]-1): # shape/3 aby se zaclo hledat kolem prostredku
+                for n in xrange(seed_data.shape[1]/3,seed_data.shape[1]-1): 
+                    for j in xrange(seed_data.shape[2]/3,seed_data.shape[2]-1):
                         if seed_data[i][n][j]==1:
                             seed = (np.array([i]),np.array([n]),np.array([j]))
                             logger.debug('automatic seed -> '+str(seed)+' value -> '+str(seed_data[i][n][j]))
@@ -106,7 +106,8 @@ class HistologyAnalyser:
                         break
                 if seed is not None:
                         break
-            data3d_thr = thresholding_functions.getPriorityObjects(data3d_thr, nObj=1, seeds=seed)
+            # Zaruci ze ve vystupu nebudou cevy ktere vedou od nikud nikam
+            data3d_thr = thresholding_functions.getPriorityObjects(data3d_thr, nObj=1, seeds=seed) 
         
         return data3d_thr
 
@@ -324,7 +325,7 @@ class SkeletonAnalyser:
                 stats[edgst['id']] = edgst
                 
                 if guiUpdateFunction is not None: # update gui progress
-                    guiUpdateFunction(edg_number,len_edg)
+                    guiUpdateFunction(edg_number,len_edg,1)
 
 #save data for faster debug
             struct = {'sVD':self.volume_data, 'stats':stats, 'len_edg':len_edg}
@@ -340,6 +341,9 @@ class SkeletonAnalyser:
         for edg_number in range (1,len_edg+1):
             edgst = stats[edg_number]
             edgst.update(self.__connected_edge_angle(edg_number, stats))
+            
+            if guiUpdateFunction is not None: # update gui progress
+                    guiUpdateFunction(edg_number,len_edg,2)
 
 
 

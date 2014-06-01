@@ -31,7 +31,7 @@ import histology_analyser as HA
 from histology_report import HistologyReport
 
 class HistologyAnalyserWindow(QMainWindow): 
-    HEIGHT = 600
+    HEIGHT = 350 #600
     WIDTH = 800
     
     def __init__(self,inputfile=None,threshold=None,skeleton=False,crop=None,crgui=False):
@@ -108,7 +108,6 @@ class HistologyAnalyserWindow(QMainWindow):
                 self.data3d = HA.generate_sample_data(1)
                 
             ### Crop data
-            # TODO - info about what is happening on top of window (or somewhere else)
             self.setStatusBarText('Crop Data')
             if self.args_crop is not None: # --crop cli parameter crop
                 crop = self.args_crop
@@ -123,7 +122,6 @@ class HistologyAnalyserWindow(QMainWindow):
             self.ha = HA.HistologyAnalyser(self.data3d, self.metadata, self.args_threshold, nogui=False)
             
             ### Remove Area
-            # TODO - info about what is happening on top of window (or somewhere else)
             logger.debug('Remove area')
             self.setStatusBarText('Remove area')
             self.showRemoveDialog(self.ha.data3d)
@@ -154,31 +152,7 @@ class HistologyAnalyserWindow(QMainWindow):
         
         ### Show segmented data
         self.showSegmResultDialog()  
-        
-    # TODO - get rid of this
-    def computeStatistics(self):
-        ### Computing statistics
-        # TODO - run in separate thread and send info to main window (% completed)
-        logger.info("######### statistics")
-        self.setStatusBarText('Computing Statistics')
-        self.showStatsRunDialog()
-        
-        #def updatefunction(p,c): # TODO - just placeholder, replace with GUI update function
-            #print str(p)+'/'+str(c)+' processed'
-        
-        #self.ha.skeleton_to_statistics(self.data3d_thr, self.data3d_skel, guiUpdateFunction=updatefunction) 
-        #self.fixWindow()
-        
-        ### Saving files
-        # TODO - move this somewhere else / or delete
-        #logger.info("##### write to file")
-        #self.setStatusBarText('Statistics - write file')
-        #self.showMessage('Writing files (Pickle) \nPlease wait...') 
-        #self.ha.writeSkeletonToPickle('skel.pkl')
 
-        ### Finished - Show report
-        #self.showStatsResultDialog()
-        
         
     def setStatusBarText(self,text=""):
         """
@@ -187,14 +161,16 @@ class HistologyAnalyserWindow(QMainWindow):
         self.statusBar().showMessage(text)
         QtCore.QCoreApplication.processEvents()
     
-    def fixWindow(self,w=None,h=None):
+    def fixWindow(self,width=None,height=None):
         """
         Resets Main window size, and makes sure all events (gui changes) were processed
         """
-        if (w is not None) and (h is not None):
-            self.resize(w, h)
-        else:    
-            self.resize(self.WIDTH, self.HEIGHT)
+        if width is None:
+            width = self.WIDTH
+        if height is None:
+            height = self.HEIGHT
+            
+        self.resize(width, height)
         QtCore.QCoreApplication.processEvents() # this is very important
         
     def embedWidget(self, widget=None):     
@@ -261,14 +237,13 @@ class HistologyAnalyserWindow(QMainWindow):
                             data3d_skel=self.data3d_skel
                             )
         self.embedWidget(newapp)
-        self.fixWindow(500,250)
+        self.fixWindow()
         newapp.exec_()
     
     def showStatsResultDialog(self,histologyAnalyser=None):
-        newapp = StatsResultDialog(self,
-                                histologyAnalyser=self.ha
-                                )
+        newapp = StatsResultDialog(self, histologyAnalyser=self.ha )
         self.embedWidget(newapp)
+        self.fixWindow(height = 600)
         newapp.exec_()
         
     def showRemoveDialog(self, data3d=None):
@@ -308,7 +283,7 @@ class HistologyAnalyserWindow(QMainWindow):
     def showLoadDialog(self):
         newapp = LoadDialog(mainWindow=self, inputfile=self.args_inputfile, crgui=self.args_crgui)
         self.embedWidget(newapp)
-        self.fixWindow(self.WIDTH,300)
+        self.fixWindow()
         newapp.exec_()
         
 # TODO - nicer look
@@ -327,17 +302,17 @@ class SegmQueryDialog(QDialog):
         
         info_label = QLabel('Default segmentation settings?')
         
-        self.ui_gridLayout.addWidget(info_label, rstart + 0, 0,)
+        self.ui_gridLayout.addWidget(info_label, rstart + 0, 0, 1, 3)
         rstart +=1
         
         ### Buttons
         btn_default = QPushButton("Use default parameters", self)
         btn_default.clicked.connect(self.runSegmDefault)
-        btn_manual = QPushButton("Set segmentation parameters manualy", self)
+        btn_manual = QPushButton("Set segmentation parameters and area manualy", self)
         btn_manual.clicked.connect(self.runSegmManual)
         
-        self.ui_gridLayout.addWidget(btn_default, rstart + 0, 0)
-        self.ui_gridLayout.addWidget(btn_manual, rstart + 1, 0)
+        self.ui_gridLayout.addWidget(btn_default, rstart + 0, 1)
+        self.ui_gridLayout.addWidget(btn_manual, rstart + 1, 1)
         rstart +=2
         
         ### Stretcher
@@ -369,9 +344,14 @@ class SegmWaitDialog(QDialog):
 
         rstart = 0
         
-        info_label = QLabel('Segmentation\n1. Select segmentation Area\n2. Select finer segmentation settings\n3. Wait until segmentation is finished')
         
-        self.ui_gridLayout.addWidget(info_label, rstart + 0, 0)
+        font_info = QFont()
+        font_info.setBold(True)
+        font_info.setPixelSize(15)
+        info_label = QLabel('Segmentation\n1. Select segmentation Area\n2. Select finer segmentation settings\n3. Wait until segmentation is finished')
+        info_label.setFont(font_info)
+        
+        self.ui_gridLayout.addWidget(info_label, rstart + 0, 0, 1, 3)
         rstart +=1
         
         ### Stretcher
@@ -406,7 +386,7 @@ class SegmResultDialog(QDialog):
         info_label = QLabel('Segmentation finished')
         info_label.setFont(font_info)
         
-        self.ui_gridLayout.addWidget(info_label, rstart + 0, 0)
+        self.ui_gridLayout.addWidget(info_label, rstart + 0, 0, 1, 3)
         rstart += 1
         
         btn_preview = QPushButton("Show segmented data", self)
@@ -414,11 +394,11 @@ class SegmResultDialog(QDialog):
         btn_write = QPushButton("Write segmented data to file", self)
         btn_write.clicked.connect(self.writeSegmentedData)
         btn_stats = QPushButton("Compute Statistics", self)
-        btn_stats.clicked.connect(self.computeStatistics)
+        btn_stats.clicked.connect(self.mainWindow.showStatsRunDialog)
         
-        self.ui_gridLayout.addWidget(btn_preview, rstart + 0, 0)
-        self.ui_gridLayout.addWidget(btn_write, rstart + 1, 0)
-        self.ui_gridLayout.addWidget(btn_stats, rstart + 2, 0)
+        self.ui_gridLayout.addWidget(btn_preview, rstart + 0, 1)
+        self.ui_gridLayout.addWidget(btn_write, rstart + 1, 1)
+        self.ui_gridLayout.addWidget(btn_stats, rstart + 2, 1)
         rstart += 3
         
         ### Stretcher
@@ -429,9 +409,6 @@ class SegmResultDialog(QDialog):
         ### Setup layout
         self.setLayout(self.ui_gridLayout)
         self.show()
-        
-    def computeStatistics(self):
-        self.mainWindow.computeStatistics()
         
     def writeSegmentedData(self): # TODO - choose save path + or maybe just remove
         logger.debug("Writing pickle file")
@@ -446,14 +423,11 @@ class SegmResultDialog(QDialog):
 
 # Worker signals for computing statistics
 class StatsWorkerSignals(QObject):
-    update = pyqtSignal(int,int)
+    update = pyqtSignal(int,int,int)
     finished = pyqtSignal()
 
 # Worker for computing statistics
-class StatsWorker(QRunnable):
-    signal_update = pyqtSignal(int,int)
-    signal_finished = pyqtSignal()
-        
+class StatsWorker(QRunnable):        
     def __init__(self, ha, data3d_thr, data3d_skel):
         super(StatsWorker, self).__init__()
         self.ha = ha
@@ -466,7 +440,6 @@ class StatsWorker(QRunnable):
         self.ha.skeleton_to_statistics(self.data3d_thr, self.data3d_skel, guiUpdateFunction=self.signals.update.emit) 
         self.signals.finished.emit()
 
-# TODO - nicer look
 class StatsRunDialog(QDialog):
     def __init__(self, ha, data3d_thr, data3d_skel, mainWindow=None):
         self.mainWindow = mainWindow
@@ -479,6 +452,9 @@ class StatsRunDialog(QDialog):
         
         self.pool = QThreadPool()
         self.pool.setMaxThreadCount(1)
+        
+        if self.mainWindow is not None:
+            self.mainWindow.setStatusBarText('Computing Statistics...')
     
     def initUI(self):
         self.ui_gridLayout = QGridLayout()
@@ -486,13 +462,30 @@ class StatsRunDialog(QDialog):
 
         rstart = 0
         
-        info_label=QLabel('Computing Statistics\nPlease wait... ')
+        ### Info
+        font_info = QFont()
+        font_info.setBold(True)
+        font_info.setPixelSize(20)
+        info_label=QLabel('Computing Statistics:')
+        info_label.setFont(font_info)
+        
+        self.ui_gridLayout.addWidget(info_label, rstart + 0, 0)
+        rstart +=1
+        
+        ### Progress bar
         self.pbar=QProgressBar(self)
         self.pbar.setValue(0)
         self.pbar.setGeometry(30, 40, 200, 25)
         
-        self.ui_gridLayout.addWidget(info_label, rstart + 0, 0)
-        self.ui_gridLayout.addWidget(self.pbar, rstart + 1, 0)
+        self.ui_gridLayout.addWidget(self.pbar, rstart + 0, 0)
+        rstart +=1
+        
+        ### Progress info
+        self.ui_partInfo_label=QLabel('Processing part: -')
+        self.ui_progressInfo_label=QLabel('Progress: -/-')
+        
+        self.ui_gridLayout.addWidget(self.ui_partInfo_label, rstart + 0, 0)
+        self.ui_gridLayout.addWidget(self.ui_progressInfo_label, rstart + 1, 0)
         rstart +=2
         
         ### Stretcher
@@ -505,22 +498,30 @@ class StatsRunDialog(QDialog):
         self.show()
         
     def start(self):
+        logger.info("Computing Statistics")
         worker = StatsWorker(self.ha, self.data3d_thr, self.data3d_skel)
         worker.signals.update.connect(self.updateInfo)
-        worker.signals.finished.connect(self.finished)
+        worker.signals.finished.connect(self.mainWindow.showStatsResultDialog)
 
         self.pool.start(worker)
         
         #self.pool.waitForDone()
+        
+        ### Saving files
+        # TODO - move this somewhere else / or delete
+        #logger.info("##### write to file")
+        #self.setStatusBarText('Statistics - write file')
+        #self.showMessage('Writing files (Pickle) \nPlease wait...') 
+        #self.ha.writeSkeletonToPickle('skel.pkl')
     
-    def updateInfo(self, part=0, whole=1):
+    def updateInfo(self, part=0, whole=1, processPart=1):
         logger.debug('processed - '+str(part)+'/'+str(whole))
+        # update progress bar
         step = int((part/float(whole))*100)
         self.pbar.setValue(step)
-        
-    def finished(self):
-        # TODO - edit this (emit signal?)
-        self.mainWindow.showStatsResultDialog()
+        # update progress info
+        self.ui_partInfo_label.setText('Processing part: '+str(processPart))
+        self.ui_progressInfo_label.setText('Progress: '+str(part)+'/'+str(whole))
 
 class StatsResultDialog(QDialog):
     def __init__(self, mainWindow=None, histologyAnalyser=None):
@@ -716,7 +717,8 @@ class LoadDialog(QDialog):
         
         ### Title
         font_label = QFont()
-        font_label.setBold(True)        
+        font_label.setBold(True)     
+        font_label.setPixelSize(20)   
         ha_title = QLabel('Histology analyser')
         ha_title.setFont(font_label)
         ha_title.setAlignment(Qt.AlignCenter)
@@ -807,7 +809,7 @@ class LoadDialog(QDialog):
             return
         self.importDataWithGui()
     
-    def loadDataClear(self,event):
+    def loadDataClear(self,event): # TODO - Generate data here => display real data shape
         self.inputfile=None
         self.importDataWithGui()
         self.mainWindow.setStatusBarText('Ready')
