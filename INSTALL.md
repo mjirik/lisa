@@ -183,6 +183,10 @@ Use VirtualBox
 ==============
 
 * Install VirtualBox (https://www.virtualbox.org/)
+* Download Lisa Image (http://uloz.to/xU4oHfKw/lisa-ubuntu14-04-vdi)
+
+or 
+
 * Download Lisa Image (http://147.228.240.61/queetech/install/lisa_ubuntu14.04.vdi
 
 
