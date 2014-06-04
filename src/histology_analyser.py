@@ -38,6 +38,7 @@ import skelet3d
 import segmentation
 import misc
 import py3DSeedEditor as se
+import thresholding_functions
 
 from seed_editor_qt import QTSeedEditor
 
@@ -48,12 +49,11 @@ fast_debug = False
 import histology_analyser_gui as HA_GUI
 
 class HistologyAnalyser:
-    def __init__(self, data3d, metadata, threshold, nogui=True):
+    def __init__(self, data3d, metadata, threshold=-1, nogui=True):
         self.data3d = data3d
         self.threshold = threshold
         self.nogui = nogui
 
-        print metadata
         if 'voxelsize_mm' not in metadata.keys():
 # @TODO resolve problem with voxelsize
             metadata['voxelsize_mm'] = [0.1, 0.2, 0.3]
@@ -70,20 +70,47 @@ class HistologyAnalyser:
             pyed.exec_()
 
     def data_to_binar(self):
+        ### Median filter
         filteredData = scipy.ndimage.filters.median_filter(self.data3d, size=2)
-        #filteredData = self.data3d
         
+        ### Segmentation
         data3d_thr = segmentation.vesselSegmentation(
-            filteredData, #self.data3d,
+            filteredData, 
             segmentation=np.ones(self.data3d.shape, dtype='int8'),
             threshold=self.threshold, #-1,
             inputSigma=0, #0.15,
             dilationIterations=2,
             nObj=1,
-            biggestObjects=False,
+            biggestObjects= False,
             interactivity= not self.nogui,
-            binaryClosingIterations=5,
-            binaryOpeningIterations=1)
+            binaryClosingIterations=2, #5,  # TODO !!! - vytvari na stranach oblasti ktere se pak nenasegmentuji
+            binaryOpeningIterations=0 #1
+            )
+        
+        ### NoGUI segmentation fix
+        # Pri pouziti nogui modu segmentation.py nepouzije funkci getPriorityObjects jelikoz nema seedy => odlisne vysledky.
+        # Proto musim rucne zjistit vhodny seed a zavolat funkci az ted.
+        if self.nogui:
+            # Get seed that is inside of big object
+            seed_data = scipy.ndimage.morphology.binary_erosion(data3d_thr, iterations=2) # hledam pouze velke cevy
+            seed = None
+            for i in xrange(seed_data.shape[0]/3,seed_data.shape[0]-1): # shape/3 aby se zaclo hledat kolem prostredku
+                for n in xrange(seed_data.shape[1]/3,seed_data.shape[1]-1): 
+                    for j in xrange(seed_data.shape[2]/3,seed_data.shape[2]-1):
+                        if seed_data[i][n][j]==1:
+                            seed = (np.array([i]),np.array([n]),np.array([j]))
+                            logger.debug('automatic seed -> '+str(seed)+' value -> '+str(seed_data[i][n][j]))
+                            break
+                    if seed is not None:
+                        break
+                if seed is not None:
+                        break
+            # Zaruci ze ve vystupu nebudou cevy ktere vedou od nikud nikam
+            data3d_thr = thresholding_functions.getPriorityObjects(data3d_thr, nObj=1, seeds=seed) 
+            
+        ### Zalepeni der
+        data3d_thr = scipy.ndimage.morphology.binary_fill_holes(data3d_thr)
+        
         return data3d_thr
 
     def binar_to_skeleton(self, data3d_thr):
@@ -96,13 +123,13 @@ class HistologyAnalyser:
         data3d_skel = self.binar_to_skeleton(data3d_thr)
         return data3d_thr, data3d_skel
     
-    def skeleton_to_statistics(self, data3d_thr, data3d_skel):
+    def skeleton_to_statistics(self, data3d_thr, data3d_skel, guiUpdateFunction=None):
         skan = SkeletonAnalyser(
             data3d_skel,
             volume_data=data3d_thr,
             voxelsize_mm=self.metadata['voxelsize_mm'])
 
-        stats = skan.skeleton_analysis()
+        stats = skan.skeleton_analysis(guiUpdateFunction=guiUpdateFunction)
         self.sklabel = skan.sklabel
         #data3d_nodes[data3d_nodes==3] = 2
         self.stats = {'Graph':stats}
@@ -201,7 +228,7 @@ class HistologyAnalyser:
 
 
     def writeStatsToYAML(self, filename='hist_stats.yaml'):
-        print 'write to yaml'
+        logger.debug('writeStatsToYAML')
         misc.obj_to_file(self.stats, filename=filename, filetype='yaml')
 
         #sitk.
@@ -272,7 +299,7 @@ class SkeletonAnalyser:
         self.__generate_sklabel(skelet_nodes)
 
 
-    def skeleton_analysis(self):
+    def skeleton_analysis(self, guiUpdateFunction = None):
         """
         Glossary:
         element: line structure of skeleton connected to node on both ends
@@ -288,8 +315,8 @@ class SkeletonAnalyser:
             stats = {}
             len_edg = np.max(self.sklabel)
             #len_edg = 30
-
-            for edg_number in range (1,len_edg):
+                
+            for edg_number in range(1,len_edg+1):
                 edgst = self.__connection_analysis(edg_number)
                 edgst.update(self.__edge_length(edg_number))
                 edgst.update(self.__edge_curve(edg_number, edgst, self.voxelsize_mm))
@@ -298,6 +325,9 @@ class SkeletonAnalyser:
                 if self.volume_data is not None:
                     edgst['radius_mm'] = float(self.__radius_analysis(edg_number,skdst))
                 stats[edgst['id']] = edgst
+                
+                if guiUpdateFunction is not None: # update gui progress
+                    guiUpdateFunction(edg_number,len_edg,1)
 
 #save data for faster debug
             struct = {'sVD':self.volume_data, 'stats':stats, 'len_edg':len_edg}
@@ -310,9 +340,12 @@ class SkeletonAnalyser:
 
 
         #@TODO dokončit
-        for edg_number in range (1,len_edg):
+        for edg_number in range (1,len_edg+1):
             edgst = stats[edg_number]
             edgst.update(self.__connected_edge_angle(edg_number, stats))
+            
+            if guiUpdateFunction is not None: # update gui progress
+                    guiUpdateFunction(edg_number,len_edg,2)
 
 
 
@@ -826,16 +859,15 @@ def parser_init():
 #        default='histout.pkl',
 #        help='output file')
     parser.add_argument('-t', '--threshold', type=int,
-        default=-1, #6600,
+        default=-1, 
         help='data threshold, default -1 (gui/automatic selection)')
     parser.add_argument(
         '-is', '--input_is_skeleton', action='store_true',
         help='Input file is .pkl file with skeleton')
     parser.add_argument('-cr', '--crop', type=int, metavar='N', nargs='+',
-        #default=[0,-1,0,-1,0,-1],
         default=None,
         help='Segmentation labels, default 1')
-    parser.add_argument(
+    parser.add_argument( # TODO - not needed??
         '--crgui', action='store_true',
         help='GUI crop')
     parser.add_argument(
@@ -865,7 +897,7 @@ def processData(inputfile=None,threshold=None,skeleton=False,crop=None):
         if inputfile is None: ## Using generated sample data
             logger.info('Generating sample data...')
             metadata = {'voxelsize_mm': [1, 1, 1]}
-            data3d = generate_sample_data(2)
+            data3d = generate_sample_data(1)
         else: ## Normal runtime
             dr = datareader.DataReader()
             data3d, metadata = dr.Get3DData(inputfile)
@@ -916,10 +948,16 @@ def main():
         logger.info('Input file -> %s', args.inputfile)
         logger.info('Data crop -> %s', str(args.crop))
         logger.info('Threshold -> %s', args.threshold)
-        processData(inputfile=args.inputfile,threshold=args.threshold,skeleton=args.input_is_skeleton,crop=args.crop)
+        processData(inputfile=args.inputfile,
+                    threshold=args.threshold,
+                    skeleton=args.input_is_skeleton,
+                    crop=args.crop)
     else:
         app = QApplication(sys.argv)
-        gui = HA_GUI.HistologyAnalyserWindow(inputfile=args.inputfile,threshold=args.threshold,skeleton=args.input_is_skeleton,crop=args.crop,crgui=args.crgui)
+        gui = HA_GUI.HistologyAnalyserWindow(inputfile=args.inputfile,
+                                            skeleton=args.input_is_skeleton,
+                                            crop=args.crop,
+                                            crgui=args.crgui)
         sys.exit(app.exec_())
         
 if __name__ == "__main__":

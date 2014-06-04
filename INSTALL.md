@@ -179,6 +179,26 @@ Install Mac OS
     
  * 
    
+Use VirtualBox
+==============
+
+* Install VirtualBox (https://www.virtualbox.org/)
+* Download Lisa Image (http://uloz.to/xU4oHfKw/lisa-ubuntu14-04-vdi)
+
+or 
+* Download Lisa Image (http://147.228.240.61/queetech/install/lisa_ubuntu14.04.vdi)
+
+In VirtualBox
+
+* Create new computer
+
+    * Name: Lisa
+    * Type: Linux
+    * Version: Ubuntu (32bit)
+    
+* Set memory size to 1024MB and more
+* Use existing hard disk and locate downloaded Lisa Image (lisa_ubuntu14.04.vdi)
+* Password to Lisa account is: L1v3r.
 
 
 Install Windows

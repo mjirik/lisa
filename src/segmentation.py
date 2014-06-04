@@ -181,9 +181,6 @@ def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsize_mm = [
 
         output[output != 0] = 1
     
-    ## Zalepeni der
-    output = scipy.ndimage.morphology.binary_fill_holes(output)
-    
     ## Vraceni matice.
     if returnThreshold:
 

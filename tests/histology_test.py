@@ -63,7 +63,7 @@ class HistologyTest(unittest.TestCase):
         data3d_skel = ha.binar_to_skeleton(data3d_thr)
         
         # get statistics
-        ha.skeleton_to_statistics(data3d_thr, data3d_skel,showResult=False)
+        ha.skeleton_to_statistics(data3d_thr, data3d_skel)
         yaml_new = "hist_stats_new.yaml"
         ha.writeStatsToYAML(filename=yaml_new)
         
