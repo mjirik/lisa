@@ -52,7 +52,8 @@ import matplotlib.pyplot as plt
 import experiments
 
 
-def feat_hist_by_segmentation(data3d_orig, data3d_seg, visualization=True):
+def feat_hist_by_segmentation(data3d_orig, data3d_seg, voxelsize_mm=[1],
+                              visualization=True):
     bins = range(-1024, 1024, 1)
     bins = range(-512, 512, 1)
     hist1, bin_edges1 = np.histogram(data3d_orig[data3d_seg > 0], bins=bins)
@@ -64,8 +65,10 @@ def feat_hist_by_segmentation(data3d_orig, data3d_seg, visualization=True):
         plt.legend([plt_liver, plt_rest], ['Liver', 'Other tissue'])
         #plt.plot(bin_edges1[1:], hist1, bin_edges2[1:], hist2)
         plt.show()
-    fv_hist = {'hist1': hist1,
-               'hist2': hist2,
+
+    vvolume = np.prod(voxelsize_mm)
+    fv_hist = {'hist1': hist1 * vvolume,
+               'hist2': hist2 * vvolume,
                'bins': bins
                }
     return fv_hist
