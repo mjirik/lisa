@@ -98,25 +98,19 @@ def lbp(data3d_orig, data3d_seg, visualization=True):
 
 
 def lbp3d(data3d_orig, filename, visualization=True):
-    import lbpLibrary3d as lbp3d
+    from lbp import lbp3d
     lib3d = lbp3d.loadLibrary()
     f = open(filename, 'r')
     maskJSON = json.load(f)
-    mask = {}
-    mask['maskCoef'] = maskJSON['mask']['coefs']
-    mask['center'] = maskJSON['mask']['center']
-    mask['mask'] = lbp3d.coordToPoints(
-        maskJSON['mask']['coordx'],
-        maskJSON['mask']['coordy'],
-        maskJSON['mask']['coordz'],
+    mask = maskJSON['mask']
+    lbp3d.coordToPoints(
+        mask,
         data3d_orig.shape[2],
         data3d_orig.shape[1])
     res = lbp3d.compute(
         lib3d,
         data3d_orig,
-        maskJSON['mask']['pointsNum'],
-        mask,
-        maskJSON['mask']['size'][0])
+        mask)
     return res
 
 
