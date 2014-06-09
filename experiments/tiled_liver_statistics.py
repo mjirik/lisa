@@ -99,7 +99,7 @@ def lbp(data3d_orig, data3d_seg, visualization=True):
 
 def lbp3d(data3d_orig, filename, visualization=True):
     from lbp import lbp3d
-    lib3d = lbp3d.loadLibrary()
+    lib3d = lbp3d.load()
     f = open(filename, 'r')
     maskJSON = json.load(f)
     mask = maskJSON['mask']
