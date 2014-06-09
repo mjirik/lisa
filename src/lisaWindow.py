@@ -421,7 +421,7 @@ class OrganSegmentationWindow(QMainWindow):
         if oseg.data3d is None:
             self.statusBar().showMessage('No DICOM data!')
             return
-        sgm = (oseg.segmentation == 1).astype(np.uint8)
+        sgm = oseg.segmentation.astype(np.uint8)
 
         pyed = QTSeedEditor(oseg.data3d,
                             seeds=sgm,
