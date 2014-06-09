@@ -1,6 +1,13 @@
 # /usr/bin/env python
 # -*- coding: utf-8 -*-
-""" LISA - organ segmentation tool. """
+"""
+LISA - organ segmentation tool.
+
+'Liver Surgery Analyser
+
+    npython organ_segmentation.py
+    npython organ_segmentation.py -mroi -vs 0.6
+"""
 
 import logging
 logger = logging.getLogger(__name__)
@@ -102,7 +109,8 @@ class OrganSegmentation():
         input_datapath_start='',
         experiment_caption='',
         lisa_operator_identifier='',
-        volume_unit='ml'
+        volume_unit='ml',
+        save_filetype='pklz',
 
         #           iparams=None,
     ):
@@ -165,6 +173,7 @@ class OrganSegmentation():
         self.volume_unit = volume_unit
         self.organ_interactivity_counter = 0
         self.dcmfilelist = None
+        self.save_filetype = save_filetype
 
 #
         oseg_input_params = locals()
@@ -715,17 +724,18 @@ class OrganSegmentation():
         filename += "-" + self.experiment_caption
 #        if savestring in ['a', 'A']:
 # save renamed file too
-        filepath = 'org-' + filename + '.pklz'
+        filepath = 'org-' + filename + '.' + self.save_filetype
         # rint filepath
         # rint 'op ', op
         filepath = op.join(odp, filepath)
         filepath = misc.suggest_filename(filepath)
-        misc.obj_to_file(data, filepath, filetype='pklz')
+        misc.obj_to_file(data, filepath, filetype=self.save_filetype)
 
-        filepath = 'organ_last.pklz'
+        filepath = 'organ_last.' + self.save_filetype
         filepath = op.join(odp, filepath)
         # ilepath = misc.suggest_filename(filepath)
-        misc.obj_to_file(data, filepath, filetype='pklz')
+        misc.obj_to_file(data, filepath, filetype=self.save_filetype)
+# save to mat
 
 #        iparams = self.get_iparams()
         # filepath = 'organ_iparams.pklz'
@@ -821,18 +831,29 @@ def lisa_config_init():
 
 
 def parser_init(cfg):
+
     # input parser
-    parser = argparse.ArgumentParser(
-        description='Segment vessels from liver \n\
-                \npython organ_segmentation.py\n\
-                \npython organ_segmentation.py -mroi -vs 0.6')
-    parser.add_argument('-cf', '--configfile', default=None,
-                        help="Use another config. It is loaded after default \
+    conf_parser = argparse.ArgumentParser(
+        # Turn off help, so we print all options in response to -h
+        add_help=False
+    )
+    conf_parser.add_argument(
+        '-cf', '--configfile', default=None,
+        help="Use another config. It is loaded after default \
 config and user config.")
 # Read alternative config file. First is loaded default config. Then user
 # config in lisa_data directory. After that is readed config defined by
 # --configfile parameter
-    knownargs, unknownargs = parser.parse_known_args()
+    knownargs, unknownargs = conf_parser.parse_known_args()
+
+    parser = argparse.ArgumentParser(
+        # Inherit options from config_parser
+        parents=[conf_parser],
+        # print script description with -h/--help
+        description=__doc__,
+        # Don't mess with format of description
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
     if knownargs.configfile is not None:
         cfg = config.get_config(knownargs.configfile, cfg)
 
