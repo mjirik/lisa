@@ -64,7 +64,7 @@ class OrganSegmentationWindow(QMainWindow):
         font_info.setPixelSize(10)
 
         #############
-        ### LISA logo
+        # ## LISA logo
         # font_title = QFont()
         # font_title.setBold(True)
         # font_title.setSize(24)
@@ -178,17 +178,22 @@ class OrganSegmentationWindow(QMainWindow):
         text_resection = QLabel('Virtual resection')
         text_resection.setFont(font_label)
 
-        grid.addWidget(hr, rstart + 0, 2, 1, 4)
-        grid.addWidget(text_resection, rstart + 0, 1)
 
         btn_vesselseg = QPushButton("Vessel segmentation", self)
         btn_vesselseg.clicked.connect(self.btnVesselSegmentation)
 
+        btn_lesions = QPushButton("Lesions localization", self)
+        btn_lesions.clicked.connect(self.btnLesionLocalization)
+
         btn_resection = QPushButton("Virtual resection", self)
         btn_resection.clicked.connect(self.btnVirtualResection)
 
+
+        grid.addWidget(hr, rstart + 0, 2, 1, 4)
+        grid.addWidget(text_resection, rstart + 0, 1)
         grid.addWidget(btn_vesselseg, rstart + 1, 1)
-        grid.addWidget(btn_resection, rstart + 1, 2)
+        grid.addWidget(btn_lesions, rstart + 1, 2)
+        grid.addWidget(btn_resection, rstart + 1, 3)
 
         ##############
 
@@ -531,6 +536,9 @@ class OrganSegmentationWindow(QMainWindow):
         #pyqtRemoveInputHook()
         #import ipdb; ipdb.set_trace() # BREAKPOINT
         #pass
+
+    def btnLesionLocalization(self):
+        self.oseg.lesionsLocalization()
 
     def btnVesselSegmentation(self):
         """

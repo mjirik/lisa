@@ -24,8 +24,8 @@ import scipy
 import misc
 import py3DSeedEditor
 import dcmreaddata
-import show3
-import vessel_cut
+# import show3
+# import vessel_cut
 import scipy.ndimage.measurements as scimeas
 # from skimage.morphology import remove_small_objects
 import skimage.morphology as skimor

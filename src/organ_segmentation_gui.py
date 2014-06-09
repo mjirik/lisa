@@ -672,6 +672,17 @@ class OrganSegmentation():
             #tmpslice = #np.logical_and(
             #circle < (6400 + 60), circle > (6400 - 60))
 
+    def lesionsLocalization(self):
+        """ Localization of lession """
+        import lesions
+        tumory = lesions.Lesions()
+        # tumory.overlay_test()
+        data = self.export()
+        tumory.import_data(data)
+        tumory.automatic_localization()
+
+        self.segmentation = tumory.segmentation
+
     def get_segmented_volume_size_mm3(self):
         """Compute segmented volume in mm3, based on subsampeled data."""
 
