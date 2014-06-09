@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# /usr/bin/env python
 # -*- coding: utf-8 -*-
 """ LISA - organ segmentation tool. """
 
@@ -19,10 +19,10 @@ import scipy
 import scipy.ndimage
 import numpy as np
 
-#import dcmreaddata as dcmreader
+# import dcmreaddata as dcmreader
 import pycut
-#from seg2fem import gen_mesh_from_voxels, gen_mesh_from_voxels_mc
-#from viewer import QVTKViewer
+# from seg2fem import gen_mesh_from_voxels, gen_mesh_from_voxels_mc
+# from viewer import QVTKViewer
 import qmisc
 import misc
 import config
@@ -30,10 +30,10 @@ import datareader
 import datawriter
 
 import time
-#import audiosupport
+# import audiosupport
 import argparse
-#import skimage
-#import skimage.transform
+# import skimage
+# import skimage.transform
 
 scaling_modes = {
     'original': (None, None, None),
@@ -47,7 +47,7 @@ scaling_modes = {
 from pkg_resources import parse_version
 import sklearn
 if parse_version(sklearn.__version__) > parse_version('0.10'):
-    #new versions
+    # new versions
     cvtype_name = 'covariance_type'
 else:
     cvtype_name = 'cvtype'
@@ -65,12 +65,12 @@ config_version = [1, 0, 0]
 
 
 def import_gui():
-    #from lisaWindow import OrganSegmentationWindow
-    #from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
-    #    QGridLayout, QLabel, QPushButton, QFrame, \
-    #    QFont, QPixmap
-    #from PyQt4.Qt import QString
-    #from seed_editor_qt import QTSeedEditor
+    # from lisaWindow import OrganSegmentationWindow
+    # from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
+    #     QGridLayout, QLabel, QPushButton, QFrame, \
+    #     QFont, QPixmap
+    # from PyQt4.Qt import QString
+    # from seed_editor_qt import QTSeedEditor
     pass
 
 
@@ -137,7 +137,7 @@ class OrganSegmentation():
         self.working_voxelsize_mm = None
         self.input_wvx_size = working_voxelsize_mm
 
-        #print segparams
+        # print segparams
 # @TODO each axis independent alpha
         self.segparams = default_segparams
         self.segparams.update(segparams)
@@ -181,16 +181,16 @@ class OrganSegmentation():
             if datapath is not None:
                 reader = datareader.DataReader()
                 datap = reader.Get3DData(datapath, dataplus_format=True)
-                #self.iparams['series_number'] = metadata['series_number']
+                # self.iparams['series_number'] = metadata['series_number']
                 # self.iparams['datapath'] = datapath
                 self.import_dataplus(datap)
             else:
-# data will be selected from gui
+                # data will be selected from gui
                 pass
-                #logger.error('No input path or 3d data')
+                # logger.error('No input path or 3d data')
 
         else:
-            #self.data3d = data3d
+            # self.data3d = data3d
             # default values are updated in next line
             mindatap = {'series_number': -1,
                         'voxelsize_mm': 1,
@@ -203,9 +203,9 @@ class OrganSegmentation():
 
             # self.iparams['series_number'] = self.metadata['series_number']
             # self.iparams['datapath'] = self.metadata['datapath']
-        #self.import_dataplus()
+        # self.import_dataplus()
 
-    #def importDataPlus(self, datap):
+    # def importDataPlus(self, datap):
     #    """
     #    Function for input data
     #    """
@@ -230,7 +230,7 @@ class OrganSegmentation():
 
     def process_wvx_size_mm(self, metadata):
 
-        #vx_size = self.working_voxelsize_mm
+        # vx_size = self.working_voxelsize_mm
         vx_size = self.input_wvx_size
         if vx_size == 'orig':
             vx_size = metadata['voxelsize_mm']
@@ -246,12 +246,12 @@ class OrganSegmentation():
 
         vx_size = np.array(vx_size).astype(float)
 
-       # if np.isscalar(vx_sizey):
-       #     vx_size = (np.ones([3]) *vx_size).astype(float)
+        # if np.isscalar(vx_sizey):
+        #     vx_size = (np.ones([3]) *vx_size).astype(float)
 
         # self.iparams['working_voxelsize_mm'] = vx_size
         self.working_voxelsize_mm = vx_size
-        #return vx_size
+        # return vx_size
 
     def __volume_blowup_criterial_funcion(self, threshold, wanted_volume,
                                           segmentation_smooth
@@ -269,20 +269,20 @@ class OrganSegmentation():
         Sigma is computed in mm
 
         """
-        #import scipy.ndimage
+        # import scipy.ndimage
         sigma = float(sigma_mm) / np.array(self.voxelsize_mm)
 
-        #print sigma
-        #from PyQt4.QtCore import pyqtRemoveInputHook
-        #pyqtRemoveInputHook()
+        # print sigma
+        # from PyQt4.QtCore import pyqtRemoveInputHook
+        # pyqtRemoveInputHook()
         vol1 = np.sum(self.segmentation)
         wvol = vol1 * self.volume_blowup
         segsmooth = scipy.ndimage.filters.gaussian_filter(
             self.segmentation.astype(np.float32), sigma)
-        #import ipdb; ipdb.set_trace()
-        #import pdb; pdb.set_trace()
-        #pyed = py3DSeedEditor.py3DSeedEditor(self.orig_scale_segmentation)
-        #pyed.show()
+        # import ipdb; ipdb.set_trace()
+        # import pdb; pdb.set_trace()
+        # pyed = py3DSeedEditor.py3DSeedEditor(self.orig_scale_segmentation)
+        # pyed.show()
 
         critf = lambda x: self.__volume_blowup_criterial_funcion(x, wvol,
                                                                  segsmooth)
@@ -294,7 +294,7 @@ class OrganSegmentation():
                              ).astype(np.int8)
         vol2 = np.sum(self.segmentation)
         logger.debug("volume ratio " + str(vol2 / float(vol1)))
-        #import ipdb; ipdb.set_trace()
+        # import ipdb; ipdb.set_trace()
 
     def import_dataplus(self, dataplus):
         datap = {
@@ -302,16 +302,16 @@ class OrganSegmentation():
         }
         datap.update(dataplus)
         # voxelsize processing
-        #self.parameters = {}
+        # self.parameters = {}
 
         dpkeys = datap.keys()
-        #self.segparams['pairwise_alpha']=25
+        # self.segparams['pairwise_alpha']=25
         self.data3d = datap['data3d']
 
         if self.roi is not None:
             self.crop(self.roi)
-            #self.data3d = qmisc.crop(self.data3d, self.roi)
-            #self.crinfo = self.roi
+            # self.data3d = qmisc.crop(self.data3d, self.roi)
+            # self.crinfo = self.roi
             # self.iparams['roi'] = self.roi
             # self.iparams['manualroi'] = False
 
@@ -335,8 +335,8 @@ class OrganSegmentation():
             self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
 
         self.dcmfilelist = datap['dcmfilelist']
-        #self.segparams = {'pairwiseAlpha':2, 'use_boundary_penalties':True,
-        #'boundary_penalties_sigma':50}
+        # self.segparams = {'pairwiseAlpha':2, 'use_boundary_penalties':True,
+        # 'boundary_penalties_sigma':50}
 
         try:
             self.seeds = datap['processing_information'][
@@ -364,7 +364,7 @@ class OrganSegmentation():
         tmpcrinfo: temporary crop information
 
         """
-        #print ('sedds ', str(self.seeds.shape), ' se ',
+        # print ('sedds ', str(self.seeds.shape), ' se ',
         #       str(self.segmentation.shape), ' d3d ', str(self.data3d.shape))
         self.data3d = qmisc.crop(self.data3d, tmpcrinfo)
 # No, size of seeds should be same as data3d
@@ -377,14 +377,14 @@ class OrganSegmentation():
         self.crinfo = qmisc.combinecrinfo(self.crinfo, tmpcrinfo)
         logger.debug("crinfo " + str(self.crinfo))
 
-        #print '----sedds ', self.seeds.shape, ' se ',
-#self.segmentation.shape,\
+        # print '----sedds ', self.seeds.shape, ' se ',
+# self.segmentation.shape,\
         #        ' d3d ', self.data3d.shape
 
     def _interactivity_begin(self):
         logger.debug('_interactivity_begin()')
-        #print 'zoom ', self.zoom
-        #print 'svs_mm ', self.working_voxelsize_mm
+        # print 'zoom ', self.zoom
+        # print 'svs_mm ', self.working_voxelsize_mm
         data3d_res = scipy.ndimage.zoom(
             self.data3d,
             self.zoom,
@@ -397,13 +397,13 @@ class OrganSegmentation():
                      '\nmodelparams ' + str(self.segmodelparams)
                      )
         igc = pycut.ImageGraphCut(
-            #self.data3d,
+            # self.data3d,
             data3d_res,
             segparams=self.segparams,
             voxelsize=self.working_voxelsize_mm,
             modelparams=self.segmodelparams,
             volume_unit='ml'
-            #voxelsize=self.voxelsize_mm
+            # oxelsize=self.voxelsize_mm
         )
 
         igc.modelparams = self.segmodelparams
@@ -429,9 +429,9 @@ class OrganSegmentation():
         logger.debug('_interactivity_end()')
         # @TODO remove old code in except part
         try:
-            #print 'pred vyjimkou'
-            #raise Exception ('test without skimage')
-            #print 'za vyjimkou'
+            # rint 'pred vyjimkou'
+            # aise Exception ('test without skimage')
+            # rint 'za vyjimkou'
             import skimage
             import skimage.transform
 # Now we need reshape  seeds and segmentation to original size
@@ -465,15 +465,15 @@ class OrganSegmentation():
 # @TODO odstranit hack pro oříznutí na stejnou velikost
 # v podstatě je to vyřešeno, ale nechalo by se to dělat elegantněji v zoom
 # tam je bohužel patrně bug
-            #print 'd3d ', self.data3d.shape
-            #print 's orig scale shape ', segm_orig_scale.shape
+            # rint 'd3d ', self.data3d.shape
+            # rint 's orig scale shape ', segm_orig_scale.shape
             shp = [
                 np.min([segm_orig_scale.shape[0], self.data3d.shape[0]]),
                 np.min([segm_orig_scale.shape[1], self.data3d.shape[1]]),
                 np.min([segm_orig_scale.shape[2], self.data3d.shape[2]]),
             ]
-            #self.data3d = self.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
-            #import ipdb; ipdb.set_trace() # BREAKPOINT
+            # elf.data3d = self.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
+            # mport ipdb; ipdb.set_trace() # BREAKPOINT
 
             self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
             self.segmentation[
@@ -491,10 +491,10 @@ class OrganSegmentation():
         if self.segmentation_smoothing:
             self.segm_smoothing(self.smoothing_mm)
 
-        #print 'autocrop', self.autocrop
+        # rint 'autocrop', self.autocrop
         if self.autocrop is True:
-            #print
-            #import pdb; pdb.set_trace()
+            # rint
+            # mport pdb; pdb.set_trace()
 
             tmpcrinfo = qmisc.crinfo_from_specific_data(
                 self.segmentation,
@@ -502,19 +502,19 @@ class OrganSegmentation():
 
             self.crop(tmpcrinfo)
 
-        #oseg = self
-        #print 'ms d3d ', oseg.data3d.shape
-        #print 'ms seg ', oseg.segmentation.shape
-        #print 'crinfo ', oseg.crinfo
-            #self.segmentation = qmisc.crop(self.segmentation, tmpcrinfo)
-            #self.data3d = qmisc.crop(self.data3d, tmpcrinfo)
+        # seg = self
+        # rint 'ms d3d ', oseg.data3d.shape
+        # rint 'ms seg ', oseg.segmentation.shape
+        # rint 'crinfo ', oseg.crinfo
+            # elf.segmentation = qmisc.crop(self.segmentation, tmpcrinfo)
+            # elf.data3d = qmisc.crop(self.data3d, tmpcrinfo)
 
-            #self.crinfo = qmisc.combinecrinfo(self.crinfo, tmpcrinfo)
+            # elf.crinfo = qmisc.combinecrinfo(self.crinfo, tmpcrinfo)
 
         if self.texture_analysis not in (None, False):
             import texture_analysis
             # doplnit nějaký kód, parametry atd
-            #self.orig_scale_segmentation =
+            # elf.orig_scale_segmentation =
             # texture_analysis.segmentation(self.data3d,
             # self.orig_scale_segmentation, params = self.texture_analysis)
             self.segmentation = texture_analysis.segmentation(
@@ -524,7 +524,7 @@ class OrganSegmentation():
             )
 
         # set label number
-#!!! pomaly!!!
+# !! pomaly!!!
 # @TODO make faster
         self.segmentation[self.segmentation == 1] = self.output_label
 #
@@ -569,9 +569,9 @@ class OrganSegmentation():
 
     def ninteractivity(self):
         """Function for automatic (noninteractiv) mode."""
-        #import pdb; pdb.set_trace()
+        # mport pdb; pdb.set_trace()
         igc = self._interactivity_begin()
-        #igc.interactivity()
+        # gc.interactivity()
         igc.make_gc()
         self.segmentation = (igc.segmentation == 0).astype(np.int8)
         self._interactivity_end(igc)
@@ -603,10 +603,10 @@ class OrganSegmentation():
         data['processing_information'] = processing_information
 # TODO add dcmfilelist
         logger.debug("export()")
-        #logger.debug(str(data))
+        # ogger.debug(str(data))
         logger.debug("org int ctr " + str(self.organ_interactivity_counter))
-        #data["metadata"] = self.metadata
-        #import pdb; pdb.set_trace()
+        # ata["metadata"] = self.metadata
+        # mport pdb; pdb.set_trace()
         return data
 
     # def get_iparams(self):
@@ -633,44 +633,44 @@ class OrganSegmentation():
 
         for i in range(0, len(x_mm)):
 
-# xx and yy are 200x200 tables containing the x and y coordinates as values
-# mgrid is a mesh creation helper
+            # xx and yy are 200x200 tables containing the x and y coordinates
+            # values. mgrid is a mesh creation helper
             xx, yy = np.mgrid[
                 :self.seeds.shape[1],
                 :self.seeds.shape[2]
             ]
-# circles contains the squared distance to the (100, 100) point
-# we are just using the circle equation learnt at school
+        # circles contains the squared distance to the (100, 100) point
+        # we are just using the circle equation learnt at school
             circle = (
                 (xx - x_mm[i] / self.voxelsize_mm[1]) ** 2 +
                 (yy - y_mm[i] / self.voxelsize_mm[2]) ** 2
             ) ** (0.5)
-# donuts contains 1's and 0's organized in a donut shape
-# you apply 2 thresholds on circle to define the shape
+        # donuts contains 1's and 0's organized in a donut shape
+        # you apply 2 thresholds on circle to define the shape
             # slice jen s jednim kruhem
             slicecircle = circle < radius
             slicen = int(z_mm / self.voxelsize_mm[0])
             # slice s tim co už je v něm nastaveno
             slicetmp = self.seeds[slicen, :, :]
-            #import pdb; pdb.set_trace()
+            # mport pdb; pdb.set_trace()
 
             slicetmp[slicecircle == 1] = label
 
             self.seeds[slicen, :, :] = slicetmp
 
-#, QMainWindow
-            #import py3DSeedEditor
-            #rr=py3DSeedEditor.py3DSeedEditor(self.seeds); rr.show()
+#  QMainWindow
+            # mport py3DSeedEditor
+            # r=py3DSeedEditor.py3DSeedEditor(self.seeds); rr.show()
 
-            #from seed_editor_qt import QTSeedEditor
-            #from PyQt4.QtGui import QApplication
-            #app = QApplication(sys.argv)
-            #pyed = QTSeedEditor(circle)
-            #pyed.exec_()
+            # rom seed_editor_qt import QTSeedEditor
+            # rom PyQt4.QtGui import QApplication
+            # pp = QApplication(sys.argv)
+            # yed = QTSeedEditor(circle)
+            # yed.exec_()
 
-            #app.exit()
-            #tmpslice = #np.logical_and(
-            #circle < (6400 + 60), circle > (6400 - 60))
+            # pp.exit()
+            # mpslice = # p.logical_and(
+            # ircle < (6400 + 60), circle > (6400 - 60))
 
     def lesionsLocalization(self):
         """ Localization of lession """
@@ -710,21 +710,21 @@ class OrganSegmentation():
         data['version'] = self.version  # qmisc.getVersionString()
         data['experiment_caption'] = self.experiment_caption
         data['lisa_operator_identifier'] = self.lisa_operator_identifier
- #       data['organ_interactivity_counter'] = self.organ_interactivity_counter
+#       data['organ_interactivity_counter'] = self.organ_interactivity_counter
         pth, filename = op.split(op.normpath(self.datapath))
         filename += "-" + self.experiment_caption
 #        if savestring in ['a', 'A']:
 # save renamed file too
         filepath = 'org-' + filename + '.pklz'
-        #print filepath
-        #print 'op ', op
+        # rint filepath
+        # rint 'op ', op
         filepath = op.join(odp, filepath)
         filepath = misc.suggest_filename(filepath)
         misc.obj_to_file(data, filepath, filetype='pklz')
 
         filepath = 'organ_last.pklz'
         filepath = op.join(odp, filepath)
-        #filepath = misc.suggest_filename(filepath)
+        # ilepath = misc.suggest_filename(filepath)
         misc.obj_to_file(data, filepath, filetype='pklz')
 
 #        iparams = self.get_iparams()
@@ -732,9 +732,9 @@ class OrganSegmentation():
         # filepath = op.join(odp, filepath)
         # misc.obj_to_file(iparams, filepath, filetype='pklz')
 
-        #if savestring in ['a', 'A']:
+        # f savestring in ['a', 'A']:
         if False:
-# save renamed file too
+            # save renamed file too
             data['data3d'] = None
             filepath = 'organ_small-' + filename + '.pklz'
             filepath = op.join(odp, filepath)
@@ -742,22 +742,22 @@ class OrganSegmentation():
             misc.obj_to_file(data, filepath, filetype='pklz')
 
     def save_outputs_dcm(self):
-# TODO add
+        # TODO add
         logger.debug('save dcm')
         from PyQt4.QtCore import pyqtRemoveInputHook
         pyqtRemoveInputHook()
-        #import ipdb; ipdb.set_trace() # BREAKPOINT
+        # mport ipdb; ipdb.set_trace() # BREAKPOINT
         odp = self.output_datapath
         pth, filename = op.split(op.normpath(self.datapath))
         filename += "-" + self.experiment_caption
-        #if savestring in ['ad']:
-            # save to DICOM
+        # f savestring in ['ad']:
+        #       save to DICOM
         filepath = 'dicom-' + filename
         filepath = os.path.join(odp, filepath)
         filepath = misc.suggest_filename(filepath)
         output_dicom_dir = filepath
         data = self.export()
-        #import ipdb; ipdb.set_trace()  # BREAKPOINT
+        # mport ipdb; ipdb.set_trace()  # BREAKPOINT
         overlays = {
             3:
             (data['segmentation'] == self.output_label).astype(np.int8)
@@ -803,7 +803,7 @@ def lisa_config_init():
         'viewermin': -125,
         'output_datapath': os.path.expanduser("~/lisa_data"),
         'input_datapath_start': os.path.expanduser("~/lisa_data")
-        #'config_version':[1,1]
+        # config_version':[1,1]
     }
 
     cfg.update(cfgplus)
@@ -938,13 +938,13 @@ config and user config.")
 
 def main():
 
-#    import ipdb; ipdb.set_trace() # BREAKPOINT
+    #    import ipdb; ipdb.set_trace() # BREAKPOINT
     try:
         logger_init()
         cfg = lisa_config_init()
         args = parser_init(cfg)
 
-        #print args["arg"]
+        # rint args["arg"]
         oseg_argspec_keys = config.get_function_keys(
             OrganSegmentation.__init__)
 
@@ -964,7 +964,7 @@ def main():
             oseg.ninteractivity()
             oseg.save_outputs()
         else:
-            #import_gui()
+            # mport_gui()
             from lisaWindow import OrganSegmentationWindow
             from PyQt4.QtGui import QApplication
             app = QApplication(sys.argv)
@@ -974,10 +974,10 @@ def main():
 
     except Exception as e:
         import traceback
-        #import exceptionProcessing
+        # mport exceptionProcessing
         exceptionProcessing.reportException(e)
         print traceback.format_exc()
-        #raise e
+        # aise e
 
 
 if __name__ == "__main__":

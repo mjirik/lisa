@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# /usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import logging
@@ -63,8 +63,8 @@ class OrganSegmentationWindow(QMainWindow):
         font_info.setItalic(True)
         font_info.setPixelSize(10)
 
-        #############
-        # ## LISA logo
+        # # # # # # #
+        # #  LISA logo
         # font_title = QFont()
         # font_title.setBold(True)
         # font_title.setSize(24)
@@ -81,15 +81,15 @@ class OrganSegmentationWindow(QMainWindow):
         lisa_logo = QLabel()
         logopath = os.path.join(path_to_script, "../applications/LISA256.png")
         logo = QPixmap(logopath)
-        lisa_logo.setPixmap(logo)#.scaledToWidth(128))
+        lisa_logo.setPixmap(logo)  # scaledToWidth(128))
         grid.addWidget(lisa_title, 0, 1)
         grid.addWidget(info, 1, 1)
         grid.addWidget(lisa_logo, 0, 2, 2, 2)
-        #grid.setColumnMinimumWidth(1, logo.width()/2)
-        #grid.setColumnMinimumWidth(2, logo.width()/2)
-        #grid.setColumnMinimumWidth(3, logo.width()/2)
+        # rid.setColumnMinimumWidth(1, logo.width()/2)
+        # rid.setColumnMinimumWidth(2, logo.width()/2)
+        # rid.setColumnMinimumWidth(3, logo.width()/2)
 
-        ### dicom reader
+        # # dicom reader
         rstart = 2
         hr = QFrame()
         hr.setFrameShape(QFrame.HLine)
@@ -105,14 +105,14 @@ class OrganSegmentationWindow(QMainWindow):
         btn_dcmcrop.clicked.connect(self.cropDcm)
 
         # voxelsize gui comment
-        #self.scaling_mode = 'original'
-        #combo_vs = QComboBox(self)
-        #combo_vs.activated[str].connect(self.changeVoxelSize)
-        #keys = scaling_modes.keys()
-        #keys.sort()
-        #combo_vs.addItems(keys)
-        #combo_vs.setCurrentIndex(keys.index(self.scaling_mode))
-        #self.text_vs = QLabel('Voxel size:')
+        # elf.scaling_mode = 'original'
+        # ombo_vs = QComboBox(self)
+        # ombo_vs.activated[str].connect(self.changeVoxelSize)
+        # eys = scaling_modes.keys()
+        # eys.sort()
+        # ombo_vs.addItems(keys)
+        # ombo_vs.setCurrentIndex(keys.index(self.scaling_mode))
+        # elf.text_vs = QLabel('Voxel size:')
         # end-- voxelsize gui
         self.text_dcm_dir = QLabel('DICOM dir:')
         self.text_dcm_data = QLabel('DICOM data:')
@@ -128,7 +128,7 @@ class OrganSegmentationWindow(QMainWindow):
         grid.addWidget(self.text_dcm_data, rstart + 7, 1, 1, 3)
         rstart += 9
 
-        # ################ segmentation
+        # # # # # # # # #  segmentation
         hr = QFrame()
         hr.setFrameShape(QFrame.HLine)
         text_seg = QLabel('Segmentation')
@@ -148,7 +148,7 @@ class OrganSegmentationWindow(QMainWindow):
         grid.addWidget(self.text_seg_data, rstart + 2, 1, 1, 3)
         rstart += 3
 
-        # ################ save/view
+        # # # # # # # # #  save/view
         # hr = QFrame()
         # hr.setFrameShape(QFrame.HLine)
         btn_segsave = QPushButton("Save", self)
@@ -167,7 +167,7 @@ class OrganSegmentationWindow(QMainWindow):
         grid.addWidget(btn_segsavedcm, rstart + 0, 2)
         rstart += 2
 
-        # ######Virtual resection
+        # # # # Virtual resection
 
         hr = QFrame()
         hr.setFrameShape(QFrame.HLine)
@@ -178,7 +178,6 @@ class OrganSegmentationWindow(QMainWindow):
         text_resection = QLabel('Virtual resection')
         text_resection.setFont(font_label)
 
-
         btn_vesselseg = QPushButton("Vessel segmentation", self)
         btn_vesselseg.clicked.connect(self.btnVesselSegmentation)
 
@@ -188,18 +187,17 @@ class OrganSegmentationWindow(QMainWindow):
         btn_resection = QPushButton("Virtual resection", self)
         btn_resection.clicked.connect(self.btnVirtualResection)
 
-
         grid.addWidget(hr, rstart + 0, 2, 1, 4)
         grid.addWidget(text_resection, rstart + 0, 1)
         grid.addWidget(btn_vesselseg, rstart + 1, 1)
         grid.addWidget(btn_lesions, rstart + 1, 2)
         grid.addWidget(btn_resection, rstart + 1, 3)
 
-        ##############
+        # # # # # # #
 
         hr = QFrame()
         hr.setFrameShape(QFrame.HLine)
-        #grid.addWidget(hr, rstart + 0, 0, 1, 4)
+        # rid.addWidget(hr, rstart + 0, 0, 1, 4)
 
         rstart += 3
         # quit
@@ -241,16 +239,16 @@ class OrganSegmentationWindow(QMainWindow):
             dcmdir = QFileDialog.getOpenFileName(
                 caption='Select Data File',
                 directory=directory
-                #options=QFileDialog.ShowDirsOnly,
+                # ptions=QFileDialog.ShowDirsOnly,
             )
         else:
             app = QApplication(sys.argv)
             dcmdir = QFileDialog.getOpenFileName(
                 caption='Select DICOM Folder',
-                #options=QFileDialog.ShowDirsOnly,
+                # ptions=QFileDialog.ShowDirsOnly,
                 directory=directory
             )
-            #app.exec_()
+            # pp.exec_()
             app.exit(0)
         if len(dcmdir) > 0:
 
@@ -279,7 +277,7 @@ class OrganSegmentationWindow(QMainWindow):
                 options=QFileDialog.ShowDirsOnly,
                 directory=directory
             )
-            #app.exec_()
+            # pp.exec_()
             app.exit(0)
         if len(dcmdir) > 0:
 
@@ -294,11 +292,11 @@ class OrganSegmentationWindow(QMainWindow):
         QApplication.processEvents()
 
         oseg = self.oseg
-        #if oseg.datapath is None:
-            #oseg.datapath = dcmreader.get_dcmdir_qt(
-            #    app=True,
-            #    directory=self.oseg.input_datapath_start
-            #)
+        # f oseg.datapath is None:
+        #     seg.datapath = dcmreader.get_dcmdir_qt(
+        #        app=True,
+        #        directory=self.oseg.input_datapath_start
+        #
         oseg.datapath = self.__get_datafile(
             app=True,
             directory=self.oseg.input_datapath_start
@@ -314,11 +312,11 @@ class OrganSegmentationWindow(QMainWindow):
         QApplication.processEvents()
 
         oseg = self.oseg
-        #if oseg.datapath is None:
-            #oseg.datapath = dcmreader.get_dcmdir_qt(
-            #    app=True,
-            #    directory=self.oseg.input_datapath_start
-            #)
+        # f oseg.datapath is None:
+        #     seg.datapath = dcmreader.get_dcmdir_qt(
+        #        app=True,
+        #        directory=self.oseg.input_datapath_start
+        #
         oseg.datapath = self.__get_datadir(
             app=True,
             directory=self.oseg.input_datapath_start
@@ -335,9 +333,9 @@ class OrganSegmentationWindow(QMainWindow):
 
         reader = datareader.DataReader()
 
-        #oseg.data3d, metadata =
+        # seg.data3d, metadata =
         datap = reader.Get3DData(oseg.datapath, dataplus_format=True)
-        #print datap.keys()
+        # rint datap.keys()
         # self.iparams['series_number'] = self.metadata['series_number']
         # self.iparams['datapath'] = self.datapath
         oseg.import_dataplus(datap)
@@ -361,7 +359,7 @@ class OrganSegmentationWindow(QMainWindow):
         mx = self.oseg.viewermax
         mn = self.oseg.viewermin
         width = mx - mn
-        #center = (float(mx)-float(mn))
+        # enter = (float(mx)-float(mn))
         center = np.average([mx, mn])
         logger.debug("window params max %f min %f width, %f center %f" %
                      (mx, mn, width, center))
@@ -375,7 +373,7 @@ class OrganSegmentationWindow(QMainWindow):
             for ii in crinfo:
                 tmpcrinfo.append([ii.start, ii.stop])
 
-            #oseg.data3d = qmisc.crop(oseg.data3d, oseg.crinfo)
+            # seg.data3d = qmisc.crop(oseg.data3d, oseg.crinfo)
             oseg.crop(tmpcrinfo)
 
         self.setLabelText(self.text_dcm_data, self.getDcmInfo())
@@ -395,7 +393,7 @@ class OrganSegmentationWindow(QMainWindow):
         mx = self.oseg.viewermax
         mn = self.oseg.viewermin
         width = mx - mn
-        #center = (float(mx)-float(mn))
+        # enter = (float(mx)-float(mn))
         center = np.average([mx, mn])
         logger.debug("window params max %f min %f width, %f center %f" %
                      (mx, mn, width, center))
@@ -417,9 +415,9 @@ class OrganSegmentationWindow(QMainWindow):
 
     def manualSeg(self):
         oseg = self.oseg
-        #print 'ms d3d ', oseg.data3d.shape
-        #print 'ms seg ', oseg.segmentation.shape
-        #print 'crinfo ', oseg.crinfo
+        # rint 'ms d3d ', oseg.data3d.shape
+        # rint 'ms seg ', oseg.segmentation.shape
+        # rint 'crinfo ', oseg.crinfo
         if oseg.data3d is None:
             self.statusBar().showMessage('No DICOM data!')
             return
@@ -505,7 +503,7 @@ class OrganSegmentationWindow(QMainWindow):
             self.statusBar().showMessage('No segmentation data!')
 
     def btnVirtualResection(self):
-        #import vessel_cut
+        # mport vessel_cut
 
         data = {'data3d': self.oseg.data3d,
                 'segmentation': self.oseg.segmentation,
@@ -516,7 +514,7 @@ class OrganSegmentationWindow(QMainWindow):
         self.oseg.segmentation = cut['segmentation']
         self.oseg.slab = cut['slab']
 
-        #print
+        # rint
 
         voxelvolume_mm3 = np.prod(self.oseg.voxelsize_mm)
         v1 = np.sum(cut['segmentation'] == self.oseg.slab['liver'])
@@ -532,10 +530,10 @@ class OrganSegmentationWindow(QMainWindow):
         )
         self.setLabelText(self.text_seg_data, aux)
 
-        #from PyQt4.QtCore import pyqtRemoveInputHook
-        #pyqtRemoveInputHook()
-        #import ipdb; ipdb.set_trace() # BREAKPOINT
-        #pass
+        # rom PyQt4.QtCore import pyqtRemoveInputHook
+        # yqtRemoveInputHook()
+        # mport ipdb; ipdb.set_trace() # BREAKPOINT
+        # ass
 
     def btnLesionLocalization(self):
         self.oseg.lesionsLocalization()
@@ -556,20 +554,20 @@ class OrganSegmentationWindow(QMainWindow):
             interactivity=True,
             binaryClosingIterations=2,
             binaryOpeningIterations=0)
-        #print outputSegmentation
-        #print np.unique(outputSegmentation)
-        #print self.oseg.slab
+        # rint outputSegmentation
+        # rint np.unique(outputSegmentation)
+        # rint self.oseg.slab
         slab = {'porta': 2}
         slab.update(self.oseg.slab)
-        #from PyQt4.QtCore import pyqtRemoveInputHook
-        #pyqtRemoveInputHook()
-        #import ipdb; ipdb.set_trace() # BREAKPOINT
+        # rom PyQt4.QtCore import pyqtRemoveInputHook
+        # yqtRemoveInputHook()
+        # mport ipdb; ipdb.set_trace() # BREAKPOINT
         self.oseg.slab = slab
         self.oseg.segmentation[outputSegmentation == 1] = slab['porta']
 
     def view3D(self):
-        #from seg2mesh import gen_mesh_from_voxels, mesh2vtk, smooth_mesh
-        #from viewer import QVTKViewer
+        # rom seg2mesh import gen_mesh_from_voxels, mesh2vtk, smooth_mesh
+        # rom viewer import QVTKViewer
         oseg = self.oseg
         if oseg.segmentation is not None:
             pts, els, et = gen_mesh_from_voxels(oseg.segmentation,
