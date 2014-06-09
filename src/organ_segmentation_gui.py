@@ -948,6 +948,11 @@ config and user config.")
         help='Smoothing of output segmentation',
         default=cfg["segmentation_smoothing"]
     )
+    parser.add_argument(
+        '--save_filetype', type=str,  # type=int,
+        help='File type of saving data. It can be pklz(default), pkl or mat',
+        default=cfg["save_filetype"])
+
     args_obj = parser.parse_args()
 
     # next two lines brings cfg from file over input parser. This is why there
