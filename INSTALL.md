@@ -24,16 +24,13 @@ Install (L)Ubuntu 14.04
 
 Tested with Ubuntu 14.04 32-bit and Linux Mint 16 Petra
 
-Use package manager to satisfy requirements
-
+    # 1. requirements
     sudo apt-get install python git python-dev g++ python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools curl
     
-SimpleITK is not in ubuntu packages. You can use easy_install
-
+    # 2. simpleITK  
     sudo easy_install -U SimpleITK
     
-For pygco use following (more info https://github.com/mjirik/pyseg_base/blob/master/INSTALL)
-
+    # 3. install gco_python
     mkdir ~/projects
     cd ~/projects
     git clone https://github.com/mjirik/gco_python.git
@@ -41,6 +38,10 @@ For pygco use following (more info https://github.com/mjirik/pyseg_base/blob/mas
     make
     sudo python setup.py install
     cd ..
+
+1. First use package manager to satisfy requirements. 
+2. SimpleITK is not in ubuntu packages. You can use easy_install
+3. For pygco use following (more info https://github.com/mjirik/pyseg_base/blob/master/INSTALL)
 
 Get stable branche
 
