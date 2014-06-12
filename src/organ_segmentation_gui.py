@@ -1,49 +1,46 @@
-#!/usr/bin/env python
+# /usr/bin/env python
 # -*- coding: utf-8 -*-
-""" LISA - organ segmentation tool. """
+"""
+LISA - organ segmentation tool.
 
-# from scipy.io import loadmat, savemat
-import scipy
-from scipy import ndimage
-import numpy as np
+'Liver Surgery Analyser
+
+    npython organ_segmentation.py
+    npython organ_segmentation.py -mroi -vs 0.6
+"""
+
+import logging
+logger = logging.getLogger(__name__)
 
 import sys
 import os
 import os.path as op
 
-from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
-    QGridLayout, QLabel, QPushButton, QFrame, QFileDialog,\
-    QFont, QPixmap, QComboBox
-from PyQt4.Qt import QString
-
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 
-import dcmreaddata as dcmreader
-from seed_editor_qt import QTSeedEditor
+import exceptionProcessing
+
+# from scipy.io import loadmat, savemat
+import scipy
+import scipy.ndimage
+import numpy as np
+
+# import dcmreaddata as dcmreader
 import pycut
-#from seg2fem import gen_mesh_from_voxels, gen_mesh_from_voxels_mc
-#from viewer import QVTKViewer
+# from seg2fem import gen_mesh_from_voxels, gen_mesh_from_voxels_mc
+# from viewer import QVTKViewer
 import qmisc
 import misc
 import config
 import datareader
 import datawriter
 
-from seg2mesh import gen_mesh_from_voxels, mesh2vtk, smooth_mesh
-
-try:
-    from viewer import QVTKViewer
-    viewer3D_available = True
-
-except ImportError:
-    viewer3D_available = False
-
 import time
-#import audiosupport
+# import audiosupport
 import argparse
-import logging
-logger = logging.getLogger(__name__)
+# import skimage
+# import skimage.transform
 
 scaling_modes = {
     'original': (None, None, None),
@@ -57,7 +54,7 @@ scaling_modes = {
 from pkg_resources import parse_version
 import sklearn
 if parse_version(sklearn.__version__) > parse_version('0.10'):
-    #new versions
+    # new versions
     cvtype_name = 'covariance_type'
 else:
     cvtype_name = 'cvtype'
@@ -74,6 +71,16 @@ default_segparams = {'pairwise_alpha_per_mm2': 40,
 config_version = [1, 0, 0]
 
 
+def import_gui():
+    # from lisaWindow import OrganSegmentationWindow
+    # from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
+    #     QGridLayout, QLabel, QPushButton, QFrame, \
+    #     QFont, QPixmap
+    # from PyQt4.Qt import QString
+    # from seed_editor_qt import QTSeedEditor
+    pass
+
+
 class OrganSegmentation():
     def __init__(
         self,
@@ -88,6 +95,7 @@ class OrganSegmentation():
         texture_analysis=None,
         segmentation_smoothing=False,
         smoothing_mm=4,
+        volume_blowup=1.00,
         data3d=None,
         metadata=None,
         seeds=None,
@@ -101,7 +109,9 @@ class OrganSegmentation():
         input_datapath_start='',
         experiment_caption='',
         lisa_operator_identifier='',
-        volume_unit='ml'
+        volume_unit='ml',
+        save_filetype='pklz',
+
         #           iparams=None,
     ):
         """ Segmentation of objects from CT data.
@@ -120,6 +130,8 @@ class OrganSegmentation():
         lisa_operator_identifier: used for logging
         input_datapath_start: Path where user directory selection dialog
             starts.
+        volume_blowup: Blow up volume is computed in smoothing so it is working
+            only if smoothing is turned on.
 
         """
 
@@ -133,7 +145,7 @@ class OrganSegmentation():
         self.working_voxelsize_mm = None
         self.input_wvx_size = working_voxelsize_mm
 
-        #print segparams
+        # print segparams
 # @TODO each axis independent alpha
         self.segparams = default_segparams
         self.segparams.update(segparams)
@@ -146,6 +158,7 @@ class OrganSegmentation():
         self.texture_analysis = texture_analysis
         self.segmentation_smoothing = segmentation_smoothing
         self.smoothing_mm = smoothing_mm
+        self.volume_blowup = volume_blowup
         self.edit_data = edit_data
         self.roi = roi
         self.data3d = data3d
@@ -159,6 +172,16 @@ class OrganSegmentation():
         self.viewermin = viewermin
         self.volume_unit = volume_unit
         self.organ_interactivity_counter = 0
+        self.dcmfilelist = None
+        self.save_filetype = save_filetype
+
+#
+        oseg_input_params = locals()
+        oseg_input_params = self.__clean_oseg_input_params(oseg_input_params)
+
+        logger.debug("oseg_input_params")
+        logger.debug(str(oseg_input_params))
+        self.oseg_input_params = oseg_input_params
 
         if data3d is None or metadata is None:
             # if 'datapath' in self.iparams:
@@ -166,52 +189,87 @@ class OrganSegmentation():
 
             if datapath is not None:
                 reader = datareader.DataReader()
-                self.data3d, self.metadata = reader.Get3DData(datapath)
-                #self.iparams['series_number'] = self.metadata['series_number']
+                datap = reader.Get3DData(datapath, dataplus_format=True)
+                # self.iparams['series_number'] = metadata['series_number']
                 # self.iparams['datapath'] = datapath
-                self.process_dicom_data()
+                self.import_dataplus(datap)
             else:
-# data will be selected from gui
+                # data will be selected from gui
                 pass
-                #logger.error('No input path or 3d data')
+                # logger.error('No input path or 3d data')
 
         else:
-            self.data3d = data3d
+            # self.data3d = data3d
             # default values are updated in next line
-            self.metadata = {'series_number': -1,
-                             'voxelsize_mm': 1,
-                             'datapath': None}
-            self.metadata.update(metadata)
-            self.process_dicom_data()
+            mindatap = {'series_number': -1,
+                        'voxelsize_mm': 1,
+                        'datapath': None,
+                        'data3d': data3d
+                        }
+
+            mindatap.update(metadata)
+            self.import_dataplus(mindatap)
 
             # self.iparams['series_number'] = self.metadata['series_number']
             # self.iparams['datapath'] = self.metadata['datapath']
-        #self.process_dicom_data()
+        # self.import_dataplus()
 
-    def process_wvx_size_mm(self):
+    # def importDataPlus(self, datap):
+    #    """
+    #    Function for input data
+    #    """
+    #    self.data3d = datap['data3d']
+    #    self.crinfo = datap['crinfo']
+    #    self.segmentation = datap['segmentation']
+    #    self.slab = datap['slab']
+    #    self.voxelsize_mm = datap['voxelsize_mm']
+    #    self.orig_shape = datap['orig_shape']
+    #    self.seeds = datap[
+    #        'processing_information']['organ_segmentation']['seeds']
 
-        #vx_size = self.working_voxelsize_mm
+    def __clean_oseg_input_params(self, oseg_params):
+        """
+        Used for storing input params of organ segmentation. Big data are not
+        stored due to big  memory usage.
+        """
+        oseg_params['data3d'] = None
+        oseg_params['segmentation'] = None
+        oseg_params.pop('self')
+        return oseg_params
+
+    def process_wvx_size_mm(self, metadata):
+
+        # vx_size = self.working_voxelsize_mm
         vx_size = self.input_wvx_size
         if vx_size == 'orig':
-            vx_size = self.metadata['voxelsize_mm']
+            vx_size = metadata['voxelsize_mm']
 
         elif vx_size == 'orig*2':
-            vx_size = np.array(self.metadata['voxelsize_mm']) * 2
+            vx_size = np.array(metadata['voxelsize_mm']) * 2
 
         elif vx_size == 'orig*4':
-            vx_size = np.array(self.metadata['voxelsize_mm']) * 4
+            vx_size = np.array(metadata['voxelsize_mm']) * 4
 
         if np.isscalar(vx_size):
             vx_size = ([vx_size] * 3)
 
         vx_size = np.array(vx_size).astype(float)
 
-       # if np.isscalar(vx_sizey):
-       #     vx_size = (np.ones([3]) *vx_size).astype(float)
+        # if np.isscalar(vx_sizey):
+        #     vx_size = (np.ones([3]) *vx_size).astype(float)
 
         # self.iparams['working_voxelsize_mm'] = vx_size
         self.working_voxelsize_mm = vx_size
-        #return vx_size
+        # return vx_size
+
+    def __volume_blowup_criterial_funcion(self, threshold, wanted_volume,
+                                          segmentation_smooth
+                                          ):
+
+        segm = (1.0 * segmentation_smooth > threshold).astype(np.int8)
+        vol2 = np.sum(segm)
+        criterium = (wanted_volume - vol2) ** 2
+        return criterium
 
     def segm_smoothing(self, sigma_mm):
         """
@@ -220,41 +278,80 @@ class OrganSegmentation():
         Sigma is computed in mm
 
         """
-        #print "smoothing"
+        # import scipy.ndimage
         sigma = float(sigma_mm) / np.array(self.voxelsize_mm)
 
-        #print sigma
-        #import pdb; pdb.set_trace()
-        self.segmentation = scipy.ndimage.filters.gaussian_filter(
+        # print sigma
+        # from PyQt4.QtCore import pyqtRemoveInputHook
+        # pyqtRemoveInputHook()
+        vol1 = np.sum(self.segmentation)
+        wvol = vol1 * self.volume_blowup
+        segsmooth = scipy.ndimage.filters.gaussian_filter(
             self.segmentation.astype(np.float32), sigma)
-        #import pdb; pdb.set_trace()
-        #pyed = py3DSeedEditor.py3DSeedEditor(self.orig_scale_segmentation)
-        #pyed.show()
+        # import ipdb; ipdb.set_trace()
+        # import pdb; pdb.set_trace()
+        # pyed = py3DSeedEditor.py3DSeedEditor(self.orig_scale_segmentation)
+        # pyed.show()
 
-        self.segmentation = (1.0 * (self.segmentation > 0.5)).astype(np.int8)
+        critf = lambda x: self.__volume_blowup_criterial_funcion(x, wvol,
+                                                                 segsmooth)
 
-    def process_dicom_data(self):
+        thr = scipy.optimize.fmin(critf, x0=0.5, disp=False)[0]
+
+        self.segmentation = (1.0 *
+                             (segsmooth > thr)  # self.volume_blowup)
+                             ).astype(np.int8)
+        vol2 = np.sum(self.segmentation)
+        logger.debug("volume ratio " + str(vol2 / float(vol1)))
+        # import ipdb; ipdb.set_trace()
+
+    def import_dataplus(self, dataplus):
+        datap = {
+            'dcmfilelist': None,
+        }
+        datap.update(dataplus)
         # voxelsize processing
-        #self.parameters = {}
+        # self.parameters = {}
 
-        #self.segparams['pairwise_alpha']=25
+        dpkeys = datap.keys()
+        # self.segparams['pairwise_alpha']=25
+        self.data3d = datap['data3d']
 
         if self.roi is not None:
             self.crop(self.roi)
-            #self.data3d = qmisc.crop(self.data3d, self.roi)
-            #self.crinfo = self.roi
+            # self.data3d = qmisc.crop(self.data3d, self.roi)
+            # self.crinfo = self.roi
             # self.iparams['roi'] = self.roi
             # self.iparams['manualroi'] = False
 
-        self.voxelsize_mm = np.array(self.metadata['voxelsize_mm'])
-        self.process_wvx_size_mm()
+        self.voxelsize_mm = np.array(datap['voxelsize_mm'])
+        self.process_wvx_size_mm(datap)
         self.autocrop_margin = self.autocrop_margin_mm / self.voxelsize_mm
         self.zoom = self.voxelsize_mm / (1.0 * self.working_voxelsize_mm)
-        self.orig_shape = self.data3d.shape
-        self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
+        if 'orig_shape' in dpkeys:
+            self.orig_shape = datap['orig_shape']
+        else:
+            self.orig_shape = self.data3d.shape
 
-        #self.segparams = {'pairwiseAlpha':2, 'use_boundary_penalties':True,
-        #'boundary_penalties_sigma':50}
+        if 'crinfo' in dpkeys:
+            self.crinfo = datap['crinfo']
+        if 'slab' in dpkeys:
+            self.slab = datap['slab']
+
+        if ('segmentation' in dpkeys) and datap['segmentation'] is not None:
+            self.segmentation = datap['segmentation']
+        else:
+            self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
+
+        self.dcmfilelist = datap['dcmfilelist']
+        # self.segparams = {'pairwiseAlpha':2, 'use_boundary_penalties':True,
+        # 'boundary_penalties_sigma':50}
+
+        try:
+            self.seeds = datap['processing_information'][
+                'organ_segmentation']['seeds']
+        except:
+            logger.debug('seeds not found in dataplus')
 
         # for each mm on boundary there will be sum of penalty equal 10
 
@@ -265,7 +362,7 @@ class OrganSegmentation():
         if self.seeds is None:
             self.seeds = np.zeros(self.data3d.shape, dtype=np.int8)
         logger.info('dir ' + str(self.datapath) + ", series_number" +
-                    str(self.metadata['series_number']) + 'voxelsize_mm' +
+                    str(datap['series_number']) + 'voxelsize_mm' +
                     str(self.voxelsize_mm))
         self.time_start = time.time()
 
@@ -276,7 +373,7 @@ class OrganSegmentation():
         tmpcrinfo: temporary crop information
 
         """
-        #print ('sedds ', str(self.seeds.shape), ' se ',
+        # print ('sedds ', str(self.seeds.shape), ' se ',
         #       str(self.segmentation.shape), ' d3d ', str(self.data3d.shape))
         self.data3d = qmisc.crop(self.data3d, tmpcrinfo)
 # No, size of seeds should be same as data3d
@@ -289,15 +386,15 @@ class OrganSegmentation():
         self.crinfo = qmisc.combinecrinfo(self.crinfo, tmpcrinfo)
         logger.debug("crinfo " + str(self.crinfo))
 
-        #print '----sedds ', self.seeds.shape, ' se ',
-#self.segmentation.shape,\
+        # print '----sedds ', self.seeds.shape, ' se ',
+# self.segmentation.shape,\
         #        ' d3d ', self.data3d.shape
 
     def _interactivity_begin(self):
         logger.debug('_interactivity_begin()')
-        #print 'zoom ', self.zoom
-        #print 'svs_mm ', self.working_voxelsize_mm
-        data3d_res = ndimage.zoom(
+        # print 'zoom ', self.zoom
+        # print 'svs_mm ', self.working_voxelsize_mm
+        data3d_res = scipy.ndimage.zoom(
             self.data3d,
             self.zoom,
             mode='nearest',
@@ -309,13 +406,13 @@ class OrganSegmentation():
                      '\nmodelparams ' + str(self.segmodelparams)
                      )
         igc = pycut.ImageGraphCut(
-            #self.data3d,
+            # self.data3d,
             data3d_res,
             segparams=self.segparams,
             voxelsize=self.working_voxelsize_mm,
             modelparams=self.segmodelparams,
             volume_unit='ml'
-            #voxelsize=self.voxelsize_mm
+            # oxelsize=self.voxelsize_mm
         )
 
         igc.modelparams = self.segmodelparams
@@ -326,7 +423,7 @@ class OrganSegmentation():
 #        }
         # if self.iparams['seeds'] is not None:
         if self.seeds is not None:
-            seeds_res = ndimage.zoom(
+            seeds_res = scipy.ndimage.zoom(
                 self.seeds,
                 self.zoom,
                 mode='nearest',
@@ -339,55 +436,74 @@ class OrganSegmentation():
 
     def _interactivity_end(self, igc):
         logger.debug('_interactivity_end()')
+        # @TODO remove old code in except part
+        try:
+            # rint 'pred vyjimkou'
+            # aise Exception ('test without skimage')
+            # rint 'za vyjimkou'
+            import skimage
+            import skimage.transform
+# Now we need reshape  seeds and segmentation to original size
 
-        segm_orig_scale = scipy.ndimage.zoom(
-            self.segmentation,
-            1.0 / self.zoom,
-            mode='nearest',
-            order=0
-        ).astype(np.int8)
-        seeds = scipy.ndimage.zoom(
-            igc.seeds,
-            1.0 / self.zoom,
-            mode='nearest',
-            order=0
-        )
-        self.organ_interactivity_counter = igc.interactivity_counter
+            segm_orig_scale = skimage.transform.resize(
+                self.segmentation, self.data3d.shape, order=0)
+
+            seeds = skimage.transform.resize(
+                igc.seeds, self.data3d.shape, order=0)
+
+            self.segmentation = segm_orig_scale
+            self.seeds = seeds
+        except:
+
+            segm_orig_scale = scipy.ndimage.zoom(
+                self.segmentation,
+                1.0 / self.zoom,
+                mode='nearest',
+                order=0
+            ).astype(np.int8)
+            seeds = scipy.ndimage.zoom(
+                igc.seeds,
+                1.0 / self.zoom,
+                mode='nearest',
+                order=0
+            )
+            self.organ_interactivity_counter = igc.interactivity_counter
+            logger.debug("org inter counter " +
+                         str(self.organ_interactivity_counter))
 
 # @TODO odstranit hack pro oříznutí na stejnou velikost
 # v podstatě je to vyřešeno, ale nechalo by se to dělat elegantněji v zoom
 # tam je bohužel patrně bug
-        #print 'd3d ', self.data3d.shape
-        #print 's orig scale shape ', segm_orig_scale.shape
-        shp = [
-            np.min([segm_orig_scale.shape[0], self.data3d.shape[0]]),
-            np.min([segm_orig_scale.shape[1], self.data3d.shape[1]]),
-            np.min([segm_orig_scale.shape[2], self.data3d.shape[2]]),
-        ]
-        #self.data3d = self.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
-        #import ipdb; ipdb.set_trace() # BREAKPOINT
+            # rint 'd3d ', self.data3d.shape
+            # rint 's orig scale shape ', segm_orig_scale.shape
+            shp = [
+                np.min([segm_orig_scale.shape[0], self.data3d.shape[0]]),
+                np.min([segm_orig_scale.shape[1], self.data3d.shape[1]]),
+                np.min([segm_orig_scale.shape[2], self.data3d.shape[2]]),
+            ]
+            # elf.data3d = self.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
+            # mport ipdb; ipdb.set_trace() # BREAKPOINT
 
-        self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
-        self.segmentation[
-            0:shp[0],
-            0:shp[1],
-            0:shp[2]] = segm_orig_scale[0:shp[0], 0:shp[1], 0:shp[2]]
+            self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
+            self.segmentation[
+                0:shp[0],
+                0:shp[1],
+                0:shp[2]] = segm_orig_scale[0:shp[0], 0:shp[1], 0:shp[2]]
 
-        del segm_orig_scale
+            del segm_orig_scale
 
-        # self.iparams['seeds'] = np.zeros(self.data3d.shape, dtype=np.int8)
-        # self.iparams['seeds'][
-        #     0:shp[0],
-        #     0:shp[1],
-        #     0:shp[2]] = seeds[0:shp[0], 0:shp[1], 0:shp[2]]
+            self.seeds[
+                0:shp[0],
+                0:shp[1],
+                0:shp[2]] = seeds[0:shp[0], 0:shp[1], 0:shp[2]]
 
         if self.segmentation_smoothing:
             self.segm_smoothing(self.smoothing_mm)
 
-        #print 'autocrop', self.autocrop
+        # rint 'autocrop', self.autocrop
         if self.autocrop is True:
-            #print
-            #import pdb; pdb.set_trace()
+            # rint
+            # mport pdb; pdb.set_trace()
 
             tmpcrinfo = qmisc.crinfo_from_specific_data(
                 self.segmentation,
@@ -395,19 +511,19 @@ class OrganSegmentation():
 
             self.crop(tmpcrinfo)
 
-        #oseg = self
-        #print 'ms d3d ', oseg.data3d.shape
-        #print 'ms seg ', oseg.segmentation.shape
-        #print 'crinfo ', oseg.crinfo
-            #self.segmentation = qmisc.crop(self.segmentation, tmpcrinfo)
-            #self.data3d = qmisc.crop(self.data3d, tmpcrinfo)
+        # seg = self
+        # rint 'ms d3d ', oseg.data3d.shape
+        # rint 'ms seg ', oseg.segmentation.shape
+        # rint 'crinfo ', oseg.crinfo
+            # elf.segmentation = qmisc.crop(self.segmentation, tmpcrinfo)
+            # elf.data3d = qmisc.crop(self.data3d, tmpcrinfo)
 
-            #self.crinfo = qmisc.combinecrinfo(self.crinfo, tmpcrinfo)
+            # elf.crinfo = qmisc.combinecrinfo(self.crinfo, tmpcrinfo)
 
         if self.texture_analysis not in (None, False):
             import texture_analysis
             # doplnit nějaký kód, parametry atd
-            #self.orig_scale_segmentation =
+            # elf.orig_scale_segmentation =
             # texture_analysis.segmentation(self.data3d,
             # self.orig_scale_segmentation, params = self.texture_analysis)
             self.segmentation = texture_analysis.segmentation(
@@ -417,7 +533,7 @@ class OrganSegmentation():
             )
 
         # set label number
-#!!! pomaly!!!
+# !! pomaly!!!
 # @TODO make faster
         self.segmentation[self.segmentation == 1] = self.output_label
 #
@@ -425,6 +541,8 @@ class OrganSegmentation():
 
 #    def interactivity(self, min_val=800, max_val=1300):
     def interactivity(self, min_val=None, max_val=None):
+        from seed_editor_qt import QTSeedEditor
+        import_gui()
         logger.debug('interactivity')
         # if self.edit_data:
         #     self.data3d = self.data_editor(self.data3d)
@@ -460,9 +578,9 @@ class OrganSegmentation():
 
     def ninteractivity(self):
         """Function for automatic (noninteractiv) mode."""
-        #import pdb; pdb.set_trace()
+        # mport pdb; pdb.set_trace()
         igc = self._interactivity_begin()
-        #igc.interactivity()
+        # gc.interactivity()
         igc.make_gc()
         self.segmentation = (igc.segmentation == 0).astype(np.int8)
         self._interactivity_end(igc)
@@ -482,10 +600,22 @@ class OrganSegmentation():
         data['slab'] = slab
         data['voxelsize_mm'] = self.voxelsize_mm
         data['orig_shape'] = self.orig_shape
-        data['processing_time'] = self.processing_time
+        processing_information = {
+            'organ_segmentation': {
+                'processing_time': self.processing_time,
+                'oseg_input_params': self.oseg_input_params,
+                'organ_interactivity_counter':
+                self.organ_interactivity_counter,
+                'seeds': self.seeds  # qmisc.SparseMatrix(self.seeds)
+            }
+        }
+        data['processing_information'] = processing_information
 # TODO add dcmfilelist
-        #data["metadata"] = self.metadata
-        #import pdb; pdb.set_trace()
+        logger.debug("export()")
+        # ogger.debug(str(data))
+        logger.debug("org int ctr " + str(self.organ_interactivity_counter))
+        # ata["metadata"] = self.metadata
+        # mport pdb; pdb.set_trace()
         return data
 
     # def get_iparams(self):
@@ -512,44 +642,55 @@ class OrganSegmentation():
 
         for i in range(0, len(x_mm)):
 
-# xx and yy are 200x200 tables containing the x and y coordinates as values
-# mgrid is a mesh creation helper
+            # xx and yy are 200x200 tables containing the x and y coordinates
+            # values. mgrid is a mesh creation helper
             xx, yy = np.mgrid[
                 :self.seeds.shape[1],
                 :self.seeds.shape[2]
             ]
-# circles contains the squared distance to the (100, 100) point
-# we are just using the circle equation learnt at school
+        # circles contains the squared distance to the (100, 100) point
+        # we are just using the circle equation learnt at school
             circle = (
                 (xx - x_mm[i] / self.voxelsize_mm[1]) ** 2 +
                 (yy - y_mm[i] / self.voxelsize_mm[2]) ** 2
             ) ** (0.5)
-# donuts contains 1's and 0's organized in a donut shape
-# you apply 2 thresholds on circle to define the shape
+        # donuts contains 1's and 0's organized in a donut shape
+        # you apply 2 thresholds on circle to define the shape
             # slice jen s jednim kruhem
             slicecircle = circle < radius
             slicen = int(z_mm / self.voxelsize_mm[0])
             # slice s tim co už je v něm nastaveno
             slicetmp = self.seeds[slicen, :, :]
-            #import pdb; pdb.set_trace()
+            # mport pdb; pdb.set_trace()
 
             slicetmp[slicecircle == 1] = label
 
             self.seeds[slicen, :, :] = slicetmp
 
-#, QMainWindow
-            #import py3DSeedEditor
-            #rr=py3DSeedEditor.py3DSeedEditor(self.seeds); rr.show()
+#  QMainWindow
+            # mport py3DSeedEditor
+            # r=py3DSeedEditor.py3DSeedEditor(self.seeds); rr.show()
 
-            #from seed_editor_qt import QTSeedEditor
-            #from PyQt4.QtGui import QApplication
-            #app = QApplication(sys.argv)
-            #pyed = QTSeedEditor(circle)
-            #pyed.exec_()
+            # rom seed_editor_qt import QTSeedEditor
+            # rom PyQt4.QtGui import QApplication
+            # pp = QApplication(sys.argv)
+            # yed = QTSeedEditor(circle)
+            # yed.exec_()
 
-            #app.exit()
-            #tmpslice = #np.logical_and(
-            #circle < (6400 + 60), circle > (6400 - 60))
+            # pp.exit()
+            # mpslice = # p.logical_and(
+            # ircle < (6400 + 60), circle > (6400 - 60))
+
+    def lesionsLocalization(self):
+        """ Localization of lession """
+        import lesions
+        tumory = lesions.Lesions()
+        # tumory.overlay_test()
+        data = self.export()
+        tumory.import_data(data)
+        tumory.automatic_localization()
+
+        self.segmentation = tumory.segmentation
 
     def get_segmented_volume_size_mm3(self):
         """Compute segmented volume in mm3, based on subsampeled data."""
@@ -578,31 +719,32 @@ class OrganSegmentation():
         data['version'] = self.version  # qmisc.getVersionString()
         data['experiment_caption'] = self.experiment_caption
         data['lisa_operator_identifier'] = self.lisa_operator_identifier
-        data['organ_interactivity_counter'] = self.organ_interactivity_counter
+#       data['organ_interactivity_counter'] = self.organ_interactivity_counter
         pth, filename = op.split(op.normpath(self.datapath))
         filename += "-" + self.experiment_caption
 #        if savestring in ['a', 'A']:
 # save renamed file too
-        filepath = 'org-' + filename + '.pklz'
-        #print filepath
-        #print 'op ', op
+        filepath = 'org-' + filename + '.' + self.save_filetype
+        # rint filepath
+        # rint 'op ', op
         filepath = op.join(odp, filepath)
         filepath = misc.suggest_filename(filepath)
-        misc.obj_to_file(data, filepath, filetype='pklz')
+        misc.obj_to_file(data, filepath, filetype=self.save_filetype)
 
-        filepath = 'organ_last.pklz'
+        filepath = 'organ_last.' + self.save_filetype
         filepath = op.join(odp, filepath)
-        #filepath = misc.suggest_filename(filepath)
-        misc.obj_to_file(data, filepath, filetype='pklz')
+        # ilepath = misc.suggest_filename(filepath)
+        misc.obj_to_file(data, filepath, filetype=self.save_filetype)
+# save to mat
 
 #        iparams = self.get_iparams()
         # filepath = 'organ_iparams.pklz'
         # filepath = op.join(odp, filepath)
         # misc.obj_to_file(iparams, filepath, filetype='pklz')
 
-        #if savestring in ['a', 'A']:
+        # f savestring in ['a', 'A']:
         if False:
-# save renamed file too
+            # save renamed file too
             data['data3d'] = None
             filepath = 'organ_small-' + filename + '.pklz'
             filepath = op.join(odp, filepath)
@@ -610,402 +752,56 @@ class OrganSegmentation():
             misc.obj_to_file(data, filepath, filetype='pklz')
 
     def save_outputs_dcm(self):
-# TODO add
+        # TODO add
         logger.debug('save dcm')
         from PyQt4.QtCore import pyqtRemoveInputHook
         pyqtRemoveInputHook()
-        #import ipdb; ipdb.set_trace() # BREAKPOINT
+        # mport ipdb; ipdb.set_trace() # BREAKPOINT
         odp = self.output_datapath
         pth, filename = op.split(op.normpath(self.datapath))
         filename += "-" + self.experiment_caption
-        #if savestring in ['ad']:
-            # save to DICOM
+        # f savestring in ['ad']:
+        #       save to DICOM
         filepath = 'dicom-' + filename
         filepath = os.path.join(odp, filepath)
         filepath = misc.suggest_filename(filepath)
         output_dicom_dir = filepath
         data = self.export()
-        #import ipdb; ipdb.set_trace()  # BREAKPOINT
+        # mport ipdb; ipdb.set_trace()  # BREAKPOINT
         overlays = {
             3:
             (data['segmentation'] == self.output_label).astype(np.int8)
         }
-        datawriter.saveOverlayToDicomCopy(self.metadata['dcmfilelist'],
-                                          output_dicom_dir, overlays,
-                                          data['crinfo'], data['orig_shape'])
+        if self.dcmfilelist is not None:
+            datawriter.saveOverlayToDicomCopy(
+                self.dcmfilelist,
+                output_dicom_dir, overlays,
+                data['crinfo'], data['orig_shape'])
 
 
-# GUI
-class OrganSegmentationWindow(QMainWindow):
-
-    def __init__(self, oseg=None):
-
-        self.oseg = oseg
-
-        QMainWindow.__init__(self)
-        self.initUI()
-
-        if oseg is not None:
-            if oseg.data3d is not None:
-                self.setLabelText(self.text_dcm_dir, self.oseg.datapath)
-                self.setLabelText(self.text_dcm_data, self.getDcmInfo())
-
-        self.statusBar().showMessage('Ready')
-
-    def initUI(self):
-        cw = QWidget()
-        self.setCentralWidget(cw)
-        grid = QGridLayout()
-        grid.setSpacing(15)
-
-        # status bar
-        self.statusBar().showMessage('Ready')
-
-        font_label = QFont()
-        font_label.setBold(True)
-        font_info = QFont()
-        font_info.setItalic(True)
-        font_info.setPixelSize(10)
-
-        #############
-        ### LISA logo
-        # font_title = QFont()
-        # font_title.setBold(True)
-        # font_title.setSize(24)
-
-        lisa_title = QLabel('LIver Surgery Analyser')
-        info = QLabel('Developed by:\n' +
-                      'University of West Bohemia\n' +
-                      'Faculty of Applied Sciences\n' +
-                      QString.fromUtf8('M. Jiřík, V. Lukeš - 2013') +
-                      '\n\nVersion: ' + self.oseg.version
-                      )
-        info.setFont(font_info)
-        lisa_title.setFont(font_label)
-        lisa_logo = QLabel()
-        logopath = os.path.join(path_to_script, "../applications/LISA256.png")
-        logo = QPixmap(logopath)
-        lisa_logo.setPixmap(logo)
-        grid.addWidget(lisa_title, 0, 1)
-        grid.addWidget(info, 1, 1)
-        grid.addWidget(lisa_logo, 0, 2, 2, 1)
-        grid.setColumnMinimumWidth(1, logo.width())
-
-        ### dicom reader
-        rstart = 2
-        hr = QFrame()
-        hr.setFrameShape(QFrame.HLine)
-        text_dcm = QLabel('DICOM reader')
-        text_dcm.setFont(font_label)
-        btn_dcmdir = QPushButton("Load DICOM", self)
-        btn_dcmdir.clicked.connect(self.loadDcmDir)
-        btn_dcmcrop = QPushButton("Crop", self)
-        btn_dcmcrop.clicked.connect(self.cropDcm)
-
-        # voxelsize gui comment
-        #self.scaling_mode = 'original'
-        #combo_vs = QComboBox(self)
-        #combo_vs.activated[str].connect(self.changeVoxelSize)
-        #keys = scaling_modes.keys()
-        #keys.sort()
-        #combo_vs.addItems(keys)
-        #combo_vs.setCurrentIndex(keys.index(self.scaling_mode))
-        #self.text_vs = QLabel('Voxel size:')
-        # end-- voxelsize gui
-        self.text_dcm_dir = QLabel('DICOM dir:')
-        self.text_dcm_data = QLabel('DICOM data:')
-        grid.addWidget(hr, rstart + 0, 0, 1, 4)
-        grid.addWidget(text_dcm, rstart + 1, 1, 1, 2)
-        grid.addWidget(btn_dcmdir, rstart + 2, 1)
-        grid.addWidget(btn_dcmcrop, rstart + 2, 2)
-        # voxelsize gui comment
-        # grid.addWidget(self.text_vs, rstart + 3, 1)
-        # grid.addWidget(combo_vs, rstart + 4, 1)
-        grid.addWidget(self.text_dcm_dir, rstart + 5, 1, 1, 2)
-        grid.addWidget(self.text_dcm_data, rstart + 6, 1, 1, 2)
-        rstart += 8
-
-        # ################ segmentation
-        hr = QFrame()
-        hr.setFrameShape(QFrame.HLine)
-        text_seg = QLabel('Segmentation')
-        text_seg.setFont(font_label)
-        btn_mask = QPushButton("Mask region", self)
-        btn_mask.clicked.connect(self.maskRegion)
-        btn_segauto = QPushButton("Automatic seg.", self)
-        btn_segauto.clicked.connect(self.autoSeg)
-        btn_segman = QPushButton("Manual seg.", self)
-        btn_segman.clicked.connect(self.manualSeg)
-        self.text_seg_data = QLabel('segmented data:')
-        grid.addWidget(hr, rstart + 0, 0, 1, 4)
-        grid.addWidget(text_seg, rstart + 1, 1)
-        grid.addWidget(btn_mask, rstart + 2, 1)
-        grid.addWidget(btn_segauto, rstart + 3, 1)
-        grid.addWidget(btn_segman, rstart + 3, 2)
-        grid.addWidget(self.text_seg_data, rstart + 4, 1, 1, 2)
-        rstart += 5
-
-        # ################ save/view
-        # hr = QFrame()
-        # hr.setFrameShape(QFrame.HLine)
-        btn_segsave = QPushButton("Save", self)
-        btn_segsave.clicked.connect(self.saveOut)
-        btn_segsavedcm = QPushButton("Save Dicom", self)
-        btn_segsavedcm.clicked.connect(self.saveOutDcm)
-        btn_segview = QPushButton("View3D", self)
-        if viewer3D_available:
-            btn_segview.clicked.connect(self.view3D)
-
-        else:
-            btn_segview.setEnabled(False)
-
-        grid.addWidget(btn_segsave, rstart + 0, 1)
-        grid.addWidget(btn_segview, rstart + 0, 2)
-        grid.addWidget(btn_segsavedcm, rstart + 1, 1)
-        rstart += 2
-
-        hr = QFrame()
-        hr.setFrameShape(QFrame.HLine)
-        grid.addWidget(hr, rstart + 0, 0, 1, 4)
-
-        # quit
-        btn_quit = QPushButton("Quit", self)
-        btn_quit.clicked.connect(self.quit)
-        grid.addWidget(btn_quit, rstart + 1, 1, 1, 2)
-
-        cw.setLayout(grid)
-        self.setWindowTitle('LISA')
-        self.show()
-
-    def quit(self, event):
-        self.close()
-
-    def changeVoxelSize(self, val):
-        self.scaling_mode = str(val)
-
-    def setLabelText(self, obj, text):
-        dlab = str(obj.text())
-        obj.setText(dlab[:dlab.find(':')] + ': %s' % text)
-
-    def getDcmInfo(self):
-        vx_size = self.oseg.voxelsize_mm
-        vsize = tuple([float(ii) for ii in vx_size])
-        ret = ' %dx%dx%d,  %fx%fx%f mm' % (self.oseg.data3d.shape + vsize)
-
-        return ret
-
-    # def setVoxelVolume(self, vxs):
-    #     self.voxel_volume = np.prod(vxs)
-
-    def loadDcmDir(self):
-        self.statusBar().showMessage('Reading DICOM directory...')
-        QApplication.processEvents()
-
-        oseg = self.oseg
-        if oseg.datapath is None:
-            oseg.datapath = dcmreader.get_dcmdir_qt(
-                app=True,
-                directory=self.oseg.input_datapath_start
-            )
-
-        if oseg.datapath is None:
-            self.statusBar().showMessage('No DICOM directory specified!')
-            return
-
-        reader = datareader.DataReader()
-
-        oseg.data3d, oseg.metadata = reader.Get3DData(oseg.datapath)
-        # self.iparams['series_number'] = self.metadata['series_number']
-        # self.iparams['datapath'] = self.datapath
-        oseg.process_dicom_data()
-        self.setLabelText(self.text_dcm_dir, oseg.datapath)
-        self.setLabelText(self.text_dcm_data, self.getDcmInfo())
-        self.statusBar().showMessage('Ready')
-
-    def cropDcm(self):
-        oseg = self.oseg
-
-        if oseg.data3d is None:
-            self.statusBar().showMessage('No DICOM data!')
-            return
-
-        self.statusBar().showMessage('Cropping DICOM data...')
-        QApplication.processEvents()
-
-        pyed = QTSeedEditor(oseg.data3d, mode='crop',
-                            voxelSize=oseg.voxelsize_mm)
-        # @TODO
-        mx = self.oseg.viewermax
-        mn = self.oseg.viewermin
-        width = mx - mn
-        #center = (float(mx)-float(mn))
-        center = np.average([mx, mn])
-        logger.debug("window params max %f min %f width, %f center %f" %
-                     (mx, mn, width, center))
-        pyed.changeC(center)
-        pyed.changeW(width)
-        pyed.exec_()
-
-        crinfo = pyed.getROI()
-        if crinfo is not None:
-            tmpcrinfo = []
-            for ii in crinfo:
-                tmpcrinfo.append([ii.start, ii.stop])
-
-            #oseg.data3d = qmisc.crop(oseg.data3d, oseg.crinfo)
-            oseg.crop(tmpcrinfo)
-
-        self.setLabelText(self.text_dcm_data, self.getDcmInfo())
-        self.statusBar().showMessage('Ready')
-
-    def maskRegion(self):
-        if self.oseg.data3d is None:
-            self.statusBar().showMessage('No DICOM data!')
-            return
-
-        self.statusBar().showMessage('Mask region...')
-        QApplication.processEvents()
-
-        pyed = QTSeedEditor(self.oseg.data3d, mode='mask',
-                            voxelSize=self.oseg.voxelsize_mm)
-
-        mx = self.oseg.viewermax
-        mn = self.oseg.viewermin
-        width = mx - mn
-        #center = (float(mx)-float(mn))
-        center = np.average([mx, mn])
-        logger.debug("window params max %f min %f width, %f center %f" %
-                     (mx, mn, width, center))
-        pyed.changeC(center)
-        pyed.changeW(width)
-        pyed.exec_()
-
-        self.statusBar().showMessage('Ready')
-
-    def autoSeg(self):
-        if self.oseg.data3d is None:
-            self.statusBar().showMessage('No DICOM data!')
-            return
-
-        self.oseg.interactivity(
-            min_val=self.oseg.viewermin,
-            max_val=self.oseg.viewermax)
-        self.checkSegData('auto. seg., ')
-
-    def manualSeg(self):
-        oseg = self.oseg
-        #print 'ms d3d ', oseg.data3d.shape
-        #print 'ms seg ', oseg.segmentation.shape
-        #print 'crinfo ', oseg.crinfo
-        if oseg.data3d is None:
-            self.statusBar().showMessage('No DICOM data!')
-            return
-
-        pyed = QTSeedEditor(oseg.data3d,
-                            seeds=oseg.segmentation,
-                            mode='draw',
-                            voxelSize=oseg.voxelsize_mm, volume_unit='ml')
-        pyed.exec_()
-
-        oseg.segmentation = pyed.getSeeds()
-        self.oseg.processing_time = time.time() - self.oseg.time_start
-        self.checkSegData('manual seg., ')
-
-    def checkSegData(self, msg):
-        oseg = self.oseg
-        if oseg.segmentation is None:
-            self.statusBar().showMessage('No segmentation!')
-            return
-
-        nzs = oseg.segmentation.nonzero()
-        nn = nzs[0].shape[0]
-        if nn > 0:
-            voxelvolume_mm3 = np.prod(oseg.voxelsize_mm)
-            tim = self.oseg.processing_time
-
-            if self.oseg.volume_unit == 'ml':
-                import datetime
-                timstr = str(datetime.timedelta(seconds=round(tim)))
-                logger.debug('tim = ' + str(tim))
-                aux = 'volume = %.2f [ml] , time = %s' %\
-                      (nn * voxelvolume_mm3 / 1000, timstr)
-            else:
-                aux = 'volume = %.6e mm3' % (nn * voxelvolume_mm3, )
-            self.setLabelText(self.text_seg_data, msg + aux)
-            self.statusBar().showMessage('Ready')
-
-        else:
-            self.statusBar().showMessage('No segmentation!')
-
-    def saveOut(self, event=None, filename=None):
-        if self.oseg.segmentation is not None:
-            self.statusBar().showMessage('Saving segmentation data...')
-            QApplication.processEvents()
-
-            # if filename is None:
-            #     filename = \
-            #         str(QFileDialog.getSaveFileName(self,
-            #                                         'Save SEG file',
-            #                                         filter='Files (*.seg)'))
-
-            # if len(filename) > 0:
-
-            #     outdata = {'data': self.dcm_3Ddata,
-            #                'segdata': self.segmentation_data,
-            #                'voxelsize_mm': self.voxel_sizemm,
-            #                'offset_mm': self.dcm_offsetmm}
-
-            #     if self.segmentation_seeds is not None:
-            #         outdata['segseeds'] = self.segmentation_seeds
-
-            #     savemat(filename, outdata, appendmat=False)
-
-            # else:
-            #     self.statusBar().showMessage('No output file specified!')
-
-            self.oseg.save_outputs()
-            self.statusBar().showMessage('Ready')
-
-        else:
-            self.statusBar().showMessage('No segmentation data!')
-
-    def saveOutDcm(self, event=None, filename=None):
-        if self.oseg.segmentation is not None:
-            self.statusBar().showMessage('Saving segmentation data...')
-            QApplication.processEvents()
-
-            self.oseg.save_outputs_dcm()
-            self.statusBar().showMessage('Ready')
-
-        else:
-            self.statusBar().showMessage('No segmentation data!')
-
-    def view3D(self):
-        #from seg2mesh import gen_mesh_from_voxels, mesh2vtk, smooth_mesh
-        #from viewer import QVTKViewer
-        oseg = self.oseg
-        if oseg.segmentation is not None:
-            pts, els, et = gen_mesh_from_voxels(oseg.segmentation,
-                                                oseg.voxelsize_mm,
-                                                etype='q', mtype='s')
-            pts = smooth_mesh(pts, els, et,
-                              n_iter=10)
-            vtkdata = mesh2vtk(pts, els, et)
-            view = QVTKViewer(vtk_data=vtkdata)
-            view.exec_()
-
-        else:
-            self.statusBar().showMessage('No segmentation data!')
-
-
-def main():
-
+def logger_init():
     logger.setLevel(logging.WARNING)
     ch = logging.StreamHandler()
+    ch.setLevel(logging.ERROR)
+    fh = logging.FileHandler('lisa.log')
+
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    fh.setFormatter(formatter)
+    fh.setLevel(logging.DEBUG)
     logger.addHandler(ch)
+    logger.addHandler(fh)
 
-    #logger.debug('input params')
+    logger.debug('logger started')
 
+
+def lisa_config_init():
+    """
+    Generate default config from function paramteres.
+    Specific config given by command line argument is implemented in
+    parser_init() function.
+    """
     # read confguraton from file, use default values from OrganSegmentation
     cfg = config.get_default_function_config(OrganSegmentation.__init__)
 
@@ -1017,7 +813,7 @@ def main():
         'viewermin': -125,
         'output_datapath': os.path.expanduser("~/lisa_data"),
         'input_datapath_start': os.path.expanduser("~/lisa_data")
-        #'config_version':[1,1]
+        # config_version':[1,1]
     }
 
     cfg.update(cfgplus)
@@ -1031,12 +827,36 @@ def main():
         records_to_save=['experiment_caption', 'lisa_operator_identifier'])
     # read user defined config in user data
     cfg = config.get_config(user_config_path, cfg)
+    return cfg
+
+
+def parser_init(cfg):
 
     # input parser
+    conf_parser = argparse.ArgumentParser(
+        # Turn off help, so we print all options in response to -h
+        add_help=False
+    )
+    conf_parser.add_argument(
+        '-cf', '--configfile', default=None,
+        help="Use another config. It is loaded after default \
+config and user config.")
+# Read alternative config file. First is loaded default config. Then user
+# config in lisa_data directory. After that is readed config defined by
+# --configfile parameter
+    knownargs, unknownargs = conf_parser.parse_known_args()
+
     parser = argparse.ArgumentParser(
-        description='Segment vessels from liver \n\
-                \npython organ_segmentation.py\n\
-                \npython organ_segmentation.py -mroi -vs 0.6')
+        # Inherit options from config_parser
+        parents=[conf_parser],
+        # print script description with -h/--help
+        description=__doc__,
+        # Don't mess with format of description
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    if knownargs.configfile is not None:
+        cfg = config.get_config(knownargs.configfile, cfg)
+
     parser.add_argument('-dd', '--datapath',
                         default=cfg["datapath"],
                         help='path to data dir')
@@ -1088,8 +908,6 @@ def main():
     parser.add_argument(
         '-tx', '--texture_analysis', action='store_true',
         help='run with texture analysis')
-    parser.add_argument('-exd', '--exampledata', action='store_true',
-                        help='run unittest')
     parser.add_argument('-ed', '--edit_data', action='store_true',
                         help='Run data editor')
     parser.add_argument(
@@ -1107,6 +925,9 @@ def main():
     parser.add_argument(
         '-so', '--show_output', action='store_true',
         help='Show output data in viewer')
+    parser.add_argument(
+        '-ni', '--no_interactivity', action='store_true',
+        help='run in no interactivity mode, seeds must be defined')
     parser.add_argument('-a', '--arg', nargs='+', type=float)
     parser.add_argument(
         '-ec', '--experiment_caption', type=str,  # type=int,
@@ -1127,53 +948,63 @@ def main():
         help='Smoothing of output segmentation',
         default=cfg["segmentation_smoothing"]
     )
+    parser.add_argument(
+        '--save_filetype', type=str,  # type=int,
+        help='File type of saving data. It can be pklz(default), pkl or mat',
+        default=cfg["save_filetype"])
+
     args_obj = parser.parse_args()
 
     # next two lines brings cfg from file over input parser. This is why there
     # is no need to have cfg param in input arguments
     args = cfg
     args.update(vars(args_obj))
-    #print args["arg"]
-    oseg_argspec_keys = config.get_function_keys(OrganSegmentation.__init__)
+    return args
 
-    if args["debug"]:
-        logger.setLevel(logging.DEBUG)
 
-    if args["exampledata"]:
-        args["datapath"] = \
-            '../sample_data/matlab/examples/sample_data/DICOM/digest_article/'
+def main():
 
-    app = QApplication(sys.argv)
+    #    import ipdb; ipdb.set_trace() # BREAKPOINT
+    try:
+        logger_init()
+        cfg = lisa_config_init()
+        args = parser_init(cfg)
 
-    if args["iparams"] is not None:
-        params = misc.obj_from_file(args["iparams"], filetype='pickle')
+        # rint args["arg"]
+        oseg_argspec_keys = config.get_function_keys(
+            OrganSegmentation.__init__)
 
-    else:
-        params = config.subdict(args, oseg_argspec_keys)
+        if args["debug"]:
+            logger.setLevel(logging.DEBUG)
 
-    logger.debug('params ' + str(params))
-    oseg = OrganSegmentation(**params)
+        if args["iparams"] is not None:
+            params = misc.obj_from_file(args["iparams"], filetype='pickle')
 
-    oseg_w = OrganSegmentationWindow(oseg)
+        else:
+            params = config.subdict(args, oseg_argspec_keys)
 
-    #oseg.interactivity(args["viewermin"], args["viewermax"])
+        logger.debug('params ' + str(params))
+        oseg = OrganSegmentation(**params)
 
-    #audiosupport.beep()
-    # print(
-    #     "Volume " +
-    #     str(oseg.get_segmented_volume_size_mm3() / 1000000.0) + ' [l]')
-    # #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour =
-    # # oseg.segmentation)
-    # #pyed.show()
-    # print("Total time: " + str(oseg.processing_time))
-
-    # if args["show_output"]:
-    #     oseg.show_output()
-
-    #print savestring
-    #  save_outputs(args, oseg, qt_app)
+        if args["no_interactivity"]:
+            oseg.ninteractivity()
+            oseg.save_outputs()
+        else:
+            # mport_gui()
+            from lisaWindow import OrganSegmentationWindow
+            from PyQt4.QtGui import QApplication
+            app = QApplication(sys.argv)
+            oseg_w = OrganSegmentationWindow(oseg) # noqa
 #    import pdb; pdb.set_trace()
-    sys.exit(app.exec_())
+            sys.exit(app.exec_())
+
+    except Exception as e:
+        import traceback
+        # mport exceptionProcessing
+        exceptionProcessing.reportException(e)
+        print traceback.format_exc()
+        # aise e
+
 
 if __name__ == "__main__":
     main()

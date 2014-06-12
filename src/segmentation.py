@@ -19,6 +19,9 @@ sys.path.append("../extern/")
 import uiThreshold
 import thresholding_functions
 
+import logging
+logger = logging.getLogger(__name__)
+
 import numpy
 import scipy
 import scipy.ndimage
@@ -64,25 +67,25 @@ def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsize_mm = [
     """
 
     dim = numpy.ndim(data)
-    print 'Dimenze vstupnich dat: ' + str(dim)
+    logger.debug( 'Dimenze vstupnich dat: ' + str(dim))
     if (dim < 2) or (dim > 3):
-        print 'Nepodporovana dimenze dat!'
-        print 'Ukonceni funkce!'
+        logger.debug( 'Nepodporovana dimenze dat!')
+        logger.debug( 'Ukonceni funkce!')
         return None
 
     if seeds == None:
-        print 'Funkce spustena bez prioritnich objektu!'
+        logger.debug( 'Funkce spustena bez prioritnich objektu!')
 
     if biggestObjects:
-        print 'Funkce spustena s vracenim nejvetsich objektu => nebude mozne vybrat prioritni objekty!'
+        logger.debug( 'Funkce spustena s vracenim nejvetsich objektu => nebude mozne vybrat prioritni objekty!')
 
     if ( nObj < 1 ) :
         nObj = 1
 
     if biggestObjects:
-        print 'Vybrano objektu k vraceni: ' + str(nObj)
+        logger.debug( 'Vybrano objektu k vraceni: ' + str(nObj))
 
-    print('Pripravuji data...')
+    logger.debug('Pripravuji data...')
 
     voxel = numpy.array(voxelsize_mm)
 
@@ -104,19 +107,19 @@ def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsize_mm = [
     ## Ziskani datove oblasti jater (bud pouze jater nebo i jejich okoli - zalezi,
     ## jakym zpusobem bylo nalozeno s operaci dilatace dat).
     preparedData = (data * (segmentation == 1))#.astype(numpy.float)
-    print 'Typ vstupnich dat: ' + str(preparedData.dtype)
+    logger.debug( 'Typ vstupnich dat: ' + str(preparedData.dtype))
 
 #    if preparedData.dtype != numpy.uint8:
 #        print 'Data nejsou typu numpy.uint8 => muze dojit k errorum'
 
     if not numpy.can_cast(preparedData.dtype, numpy.float):
-       print 'ERROR: (debug message) Data nejsou takoveho typu, aby se daly prevest na typ "numpy.float" => muze dojit k errorum'
-       print 'Ukoncuji funkci!'
+       logger.debug( 'ERROR: (debug message) Data nejsou takoveho typu, aby se daly prevest na typ "numpy.float" => muze dojit k errorum')
+       logger.debug( 'Ukoncuji funkci!')
        return None
 
     if (preparedData == False).all():
-       print 'ERROR: (debug message) Jsou spatna data nebo segmentacni matice: all is true == data is all false == bad segmentation matrix (if data matrix is ok)'
-       print 'Ukoncuji funkci!'
+       logger.debug( 'ERROR: (debug message) Jsou spatna data nebo segmentacni matice: all is true == data is all false == bad segmentation matrix (if data matrix is ok)')
+       logger.debug( 'Ukoncuji funkci!')
        return None
 
     del(data)
@@ -129,9 +132,9 @@ def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsize_mm = [
         inputSigma = number
 
     seeds = None
-    if biggestObjects == False and seeds == None and interactivity == True:
+    if biggestObjects == False and seeds == None and interactivity == True and threshold==-1:
 
-        print('Nyni si levym nebo pravym tlacitkem mysi (klepnutim nebo tazenim) oznacte specificke oblasti k vraceni.')
+        logger.debug(('Nyni si levym nebo pravym tlacitkem mysi (klepnutim nebo tazenim) oznacte specificke oblasti k vraceni.'))
         import py3DSeedEditor
         pyed = py3DSeedEditor.py3DSeedEditor(preparedData)
         pyed.show()
@@ -141,12 +144,12 @@ def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsize_mm = [
         if (seeds != 0).any() == False:
 
             seeds = None
-            print 'Zadne seedy nezvoleny => nejsou prioritni objekty.'
+            logger.debug( 'Zadne seedy nezvoleny => nejsou prioritni objekty.')
 
         else:
 
             seeds = seeds.nonzero()#seeds * (seeds != 0) ## seeds je n-tice poli indexu nenulovych prvku => item krychle je == krychle[ seeds[0][x], seeds[1][x], seeds[2][x] ]
-            print 'Seedu bez nul: ' + str(len(seeds[0]))
+            logger.debug( 'Seedu bez nul: ' + str(len(seeds[0])))
 
     closing = binaryClosingIterations
     opening = binaryOpeningIterations
@@ -172,12 +175,12 @@ def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsize_mm = [
     ## Vypocet binarni matice.
     if output == None:
 
-        print 'Zadna data k vraceni! (output == None)'
+        logger.debug( 'Zadna data k vraceni! (output == None)')
 
     elif binaryOutput:
 
         output[output != 0] = 1
-
+    
     ## Vraceni matice.
     if returnThreshold:
 

@@ -3,33 +3,15 @@ LISA
 
 LIver Surgery Analyser.
 
+![lisa logo](https://raw.githubusercontent.com/mjirik/lisa/master/applications/LISA256.png)
 
-
-Requirements
-------------
-
-Installing requires you to have installed:
-
-* GIT - distributed version control system (http://git-scm.com)
-* numpy (http://www.numpy.org)
-* scipy (http://scipy.org)
-* scikit-learn (http://scikit-learn.org)
-* Cython - C-extension for Python (http://cython.org)
-* pyqt - Python bindings for Qt application framework
-(http://www.riverbankcomputing.com/software/pyqt)
-* pygco - Graphcuts for Python (https://github.com/amueller/gco_python)
-* pydicom - package for working with DICOM files
-(http://code.google.com/p/pydicom)
-* pyqt - QT4 for python (https://wiki.python.org/moin/PyQt)
-* ITK (optional) - Package for medical image analysis (http://www.itk.org/)
-* VTK (optional) - The Visualization Toolkit (http://www.vtk.org/)
 
 
 
 Install
 -------
 
-See our install notes for Linux, Mac OS and Windows (https://github.com/mjirik/lisa/blob/master/INSTALL.md)
+See our [install notes](https://github.com/mjirik/lisa/blob/master/INSTALL.md) for Linux, Mac OS and Windows 
 
 
 Get stable branche
@@ -45,9 +27,9 @@ or
     git clone git@github.com:mjirik/lisa.git
     git submodule update --init --recursive
 
+or use [Lisa in Ubuntu for VirtualBox](http://147.228.240.61/queetech/install/lisa_ubuntu14.04.vdi)
 
-You can find more install notes in file 'notes.md'
-(https://github.com/mjirik/liver-surgery/blob/master/notes.md)
+
 
 Get sample data
 ---------------
@@ -94,3 +76,8 @@ Tests
     nosetests
     
     
+Video
+-----
+
+[![Video webcam tracking](https://img.youtube.com/vi/O408OKV5LhQ/0.jpg)](https://www.youtube.com/watch?v=O408OKV5LhQ)
+

@@ -1,5 +1,13 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
+"""
+This is module for configuration support.
+
+There are two config files in Lisa. One is in source directory. It is default
+config file. It must not have parameter config_version. Second file is in
+~/lisa_data directory. This file must have config_version parameter.
+
+"""
 
 # import funkcí z jiného adresáře
 import sys

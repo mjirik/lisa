@@ -1,3 +1,11 @@
+2014-04-09
+Input data path start is in ~/lisa_data and can be defined in config.
+New button "Open file" can import .pklz or .raw data
+Vessel Segmentation for segmentation of vessels
+Middle pen selected on start of automatic segmentation
+
+
+
 2014-01-21
 Window/Level in crop window
 Time measurement - start is after data load

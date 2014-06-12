@@ -10,6 +10,7 @@ import sys
 import os.path
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -37,6 +38,7 @@ import skelet3d
 import segmentation
 import misc
 import py3DSeedEditor as se
+import thresholding_functions
 
 from seed_editor_qt import QTSeedEditor
 
@@ -44,13 +46,14 @@ GAUSSIAN_SIGMA = 1
 fast_debug = False
 #fast_debug = True
 
+import histology_analyser_gui as HA_GUI
 
 class HistologyAnalyser:
-    def __init__(self, data3d, metadata, threshold):
+    def __init__(self, data3d, metadata, threshold=-1, nogui=True):
         self.data3d = data3d
         self.threshold = threshold
+        self.nogui = nogui
 
-        print metadata
         if 'voxelsize_mm' not in metadata.keys():
 # @TODO resolve problem with voxelsize
             metadata['voxelsize_mm'] = [0.1, 0.2, 0.3]
@@ -59,27 +62,55 @@ class HistologyAnalyser:
 
 
     def remove_area(self):
-
-        app = QApplication(sys.argv)
-        pyed = QTSeedEditor(
-            self.data3d, mode='mask'
-        )
-        pyed.exec_()
+        if not self.nogui:
+            app = QApplication(sys.argv)
+            pyed = QTSeedEditor(
+                self.data3d, mode='mask'
+            )
+            pyed.exec_()
 
     def data_to_binar(self):
+        ### Median filter
+        filteredData = scipy.ndimage.filters.median_filter(self.data3d, size=2)
+        
+        ### Segmentation
         data3d_thr = segmentation.vesselSegmentation(
-            self.data3d,
+            filteredData, 
             segmentation=np.ones(self.data3d.shape, dtype='int8'),
-            #segmentation=oseg.orig_scale_segmentation,
-            threshold=-1,
-            inputSigma=0.15,
+            threshold=self.threshold, #-1,
+            inputSigma=0, #0.15,
             dilationIterations=2,
             nObj=1,
-            biggestObjects=False,
-#        dataFiltering = True,
-            interactivity=True,
-            binaryClosingIterations=5,
-            binaryOpeningIterations=1)
+            biggestObjects= False,
+            interactivity= not self.nogui,
+            binaryClosingIterations=2, #5,  # TODO !!! - vytvari na stranach oblasti ktere se pak nenasegmentuji
+            binaryOpeningIterations=0 #1
+            )
+        
+        ### NoGUI segmentation fix
+        # Pri pouziti nogui modu segmentation.py nepouzije funkci getPriorityObjects jelikoz nema seedy => odlisne vysledky.
+        # Proto musim rucne zjistit vhodny seed a zavolat funkci az ted.
+        if self.nogui:
+            # Get seed that is inside of big object
+            seed_data = scipy.ndimage.morphology.binary_erosion(data3d_thr, iterations=2) # hledam pouze velke cevy
+            seed = None
+            for i in xrange(seed_data.shape[0]/3,seed_data.shape[0]-1): # shape/3 aby se zaclo hledat kolem prostredku
+                for n in xrange(seed_data.shape[1]/3,seed_data.shape[1]-1): 
+                    for j in xrange(seed_data.shape[2]/3,seed_data.shape[2]-1):
+                        if seed_data[i][n][j]==1:
+                            seed = (np.array([i]),np.array([n]),np.array([j]))
+                            logger.debug('automatic seed -> '+str(seed)+' value -> '+str(seed_data[i][n][j]))
+                            break
+                    if seed is not None:
+                        break
+                if seed is not None:
+                        break
+            # Zaruci ze ve vystupu nebudou cevy ktere vedou od nikud nikam
+            data3d_thr = thresholding_functions.getPriorityObjects(data3d_thr, nObj=1, seeds=seed) 
+            
+        ### Zalepeni der
+        data3d_thr = scipy.ndimage.morphology.binary_fill_holes(data3d_thr)
+        
         return data3d_thr
 
     def binar_to_skeleton(self, data3d_thr):
@@ -91,12 +122,23 @@ class HistologyAnalyser:
         data3d_thr = self.data_to_binar()
         data3d_skel = self.binar_to_skeleton(data3d_thr)
         return data3d_thr, data3d_skel
-
-    def skeleton_to_statistics(self, data3d_thr, data3d_skel):
+    
+    def skeleton_to_statistics(self, data3d_thr, data3d_skel, guiUpdateFunction=None):
         skan = SkeletonAnalyser(
             data3d_skel,
             volume_data=data3d_thr,
-            voxelsize_mm=metadata['voxelsize_mm'])
+            voxelsize_mm=self.metadata['voxelsize_mm'])
+
+        stats = skan.skeleton_analysis(guiUpdateFunction=guiUpdateFunction)
+        self.sklabel = skan.sklabel
+        #data3d_nodes[data3d_nodes==3] = 2
+        self.stats = {'Graph':stats}
+        
+    def showSegmentedData(self, data3d_thr, data3d_skel):
+        skan = SkeletonAnalyser(
+            data3d_skel,
+            volume_data=data3d_thr,
+            voxelsize_mm=self.metadata['voxelsize_mm'])
         data3d_nodes_vis = skan.sklabel.copy()
 # edges
         data3d_nodes_vis[data3d_nodes_vis > 0] = 1
@@ -109,16 +151,13 @@ class HistologyAnalyser:
         #    contours=data3d_thr.astype(np.int8)
         #)
         #app.exec_()
-        pyed = se.py3DSeedEditor(
-            data3d,
-            seeds=(data3d_nodes_vis).astype(np.int8),
-            contour=data3d_thr.astype(np.int8)
-        )
-        pyed.show()
-        stats = skan.skeleton_analysis()
-        self.sklabel = skan.sklabel
-        #data3d_nodes[data3d_nodes==3] = 2
-        self.stats = {'Graph':stats}
+        if not self.nogui:
+            pyed = se.py3DSeedEditor(
+                self.data3d,
+                seeds=(data3d_nodes_vis).astype(np.int8),
+                contour=data3d_thr.astype(np.int8)
+            )
+            pyed.show()
 
     def run(self):
         #self.preprocessing()
@@ -189,7 +228,7 @@ class HistologyAnalyser:
 
 
     def writeStatsToYAML(self, filename='hist_stats.yaml'):
-        print 'write to yaml'
+        logger.debug('writeStatsToYAML')
         misc.obj_to_file(self.stats, filename=filename, filetype='yaml')
 
         #sitk.
@@ -260,7 +299,7 @@ class SkeletonAnalyser:
         self.__generate_sklabel(skelet_nodes)
 
 
-    def skeleton_analysis(self):
+    def skeleton_analysis(self, guiUpdateFunction = None):
         """
         Glossary:
         element: line structure of skeleton connected to node on both ends
@@ -276,16 +315,19 @@ class SkeletonAnalyser:
             stats = {}
             len_edg = np.max(self.sklabel)
             #len_edg = 30
-
-            for edg_number in range (1,len_edg):
+                
+            for edg_number in range(1,len_edg+1):
                 edgst = self.__connection_analysis(edg_number)
                 edgst.update(self.__edge_length(edg_number))
                 edgst.update(self.__edge_curve(edg_number, edgst, self.voxelsize_mm))
                 edgst.update(self.__edge_vectors(edg_number, edgst))
                 #edgst = edge_analysis(sklabel, i)
                 if self.volume_data is not None:
-                    edgst['radius'] = float(self.__radius_analysis(skdst, edg_number))
+                    edgst['radius_mm'] = float(self.__radius_analysis(edg_number,skdst))
                 stats[edgst['id']] = edgst
+                
+                if guiUpdateFunction is not None: # update gui progress
+                    guiUpdateFunction(edg_number,len_edg,1)
 
 #save data for faster debug
             struct = {'sVD':self.volume_data, 'stats':stats, 'len_edg':len_edg}
@@ -298,9 +340,12 @@ class SkeletonAnalyser:
 
 
         #@TODO dokončit
-        for edg_number in range (1,len_edg):
+        for edg_number in range (1,len_edg+1):
             edgst = stats[edg_number]
             edgst.update(self.__connected_edge_angle(edg_number, stats))
+            
+            if guiUpdateFunction is not None: # update gui progress
+                    guiUpdateFunction(edg_number,len_edg,2)
 
 
 
@@ -678,6 +723,8 @@ class SkeletonAnalyser:
                     self.volume_data,
                     sampling=self.voxelsize_mm
                     )
+
+            # import ipdb; ipdb.set_trace() # BREAKPOINT
             dst = dst * (self.sklabel != 0)
 
             return dst
@@ -691,9 +738,9 @@ class SkeletonAnalyser:
         """
         return smaller radius of tube
         """
+        #import ipdb; ipdb.set_trace() # BREAKPOINT
         edg_skdst = skdst * (self.sklabel == edg_number)
         return np.mean(edg_skdst[edg_skdst != 0])
-
 
 
 
@@ -729,73 +776,189 @@ class SkeletonAnalyser:
 
         return edg_stats
 
+def generate_sample_data(m=1, noise_level=0.005, gauss_sigma=0.1):
+    """
+    Generate sample vessel system.
+    J. Kunes
+    
+    Input:
+        m - output will be (100*m)^3 numpy array
+        noise_level - noise power, disable noise with -1
+        gauss_sigma - gauss filter sigma, disable filter with -1
+        
+    Output:
+        (100*m)^3 numpy array
+            voxel size = [1,1,1]
+    """
+    import thresholding_functions
+    
+    data3d = np.zeros((100*m,100*m,100*m), dtype=np.int)
 
+    # size 8
+    data3d_new = np.ones((100*m,100*m,100*m), dtype=np.bool)
+    data3d_new[0:30*m,20*m,20*m] = 0
+    data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 8*m] = 0
+    data3d[data3d_new == 0] = 1
+    # size 7
+    data3d_new = np.ones((100*m,100*m,100*m), dtype=np.bool)
+    data3d_new[31*m:70*m,20*m,20*m] = 0
+    data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 7*m] = 0
+    data3d[data3d_new == 0] = 1
+    # size 6
+    data3d_new = np.ones((100*m,100*m,100*m), dtype=np.bool)
+    data3d_new[70*m,20*m:50*m,20*m] = 0
+    data3d_new[31*m,20*m,20*m:70*m] = 0
+    data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 6*m] = 0
+    data3d[data3d_new == 0] = 1
+    # size 5
+    data3d_new = np.ones((100*m,100*m,100*m), dtype=np.bool)
+    data3d_new[70*m:95*m,20*m,20*m] = 0
+    data3d_new[31*m:60*m,20*m,70*m] = 0
+    data3d_new[70*m:90*m,50*m,20*m] = 0
+    data3d_new[70*m,50*m,20*m:50*m] = 0
+    data3d_new[31*m,20*m:45*m,20*m] = 0
+    data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 5*m] = 0
+    data3d[data3d_new == 0] = 1
+    # size 4
+    data3d_new = np.ones((100*m,100*m,100*m), dtype=np.bool)
+    data3d_new[31*m,20*m:50*m,70*m] = 0
+    data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 4*m] = 0
+    data3d[data3d_new == 0] = 1
+    # size 3
+    data3d_new = np.ones((100*m,100*m,100*m), dtype=np.bool)
+    data3d_new[31*m:50*m,50*m,70*m] = 0
+    data3d_new[31*m:50*m,45*m,20*m] = 0
+    data3d_new[70*m,50*m:70*m,50*m] = 0
+    data3d_new[70*m:80*m,50*m,50*m] = 0
+    data3d_new[scipy.ndimage.distance_transform_edt(data3d_new) <= 3*m] = 0
+    data3d[data3d_new == 0] = 1
+    
+    data3d = data3d*3030   # 3030+5920 = vessel value
+    data3d += 5920         # 5920 = background value
+    
+    if gauss_sigma>0:
+        sigma = np.round(gauss_sigma, 2)
+        sigmaNew = thresholding_functions.calculateSigma([1,1,1], sigma)
+        data3d = thresholding_functions.gaussFilter(data3d, sigmaNew)
+    
+    if noise_level>0:
+        noise = np.random.normal(1,noise_level,(100*m,100*m,100*m))
+        data3d = data3d*noise
+    
+    return data3d
 
-if __name__ == "__main__":
-    import misc
-    logger = logging.getLogger()
-
-    logger.setLevel(logging.WARNING)
-    ch = logging.StreamHandler()
-    logger.addHandler(ch)
-
-    #logger.debug('input params')
-
+def parser_init():
     # input parser
     parser = argparse.ArgumentParser(
         description='Histology analyser'
     )
     parser.add_argument('-i', '--inputfile',
-            default='histin.tif',
-            help='input file')
+        default=None,
+        help='Input file, .tif file')
 #    parser.add_argument('-o', '--outputfile',
-#            default='histout.pkl',
-#            help='output file')
+#        default='histout.pkl',
+#        help='output file')
     parser.add_argument('-t', '--threshold', type=int,
-            default=6600,
-            help='data threshold, default 1')
+        default=-1, 
+        help='data threshold, default -1 (gui/automatic selection)')
     parser.add_argument(
         '-is', '--input_is_skeleton', action='store_true',
-        help='input file is .pkl file with skeleton')
+        help='Input file is .pkl file with skeleton')
     parser.add_argument('-cr', '--crop', type=int, metavar='N', nargs='+',
-            default=[0,-1,0,-1,0,-1],
-            help='segmentation labels, default 1')
+        default=None,
+        help='Segmentation labels, default 1')
+    parser.add_argument( # TODO - not needed??
+        '--crgui', action='store_true',
+        help='GUI crop')
+    parser.add_argument(
+        '--nogui', action='store_true',
+        help='Disable GUI')
+    parser.add_argument(
+        '-d', '--debug', action='store_true',
+        help='Debug mode')
     args = parser.parse_args()
+    
+    return args
 
-    #data = misc.obj_from_file(args.inputfile, filetype = 'pickle')
-
-    print args.input_is_skeleton
-    if args.input_is_skeleton:
-        print "input is skeleton"
+# Processing data without gui
+def processData(inputfile=None,threshold=None,skeleton=False,crop=None):
+    ### when input is just skeleton
+    if skeleton:
+        logger.info("input is skeleton")
         struct = misc.obj_from_file(filename='tmp0.pkl', filetype='pickle')
         data3d_skel = struct['skel']
         data3d_thr = struct['thr']
         data3d = struct['data3d']
         metadata = struct['metadata']
-        ha = HistologyAnalyser(data3d, metadata, args.threshold)
-        print "end of is skeleton"
-    else:
-        dr = datareader.DataReader()
-        data3d, metadata = dr.Get3DData(args.inputfile)
-# crop data
-        cr = args.crop
-        data3d = data3d[cr[0]:cr[1], cr[2]:cr[3], cr[4]:cr[5]]
-
-
-
-        ha = HistologyAnalyser(data3d, metadata, args.threshold)
-        ha.remove_area()
+        ha = HistologyAnalyser(data3d, metadata, threshold, nogui=True)
+        logger.info("end of is skeleton")
+    else: 
+        ### Reading/Generating data
+        if inputfile is None: ## Using generated sample data
+            logger.info('Generating sample data...')
+            metadata = {'voxelsize_mm': [1, 1, 1]}
+            data3d = generate_sample_data(1)
+        else: ## Normal runtime
+            dr = datareader.DataReader()
+            data3d, metadata = dr.Get3DData(inputfile)
+        
+        ### Crop data
+        if crop is not None:
+            logger.debug('Croping data: %s', str(crop))
+            data3d = data3d[crop[0]:crop[1], crop[2]:crop[3], crop[4]:crop[5]]
+        
+        ### Init HistologyAnalyser object
+        logger.debug('Init HistologyAnalyser object')
+        ha = HistologyAnalyser(data3d, metadata, threshold, nogui=True)
+        
+        ### No GUI == No Remove Area
+        
+        ### Segmentation
+        logger.debug('Segmentation')
         data3d_thr, data3d_skel = ha.data_to_skeleton()
-        struct = {'skel': data3d_skel, 'thr': data3d_thr, 'data3d': data3d, 'metadata':metadata}
-        misc.obj_to_file(struct, filename='tmp0.pkl', filetype='pickle')
-
-    print " #########  statistics"
+        
+    ### Computing statistics
+    logger.info("######### statistics")
     ha.skeleton_to_statistics(data3d_thr, data3d_skel)
-    #ha.run()
-    print "              #####    write to file"
+    
+    ### Saving files
+    logger.info("##### write to file")
     ha.writeStatsToCSV()
     ha.writeStatsToYAML()
     ha.writeSkeletonToPickle('skel.pkl')
-    #ha.show()
+    #struct = {'skel': data3d_skel, 'thr': data3d_thr, 'data3d': data3d, 'metadata':metadata}
+    #misc.obj_to_file(struct, filename='tmp0.pkl', filetype='pickle')
+    
+    ### End
+    logger.info('Finished')
 
+def main():
+    args = parser_init()
 
+    logger = logging.getLogger()
+    logger.setLevel(logging.WARNING)
+    #ch = logging.StreamHandler() #https://docs.python.org/2/howto/logging.html#configuring-logging
+    #logger.addHandler(ch)
+
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
+    
+    if args.nogui:
+        logger.info('Running without GUI')
+        logger.info('Input file -> %s', args.inputfile)
+        logger.info('Data crop -> %s', str(args.crop))
+        logger.info('Threshold -> %s', args.threshold)
+        processData(inputfile=args.inputfile,
+                    threshold=args.threshold,
+                    skeleton=args.input_is_skeleton,
+                    crop=args.crop)
+    else:
+        app = QApplication(sys.argv)
+        gui = HA_GUI.HistologyAnalyserWindow(inputfile=args.inputfile,
+                                            skeleton=args.input_is_skeleton,
+                                            crop=args.crop,
+                                            crgui=args.crgui)
+        sys.exit(app.exec_())
+        
+if __name__ == "__main__":
+    main()

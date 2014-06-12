@@ -1,6 +1,9 @@
 #! /opt/local/bin/python
 # -*- coding: utf-8 -*-
 
+import logging
+logger = logging.getLogger(__name__)
+
 # import funkcí z jiného adresáře
 import sys
 import os.path
@@ -12,8 +15,6 @@ sys.path.append(os.path.join(path_to_script,
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
 
-import logging
-logger = logging.getLogger(__name__)
 
 
 #import apdb

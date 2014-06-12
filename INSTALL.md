@@ -1,4 +1,58 @@
-Install (L)Ubuntu 13.10
+Requirements
+============
+
+Installing requires you to have installed:
+
+* GIT - distributed version control system (http://git-scm.com)
+* numpy (http://www.numpy.org)
+* scipy (http://scipy.org)
+* scikit-learn (http://scikit-learn.org)
+* Cython - C-extension for Python (http://cython.org)
+* pyqt - Python bindings for Qt application framework
+(http://www.riverbankcomputing.com/software/pyqt)
+* pygco - Graphcuts for Python (https://github.com/amueller/gco_python)
+* pydicom - package for working with DICOM files
+(http://code.google.com/p/pydicom)
+* pyqt - QT4 for python (https://wiki.python.org/moin/PyQt)
+* ITK (optional) - Package for medical image analysis (http://www.itk.org/)
+* VTK (optional) - The Visualization Toolkit (http://www.vtk.org/)
+
+
+
+Install (L)Ubuntu 14.04
+=======================
+
+Tested with Ubuntu 14.04 32-bit and Linux Mint 16 Petra
+
+    # 1. requirements
+    sudo apt-get install python git python-dev g++ python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools curl
+    
+    # 2. simpleITK  
+    sudo easy_install -U SimpleITK
+    
+    # 3. install gco_python
+    mkdir ~/projects
+    cd ~/projects
+    git clone https://github.com/mjirik/gco_python.git
+    cd gco_python
+    make
+    sudo python setup.py install
+    cd ..
+
+1. First use package manager to satisfy requirements. 
+2. SimpleITK is not in ubuntu packages. You can use easy_install
+3. For pygco use following (more info https://github.com/mjirik/pyseg_base/blob/master/INSTALL)
+
+Get stable branche
+
+    git clone --recursive -b stable https://github.com/mjirik/lisa.git
+
+or for current developement (if you want to participate)
+
+    git clone --recursive git@github.com:mjirik/lisa.git
+
+
+Install (L)Ubuntu 12.04 (13.10)
 =========================
 
 Use package manager
@@ -11,12 +65,17 @@ SimpleITK is not in ubuntu packages. You can use easy_install
     
 For pygco use following (more info https://github.com/mjirik/pyseg_base/blob/master/INSTALL)
 
-    git clone git@github.com:mjirik/liver-surgery.git
-    git submodule update --init --recursive
     git clone https://github.com/amueller/gco_python.git
     cd gco_python
     make
     python setup.py install
+
+Get stable branche
+
+    mkdir ~/projects
+    cd ~/projects
+    git clone --recursive -b stable https://github.com/mjirik/lisa.git
+
     
 Problems on Linux:
 
@@ -31,13 +90,6 @@ Problems on Linux:
 Install Mac OS
 ==============
 
-
- * GIT
- 
-    Use mac installer  (http://git-scm.com/download/mac)
-    There is a need to allow install applications from unknown developers
-    (Settings - Security & Privacy - General - Allow applications downloaded from)
-
  * Xcode, gcc and make
 
     Install Xcode from appstore. You will need an AppleID.
@@ -48,19 +100,31 @@ Install Mac OS
     * Click "Components".
     * Click "Install" on the command line tools line.
 
+
  * MacPorts
 
     Use standard pkg package. (http://www.macports.org/install.php)
-    Tested on Mountain Lion installer 
-    (https://distfiles.macports.org/MacPorts/MacPorts-2.2.1-10.8-MountainLion.pkg
+    
+    Tested on [OS X 10.8 Mountain Lion installer](https://distfiles.macports.org/MacPorts/MacPorts-2.2.1-10.8-MountainLion.pkg)
+    and [OSX 10.9 Mavericks installer](https://distfiles.macports.org/MacPorts/MacPorts-2.2.1-10.9-Mavericks.pkg)
 
+
+ * GIT
+
+    Use mac ports
+
+        sudo port install git-core +svn +doc +bash_completion +gitweb
+
+    Use mac installer  (http://git-scm.com/download/mac)
+    There is a need to allow install applications from unknown developers
+    (Settings - Security & Privacy - General - Allow applications downloaded from)
 
  * Numpy, Scipy, ...
 
 
         sudo port selfupdate
         sudo port upgrade outdated
-        sudo port install py27-pyqt4 py27-numpy py27-scipy py27-matplotlib py27-ipython +notebook py27-pandas py27-sympy py27-nose  py-scikit-learn py-pydicom py27-yaml py27-cython vtk5 +qt4_mac +python27
+        sudo port install py27-pyqt4 py27-numpy py27-scipy py27-matplotlib py27-ipython +notebook py27-pandas py27-sympy py27-nose  py-scikit-learn py-pydicom py27-yaml py27-cython vtk5 +qt4_mac +python27 py27-distutils-extra
  
 
  * Select default python
@@ -72,8 +136,21 @@ Install Mac OS
 
 
         sudo easy_install cython
+        
+    or
+
+        sudo -E easy_install cython
 
  * gco_python
+
+    Try this
+
+        git clone https://github.com/amueller/gco_python.git
+        cd gco_python
+        make
+        sudo -E python setup.py install
+
+    or this
 
     See install notes to pyseg_base (https://github.com/mjirik/pyseg_base/blob/master/INSTALL).
     If there is a problem with clang compiler, you are should edit gco 
@@ -86,7 +163,43 @@ Install Mac OS
         git submodule update --init --recursive
 
 
+### Known problems on Mac OS 
 
+ * Cython installation fail
+
+        command 'cc' failed with exit status 1
+        
+    or
+    
+        import Cython.Distutils
+
+    Install cython with easy_install 
+    
+        sudo -E easy_install cython
+    
+    
+ * 
+   
+Use VirtualBox
+==============
+
+* Install VirtualBox (https://www.virtualbox.org/)
+* Download Lisa Image (http://uloz.to/xU4oHfKw/lisa-ubuntu14-04-vdi)
+
+or 
+* Download Lisa Image (http://147.228.240.61/queetech/install/lisa_ubuntu14.04.vdi)
+
+In VirtualBox
+
+* Create new computer
+
+    * Name: Lisa
+    * Type: Linux
+    * Version: Ubuntu (32bit)
+    
+* Set memory size to 1024MB and more
+* Use existing hard disk and locate downloaded Lisa Image (lisa_ubuntu14.04.vdi)
+* Password to Lisa account is: L1v3r.
 
 
 Install Windows
@@ -94,8 +207,9 @@ Install Windows
 
 
 * Python XY (http://code.google.com/p/pythonxy/)
-    
+
     Add all packages.
+
 * Git (http://www.git-scm.com/download/win)
 
     Select "Run Git from the Windows Command Prompt" or "Run Git and included Unix tools from the Windows Command Prompt"

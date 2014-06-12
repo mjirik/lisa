@@ -105,5 +105,9 @@ def obj_to_file(obj, filename='annotation.yaml', filetype='yaml'):
         #f = open(filename, 'wb')
         pickle.dump(obj, f)
         f.close
+    elif filetype in('mat'):
+
+        import scipy.io as sio
+        sio.savemat(filename, obj)
     else:
         logger.error('Unknown filetype ' + filetype)
