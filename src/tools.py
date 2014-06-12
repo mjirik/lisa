@@ -255,6 +255,46 @@ def smoothing_tv(data, weight, pseudo_3D='True', multichannel=False, sliceId=2):
         data = (255 * data).astype(np.uint8)
     return data
 
+def canny(data, sigma=1, sliceId=2):
+    edges = np.zeros(data.shape, dtype=np.bool)
+    if sliceId == 2:
+        for idx in range(data.shape[2]):
+            edges[:, :, idx] = skifil.canny(data[:, :, idx], sigma=sigma)
+    elif sliceId == 0:
+        for idx in range(data.shape[0]):
+            edges[idx, :, :] = skifil.canny(data[idx, :, :], sigma=sigma)
+    return edges
+
+def scharr(data, sliceId=2):
+    edges = np.zeros(data.shape)
+    if sliceId == 2:
+        for idx in range(data.shape[2]):
+            edges[:, :, idx] = skifil.scharr(data[:, :, idx])
+    elif sliceId == 0:
+        for idx in range(data.shape[0]):
+            edges[idx, :, :] = skifil.scharr(data[idx, :, :])
+    return edges
+
+def sobel(data, sliceId=2):
+    edges = np.zeros(data.shape)
+    if sliceId == 2:
+        for idx in range(data.shape[2]):
+            edges[:, :, idx] = skifil.sobel(data[:, :, idx])
+    elif sliceId == 0:
+        for idx in range(data.shape[0]):
+            edges[idx, :, :] = skifil.sobel(data[idx, :, :])
+    return edges
+
+def roberts(data, sliceId=2):
+    edges = np.zeros(data.shape)
+    if sliceId == 2:
+        for idx in range(data.shape[2]):
+            edges[:, :, idx] = skifil.roberts(data[:, :, idx])
+    elif sliceId == 0:
+        for idx in range(data.shape[0]):
+            edges[idx, :, :] = skifil.roberts(data[idx, :, :])
+    return edges
+
 def analyse_histogram(data, roi=None, debug=False, dens_min=20, dens_max=255, minT=0.95, maxT=1.05):
     if roi == None:
         #roi = np.ones(data.shape, dtype=np.bool)
@@ -329,7 +369,7 @@ def intensity_probability(data, std=20, roi=None, dens_min=5, dens_max=255):
         else:
             probs[coords[i,0], coords[i,1]] = probs_L[i]
 
-    return probs
+    return probs, mu
 
 
 def get_zunics_compatness(obj):

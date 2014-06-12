@@ -334,13 +334,18 @@ class Lesions:
 #----------------------------------------------------------------------------------------------------------------------
     def get_seeds_using_prob_class1(self, data, class1, roi=None, dens_min=20, dens_max=255, thresholdType='percOfMaxDist', percT=0.5):
         # calculates probability based on similarity of intensities
-        probs = tools.intensity_probability(data, std=10)
+        probs, mu = tools.intensity_probability(data, std=10)
         # py3DSeedEditor.py3DSeedEditor(data).show()
         # py3DSeedEditor.py3DSeedEditor(probs).show()
         # normalizing and calculating reciprocal values
         # weights_ints = skexp.rescale_intensity(probs, in_range=(0,probs.max()), out_range=(1,0))
         weights_ints = np.exp(-probs)
-        # py3DSeedEditor.py3DSeedEditor(weights_ints).show()
+
+        weights_h = np.where(data > mu, 1 - probs, 0)
+        weights_l = np.where(data < mu, 1 - probs, 0)
+        # py3DSeedEditor.py3DSeedEditor(1 - probs).show()
+        py3DSeedEditor.py3DSeedEditor(weights_h).show()
+        py3DSeedEditor.py3DSeedEditor(weights_l).show()
 
         if roi is None:
             roi = np.logical_and(data >= dens_min, data <= dens_max)
@@ -460,7 +465,7 @@ def main():
     # more total-variation
     # data['data3d'] = tools.smoothing_tv(data['data3d'], weight=0.2, multichannel=False, sliceId=0)
     # py3DSeedEditor.py3DSeedEditor(data['data3d']).show()
-    #---------------------------gym
+    #---------------------------
 
     tumory = Lesions()
     # tumory.overlay_test()
