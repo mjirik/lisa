@@ -692,6 +692,58 @@ class OrganSegmentation():
 
         self.segmentation = tumory.segmentation
 
+    def portalVeinSegmentation(self):
+
+        import segmentation
+        outputSegmentation = segmentation.vesselSegmentation(
+            self.data3d,
+            self.segmentation,
+            threshold=-1,
+            inputSigma=0.15,
+            dilationIterations=2,
+            nObj=1,
+            biggestObjects=False,
+            interactivity=True,
+            binaryClosingIterations=2,
+            binaryOpeningIterations=0)
+        slab = {'porta': 2}
+        slab.update(self.slab)
+        # rom PyQt4.QtCore import pyqtRemoveInputHook
+        # yqtRemoveInputHook()
+        # mport ipdb; ipdb.set_trace() # BREAKPOINT
+        self.slab = slab
+        self.segmentation[outputSegmentation == 1] = slab['porta']
+
+    def hepaticVeinsSegmentation(self):
+
+        import segmentation
+        import skelet3d
+        import histology_analyser as skan
+        outputSegmentation = segmentation.vesselSegmentation(
+            self.data3d,
+            self.segmentation,
+            threshold=-1,
+            inputSigma=0.15,
+            dilationIterations=2,
+            nObj=1,
+            biggestObjects=False,
+            interactivity=True,
+            binaryClosingIterations=2,
+            binaryOpeningIterations=0)
+        slab = {'hepatic_veins': 3}
+        slab.update(self.slab)
+        # rom PyQt4.QtCore import pyqtRemoveInputHook
+        # yqtRemoveInputHook()
+        # mport ipdb; ipdb.set_trace() # BREAKPOINT
+        self.slab = slab
+        self.segmentation[outputSegmentation == 1] = slab['hepatic_veins']
+
+# skeletonizace
+        skan.HistologyAnalyser(self.data3d, self.metadata)
+        data3d_skel = skan.binar_to_skeleton(outputSegmentation)
+        skan.skeleton_to_statistics(outputSegmentation, data3d_skel)
+        print skan.stats
+
     def get_segmented_volume_size_mm3(self):
         """Compute segmented volume in mm3, based on subsampeled data."""
 

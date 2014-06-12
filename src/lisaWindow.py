@@ -178,8 +178,11 @@ class OrganSegmentationWindow(QMainWindow):
         text_resection = QLabel('Virtual resection')
         text_resection.setFont(font_label)
 
-        btn_vesselseg = QPushButton("Vessel segmentation", self)
-        btn_vesselseg.clicked.connect(self.btnVesselSegmentation)
+        btn_pvseg = QPushButton("Portal vein seg.", self)
+        btn_pvseg.clicked.connect(self.btnPortalVeinSegmentation)
+
+        btn_hvseg = QPushButton("Hepatic veins seg.", self)
+        btn_hvseg.clicked.connect(self.btnHepaticVeinsSegmentation)
 
         btn_lesions = QPushButton("Lesions localization", self)
         btn_lesions.clicked.connect(self.btnLesionLocalization)
@@ -189,9 +192,10 @@ class OrganSegmentationWindow(QMainWindow):
 
         grid.addWidget(hr, rstart + 0, 2, 1, 4)
         grid.addWidget(text_resection, rstart + 0, 1)
-        grid.addWidget(btn_vesselseg, rstart + 1, 1)
-        grid.addWidget(btn_lesions, rstart + 1, 2)
-        grid.addWidget(btn_resection, rstart + 1, 3)
+        grid.addWidget(btn_pvseg, rstart + 1, 1)
+        grid.addWidget(btn_hvseg, rstart + 1, 2)
+        grid.addWidget(btn_lesions, rstart + 1, 3)
+        grid.addWidget(btn_resection, rstart + 2, 3)
 
         # # # # # # #
 
@@ -538,32 +542,17 @@ class OrganSegmentationWindow(QMainWindow):
     def btnLesionLocalization(self):
         self.oseg.lesionsLocalization()
 
-    def btnVesselSegmentation(self):
+    def btnPortalVeinSegmentation(self):
         """
         Function calls segmentation.vesselSegmentation function.
         """
+        self.oseg.portalVeinSegmentation()
 
-        outputSegmentation = segmentation.vesselSegmentation(
-            self.oseg.data3d,
-            self.oseg.segmentation,
-            threshold=-1,
-            inputSigma=0.15,
-            dilationIterations=2,
-            nObj=1,
-            biggestObjects=False,
-            interactivity=True,
-            binaryClosingIterations=2,
-            binaryOpeningIterations=0)
-        # rint outputSegmentation
-        # rint np.unique(outputSegmentation)
-        # rint self.oseg.slab
-        slab = {'porta': 2}
-        slab.update(self.oseg.slab)
-        # rom PyQt4.QtCore import pyqtRemoveInputHook
-        # yqtRemoveInputHook()
-        # mport ipdb; ipdb.set_trace() # BREAKPOINT
-        self.oseg.slab = slab
-        self.oseg.segmentation[outputSegmentation == 1] = slab['porta']
+    def btnHepaticVeinsSegmentation(self):
+        """
+        Function calls segmentation.vesselSegmentation function.
+        """
+        self.oseg.hepaticVeinsSegmentation()
 
     def view3D(self):
         # rom seg2mesh import gen_mesh_from_voxels, mesh2vtk, smooth_mesh
