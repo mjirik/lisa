@@ -509,4 +509,10 @@ class SkeletonAnalyser:
                     }
 
         return edg_stats
+        
+def curve_model(t, params):
+    p0 = params['start'][0] + t*params['vector'][0]
+    p1 = params['start'][1] + t*params['vector'][1]
+    p2 = params['start'][2] + t*params['vector'][2]
+    return [p0, p1, p2]
 

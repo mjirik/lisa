@@ -727,7 +727,7 @@ class LoadDialog(QDialog):
         info = QLabel('Load Data:')
         info.setFont(font_info)
         
-        btn_dcmdir = QPushButton("Load DICOM", self)
+        btn_dcmdir = QPushButton("Load directory (DICOM)", self)
         btn_dcmdir.clicked.connect(self.loadDataDir)
         btn_datafile = QPushButton("Load file", self)
         btn_datafile.clicked.connect(self.loadDataFile)
@@ -782,13 +782,13 @@ class LoadDialog(QDialog):
             self.crgui = False
     
     def loadDataDir(self,event):
-        self.mainWindow.setStatusBarText('Reading DICOM directory...')
+        self.mainWindow.setStatusBarText('Reading directory...')
         self.inputfile = self.__get_datadir(
             app=True,
             directory=''
         )
         if self.inputfile is None:
-            self.mainWindow.setStatusBarText('No DICOM directory specified!')
+            self.mainWindow.setStatusBarText('No directory specified!')
             return
         self.importDataWithGui()
     
@@ -823,7 +823,7 @@ class LoadDialog(QDialog):
         else:
             app = QApplication(sys.argv)
             dcmdir = QFileDialog.getOpenFileName(
-                caption='Select DICOM Folder',
+                caption='Select Data File',
                 #options=QFileDialog.ShowDirsOnly,
                 directory=directory
             )
@@ -844,14 +844,14 @@ class LoadDialog(QDialog):
         from PyQt4.QtGui import QFileDialog
         if app:
             dcmdir = QFileDialog.getExistingDirectory(
-                caption='Select DICOM Folder',
+                caption='Select Folder',
                 options=QFileDialog.ShowDirsOnly,
                 directory=directory
             )
         else:
             app = QApplication(sys.argv)
             dcmdir = QFileDialog.getExistingDirectory(
-                caption='Select DICOM Folder',
+                caption='Select Folder',
                 options=QFileDialog.ShowDirsOnly,
                 directory=directory
             )
@@ -876,7 +876,8 @@ class LoadDialog(QDialog):
             try:
                 reader = datareader.DataReader()
                 self.data3d, self.metadata = reader.Get3DData(self.inputfile)
-            except Exception:
+            except:
+                logger.error("Unexpected error: "+str(sys.exc_info()[0]))
                 self.mainWindow.setStatusBarText('Bad file/folder!!!')
                 return
             

@@ -21,6 +21,8 @@ logger = logging.getLogger(__name__)
 
 import dcmreaddata as dcmr
 
+import SimpleITK as sitk
+import numpy as np
 
 class DataReader:
 
@@ -62,7 +64,6 @@ class DataReader:
 
             else:
 # reading raw file
-                import SimpleITK as sitk
                 image = sitk.ReadImage(datapath)
                 #image = sitk.ReadImage('/home/mjirik/data/medical/data_orig/sliver07/01/liver-orig001.mhd') #noqa
                 #sz = image.GetSize()
@@ -89,14 +90,48 @@ class DataReader:
                 ]
 
         else:
-#reading dicom
-
-            reader = dcmr.DicomReader(datapath, qt_app=None, gui=True)
-            data3d = reader.get_3Ddata(start, stop, step)
-            metadata = reader.get_metaData()
-            metadata['series_number'] = reader.series_number
-            metadata['datadir'] = datapath
-            self.overlay_fcn = reader.get_overlay
+            # checks if data is in DICOM format
+            dir_type = 'images'
+            for f in os.listdir(datapath):
+                if f.endswith(".dcm"):
+                    dir_type = 'dicom'
+            
+            if dir_type == 'dicom': #reading dicom
+                logger.debug('Dir - DICOM')                
+                reader = dcmr.DicomReader(datapath, qt_app=None, gui=True)
+                data3d = reader.get_3Ddata(start, stop, step)
+                metadata = reader.get_metaData()
+                metadata['series_number'] = reader.series_number
+                metadata['datadir'] = datapath
+                self.overlay_fcn = reader.get_overlay
+            else: # reading image sequence
+                logger.debug('Dir - Image sequence')  
+                
+                logger.debug('Getting list of readable files...') 
+                flist = []
+                for f in os.listdir(datapath):
+                    try:
+                        sitk.ReadImage(os.path.join(datapath,f))
+                    except:
+                        logger.warning("Cant load file: "+str(f))
+                        continue
+                    flist.append(os.path.join(datapath,f))
+                flist.sort()
+                
+                logger.debug('Reading image data...') 
+                image = sitk.ReadImage(flist)
+                logger.debug('Getting numpy array from image data...') 
+                data3d = sitk.GetArrayFromImage(image)
+                
+                metadata = {}  # reader.get_metaData()
+                metadata['series_number'] = 0  # reader.series_number
+                metadata['datadir'] = datapath
+                spacing = image.GetSpacing()
+                metadata['voxelsize_mm'] = [
+                    spacing[2],
+                    spacing[0],
+                    spacing[1],
+                ]
 
         if dataplus_format:
             logger.debug('dataplus format')
