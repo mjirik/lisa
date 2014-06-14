@@ -119,7 +119,6 @@ class HistologyAnalyserWindow(QMainWindow):
             self.showRemoveDialog(self.ha.data3d)
 
             ### Segmentation
-            logger.debug('Segmentation Query Dialog')
             self.showSegmQueryDialog()
         
     def runSegmentation(self, default=False):
@@ -132,13 +131,18 @@ class HistologyAnalyserWindow(QMainWindow):
         # use default segmentation parameters
         if default is True:
             self.ha.nogui = True
-            self.ha.threshold = 7000
+            self.ha.threshold = 10000 #7000
+            self.ha.binaryClosing = 1 #2
+            self.ha.binaryOpening = 1 #1
+        else:
+            self.ha.nogui = False
+            self.ha.threshold = -1
         
         # run segmentation
         self.data3d_thr, self.data3d_skel = self.ha.data_to_skeleton()
-        
         if default is True:
             self.ha.nogui = False
+            
         self.fixWindow()
         self.setStatusBarText('Ready')
         
@@ -205,6 +209,7 @@ class HistologyAnalyserWindow(QMainWindow):
         self.fixWindow()
     
     def showSegmQueryDialog(self):
+        logger.debug('Segmentation Query Dialog')
         newapp = SegmQueryDialog(self)
         self.embedWidget(newapp)
         self.fixWindow()
@@ -381,17 +386,20 @@ class SegmResultDialog(QDialog):
         self.ui_gridLayout.addWidget(info_label, rstart + 0, 0, 1, 3)
         rstart += 1
         
-        btn_preview = QPushButton("Show segmented data", self)
+        btn_preview = QPushButton("Show segmentation result", self)
         btn_preview.clicked.connect(self.showSegmentedData)
+        btn_segm = QPushButton("Go back to segmentation", self)
+        btn_segm.clicked.connect(self.mainWindow.showSegmQueryDialog)
         btn_write = QPushButton("Write segmented data to file", self)
         btn_write.clicked.connect(self.writeSegmentedData)
         btn_stats = QPushButton("Compute Statistics", self)
         btn_stats.clicked.connect(self.mainWindow.showStatsRunDialog)
         
         self.ui_gridLayout.addWidget(btn_preview, rstart + 0, 1)
-        self.ui_gridLayout.addWidget(btn_write, rstart + 1, 1)
-        self.ui_gridLayout.addWidget(btn_stats, rstart + 2, 1)
-        rstart += 3
+        self.ui_gridLayout.addWidget(btn_segm, rstart + 1, 1)
+        self.ui_gridLayout.addWidget(btn_write, rstart + 2, 1)
+        self.ui_gridLayout.addWidget(btn_stats, rstart + 3, 1)
+        rstart += 4
         
         ### Stretcher
         self.ui_gridLayout.addItem(QSpacerItem(0,0), rstart + 0, 0)

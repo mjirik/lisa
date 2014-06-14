@@ -50,17 +50,18 @@ import histology_analyser_gui as HA_GUI
 from skeleton_analyser import SkeletonAnalyser
 
 class HistologyAnalyser:
-    def __init__(self, data3d, metadata, threshold=-1, nogui=True):
+    def __init__(self, data3d, metadata, threshold=-1, binaryClosing=1, binaryOpening=1, nogui=True):
         self.data3d = data3d
-        self.threshold = threshold
         self.nogui = nogui
+        self.threshold = threshold
+        self.binaryClosing = binaryClosing
+        self.binaryOpening = binaryOpening
 
         if 'voxelsize_mm' not in metadata.keys():
 # @TODO resolve problem with voxelsize
             metadata['voxelsize_mm'] = [0.1, 0.2, 0.3]
 
         self.metadata = metadata
-
 
     def remove_area(self):
         if not self.nogui:
@@ -72,43 +73,22 @@ class HistologyAnalyser:
 
     def data_to_binar(self):
         ### Median filter
-        filteredData = scipy.ndimage.filters.median_filter(self.data3d, size=2)
+        filteredData = scipy.ndimage.filters.median_filter(self.data3d, size=2) 
         
         ### Segmentation
         data3d_thr = segmentation.vesselSegmentation(
-            filteredData, 
+            filteredData, #self.data3d,
             segmentation=np.ones(self.data3d.shape, dtype='int8'),
-            threshold=self.threshold, #-1,
+            threshold=self.threshold,
             inputSigma=0, #0.15,
             dilationIterations=2,
             nObj=1,
             biggestObjects= False,
             interactivity= not self.nogui,
-            binaryClosingIterations=2, #5,  # TODO !!! - vytvari na stranach oblasti ktere se pak nenasegmentuji
-            binaryOpeningIterations=0 #1
+            binaryClosingIterations=self.binaryClosing, #5,  # TODO !!! - vytvari na stranach oblasti ktere se pak nenasegmentuji
+            binaryOpeningIterations=self.binaryOpening #1
             )
         
-        ### NoGUI segmentation fix
-        # Pri pouziti nogui modu segmentation.py nepouzije funkci getPriorityObjects jelikoz nema seedy => odlisne vysledky.
-        # Proto musim rucne zjistit vhodny seed a zavolat funkci az ted.
-        if self.nogui:
-            # Get seed that is inside of big object
-            seed_data = scipy.ndimage.morphology.binary_erosion(data3d_thr, iterations=2) # hledam pouze velke cevy
-            seed = None
-            for i in xrange(seed_data.shape[0]/3,seed_data.shape[0]-1): # shape/3 aby se zaclo hledat kolem prostredku
-                for n in xrange(seed_data.shape[1]/3,seed_data.shape[1]-1): 
-                    for j in xrange(seed_data.shape[2]/3,seed_data.shape[2]-1):
-                        if seed_data[i][n][j]==1:
-                            seed = (np.array([i]),np.array([n]),np.array([j]))
-                            logger.debug('automatic seed -> '+str(seed)+' value -> '+str(seed_data[i][n][j]))
-                            break
-                    if seed is not None:
-                        break
-                if seed is not None:
-                        break
-            # Zaruci ze ve vystupu nebudou cevy ktere vedou od nikud nikam
-            data3d_thr = thresholding_functions.getPriorityObjects(data3d_thr, nObj=1, seeds=seed) 
-            
         ### Zalepeni der
         data3d_thr = scipy.ndimage.morphology.binary_fill_holes(data3d_thr)
         
