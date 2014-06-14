@@ -174,6 +174,7 @@ class OrganSegmentation():
         self.organ_interactivity_counter = 0
         self.dcmfilelist = None
         self.save_filetype = save_filetype
+        self.vessel_tree = {}
 
 #
         oseg_input_params = locals()
@@ -600,6 +601,7 @@ class OrganSegmentation():
         data['slab'] = slab
         data['voxelsize_mm'] = self.voxelsize_mm
         data['orig_shape'] = self.orig_shape
+        data['vessel_tree'] = self.vessel_tree
         processing_information = {
             'organ_segmentation': {
                 'processing_time': self.processing_time,
@@ -714,11 +716,27 @@ class OrganSegmentation():
         self.slab = slab
         self.segmentation[outputSegmentation == 1] = slab['porta']
 
+        self.__vesselTree(outputSegmentation, 'porta')
+
+    def __vesselTree(self, binaryData3d, textLabel):
+        import skelet3d
+        import histology_analyser as skan
+        metadata = {'voxelsize_mm': self.voxelsize_mm}
+        sa = skan.HistologyAnalyser(self.data3d, metadata)
+        data3d_skel = skelet3d.skelet3d(
+            (binaryData3d > 0).astype(np.int8)
+        )
+        # data3d_skel = sa.binar_to_skeleton(outputSegmentation)
+        sa.skeleton_to_statistics(binaryData3d, data3d_skel)
+        self.vessel_tree[textLabel] = sa.stats
+        #print sa.stats
+# save skeleton to special file
+        misc.obj_to_file(self.vessel_tree, 'vessel_tree.yaml', filetype='yaml')
+
+
     def hepaticVeinsSegmentation(self):
 
         import segmentation
-        import skelet3d
-        import histology_analyser as skan
         outputSegmentation = segmentation.vesselSegmentation(
             self.data3d,
             self.segmentation,
@@ -739,14 +757,7 @@ class OrganSegmentation():
         self.segmentation[outputSegmentation == 1] = slab['hepatic_veins']
 
 # skeletonizace
-        metadata = {'voxelsize_mm': self.voxelsize_mm}
-        sa = skan.HistologyAnalyser(self.data3d, metadata)
-        data3d_skel = skelet3d.skelet3d(
-            (outputSegmentation > 0).astype(np.int8)
-        )
-        # data3d_skel = sa.binar_to_skeleton(outputSegmentation)
-        sa.skeleton_to_statistics(outputSegmentation, data3d_skel)
-        print sa.stats
+        self.__vesselTree(outputSegmentation, 'hepatic_veins')
 
     def get_segmented_volume_size_mm3(self):
         """Compute segmented volume in mm3, based on subsampeled data."""
