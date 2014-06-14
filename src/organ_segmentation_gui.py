@@ -739,10 +739,14 @@ class OrganSegmentation():
         self.segmentation[outputSegmentation == 1] = slab['hepatic_veins']
 
 # skeletonizace
-        skan.HistologyAnalyser(self.data3d, self.metadata)
-        data3d_skel = skan.binar_to_skeleton(outputSegmentation)
-        skan.skeleton_to_statistics(outputSegmentation, data3d_skel)
-        print skan.stats
+        metadata = {'voxelsize_mm': self.voxelsize_mm}
+        sa = skan.HistologyAnalyser(self.data3d, metadata)
+        data3d_skel = skelet3d.skelet3d(
+            (outputSegmentation > 0).astype(np.int8)
+        )
+        # data3d_skel = sa.binar_to_skeleton(outputSegmentation)
+        sa.skeleton_to_statistics(outputSegmentation, data3d_skel)
+        print sa.stats
 
     def get_segmented_volume_size_mm3(self):
         """Compute segmented volume in mm3, based on subsampeled data."""
