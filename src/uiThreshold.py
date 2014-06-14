@@ -384,7 +384,7 @@ class uiThreshold:
 
         """
 
-        if (self.biggestObjects == True or self.seeds != None) :
+        if (self.biggestObjects == True and self.seeds != None) :
 
            self.imgFiltering = thresholding_functions.getPriorityObjects(self.imgFiltering, self.nObj, self.seeds)
 
