@@ -44,7 +44,6 @@ class DataReader:
         """
 
         if qt_app is None and gui is True:
-            print "---- delam qtapplication"
             from PyQt4.QtGui import QApplication
             qt_app = QApplication(sys.argv)
 
@@ -92,12 +91,12 @@ class DataReader:
         else:
             # checks if data is in DICOM format
             dir_type = 'images'
-            for f in os.listdir(datapath):
-                if f.endswith(".dcm"):
-                    dir_type = 'dicom'
-            
+            if dcmr.is_dicom_dir(datapath):
+                dir_type = 'dicom'
+
+
             if dir_type == 'dicom': #reading dicom
-                logger.debug('Dir - DICOM')                
+                logger.debug('Dir - DICOM')
                 reader = dcmr.DicomReader(datapath, qt_app=None, gui=True)
                 data3d = reader.get_3Ddata(start, stop, step)
                 metadata = reader.get_metaData()
@@ -105,9 +104,9 @@ class DataReader:
                 metadata['datadir'] = datapath
                 self.overlay_fcn = reader.get_overlay
             else: # reading image sequence
-                logger.debug('Dir - Image sequence')  
-                
-                logger.debug('Getting list of readable files...') 
+                logger.debug('Dir - Image sequence')
+
+                logger.debug('Getting list of readable files...')
                 flist = []
                 for f in os.listdir(datapath):
                     try:
@@ -117,12 +116,12 @@ class DataReader:
                         continue
                     flist.append(os.path.join(datapath,f))
                 flist.sort()
-                
-                logger.debug('Reading image data...') 
+
+                logger.debug('Reading image data...')
                 image = sitk.ReadImage(flist)
-                logger.debug('Getting numpy array from image data...') 
+                logger.debug('Getting numpy array from image data...')
                 data3d = sitk.GetArrayFromImage(image)
-                
+
                 metadata = {}  # reader.get_metaData()
                 metadata['series_number'] = 0  # reader.series_number
                 metadata['datadir'] = datapath
