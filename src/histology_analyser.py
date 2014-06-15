@@ -191,7 +191,6 @@ class HistologyAnalyser:
         logger.debug('writeStatsToYAML')
         misc.obj_to_file(self.stats, filename=filename, filetype='yaml')
 
-        #sitk.
     def writeStatsToCSV(self, filename='hist_stats.csv'):
         data = self.stats['Graph']
 
@@ -206,7 +205,6 @@ class HistologyAnalyser:
             for lineid in data:
                 dataline = data[lineid]
                 writer.writerow(self.__dataToCSVLine(dataline))
-                #spamwriter.writerow(['Spam', 'Lovely Spam', 'Wonderful Spam'])
 
 
     def writeSkeletonToPickle(self, filename='skel.pkl'):

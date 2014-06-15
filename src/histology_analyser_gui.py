@@ -513,7 +513,6 @@ class StatsRunDialog(QDialog):
         #self.ha.writeSkeletonToPickle('skel.pkl')
     
     def updateInfo(self, part=0, whole=1, processPart=1):
-        logger.info('processed '+str(part)+'/'+str(whole)+', part '+str(processPart))
         # update progress bar
         step = int((part/float(whole))*100)
         self.pbar.setValue(step)

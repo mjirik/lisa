@@ -36,8 +36,10 @@ class SkeletonAnalyser:
         node: connection point of elements. It is one or few voxelsize_mm
         terminal: terminal node
         """
-        if guiUpdateFunction is None: # if not using gui -> print to debug
-            guiUpdateFunction = lambda num,lenght,part: logger.info('skeleton_analysis: processed '+str(num)+'/'+str(lenght)+', part '+str(part))
+        def updateFunction(num,lenght,part):
+            logger.info('skeleton_analysis: processed '+str(num)+'/'+str(lenght)+', part '+str(part))
+            if guiUpdateFunction is not None:
+                guiUpdateFunction(edg_number,len_edg,1)
         
         if self.volume_data is not None:
             skdst = self.__radius_analysis_init()
@@ -58,7 +60,7 @@ class SkeletonAnalyser:
                 edgst['radius_mm'] = float(self.__radius_analysis(edg_number,skdst))
             stats[edgst['id']] = edgst
             
-            guiUpdateFunction(edg_number,len_edg,1) # update gui progress
+            updateFunction(edg_number,len_edg,1) # update gui progress
         logger.debug('skeleton_analysis: fnished first processing part')
         
 
@@ -68,7 +70,7 @@ class SkeletonAnalyser:
             edgst = stats[edg_number]
             edgst.update(self.__connected_edge_angle(edg_number, stats))
             
-            guiUpdateFunction(edg_number,len_edg,2) # update gui progress
+            updateFunction(edg_number,len_edg,2) # update gui progress
         logger.debug('skeleton_analysis: finished second processing part')
 
 
@@ -349,27 +351,23 @@ class SkeletonAnalyser:
         """
         Gives array of element neghbors numbers
         """
-
         BOUNDARY_PX = 5
-        element = (self.sklabel == el_number)
-        enz = element.nonzero()
 
-
-
-# limits for square neighborhood
-        lo0 = np.max([0, np.min(enz[0]) - BOUNDARY_PX])
-        lo1 = np.max([0, np.min(enz[1]) - BOUNDARY_PX])
-        lo2 = np.max([0, np.min(enz[2]) - BOUNDARY_PX])
-        hi0 = np.min([self.sklabel.shape[0], np.max(enz[0]) + BOUNDARY_PX])
-        hi1 = np.min([self.sklabel.shape[1], np.max(enz[1]) + BOUNDARY_PX])
-        hi2 = np.min([self.sklabel.shape[2], np.max(enz[2]) + BOUNDARY_PX])
-
-# sklabel crop
-        sklabelcr = self.sklabel[
-                lo0:hi0,
-                lo1:hi1,
-                lo2:hi2
-                ]
+        box = scipy.ndimage.find_objects(self.sklabel, max_label = el_number)
+        box = box[len(box)-1]
+        
+        d = max(0,box[0].start-BOUNDARY_PX)
+        u = min(self.sklabel.shape[0],box[0].stop+BOUNDARY_PX)
+        slice_z = slice(d,u)
+        d = max(0,box[1].start-BOUNDARY_PX)
+        u = min(self.sklabel.shape[1],box[1].stop+BOUNDARY_PX)
+        slice_y = slice(d,u)
+        d = max(0,box[2].start-BOUNDARY_PX)
+        u = min(self.sklabel.shape[2],box[2].stop+BOUNDARY_PX)
+        slice_x = slice(d,u)
+        box = (slice_z,slice_y,slice_x)
+        
+        sklabelcr = self.sklabel[box]
 
         # element crop
         element = (sklabelcr == el_number)
