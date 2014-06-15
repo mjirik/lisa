@@ -16,31 +16,18 @@ logger = logging.getLogger(__name__)
 
 import argparse
 
-from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
-     QGridLayout, QLabel, QPushButton, QFrame, QFileDialog,\
-     QFont, QPixmap, QComboBox
+from PyQt4.QtGui import QApplication
 
 import numpy as np
 import scipy.ndimage
 import misc
 import datareader
-#import SimpleITK as sitk
-import scipy.ndimage
-from PyQt4.QtGui import QApplication
 import csv
-
-import sys
-import traceback
-
 
 import seed_editor_qt as seqt
 import skelet3d
 import segmentation
-import misc
 import py3DSeedEditor as se
-import thresholding_functions
-
-from seed_editor_qt import QTSeedEditor
 
 GAUSSIAN_SIGMA = 1
 fast_debug = False
@@ -50,25 +37,18 @@ import histology_analyser_gui as HA_GUI
 from skeleton_analyser import SkeletonAnalyser
 
 class HistologyAnalyser:
-    def __init__(self, data3d, metadata, threshold=-1, nogui=True):
+    def __init__(self, data3d, metadata, threshold=-1, binaryClosing=1, binaryOpening=1, nogui=True):
         self.data3d = data3d
-        self.threshold = threshold
         self.nogui = nogui
+        self.threshold = threshold
+        self.binaryClosing = binaryClosing
+        self.binaryOpening = binaryOpening
 
         if 'voxelsize_mm' not in metadata.keys():
 # @TODO resolve problem with voxelsize
             metadata['voxelsize_mm'] = [0.1, 0.2, 0.3]
 
         self.metadata = metadata
-
-
-    def remove_area(self):
-        if not self.nogui:
-            app = QApplication(sys.argv)
-            pyed = QTSeedEditor(
-                self.data3d, mode='mask'
-            )
-            pyed.exec_()
 
     def data_to_binar(self):
         ### Median filter
@@ -78,14 +58,14 @@ class HistologyAnalyser:
         data3d_thr = segmentation.vesselSegmentation(
             filteredData,
             segmentation=np.ones(self.data3d.shape, dtype='int8'),
-            threshold=self.threshold, #-1,
+            threshold=self.threshold,
             inputSigma=0, #0.15,
             dilationIterations=2,
             nObj=1,
             biggestObjects= False,
             interactivity= not self.nogui,
-            binaryClosingIterations=2, #5,  # TODO !!! - vytvari na stranach oblasti ktere se pak nenasegmentuji
-            binaryOpeningIterations=0 #1
+            binaryClosingIterations=self.binaryClosing, #5,  # TODO !!! - vytvari na stranach oblasti ktere se pak nenasegmentuji
+            binaryOpeningIterations=self.binaryOpening #1
             )
 
         ### NoGUI segmentation fix
@@ -160,71 +140,71 @@ class HistologyAnalyser:
             )
             pyed.show()
 
-    def run(self):
-        #self.preprocessing()
-        app = QApplication(sys.argv)
-        if not fast_debug:
-            data3d_thr = self.data_to_binar()
+    #def run(self):
+        ##self.preprocessing()
+        #app = QApplication(sys.argv)
+        #if not fast_debug:
+            #data3d_thr = self.data_to_binar()
 
-            #self.data3d_thri = self.muxImage(
-            #        self.data3d_thr2.astype(np.uint16),
-            #        metadata
-            #        )
-            #sitk.Show(self.data3d_thri)
+            ##self.data3d_thri = self.muxImage(
+            ##        self.data3d_thr2.astype(np.uint16),
+            ##        metadata
+            ##        )
+            ##sitk.Show(self.data3d_thri)
 
-            #self.data3di = self.muxImage(
-            #        self.data3d.astype(np.uint16),
-            #        metadata
-            #        )
-            #sitk.Show(self.data3di)
+            ##self.data3di = self.muxImage(
+            ##        self.data3d.astype(np.uint16),
+            ##        metadata
+            ##        )
+            ##sitk.Show(self.data3di)
 
 
-            #app.exec_()
-            data3d_skel = self.binar_to_skeleton(data3d_thr)
+            ##app.exec_()
+            #data3d_skel = self.binar_to_skeleton(data3d_thr)
 
-            print "skelet"
+            #print "skelet"
 
-        # pyed = seqt.QTSeedEditor(
-        #         data3d,
-        #         contours=data3d_thr.astype(np.int8),
-        #         seeds=data3d_skel.astype(np.int8)
-        #         )
-            #app.exec_()
-        else:
-            struct = misc.obj_from_file(filename='tmp0.pkl', filetype='pickle')
-            data3d_skel = struct['sk']
-            data3d_thr = struct['thr']
+        ## pyed = seqt.QTSeedEditor(
+        ##         data3d,
+        ##         contours=data3d_thr.astype(np.int8),
+        ##         seeds=data3d_skel.astype(np.int8)
+        ##         )
+            ##app.exec_()
+        #else:
+            #struct = misc.obj_from_file(filename='tmp0.pkl', filetype='pickle')
+            #data3d_skel = struct['sk']
+            #data3d_thr = struct['thr']
 
-        self.skeleton_to_statistics(data3d_skel)
+        #self.skeleton_to_statistics(data3d_skel)
 
 
 
        # import pdb; pdb.set_trace()
-    def preprocessing(self):
-        self.data3d = scipy.ndimage.filters.gaussian_filter(
-                self.data3d,
-                GAUSSIAN_SIGMA
-                )
-        self.data3d_thr = self.data3d > self.threshold
+    #def preprocessing(self):
+        #self.data3d = scipy.ndimage.filters.gaussian_filter(
+                #self.data3d,
+                #GAUSSIAN_SIGMA
+                #)
+        #self.data3d_thr = self.data3d > self.threshold
 
-        self.data3d_thr2 = scipy.ndimage.morphology.binary_opening(
-                self.data3d_thr
-                )
-        #gf = sitk.SmoothingRecursiveGaussianImageFilter()
-        #gf.SetSigma(5)
-        #gf = sitk.DiscreteGaussianImageFilter()
-        #gf.SetVariance(1.0)
-        #self.data3di2 = gf.Execute(self.data3di)#, 5)
+        #self.data3d_thr2 = scipy.ndimage.morphology.binary_opening(
+                #self.data3d_thr
+                #)
+        ##gf = sitk.SmoothingRecursiveGaussianImageFilter()
+        ##gf.SetSigma(5)
+        ##gf = sitk.DiscreteGaussianImageFilter()
+        ##gf.SetVariance(1.0)
+        ##self.data3di2 = gf.Execute(self.data3di)#, 5)
 
-        pass
+        #pass
 
 
 
-    def muxImage(self, data3d, metadata):
-        data3di = sitk.GetImageFromArray(data3d)
-        data3di.SetSpacing(metadata['voxelsize_mm'])
+    #def muxImage(self, data3d, metadata):
+        #data3di = sitk.GetImageFromArray(data3d)
+        #data3di.SetSpacing(metadata['voxelsize_mm'])
 
-        return data3di
+        #return data3di
 
 
 
@@ -355,22 +335,28 @@ def parser_init():
     )
     parser.add_argument('-i', '--inputfile',
         default=None,
-        help='Input file, .tif file')
-#    parser.add_argument('-o', '--outputfile',
-#        default='histout.pkl',
-#        help='output file')
+        help='Input file/directory. Generates sample data, if not set.')
+    parser.add_argument(
+        '-vs', '--voxelsize',
+        default=None,
+        type=float,
+        metavar='N',
+        nargs='+',
+        help='Size of one voxel. Format: "Z Y X"')
     parser.add_argument('-t', '--threshold', type=int,
+<<<<<<< HEAD
         default=-1,
         help='data threshold, default -1 (gui/automatic selection)')
+=======
+        default=-1,
+        help='Segmentation threshold. Default -1 (GUI/Automatic selection)')
+>>>>>>> 15f78a791d249d1e9216f8a357111ae7dccbe570
     parser.add_argument(
         '-is', '--input_is_skeleton', action='store_true',
         help='Input file is .pkl file with skeleton')
     parser.add_argument('-cr', '--crop', type=int, metavar='N', nargs='+',
         default=None,
-        help='Segmentation labels, default 1')
-    parser.add_argument( # TODO - not needed??
-        '--crgui', action='store_true',
-        help='GUI crop')
+        help='Crops input data. In GUI mode, crops before GUI crop. Default is None. Format: "z1 z2 y1 y2 x1 x2"')
     parser.add_argument(
         '--nogui', action='store_true',
         help='Disable GUI')
@@ -382,7 +368,7 @@ def parser_init():
     return args
 
 # Processing data without gui
-def processData(inputfile=None,threshold=None,skeleton=False,crop=None):
+def processData(inputfile=None,threshold=None,skeleton=False,crop=None,voxelsize=None):
     ### when input is just skeleton
     if skeleton:
         logger.info("input is skeleton")
@@ -402,7 +388,15 @@ def processData(inputfile=None,threshold=None,skeleton=False,crop=None):
         else: ## Normal runtime
             dr = datareader.DataReader()
             data3d, metadata = dr.Get3DData(inputfile)
+<<<<<<< HEAD
 
+=======
+
+        ### Custom voxel size
+        if voxelsize is not None:
+            metadata['voxelsize_mm'] = voxelsize
+
+>>>>>>> 15f78a791d249d1e9216f8a357111ae7dccbe570
         ### Crop data
         if crop is not None:
             logger.debug('Croping data: %s', str(crop))
@@ -452,13 +446,16 @@ def main():
         processData(inputfile=args.inputfile,
                     threshold=args.threshold,
                     skeleton=args.input_is_skeleton,
-                    crop=args.crop)
+                    crop=args.crop,
+                    voxelsize=args.voxelsize
+                    )
     else:
         app = QApplication(sys.argv)
         gui = HA_GUI.HistologyAnalyserWindow(inputfile=args.inputfile,
                                             skeleton=args.input_is_skeleton,
                                             crop=args.crop,
-                                            crgui=args.crgui)
+                                            voxelsize=args.voxelsize
+                                            )
         sys.exit(app.exec_())
 
 if __name__ == "__main__":

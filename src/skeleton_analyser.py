@@ -13,10 +13,6 @@ import traceback
 
 import numpy as np
 import scipy.ndimage
-import misc
-
-fast_debug = False
-#fast_debug = True
 
 class SkeletonAnalyser:
     """
@@ -31,7 +27,7 @@ class SkeletonAnalyser:
         # get array with 1 for edge, 2 is node and 3 is terminal
         skelet_nodes = self.__skeleton_nodes(data3d_skel, self.volume_data)
         self.__generate_sklabel(skelet_nodes)
-
+        logger.debug('Inited SkeletonAnalyser - voxelsize:'+str(voxelsize_mm)+' volumedata:'+str(volume_data is not None))
 
     def skeleton_analysis(self, guiUpdateFunction = None):
         """
@@ -39,49 +35,41 @@ class SkeletonAnalyser:
         element: line structure of skeleton connected to node on both ends
         node: connection point of elements. It is one or few voxelsize_mm
         terminal: terminal node
-
-
         """
-        if not fast_debug:
+        if guiUpdateFunction is None: # if not using gui -> print to debug
+            guiUpdateFunction = lambda num,lenght,part: logger.info('skeleton_analysis: processed '+str(num)+'/'+str(lenght)+', part '+str(part))
+        
+        if self.volume_data is not None:
+            skdst = self.__radius_analysis_init()
+
+        stats = {}
+        len_edg = np.max(self.sklabel)
+        
+            
+        logger.debug('skeleton_analysis: starting first processing part')
+        for edg_number in range(1,len_edg+1):
+            edgst = {}
+            edgst.update(self.__connection_analysis(edg_number))
+            edgst.update(self.__edge_length(edg_number))
+            edgst.update(self.__edge_curve(edg_number, edgst))
+            edgst.update(self.__edge_vectors(edg_number, edgst))
+            #edgst = edge_analysis(sklabel, i)
             if self.volume_data is not None:
-                skdst = self.__radius_analysis_init()
-
-            stats = {}
-            len_edg = np.max(self.sklabel)
-            #len_edg = 30
-                
-            for edg_number in range(1,len_edg+1):
-                edgst = self.__connection_analysis(edg_number)
-                edgst.update(self.__edge_length(edg_number))
-                edgst.update(self.__edge_curve(edg_number, edgst, self.voxelsize_mm))
-                edgst.update(self.__edge_vectors(edg_number, edgst))
-                #edgst = edge_analysis(sklabel, i)
-                if self.volume_data is not None:
-                    edgst['radius_mm'] = float(self.__radius_analysis(edg_number,skdst))
-                stats[edgst['id']] = edgst
-                
-                if guiUpdateFunction is not None: # update gui progress
-                    guiUpdateFunction(edg_number,len_edg,1)
-
-#save data for faster debug
-            struct = {'sVD':self.volume_data, 'stats':stats, 'len_edg':len_edg}
-            misc.obj_to_file(struct, filename='tmp.pkl', filetype='pickle')
-        else:
-            struct = misc.obj_from_file(filename='tmp.pkl', filetype='pickle')
-            self.volume_data = struct['sVD']
-            stats = struct['stats']
-            len_edg = struct['len_edg']
-
+                edgst['radius_mm'] = float(self.__radius_analysis(edg_number,skdst))
+            stats[edgst['id']] = edgst
+            
+            guiUpdateFunction(edg_number,len_edg,1) # update gui progress
+        logger.debug('skeleton_analysis: fnished first processing part')
+        
 
         #@TODO dokončit
+        logger.debug('skeleton_analysis: starting second processing part')
         for edg_number in range (1,len_edg+1):
             edgst = stats[edg_number]
             edgst.update(self.__connected_edge_angle(edg_number, stats))
             
-            if guiUpdateFunction is not None: # update gui progress
-                    guiUpdateFunction(edg_number,len_edg,2)
-
-
+            guiUpdateFunction(edg_number,len_edg,2) # update gui progress
+        logger.debug('skeleton_analysis: finished second processing part')
 
 
         return stats
@@ -261,7 +249,7 @@ class SkeletonAnalyser:
 
         try:
             vectorA1 = self.__vector_of_connected_edge(edg_number, stats, 'A', 1)
-        except Exception as e:
+        except:
             print ("connected edge (number " + str(edg_number) + ") vectorA not found 1")
 
         out.update(self.__connected_edge_angle_on_one_end(edg_number, stats, 'A'))
@@ -339,7 +327,7 @@ class SkeletonAnalyser:
         nodes = (mocnost > 3).astype(np.int8)
         terminals = ((mocnost == 2) | (mocnost == 1)).astype(np.int8)
 
-        nt = nodes - terminals
+        nt = nodes - terminals # unused
 
         #pyed = seqt.QTSeedEditor(
         #        mocnost,
@@ -354,8 +342,8 @@ class SkeletonAnalyser:
 
         return data3d_skel
 
-    def node_analysis(sklabel):
-        pass
+    #def node_analysis(sklabel):
+        #pass
 
     def __element_neighbors(self, el_number):
         """
@@ -409,7 +397,7 @@ class SkeletonAnalyser:
         #self.voxelsize_mm
         return {'lengthEstimation':float(np.sum(self.sklabel == edg_number) + 2)}
 
-    def __edge_curve(self,  edg_number, edg_stats, voxelsize_mm):
+    def __edge_curve(self,  edg_number, edg_stats):
         """
         Return params of curve and its starts and ends locations
         """
@@ -419,8 +407,8 @@ class SkeletonAnalyser:
             nd10, nd11, nd12 = (edg_stats['nodeIdB'] == self.sklabel).nonzero()
             point0 = np.array([np.mean(nd00), np.mean(nd01), np.mean(nd02)])
             point1 = np.array([np.mean(nd10), np.mean(nd11), np.mean(nd12)])
-            point0_mm = point0 * voxelsize_mm
-            point1_mm = point1 * voxelsize_mm
+            point0_mm = point0 * self.voxelsize_mm
+            point1_mm = point1 * self.voxelsize_mm
             retval = {'curve_params':
                       {'start':point0_mm.tolist(),
                        'vector':(point1_mm-point0_mm).tolist()},
@@ -434,8 +422,8 @@ class SkeletonAnalyser:
         return retval
 
 
-    def edge_analysis(sklabel, edg_number):
-        print 'element_analysis'
+    #def edge_analysis(sklabel, edg_number):
+        #print 'element_analysis'
 
 
 
@@ -496,7 +484,7 @@ class SkeletonAnalyser:
 # remove edg_number from connectedEdges list
             connectedEdgesA = connectedEdgesA[connectedEdgesA != edg_number]
             connectedEdgesB = connectedEdgesB[connectedEdgesB != edg_number]
-            print 'edg_neigh ', edg_neigh, ' ,0: ', connectedEdgesA, '  ,0 '
+            #logger.debug('edg_neigh '+str(edg_neigh)+' ,0: '+str(connectedEdgesA)+'  ,0 ')
 
             #import pdb; pdb.set_trace()
 

@@ -16,7 +16,6 @@ sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
 from PyQt4 import QtCore
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-from PyQt4.Qt import QString
 
 import numpy as np
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -24,7 +23,6 @@ from matplotlib.figure import Figure
 
 import datareader
 from seed_editor_qt import QTSeedEditor
-import py3DSeedEditor
 import misc
 
 import histology_analyser as HA
@@ -34,11 +32,11 @@ class HistologyAnalyserWindow(QMainWindow):
     HEIGHT = 350 #600
     WIDTH = 800
     
-    def __init__(self,inputfile=None,skeleton=False,crop=None,crgui=False):
+    def __init__(self,inputfile=None,skeleton=False,crop=None,voxelsize=None):
         self.args_inputfile=inputfile
         self.args_skeleton=skeleton
         self.args_crop=crop
-        self.args_crgui=crgui
+        self.args_voxelsize=voxelsize
         
         QMainWindow.__init__(self)   
         self.initUI()
@@ -119,7 +117,6 @@ class HistologyAnalyserWindow(QMainWindow):
             self.showRemoveDialog(self.ha.data3d)
 
             ### Segmentation
-            logger.debug('Segmentation Query Dialog')
             self.showSegmQueryDialog()
         
     def runSegmentation(self, default=False):
@@ -132,13 +129,18 @@ class HistologyAnalyserWindow(QMainWindow):
         # use default segmentation parameters
         if default is True:
             self.ha.nogui = True
-            self.ha.threshold = 7000
+            self.ha.threshold = 2800 #7000
+            self.ha.binaryClosing = 1 #2
+            self.ha.binaryOpening = 1 #1
+        else:
+            self.ha.nogui = False
+            self.ha.threshold = -1
         
         # run segmentation
         self.data3d_thr, self.data3d_skel = self.ha.data_to_skeleton()
-        
         if default is True:
             self.ha.nogui = False
+            
         self.fixWindow()
         self.setStatusBarText('Ready')
         
@@ -205,6 +207,7 @@ class HistologyAnalyserWindow(QMainWindow):
         self.fixWindow()
     
     def showSegmQueryDialog(self):
+        logger.debug('Segmentation Query Dialog')
         newapp = SegmQueryDialog(self)
         self.embedWidget(newapp)
         self.fixWindow()
@@ -273,7 +276,7 @@ class HistologyAnalyserWindow(QMainWindow):
         return newapp.img
         
     def showLoadDialog(self):
-        newapp = LoadDialog(mainWindow=self, inputfile=self.args_inputfile, crgui=self.args_crgui)
+        newapp = LoadDialog(mainWindow=self, inputfile=self.args_inputfile, voxelsize=self.args_voxelsize)
         self.embedWidget(newapp)
         self.fixWindow()
         newapp.exec_()
@@ -381,17 +384,20 @@ class SegmResultDialog(QDialog):
         self.ui_gridLayout.addWidget(info_label, rstart + 0, 0, 1, 3)
         rstart += 1
         
-        btn_preview = QPushButton("Show segmented data", self)
+        btn_preview = QPushButton("Show segmentation result", self)
         btn_preview.clicked.connect(self.showSegmentedData)
+        btn_segm = QPushButton("Go back to segmentation", self)
+        btn_segm.clicked.connect(self.mainWindow.showSegmQueryDialog)
         btn_write = QPushButton("Write segmented data to file", self)
         btn_write.clicked.connect(self.writeSegmentedData)
         btn_stats = QPushButton("Compute Statistics", self)
         btn_stats.clicked.connect(self.mainWindow.showStatsRunDialog)
         
         self.ui_gridLayout.addWidget(btn_preview, rstart + 0, 1)
-        self.ui_gridLayout.addWidget(btn_write, rstart + 1, 1)
-        self.ui_gridLayout.addWidget(btn_stats, rstart + 2, 1)
-        rstart += 3
+        self.ui_gridLayout.addWidget(btn_segm, rstart + 1, 1)
+        self.ui_gridLayout.addWidget(btn_write, rstart + 2, 1)
+        self.ui_gridLayout.addWidget(btn_stats, rstart + 3, 1)
+        rstart += 4
         
         ### Stretcher
         self.ui_gridLayout.addItem(QSpacerItem(0,0), rstart + 0, 0)
@@ -507,7 +513,7 @@ class StatsRunDialog(QDialog):
         #self.ha.writeSkeletonToPickle('skel.pkl')
     
     def updateInfo(self, part=0, whole=1, processPart=1):
-        logger.debug('processed - '+str(part)+'/'+str(whole))
+        logger.info('processed '+str(part)+'/'+str(whole)+', part '+str(processPart))
         # update progress bar
         step = int((part/float(whole))*100)
         self.pbar.setValue(step)
@@ -689,18 +695,19 @@ class HistogramMplCanvas(FigureCanvas):
             self.axes.set_ylabel(self.text_ylabel)
         
 class LoadDialog(QDialog):
-    def __init__(self, mainWindow=None, inputfile=None, crgui=False):
+    def __init__(self, mainWindow=None, inputfile=None, voxelsize=None):
         self.mainWindow = mainWindow
         self.inputfile = inputfile
-        self.crgui = crgui
+        self.voxelsize = voxelsize
         self.data3d = None
         self.metadata = None
+        self.crgui = False
         
         QDialog.__init__(self)
         self.initUI()
         
         if self.inputfile is not None:
-            self.importDataWithGui()
+            self.importDataWithGui(self.voxelsize)
     
     def initUI(self):
         self.ui_gridLayout = QGridLayout()
@@ -738,10 +745,7 @@ class LoadDialog(QDialog):
         self.text_dcm_data = QLabel('Data info: -')
         
         crop_box = QCheckBox('Crop data', self)
-        if self.crgui:
-            crop_box.setCheckState(Qt.Checked)
-        else:
-            crop_box.setCheckState(Qt.Unchecked)
+        crop_box.setCheckState(Qt.Unchecked)
         crop_box.stateChanged.connect(self.cropBox)
         
         btn_process = QPushButton("Continue", self)
@@ -864,7 +868,7 @@ class LoadDialog(QDialog):
             
         return dcmdir
         
-    def importDataWithGui(self):
+    def importDataWithGui(self,voxelsize=None):
         if self.inputfile is None:
             ### Generating data if no input file
             logger.info('Generating sample data...')
@@ -882,6 +886,9 @@ class LoadDialog(QDialog):
                 return
             
             self.text_dcm_dir.setText('Data path: '+str(self.inputfile))
+        
+        if voxelsize is not None:
+            self.metadata['voxelsize_mm'] = voxelsize
             
         voxelsize = self.metadata['voxelsize_mm']
         shape = self.data3d.shape
