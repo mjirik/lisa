@@ -16,7 +16,6 @@ sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
 from PyQt4 import QtCore
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-from PyQt4.Qt import QString
 
 import numpy as np
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -24,7 +23,6 @@ from matplotlib.figure import Figure
 
 import datareader
 from seed_editor_qt import QTSeedEditor
-import py3DSeedEditor
 import misc
 
 import histology_analyser as HA
@@ -703,6 +701,7 @@ class LoadDialog(QDialog):
         self.voxelsize = voxelsize
         self.data3d = None
         self.metadata = None
+        self.crgui = False
         
         QDialog.__init__(self)
         self.initUI()
@@ -888,7 +887,7 @@ class LoadDialog(QDialog):
             
             self.text_dcm_dir.setText('Data path: '+str(self.inputfile))
         
-        if self.voxelsize is not None:
+        if voxelsize is not None:
             self.metadata['voxelsize_mm'] = voxelsize
             
         voxelsize = self.metadata['voxelsize_mm']
