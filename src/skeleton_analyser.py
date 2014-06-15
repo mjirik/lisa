@@ -15,9 +15,6 @@ import numpy as np
 import scipy.ndimage
 import misc
 
-fast_debug = False
-#fast_debug = True
-
 class SkeletonAnalyser:
     """
     Example:
@@ -39,49 +36,41 @@ class SkeletonAnalyser:
         element: line structure of skeleton connected to node on both ends
         node: connection point of elements. It is one or few voxelsize_mm
         terminal: terminal node
-
-
         """
-        if not fast_debug:
+        if guiUpdateFunction is None: # if not using gui -> print to debug
+            guiUpdateFunction = lambda num,lenght,part: logger.info('skeleton_analysis: processed '+str(num)+'/'+str(lenght)+', part '+str(part))
+        
+        if self.volume_data is not None:
+            skdst = self.__radius_analysis_init()
+
+        stats = {}
+        len_edg = np.max(self.sklabel)
+        
+            
+        logger.debug('skeleton_analysis: starting first processing part')
+        for edg_number in range(1,len_edg+1):
+            edgst = {}
+            edgst.update(self.__connection_analysis(edg_number))
+            edgst.update(self.__edge_length(edg_number))
+            edgst.update(self.__edge_curve(edg_number, edgst, self.voxelsize_mm))
+            edgst.update(self.__edge_vectors(edg_number, edgst))
+            #edgst = edge_analysis(sklabel, i)
             if self.volume_data is not None:
-                skdst = self.__radius_analysis_init()
-
-            stats = {}
-            len_edg = np.max(self.sklabel)
-            #len_edg = 30
-                
-            for edg_number in range(1,len_edg+1):
-                edgst = self.__connection_analysis(edg_number)
-                edgst.update(self.__edge_length(edg_number))
-                edgst.update(self.__edge_curve(edg_number, edgst, self.voxelsize_mm))
-                edgst.update(self.__edge_vectors(edg_number, edgst))
-                #edgst = edge_analysis(sklabel, i)
-                if self.volume_data is not None:
-                    edgst['radius_mm'] = float(self.__radius_analysis(edg_number,skdst))
-                stats[edgst['id']] = edgst
-                
-                if guiUpdateFunction is not None: # update gui progress
-                    guiUpdateFunction(edg_number,len_edg,1)
-
-#save data for faster debug
-            struct = {'sVD':self.volume_data, 'stats':stats, 'len_edg':len_edg}
-            misc.obj_to_file(struct, filename='tmp.pkl', filetype='pickle')
-        else:
-            struct = misc.obj_from_file(filename='tmp.pkl', filetype='pickle')
-            self.volume_data = struct['sVD']
-            stats = struct['stats']
-            len_edg = struct['len_edg']
-
+                edgst['radius_mm'] = float(self.__radius_analysis(edg_number,skdst))
+            stats[edgst['id']] = edgst
+            
+            guiUpdateFunction(edg_number,len_edg,1) # update gui progress
+        logger.debug('skeleton_analysis: fnished first processing part')
+        
 
         #@TODO dokončit
+        logger.debug('skeleton_analysis: starting second processing part')
         for edg_number in range (1,len_edg+1):
             edgst = stats[edg_number]
             edgst.update(self.__connected_edge_angle(edg_number, stats))
             
-            if guiUpdateFunction is not None: # update gui progress
-                    guiUpdateFunction(edg_number,len_edg,2)
-
-
+            guiUpdateFunction(edg_number,len_edg,2) # update gui progress
+        logger.debug('skeleton_analysis: finished second processing part')
 
 
         return stats
@@ -496,7 +485,7 @@ class SkeletonAnalyser:
 # remove edg_number from connectedEdges list
             connectedEdgesA = connectedEdgesA[connectedEdgesA != edg_number]
             connectedEdgesB = connectedEdgesB[connectedEdgesB != edg_number]
-            print 'edg_neigh ', edg_neigh, ' ,0: ', connectedEdgesA, '  ,0 '
+            #logger.debug('edg_neigh '+str(edg_neigh)+' ,0: '+str(connectedEdgesA)+'  ,0 ')
 
             #import pdb; pdb.set_trace()
 

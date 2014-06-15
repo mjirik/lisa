@@ -131,7 +131,7 @@ class HistologyAnalyserWindow(QMainWindow):
         # use default segmentation parameters
         if default is True:
             self.ha.nogui = True
-            self.ha.threshold = 10000 #7000
+            self.ha.threshold = 2800 #7000
             self.ha.binaryClosing = 1 #2
             self.ha.binaryOpening = 1 #1
         else:
@@ -515,7 +515,7 @@ class StatsRunDialog(QDialog):
         #self.ha.writeSkeletonToPickle('skel.pkl')
     
     def updateInfo(self, part=0, whole=1, processPart=1):
-        logger.debug('processed - '+str(part)+'/'+str(whole))
+        logger.info('processed '+str(part)+'/'+str(whole)+', part '+str(processPart))
         # update progress bar
         step = int((part/float(whole))*100)
         self.pbar.setValue(step)
