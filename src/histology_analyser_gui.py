@@ -34,11 +34,11 @@ class HistologyAnalyserWindow(QMainWindow):
     HEIGHT = 350 #600
     WIDTH = 800
     
-    def __init__(self,inputfile=None,skeleton=False,crop=None,crgui=False):
+    def __init__(self,inputfile=None,skeleton=False,crop=None,voxelsize=None):
         self.args_inputfile=inputfile
         self.args_skeleton=skeleton
         self.args_crop=crop
-        self.args_crgui=crgui
+        self.args_voxelsize=voxelsize
         
         QMainWindow.__init__(self)   
         self.initUI()
@@ -278,7 +278,7 @@ class HistologyAnalyserWindow(QMainWindow):
         return newapp.img
         
     def showLoadDialog(self):
-        newapp = LoadDialog(mainWindow=self, inputfile=self.args_inputfile, crgui=self.args_crgui)
+        newapp = LoadDialog(mainWindow=self, inputfile=self.args_inputfile, voxelsize=self.args_voxelsize)
         self.embedWidget(newapp)
         self.fixWindow()
         newapp.exec_()
@@ -697,10 +697,10 @@ class HistogramMplCanvas(FigureCanvas):
             self.axes.set_ylabel(self.text_ylabel)
         
 class LoadDialog(QDialog):
-    def __init__(self, mainWindow=None, inputfile=None, crgui=False):
+    def __init__(self, mainWindow=None, inputfile=None, voxelsize=None):
         self.mainWindow = mainWindow
         self.inputfile = inputfile
-        self.crgui = crgui
+        self.voxelsize = voxelsize
         self.data3d = None
         self.metadata = None
         
@@ -708,7 +708,7 @@ class LoadDialog(QDialog):
         self.initUI()
         
         if self.inputfile is not None:
-            self.importDataWithGui()
+            self.importDataWithGui(self.voxelsize)
     
     def initUI(self):
         self.ui_gridLayout = QGridLayout()
@@ -746,10 +746,7 @@ class LoadDialog(QDialog):
         self.text_dcm_data = QLabel('Data info: -')
         
         crop_box = QCheckBox('Crop data', self)
-        if self.crgui:
-            crop_box.setCheckState(Qt.Checked)
-        else:
-            crop_box.setCheckState(Qt.Unchecked)
+        crop_box.setCheckState(Qt.Unchecked)
         crop_box.stateChanged.connect(self.cropBox)
         
         btn_process = QPushButton("Continue", self)
@@ -872,7 +869,7 @@ class LoadDialog(QDialog):
             
         return dcmdir
         
-    def importDataWithGui(self):
+    def importDataWithGui(self,voxelsize=None):
         if self.inputfile is None:
             ### Generating data if no input file
             logger.info('Generating sample data...')
@@ -890,6 +887,9 @@ class LoadDialog(QDialog):
                 return
             
             self.text_dcm_dir.setText('Data path: '+str(self.inputfile))
+        
+        if self.voxelsize is not None:
+            self.metadata['voxelsize_mm'] = voxelsize
             
         voxelsize = self.metadata['voxelsize_mm']
         shape = self.data3d.shape

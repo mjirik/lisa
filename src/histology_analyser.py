@@ -335,22 +335,23 @@ def parser_init():
     )
     parser.add_argument('-i', '--inputfile',
         default=None,
-        help='Input file, .tif file')
-#    parser.add_argument('-o', '--outputfile',
-#        default='histout.pkl',
-#        help='output file')
+        help='Input file/directory. Generates sample data, if not set.')
+    parser.add_argument(
+        '-vs', '--voxelsize',
+        default=None,
+        type=float,
+        metavar='N',
+        nargs='+',
+        help='Size of one voxel. Format: "Z Y X"')
     parser.add_argument('-t', '--threshold', type=int,
         default=-1, 
-        help='data threshold, default -1 (gui/automatic selection)')
+        help='Segmentation threshold. Default -1 (GUI/Automatic selection)')
     parser.add_argument(
         '-is', '--input_is_skeleton', action='store_true',
         help='Input file is .pkl file with skeleton')
     parser.add_argument('-cr', '--crop', type=int, metavar='N', nargs='+',
         default=None,
-        help='Segmentation labels, default 1')
-    parser.add_argument( # TODO - not needed??
-        '--crgui', action='store_true',
-        help='GUI crop')
+        help='Crops input data. In GUI mode, crops before GUI crop. Default is None. Format: "z1 z2 y1 y2 x1 x2"')
     parser.add_argument(
         '--nogui', action='store_true',
         help='Disable GUI')
@@ -362,7 +363,7 @@ def parser_init():
     return args
 
 # Processing data without gui
-def processData(inputfile=None,threshold=None,skeleton=False,crop=None):
+def processData(inputfile=None,threshold=None,skeleton=False,crop=None,voxelsize=None):
     ### when input is just skeleton
     if skeleton:
         logger.info("input is skeleton")
@@ -382,6 +383,10 @@ def processData(inputfile=None,threshold=None,skeleton=False,crop=None):
         else: ## Normal runtime
             dr = datareader.DataReader()
             data3d, metadata = dr.Get3DData(inputfile)
+            
+        ### Custom voxel size
+        if voxelsize is not None:
+            metadata['voxelsize_mm'] = voxelsize
         
         ### Crop data
         if crop is not None:
@@ -432,13 +437,16 @@ def main():
         processData(inputfile=args.inputfile,
                     threshold=args.threshold,
                     skeleton=args.input_is_skeleton,
-                    crop=args.crop)
+                    crop=args.crop,
+                    voxelsize=args.voxelsize
+                    )
     else:
         app = QApplication(sys.argv)
         gui = HA_GUI.HistologyAnalyserWindow(inputfile=args.inputfile,
                                             skeleton=args.input_is_skeleton,
                                             crop=args.crop,
-                                            crgui=args.crgui)
+                                            voxelsize=args.voxelsize
+                                            )
         sys.exit(app.exec_())
         
 if __name__ == "__main__":
