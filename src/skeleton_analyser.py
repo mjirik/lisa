@@ -39,7 +39,7 @@ class SkeletonAnalyser:
         def updateFunction(num,lenght,part):
             logger.info('skeleton_analysis: processed '+str(num)+'/'+str(lenght)+', part '+str(part))
             if guiUpdateFunction is not None:
-                guiUpdateFunction(edg_number,len_edg,1)
+                guiUpdateFunction(num,lenght,part)
         
         if self.volume_data is not None:
             skdst = self.__radius_analysis_init()
@@ -357,7 +357,7 @@ class SkeletonAnalyser:
 
     def __element_neighbors(self, el_number):
         """
-        Gives array of element neghbors numbers
+        Gives array of element neighbors numbers (edges+nodes/terminals)
         """
         BOUNDARY_PX = 5
         
@@ -376,7 +376,7 @@ class SkeletonAnalyser:
             slice_x = slice(d,u)
             box = (slice_z,slice_y,slice_x)
         else: # node/terminal (just one point)
-            elm_pos = np.where(self.sklabel == el_number)
+            elm_pos = np.where(self.sklabel == el_number) # TODO - try to find something faster (maybe before this move all labels to positive numbers and remember where is zero)
             
             # TODO - make sure the bounding box is not shifted from center
             d = max(0,elm_pos[0][0]-BOUNDARY_PX)
