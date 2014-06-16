@@ -52,6 +52,7 @@ class SkeletonAnalyser:
         stats = {}
         len_edg = np.max(self.sklabel)
         len_node = np.min(self.sklabel)
+        logger.debug('len_edg: '+str(len_edg)+' len_node: '+str(len_node))
         
         logger.debug('skeleton_analysis: starting element_neighbors processing')
         self.elm_neigh = {}
@@ -61,7 +62,7 @@ class SkeletonAnalyser:
             if node_pos is not None:
                 self.nodes_pos[edg_number] = node_pos
             #logger.debug(str(edg_number)+' : '+str(self.elm_neigh[edg_number])+' node_pos: '+str(node_pos))
-            updateFunction(edg_number+abs(len_node),abs(len_node)+len_edg,0) # update gui progress
+            updateFunction(edg_number+abs(len_node)+1,abs(len_node)+len_edg+1,0) # update gui progress
         logger.debug('skeleton_analysis: finished element_neighbors processing')
 
 

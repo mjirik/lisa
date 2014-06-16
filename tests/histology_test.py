@@ -48,22 +48,12 @@ class HistologyTest(unittest.TestCase):
         threshold = 2.5
         ha = HistologyAnalyser(data3d, metadata, threshold)
         
-        # modifited ha.data_to_skeleton() function
-        data3d_thr = segmentation.vesselSegmentation(
-            data3d,
-            segmentation=np.ones(tvg.data3d.shape, dtype='int8'),
-            threshold=threshold,
-            inputSigma=0.15,
-            dilationIterations=2,
-            nObj=1,
-            biggestObjects=False,
-            interactivity=False,
-            binaryClosingIterations=5,
-            binaryOpeningIterations=1)
-        data3d_skel = ha.binar_to_skeleton(data3d_thr)
+        # segmented data
+        ha.data_to_binar()
+        ha.data_to_skeleton()
         
         # get statistics
-        ha.skeleton_to_statistics(data3d_thr, data3d_skel)
+        ha.data_to_statistics()
         yaml_new = "hist_stats_new.yaml"
         ha.writeStatsToYAML(filename=yaml_new)
         

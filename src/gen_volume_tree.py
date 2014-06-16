@@ -50,8 +50,8 @@ class TreeVolumeGenerator:
         
         # prvni a koncovy bod, v mm + radius v mm
         try:
-            p1m = cyl_data['nodeA_XYZ_mm'] # souradnice ulozeny [Z,Y,X]
-            p2m = cyl_data['nodeB_XYZ_mm']
+            p1m = cyl_data['nodeA_ZYX_mm'] # souradnice ulozeny [Z,Y,X]
+            p2m = cyl_data['nodeB_ZYX_mm']
             rad = cyl_data['radius_mm']
         except:
             logger.error("Segment id "+str(cyl_id)+": Error reading data from yaml!")
