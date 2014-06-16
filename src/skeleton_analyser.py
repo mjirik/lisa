@@ -55,7 +55,8 @@ class SkeletonAnalyser:
             logger.debug(str(edg_number)+' : '+str(self.elm_neigh[edg_number]))
             updateFunction(edg_number+abs(len_node),abs(len_node)+len_edg,0) # update gui progress
         logger.debug('skeleton_analysis: finished element_neighbors processing part')
-            
+
+
         logger.debug('skeleton_analysis: starting first processing part')
         for edg_number in range(1,len_edg+1):
             edgst = {}
@@ -358,37 +359,47 @@ class SkeletonAnalyser:
     def __element_neighbors(self, el_number):
         """
         Gives array of element neighbors numbers (edges+nodes/terminals)
-        """
+        input:
+            self.sklabel - original labeled data
+            el_number - element label
+            
+        uses/creates:
+            self.shifted_sklabel - all labels shifted to positive numbers
+            self.shifted_zero - value of original 0
+            
+        returns:
+            array of neighbor values
+                - nodes for edge, edges for node
+        """ 
+        # check if we have shifted sklabel, if not create it.
+        try:
+            self.shifted_zero
+            self.shifted_sklabel
+        except AttributeError:
+            logger.debug('Generating shifted sklabel...')
+            self.shifted_zero = abs(np.min(self.sklabel))+1
+            self.shifted_sklabel = self.sklabel + self.shifted_zero
+        
+        el_number_shifted = el_number + self.shifted_zero
+        
         BOUNDARY_PX = 5
         
-        if el_number>0: # edge (multiple points)
-            box = scipy.ndimage.find_objects(self.sklabel, max_label = el_number) # cant have max_label<0
-            box = box[len(box)-1]
+        if el_number<0:
+            box = scipy.ndimage.find_objects(self.shifted_sklabel, max_label = el_number_shifted) # cant have max_label<0
+        else:
+            box = scipy.ndimage.find_objects(self.sklabel, max_label = el_number)
+        box = box[len(box)-1]
 
-            d = max(0,box[0].start-BOUNDARY_PX)
-            u = min(self.sklabel.shape[0],box[0].stop+BOUNDARY_PX)
-            slice_z = slice(d,u)
-            d = max(0,box[1].start-BOUNDARY_PX)
-            u = min(self.sklabel.shape[1],box[1].stop+BOUNDARY_PX)
-            slice_y = slice(d,u)
-            d = max(0,box[2].start-BOUNDARY_PX)
-            u = min(self.sklabel.shape[2],box[2].stop+BOUNDARY_PX)
-            slice_x = slice(d,u)
-            box = (slice_z,slice_y,slice_x)
-        else: # node/terminal (just one point)
-            elm_pos = np.where(self.sklabel == el_number) # TODO - try to find something faster (maybe before this move all labels to positive numbers and remember where is zero)
-            
-            # TODO - make sure the bounding box is not shifted from center
-            d = max(0,elm_pos[0][0]-BOUNDARY_PX)
-            u = min(self.sklabel.shape[0],elm_pos[0][0]+BOUNDARY_PX)
-            slice_z = slice(d,u)
-            d = max(0,elm_pos[1][0]-BOUNDARY_PX)
-            u = min(self.sklabel.shape[1],elm_pos[1][0]+BOUNDARY_PX)
-            slice_y = slice(d,u)
-            d = max(0,elm_pos[2][0]-BOUNDARY_PX)
-            u = min(self.sklabel.shape[2],elm_pos[2][0]+BOUNDARY_PX)
-            slice_x = slice(d,u)
-            box = (slice_z,slice_y,slice_x)
+        d = max(0,box[0].start-BOUNDARY_PX)
+        u = min(self.sklabel.shape[0],box[0].stop+BOUNDARY_PX)
+        slice_z = slice(d,u)
+        d = max(0,box[1].start-BOUNDARY_PX)
+        u = min(self.sklabel.shape[1],box[1].stop+BOUNDARY_PX)
+        slice_y = slice(d,u)
+        d = max(0,box[2].start-BOUNDARY_PX)
+        u = min(self.sklabel.shape[2],box[2].stop+BOUNDARY_PX)
+        slice_x = slice(d,u)
+        box = (slice_z,slice_y,slice_x)
             
         sklabelcr = self.sklabel[box]
         
@@ -402,15 +413,18 @@ class SkeletonAnalyser:
 
         neighborhood = sklabelcr * dilat_element
 
-# if el_number is edge, return nodes
         neighbors = np.unique(neighborhood)
         neighbors = neighbors [neighbors != 0]
         neighbors = neighbors [neighbors != el_number]
-        #neighbors = [np.unique(neighborhood) != el_number]
-        #if el_number > 0:
-        #    neighbors = np.unique(neighborhood)[np.unique(neighborhood)<0]
-        #else:
-        #    neighbors = np.unique(neighborhood)[np.unique(neighborhood)>0]
+        
+        if el_number>0: # elnumber is edge
+            neighbors = neighbors [neighbors < 0] # return nodes
+        elif el_number<0: # elnumber is node
+            neighbors = neighbors [neighbors > 0] # return edge
+        else:
+            logger.warning('Element is zero!!')
+            neighbors = []
+            
         return neighbors
 
 
