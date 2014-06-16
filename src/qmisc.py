@@ -125,7 +125,7 @@ def uncrop(data, crinfo, orig_shape):
     startx = np.round(crinfo[0][0]).astype(int)
     starty = np.round(crinfo[1][0]).astype(int)
     startz = np.round(crinfo[2][0]).astype(int)
-    
+
     data_out [
             #np.round(crinfo[0][0]).astype(int):np.round(crinfo[0][1]).astype(int)+1,
             #np.round(crinfo[1][0]).astype(int):np.round(crinfo[1][1]).astype(int)+1,
@@ -141,7 +141,7 @@ def uncrop(data, crinfo, orig_shape):
 def getVersionString():
     """
     Function return string with version information.
-    It is performed by use one of three procedures: git describe, 
+    It is performed by use one of three procedures: git describe,
     file in .git dir and file __VERSION__.
     """
     version_string = None
@@ -149,11 +149,11 @@ def getVersionString():
         version_string = subprocess.check_output(['git','describe'])
     except:
         logger.warning('Command "git describe" is not working')
-        
+
     if version_string == None:
         try:
             path_to_version = os.path.join(path_to_script,'../.git/refs/heads/master')
-            with file(path_to_version) as f: 
+            with file(path_to_version) as f:
                 version_string = f.read()
         except:
             logger.warning('Problem with reading file ".git/refs/heads/master"')
@@ -161,7 +161,7 @@ def getVersionString():
     if version_string == None:
         try:
             path_to_version = os.path.join(path_to_script,'../__VERSION__')
-            with file(path_to_version) as f: 
+            with file(path_to_version) as f:
                 version_string = f.read()
             path_to_version = path_to_version + '  version number is created manually'
 
@@ -177,7 +177,7 @@ def get_one_biggest_object(data):
     """ Return biggest object """
     lab, num = scipy.ndimage.label(data)
     #print ("bum = "+str(num))
-    
+
     maxlab = max_area_index(lab, num)
 
     data = (lab == maxlab)
