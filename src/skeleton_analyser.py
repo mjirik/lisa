@@ -46,7 +46,15 @@ class SkeletonAnalyser:
 
         stats = {}
         len_edg = np.max(self.sklabel)
+        len_node = np.min(self.sklabel)
         
+        logger.debug('skeleton_analysis: starting element_neighbors processing part')
+        self.elm_neigh = {}
+        for edg_number in (range(len_node,0) + range(1,len_edg+1)):
+            self.elm_neigh[edg_number] = self.__element_neighbors(edg_number) 
+            logger.debug(str(edg_number)+' : '+str(self.elm_neigh[edg_number]))
+            updateFunction(edg_number+abs(len_node),abs(len_node)+len_edg,0) # update gui progress
+        logger.debug('skeleton_analysis: finished element_neighbors processing part')
             
         logger.debug('skeleton_analysis: starting first processing part')
         for edg_number in range(1,len_edg+1):
@@ -61,7 +69,7 @@ class SkeletonAnalyser:
             stats[edgst['id']] = edgst
             
             updateFunction(edg_number,len_edg,1) # update gui progress
-        logger.debug('skeleton_analysis: fnished first processing part')
+        logger.debug('skeleton_analysis: finished first processing part')
         
 
         #@TODO dokončit
@@ -352,23 +360,38 @@ class SkeletonAnalyser:
         Gives array of element neghbors numbers
         """
         BOUNDARY_PX = 5
+        
+        if el_number>0: # edge (multiple points)
+            box = scipy.ndimage.find_objects(self.sklabel, max_label = el_number) # cant have max_label<0
+            box = box[len(box)-1]
 
-        box = scipy.ndimage.find_objects(self.sklabel, max_label = el_number)
-        box = box[len(box)-1]
-        
-        d = max(0,box[0].start-BOUNDARY_PX)
-        u = min(self.sklabel.shape[0],box[0].stop+BOUNDARY_PX)
-        slice_z = slice(d,u)
-        d = max(0,box[1].start-BOUNDARY_PX)
-        u = min(self.sklabel.shape[1],box[1].stop+BOUNDARY_PX)
-        slice_y = slice(d,u)
-        d = max(0,box[2].start-BOUNDARY_PX)
-        u = min(self.sklabel.shape[2],box[2].stop+BOUNDARY_PX)
-        slice_x = slice(d,u)
-        box = (slice_z,slice_y,slice_x)
-        
+            d = max(0,box[0].start-BOUNDARY_PX)
+            u = min(self.sklabel.shape[0],box[0].stop+BOUNDARY_PX)
+            slice_z = slice(d,u)
+            d = max(0,box[1].start-BOUNDARY_PX)
+            u = min(self.sklabel.shape[1],box[1].stop+BOUNDARY_PX)
+            slice_y = slice(d,u)
+            d = max(0,box[2].start-BOUNDARY_PX)
+            u = min(self.sklabel.shape[2],box[2].stop+BOUNDARY_PX)
+            slice_x = slice(d,u)
+            box = (slice_z,slice_y,slice_x)
+        else: # node/terminal (just one point)
+            elm_pos = np.where(self.sklabel == el_number)
+            
+            # TODO - make sure the bounding box is not shifted from center
+            d = max(0,elm_pos[0][0]-BOUNDARY_PX)
+            u = min(self.sklabel.shape[0],elm_pos[0][0]+BOUNDARY_PX)
+            slice_z = slice(d,u)
+            d = max(0,elm_pos[1][0]-BOUNDARY_PX)
+            u = min(self.sklabel.shape[1],elm_pos[1][0]+BOUNDARY_PX)
+            slice_y = slice(d,u)
+            d = max(0,elm_pos[2][0]-BOUNDARY_PX)
+            u = min(self.sklabel.shape[2],elm_pos[2][0]+BOUNDARY_PX)
+            slice_x = slice(d,u)
+            box = (slice_z,slice_y,slice_x)
+            
         sklabelcr = self.sklabel[box]
-
+        
         # element crop
         element = (sklabelcr == el_number)
 
@@ -392,8 +415,9 @@ class SkeletonAnalyser:
 
 
     def __edge_length(self, edg_number):
-        #self.voxelsize_mm
-        return {'lengthEstimation':float(np.sum(self.sklabel == edg_number) + 2)}
+        # TODO - rewrite with voxelsize. 
+        lengthEstimation = float(np.sum(self.sklabel == edg_number) + 2) # this is fastest :-(
+        return {'lengthEstimation':lengthEstimation}
 
     def __edge_curve(self,  edg_number, edg_stats):
         """
@@ -468,7 +492,7 @@ class SkeletonAnalyser:
         """
         Analysis of which edge is connected
         """
-        edg_neigh = self.__element_neighbors(edg_number)
+        edg_neigh = self.elm_neigh[edg_number]
         if len(edg_neigh) != 2:
             print ('Wrong number (' + str(edg_neigh) +
                     ') of connected edges in connection_analysis() for\
@@ -477,8 +501,8 @@ class SkeletonAnalyser:
                     'id':edg_number
                     }
         else:
-            connectedEdgesA = self.__element_neighbors(edg_neigh[0])
-            connectedEdgesB = self.__element_neighbors(edg_neigh[1])
+            connectedEdgesA = self.elm_neigh[edg_neigh[0]]
+            connectedEdgesB = self.elm_neigh[edg_neigh[1]]
 # remove edg_number from connectedEdges list
             connectedEdgesA = connectedEdgesA[connectedEdgesA != edg_number]
             connectedEdgesB = connectedEdgesB[connectedEdgesB != edg_number]
