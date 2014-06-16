@@ -37,7 +37,8 @@ class SkeletonAnalyser:
         terminal: terminal node
         """
         def updateFunction(num,lenght,part):
-            logger.info('skeleton_analysis: processed '+str(num)+'/'+str(lenght)+', part '+str(part))
+            if (num%5 == 0) or num==lenght:
+                logger.info('skeleton_analysis: processed '+str(num)+'/'+str(lenght)+', part '+str(part))
             if guiUpdateFunction is not None:
                 guiUpdateFunction(num,lenght,part)
         
@@ -48,43 +49,45 @@ class SkeletonAnalyser:
         len_edg = np.max(self.sklabel)
         len_node = np.min(self.sklabel)
         
-        logger.debug('skeleton_analysis: starting element_neighbors processing part')
+        logger.debug('skeleton_analysis: starting element_neighbors processing')
         self.elm_neigh = {}
+        self.nodes_pos = {}
         for edg_number in (range(len_node,0) + range(1,len_edg+1)):
-            self.elm_neigh[edg_number] = self.__element_neighbors(edg_number) 
-            logger.debug(str(edg_number)+' : '+str(self.elm_neigh[edg_number]))
+            self.elm_neigh[edg_number], node_pos = self.__element_neighbors(edg_number) 
+            if node_pos is not None:
+                self.nodes_pos[edg_number] = node_pos
+            #logger.debug(str(edg_number)+' : '+str(self.elm_neigh[edg_number])+' node_pos: '+str(node_pos))
             updateFunction(edg_number+abs(len_node),abs(len_node)+len_edg,0) # update gui progress
-        logger.debug('skeleton_analysis: finished element_neighbors processing part')
+        logger.debug('skeleton_analysis: finished element_neighbors processing')
 
 
         logger.debug('skeleton_analysis: starting first processing part')
         for edg_number in range(1,len_edg+1):
             edgst = {}
-            edgst.update(self.__connection_analysis(edg_number))
-            edgst.update(self.__edge_length(edg_number))
-            edgst.update(self.__edge_curve(edg_number, edgst))
-            edgst.update(self.__edge_vectors(edg_number, edgst))
+            edgst.update(self.__connection_analysis(edg_number)) # 6.89e-05 s (speed OK!)
+            edgst.update(self.__edge_length(edg_number)) # 0.11 s
+            edgst.update(self.__edge_curve(edg_number, edgst)) # +-0 s (speed OK!)
+            edgst.update(self.__edge_vectors(edg_number, edgst)) # 3.719e-05 s (speed OK!)
             #edgst = edge_analysis(sklabel, i)
             if self.volume_data is not None:
-                edgst['radius_mm'] = float(self.__radius_analysis(edg_number,skdst))
+                edgst['radius_mm'] = float(self.__radius_analysis(edg_number,skdst)) # 0.37 s
             stats[edgst['id']] = edgst
             
             updateFunction(edg_number,len_edg,1) # update gui progress
         logger.debug('skeleton_analysis: finished first processing part')
         
 
-        #@TODO dokončit
-        logger.debug('skeleton_analysis: starting second processing part')
-        for edg_number in range (1,len_edg+1):
-            edgst = stats[edg_number]
-            edgst.update(self.__connected_edge_angle(edg_number, stats))
+        ##@TODO dokončit
+        #logger.debug('skeleton_analysis: starting second processing part')
+        #for edg_number in range (1,len_edg+1):
+            #edgst = stats[edg_number]
+            #edgst.update(self.__connected_edge_angle(edg_number, stats))
             
-            updateFunction(edg_number,len_edg,2) # update gui progress
-        logger.debug('skeleton_analysis: finished second processing part')
+            #updateFunction(edg_number,len_edg,2) # update gui progress
+        #logger.debug('skeleton_analysis: finished second processing part')
 
 
         return stats
-        #import pdb; pdb.set_trace()
 
     def __generate_sklabel(self, skelet_nodes):
 
@@ -370,6 +373,7 @@ class SkeletonAnalyser:
         returns:
             array of neighbor values
                 - nodes for edge, edges for node
+            if el_number is node - mean position of node, else None
         """ 
         # check if we have shifted sklabel, if not create it.
         try:
@@ -403,6 +407,15 @@ class SkeletonAnalyser:
             
         sklabelcr = self.sklabel[box]
         
+        # if node get node position
+        if el_number<0: 
+            nd0, nd1, nd2 = (el_number == sklabelcr).nonzero()
+            point_mean = [np.mean(nd0), np.mean(nd1), np.mean(nd2)]
+            node_pos = [float(point_mean[0]+box[0].start),float(point_mean[1]+box[1].start),float(point_mean[2]+box[2].start)]
+        else:
+            node_pos = None
+        
+        
         # element crop
         element = (sklabelcr == el_number)
 
@@ -424,8 +437,8 @@ class SkeletonAnalyser:
         else:
             logger.warning('Element is zero!!')
             neighbors = []
-            
-        return neighbors
+        
+        return neighbors, node_pos 
 
 
     def __edge_length(self, edg_number):
@@ -439,17 +452,15 @@ class SkeletonAnalyser:
         """
         retval = {}
         try:
-            nd00, nd01, nd02 = (edg_stats['nodeIdA'] == self.sklabel).nonzero()
-            nd10, nd11, nd12 = (edg_stats['nodeIdB'] == self.sklabel).nonzero()
-            point0 = np.array([np.mean(nd00), np.mean(nd01), np.mean(nd02)])
-            point1 = np.array([np.mean(nd10), np.mean(nd11), np.mean(nd12)])
+            point0 = np.array(edg_stats['nodeA_ZYX'])
+            point1 = np.array(edg_stats['nodeB_ZYX'])
             point0_mm = point0 * self.voxelsize_mm
             point1_mm = point1 * self.voxelsize_mm
             retval = {'curve_params':
                       {'start':point0_mm.tolist(),
                        'vector':(point1_mm-point0_mm).tolist()},
-                      'nodeA_XYZ_mm': point0_mm.tolist(),
-                      'nodeB_XYZ_mm': point1_mm.tolist()
+                      'nodeA_ZYX_mm': point0_mm.tolist(),
+                      'nodeB_ZYX_mm': point1_mm.tolist()
                       }
         except Exception as ex:
             logger.warning("Problem in __edge_curve()")
@@ -528,6 +539,8 @@ class SkeletonAnalyser:
                     'id':edg_number,
                     'nodeIdA':int(edg_neigh[0]),
                     'nodeIdB':int(edg_neigh[1]),
+                    'nodeA_ZYX': list(self.nodes_pos[edg_neigh[0]]),
+                    'nodeB_ZYX': list(self.nodes_pos[edg_neigh[1]]),
                     'connectedEdgesA':connectedEdgesA.tolist(),
                     'connectedEdgesB':connectedEdgesB.tolist()
                     }
