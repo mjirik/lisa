@@ -29,26 +29,36 @@ import skelet3d
 import segmentation
 import py3DSeedEditor as se
 
-GAUSSIAN_SIGMA = 1
-fast_debug = False
-#fast_debug = True
-
 import histology_analyser_gui as HA_GUI
 from skeleton_analyser import SkeletonAnalyser
 
 class HistologyAnalyser:
     def __init__(self, data3d, metadata, threshold=-1, binaryClosing=1, binaryOpening=1, nogui=True):
         self.data3d = data3d
-        self.nogui = nogui
+        if 'voxelsize_mm' not in metadata.keys():
+            metadata['voxelsize_mm'] = [1, 1, 1]
+        self.metadata = metadata
+        
+        self.data3d_thr = None
+        self.data3d_skel = None
+        
         self.threshold = threshold
         self.binaryClosing = binaryClosing
         self.binaryOpening = binaryOpening
-
-        if 'voxelsize_mm' not in metadata.keys():
-# @TODO resolve problem with voxelsize
-            metadata['voxelsize_mm'] = [0.1, 0.2, 0.3]
-
-        self.metadata = metadata
+        
+        self.nogui = nogui
+        
+    def get_voxelsize(self):
+        return self.metadata['voxelsize_mm']
+        
+    def get_data3d(self):
+        return self.data3d
+    
+    def get_data3d_segmented(self):
+        return self.data3d_thr
+        
+    def get_data3d_skeleton(self):
+        return self.data3d_skel
 
     def data_to_binar(self):
         ### Median filter
@@ -67,125 +77,60 @@ class HistologyAnalyser:
             binaryClosingIterations=self.binaryClosing, #5,  # TODO !!! - vytvari na stranach oblasti ktere se pak nenasegmentuji
             binaryOpeningIterations=self.binaryOpening #1
             )
+        del(filteredData)
         
         ### Zalepeni der
-        data3d_thr = scipy.ndimage.morphology.binary_fill_holes(data3d_thr)
+        scipy.ndimage.morphology.binary_fill_holes(data3d_thr, output = data3d_thr)
         
-        return data3d_thr
-
-    def binar_to_skeleton(self, data3d_thr):
-        data3d_thr = (data3d_thr > 0).astype(np.int8)
-        data3d_skel = skelet3d.skelet3d(data3d_thr)
-        return data3d_skel
+        self.data3d_thr = data3d_thr
+    
+    def binar_to_skeleton(self):
+		self.data3d_skel = skelet3d.skelet3d((self.data3d_thr > 0).astype(np.int8))
 
     def data_to_skeleton(self):
-        data3d_thr = self.data_to_binar()
-        data3d_skel = self.binar_to_skeleton(data3d_thr)
-        return data3d_thr, data3d_skel
+        self.data_to_binar()
+        self.binar_to_skeleton()
     
-    def skeleton_to_statistics(self, data3d_thr, data3d_skel, guiUpdateFunction=None):
+    def data_to_statistics(self, guiUpdateFunction=None):
+        self.stats = {}
+        
+        if (self.data3d_skel is None) or (self.data3d_thr is None):
+            logger.debug('Skeleton was not generated!!! Generating now...')
+            self.data_to_skeleton()
+        
+        ## process skeleton to statistics
         skan = SkeletonAnalyser(
-            data3d_skel,
-            volume_data=data3d_thr,
-            voxelsize_mm=self.metadata['voxelsize_mm'])
-
+            self.data3d_skel,
+            volume_data=self.data3d_thr,
+            voxelsize_mm=self.metadata['voxelsize_mm']
+            )
         stats = skan.skeleton_analysis(guiUpdateFunction=guiUpdateFunction)
-        self.sklabel = skan.sklabel
-        #data3d_nodes[data3d_nodes==3] = 2
+        self.sklabel = skan.sklabel # needed only by self.writeSkeletonToPickle()
         self.stats = {'Graph':stats}
         
-    def showSegmentedData(self, data3d_thr, data3d_skel):
+        ## process volume data to statistics
+        # TODO
+        
+    def showSegmentedData(self):
         skan = SkeletonAnalyser(
-            data3d_skel,
-            volume_data=data3d_thr,
+            self.data3d_skel,
+            volume_data=self.data3d_thr,
             voxelsize_mm=self.metadata['voxelsize_mm'])
         data3d_nodes_vis = skan.sklabel.copy()
-# edges
+        del(skan)
+        
+        # edges
         data3d_nodes_vis[data3d_nodes_vis > 0] = 1
-# nodes and terminals
+        # nodes and terminals
         data3d_nodes_vis[data3d_nodes_vis < 0] = 2
 
-        #pyed = seqt.QTSeedEditor(
-        #    data3d,
-        #    seeds=(data3d_nodes_vis).astype(np.int8),
-        #    contours=data3d_thr.astype(np.int8)
-        #)
-        #app.exec_()
         if not self.nogui:
             pyed = se.py3DSeedEditor(
                 self.data3d,
                 seeds=(data3d_nodes_vis).astype(np.int8),
-                contour=data3d_thr.astype(np.int8)
+                contour=self.data3d_thr.astype(np.int8)
             )
             pyed.show()
-
-    #def run(self):
-        ##self.preprocessing()
-        #app = QApplication(sys.argv)
-        #if not fast_debug:
-            #data3d_thr = self.data_to_binar()
-
-            ##self.data3d_thri = self.muxImage(
-            ##        self.data3d_thr2.astype(np.uint16),
-            ##        metadata
-            ##        )
-            ##sitk.Show(self.data3d_thri)
-
-            ##self.data3di = self.muxImage(
-            ##        self.data3d.astype(np.uint16),
-            ##        metadata
-            ##        )
-            ##sitk.Show(self.data3di)
-
-
-            ##app.exec_()
-            #data3d_skel = self.binar_to_skeleton(data3d_thr)
-
-            #print "skelet"
-
-        ## pyed = seqt.QTSeedEditor(
-        ##         data3d,
-        ##         contours=data3d_thr.astype(np.int8),
-        ##         seeds=data3d_skel.astype(np.int8)
-        ##         )
-            ##app.exec_()
-        #else:
-            #struct = misc.obj_from_file(filename='tmp0.pkl', filetype='pickle')
-            #data3d_skel = struct['sk']
-            #data3d_thr = struct['thr']
-
-        #self.skeleton_to_statistics(data3d_skel)
-
-
-
-       # import pdb; pdb.set_trace()
-    #def preprocessing(self):
-        #self.data3d = scipy.ndimage.filters.gaussian_filter(
-                #self.data3d,
-                #GAUSSIAN_SIGMA
-                #)
-        #self.data3d_thr = self.data3d > self.threshold
-
-        #self.data3d_thr2 = scipy.ndimage.morphology.binary_opening(
-                #self.data3d_thr
-                #)
-        ##gf = sitk.SmoothingRecursiveGaussianImageFilter()
-        ##gf.SetSigma(5)
-        ##gf = sitk.DiscreteGaussianImageFilter()
-        ##gf.SetVariance(1.0)
-        ##self.data3di2 = gf.Execute(self.data3di)#, 5)
-
-        #pass
-
-
-
-    #def muxImage(self, data3d, metadata):
-        #data3di = sitk.GetImageFromArray(data3d)
-        #data3di.SetSpacing(metadata['voxelsize_mm'])
-
-        #return data3di
-
-
 
     def writeStatsToYAML(self, filename='hist_stats.yaml'):
         logger.debug('writeStatsToYAML')
@@ -211,7 +156,7 @@ class HistologyAnalyser:
         misc.obj_to_file(self.sklabel, filename=filename, filetype='pickle')
 
 
-    def __dataToCSVLine(self, dataline):
+    def __dataToCSVLine(self, dataline): # TODO - finish this
         arr = []
 # @TODO arr.append
         try:
@@ -227,12 +172,13 @@ class HistologyAnalyser:
 
         return arr
 
+# TODO - include this in generate_sample_data()
+#def muxImage(self, data3d, metadata):
+    #import SimpleITK as sitk
+    #data3di = sitk.GetImageFromArray(data3d)
+    #data3di.SetSpacing(metadata['voxelsize_mm'])
 
-
-    def show(self):
-        app = QApplication(sys.argv)
-        seqt.QTSeedEditor(self.output.astype(np.int16))
-        app.exec_()
+    #return data3di
 
 def generate_sample_data(m=1, noise_level=0.005, gauss_sigma=0.1):
     """
@@ -341,15 +287,14 @@ def parser_init():
 
 # Processing data without gui
 def processData(inputfile=None,threshold=None,skeleton=False,crop=None,voxelsize=None):
-    ### when input is just skeleton
-    if skeleton:
+    if skeleton: ### when input is just skeleton # TODO - test if works or just delete
         logger.info("input is skeleton")
         struct = misc.obj_from_file(filename='tmp0.pkl', filetype='pickle')
-        data3d_skel = struct['skel']
-        data3d_thr = struct['thr']
         data3d = struct['data3d']
         metadata = struct['metadata']
         ha = HistologyAnalyser(data3d, metadata, threshold, nogui=True)
+        ha.data3d_skel = struct['skel']
+        ha.data3d_thr = struct['thr']
         logger.info("end of is skeleton")
     else: 
         ### Reading/Generating data
@@ -378,11 +323,11 @@ def processData(inputfile=None,threshold=None,skeleton=False,crop=None,voxelsize
         
         ### Segmentation
         logger.debug('Segmentation')
-        data3d_thr, data3d_skel = ha.data_to_skeleton()
+        ha.data_to_skeleton()
         
     ### Computing statistics
     logger.info("######### statistics")
-    ha.skeleton_to_statistics(data3d_thr, data3d_skel)
+    ha.data_to_statistics()
     
     ### Saving files
     logger.info("##### write to file")

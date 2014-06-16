@@ -24,9 +24,12 @@ class SkeletonAnalyser:
     def __init__(self, data3d_skel, volume_data=None, voxelsize_mm=[1,1,1]):
         self.volume_data = volume_data
         self.voxelsize_mm = voxelsize_mm
+        
         # get array with 1 for edge, 2 is node and 3 is terminal
-        skelet_nodes = self.__skeleton_nodes(data3d_skel, self.volume_data)
-        self.__generate_sklabel(skelet_nodes)
+        logger.debug('Generating sklabel...')
+        skelet_nodes = self.__skeleton_nodes(data3d_skel)
+        self.sklabel = self.__generate_sklabel(skelet_nodes)
+        
         logger.debug('Inited SkeletonAnalyser - voxelsize:'+str(voxelsize_mm)+' volumedata:'+str(volume_data is not None))
 
     def skeleton_analysis(self, guiUpdateFunction = None):
@@ -42,6 +45,7 @@ class SkeletonAnalyser:
             if guiUpdateFunction is not None:
                 guiUpdateFunction(num,lenght,part)
         
+        logger.debug('__radius_analysis_init')
         if self.volume_data is not None:
             skdst = self.__radius_analysis_init()
 
@@ -89,13 +93,32 @@ class SkeletonAnalyser:
 
         return stats
 
+    def __skeleton_nodes(self, data3d_skel):
+        """
+        Return 3d ndarray where 0 is background, 1 is skeleton, 2 is node
+        and 3 is terminal node
+
+        """
+        kernel = np.ones([3,3,3])
+
+        mocnost = scipy.ndimage.filters.convolve(data3d_skel, kernel) * data3d_skel
+
+        nodes = (mocnost > 3).astype(np.int8)
+        terminals = ((mocnost == 2) | (mocnost == 1)).astype(np.int8)
+
+        data3d_skel[nodes==1] = 2
+        data3d_skel[terminals==1] = 3
+
+        return data3d_skel
+
     def __generate_sklabel(self, skelet_nodes):
 
         sklabel_edg, len_edg = scipy.ndimage.label(skelet_nodes == 1, structure=np.ones([3,3,3]))
         sklabel_nod, len_nod = scipy.ndimage.label(skelet_nodes > 1, structure=np.ones([3,3,3]))
 
-        self.sklabel = sklabel_edg - sklabel_nod
-
+        sklabel = sklabel_edg - sklabel_nod
+        
+        return sklabel
 
     def __edge_vectors(self, edg_number, edg_stats):
         """
@@ -300,61 +323,6 @@ class SkeletonAnalyser:
     def __get_vector_from_curve(self, t0, t1, curve_params):
         return (np.array(curve_model(t1, curve_params)) - \
                 np.array(curve_model(t0,curve_params)))
-
-
-
-    def __skeleton_nodes(self, data3d_skel, data3d_thr):
-        """
-        Return 3d ndarray where 0 is background, 1 is skeleton, 2 is node
-        and 3 is terminal node
-
-        """
-        # @TODO  remove data3d_thr
-
-
-# -----------------  get nodes --------------------------
-        kernel = np.ones([3,3,3])
-        #kernel[0,0,0]=0
-        #kernel[0,0,2]=0
-        #kernel[0,2,0]=0
-        #kernel[0,2,2]=0
-        #kernel[2,0,0]=0
-        #kernel[2,0,2]=0
-        #kernel[2,2,0]=0
-        #kernel[2,2,2]=0
-
-        #kernel = np.zeros([3,3,3])
-        #kernel[1,1,:] = 1
-        #kernel[1,:,1] = 1
-        #kernel[:,1,1] = 1
-
-        #data3d_skel = np.zeros([40,40,40])
-        #data3d_skel[10,10,10] = 1
-        #data3d_skel[10,11,10] = 1
-        #data3d_skel[10,12,10] = 1
-        #data3d_skel = data3d_skel.astype(np.int8)
-
-
-        mocnost = scipy.ndimage.filters.convolve(data3d_skel, kernel) * data3d_skel
-        #import pdb; pdb.set_trace()
-
-        nodes = (mocnost > 3).astype(np.int8)
-        terminals = ((mocnost == 2) | (mocnost == 1)).astype(np.int8)
-
-        nt = nodes - terminals # unused
-
-        #pyed = seqt.QTSeedEditor(
-        #        mocnost,
-        #        contours=data3d_thr.astype(np.int8),
-        #        seeds=nt
-        #        )
-
-        #import pdb; pdb.set_trace()
-
-        data3d_skel[nodes==1] = 2
-        data3d_skel[terminals==1] = 3
-
-        return data3d_skel
 
     #def node_analysis(sklabel):
         #pass

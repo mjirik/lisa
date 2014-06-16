@@ -89,11 +89,11 @@ class HistologyAnalyserWindow(QMainWindow):
         if self.args_skeleton: 
             logger.info("input is skeleton")
             struct = misc.obj_from_file(filename='tmp0.pkl', filetype='pickle')
-            self.data3d_skel = struct['skel']
-            self.data3d_thr = struct['thr']
             self.data3d = struct['data3d']
             self.metadata = struct['metadata']
             self.ha = HA.HistologyAnalyser(self.data3d, self.metadata, nogui=False)
+            self.ha.data3d_skel = struct['skel']
+            self.ha.data3d_thr = struct['thr']
             logger.info("end of is skeleton")
             self.fixWindow() # just to be sure
         else:
@@ -137,7 +137,7 @@ class HistologyAnalyserWindow(QMainWindow):
             self.ha.threshold = -1
         
         # run segmentation
-        self.data3d_thr, self.data3d_skel = self.ha.data_to_skeleton()
+        self.ha.data_to_skeleton()
         if default is True:
             self.ha.nogui = False
             
@@ -220,22 +220,18 @@ class HistologyAnalyserWindow(QMainWindow):
         self.fixWindow()
         
     def showStatsRunDialog(self):
-        newapp = StatsRunDialog(self.ha, self.data3d_thr, self.data3d_skel, mainWindow=self)
+        newapp = StatsRunDialog(self.ha, mainWindow=self)
         self.embedWidget(newapp)
         self.fixWindow()
         newapp.start()
     
     def showSegmResultDialog(self):
-        newapp = SegmResultDialog(self, 
-                            histologyAnalyser=self.ha,
-                            data3d_thr=self.data3d_thr,
-                            data3d_skel=self.data3d_skel
-                            )
+        newapp = SegmResultDialog(self, histologyAnalyser=self.ha)
         self.embedWidget(newapp)
         self.fixWindow()
         newapp.exec_()
     
-    def showStatsResultDialog(self,histologyAnalyser=None):
+    def showStatsResultDialog(self):
         newapp = StatsResultDialog(self, histologyAnalyser=self.ha )
         self.embedWidget(newapp)
         self.fixWindow(height = 600)
@@ -358,13 +354,11 @@ class SegmWaitDialog(QDialog):
         self.setLayout(self.ui_gridLayout)
         self.show()
 
-# TODO - go back to segmentation/crop/mask...
+# TODO - go back to crop/mask...
 class SegmResultDialog(QDialog):
-    def __init__(self, mainWindow=None, histologyAnalyser=None, data3d_thr=None, data3d_skel=None):
+    def __init__(self, mainWindow=None, histologyAnalyser=None):
         self.mainWindow = mainWindow
         self.ha = histologyAnalyser
-        self.data3d_thr=data3d_thr
-        self.data3d_skel=data3d_skel
         
         QDialog.__init__(self)
         self.initUI()
@@ -388,16 +382,13 @@ class SegmResultDialog(QDialog):
         btn_preview.clicked.connect(self.showSegmentedData)
         btn_segm = QPushButton("Go back to segmentation", self)
         btn_segm.clicked.connect(self.mainWindow.showSegmQueryDialog)
-        btn_write = QPushButton("Write segmented data to file", self)
-        btn_write.clicked.connect(self.writeSegmentedData)
         btn_stats = QPushButton("Compute Statistics", self)
         btn_stats.clicked.connect(self.mainWindow.showStatsRunDialog)
         
         self.ui_gridLayout.addWidget(btn_preview, rstart + 0, 1)
         self.ui_gridLayout.addWidget(btn_segm, rstart + 1, 1)
-        self.ui_gridLayout.addWidget(btn_write, rstart + 2, 1)
-        self.ui_gridLayout.addWidget(btn_stats, rstart + 3, 1)
-        rstart += 4
+        self.ui_gridLayout.addWidget(btn_stats, rstart + 2, 1)
+        rstart += 3
         
         ### Stretcher
         self.ui_gridLayout.addItem(QSpacerItem(0,0), rstart + 0, 0)
@@ -407,17 +398,10 @@ class SegmResultDialog(QDialog):
         ### Setup layout
         self.setLayout(self.ui_gridLayout)
         self.show()
-        
-    def writeSegmentedData(self): # TODO - choose save path + or maybe just remove
-        logger.debug("Writing pickle file")
-        self.mainWindow.setStatusBarText('Writing pickle file')
-        struct = {'skel': self.data3d_skel, 'thr': self.data3d_thr, 'data3d': self.mainWindow.data3d, 'metadata':self.mainWindow.metadata}
-        misc.obj_to_file(struct, filename='tmp0.pkl', filetype='pickle')
-        self.mainWindow.setStatusBarText('Ready')
     
     def showSegmentedData(self):
         logger.debug('Preview of segmented data')
-        self.ha.showSegmentedData(self.data3d_thr, self.data3d_skel)
+        self.ha.showSegmentedData()
 
 # Worker signals for computing statistics
 class StatsWorkerSignals(QObject):
@@ -426,24 +410,20 @@ class StatsWorkerSignals(QObject):
 
 # Worker for computing statistics
 class StatsWorker(QRunnable):        
-    def __init__(self, ha, data3d_thr, data3d_skel):
+    def __init__(self, ha):
         super(StatsWorker, self).__init__()
         self.ha = ha
-        self.data3d_thr = data3d_thr
-        self.data3d_skel = data3d_skel
         
         self.signals = StatsWorkerSignals()
 
     def run(self):        
-        self.ha.skeleton_to_statistics(self.data3d_thr, self.data3d_skel, guiUpdateFunction=self.signals.update.emit) 
+        self.ha.data_to_statistics(guiUpdateFunction=self.signals.update.emit) 
         self.signals.finished.emit()
 
 class StatsRunDialog(QDialog):
-    def __init__(self, ha, data3d_thr, data3d_skel, mainWindow=None):
+    def __init__(self, ha, mainWindow=None):
         self.mainWindow = mainWindow
         self.ha = ha
-        self.data3d_thr = data3d_thr
-        self.data3d_skel = data3d_skel
         
         QDialog.__init__(self)
         self.initUI()
@@ -497,20 +477,11 @@ class StatsRunDialog(QDialog):
         
     def start(self):
         logger.info("Computing Statistics")
-        worker = StatsWorker(self.ha, self.data3d_thr, self.data3d_skel)
+        worker = StatsWorker(self.ha)
         worker.signals.update.connect(self.updateInfo)
         worker.signals.finished.connect(self.mainWindow.showStatsResultDialog)
 
         self.pool.start(worker)
-        
-        #self.pool.waitForDone()
-        
-        ### Saving files
-        # TODO - move this somewhere else / or delete
-        #logger.info("##### write to file")
-        #self.setStatusBarText('Statistics - write file')
-        #self.showMessage('Writing files (Pickle) \nPlease wait...') 
-        #self.ha.writeSkeletonToPickle('skel.pkl')
     
     def updateInfo(self, part=0, whole=1, processPart=1):
         # update progress bar
@@ -806,7 +777,7 @@ class LoadDialog(QDialog):
             return
         self.importDataWithGui()
     
-    def loadDataClear(self,event): # TODO - Generate data here => display real data shape
+    def loadDataClear(self,event): 
         self.inputfile=None
         self.importDataWithGui()
         self.mainWindow.setStatusBarText('Ready')
