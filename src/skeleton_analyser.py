@@ -411,7 +411,27 @@ class SkeletonAnalyser:
             'lengthEstimation'  - Estimated length of edge
             'nodesDistance'     - Distance between connected nodes
             'tortuosity'         - Tortuosity
-        """        
+        """
+        # test for needed data
+        try:
+            edg_stats['nodeIdA']
+            edg_stats['nodeIdB']
+            edg_stats['nodeA_ZYX']
+            edg_stats['nodeB_ZYX']
+        except:
+            logger.warning('__edge_length doesnt have needed data!!! Using unreliable method.')            
+            length = float(np.sum(self.sklabel[self.elm_box[edg_number]] == edg_number) + 2) 
+            medium_voxel_length = (self.voxelsize_mm[0]+self.voxelsize_mm[1]+self.voxelsize_mm[2])/3.0
+            length = length*medium_voxel_length
+            
+            stats = {
+                'lengthEstimation':float(length),
+                'nodesDistance': None,
+                'tortuosity': 1
+                }
+                
+            return stats
+            
         # crop used area
         box = self.elm_box[edg_number]
         sklabelcr = self.sklabel[box]
