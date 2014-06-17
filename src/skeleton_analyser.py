@@ -68,7 +68,7 @@ class SkeletonAnalyser:
         for edg_number in range(1,len_edg+1):
             edgst = {}
             edgst.update(self.__connection_analysis(edg_number)) # 6.89e-05 s (speed OK!)
-            edgst.update(self.__edge_length(edg_number)) # 0.11 s
+            edgst.update(self.__edge_length(edg_number)) # +-0s (speed OK!)
             edgst.update(self.__edge_curve(edg_number, edgst)) # +-0 s (speed OK!)
             edgst.update(self.__edge_vectors(edg_number, edgst)) # 3.719e-05 s (speed OK!)
             #edgst = edge_analysis(sklabel, i)
@@ -401,8 +401,11 @@ class SkeletonAnalyser:
 
     def __edge_length(self, edg_number):
         # TODO - rewrite with voxelsize. 
-        lengthEstimation = float(np.sum(self.sklabel == edg_number) + 2) # this is fastest :-(
-        return {'lengthEstimation':lengthEstimation}
+        lengthEstimation = float(np.sum(self.sklabel[self.elm_box[edg_number]] == edg_number) + 2) 
+        
+        stats = {'lengthEstimation':lengthEstimation}
+        
+        return stats
 
     def __edge_curve(self,  edg_number, edg_stats):
         """
