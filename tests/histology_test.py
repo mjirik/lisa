@@ -61,12 +61,12 @@ class HistologyTest(unittest.TestCase):
         hr = HistologyReport()
         hr.importFromYaml(yaml_path)
         hr.generateStats()
-        stats_orig = hr.stats
+        stats_orig = hr.stats['Report']
         
         hr = HistologyReport()
         hr.importFromYaml(os.path.join(path_to_script, yaml_new))
         hr.generateStats()
-        stats_new = hr.stats
+        stats_new = hr.stats['Report']
         
         # compare
         self.assertGreater(stats_orig['Total length mm'],stats_new['Total length mm']*0.9)

@@ -1,22 +1,28 @@
+General:
+    data_volume_mm3: 1000000
 Graph:
   1:
     nodeA_ZYX_mm: [10, 20, 20]
     nodeB_ZYX_mm: [30, 20, 20]
     lengthEstimation: 20.0
+    tortuosity: 1
     radius_mm: 7
   2:
     nodeA_ZYX_mm: [30, 20, 20]
     nodeB_ZYX_mm: [30, 50, 20]
     lengthEstimation: 30.0
+    tortuosity: 1
     radius_mm: 5
   3:
     nodeA_ZYX_mm: [30, 20, 20]
     nodeB_ZYX_mm: [30, 50, 50]
     lengthEstimation: 42.4264
+    tortuosity: 1
     radius_mm: 4
   4:
     nodeA_ZYX_mm: [30, 20, 20]
     nodeB_ZYX_mm: [60, 20, 20]
     lengthEstimation: 30.0
+    tortuosity: 1
     radius_mm: 7
 
