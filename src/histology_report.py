@@ -43,6 +43,8 @@ class HistologyReport:
                     )                    
             writer.writerow([data['Avg length mm']])
             writer.writerow([data['Total length mm']])
+            writer.writerow([data['Length density']])
+            writer.writerow([data['Avg tortuosity']])
             writer.writerow([data['Avg radius mm']])
             writer.writerow(data['Radius histogram'][0])
             writer.writerow(data['Radius histogram'][1])
@@ -65,6 +67,8 @@ class HistologyReport:
         stats = {
             'Avg length mm': 0,
             'Total length mm': 0,
+            'Length density': 0,
+            'Avg tortuosity': 0,
             'Avg radius mm': 0,
             'Radius histogram': None,
             'Length histogram': None,
@@ -73,13 +77,19 @@ class HistologyReport:
 
         radius_array = []
         length_array = []
+        tortuosity_array = []
         for key in self.data['Graph']:
             length_array.append(self.data['Graph'][key]['lengthEstimation'])
+            tortuosity_array.append(self.data['Graph'][key]['tortuosity'])
             radius_array.append(self.data['Graph'][key]['radius_mm'])
+            
         num_of_entries = len(length_array)
         stats['Total length mm'] = sum(length_array)
         stats['Avg length mm'] = stats['Total length mm']/float(num_of_entries)
+        stats['Length density'] = self.data['General']['data_volume_mm3']/float(stats['Total length mm'])
+        stats['Avg tortuosity'] = sum(tortuosity_array)/float(num_of_entries)
         stats['Avg radius mm'] = sum(radius_array)/float(num_of_entries)
+        
         radiusHistogram = np.histogram(radius_array,bins=binNum)
         stats['Radius histogram'] = [radiusHistogram[0].tolist(),radiusHistogram[1].tolist()]
         lengthHistogram = np.histogram(length_array,bins=binNum)

@@ -524,6 +524,8 @@ class StatsResultDialog(QDialog):
         report = self.hr.stats['Report']
         report_label = QLabel('Total length mm: '+str(report['Total length mm'])+'\n'
                         +'Avg length mm: '+str(report['Avg length mm'])+'\n'
+                        +'Length density: '+str(report['Length density'])+'\n'
+                        +'Avg tortuosity: '+str(report['Avg tortuosity'])+'\n'
                         +'Avg radius mm: '+str(report['Avg radius mm'])
                         )
         histogram_radius = HistogramMplCanvas(report['Radius histogram'][0],

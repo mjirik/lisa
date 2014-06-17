@@ -98,6 +98,15 @@ class HistologyAnalyser:
             logger.debug('Skeleton was not generated!!! Generating now...')
             self.data_to_skeleton()
         
+        ## add general info
+        vs = self.metadata['voxelsize_mm']
+        info = {
+                'voxel_size_mm':list(vs),
+                'data_size_px':list(self.data3d.shape),
+                'data_volume_mm3':float(self.data3d.shape[0]*self.data3d.shape[1]*self.data3d.shape[2]*vs[0]*vs[1]*vs[2])
+                }
+        self.stats.update({'General':info})
+        
         ## process skeleton to statistics
         skan = SkeletonAnalyser(
             self.data3d_skel,
@@ -106,7 +115,7 @@ class HistologyAnalyser:
             )
         stats = skan.skeleton_analysis(guiUpdateFunction=guiUpdateFunction)
         self.sklabel = skan.sklabel # needed only by self.writeSkeletonToPickle()
-        self.stats = {'Graph':stats}
+        self.stats.update({'Graph':stats})
         
         ## process volume data to statistics
         # TODO
@@ -136,7 +145,7 @@ class HistologyAnalyser:
         logger.debug('writeStatsToYAML')
         misc.obj_to_file(self.stats, filename=filename, filetype='yaml')
 
-    def writeStatsToCSV(self, filename='hist_stats.csv'):
+    def writeStatsToCSV(self, filename='hist_stats.csv'): # TODO - fix this to save everything
         data = self.stats['Graph']
 
         with open(filename, 'wb') as csvfile:
