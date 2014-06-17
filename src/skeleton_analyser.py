@@ -56,11 +56,9 @@ class SkeletonAnalyser:
         
         logger.debug('skeleton_analysis: starting element_neighbors processing')
         self.elm_neigh = {}
-        self.nodes_pos = {}
+        self.elm_box = {}
         for edg_number in (range(len_node,0) + range(1,len_edg+1)):
-            self.elm_neigh[edg_number], node_pos = self.__element_neighbors(edg_number) 
-            if node_pos is not None:
-                self.nodes_pos[edg_number] = node_pos
+            self.elm_neigh[edg_number], self.elm_box[edg_number] = self.__element_neighbors(edg_number) 
             #logger.debug(str(edg_number)+' : '+str(self.elm_neigh[edg_number])+' node_pos: '+str(node_pos))
             updateFunction(edg_number+abs(len_node)+1,abs(len_node)+len_edg+1,0) # update gui progress
         logger.debug('skeleton_analysis: finished element_neighbors processing')
@@ -342,7 +340,7 @@ class SkeletonAnalyser:
         returns:
             array of neighbor values
                 - nodes for edge, edges for node
-            if el_number is node - mean position of node, else None
+            element bounding box (with border)
         """ 
         # check if we have shifted sklabel, if not create it.
         try:
@@ -376,15 +374,6 @@ class SkeletonAnalyser:
             
         sklabelcr = self.sklabel[box]
         
-        # if node get node position
-        if el_number<0: 
-            nd0, nd1, nd2 = (el_number == sklabelcr).nonzero()
-            point_mean = [np.mean(nd0), np.mean(nd1), np.mean(nd2)]
-            node_pos = [float(point_mean[0]+box[0].start),float(point_mean[1]+box[1].start),float(point_mean[2]+box[2].start)]
-        else:
-            node_pos = None
-        
-        
         # element crop
         element = (sklabelcr == el_number)
 
@@ -407,7 +396,7 @@ class SkeletonAnalyser:
             logger.warning('Element is zero!!')
             neighbors = []
         
-        return neighbors, node_pos 
+        return neighbors, box
 
 
     def __edge_length(self, edg_number):
@@ -421,16 +410,28 @@ class SkeletonAnalyser:
         """
         retval = {}
         try:
-            point0 = np.array(edg_stats['nodeA_ZYX'])
-            point1 = np.array(edg_stats['nodeB_ZYX'])
+            box0 = self.elm_box[edg_stats['nodeIdA']]
+            nd00, nd01, nd02 = (edg_stats['nodeIdA'] == self.sklabel[box0]).nonzero()
+            point0_mean = [np.mean(nd00), np.mean(nd01), np.mean(nd02)]
+            point0 = np.array([float(point0_mean[0]+box0[0].start),float(point0_mean[1]+box0[1].start),float(point0_mean[2]+box0[2].start)])
+            
+            box1 = self.elm_box[edg_stats['nodeIdB']]
+            nd10, nd11, nd12 = (edg_stats['nodeIdB'] == self.sklabel[box1]).nonzero()
+            point1_mean = [np.mean(nd10), np.mean(nd11), np.mean(nd12)]
+            point1 = np.array([float(point1_mean[0]+box1[0].start),float(point1_mean[1]+box1[1].start),float(point1_mean[2]+box1[2].start)])
+
             point0_mm = point0 * self.voxelsize_mm
             point1_mm = point1 * self.voxelsize_mm
             retval = {'curve_params':
-                      {'start':point0_mm.tolist(),
-                       'vector':(point1_mm-point0_mm).tolist()},
-                      'nodeA_ZYX_mm': point0_mm.tolist(),
-                      'nodeB_ZYX_mm': point1_mm.tolist()
-                      }
+                            {
+                            'start':point0_mm.tolist(),
+                            'vector':(point1_mm-point0_mm).tolist()
+                            },
+                        'nodeA_ZYX': point0.tolist(),
+                        'nodeB_ZYX': point1.tolist(),
+                        'nodeA_ZYX_mm': point0_mm.tolist(),
+                        'nodeB_ZYX_mm': point1_mm.tolist()
+                        }
         except Exception as ex:
             logger.warning("Problem in __edge_curve()")
             print (ex)
@@ -508,8 +509,6 @@ class SkeletonAnalyser:
                     'id':edg_number,
                     'nodeIdA':int(edg_neigh[0]),
                     'nodeIdB':int(edg_neigh[1]),
-                    'nodeA_ZYX': list(self.nodes_pos[edg_neigh[0]]),
-                    'nodeB_ZYX': list(self.nodes_pos[edg_neigh[1]]),
                     'connectedEdgesA':connectedEdgesA.tolist(),
                     'connectedEdgesB':connectedEdgesB.tolist()
                     }
