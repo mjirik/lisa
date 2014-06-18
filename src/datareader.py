@@ -49,89 +49,11 @@ class DataReader:
 
         datapath = os.path.normpath(datapath)
         if os.path.isfile(datapath):
-            path, ext = os.path.splitext(datapath)
-            if ext in ('.pklz', '.pkl'):
-                import misc
-                data = misc.obj_from_file(datapath, filetype='pkl')
-                data3d = data.pop('data3d')
-                # etadata must have series_number
-                metadata = {
-                    'series_number': 0,
-                    'datadir': datapath
-                }
-                metadata.update(data)
-
-            else:
-                # reading raw file
-                import SimpleITK as sitk
-                image = sitk.ReadImage(datapath)
-                # mage =
-                # sitk.ReadImage('/home/mjirik/data/medical/data_orig/sliver07/01/liver-orig001.mhd') #  noqa
-                # z = image.GetSize()
-
-                # ata3d = sitk.Image(sz[0],sz[1],sz[2], sitk.sitkInt16)
-
-                # or i in range(0,sz[0]):
-                #    print i
-                #    for j in range(0,sz[1]):
-                #        for k in range(0,sz[2]):
-                #            data3d[i,j,k]=image[i,j,k]
-
-                data3d = sitk.GetArrayFromImage(image)  # + 1024
-                # ata3d = np.transpose(data3d)
-                # ata3d = np.rollaxis(data3d,1)
-                metadata = {}  # reader.get_metaData()
-                metadata['series_number'] = 0  # reader.series_number
-                metadata['datadir'] = datapath
-                spacing = image.GetSpacing()
-                metadata['voxelsize_mm'] = [
-                    spacing[2],
-                    spacing[0],
-                    spacing[1],
-                ]
+            data3d, metadata = self.__ReadFromFile(datapath)
 
         else:
-            # checks if data is in DICOM format
-            dir_type = 'images'
-            if dcmr.is_dicom_dir(datapath):
-                dir_type = 'dicom'
-
-            if dir_type == 'dicom':  # eading dicom
-                logger.debug('Dir - DICOM')
-                reader = dcmr.DicomReader(datapath, qt_app=None, gui=True)
-                data3d = reader.get_3Ddata(start, stop, step)
-                metadata = reader.get_metaData()
-                metadata['series_number'] = reader.series_number
-                metadata['datadir'] = datapath
-                self.overlay_fcn = reader.get_overlay
-            else:  # reading image sequence
-                logger.debug('Dir - Image sequence')
-
-                logger.debug('Getting list of readable files...')
-                flist = []
-                for f in os.listdir(datapath):
-                    try:
-                        sitk.ReadImage(os.path.join(datapath, f))
-                    except:
-                        logger.warning("Cant load file: "+str(f))
-                        continue
-                    flist.append(os.path.join(datapath, f))
-                flist.sort()
-
-                logger.debug('Reading image data...')
-                image = sitk.ReadImage(flist)
-                logger.debug('Getting numpy array from image data...')
-                data3d = sitk.GetArrayFromImage(image)
-
-                metadata = {}  # reader.get_metaData()
-                metadata['series_number'] = 0  # reader.series_number
-                metadata['datadir'] = datapath
-                spacing = image.GetSpacing()
-                metadata['voxelsize_mm'] = [
-                    spacing[2],
-                    spacing[0],
-                    spacing[1],
-                ]
+            data3d, metadata = self.__ReadFromDirectory(
+                datapath, start, stop, step)
 
         if dataplus_format:
             logger.debug('dataplus format')
@@ -141,6 +63,95 @@ class DataReader:
             return datap
         else:
             return data3d, metadata
+
+    def __ReadFromDirectory(self, datapath, start, stop, step):
+        # checks if data is in DICOM format
+        dir_type = 'images'
+        if dcmr.is_dicom_dir(datapath):
+            dir_type = 'dicom'
+
+        if dir_type == 'dicom':  # eading dicom
+            logger.debug('Dir - DICOM')
+            reader = dcmr.DicomReader(datapath, qt_app=None, gui=True)
+            data3d = reader.get_3Ddata(start, stop, step)
+            metadata = reader.get_metaData()
+            metadata['series_number'] = reader.series_number
+            metadata['datadir'] = datapath
+            self.overlay_fcn = reader.get_overlay
+        else:  # reading image sequence
+            import SimpleITK as sitk
+            logger.debug('Dir - Image sequence')
+
+            logger.debug('Getting list of readable files...')
+            flist = []
+            for f in os.listdir(datapath):
+                try:
+                    sitk.ReadImage(os.path.join(datapath, f))
+                except:
+                    logger.warning("Cant load file: "+str(f))
+                    continue
+                flist.append(os.path.join(datapath, f))
+            flist.sort()
+
+            logger.debug('Reading image data...')
+            image = sitk.ReadImage(flist)
+            logger.debug('Getting numpy array from image data...')
+            data3d = sitk.GetArrayFromImage(image)
+
+            metadata = {}  # reader.get_metaData()
+            metadata['series_number'] = 0  # reader.series_number
+            metadata['datadir'] = datapath
+            spacing = image.GetSpacing()
+            metadata['voxelsize_mm'] = [
+                spacing[2],
+                spacing[0],
+                spacing[1],
+            ]
+
+        return data3d, metadata
+
+    def __ReadFromFile(self, datapath):
+        path, ext = os.path.splitext(datapath)
+        if ext in ('.pklz', '.pkl'):
+            import misc
+            data = misc.obj_from_file(datapath, filetype='pkl')
+            data3d = data.pop('data3d')
+            # etadata must have series_number
+            metadata = {
+                'series_number': 0,
+                'datadir': datapath
+            }
+            metadata.update(data)
+
+        else:
+            # reading raw file
+            import SimpleITK as sitk
+            image = sitk.ReadImage(datapath)
+            # mage =
+            # sitk.ReadImage('/home/mjirik/data/medical/data_orig/sliver07/01/liver-orig001.mhd') #  noqa
+            # z = image.GetSize()
+
+            # ata3d = sitk.Image(sz[0],sz[1],sz[2], sitk.sitkInt16)
+
+            # or i in range(0,sz[0]):
+            #    print i
+            #    for j in range(0,sz[1]):
+            #        for k in range(0,sz[2]):
+            #            data3d[i,j,k]=image[i,j,k]
+
+            data3d = sitk.GetArrayFromImage(image)  # + 1024
+            # ata3d = np.transpose(data3d)
+            # ata3d = np.rollaxis(data3d,1)
+            metadata = {}  # reader.get_metaData()
+            metadata['series_number'] = 0  # reader.series_number
+            metadata['datadir'] = datapath
+            spacing = image.GetSpacing()
+            metadata['voxelsize_mm'] = [
+                spacing[2],
+                spacing[0],
+                spacing[1],
+            ]
+        return data3d, metadata
 
     def GetOverlay(self):
         """ Generates dictionary of ovelays
