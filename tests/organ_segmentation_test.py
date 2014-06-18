@@ -202,13 +202,13 @@ class OrganSegmentationTest(unittest.TestCase):
         """
         #dcmdir = os.path.join(path_to_script,'./../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
 # data
-        img3d = np.random.rand(32,64,64) * 5
+        img3d = np.random.rand(32,64,64) * 4
         img3d[4:24,12:32,5:25,] = img3d [4:24, 12:32,5:25] + 25
 
 #seeds
         seeds = np.zeros([32, 64, 64], np.int8)
-        seeds [9:12,13:29,20:25] = 1
-        seeds [9:12,6:9,3:32] = 2
+        seeds [9:12,13:29,18:25] = 1
+        seeds [9:12,4:9,3:32] = 2
 #[mm]  10 x 10 x 10        #voxelsize_mm = [1,4,3]
         voxelsize_mm = [5,5,5]
         metadata = {'voxelsize_mm': voxelsize_mm}
@@ -229,16 +229,18 @@ class OrganSegmentationTest(unittest.TestCase):
         #print ("with left mouse button select some pixels of the brain")
         #print ("with right mouse button select some pixels of other tissues and background")
 
-        oseg.ninteractivity()
+        #from PyQt4.QtGui import QApplication
+        #app = QApplication(sys.argv)
         #oseg.interactivity()
+        oseg.ninteractivity()
 
         volume = oseg.get_segmented_volume_size_mm3()
 
         #import pdb; pdb.set_trace()
 
         #mel by to být litr. tedy milion mm3
-        self.assertGreater(volume,900000)
-        self.assertLess(volume,1100000)
+        self.assertGreater(volume, 900000)
+        self.assertLess(volume, 1100000)
 
     def test_volume_resize(self):
         #from scipy.sparse.import lil_matrix
