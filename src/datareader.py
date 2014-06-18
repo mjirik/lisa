@@ -21,7 +21,6 @@ logger = logging.getLogger(__name__)
 
 import dcmreaddata as dcmr
 
-import SimpleITK as sitk
 import numpy as np
 
 class DataReader:
@@ -63,6 +62,7 @@ class DataReader:
 
             else:
 # reading raw file
+                import SimpleITK as sitk
                 image = sitk.ReadImage(datapath)
                 #image = sitk.ReadImage('/home/mjirik/data/medical/data_orig/sliver07/01/liver-orig001.mhd') #noqa
                 #sz = image.GetSize()
