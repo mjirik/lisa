@@ -232,19 +232,7 @@ if __name__ == "__main__":
 #vizualizace
     pyed = se.py3DSeedEditor(hr.data3d)
     pyed.show()
-# 3d vizualizace (debug)
-    if args.debug:
-        try:
-            from vtk_point_cloud import VtkPointCloud
-            pointCloud = VtkPointCloud(None,0,51,True)
-            for z in xrange(0,len(hr.data3d)):
-                for y in xrange(0,len(hr.data3d[z])):
-                    for x in xrange(0,len(hr.data3d[z][y])):
-                        if hr.data3d[z][y][x] == 1:
-                            pointCloud.addPoint([x,y,z])
-            pointCloud.rander()
-        except:
-            logger.error("pointCloud 3d debug error: cant find vtk_point_cloud.py")
+
 #ukládání do souboru
     if args.outputfile is not None:
         hr.saveToFile(args.outputfile)

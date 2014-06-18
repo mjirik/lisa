@@ -99,15 +99,24 @@ class HistologyAnalyser:
             self.data_to_skeleton()
         
         ## add general info
+        logger.debug('Computing general statistics...')
         vs = self.metadata['voxelsize_mm']
+        voxel_volume_mm3 = vs[0]*vs[1]*vs[2]
+        volume_px = self.data3d.shape[0]*self.data3d.shape[1]*self.data3d.shape[2]
+        volume_mm3 = volume_px*voxel_volume_mm3
+        vessel_volume_fraction = float(np.sum(np.sum(np.sum(self.data3d_thr))))/float(volume_px)
         info = {
                 'voxel_size_mm':list(vs),
-                'data_size_px':list(self.data3d.shape),
-                'data_volume_mm3':float(self.data3d.shape[0]*self.data3d.shape[1]*self.data3d.shape[2]*vs[0]*vs[1]*vs[2])
+                'voxel_volume_mm3':float(voxel_volume_mm3),
+                'shape_px':list(self.data3d.shape),
+                'volume_px':float(volume_px),
+                'volume_mm3':float(volume_mm3),
+                'vessel_volume_fraction':float(vessel_volume_fraction)
                 }
         self.stats.update({'General':info})
         
         ## process skeleton to statistics
+        logger.debug('Computing skeleton to statistics...')
         skan = SkeletonAnalyser(
             self.data3d_skel,
             volume_data=self.data3d_thr,
@@ -116,9 +125,6 @@ class HistologyAnalyser:
         stats = skan.skeleton_analysis(guiUpdateFunction=guiUpdateFunction)
         self.sklabel = skan.sklabel # needed only by self.writeSkeletonToPickle()
         self.stats.update({'Graph':stats})
-        
-        ## process volume data to statistics
-        # TODO
         
     def showSegmentedData(self):
         skan = SkeletonAnalyser(
@@ -310,7 +316,7 @@ def processData(inputfile=None,threshold=None,skeleton=False,crop=None,voxelsize
         if inputfile is None: ## Using generated sample data
             logger.info('Generating sample data...')
             metadata = {'voxelsize_mm': [1, 1, 1]}
-            data3d = generate_sample_data(1)
+            data3d = generate_sample_data(1,0,0)
         else: ## Normal runtime
             dr = datareader.DataReader()
             data3d, metadata = dr.Get3DData(inputfile)

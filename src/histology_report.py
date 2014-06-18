@@ -52,6 +52,7 @@ class HistologyReport:
             writer.writerow(data['Length histogram'][1])
 
     def generateStats(self,binNum=40):
+        # TODO - upravit dokumentaci
         """
         Funkce na vygenerování statistik.
 
@@ -65,38 +66,53 @@ class HistologyReport:
 
         """
         stats = {
-            'Avg length mm': 0,
-            'Total length mm': 0,
-            'Length density': 0,
-            'Avg tortuosity': 0,
-            'Avg radius mm': 0,
-            'Radius histogram': None,
-            'Length histogram': None,
-
+            'Main':{
+                'Vessel volume fraction (Vv)': '-',
+                'Surface density (Sv)': '-',
+                'Length density (Lv)': '-',
+                'Tortuosity': '-',
+                'Nv': '-',
+                },
+            'Other':{
+                'Avg length mm': '-',
+                'Total length mm': '-',
+                'Avg radius mm': '-',
+                'Radius histogram': None,
+                'Length histogram': None
+                }
         }
-
+        
+        # Get other stats
         radius_array = []
         length_array = []
-        tortuosity_array = []
         for key in self.data['Graph']:
             length_array.append(self.data['Graph'][key]['lengthEstimation'])
-            tortuosity_array.append(self.data['Graph'][key]['tortuosity'])
             radius_array.append(self.data['Graph'][key]['radius_mm'])
             
         num_of_entries = len(length_array)
-        stats['Total length mm'] = sum(length_array)
-        stats['Avg length mm'] = stats['Total length mm']/float(num_of_entries)
-        stats['Length density'] = self.data['General']['data_volume_mm3']/float(stats['Total length mm'])
-        stats['Avg tortuosity'] = sum(tortuosity_array)/float(num_of_entries)
-        stats['Avg radius mm'] = sum(radius_array)/float(num_of_entries)
+        stats['Other']['Total length mm'] = sum(length_array)
+        stats['Other']['Avg length mm'] = stats['Other']['Total length mm']/float(num_of_entries)
+        stats['Other']['Avg radius mm'] = sum(radius_array)/float(num_of_entries)
         
         radiusHistogram = np.histogram(radius_array,bins=binNum)
-        stats['Radius histogram'] = [radiusHistogram[0].tolist(),radiusHistogram[1].tolist()]
+        stats['Other']['Radius histogram'] = [radiusHistogram[0].tolist(),radiusHistogram[1].tolist()]
         lengthHistogram = np.histogram(length_array,bins=binNum)
-        stats['Length histogram'] = [lengthHistogram[0].tolist(),lengthHistogram[1].tolist()]
-
+        stats['Other']['Length histogram'] = [lengthHistogram[0].tolist(),lengthHistogram[1].tolist()]
+        
+        # get main stats
+        tortuosity_array = []
+        for key in self.data['Graph']:
+            tortuosity_array.append(self.data['Graph'][key]['tortuosity'])
+        num_of_entries = len(tortuosity_array)
+        stats['Main']['Tortuosity'] = sum(tortuosity_array)/float(num_of_entries)
+        stats['Main']['Length density (Lv)'] = self.data['General']['volume_mm3']/float(stats['Other']['Total length mm'])
+        stats['Main']['Vessel volume fraction (Vv)'] = self.data['General']['vessel_volume_fraction']
+        #stats['Main']['Surface density (Sv)'] =
+        #stats['Main']['Nv'] =
+        
+        # save stats
         self.stats = {'Report':stats}
-        logger.debug(stats)
+        logger.debug('Main stats: '+str(stats['Main']))
 
 
 if __name__ == "__main__":

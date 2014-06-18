@@ -1,5 +1,6 @@
 General:
-    data_volume_mm3: 1000000
+    volume_mm3: 1000000
+    vessel_volume_fraction: 0.0135
 Graph:
   1:
     nodeA_ZYX_mm: [10, 20, 20]

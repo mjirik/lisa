@@ -522,28 +522,38 @@ class StatsResultDialog(QDialog):
         
         ### histology report
         report = self.hr.stats['Report']
-        report_label = QLabel('Total length mm: '+str(report['Total length mm'])+'\n'
-                        +'Avg length mm: '+str(report['Avg length mm'])+'\n'
-                        +'Length density: '+str(report['Length density'])+'\n'
-                        +'Avg tortuosity: '+str(report['Avg tortuosity'])+'\n'
-                        +'Avg radius mm: '+str(report['Avg radius mm'])
-                        )
-        histogram_radius = HistogramMplCanvas(report['Radius histogram'][0],
-                                        report['Radius histogram'][1],
+        report_m = report['Main']
+        report_o = report['Other']
+        
+        report_label_main = QLabel('Vessel volume fraction (Vv): '+str(report_m['Vessel volume fraction (Vv)'])+'\n'
+                                +'Surface density (Sv): '+str(report_m['Surface density (Sv)'])+'\n'
+                                +'Length density (Lv): '+str(report_m['Length density (Lv)'])+'\n'
+                                +'Tortuosity: '+str(report_m['Tortuosity'])+'\n'
+                                +'Nv: '+str(report_m['Nv'])
+                                )
+        
+        report_label_other = QLabel('Total length mm: '+str(report_o['Total length mm'])+'\n'
+                                +'Avg length mm: '+str(report_o['Avg length mm'])+'\n'
+                                +'Avg radius mm: '+str(report_o['Avg radius mm'])
+                                )
+        histogram_radius = HistogramMplCanvas(report_o['Radius histogram'][0],
+                                        np.round(np.array(report_o['Radius histogram'][1]),2).tolist(),
                                         title='Radius histogram',
                                         xlabel="Blood-vessel radius [mm]",
                                         ylabel="Number"
                                         )
-        histogram_length = HistogramMplCanvas(report['Length histogram'][0],
-                                        report['Length histogram'][1],
+        # mili -> mikro (becouse radius is very small)
+        histogram_length = HistogramMplCanvas(report_o['Length histogram'][0],
+                                        np.round(np.array(report_o['Length histogram'][1])*1000,2).tolist(),
                                         title='Length histogram',
-                                        xlabel="Blood-vessel length [mm]",
+                                        xlabel="Blood-vessel length ["+r'$\mu$'+"m]",
                                         ylabel="Number"
                                         )
         
-        self.ui_gridLayout.addWidget(report_label, rstart + 0, 0, 1, 3)
-        self.ui_gridLayout.addWidget(histogram_radius, rstart + 1, 0, 1, 3)
-        self.ui_gridLayout.addWidget(histogram_length, rstart + 2, 0, 1, 3)
+        self.ui_gridLayout.addWidget(report_label_main, rstart + 0, 0, 1, 2)
+        self.ui_gridLayout.addWidget(report_label_other, rstart + 0, 2, 1, 2)
+        self.ui_gridLayout.addWidget(histogram_radius, rstart + 1, 0, 1, 4)
+        self.ui_gridLayout.addWidget(histogram_length, rstart + 2, 0, 1, 4)
         rstart +=3
         
         ### buttons
@@ -558,9 +568,9 @@ class StatsResultDialog(QDialog):
         
         self.ui_gridLayout.addWidget(btn_yaml, rstart + 0, 0)
         self.ui_gridLayout.addWidget(btn_csv, rstart + 0, 1)
-        self.ui_gridLayout.addWidget(btn_rep_yaml, rstart + 1, 0)
-        self.ui_gridLayout.addWidget(btn_rep_csv, rstart + 1, 1)
-        rstart +=2
+        self.ui_gridLayout.addWidget(btn_rep_yaml, rstart + 0, 2)
+        self.ui_gridLayout.addWidget(btn_rep_csv, rstart + 0, 3)
+        rstart +=1
         
         ### Stretcher
         self.ui_gridLayout.addItem(QSpacerItem(0,0), rstart + 0, 0,)
@@ -846,7 +856,7 @@ class LoadDialog(QDialog):
             logger.info('Generating sample data...')
             self.mainWindow.setStatusBarText('Generating sample data...')
             self.metadata = {'voxelsize_mm': [1, 1, 1]}
-            self.data3d = HA.generate_sample_data(1)
+            self.data3d = HA.generate_sample_data(1,0,0)
             self.text_dcm_dir.setText('Data path: '+'Generated sample data')
         else:
             try:

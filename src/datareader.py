@@ -65,12 +65,7 @@ class DataReader:
             return data3d, metadata
 
     def __ReadFromDirectory(self, datapath, start, stop, step):
-        # checks if data is in DICOM format
-        dir_type = 'images'
-        if dcmr.is_dicom_dir(datapath):
-            dir_type = 'dicom'
-
-        if dir_type == 'dicom':  # eading dicom
+        if dcmr.is_dicom_dir(datapath):  # reading dicom
             logger.debug('Dir - DICOM')
             reader = dcmr.DicomReader(datapath, qt_app=None, gui=True)
             data3d = reader.get_3Ddata(start, stop, step)

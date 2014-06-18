@@ -69,14 +69,14 @@ class HistologyTest(unittest.TestCase):
         stats_new = hr.stats['Report']
         
         # compare
-        self.assertGreater(stats_orig['Total length mm'],stats_new['Total length mm']*0.9)
-        self.assertLess(stats_orig['Total length mm'],stats_new['Total length mm']*1.1)
+        self.assertGreater(stats_orig['Other']['Total length mm'],stats_new['Other']['Total length mm']*0.9)
+        self.assertLess(stats_orig['Other']['Total length mm'],stats_new['Other']['Total length mm']*1.1)
         
-        self.assertGreater(stats_orig['Avg length mm'],stats_new['Avg length mm']*0.9)
-        self.assertLess(stats_orig['Avg length mm'],stats_new['Avg length mm']*1.1)
+        self.assertGreater(stats_orig['Other']['Avg length mm'],stats_new['Other']['Avg length mm']*0.9)
+        self.assertLess(stats_orig['Other']['Avg length mm'],stats_new['Other']['Avg length mm']*1.1)
         
-        self.assertGreater(stats_orig['Avg radius mm'],stats_new['Avg radius mm']*0.9)
-        self.assertLess(stats_orig['Avg radius mm'],stats_new['Avg radius mm']*1.1)
+        self.assertGreater(stats_orig['Other']['Avg radius mm'],stats_new['Other']['Avg radius mm']*0.9)
+        self.assertLess(stats_orig['Other']['Avg radius mm'],stats_new['Other']['Avg radius mm']*1.1)
 
 
 if __name__ == "__main__":
