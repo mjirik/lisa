@@ -137,7 +137,7 @@ def eval_all_from_dataset_metadata(inputdata, visualization=False):
         data3d_a_path = os.path.join(inputdata['basedir'],
                                      inputdata['data'][i]['sliverseg'])
         data3d_a, metadata_a = reader.Get3DData(data3d_a_path)
-        print "inputdata ", inputdata['data'][i].keys()
+        print "inputdata ", inputdata['data'][i].values()
         try:
 # if there is defined overlay
             data3d_a = reader.GetOverlay()[inputdata['data'][i][
