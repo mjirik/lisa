@@ -537,14 +537,14 @@ class StatsResultDialog(QDialog):
                                 +'Avg radius mm: '+str(report_o['Avg radius mm'])
                                 )
         histogram_radius = HistogramMplCanvas(report_o['Radius histogram'][0],
-                                        np.round(np.array(report_o['Radius histogram'][1]),2).tolist(),
+                                        report_o['Radius histogram'][1],
                                         title='Radius histogram',
                                         xlabel="Blood-vessel radius [mm]",
                                         ylabel="Number"
                                         )
         # mili -> mikro (becouse radius is very small)
         histogram_length = HistogramMplCanvas(report_o['Length histogram'][0],
-                                        np.round(np.array(report_o['Length histogram'][1])*1000,2).tolist(),
+                                        (np.array(report_o['Length histogram'][1])*1000).tolist(),
                                         title='Length histogram',
                                         xlabel="Blood-vessel length ["+r'$\mu$'+"m]",
                                         ylabel="Number"
@@ -659,8 +659,8 @@ class HistogramMplCanvas(FigureCanvas):
         
         # better x axis numbering
         spacing = width*4
-        start = np.ceil(xaxis_min) + spacing
-        end = np.ceil(xaxis_max) + 0.1
+        start = xaxis_min + spacing
+        end = xaxis_max + (spacing/10.0)
         
         xticks_values = np.arange(start,end, spacing)
         xticks_values = np.round(xticks_values, 2)
