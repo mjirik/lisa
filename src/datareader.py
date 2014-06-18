@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#  /usr/bin/python
 # -*- coding: utf-8 -*-
 """ Module for readin 3D dicom data
 """
@@ -11,8 +11,8 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 sys.path.append(os.path.join(path_to_script,
                              "../extern/py3DSeedEditor/"))
-#sys.path.append(os.path.join(path_to_script, "../extern/"))
-#import featurevector
+# ys.path.append(os.path.join(path_to_script, "../extern/"))
+# mport featurevector
 
 import logging
 logger = logging.getLogger(__name__)
@@ -21,7 +21,8 @@ logger = logging.getLogger(__name__)
 
 import dcmreaddata as dcmr
 
-import numpy as np
+# import numpy as np
+
 
 class DataReader:
 
@@ -53,7 +54,7 @@ class DataReader:
                 import misc
                 data = misc.obj_from_file(datapath, filetype='pkl')
                 data3d = data.pop('data3d')
-                #metadata must have series_number
+                # etadata must have series_number
                 metadata = {
                     'series_number': 0,
                     'datadir': datapath
@@ -61,23 +62,24 @@ class DataReader:
                 metadata.update(data)
 
             else:
-# reading raw file
+                # reading raw file
                 import SimpleITK as sitk
                 image = sitk.ReadImage(datapath)
-                #image = sitk.ReadImage('/home/mjirik/data/medical/data_orig/sliver07/01/liver-orig001.mhd') #noqa
-                #sz = image.GetSize()
+                # mage =
+                # sitk.ReadImage('/home/mjirik/data/medical/data_orig/sliver07/01/liver-orig001.mhd') #  noqa
+                # z = image.GetSize()
 
-                #data3d = sitk.Image(sz[0],sz[1],sz[2], sitk.sitkInt16)
+                # ata3d = sitk.Image(sz[0],sz[1],sz[2], sitk.sitkInt16)
 
-                #for i in range(0,sz[0]):
+                # or i in range(0,sz[0]):
                 #    print i
                 #    for j in range(0,sz[1]):
                 #        for k in range(0,sz[2]):
                 #            data3d[i,j,k]=image[i,j,k]
 
                 data3d = sitk.GetArrayFromImage(image)  # + 1024
-                #data3d = np.transpose(data3d)
-                #data3d = np.rollaxis(data3d,1)
+                # ata3d = np.transpose(data3d)
+                # ata3d = np.rollaxis(data3d,1)
                 metadata = {}  # reader.get_metaData()
                 metadata['series_number'] = 0  # reader.series_number
                 metadata['datadir'] = datapath
@@ -94,8 +96,7 @@ class DataReader:
             if dcmr.is_dicom_dir(datapath):
                 dir_type = 'dicom'
 
-
-            if dir_type == 'dicom': #reading dicom
+            if dir_type == 'dicom':  # eading dicom
                 logger.debug('Dir - DICOM')
                 reader = dcmr.DicomReader(datapath, qt_app=None, gui=True)
                 data3d = reader.get_3Ddata(start, stop, step)
@@ -103,18 +104,18 @@ class DataReader:
                 metadata['series_number'] = reader.series_number
                 metadata['datadir'] = datapath
                 self.overlay_fcn = reader.get_overlay
-            else: # reading image sequence
+            else:  # reading image sequence
                 logger.debug('Dir - Image sequence')
 
                 logger.debug('Getting list of readable files...')
                 flist = []
                 for f in os.listdir(datapath):
                     try:
-                        sitk.ReadImage(os.path.join(datapath,f))
+                        sitk.ReadImage(os.path.join(datapath, f))
                     except:
                         logger.warning("Cant load file: "+str(f))
                         continue
-                    flist.append(os.path.join(datapath,f))
+                    flist.append(os.path.join(datapath, f))
                 flist.sort()
 
                 logger.debug('Reading image data...')
@@ -152,5 +153,5 @@ class DataReader:
 
 
 def get_datapath_qt(qt_app):
-# just call function from dcmr
+    # just call function from dcmr
     return dcmr.get_datapath_qt(qt_app)
