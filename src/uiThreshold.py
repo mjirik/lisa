@@ -333,7 +333,7 @@ class uiThreshold:
         self.imgFiltering = thresholding_functions.thresholding(self.imgFiltering, min_threshold, max_threshold, True, self.interactivity)
 
         ## Operace binarni otevreni a uzavreni.
-        
+
         ## Nastaveni hodnot slideru.
         if (self.interactivity == True) :
 
@@ -384,7 +384,7 @@ class uiThreshold:
 
         """
 
-        if (self.biggestObjects == True and self.seeds != None) :
+        if (self.biggestObjects == True):  # and self.seeds != None) :
 
            self.imgFiltering = thresholding_functions.getPriorityObjects(self.imgFiltering, self.nObj, self.seeds)
 
