@@ -311,7 +311,8 @@ def parser_init():
     args = parser.parse_args()
     
     # replaces -1 in crop with None
-    args.crop = [None if x==-1 else x for x in args.crop]
+    if args.crop is not None:
+        args.crop = [None if x==-1 else x for x in args.crop]
     
     return args
 
