@@ -536,18 +536,18 @@ class StatsResultDialog(QDialog):
                                 +'Avg length mm: '+str(report_o['Avg length mm'])+'\n'
                                 +'Avg radius mm: '+str(report_o['Avg radius mm'])
                                 )
+        # mili -> mikro (becouse mili has to much 0)
         histogram_radius = HistogramMplCanvas(report_o['Radius histogram'][0],
-                                        report_o['Radius histogram'][1],
+                                        (np.array(report_o['Radius histogram'][1])*1000).tolist(),
                                         title='Radius histogram',
-                                        xlabel="Blood-vessel radius [mm]",
-                                        ylabel="Number"
+                                        xlabel="Blood-vessel radius ["+r'$\mu$'+"m]",
+                                        ylabel="Count"
                                         )
-        # mili -> mikro (becouse radius is very small)
         histogram_length = HistogramMplCanvas(report_o['Length histogram'][0],
                                         (np.array(report_o['Length histogram'][1])*1000).tolist(),
                                         title='Length histogram',
                                         xlabel="Blood-vessel length ["+r'$\mu$'+"m]",
-                                        ylabel="Number"
+                                        ylabel="Count"
                                         )
         
         self.ui_gridLayout.addWidget(report_label_main, rstart + 0, 0, 1, 2)

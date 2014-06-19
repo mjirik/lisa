@@ -271,32 +271,47 @@ def parser_init():
     parser = argparse.ArgumentParser(
         description='Histology analyser'
     )
-    parser.add_argument('-i', '--inputfile',
+    
+    parser.add_argument(
+        '-i', '--inputfile',
         default=None,
         help='Input file/directory. Generates sample data, if not set.')
+        
     parser.add_argument(
-        '-vs', '--voxelsize',
+        '-vs', '--voxelsize', 
         default=None,
-        type=float,
-        metavar='N',
-        nargs='+',
+        type=float, metavar='N', nargs='+',
         help='Size of one voxel. Format: "Z Y X"')
-    parser.add_argument('-t', '--threshold', type=int,
+        
+    parser.add_argument(
+        '-t', '--threshold', type=int,
         default=-1, 
         help='Segmentation threshold. Default -1 (GUI/Automatic selection)')
+        
     parser.add_argument(
         '-is', '--input_is_skeleton', action='store_true',
         help='Input file is .pkl file with skeleton')
-    parser.add_argument('-cr', '--crop', type=int, metavar='N', nargs='+',
+        
+    parser.add_argument(
+        '-cr', '--crop', 
         default=None,
-        help='Crops input data. In GUI mode, crops before GUI crop. Default is None. Format: "z1 z2 y1 y2 x1 x2"')
+        type=int, metavar='N', nargs='+',
+        help='Crops input data. In GUI mode, crops before GUI crop. Default is None. Format: "z1 z2 y1 y2 x1 x2". -1 = None (start or end of axis).')
+        
     parser.add_argument(
-        '--nogui', action='store_true',
+        '--nogui', 
+        action='store_true',
         help='Disable GUI')
+        
     parser.add_argument(
-        '-d', '--debug', action='store_true',
+        '-d', '--debug', 
+        action='store_true',
         help='Debug mode')
+        
     args = parser.parse_args()
+    
+    # replaces -1 in crop with None
+    args.crop = [None if x==-1 else x for x in args.crop]
     
     return args
 
@@ -366,11 +381,12 @@ def main():
     if args.debug:
         logger.setLevel(logging.DEBUG)
     
+    logger.info('Input file -> %s', args.inputfile)
+    logger.info('Data crop -> %s', str(args.crop))
+    logger.info('Threshold -> %s', args.threshold)
+    
     if args.nogui:
         logger.info('Running without GUI')
-        logger.info('Input file -> %s', args.inputfile)
-        logger.info('Data crop -> %s', str(args.crop))
-        logger.info('Threshold -> %s', args.threshold)
         processData(inputfile=args.inputfile,
                     threshold=args.threshold,
                     skeleton=args.input_is_skeleton,

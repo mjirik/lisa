@@ -105,7 +105,7 @@ class HistologyReport:
             tortuosity_array.append(self.data['Graph'][key]['tortuosity'])
         num_of_entries = len(tortuosity_array)
         stats['Main']['Tortuosity'] = sum(tortuosity_array)/float(num_of_entries)
-        stats['Main']['Length density (Lv)'] = self.data['General']['volume_mm3']/float(stats['Other']['Total length mm'])
+        stats['Main']['Length density (Lv)'] = float(stats['Other']['Total length mm'])/float(self.data['General']['volume_mm3'])
         stats['Main']['Vessel volume fraction (Vv)'] = self.data['General']['vessel_volume_fraction']
         #stats['Main']['Surface density (Sv)'] =
         #stats['Main']['Nv'] =
