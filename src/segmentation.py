@@ -28,9 +28,9 @@ import scipy.ndimage
 
 import gc as garbage
 
-def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsize_mm = [1,1,1], inputSigma = -1, 
-                       dilationIterations = 0, dilationStructure = None, nObj = 10, biggestObjects = False, 
-                       seeds = None, interactivity = True, binaryClosingIterations = 2, 
+def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsize_mm = [1,1,1], inputSigma = -1,
+                       dilationIterations = 0, dilationStructure = None, nObj = 10, biggestObjects = False,
+                       seeds = None, interactivity = True, binaryClosingIterations = 2,
                        binaryOpeningIterations = 0, smartInitBinaryOperations = True,
                        returnThreshold = False, binaryOutput = True, returnUsedData = False):
 
@@ -167,9 +167,12 @@ def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsize_mm = [
             opening = 0
 
     ## Samotne filtrovani.
-    uiT = uiThreshold.uiThreshold(preparedData, voxel, threshold,
-        interactivity, number, inputSigma, nObj, biggestObjects, closing,
-        opening, seeds)
+    uiT = uiThreshold.uiThreshold(
+        preparedData, voxel=voxel, threshold=threshold,
+        interactivity=interactivity, number=number, inputSigma=inputSigma,
+        nObj=nObj, biggestObjects=biggestObjects,
+        binaryClosingIterations=closing, binaryOpeningIterations=opening,
+        seeds=seeds)
     output = uiT.run()
 
     ## Vypocet binarni matice.
@@ -180,7 +183,7 @@ def vesselSegmentation(data, segmentation = -1, threshold = -1, voxelsize_mm = [
     elif binaryOutput:
 
         output[output != 0] = 1
-    
+
     ## Vraceni matice.
     if returnThreshold:
 

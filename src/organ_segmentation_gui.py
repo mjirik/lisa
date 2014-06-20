@@ -720,19 +720,24 @@ class OrganSegmentation():
 
     def __vesselTree(self, binaryData3d, textLabel):
         import skelet3d
-        import histology_analyser as skan
-        metadata = {'voxelsize_mm': self.voxelsize_mm}
-        sa = skan.HistologyAnalyser(self.data3d, metadata)
-        data3d_skel = skelet3d.skelet3d(
-            (binaryData3d > 0).astype(np.int8)
-        )
-        # data3d_skel = sa.binar_to_skeleton(outputSegmentation)
-        sa.skeleton_to_statistics(binaryData3d, data3d_skel)
-        self.vessel_tree[textLabel] = sa.stats
-        #print sa.stats
+        import skeleton_analyser  # histology_analyser as skan
+        data3d_thr = (binaryData3d > 0).astype(np.int8)
+        data3d_skel = skelet3d.skelet3d(data3d_thr)
+
+        skan = skeleton_analyser.SkeletonAnalyser(
+            data3d_skel,
+            volume_data=data3d_thr,
+            voxelsize_mm=self.voxelsize_mm)
+        stats = skan.skeleton_analysis(guiUpdateFunction=None)
+
+        if not 'graph' in self.vessel_tree.keys():
+            self.vessel_tree['voxelsize_mm'] = self.voxelsize_mm
+            self.vessel_tree['graph'] = {}
+
+        self.vessel_tree['Graph'][textLabel] = stats
+        # print sa.stats
 # save skeleton to special file
         misc.obj_to_file(self.vessel_tree, 'vessel_tree.yaml', filetype='yaml')
-
 
     def hepaticVeinsSegmentation(self):
 
@@ -744,7 +749,7 @@ class OrganSegmentation():
             inputSigma=0.15,
             dilationIterations=2,
             nObj=1,
-            biggestObjects=False,
+            biggestObjects=True,
             interactivity=True,
             binaryClosingIterations=2,
             binaryOpeningIterations=0)

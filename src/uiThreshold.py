@@ -37,9 +37,11 @@ class uiThreshold:
 
     """
 
-    def __init__(self, data, voxel, threshold = -1, interactivity = True, number = 100.0, inputSigma = -1,
-                 nObj = 10,  biggestObjects = True, binaryClosingIterations = 2, binaryOpeningIterations = 0,
-                 seeds = None, cmap = matplotlib.cm.Greys_r):
+    def __init__(self, data, voxel, threshold=-1, interactivity=True,
+                 number=100.0, inputSigma=-1, nObj=10,  biggestObjects=True,
+                 useSeedsOfCompactObjects=True,
+                 binaryClosingIterations=2, binaryOpeningIterations=0,
+                 seeds=None, cmap=matplotlib.cm.Greys_r):
 
         """
 
@@ -83,6 +85,7 @@ class uiThreshold:
         self.ICBinaryClosingIterations = binaryClosingIterations
         self.ICBinaryOpeningIterations = binaryOpeningIterations
         self.seeds = seeds
+        self.useSeedsOfCompactObjects=useSeedsOfCompactObjects
 
         if (sys.version_info[0] < 3):
 
@@ -384,7 +387,10 @@ class uiThreshold:
 
         """
 
-        if (self.biggestObjects == True):  # and self.seeds != None) :
+        print '-------------'
+        print self.biggestObjects, self.seeds
+        if (self.biggestObjects == True or
+            (self.seeds != None and self.useSeedsOfCompactObjects)) :
 
            self.imgFiltering = thresholding_functions.getPriorityObjects(self.imgFiltering, self.nObj, self.seeds)
 
