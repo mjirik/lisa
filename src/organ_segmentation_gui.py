@@ -734,7 +734,7 @@ class OrganSegmentation():
             self.vessel_tree['voxelsize_mm'] = self.voxelsize_mm
             self.vessel_tree['graph'] = {}
 
-        self.vessel_tree['Graph'][textLabel] = stats
+        self.vessel_tree['graph'][textLabel] = stats
         # print sa.stats
 # save skeleton to special file
         misc.obj_to_file(self.vessel_tree, 'vessel_tree.yaml', filetype='yaml')
