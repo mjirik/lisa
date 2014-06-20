@@ -2,11 +2,9 @@
 # -*- coding: utf-8 -*-
 
 
-
 # import funkcí z jiného adresáře
 import sys
 import os.path
-import copy
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
@@ -14,12 +12,8 @@ sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
 
-import numpy as np
-
-import dcmreaddata as dcmr
 
 class HistologyTest(unittest.TestCase):
-
 
     def test_synthetic_data_vessel_tree_evaluation(self):
         """
@@ -31,15 +25,15 @@ class HistologyTest(unittest.TestCase):
         from gen_volume_tree import TreeVolumeGenerator
         from histology_analyser import HistologyAnalyser
         from histology_report import HistologyReport
-        import segmentation
-        import misc
+        # import segmentation
+        # import misc
 
         # generate 3d data from yaml for testing
         tvg = TreeVolumeGenerator()
         yaml_path = os.path.join(path_to_script, "./hist_stats_test.yaml")
         tvg.importFromYaml(yaml_path)
-        tvg.voxelsize_mm = [1,1,1]
-        tvg.shape = [100,100,100]
+        tvg.voxelsize_mm = [1, 1, 1]
+        tvg.shape = [100, 100, 100]
         tvg.generateTree()
 
         # init histology Analyser
@@ -69,14 +63,14 @@ class HistologyTest(unittest.TestCase):
         stats_new = hr.stats['Report']
 
         # compare
-        self.assertGreater(stats_orig['Other']['Total length mm'],stats_new['Other']['Total length mm']*0.9)
-        self.assertLess(stats_orig['Other']['Total length mm'],stats_new['Other']['Total length mm']*1.1)
+        self.assertGreater(stats_orig['Other']['Total length mm'],stats_new['Other']['Total length mm']*0.9)  # noqa
+        self.assertLess(stats_orig['Other']['Total length mm'],stats_new['Other']['Total length mm']*1.1)  # noqa
 
-        self.assertGreater(stats_orig['Other']['Avg length mm'],stats_new['Other']['Avg length mm']*0.9)
-        self.assertLess(stats_orig['Other']['Avg length mm'],stats_new['Other']['Avg length mm']*1.1)
+        self.assertGreater(stats_orig['Other']['Avg length mm'],stats_new['Other']['Avg length mm']*0.9)  # noqa
+        self.assertLess(stats_orig['Other']['Avg length mm'],stats_new['Other']['Avg length mm']*1.1)  # noqa
 
-        self.assertGreater(stats_orig['Other']['Avg radius mm'],stats_new['Other']['Avg radius mm']*0.9)
-        self.assertLess(stats_orig['Other']['Avg radius mm'],stats_new['Other']['Avg radius mm']*1.1)
+        self.assertGreater(stats_orig['Other']['Avg radius mm'],stats_new['Other']['Avg radius mm']*0.9)  # noqa
+        self.assertLess(stats_orig['Other']['Avg radius mm'],stats_new['Other']['Avg radius mm']*1.1)  # noqa
 
 
 if __name__ == "__main__":
