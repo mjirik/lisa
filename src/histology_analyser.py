@@ -76,6 +76,7 @@ class HistologyAnalyser:
             dilationIterations=2,
             nObj=1,
             biggestObjects=False,
+            useSeedsOfCompactObjects=False,
             interactivity=not self.nogui,
             binaryClosingIterations=self.binaryClosing, # noqa 5,  # TODO !!! - vytvari na stranach oblasti ktere se pak nenasegmentuji
             binaryOpeningIterations=self.binaryOpening # 1 # noqa
