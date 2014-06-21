@@ -273,6 +273,19 @@ def read_data_orig_and_seg(inputdata, i):
 
     return data3d_orig, data3d_seg, metadata_a['voxelsize_mm']
 
+def save_labels(labels, feature_fcn , voxelsize):
+    path_directory = '~/lisa_data/'
+    subdirectory = 'experiments/'
+    # Ukládání výsledku do souboru
+    if(!os.path.exists(path_directory)):
+        os.mkdir(path_directory)
+    path_subdirectory  = os.path.join(path_directory, subdirectory)
+    if(!os.path.exists(path_subdirectory)):
+        os.mkdir(path_subdirectory)
+    # TODO : Main Saving Loop ...    
+    #output_file = os.path.join(path_to_script, args.output)
+    #misc.obj_to_file(result, output_file, filetype='pickle')
+
 
 def one_experiment_setting_for_whole_dataset(inputdata, tile_shape,
                                              feature_fcn, classif_fcn, train,
