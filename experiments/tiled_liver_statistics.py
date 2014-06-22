@@ -273,28 +273,33 @@ def read_data_orig_and_seg(inputdata, i):
 
     return data3d_orig, data3d_seg, metadata_a['voxelsize_mm']
 
+
 def save_labels(inputfile, labels, feature_fcn, classif_fcn, voxelsize, tile_shape):
-    path_directory = '~/lisa_data/'
+    path_directory = 'lisa_data/'
     subdirectory = 'experiments/'
+    actual = os.getcwd()
+    os.chdir(os.path.expanduser('~'))
     # Ukládání výsledku do souboru
     if(os.path.exists(path_directory) is False):
-        os.mkdir(path_directory)
+        os.makedirs(path_directory)
     path_subdirectory  = os.path.join(path_directory, subdirectory)
     if(os.path.exists(path_subdirectory) is False):
-        os.mkdir(path_subdirectory)
+        os.makedirs(path_subdirectory)
     # TODO : Main Saving Loop ...    
     labdata = []
     slab = {}
     slab['liver'] = 1
     slab['none'] = 0
     labdata = {'labels': labels, 'feature_fcn' : str(feature_fcn), 
-               'classif_fcn' : str(clasdif_fcn), 'voxelsize_mm': voxelsize, 
+               'classif_fcn' : str(classif_fcn), 'voxelsize_mm': voxelsize, 
                'slab': slab}
+    #inputfilename = path_leaf(inputfile)
     filename = feature_fcn.__name__ + '_'+classif_fcn.__name__ + '_' + inputfile
-    filename = filename + '_' + tile_shape[0] + '_' + tile_shape[1] + '_'
-    filename = filename + tile_shape[2]
+    filename = filename + '_' + str(tile_shape[0]) + '_' + str(tile_shape[1]) + '_'
+    filename = filename + str(tile_shape[2])
     path_to_file = os.path.join(path_subdirectory, filename)
     misc.obj_to_file(labdata, path_to_file, filetype='pickle')
+    os.chdir(actual)
 
 
 def one_experiment_setting_for_whole_dataset(inputdata, tile_shape,
