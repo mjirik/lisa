@@ -273,18 +273,28 @@ def read_data_orig_and_seg(inputdata, i):
 
     return data3d_orig, data3d_seg, metadata_a['voxelsize_mm']
 
-def save_labels(labels, feature_fcn , voxelsize):
+def save_labels(inputfile, labels, feature_fcn, classif_fcn, voxelsize, tile_shape):
     path_directory = '~/lisa_data/'
     subdirectory = 'experiments/'
     # Ukládání výsledku do souboru
-    if(!os.path.exists(path_directory)):
+    if(os.path.exists(path_directory) is False):
         os.mkdir(path_directory)
     path_subdirectory  = os.path.join(path_directory, subdirectory)
-    if(!os.path.exists(path_subdirectory)):
+    if(os.path.exists(path_subdirectory) is False):
         os.mkdir(path_subdirectory)
     # TODO : Main Saving Loop ...    
-    #output_file = os.path.join(path_to_script, args.output)
-    #misc.obj_to_file(result, output_file, filetype='pickle')
+    labdata = []
+    slab = {}
+    slab['liver'] = 1
+    slab['none'] = 0
+    labdata = {'labels': labels, 'feature_fcn' : str(feature_fcn), 
+               'classif_fcn' : str(clasdif_fcn), 'voxelsize_mm': voxelsize, 
+               'slab': slab}
+    filename = feature_fcn.__name__ + '_'+classif_fcn.__name__ + '_' + inputfile
+    filename = filename + '_' + tile_shape[0] + '_' + tile_shape[1] + '_'
+    filename = filename + tile_shape[2]
+    path_to_file = os.path.join(path_subdirectory, filename)
+    misc.obj_to_file(labdata, path_to_file, filetype='pickle')
 
 
 def one_experiment_setting_for_whole_dataset(inputdata, tile_shape,
@@ -329,6 +339,8 @@ def one_experiment_setting_for_whole_dataset(inputdata, tile_shape,
 
         labels = arrange_to_tiled_data(cidxs, tile_shape, d_shp,
                                        labels_lin)
+        save_labels(inputdata['data'][i]['sliverorig'], labels, feature_fcn, 
+                    classif_fcn, voxelsize_mm, tile_shape)
         # ltl = (labels_train_lin_float * 10).astype(np.int8)
         # labels_train = arrange_to_tiled_data(cidxs, tile_shape,
         #                                     d_shp, ltl)
