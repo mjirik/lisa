@@ -34,7 +34,7 @@ import json
 #  apdb.set_trace();
 # import scipy.io
 import numpy as np
-# import scipy
+import scipy
 # from scipy import sparse
 # import traceback
 import itertools
@@ -274,11 +274,65 @@ def read_data_orig_and_seg(inputdata, i):
     return data3d_orig, data3d_seg, metadata_a['voxelsize_mm']
 
 
-def one_experiment_setting_for_whole_dataset(inputdata, tile_shape,
-                                             feature_fcn, classif_fcn, train,
-                                             visualization=False):
-    fvall = []
-    fv_tiles = []
+def data_preprocessing(data3d, voxelsize_mm, working_voxelsize_mm):
+    # working_voxelsize_mm = np.array([2.0, 1.0, 1.0])
+    zoom = voxelsize_mm / (1.0 * working_voxelsize_mm)
+
+    data3d_res = scipy.ndimage.zoom(
+        data3d,
+        zoom,
+        mode='nearest',
+        order=1
+    ).astype(np.int16)
+    return data3d_res, working_voxelsize_mm
+
+
+def data_postprocessing(segmentation_res, voxelsize_mm, working_voxelsize_mm):
+    zoom = voxelsize_mm / (1.0 * working_voxelsize_mm)
+    segm_orig_scale = scipy.ndimage.zoom(
+        segmentation_res,
+        1.0 / zoom,
+        mode='nearest',
+        order=0
+    ).astype(np.int8)
+    return segm_orig_scale
+
+
+def one_experiment_setting_training(inputdata, tile_shape,
+                                    feature_fcn, classif_fcn,
+                                    visualization=False):
+    features_t_all = []
+    labels_train_lin_all = []
+    indata_len = len(inputdata['data'])
+    features_t_all = []
+    # indata_len = 3
+
+    for i in range(0, indata_len):
+        data3d_orig, data3d_seg, voxelsize_mm = read_data_orig_and_seg(
+            inputdata, i)
+
+        if visualization:
+            pyed = py3DSeedEditor.py3DSeedEditor(data3d_orig,
+                                                 contour=data3d_seg)
+            pyed.show()
+        fv_t = get_features_in_tiles(data3d_orig, data3d_seg, tile_shape,
+                                     feature_fcn)
+        cidxs, features_t, seg_cover_t = fv_t
+        labels_train_lin_float = np.array(seg_cover_t)
+        labels_train_lin = (
+            labels_train_lin_float > 0.5).astype(np.int8).tolist()
+
+        features_t_all = features_t_all + features_t
+        labels_train_lin_all = labels_train_lin_all + labels_train_lin
+    clf = classif_fcn()
+    clf.fit(features_t_all, labels_train_lin_all)
+    import ipdb; ipdb.set_trace()  # noqa BREAKPOINT
+    return clf
+
+
+def one_experiment_setting_testing(inputdata, tile_shape,
+                                   feature_fcn, clf,
+                                   visualization=False):
     indata_len = len(inputdata['data'])
     # indata_len = 3
 
@@ -290,26 +344,13 @@ def one_experiment_setting_for_whole_dataset(inputdata, tile_shape,
             pyed = py3DSeedEditor.py3DSeedEditor(data3d_orig,
                                                  contour=data3d_seg)
             pyed.show()
-            # import pdb; pdb.set_trace()
-        # fvall.insert(i, get_features(
-        #    data3d_orig,
-        #    data3d_seg,
-        #    visualization=args.visualization
-        #    ))
-        # feature_fcn = feat_hist
         fv_t = get_features_in_tiles(data3d_orig, data3d_seg, tile_shape,
                                      feature_fcn)
         cidxs, features_t, seg_cover_t = fv_t
 
-        if train is True:
-            labels_train_lin_float = np.array(seg_cover_t)
-            labels_train_lin = labels_train_lin_float > 0.5
+        labels_train_lin_float = np.array(seg_cover_t)
+        labels_train_lin = labels_train_lin_float > 0.5
 
-        # from sklearn import svm
-        # clf = svm.SVC()
-
-        clf = classif_fcn()
-        clf.fit(features_t, labels_train_lin)
         labels_lin = clf.predict(features_t)
 
         d_shp = data3d_orig.shape
@@ -324,7 +365,22 @@ def one_experiment_setting_for_whole_dataset(inputdata, tile_shape,
         if visualization:
             pyed = py3DSeedEditor.py3DSeedEditor(data3d_seg, contour=labels)
             pyed.show()
-        fv_tiles.insert(i, fv_t)
+        #fv_tiles.insert(i, fv_t)
+    pass
+
+
+def one_experiment_setting_for_whole_dataset(inputdata, tile_shape,
+                                             feature_fcn, classif_fcn, train,
+                                             visualization=False):
+    fvall = []
+    fv_tiles = []
+    clf = one_experiment_setting_training(inputdata, tile_shape,
+                                             feature_fcn, classif_fcn,
+                                             visualization=False)
+
+    one_experiment_setting_testing(inputdata, tile_shape,
+                                             feature_fcn, clf,
+                                             visualization=True)
 
 # @TODO vracet něco inteligentního, fvall je prázdný
     return fvall
@@ -402,7 +458,7 @@ def main():
     from sklearn.naive_bayes import GaussianNB
 
     list_of_classifiers = [svm.SVC, GaussianNB]
-    tile_shape = [10, 100, 100]
+    tile_shape = [10, 50, 50]
 
     if args.features_classifs:
         import features_classifs
