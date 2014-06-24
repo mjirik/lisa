@@ -315,7 +315,9 @@ def save_labels(inputfile, labels, feature_fcn, classif_fcn, voxelsize, tile_sha
     slab['liver'] = 1
     slab['none'] = 0
     labdata = {'labels': labels, 'feature_fcn' : str(feature_fcn),
-               'classif_fcn' : str(classif_fcn), 'voxelsize_mm': voxelsize,
+# @TODO nějak vyřešit jméno klasifikátoru z instance objektu
+               #'classif_fcn' : str(classif_fcn),
+               'voxelsize_mm': voxelsize,
                'slab': slab}
     #inputfilename = path_leaf(inputfile)
     filename = feature_fcn.__name__ + '_'+classif_fcn.__name__ + '_' + inputfile
@@ -354,7 +356,7 @@ def one_experiment_setting_training(inputdata, tile_shape,
         labels_train_lin_all = labels_train_lin_all + labels_train_lin
     clf = classif_fcn()
     clf.fit(features_t_all, labels_train_lin_all)
-    import ipdb; ipdb.set_trace()  # noqa BREAKPOINT
+    #import ipdb; ipdb.set_trace()  # noqa BREAKPOINT
     return clf
 
 
@@ -385,8 +387,10 @@ def one_experiment_setting_testing(inputdata, tile_shape,
 
         labels = arrange_to_tiled_data(cidxs, tile_shape, d_shp,
                                        labels_lin)
+# @TODO změnil jsem to. Už zde není ukazatel na klasifikátor, ale přímo
+# natrénovaný klasifikátor.
         save_labels(inputdata['data'][i]['sliverorig'], labels, feature_fcn,
-                    classif_fcn, voxelsize_mm, tile_shape)
+                    clf, voxelsize_mm, tile_shape)
         # ltl = (labels_train_lin_float * 10).astype(np.int8)
         # labels_train = arrange_to_tiled_data(cidxs, tile_shape,
         #                                     d_shp, ltl)
