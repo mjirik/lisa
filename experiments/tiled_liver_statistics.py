@@ -227,8 +227,8 @@ def sample_input_data():
     inputdata = {
         'basedir': '/home/mjirik/data/medical/',
         'data': [
-            {'sliverseg': 'data_orig/sliver07/training-part1/liver-seg001.mhd', 'sliverorig': 'data_orig/sliver07/training-part1/liver-orig001.mhd'}, # noqa
-            {'sliverseg': 'data_orig/sliver07/training-part1/liver-seg002.mhd', 'sliverorig': 'data_orig/sliver07/training-part1/liver-orig002.mhd'}, # noqa
+            {'sliverseg': 'data_orig/sliver07/training-part1/liver-seg001.mhd', 'sliverorig': 'data_orig/sliver07/training-part1/liver-orig001.mhd'},  # noqa
+            {'sliverseg': 'data_orig/sliver07/training-part1/liver-seg002.mhd', 'sliverorig': 'data_orig/sliver07/training-part1/liver-orig002.mhd'},  # noqa
         ]
     }
 
@@ -306,7 +306,7 @@ def save_labels(inputfile, labels, feature_fcn, classif_fcn, voxelsize, tile_sha
     # Ukládání výsledku do souboru
     if(os.path.exists(path_directory) is False):
         os.makedirs(path_directory)
-    path_subdirectory  = os.path.join(path_directory, subdirectory)
+    path_subdirectory = os.path.join(path_directory, subdirectory)
     if(os.path.exists(path_subdirectory) is False):
         os.makedirs(path_subdirectory)
     # TODO : Main Saving Loop ...
@@ -314,14 +314,16 @@ def save_labels(inputfile, labels, feature_fcn, classif_fcn, voxelsize, tile_sha
     slab = {}
     slab['liver'] = 1
     slab['none'] = 0
-    labdata = {'labels': labels, 'feature_fcn' : str(feature_fcn),
-# @TODO nějak vyřešit jméno klasifikátoru z instance objektu
-               #'classif_fcn' : str(classif_fcn),
+    labdata = {'labels': labels, 'feature_fcn': str(feature_fcn),
+               # @TODO nějak vyřešit jméno klasifikátoru z instance objektu
+               # 'classif_fcn' : str(classif_fcn),
                'voxelsize_mm': voxelsize,
                'slab': slab}
-    #inputfilename = path_leaf(inputfile)
-    filename = feature_fcn.__name__ + '_'+classif_fcn.__name__ + '_' + inputfile
-    filename = filename + '_' + str(tile_shape[0]) + '_' + str(tile_shape[1]) + '_'
+    # inputfilename = path_leaf(inputfile)
+    filename = feature_fcn.__name__ + '_' + \
+        classif_fcn.__name__ + '_' + inputfile
+    filename = filename + '_' + \
+        str(tile_shape[0]) + '_' + str(tile_shape[1]) + '_'
     filename = filename + str(tile_shape[2])
     path_to_file = os.path.join(path_subdirectory, filename)
     misc.obj_to_file(labdata, path_to_file, filetype='pickle')
@@ -356,7 +358,7 @@ def one_experiment_setting_training(inputdata, tile_shape,
         labels_train_lin_all = labels_train_lin_all + labels_train_lin
     clf = classif_fcn()
     clf.fit(features_t_all, labels_train_lin_all)
-    #import ipdb; ipdb.set_trace()  # noqa BREAKPOINT
+    # import ipdb; ipdb.set_trace()  # noqa BREAKPOINT
     return clf
 
 
@@ -378,8 +380,8 @@ def one_experiment_setting_testing(inputdata, tile_shape,
                                      feature_fcn)
         cidxs, features_t, seg_cover_t = fv_t
 
-        labels_train_lin_float = np.array(seg_cover_t)
-        labels_train_lin = labels_train_lin_float > 0.5
+        # labels_train_lin_float = np.array(seg_cover_t)
+        # labels_train_lin = labels_train_lin_float > 0.5
 
         labels_lin = clf.predict(features_t)
 
@@ -389,8 +391,8 @@ def one_experiment_setting_testing(inputdata, tile_shape,
                                        labels_lin)
 # @TODO změnil jsem to. Už zde není ukazatel na klasifikátor, ale přímo
 # natrénovaný klasifikátor.
-        save_labels(inputdata['data'][i]['sliverorig'], labels, feature_fcn,
-                    clf, voxelsize_mm, tile_shape)
+        # save_labels(inputdata['data'][i]['sliverorig'], labels, feature_fcn,
+        #            clf, voxelsize_mm, tile_shape)
         # ltl = (labels_train_lin_float * 10).astype(np.int8)
         # labels_train = arrange_to_tiled_data(cidxs, tile_shape,
         #                                     d_shp, ltl)
@@ -399,7 +401,6 @@ def one_experiment_setting_testing(inputdata, tile_shape,
         if visualization:
             pyed = py3DSeedEditor.py3DSeedEditor(data3d_seg, contour=labels)
             pyed.show()
-        #fv_tiles.insert(i, fv_t)
     pass
 
 
@@ -407,14 +408,14 @@ def one_experiment_setting_for_whole_dataset(inputdata, tile_shape,
                                              feature_fcn, classif_fcn, train,
                                              visualization=False):
     fvall = []
-    fv_tiles = []
+    # fv_tiles = []
     clf = one_experiment_setting_training(inputdata, tile_shape,
-                                             feature_fcn, classif_fcn,
-                                             visualization=False)
+                                          feature_fcn, classif_fcn,
+                                          visualization=False)
 
     one_experiment_setting_testing(inputdata, tile_shape,
-                                             feature_fcn, clf,
-                                             visualization=True)
+                                   feature_fcn, clf,
+                                   visualization=True)
 
 # @TODO vracet něco inteligentního, fvall je prázdný
     return fvall
