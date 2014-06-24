@@ -705,6 +705,7 @@ class OrganSegmentation():
             dilationIterations=2,
             nObj=1,
             biggestObjects=False,
+            useSeedsOfCompactObjects=True,
             interactivity=True,
             binaryClosingIterations=2,
             binaryOpeningIterations=0)
@@ -730,7 +731,7 @@ class OrganSegmentation():
             voxelsize_mm=self.voxelsize_mm)
         stats = skan.skeleton_analysis(guiUpdateFunction=None)
 
-        if not 'graph' in self.vessel_tree.keys():
+        if 'graph' not in self.vessel_tree.keys():
             self.vessel_tree['voxelsize_mm'] = self.voxelsize_mm
             self.vessel_tree['graph'] = {}
 
@@ -749,7 +750,8 @@ class OrganSegmentation():
             inputSigma=0.15,
             dilationIterations=2,
             nObj=1,
-            biggestObjects=True,
+            biggestObjects=False,
+            useSeedsOfCompactObjects=True,
             interactivity=True,
             binaryClosingIterations=2,
             binaryOpeningIterations=0)
