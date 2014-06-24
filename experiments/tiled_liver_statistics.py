@@ -298,6 +298,34 @@ def data_postprocessing(segmentation_res, voxelsize_mm, working_voxelsize_mm):
     return segm_orig_scale
 
 
+def save_labels(inputfile, labels, feature_fcn, classif_fcn, voxelsize, tile_shape):
+    path_directory = 'lisa_data/'
+    subdirectory = 'experiments/'
+    actual = os.getcwd()
+    os.chdir(os.path.expanduser('~'))
+    # Ukládání výsledku do souboru
+    if(os.path.exists(path_directory) is False):
+        os.makedirs(path_directory)
+    path_subdirectory  = os.path.join(path_directory, subdirectory)
+    if(os.path.exists(path_subdirectory) is False):
+        os.makedirs(path_subdirectory)
+    # TODO : Main Saving Loop ...
+    labdata = []
+    slab = {}
+    slab['liver'] = 1
+    slab['none'] = 0
+    labdata = {'labels': labels, 'feature_fcn' : str(feature_fcn),
+               'classif_fcn' : str(classif_fcn), 'voxelsize_mm': voxelsize,
+               'slab': slab}
+    #inputfilename = path_leaf(inputfile)
+    filename = feature_fcn.__name__ + '_'+classif_fcn.__name__ + '_' + inputfile
+    filename = filename + '_' + str(tile_shape[0]) + '_' + str(tile_shape[1]) + '_'
+    filename = filename + str(tile_shape[2])
+    path_to_file = os.path.join(path_subdirectory, filename)
+    misc.obj_to_file(labdata, path_to_file, filetype='pickle')
+    os.chdir(actual)
+
+
 def one_experiment_setting_training(inputdata, tile_shape,
                                     feature_fcn, classif_fcn,
                                     visualization=False):
@@ -357,6 +385,8 @@ def one_experiment_setting_testing(inputdata, tile_shape,
 
         labels = arrange_to_tiled_data(cidxs, tile_shape, d_shp,
                                        labels_lin)
+        save_labels(inputdata['data'][i]['sliverorig'], labels, feature_fcn,
+                    classif_fcn, voxelsize_mm, tile_shape)
         # ltl = (labels_train_lin_float * 10).astype(np.int8)
         # labels_train = arrange_to_tiled_data(cidxs, tile_shape,
         #                                     d_shp, ltl)
