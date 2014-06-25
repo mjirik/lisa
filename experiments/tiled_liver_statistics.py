@@ -298,7 +298,7 @@ def data_postprocessing(segmentation_res, voxelsize_mm, working_voxelsize_mm):
     return segm_orig_scale
 
 
-def save_labels(inputfile, labels, feature_fcn, classif_fcn, voxelsize, tile_shape):
+def save_labels(inputfile, labels, feature_fcn, classif_inst, voxelsize, tile_shape):
     path_directory = 'lisa_data/'
     subdirectory = 'experiments/'
     actual = os.getcwd()
@@ -316,17 +316,17 @@ def save_labels(inputfile, labels, feature_fcn, classif_fcn, voxelsize, tile_sha
     slab['none'] = 0
     labdata = {'labels': labels, 'feature_fcn': str(feature_fcn),
                # @TODO nějak vyřešit jméno klasifikátoru z instance objektu
-               # 'classif_fcn' : str(classif_fcn),
+               'classif_fcn' : str(classif_inst.__class__.__name__),
                'voxelsize_mm': voxelsize,
                'slab': slab}
     # inputfilename = path_leaf(inputfile)
     filename = feature_fcn.__name__ + '_' + \
-        classif_fcn.__name__ + '_' + inputfile
+        classif_inst.__class__.__name__ + '_' + inputfile
     filename = filename + '_' + \
         str(tile_shape[0]) + '_' + str(tile_shape[1]) + '_'
     filename = filename + str(tile_shape[2])
     path_to_file = os.path.join(path_subdirectory, filename)
-    misc.obj_to_file(labdata, path_to_file, filetype='pickle')
+    misc.obj_to_file(labdata, path_to_file, filetype='pklz')
     os.chdir(actual)
 
 
@@ -391,8 +391,8 @@ def one_experiment_setting_testing(inputdata, tile_shape,
                                        labels_lin)
 # @TODO změnil jsem to. Už zde není ukazatel na klasifikátor, ale přímo
 # natrénovaný klasifikátor.
-        # save_labels(inputdata['data'][i]['sliverorig'], labels, feature_fcn,
-        #            clf, voxelsize_mm, tile_shape)
+        save_labels(inputdata['data'][i]['sliverorig'], labels, feature_fcn,
+                    clf, voxelsize_mm, tile_shape)
         # ltl = (labels_train_lin_float * 10).astype(np.int8)
         # labels_train = arrange_to_tiled_data(cidxs, tile_shape,
         #                                     d_shp, ltl)
