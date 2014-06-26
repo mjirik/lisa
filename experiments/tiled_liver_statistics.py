@@ -155,7 +155,6 @@ def get_features_in_tiles(data3d_orig, data3d_seg, tile_shape, feature_fcn):
     (float 0 by 1)
 
     """
-# @TODO here
     cindexes = cutter_indexes(data3d_orig.shape, tile_shape)
 # create empty list of defined length
     features_t = [None] * len(cindexes)
@@ -298,7 +297,14 @@ def data_postprocessing(segmentation_res, voxelsize_mm, working_voxelsize_mm):
     return segm_orig_scale
 
 
-def save_labels(inputfile, labels, feature_fcn, classif_inst, voxelsize, tile_shape):
+def save_labels(
+        inputfile,
+        data3d,
+        segmentation,
+        feature_fcn,
+        classif_inst,
+        voxelsize,
+        tile_shape):
     path_directory = 'lisa_data/'
     subdirectory = 'experiments/'
     actual = os.getcwd()
@@ -310,29 +316,38 @@ def save_labels(inputfile, labels, feature_fcn, classif_inst, voxelsize, tile_sh
     if(os.path.exists(path_subdirectory) is False):
         os.makedirs(path_subdirectory)
     # TODO : Main Saving Loop ...
-    labdata = []
+    dataplus = []
     slab = {}
     slab['liver'] = 1
     slab['none'] = 0
-    labdata = {'labels': labels, 'feature_fcn': str(feature_fcn),
-               # @TODO nějak vyřešit jméno klasifikátoru z instance objektu
-               'classif_fcn' : str(classif_inst.__class__.__name__),
-               'voxelsize_mm': voxelsize,
-               'slab': slab}
+    dataplus = {
+        # 'segmentation': segmentation[:10, :10, :10].astype(np.int8),
+        # 'data3d': data3d[:10, :10, :10].astype(np.int16),
+        'segmentation': segmentation.astype(np.int8),
+        'data3d': data3d.astype(np.int16),
+        'processing_info': {
+            'feature_fcn': str(feature_fcn),
+            'classif_fcn': str(classif_inst.__class__.__name__)
+        },
+        'voxelsize_mm': voxelsize,
+        'slab': slab}
     # inputfilename = path_leaf(inputfile)
     filename = feature_fcn.__name__ + '_' + \
         classif_inst.__class__.__name__ + '_' + inputfile
     filename = filename + '_' + \
         str(tile_shape[0]) + '_' + str(tile_shape[1]) + '_'
-    filename = filename + str(tile_shape[2])
+    filename = filename + str(tile_shape[2]) + '.pklz'
     path_to_file = os.path.join(path_subdirectory, filename)
-    misc.obj_to_file(labdata, path_to_file, filetype='pklz')
+    misc.obj_to_file(dataplus, path_to_file, filetype='pklz')
     os.chdir(actual)
 
 
 def one_experiment_setting_training(inputdata, tile_shape,
                                     feature_fcn, classif_fcn,
                                     visualization=False):
+    """
+    Training of experiment.
+    """
     features_t_all = []
     labels_train_lin_all = []
     indata_len = len(inputdata['data'])
@@ -382,24 +397,26 @@ def one_experiment_setting_testing(inputdata, tile_shape,
 
         # labels_train_lin_float = np.array(seg_cover_t)
         # labels_train_lin = labels_train_lin_float > 0.5
-
         labels_lin = clf.predict(features_t)
 
         d_shp = data3d_orig.shape
 
-        labels = arrange_to_tiled_data(cidxs, tile_shape, d_shp,
-                                       labels_lin)
+        segmentation = arrange_to_tiled_data(cidxs, tile_shape, d_shp,
+                                             labels_lin)
 # @TODO změnil jsem to. Už zde není ukazatel na klasifikátor, ale přímo
 # natrénovaný klasifikátor.
-        save_labels(inputdata['data'][i]['sliverorig'], labels, feature_fcn,
-                    clf, voxelsize_mm, tile_shape)
+        save_labels(
+            inputdata['data'][i]['sliverorig'], data3d_orig, segmentation,
+            feature_fcn, clf, voxelsize_mm, tile_shape)
         # ltl = (labels_train_lin_float * 10).astype(np.int8)
         # labels_train = arrange_to_tiled_data(cidxs, tile_shape,
         #                                     d_shp, ltl)
 
         # pyed = py3DSeedEditor.py3DSeedEditor(labels_train, contour=labels)
         if visualization:
-            pyed = py3DSeedEditor.py3DSeedEditor(data3d_seg, contour=labels)
+            pyed = py3DSeedEditor.py3DSeedEditor(
+                data3d_seg,
+                contour=segmentation)
             pyed.show()
     pass
 
@@ -413,9 +430,10 @@ def one_experiment_setting_for_whole_dataset(inputdata, tile_shape,
                                           feature_fcn, classif_fcn,
                                           visualization=False)
 
+    logger.info('run testing')
     one_experiment_setting_testing(inputdata, tile_shape,
                                    feature_fcn, clf,
-                                   visualization=True)
+                                   visualization=visualization)
 
 # @TODO vracet něco inteligentního, fvall je prázdný
     return fvall
