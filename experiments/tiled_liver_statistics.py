@@ -50,6 +50,7 @@ import misc
 import datareader
 import matplotlib.pyplot as plt
 import experiments
+import texture_features as tfeat
 
 
 def feat_hist_by_segmentation(data3d_orig, data3d_seg, voxelsize_mm=[1],
@@ -421,17 +422,18 @@ def one_experiment_setting_testing(inputdata, tile_shape,
     pass
 
 
-def one_experiment_setting_for_whole_dataset(inputdata, tile_shape,
-                                             feature_fcn, classif_fcn, train,
+def one_experiment_setting_for_whole_dataset(training_yaml, testing_yaml,
+                                             tile_shape, feature_fcn,
+                                             classif_fcn, train,
                                              visualization=False):
     fvall = []
     # fv_tiles = []
-    clf = one_experiment_setting_training(inputdata, tile_shape,
+    clf = one_experiment_setting_training(training_yaml, tile_shape,
                                           feature_fcn, classif_fcn,
                                           visualization=False)
 
     logger.info('run testing')
-    one_experiment_setting_testing(inputdata, tile_shape,
+    one_experiment_setting_testing(testing_yaml, tile_shape,
                                    feature_fcn, clf,
                                    visualization=visualization)
 
@@ -446,10 +448,11 @@ def make_product_list(list_of_feature_fcn, list_of_classifiers):
     return featrs_plus_classifs
 
 
-def experiment(path_to_yaml, featrs_plus_classifs,
+def experiment(training_yaml_path, testing_yaml_path,  featrs_plus_classifs,
                tile_shape, visualization=False, train=False):
 
-    inputdata = misc.obj_from_file(path_to_yaml, filetype='yaml')
+    training_yaml = misc.obj_from_file(training_yaml_path, filetype='yaml')
+    testing_yaml = misc.obj_from_file(testing_yaml_path, filetype='yaml')
 
     # import ipdb; ipdb.set_trace()  # noqa BREAKPOINT
 
@@ -460,7 +463,7 @@ def experiment(path_to_yaml, featrs_plus_classifs,
         classif_fcn = fpc[1]
 
         fvall = one_experiment_setting_for_whole_dataset(
-            inputdata, tile_shape,
+            training_yaml, testing_yaml, tile_shape,
             feature_fcn, classif_fcn, train, visualization)
 
         result = {'params': str(fpc), 'fvall': fvall}
@@ -483,6 +486,10 @@ def main():
 
     parser = argparse.ArgumentParser(
         description='Compute features on liver and other tissue.')
+    parser.add_argument('-tr', '--training_yaml_path', help='input yaml file',
+                        default="20130919_liver_statistics.yaml")
+    parser.add_argument('-te', '--testing_yaml_path', help='input yaml file',
+                        default=None)
     parser.add_argument('-si', '--sampleInput', action='store_true',
                         help='generate sample intput data', default=False)
     parser.add_argument('-v', '--visualization',  action='store_true',
@@ -490,8 +497,6 @@ def main():
     parser.add_argument('-fc', '--features_classifs',  action='store_true',
                         help='Read features and classifs list from file',
                         default=False)
-    parser.add_argument('-i', '--input', help='input yaml file',
-                        default="20130919_liver_statistics.yaml")
     parser.add_argument('-o', '--output', help='output file',
                         default="20130919_liver_statistics_results.pkl")
     parser.add_argument('-t', '--train', help='Training', default=False,
@@ -503,10 +508,18 @@ def main():
         sample_input_data()
     # input parser
     # path_to_yaml = os.path.join(path_to_script, args.input)
-    path_to_yaml = args.input
+    # training_yaml_path = args.training_yaml_path
+    # testing_yaml_path = args.testing_yaml_path
+    if args.testing_yaml_path is None:
+        print 'testing is same as training'
+        args.testing_yaml_path = args.training_yaml_path
 
     # write_csv(fvall)
-    list_of_feature_fcn = [feat_hist]
+    # gf = tfeat.GaborFeatures()
+    list_of_feature_fcn = [
+        feat_hist,
+        # gf.feats_gabor
+    ]
     from sklearn import svm
     from sklearn.naive_bayes import GaussianNB
 
@@ -520,8 +533,8 @@ def main():
         featrs_plus_classifs = make_product_list(list_of_feature_fcn,
                                                  list_of_classifiers)
 
-    result = experiment(path_to_yaml, featrs_plus_classifs,
-                        tile_shape=tile_shape,
+    result = experiment(args.training_yaml_path, args.testing_yaml_path,
+                        featrs_plus_classifs, tile_shape=tile_shape,
                         visualization=args.visualization, train=args.train)
 
 # Ukládání výsledku do souboru
