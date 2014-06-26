@@ -78,6 +78,11 @@ def read_pkl_and_pklz(filename):
 
 def obj_to_file(obj, filename='annotation.yaml', filetype='yaml'):
     '''Writes annotation in file.
+
+    Filetypes:
+        yaml
+        pkl, pickle
+        pklz, picklezip
     '''
     #import json
     #with open(filename, mode='w') as f:
