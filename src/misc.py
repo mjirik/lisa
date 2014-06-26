@@ -67,11 +67,17 @@ def read_pkl_and_pklz(filename):
         f = gzip.open(filename, 'rb')
         fcontent = f.read()
         f.close()
-    except Exception as e:
+    except IOError as e:
+        # if the problem is in not gzip file
         logger.warning("Input gzip exception: " + str(e))
         f = open(filename, 'rb')
         fcontent = f.read()
         f.close()
+    except Exception as e:
+        # other problem
+        import traceback
+        logger.error("Input gzip exception: " + str(e))
+        logger.error(traceback.format_exc())
 
     return fcontent
 
