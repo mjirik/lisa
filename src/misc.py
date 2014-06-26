@@ -1,7 +1,7 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
 
-#import sys
+# import sys
 import os
 
 
@@ -22,10 +22,10 @@ def suggest_filename(file_path, exists=None):
 
     if exists:
         file_path, file_extension = os.path.splitext(file_path)
-        #print file_path
+        # print file_path
         m = re.search(r"\d+$", file_path)
         if m is None:
-            #cislo = 2
+            # cislo = 2
             new_cislo_str = "2"
         else:
             cislostr = (m.group())
@@ -84,8 +84,8 @@ def obj_to_file(obj, filename='annotation.yaml', filetype='yaml'):
         pkl, pickle
         pklz, picklezip
     '''
-    #import json
-    #with open(filename, mode='w') as f:
+    # import json
+    # with open(filename, mode='w') as f:
     #    json.dump(annotation,f)
 
     # write to yaml
@@ -107,7 +107,7 @@ def obj_to_file(obj, filename='annotation.yaml', filetype='yaml'):
         import gzip
         import pickle
         f = gzip.open(filename, 'wb', compresslevel=1)
-        #f = open(filename, 'wb')
+        # f = open(filename, 'wb')
         pickle.dump(obj, f)
         f.close
     elif filetype in('mat'):
