@@ -9,6 +9,11 @@ import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig()
 
+import sys
+import os.path
+
+path_to_script = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(path_to_script, "./extern/sPickle"))
 
 def suggest_filename(file_path, exists=None):
     """
@@ -51,7 +56,8 @@ def obj_from_file(filename='annotation.yaml', filetype='yaml'):
     elif filetype in ('pickle', 'pkl', 'pklz', 'picklezip'):
         fcontent = read_pkl_and_pklz(filename)
         # import pickle
-        import cPickle as pickle
+        # import cPickle as pickle
+        import sPickle as pickle
         obj = pickle.loads(fcontent)
     else:
         logger.error('Unknown filetype ' + filetype)
@@ -107,15 +113,15 @@ def obj_to_file(obj, filename='annotation.yaml', filetype='yaml'):
         f.close
     elif filetype in ('pickle', 'pkl'):
         f = open(filename, 'wb')
-        import cPickle as pickle
-        pickle.dump(obj, f)
+        import sPickle as pickle
+        pickle.s_dump(obj, f)
         f.close
     elif filetype in ('picklezip', 'pklz'):
         import gzip
-        import cPickle as pickle
+        import sPickle as pickle
         f = gzip.open(filename, 'wb', compresslevel=1)
         # f = open(filename, 'wb')
-        pickle.dump(obj, f)
+        pickle.s_dump(obj, f)
         f.close
     elif filetype in('mat'):
 
