@@ -50,7 +50,8 @@ def obj_from_file(filename='annotation.yaml', filetype='yaml'):
         f.close()
     elif filetype in ('pickle', 'pkl', 'pklz', 'picklezip'):
         fcontent = read_pkl_and_pklz(filename)
-        import pickle
+        # import pickle
+        import cPickle as pickle
         obj = pickle.loads(fcontent)
     else:
         logger.error('Unknown filetype ' + filetype)
@@ -106,12 +107,12 @@ def obj_to_file(obj, filename='annotation.yaml', filetype='yaml'):
         f.close
     elif filetype in ('pickle', 'pkl'):
         f = open(filename, 'wb')
-        import pickle
+        import cPickle as pickle
         pickle.dump(obj, f)
         f.close
     elif filetype in ('picklezip', 'pklz'):
         import gzip
-        import pickle
+        import cPickle as pickle
         f = gzip.open(filename, 'wb', compresslevel=1)
         # f = open(filename, 'wb')
         pickle.dump(obj, f)
