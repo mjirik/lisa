@@ -294,7 +294,7 @@ class OrganSegmentation():
         # pyed = py3DSeedEditor.py3DSeedEditor(self.orig_scale_segmentation)
         # pyed.show()
 
-        critf = lambda x: self.__volume_blowup_criterial_funcion(x, wvol,
+        critf = lambda x: self.__volume_blowup_criterial_funcion(x, wvol, # noqa
                                                                  segsmooth)
 
         thr = scipy.optimize.fmin(critf, x0=0.5, disp=False)[0]
@@ -339,6 +339,8 @@ class OrganSegmentation():
         if 'slab' in dpkeys:
             self.slab = datap['slab']
 
+        print dataplus['segmentation']
+        print np.unique(dataplus['segmentation'])
         if ('segmentation' in dpkeys) and datap['segmentation'] is not None:
             self.segmentation = datap['segmentation']
         else:
@@ -348,24 +350,33 @@ class OrganSegmentation():
         # self.segparams = {'pairwiseAlpha':2, 'use_boundary_penalties':True,
         # 'boundary_penalties_sigma':50}
 
+        self.segparams['pairwise_alpha'] = \
+            self.segparams['pairwise_alpha_per_mm2'] / \
+            np.mean(self.working_voxelsize_mm)
+
         try:
             self.seeds = datap['processing_information'][
                 'organ_segmentation']['seeds']
         except:
             logger.debug('seeds not found in dataplus')
+            self.seeds = None
 
         # for each mm on boundary there will be sum of penalty equal 10
 
-        self.segparams['pairwise_alpha'] = \
-            self.segparams['pairwise_alpha_per_mm2'] / \
-            np.mean(self.working_voxelsize_mm)
-
         if self.seeds is None:
             self.seeds = np.zeros(self.data3d.shape, dtype=np.int8)
+        logger.info("seeds " + str(self.seeds))
         logger.info('dir ' + str(self.datapath) + ", series_number" +
                     str(datap['series_number']) + 'voxelsize_mm' +
                     str(self.voxelsize_mm))
-        self.time_start = time.time()
+
+        # try read prev information about time processing
+        try:
+            time_prev = datap['processing_information']['processing_time']
+            self.processing_time = time_prev
+            self.time_start = time.time() - time_prev
+        except:
+            self.time_start = time.time()
 
     def crop(self, tmpcrinfo):
         """
