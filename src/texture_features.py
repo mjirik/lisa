@@ -7,6 +7,7 @@ Texture features
 import numpy as np
 import skimage
 import skimage.filter
+import skimage.feature
 from scipy import ndimage as nd
 
 
@@ -45,4 +46,24 @@ class GaborFeatures():
             filtered = nd.convolve(image, kernel, mode='wrap')
             feats[k, 0] = filtered.mean()
             feats[k, 1] = filtered.var()
+        return feats
+
+
+class GlcmFeatures():
+    def feats_glcm(self, data3d):
+        # feats = np.zeros((len(kernels), 2), dtype=np.double)
+        # @TODO data are cast to uint8
+        feats = []
+        glcm = skimage.feature.greycomatrix(
+            data3d,
+            distances=[5],
+            angles=[0, np.pi/2],
+            levels=256,
+            symmetric=True,
+            normed=True)
+        feats.append(skimage.feature.greycoprops(glcm, 'dissimilarity'))
+        feats.append(skimage.feature.greycoprops(glcm, 'correlation'))
+        feats.append(skimage.feature.greycoprops(glcm, 'contrast'))
+        feats.append(skimage.feature.greycoprops(glcm, 'ASM'))
+        feats.append(skimage.feature.greycoprops(glcm, 'energy'))
         return feats
