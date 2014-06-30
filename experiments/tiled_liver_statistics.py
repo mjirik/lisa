@@ -516,9 +516,12 @@ def main():
 
     # write_csv(fvall)
     # gf = tfeat.GaborFeatures()
+    glcmf = tfeat.GlcmFeatures()
+
     list_of_feature_fcn = [
-        feat_hist,
+        # feat_hist,
         # gf.feats_gabor
+        glcmf.feats_glcm
     ]
     from sklearn import svm
     from sklearn.naive_bayes import GaussianNB

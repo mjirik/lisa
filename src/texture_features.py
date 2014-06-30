@@ -54,10 +54,14 @@ class GlcmFeatures():
         # feats = np.zeros((len(kernels), 2), dtype=np.double)
         # @TODO data are cast to uint8
         feats = []
+        im = data3d[0, :, :]
+        w_center = 100
+        w_width = 250
+        im_uint8 = (1.0 / (1 + np.exp((100 - im)/100)) * 250).astype(np.uint8)
         glcm = skimage.feature.greycomatrix(
-            data3d,
+            im_uint8,
             distances=[5],
-            angles=[0, np.pi/2],
+            angles=[0, np.pi / 2],
             levels=256,
             symmetric=True,
             normed=True)
