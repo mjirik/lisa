@@ -4,7 +4,6 @@
 # import sys
 import os
 
-
 import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig()
@@ -14,6 +13,7 @@ import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "./extern/sPickle"))
+
 
 def suggest_filename(file_path, exists=None):
     """
@@ -112,11 +112,13 @@ def obj_to_file(obj, filename='annotation.yaml', filetype='yaml'):
         yaml.dump(obj, f)
         f.close
     elif filetype in ('pickle', 'pkl'):
+        print "spkl"
         f = open(filename, 'wb')
         import sPickle as pickle
         pickle.s_dump(obj, f)
         f.close
     elif filetype in ('picklezip', 'pklz'):
+        print "spklz"
         import gzip
         import sPickle as pickle
         f = gzip.open(filename, 'wb', compresslevel=1)
