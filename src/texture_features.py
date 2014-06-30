@@ -70,4 +70,4 @@ class GlcmFeatures():
         feats.append(skimage.feature.greycoprops(glcm, 'contrast'))
         feats.append(skimage.feature.greycoprops(glcm, 'ASM'))
         feats.append(skimage.feature.greycoprops(glcm, 'energy'))
-        return feats
+        return np.array(feats).reshape(-1)
