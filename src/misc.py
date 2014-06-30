@@ -56,8 +56,8 @@ def obj_from_file(filename='annotation.yaml', filetype='yaml'):
     elif filetype in ('pickle', 'pkl', 'pklz', 'picklezip'):
         fcontent = read_pkl_and_pklz(filename)
         # import pickle
-        # import cPickle as pickle
-        import sPickle as pickle
+        import cPickle as pickle
+        #import sPickle as pickle
         obj = pickle.loads(fcontent)
     else:
         logger.error('Unknown filetype ' + filetype)
@@ -112,18 +112,24 @@ def obj_to_file(obj, filename='annotation.yaml', filetype='yaml'):
         yaml.dump(obj, f)
         f.close
     elif filetype in ('pickle', 'pkl'):
-        print "spkl"
         f = open(filename, 'wb')
-        import sPickle as pickle
-        pickle.s_dump(obj, f)
+        import cPickle as pickle
+        pickle.dump(obj, f)
         f.close
-    elif filetype in ('picklezip', 'pklz'):
-        print "spklz"
+    elif filetype in ('streamingpicklezip', 'spklz'):
+        # this is not working :-(
         import gzip
         import sPickle as pickle
         f = gzip.open(filename, 'wb', compresslevel=1)
         # f = open(filename, 'wb')
         pickle.s_dump(obj, f)
+        f.close
+    elif filetype in ('picklezip', 'pklz'):
+        import gzip
+        import cPickle as pickle
+        f = gzip.open(filename, 'wb', compresslevel=1)
+        # f = open(filename, 'wb')
+        pickle.dump(obj, f)
         f.close
     elif filetype in('mat'):
 
