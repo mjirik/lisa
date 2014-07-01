@@ -127,7 +127,7 @@ def f_lbp3d(data3d_orig):
         True)
 
 
-def get_features(data3d_orig, data3d_seg, feature_fcn, visualization=True):
+def get_features(data3d_orig, data3d_seg, feature_fcn, feature_fcn_params=[], visualization=True):
     u"""
     Sem doplníme všechny naše měření.
 
@@ -135,10 +135,12 @@ def get_features(data3d_orig, data3d_seg, feature_fcn, visualization=True):
     histogramu.
     data3d_orig: CT data3d_orig
     data3d_seg: jedničky tam, kde jsou játra
+    feature_fcn_plus_params: list of size 2: [feature_function, [3, 'real']]
 
     """
+    # feature_fcn, feature_fcn_params = feature_fcn_plus_params
 
-    featur = feature_fcn(data3d_orig)
+    featur = feature_fcn(data3d_orig, *feature_fcn_params)
     # featur = {}
     # featur['hist'] = feat_hist(data3d_orig, visualization)
     # featur['lbp'] = lbp(data3d_orig, data3d_seg, visualization)
@@ -146,7 +148,12 @@ def get_features(data3d_orig, data3d_seg, feature_fcn, visualization=True):
     return featur
 
 
-def get_features_in_tiles(data3d_orig, data3d_seg, tile_shape, feature_fcn):
+def get_features_in_tiles(
+        data3d_orig,
+        data3d_seg,
+        tile_shape,
+        feature_fcn,
+        feature_fcn_params):
     """
     Computes features for small blocks of image data (tiles).
 
@@ -165,7 +172,7 @@ def get_features_in_tiles(data3d_orig, data3d_seg, tile_shape, feature_fcn):
         cindex = cindexes[i]
         tile_orig = experiments.getArea(data3d_orig, cindex, tile_shape)
         tile_seg = experiments.getArea(data3d_seg, cindex, tile_shape)
-        tf = get_features(tile_orig, tile_seg, feature_fcn,
+        tf = get_features(tile_orig, tile_seg, feature_fcn, feature_fcn_params,
                           visualization=False)
         sc = np.sum(tile_seg > 0).astype(np.float) / np.prod(tile_shape)
         features_t[i] = tf
@@ -344,7 +351,7 @@ def save_labels(
 
 
 def one_experiment_setting_training(inputdata, tile_shape,
-                                    feature_fcn, classif_fcn,
+                                    feature_fcn_plus_params, classif_fcn,
                                     visualization=False):
     """
     Training of experiment.
@@ -364,7 +371,8 @@ def one_experiment_setting_training(inputdata, tile_shape,
                                                  contour=data3d_seg)
             pyed.show()
         fv_t = get_features_in_tiles(data3d_orig, data3d_seg, tile_shape,
-                                     feature_fcn)
+                                     feature_fcn_plus_params[0],
+                                     feature_fcn_plus_params[1])
         cidxs, features_t, seg_cover_t = fv_t
         labels_train_lin_float = np.array(seg_cover_t)
         labels_train_lin = (
@@ -379,7 +387,7 @@ def one_experiment_setting_training(inputdata, tile_shape,
 
 
 def one_experiment_setting_testing(inputdata, tile_shape,
-                                   feature_fcn, clf,
+                                   feature_fcn_plus_params, clf,
                                    visualization=False):
     indata_len = len(inputdata['data'])
     # indata_len = 3
@@ -393,7 +401,8 @@ def one_experiment_setting_testing(inputdata, tile_shape,
                                                  contour=data3d_seg)
             pyed.show()
         fv_t = get_features_in_tiles(data3d_orig, data3d_seg, tile_shape,
-                                     feature_fcn)
+                                     feature_fcn_plus_params[0],
+                                     feature_fcn_plus_params[1])
         cidxs, features_t, seg_cover_t = fv_t
 
         # labels_train_lin_float = np.array(seg_cover_t)
@@ -408,7 +417,7 @@ def one_experiment_setting_testing(inputdata, tile_shape,
 # natrénovaný klasifikátor.
         save_labels(
             inputdata['data'][i]['sliverorig'], data3d_orig, segmentation,
-            feature_fcn, clf, voxelsize_mm, tile_shape)
+            feature_fcn_plus_params, clf, voxelsize_mm, tile_shape)
         # ltl = (labels_train_lin_float * 10).astype(np.int8)
         # labels_train = arrange_to_tiled_data(cidxs, tile_shape,
         #                                     d_shp, ltl)
@@ -422,10 +431,14 @@ def one_experiment_setting_testing(inputdata, tile_shape,
     pass
 
 
-def one_experiment_setting_for_whole_dataset(training_yaml, testing_yaml,
-                                             tile_shape, feature_fcn,
-                                             classif_fcn, train,
-                                             visualization=False):
+def one_experiment_setting_for_whole_dataset(
+        training_yaml,
+        testing_yaml,
+        tile_shape,
+        feature_fcn,
+        classif_fcn,
+        train,
+        visualization=False):
     fvall = []
     # fv_tiles = []
     clf = one_experiment_setting_training(training_yaml, tile_shape,
