@@ -310,6 +310,7 @@ def save_labels(
         data3d,
         segmentation,
         feature_fcn,
+        feature_fcn_params,
         classif_inst,
         voxelsize,
         tile_shape):
@@ -333,14 +334,16 @@ def save_labels(
         # 'data3d': data3d[:10, :10, :10].astype(np.int16),
         'segmentation': segmentation.astype(np.int8),
         'data3d': data3d.astype(np.int16),
-        'processing_info': {
+        'processing_information': {
             'feature_fcn': str(feature_fcn),
+            'feature_fcn': str(feature_fcn_params),
             'classif_fcn': str(classif_inst.__class__.__name__)
         },
         'voxelsize_mm': voxelsize,
         'slab': slab}
     # inputfilename = path_leaf(inputfile)
     filename = feature_fcn.__name__ + '_' + \
+        __params_to_string_for_filename(feature_fcn_params) + '_' +\
         classif_inst.__class__.__name__ + '_' + inputfile
     filename = filename + '_' + \
         str(tile_shape[0]) + '_' + str(tile_shape[1]) + '_'
@@ -386,11 +389,26 @@ def one_experiment_setting_training(inputdata, tile_shape,
     return clf
 
 
+def __params_to_string_for_filename(params):
+    sarg = str(params)
+    sarg = sarg.replace('{', '')
+    sarg = sarg.replace('}', '')
+    sarg = sarg.replace('[', '')
+    sarg = sarg.replace(']', '')
+    sarg = sarg.replace('"', '')
+    sarg = sarg.replace("'", '')
+    sarg = sarg.replace(" ", '')
+    sarg = sarg.replace(",", '_')
+    sarg = sarg.replace(":", '-')
+    return sarg
+
+
 def one_experiment_setting_testing(inputdata, tile_shape,
                                    feature_fcn_plus_params, clf,
                                    visualization=False):
     indata_len = len(inputdata['data'])
     # indata_len = 3
+    feature_fcn, feature_fcn_params = feature_fcn_plus_params
 
     for i in range(0, indata_len):
         data3d_orig, data3d_seg, voxelsize_mm = read_data_orig_and_seg(
@@ -401,8 +419,8 @@ def one_experiment_setting_testing(inputdata, tile_shape,
                                                  contour=data3d_seg)
             pyed.show()
         fv_t = get_features_in_tiles(data3d_orig, data3d_seg, tile_shape,
-                                     feature_fcn_plus_params[0],
-                                     feature_fcn_plus_params[1])
+                                     feature_fcn,
+                                     feature_fcn_params)
         cidxs, features_t, seg_cover_t = fv_t
 
         # labels_train_lin_float = np.array(seg_cover_t)
@@ -417,7 +435,7 @@ def one_experiment_setting_testing(inputdata, tile_shape,
 # natrénovaný klasifikátor.
         save_labels(
             inputdata['data'][i]['sliverorig'], data3d_orig, segmentation,
-            feature_fcn_plus_params, clf, voxelsize_mm, tile_shape)
+            feature_fcn, feature_fcn_params, clf, voxelsize_mm, tile_shape)
         # ltl = (labels_train_lin_float * 10).astype(np.int8)
         # labels_train = arrange_to_tiled_data(cidxs, tile_shape,
         #                                     d_shp, ltl)
@@ -534,15 +552,15 @@ def main():
     list_of_feature_fcn = [
         # feat_hist,
         # gf.feats_gabor
-        glcmf.feats_glcm
+        [glcmf.feats_glcm, []]
     ]
     from sklearn import svm
     from sklearn.naive_bayes import GaussianNB
 
     list_of_classifiers = [
-            GaussianNB,
-            svm.SVC
-            ]
+        GaussianNB,
+        svm.SVC
+        ]
     tile_shape = [10, 50, 50]
 
     if args.features_classifs:
