@@ -57,7 +57,9 @@ class GlcmFeatures():
         im = data3d[0, :, :]
         w_center = 100
         w_width = 250
-        im_uint8 = (1.0 / (1 + np.exp((100 - im)/100)) * 250).astype(np.uint8)
+        im_uint8 = (1.0 /
+                    (1 + np.exp((w_center - im) / w_center))
+                    * w_width).astype(np.uint8)
         glcm = skimage.feature.greycomatrix(
             im_uint8,
             distances=[5],
@@ -71,3 +73,16 @@ class GlcmFeatures():
         feats.append(skimage.feature.greycoprops(glcm, 'ASM'))
         feats.append(skimage.feature.greycoprops(glcm, 'energy'))
         return np.array(feats).reshape(-1)
+
+
+class HaralickFeatures():
+    def feats_haralick(self, data3d, direction_independent=True):
+        import mahotas
+        import mahotas.features
+
+        mhf = mahotas.features.haralick(data3d+1024)
+
+        if direction_independent:
+            mhf = np.average(mhf, 0)
+
+        return mhf.reshape(-1)
