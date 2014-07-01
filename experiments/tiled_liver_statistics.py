@@ -526,7 +526,10 @@ def main():
     from sklearn import svm
     from sklearn.naive_bayes import GaussianNB
 
-    list_of_classifiers = [svm.SVC, GaussianNB]
+    list_of_classifiers = [
+            GaussianNB,
+            svm.SVC
+            ]
     tile_shape = [10, 50, 50]
 
     if args.features_classifs:
