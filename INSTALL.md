@@ -24,11 +24,11 @@ Install (L)Ubuntu 14.04
 
 Tested with Ubuntu 14.04 32-bit and Linux Mint 16 Petra
 
-    # 1. requirements
-    sudo apt-get install python git python-dev g++ python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools curl
+    # 1. deb package requirements
+    sudo apt-get install python git python-dev g++ python-numpy python-scipy python-matplotlib python-sklearn python-skimage python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools curl
     
-    # 2. simpleITK  
-    sudo easy_install -U SimpleITK
+    # 2. easy_install requirements simpleITK  
+    sudo easy_install -U SimpleITK mahotas
     
     # 3. install gco_python
     mkdir ~/projects
