@@ -392,7 +392,7 @@ def one_exp_set_training(inputdata, tile_shape,
         labels_train_lin_all = labels_train_lin_all + labels_train_lin
 
     # if there are named variables use dict unpacking
-    if isinstance(classif_fcn, dict):
+    if isinstance(classif_fcn_params, dict):
         clf = classif_fcn(**classif_fcn_params)
     else:
         clf = classif_fcn(*classif_fcn_params)
