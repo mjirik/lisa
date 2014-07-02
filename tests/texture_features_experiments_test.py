@@ -1,12 +1,10 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
 
-
-
 # import funkcí z jiného adresáře
 import sys
 import os.path
-import copy
+import logging
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../experiments/"))
@@ -14,15 +12,14 @@ sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
 
-import numpy as np
-
 
 #
 import tiled_liver_statistics
 
+
 class TextureFeaturesExperimentTest(unittest.TestCase):
 
-    #@unittest.skip("comment after implementation")
+    # @unittest.skip("comment after implementation")
     def test_run_experiments(self):
         """
         """
@@ -39,9 +36,9 @@ class TextureFeaturesExperimentTest(unittest.TestCase):
         haralick = tfeat.HaralickFeatures()
 
         list_of_feature_fcn = [
-            # [tls.feat_hist, []],
-            #[gf.feats_gabor, []],
-            [glcmf.feats_glcm, []],
+            [tls.feat_hist, []],
+            # [gf.feats_gabor, []],
+            # [glcmf.feats_glcm, []],
             # [haralick.feats_haralick, [True]]
         ]
         list_of_classifiers = [
@@ -54,8 +51,8 @@ class TextureFeaturesExperimentTest(unittest.TestCase):
         tile_shape = [100, 100, 100]
 
         tls.experiment(yaml_file, yaml_file,
-                        featrs_plus_classifs, tile_shape=tile_shape,
-                        visualization=False)
+                       featrs_plus_classifs, tile_shape=tile_shape,
+                       visualization=False)
 
 
 
@@ -88,4 +85,6 @@ class TextureFeaturesExperimentTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
+    logging.basicConfig( stream=sys.stderr )
+    logging.getLogger().setLevel( logging.DEBUG )
     unittest.main()

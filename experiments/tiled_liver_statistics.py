@@ -167,7 +167,7 @@ def get_features_in_tiles(
 # create empty list of defined length
     features_t = [None] * len(cindexes)
     seg_cover_t = [None] * len(cindexes)
-    print " # ## #    get fv", len(cindexes), " dsh ", data3d_orig.shape
+    print " # ## #    get fv", len(cindexes), " dsh ", data3d_orig.shape , 'tile_shape ', tile_shape
     for i in range(0, len(cindexes)):
         cindex = cindexes[i]
         tile_orig = experiments.getArea(data3d_orig, cindex, tile_shape)
@@ -191,9 +191,10 @@ def cutter_indexes(shape, tile_shape):
 
     """
     # TODO přepis r1?
-    r0 = range(0, shape[0] - tile_shape[0] + 1, tile_shape[0])
-    r1 = range(1, shape[1] - tile_shape[1] + 1, tile_shape[1])
-    r2 = range(2, shape[2] - tile_shape[2] + 1, tile_shape[2])
+    # r0 = range(0, shape[0] - tile_shape[0] + 1, tile_shape[0])
+    # r1 = range(1, shape[1] - tile_shape[1] + 1, tile_shape[1])
+    # r2 = range(2, shape[2] - tile_shape[2] + 1, tile_shape[2])
+    r0 = range(0, shape[0], tile_shape[0])
     r1 = range(0, shape[1], tile_shape[1])
     r2 = range(0, shape[2], tile_shape[2])
     cut_iterator = itertools.product(r0[:-1], r1[:-1], r2[:-1])
@@ -364,8 +365,12 @@ def one_experiment_setting_training(inputdata, tile_shape,
     indata_len = len(inputdata['data'])
     features_t_all = []
     # indata_len = 3
+    print ('number of data files ' + str(indata_len))
+    logger.debug('number of data files ' + str(indata_len))
+    print range(0, indata_len)
 
     for i in range(0, indata_len):
+        print "dfaskdfksdfhask"
         data3d_orig, data3d_seg, voxelsize_mm = read_data_orig_and_seg(
             inputdata, i)
 
@@ -373,9 +378,11 @@ def one_experiment_setting_training(inputdata, tile_shape,
             pyed = py3DSeedEditor.py3DSeedEditor(data3d_orig,
                                                  contour=data3d_seg)
             pyed.show()
+        logger.debug('data shape ' + str(data3d_orig.shape))
         fv_t = get_features_in_tiles(data3d_orig, data3d_seg, tile_shape,
                                      feature_fcn_plus_params[0],
                                      feature_fcn_plus_params[1])
+        print fv_t
         cidxs, features_t, seg_cover_t = fv_t
         labels_train_lin_float = np.array(seg_cover_t)
         labels_train_lin = (
@@ -384,6 +391,9 @@ def one_experiment_setting_training(inputdata, tile_shape,
         features_t_all = features_t_all + features_t
         labels_train_lin_all = labels_train_lin_all + labels_train_lin
     clf = classif_fcn()
+    logger.debug(
+        'ft' + str(features_t_all) + '  '
+        + str(labels_train_lin_all))
     clf.fit(features_t_all, labels_train_lin_all)
     # import ipdb; ipdb.set_trace()  # noqa BREAKPOINT
     return clf
@@ -459,6 +469,8 @@ def one_experiment_setting_for_whole_dataset(
         visualization=False):
     fvall = []
     # fv_tiles = []
+    print "classif_fcn ", classif_fcn
+    print "feature_fcn ", feature_fcn
     clf = one_experiment_setting_training(training_yaml, tile_shape,
                                           feature_fcn, classif_fcn,
                                           visualization=False)
@@ -548,13 +560,13 @@ def main():
     # write_csv(fvall)
     # gf = tfeat.GaborFeatures()
     # glcmf = tfeat.GlcmFeatures()
-    haralick = tfeat.HaralickFeatures()
+    # haralick = tfeat.HaralickFeatures()
 
     list_of_feature_fcn = [
-        # feat_hist,
+        [feat_hist, []],
         # gf.feats_gabor
         # [glcmf.feats_glcm, []]
-        [haralick.feats_haralick, [True]]
+        # [haralick.feats_haralick, [True]]
     ]
     from sklearn import svm
     from sklearn.naive_bayes import GaussianNB
