@@ -48,7 +48,7 @@ class TextureFeaturesExperimentTest(unittest.TestCase):
         featrs_plus_classifs = tls.make_product_list(list_of_feature_fcn,
                                                      list_of_classifiers)
 
-        tile_shape = [100, 100, 100]
+        tile_shape = [50, 50, 50]
 
         tls.experiment(yaml_file, yaml_file,
                        featrs_plus_classifs, tile_shape=tile_shape,
