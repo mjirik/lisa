@@ -167,7 +167,9 @@ def get_features_in_tiles(
 # create empty list of defined length
     features_t = [None] * len(cindexes)
     seg_cover_t = [None] * len(cindexes)
-    print " # ## #    get fv", len(cindexes), " dsh ", data3d_orig.shape , 'tile_shape ', tile_shape
+    logger.debug(
+        " ##    get fv" + str(len(cindexes)) + " dsh " +
+        str(data3d_orig.shape) + 'tile_shape ' + str(tile_shape))
     for i in range(0, len(cindexes)):
         cindex = cindexes[i]
         tile_orig = experiments.getArea(data3d_orig, cindex, tile_shape)
@@ -206,8 +208,8 @@ def cut_tile(data3d, cindex, tile_shape):
     """ Function is similar to experiments.getArea(). """
 
     upper_corner = cindex + np.array(tile_shape)
-    print cindex, "    tile shape ", tile_shape, ' uc ', upper_corner,\
-        ' dsh ', data3d.shape
+    #print cindex, "    tile shape ", tile_shape, ' uc ', upper_corner,\
+    #    ' dsh ', data3d.shape
 
     return data3d[cindex[0]:upper_corner[0],
                   cindex[1]:upper_corner[1],
@@ -365,12 +367,9 @@ def one_experiment_setting_training(inputdata, tile_shape,
     indata_len = len(inputdata['data'])
     features_t_all = []
     # indata_len = 3
-    print ('number of data files ' + str(indata_len))
     logger.debug('number of data files ' + str(indata_len))
-    print range(0, indata_len)
 
     for i in range(0, indata_len):
-        print "dfaskdfksdfhask"
         data3d_orig, data3d_seg, voxelsize_mm = read_data_orig_and_seg(
             inputdata, i)
 
@@ -382,7 +381,6 @@ def one_experiment_setting_training(inputdata, tile_shape,
         fv_t = get_features_in_tiles(data3d_orig, data3d_seg, tile_shape,
                                      feature_fcn_plus_params[0],
                                      feature_fcn_plus_params[1])
-        print fv_t
         cidxs, features_t, seg_cover_t = fv_t
         labels_train_lin_float = np.array(seg_cover_t)
         labels_train_lin = (
@@ -391,9 +389,6 @@ def one_experiment_setting_training(inputdata, tile_shape,
         features_t_all = features_t_all + features_t
         labels_train_lin_all = labels_train_lin_all + labels_train_lin
     clf = classif_fcn()
-    logger.debug(
-        'ft' + str(features_t_all) + '  '
-        + str(labels_train_lin_all))
     clf.fit(features_t_all, labels_train_lin_all)
     # import ipdb; ipdb.set_trace()  # noqa BREAKPOINT
     return clf
