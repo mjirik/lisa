@@ -11,6 +11,9 @@ Copyright:   (c) Pavel Volkovinsky
 -------------------------------------------------------------------------------
 """
 
+import logging
+logger = logging.getLogger(__name__)
+
 import numpy
 import scipy
 import scipy.ndimage
@@ -63,15 +66,32 @@ def thresholding(data, min_threshold, max_threshold, use_min_threshold = True, u
 
         return data
 
-def binaryClosingOpening(data, closeNum, openNum, firstClosing = True):
+def binaryClosingOpening(data, closeNum, openNum, firstClosing = True, fixBorder = True):
 
         """
 
         Aplikace binarniho uzavreni a pote binarniho otevreni.
 
         """
-
-        numpyDataOnes = numpy.ones(data.shape, dtype = type(data[0][0][0]))
+        
+        # This creates empty border around data, so closing operations wont cut off parts of segmented data on the sides
+        if fixBorder and closeNum>=1:
+            shape = data.shape
+            new_shape = (shape[0]+closeNum*2,
+                         shape[1]+closeNum*2, 
+                         shape[2]+closeNum*2)
+            logger.debug('Creating empty border for closeing operation...')
+            logger.debug('orig shape: '+str(shape)+' new shape: '+str(new_shape))
+            
+            new_data = numpy.zeros(new_shape, dtype = type(data[0][0][0]))
+            new_data[closeNum:closeNum+shape[0],
+                     closeNum:closeNum+shape[1],
+                     closeNum:closeNum+shape[2]] = data
+            data = new_data
+            del(new_data)
+        
+        # @TODO - not used!!!, why was this here?
+        #numpyDataOnes = numpy.ones(data.shape, dtype = type(data[0][0][0]))
 
         if firstClosing:
 
@@ -96,6 +116,12 @@ def binaryClosingOpening(data, closeNum, openNum, firstClosing = True):
             if (closeNum >= 1):
 
                 data = data * scipy.ndimage.binary_closing(data, iterations = closeNum)
+                
+        # Removes added empty border. Returns data matrix to original size.
+        if fixBorder and closeNum>=1:
+            data = data[closeNum:closeNum+shape[0],
+                        closeNum:closeNum+shape[1],
+                        closeNum:closeNum+shape[2]]
 
         return data
 
