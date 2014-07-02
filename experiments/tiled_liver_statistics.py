@@ -52,7 +52,6 @@ import matplotlib.pyplot as plt
 import experiments
 import texture_features as tfeat
 
-
 def feat_hist_by_segmentation(data3d_orig, data3d_seg, voxelsize_mm=[1],
                               visualization=True):
     bins = range(-1024, 1024, 1)
@@ -573,10 +572,12 @@ def main():
     ]
     from sklearn import svm
     from sklearn.naive_bayes import GaussianNB
+    from sklearn.mixture import GMM
 
     list_of_classifiers = [
         [GaussianNB, []],
         [svm.SVC, []]
+        [GMM, []]
         ]
     tile_shape = [10, 50, 50]
 
