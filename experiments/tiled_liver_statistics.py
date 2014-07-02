@@ -356,8 +356,9 @@ def save_labels(
     os.chdir(actual)
 
 
-def one_experiment_setting_training(inputdata, tile_shape,
-                                    feature_fcn_plus_params, classif_fcn,
+def one_exp_set_training(inputdata, tile_shape,
+                                    feature_fcn_plus_params,
+                                    classif_fcn_plus_params,
                                     visualization=False):
     """
     Training of experiment.
@@ -367,6 +368,7 @@ def one_experiment_setting_training(inputdata, tile_shape,
     indata_len = len(inputdata['data'])
     features_t_all = []
     # indata_len = 3
+    classif_fcn, classif_fcn_params = classif_fcn_plus_params
     logger.debug('number of data files ' + str(indata_len))
 
     for i in range(0, indata_len):
@@ -388,7 +390,13 @@ def one_experiment_setting_training(inputdata, tile_shape,
 
         features_t_all = features_t_all + features_t
         labels_train_lin_all = labels_train_lin_all + labels_train_lin
-    clf = classif_fcn()
+
+    # if there are named variables use dict unpacking
+    if isinstance(classif_fcn, dict):
+        clf = classif_fcn(**classif_fcn_params)
+    else:
+        clf = classif_fcn(*classif_fcn_params)
+
     clf.fit(features_t_all, labels_train_lin_all)
     # import ipdb; ipdb.set_trace()  # noqa BREAKPOINT
     return clf
@@ -408,7 +416,7 @@ def __params_to_string_for_filename(params):
     return sarg
 
 
-def one_experiment_setting_testing(inputdata, tile_shape,
+def one_exp_set_testing(inputdata, tile_shape,
                                    feature_fcn_plus_params, clf,
                                    visualization=False):
     indata_len = len(inputdata['data'])
@@ -454,7 +462,7 @@ def one_experiment_setting_testing(inputdata, tile_shape,
     pass
 
 
-def one_experiment_setting_for_whole_dataset(
+def one_exp_set_for_whole_dataset(
         training_yaml,
         testing_yaml,
         tile_shape,
@@ -466,12 +474,12 @@ def one_experiment_setting_for_whole_dataset(
     # fv_tiles = []
     print "classif_fcn ", classif_fcn
     print "feature_fcn ", feature_fcn
-    clf = one_experiment_setting_training(training_yaml, tile_shape,
+    clf = one_exp_set_training(training_yaml, tile_shape,
                                           feature_fcn, classif_fcn,
                                           visualization=False)
 
     logger.info('run testing')
-    one_experiment_setting_testing(testing_yaml, tile_shape,
+    one_exp_set_testing(testing_yaml, tile_shape,
                                    feature_fcn, clf,
                                    visualization=visualization)
 
@@ -500,7 +508,7 @@ def experiment(training_yaml_path, testing_yaml_path,  featrs_plus_classifs,
         feature_fcn = fpc[0]
         classif_fcn = fpc[1]
 
-        fvall = one_experiment_setting_for_whole_dataset(
+        fvall = one_exp_set_for_whole_dataset(
             training_yaml, testing_yaml, tile_shape,
             feature_fcn, classif_fcn, train, visualization)
 
@@ -567,8 +575,8 @@ def main():
     from sklearn.naive_bayes import GaussianNB
 
     list_of_classifiers = [
-        GaussianNB,
-        svm.SVC
+        [GaussianNB, []],
+        [svm.SVC, []]
         ]
     tile_shape = [10, 50, 50]
 
