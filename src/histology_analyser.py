@@ -417,9 +417,8 @@ def main():
         # gui =
         HA_GUI.HistologyAnalyserWindow(
             inputfile=args.inputfile,
-            skeleton=args.input_is_skeleton,
-            crop=args.crop,
-            voxelsize=args.voxelsize
+            voxelsize=args.voxelsize,
+            crop=args.crop
         )
         sys.exit(app.exec_())
 

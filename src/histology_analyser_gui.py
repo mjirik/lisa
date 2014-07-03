@@ -32,16 +32,11 @@ class HistologyAnalyserWindow(QMainWindow):
     HEIGHT = 350 #600
     WIDTH = 800
     
-    def __init__(self,inputfile=None,skeleton=False,crop=None,voxelsize=None):
-        self.args_inputfile=inputfile
-        self.args_skeleton=skeleton
-        self.args_crop=crop
-        self.args_voxelsize=voxelsize
-        
+    def __init__(self, inputfile = None, voxelsize = None, crop = None):
         QMainWindow.__init__(self)   
         self.initUI()
         
-        self.showLoadDialog()
+        self.showLoadDialog(inputfile = inputfile, voxelsize = voxelsize, crop = crop)
         
     def initUI(self):
         cw = QWidget()
@@ -86,38 +81,33 @@ class HistologyAnalyserWindow(QMainWindow):
         
         ### when input is just skeleton
         # TODO - edit input_is_skeleton mode to run in gui + test if it works
-        if self.args_skeleton: 
-            logger.info("input is skeleton")
-            struct = misc.obj_from_file(filename='tmp0.pkl', filetype='pickle')
-            self.data3d = struct['data3d']
-            self.metadata = struct['metadata']
-            self.ha = HA.HistologyAnalyser(self.data3d, self.metadata, nogui=False)
-            self.ha.data3d_skel = struct['skel']
-            self.ha.data3d_thr = struct['thr']
-            logger.info("end of is skeleton")
-            self.fixWindow() # just to be sure
-        else:
-            ### Crop data
-            self.setStatusBarText('Crop Data')
-            if self.args_crop is not None: # --crop cli parameter crop
-                crop = self.args_crop
-                logger.debug('Croping data: %s', str(crop))
-                self.data3d = self.data3d[crop[0]:crop[1], crop[2]:crop[3], crop[4]:crop[5]]
-            if self.crgui is True: # --crgui gui crop
-                logger.debug('Gui data crop')
-                self.data3d = self.showCropDialog(self.data3d)
+        #if self.args_skeleton: 
+            #logger.info("input is skeleton")
+            #struct = misc.obj_from_file(filename='tmp0.pkl', filetype='pickle')
+            #self.data3d = struct['data3d']
+            #self.metadata = struct['metadata']
+            #self.ha = HA.HistologyAnalyser(self.data3d, self.metadata, nogui=False)
+            #self.ha.data3d_skel = struct['skel']
+            #self.ha.data3d_thr = struct['thr']
+            #logger.info("end of is skeleton")
+            #self.fixWindow() # just to be sure
             
-            ### Init HistologyAnalyser object
-            logger.debug('Init HistologyAnalyser object')
-            self.ha = HA.HistologyAnalyser(self.data3d, self.metadata, nogui=False)
-            
-            ### Remove Area
-            logger.debug('Remove area')
-            self.setStatusBarText('Remove area')
-            self.showRemoveDialog(self.ha.data3d)
+        ### Gui Crop data
+        if self.crgui is True: # --crgui gui crop
+            logger.debug('Gui data crop')
+            self.data3d = self.showCropDialog(self.data3d)
+        
+        ### Init HistologyAnalyser object
+        logger.debug('Init HistologyAnalyser object')
+        self.ha = HA.HistologyAnalyser(self.data3d, self.metadata, nogui=False)
+        
+        ### Remove Area
+        logger.debug('Remove area')
+        self.setStatusBarText('Remove area')
+        self.showRemoveDialog(self.ha.data3d)
 
-            ### Segmentation
-            self.showSegmQueryDialog()
+        ### Segmentation
+        self.showSegmQueryDialog()
         
     def runSegmentation(self, default=False):
         logger.debug('Segmentation')
@@ -271,8 +261,11 @@ class HistologyAnalyserWindow(QMainWindow):
         
         return newapp.img
         
-    def showLoadDialog(self):
-        newapp = LoadDialog(mainWindow=self, inputfile=self.args_inputfile, voxelsize=self.args_voxelsize)
+    def showLoadDialog(self, inputfile = None, voxelsize = None, crop = None):
+        newapp = LoadDialog(mainWindow = self,
+                            inputfile = inputfile,
+                            voxelsize = voxelsize,
+                            crop = crop)
         self.embedWidget(newapp)
         self.fixWindow()
         newapp.exec_()
@@ -677,10 +670,11 @@ class HistogramMplCanvas(FigureCanvas):
             self.axes.set_ylabel(self.text_ylabel)
         
 class LoadDialog(QDialog):
-    def __init__(self, mainWindow=None, inputfile=None, voxelsize=None):
+    def __init__(self, mainWindow=None, inputfile=None, voxelsize=None, crop=None):
         self.mainWindow = mainWindow
         self.inputfile = inputfile
         self.voxelsize = voxelsize
+        self.crop = crop
         self.data3d = None
         self.metadata = None
         self.crgui = False
@@ -759,6 +753,11 @@ class LoadDialog(QDialog):
     
     def finished(self,event):
         if (self.data3d is not None) and (self.metadata is not None):
+            if self.crop is not None: # --crop cli parameter crop
+                crop = self.crop
+                logger.debug('Croping data: %s', str(crop))
+                self.data3d = self.data3d[crop[0]:crop[1], crop[2]:crop[3], crop[4]:crop[5]]
+            
             self.mainWindow.processDataGUI(self.data3d, self.metadata, self.crgui)
         
     def cropBox(self, state):
