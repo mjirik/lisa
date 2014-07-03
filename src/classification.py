@@ -20,7 +20,7 @@ class GMMClassifier():
     def fit(self, X_train, y_train):
         from sklearn.mixture import GMM
 
-        unlabels = range(0, np.max(y_train + 1))
+        unlabels = range(0, np.max(y_train) + 1)
 
         for lab in unlabels:
             if self.each_class_params is not None:

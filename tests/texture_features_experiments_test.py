@@ -27,6 +27,7 @@ class TextureFeaturesExperimentTest(unittest.TestCase):
         import texture_features as tfeat
         from sklearn import svm
         from sklearn.naive_bayes import GaussianNB
+        import classification
         self.dcmdir = os.path.join(path_to_script, '../sample_data/jatra_06mm_jenjatraplus/')
         yaml_file = os.path.join(path_to_script, '../experiments/20130919_liver_statistics.yaml')
 
@@ -35,6 +36,7 @@ class TextureFeaturesExperimentTest(unittest.TestCase):
         glcmf = tfeat.GlcmFeatures()
         haralick = tfeat.HaralickFeatures()
 
+
         list_of_feature_fcn = [
             [tls.feat_hist, []],
             # [gf.feats_gabor, []],
@@ -42,8 +44,9 @@ class TextureFeaturesExperimentTest(unittest.TestCase):
             # [haralick.feats_haralick, [True]]
         ]
         list_of_classifiers = [
-            [GaussianNB, {'covariance_type': 'full'}],
-            [svm.SVC, []]
+            [GaussianNB, []],  # {'covariance_type': 'full'}],
+            [svm.SVC, []],
+            [classification.GMMClassifier, []],
             ]
         featrs_plus_classifs = tls.make_product_list(list_of_feature_fcn,
                                                      list_of_classifiers)
