@@ -560,24 +560,27 @@ def main():
         args.testing_yaml_path = args.training_yaml_path
 
     # write_csv(fvall)
-    # gf = tfeat.GaborFeatures()
-    # glcmf = tfeat.GlcmFeatures()
-    # haralick = tfeat.HaralickFeatures()
+    gf = tfeat.GaborFeatures()
+    glcmf = tfeat.GlcmFeatures()
+    haralick = tfeat.HaralickFeatures()
 
     list_of_feature_fcn = [
         [feat_hist, []],
-        # gf.feats_gabor
-        # [glcmf.feats_glcm, []]
+        [gf.feats_gabor, []],
+        [glcmf.feats_glcm, []]
         # [haralick.feats_haralick, [True]]
     ]
     from sklearn import svm
     from sklearn.naive_bayes import GaussianNB
     from sklearn.mixture import GMM
+    from sklearn import tree
+    import classification
 
     list_of_classifiers = [
         [GaussianNB, []],
-        [svm.SVC, []]
-        [GMM, []]
+        [svm.SVC, []],
+        #[classification.GMMClassifier, []],
+        [tree.DecisionTreeClassifier, []],
         ]
     tile_shape = [10, 50, 50]
 
