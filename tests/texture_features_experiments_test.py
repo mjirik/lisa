@@ -45,8 +45,8 @@ class TextureFeaturesExperimentTest(unittest.TestCase):
         ]
         list_of_classifiers = [
             #[GaussianNB, []],
-            [svm.SVC, []],
-            #[classification.GMMClassifier,  {'n_components':3, 'covariance_type': 'full'}],
+            #[svm.SVC, []],
+            [classification.GMMClassifier,  {'n_components':2, 'covariance_type': 'full'}],
             ]
         featrs_plus_classifs = tls.make_product_list(list_of_feature_fcn,
                                                      list_of_classifiers)

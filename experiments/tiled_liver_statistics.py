@@ -577,10 +577,10 @@ def main():
     import classification
 
     list_of_classifiers = [
-        [GaussianNB, []],
-        [svm.SVC, []],
-        #[classification.GMMClassifier, []],
-        [tree.DecisionTreeClassifier, []],
+        #[GaussianNB, []],
+        #[svm.SVC, []],
+        [classification.GMMClassifier, []],
+        #[tree.DecisionTreeClassifier, []],
         ]
     tile_shape = [10, 50, 50]
 
