@@ -155,8 +155,11 @@ def eval_all_from_dataset_metadata(inputdata, visualization=False):
         obj_b = misc.obj_from_file(data3d_b_path, filetype='pickle')
         #data_b, metadata_b = reader.Get3DData(data3d_b_path)
 
-        data3d_b = qmisc.uncrop(obj_b['segmentation'],
-                                obj_b['crinfo'], data3d_a.shape)
+        if 'crinfo' in obj_b.keys():
+            data3d_b = qmisc.uncrop(obj_b['segmentation'],
+                                    obj_b['crinfo'], data3d_a.shape)
+        else:
+            data3d_b = obj_b['segmentation']
 
         #import pdb; pdb.set_trace()
         #data3d_a = (data3d_a > 1024).astype(np.int8)
@@ -188,8 +191,12 @@ def eval_all_from_dataset_metadata(inputdata, visualization=False):
             processing_time = obj_b['processing_time']
             organ_interactivity_counter = obj_b['organ_interactivity_counter']
         else:
-            processing_time = obj_b['processing_information']['organ_segmentation']['processing_time']  # noqa
-            organ_interactivity_counter = obj_b['processing_information']['organ_segmentation']['organ_interactivity_counter']  # noqa
+            try:
+                processing_time = obj_b['processing_information']['organ_segmentation']['processing_time']  # noqa
+                organ_interactivity_counter = obj_b['processing_information']['organ_segmentation']['organ_interactivity_counter']  # noqa
+            except:
+                processing_time = 0
+                organ_interactivity_counter = 0
         evaluation_all['processing_time'].append(processing_time)
         evaluation_all['organ_interactivity_counter'].append(
             organ_interactivity_counter)
