@@ -351,6 +351,7 @@ def save_labels(
         __params_to_string_for_filename(str(classif_inst)) + '_' +\
         inputfile
 
+
     filename = filename + '_' + \
         str(tile_shape[0]) + '_' + str(tile_shape[1]) + '_'
     filename = filename + str(tile_shape[2]) + '.pklz'
@@ -568,9 +569,9 @@ def main():
         args.testing_yaml_path = args.training_yaml_path
 
     # write_csv(fvall)
-    gf = tfeat.GaborFeatures()
-    glcmf = tfeat.GlcmFeatures()
-    haralick = tfeat.HaralickFeatures()
+    gf = tfeat.GaborFeatures()  # noqa
+    glcmf = tfeat.GlcmFeatures()  # noqa
+    haralick = tfeat.HaralickFeatures()  # noqa
 
     list_of_feature_fcn = [
         [feat_hist, []],
@@ -579,23 +580,23 @@ def main():
         # [haralick.feats_haralick, [True]]
     ]
     from sklearn import svm
-    from sklearn.naive_bayes import GaussianNB
-    from sklearn.mixture import GMM
-    from sklearn import tree
-    from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
-    from sklearn.lda import LDA
-    from sklearn.qda import QDA
+    from sklearn.naive_bayes import GaussianNB  # noqa
+    from sklearn.mixture import GMM  # noqa
+    from sklearn import tree  # noqa
+    from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier  # noqa
+    from sklearn.lda import LDA  # noqa
+    from sklearn.qda import QDA  # noqa
     import classification
 
     list_of_classifiers = [
-        #[GaussianNB, []],
-        #[svm.SVC, []],
+        # [GaussianNB, []],
+        # [svm.SVC, []],
         [classification.GMMClassifier, {'n_components': 2, 'covariance_type': 'full'}],
         [svm.SVC, {'kernel': 'linear'}],
         [RandomForestClassifier, []],
         [LDA, []],
         [QDA, []],
-        #[tree.DecisionTreeClassifier, []],
+        # [tree.DecisionTreeClassifier, []],
         ]
     tile_shape = [10, 50, 50]
 
