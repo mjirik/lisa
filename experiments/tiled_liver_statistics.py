@@ -52,6 +52,7 @@ import matplotlib.pyplot as plt
 import experiments
 import texture_features as tfeat
 
+
 def feat_hist_by_segmentation(data3d_orig, data3d_seg, voxelsize_mm=[1],
                               visualization=True):
     bins = range(-1024, 1024, 1)
@@ -207,7 +208,7 @@ def cut_tile(data3d, cindex, tile_shape):
     """ Function is similar to experiments.getArea(). """
 
     upper_corner = cindex + np.array(tile_shape)
-    #print cindex, "    tile shape ", tile_shape, ' uc ', upper_corner,\
+    # print cindex, "    tile shape ", tile_shape, ' uc ', upper_corner,\
     #    ' dsh ', data3d.shape
 
     return data3d[cindex[0]:upper_corner[0],
@@ -346,7 +347,10 @@ def save_labels(
     # inputfilename = path_leaf(inputfile)
     filename = feature_fcn.__name__ + '_' + \
         __params_to_string_for_filename(feature_fcn_params) + '_' +\
-        classif_inst.__class__.__name__ + '_' + inputfile
+        classif_inst.__class__.__name__ + '_' + \
+        __params_to_string_for_filename(str(classif_inst)) + '_' +\
+        inputfile
+
     filename = filename + '_' + \
         str(tile_shape[0]) + '_' + str(tile_shape[1]) + '_'
     filename = filename + str(tile_shape[2]) + '.pklz'
@@ -356,9 +360,9 @@ def save_labels(
 
 
 def one_exp_set_training(inputdata, tile_shape,
-                                    feature_fcn_plus_params,
-                                    classif_fcn_plus_params,
-                                    visualization=False):
+                         feature_fcn_plus_params,
+                         classif_fcn_plus_params,
+                         visualization=False):
     """
     Training of experiment.
     """
@@ -407,6 +411,8 @@ def __params_to_string_for_filename(params):
     sarg = sarg.replace('}', '')
     sarg = sarg.replace('[', '')
     sarg = sarg.replace(']', '')
+    sarg = sarg.replace('<', '')
+    sarg = sarg.replace('>', '')
     sarg = sarg.replace('"', '')
     sarg = sarg.replace("'", '')
     sarg = sarg.replace(" ", '')
@@ -415,9 +421,10 @@ def __params_to_string_for_filename(params):
     return sarg
 
 
-def one_exp_set_testing(inputdata, tile_shape,
-                                   feature_fcn_plus_params, clf,
-                                   visualization=False):
+def one_exp_set_testing(
+        inputdata, tile_shape,
+        feature_fcn_plus_params, clf,
+        visualization=False):
     indata_len = len(inputdata['data'])
     # indata_len = 3
     feature_fcn, feature_fcn_params = feature_fcn_plus_params
@@ -473,14 +480,15 @@ def one_exp_set_for_whole_dataset(
     # fv_tiles = []
     print "classif_fcn ", classif_fcn
     print "feature_fcn ", feature_fcn
-    clf = one_exp_set_training(training_yaml, tile_shape,
-                                          feature_fcn, classif_fcn,
-                                          visualization=False)
+    clf = one_exp_set_training(
+        training_yaml, tile_shape,
+        feature_fcn, classif_fcn,
+        visualization=False)
 
     logger.info('run testing')
     one_exp_set_testing(testing_yaml, tile_shape,
-                                   feature_fcn, clf,
-                                   visualization=visualization)
+                        feature_fcn, clf,
+                        visualization=visualization)
 
 # @TODO vracet něco inteligentního, fvall je prázdný
     return fvall
@@ -574,12 +582,19 @@ def main():
     from sklearn.naive_bayes import GaussianNB
     from sklearn.mixture import GMM
     from sklearn import tree
+    from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
+    from sklearn.lda import LDA
+    from sklearn.qda import QDA
     import classification
 
     list_of_classifiers = [
         #[GaussianNB, []],
         #[svm.SVC, []],
-        [classification.GMMClassifier, []],
+        [classification.GMMClassifier, {'n_components': 2, 'covariance_type': 'full'}],
+        [svm.SVC, {'kernel': 'linear'}],
+        [RandomForestClassifier, []],
+        [LDA, []],
+        [QDA, []],
         #[tree.DecisionTreeClassifier, []],
         ]
     tile_shape = [10, 50, 50]
