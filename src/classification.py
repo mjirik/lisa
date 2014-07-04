@@ -44,6 +44,12 @@ class GMMClassifier():
 
             self.models.insert(lab, model)
 
+    def __str__(self):
+        if self.each_class_params is not None:
+            return "GMMClassificator(" + str(self.each_class_params) + ')'
+        else:
+            return "GMMClassificator(" + str(self.same_params) + ')'
+
     def predict(self, X_test):
         X_test = np.asarray(X_test)
 
