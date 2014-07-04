@@ -351,7 +351,6 @@ def save_labels(
         __params_to_string_for_filename(str(classif_inst)) + '_' +\
         inputfile
 
-
     filename = filename + '_' + \
         str(tile_shape[0]) + '_' + str(tile_shape[1]) + '_'
     filename = filename + str(tile_shape[2]) + '.pklz'
