@@ -752,6 +752,10 @@ class LoadDialog(QDialog):
         self.ui_gridLayout.addWidget(hr2, rstart + 5, 0, 1, 3)
         rstart += 6
         
+        # settings layout
+        layout_settings = QGridLayout()
+        layout_settings.setSpacing(15)
+        
         # Manual setting of voxelsize
         self.vs_box = QCheckBox('Manual voxel size', self)
         self.vs_box.stateChanged.connect(self.vsBox)
@@ -763,20 +767,25 @@ class LoadDialog(QDialog):
         self.vs_box.setCheckState(Qt.Unchecked)
         self.vs_box.stateChanged.emit(Qt.Unchecked)
         
+        layout_settings.addWidget(self.vs_box, 0, 0)
+        
         layout_vs = QHBoxLayout()
         layout_vs.setSpacing(0)
-        
-        layout_vs.addWidget(QLabel('Z:'))
+        layout_vs.addWidget(QLabel('Z: '))
         layout_vs.addWidget(self.manual_vs_z)
-        layout_vs.addWidget(QLabel('  Y:'))
-        layout_vs.addWidget(self.manual_vs_y)
-        layout_vs.addWidget(QLabel('  X:'))
-        layout_vs.addWidget(self.manual_vs_x)
-        layout_vs.addStretch()
+        layout_settings.addLayout(layout_vs, 0, 1)
         
-        self.ui_gridLayout.addWidget(self.vs_box, rstart + 0, 0)
-        self.ui_gridLayout.addLayout(layout_vs, rstart + 0, 1, 1, 2)
-        rstart += 1
+        layout_vs = QHBoxLayout()
+        layout_vs.setSpacing(0)
+        layout_vs.addWidget(QLabel('Y: '))
+        layout_vs.addWidget(self.manual_vs_y)
+        layout_settings.addLayout(layout_vs, 0, 2)
+        
+        layout_vs = QHBoxLayout()
+        layout_vs.setSpacing(0)
+        layout_vs.addWidget(QLabel('X: '))
+        layout_vs.addWidget(self.manual_vs_x)
+        layout_settings.addLayout(layout_vs, 0, 3)
         
         # Manual setting of crop
         self.crop_box = QCheckBox('Manual crop data', self)
@@ -792,33 +801,41 @@ class LoadDialog(QDialog):
         self.crop_box.setCheckState(Qt.Unchecked)
         self.crop_box.stateChanged.emit(Qt.Unchecked)
         
+        layout_settings.addWidget(self.crop_box, 1, 0)
+        
         layout_crop = QHBoxLayout()
         layout_crop.setSpacing(0)    
-            
-        layout_crop.addWidget(QLabel('Z:'))
+        layout_crop.addWidget(QLabel('Z: '))
         layout_crop.addWidget(self.manual_crop_z_s)
         layout_crop.addWidget(QLabel('-'))
         layout_crop.addWidget(self.manual_crop_z_e)
-        layout_crop.addWidget(QLabel('  Y:'))
+        layout_settings.addLayout(layout_crop, 1, 1)
+        
+        layout_crop = QHBoxLayout()
+        layout_crop.setSpacing(0) 
+        layout_crop.addWidget(QLabel('Y: '))
         layout_crop.addWidget(self.manual_crop_y_s)
         layout_crop.addWidget(QLabel('-'))
         layout_crop.addWidget(self.manual_crop_y_e)
-        layout_crop.addWidget(QLabel('  X:'))
+        layout_settings.addLayout(layout_crop, 1, 2)
+        
+        layout_crop = QHBoxLayout()
+        layout_crop.setSpacing(0) 
+        layout_crop.addWidget(QLabel('X: '))
         layout_crop.addWidget(self.manual_crop_x_s)
         layout_crop.addWidget(QLabel('-'))
         layout_crop.addWidget(self.manual_crop_x_e)
-        layout_crop.addStretch()
-        
-        self.ui_gridLayout.addWidget(self.crop_box, rstart + 0, 0)
-        self.ui_gridLayout.addLayout(layout_crop, rstart + 0, 1, 1, 2)
-        rstart += 1
+        layout_settings.addLayout(layout_crop, 1, 3)
         
         # GUI crop checkbox
         crop_gui_box = QCheckBox('GUI Crop data', self)
         crop_gui_box.setCheckState(Qt.Unchecked)
         crop_gui_box.stateChanged.connect(self.cropGuiBox)
         
-        self.ui_gridLayout.addWidget(crop_gui_box, rstart + 0, 0)
+        layout_settings.addWidget(crop_gui_box, 2, 0)
+        
+        # add settings layout to main layout
+        self.ui_gridLayout.addLayout(layout_settings, rstart + 0, 0, 1, 3)
         rstart += 1
         
         # process button
