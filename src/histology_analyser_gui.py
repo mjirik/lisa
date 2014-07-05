@@ -672,18 +672,37 @@ class HistogramMplCanvas(FigureCanvas):
 class LoadDialog(QDialog):
     def __init__(self, mainWindow=None, inputfile=None, voxelsize=None, crop=None):
         self.mainWindow = mainWindow
+        
         self.inputfile = inputfile
-        self.voxelsize = voxelsize
-        self.crop = crop
         self.data3d = None
         self.metadata = None
-        self.crgui = False
+        
+        self.box_vs = False
+        self.box_crop = False
+        self.box_crgui = False
         
         QDialog.__init__(self)
         self.initUI()
         
+        if voxelsize is not None:
+            self.vs_box.setCheckState(Qt.Checked)
+            self.vs_box.stateChanged.emit(Qt.Checked)
+            self.manual_vs_z.setText(str(voxelsize[0]))
+            self.manual_vs_y.setText(str(voxelsize[1]))
+            self.manual_vs_x.setText(str(voxelsize[2]))
+            
+        if crop is not None:
+            self.crop_box.setCheckState(Qt.Checked)
+            self.crop_box.stateChanged.emit(Qt.Checked)
+            self.manual_crop_z_s.setText(str(crop[0]))
+            self.manual_crop_z_e.setText(str(crop[1]))
+            self.manual_crop_y_s.setText(str(crop[2]))
+            self.manual_crop_y_e.setText(str(crop[3]))
+            self.manual_crop_x_s.setText(str(crop[4]))
+            self.manual_crop_x_e.setText(str(crop[5]))
+        
         if self.inputfile is not None:
-            self.importDataWithGui(self.voxelsize)
+            self.importDataWithGui()
     
     def initUI(self):
         self.ui_gridLayout = QGridLayout()
@@ -720,13 +739,6 @@ class LoadDialog(QDialog):
         self.text_dcm_dir = QLabel('Data path: -')
         self.text_dcm_data = QLabel('Data info: -')
         
-        crop_box = QCheckBox('Crop data', self)
-        crop_box.setCheckState(Qt.Unchecked)
-        crop_box.stateChanged.connect(self.cropBox)
-        
-        btn_process = QPushButton("Continue", self)
-        btn_process.clicked.connect(self.finished)
-        
         hr2 = QFrame()
         hr2.setFrameShape(QFrame.HLine)
         
@@ -737,10 +749,88 @@ class LoadDialog(QDialog):
         self.ui_gridLayout.addWidget(btn_dataclear, rstart + 2, 2)
         self.ui_gridLayout.addWidget(self.text_dcm_dir, rstart + 3, 0, 1, 3)
         self.ui_gridLayout.addWidget(self.text_dcm_data, rstart + 4, 0, 1, 3)
-        self.ui_gridLayout.addWidget(crop_box, rstart + 5, 0)
-        self.ui_gridLayout.addWidget(hr2, rstart + 6, 0, 1, 3)
-        self.ui_gridLayout.addWidget(btn_process, rstart + 7, 1)
-        rstart +=8
+        self.ui_gridLayout.addWidget(hr2, rstart + 5, 0, 1, 3)
+        rstart += 6
+        
+        # Manual setting of voxelsize
+        self.vs_box = QCheckBox('Manual voxel size', self)
+        self.vs_box.stateChanged.connect(self.vsBox)
+
+        self.manual_vs_z = QLineEdit()
+        self.manual_vs_y = QLineEdit()
+        self.manual_vs_x = QLineEdit()
+        
+        self.vs_box.setCheckState(Qt.Unchecked)
+        self.vs_box.stateChanged.emit(Qt.Unchecked)
+        
+        layout_vs = QHBoxLayout()
+        layout_vs.setSpacing(0)
+        
+        layout_vs.addWidget(QLabel('Z:'))
+        layout_vs.addWidget(self.manual_vs_z)
+        layout_vs.addWidget(QLabel('  Y:'))
+        layout_vs.addWidget(self.manual_vs_y)
+        layout_vs.addWidget(QLabel('  X:'))
+        layout_vs.addWidget(self.manual_vs_x)
+        layout_vs.addStretch()
+        
+        self.ui_gridLayout.addWidget(self.vs_box, rstart + 0, 0)
+        self.ui_gridLayout.addLayout(layout_vs, rstart + 0, 1, 1, 2)
+        rstart += 1
+        
+        # Manual setting of crop
+        self.crop_box = QCheckBox('Manual crop data', self)
+        self.crop_box.stateChanged.connect(self.cropBox)
+
+        self.manual_crop_z_s = QLineEdit()
+        self.manual_crop_z_e = QLineEdit()
+        self.manual_crop_y_s = QLineEdit()
+        self.manual_crop_y_e = QLineEdit()
+        self.manual_crop_x_s = QLineEdit()
+        self.manual_crop_x_e = QLineEdit()
+        
+        self.crop_box.setCheckState(Qt.Unchecked)
+        self.crop_box.stateChanged.emit(Qt.Unchecked)
+        
+        layout_crop = QHBoxLayout()
+        layout_crop.setSpacing(0)    
+            
+        layout_crop.addWidget(QLabel('Z:'))
+        layout_crop.addWidget(self.manual_crop_z_s)
+        layout_crop.addWidget(QLabel('-'))
+        layout_crop.addWidget(self.manual_crop_z_e)
+        layout_crop.addWidget(QLabel('  Y:'))
+        layout_crop.addWidget(self.manual_crop_y_s)
+        layout_crop.addWidget(QLabel('-'))
+        layout_crop.addWidget(self.manual_crop_y_e)
+        layout_crop.addWidget(QLabel('  X:'))
+        layout_crop.addWidget(self.manual_crop_x_s)
+        layout_crop.addWidget(QLabel('-'))
+        layout_crop.addWidget(self.manual_crop_x_e)
+        layout_crop.addStretch()
+        
+        self.ui_gridLayout.addWidget(self.crop_box, rstart + 0, 0)
+        self.ui_gridLayout.addLayout(layout_crop, rstart + 0, 1, 1, 2)
+        rstart += 1
+        
+        # GUI crop checkbox
+        crop_gui_box = QCheckBox('GUI Crop data', self)
+        crop_gui_box.setCheckState(Qt.Unchecked)
+        crop_gui_box.stateChanged.connect(self.cropGuiBox)
+        
+        self.ui_gridLayout.addWidget(crop_gui_box, rstart + 0, 0)
+        rstart += 1
+        
+        # process button
+        hr3 = QFrame()
+        hr3.setFrameShape(QFrame.HLine)
+        
+        btn_process = QPushButton("Continue", self)
+        btn_process.clicked.connect(self.finished)
+        
+        self.ui_gridLayout.addWidget(hr3, rstart + 0, 0, 1, 3)
+        self.ui_gridLayout.addWidget(btn_process, rstart + 1, 1)
+        rstart +=2
         
         ### Stretcher
         self.ui_gridLayout.addItem(QSpacerItem(0,0), rstart + 0, 0,)
@@ -753,18 +843,85 @@ class LoadDialog(QDialog):
     
     def finished(self,event):
         if (self.data3d is not None) and (self.metadata is not None):
-            if self.crop is not None: # --crop cli parameter crop
-                crop = self.crop
-                logger.debug('Croping data: %s', str(crop))
-                self.data3d = self.data3d[crop[0]:crop[1], crop[2]:crop[3], crop[4]:crop[5]]
+            # if manually set voxelsize
+            if self.box_vs is True:
+                try:
+                    manual_vs = [float(self.manual_vs_z.text()),
+                                 float(self.manual_vs_y.text()),
+                                 float(self.manual_vs_x.text())]
+                    logger.debug('Manual voxel size: %s', str(manual_vs))
+                    self.metadata['voxelsize_mm'] = manual_vs
+                except:
+                    logger.warning('Error when setting manual voxel size - bad parameters')
+                    QMessageBox.warning(self, 'Error', 'Bad manual voxelsize parameters!!!')
+                    return
             
-            self.mainWindow.processDataGUI(self.data3d, self.metadata, self.crgui)
+            # if manually set data crop (--crop, -cr)
+            if self.box_crop is True: 
+                try:
+                    crop_raw = [self.manual_crop_z_s.text(),
+                            self.manual_crop_z_e.text(),
+                            self.manual_crop_y_s.text(),
+                            self.manual_crop_y_e.text(),
+                            self.manual_crop_x_s.text(),
+                            self.manual_crop_x_e.text()]
+                    crop = []
+                    for c in crop_raw:
+                        if str(c) == '' or str(c).lower() == 'none' or str(c).lower() == 'end' or str(c).lower() == 'start':
+                            crop.append(None)
+                        else:
+                            crop.append(int(c))
+                            
+                    logger.debug('Croping data: %s', str(crop))
+                    self.data3d = self.data3d[crop[0]:crop[1], crop[2]:crop[3], crop[4]:crop[5]]
+                except:
+                    logger.warning('Error when manually croping data - bad parameters')
+                    QMessageBox.warning(self, 'Error', 'Bad manual crop parameters!!!')
+                    return
+            
+            # @TODO - emit signal -> processDataGUI
+            self.mainWindow.processDataGUI(self.data3d, self.metadata, self.box_crgui)
         
-    def cropBox(self, state):
-        if state == QtCore.Qt.Checked:
-            self.crgui = True
         else:
-            self.crgui = False
+            # if no data3d or metadata loaded
+            logger.warning('No input data or metadata')
+            QMessageBox.warning(self, 'Error', 'No input data or metadata!!!')
+        
+    def vsBox(self, state):    
+        if state == QtCore.Qt.Checked:
+            self.box_vs = True
+            self.manual_vs_z.setEnabled(True)
+            self.manual_vs_y.setEnabled(True)
+            self.manual_vs_x.setEnabled(True)
+        else:
+            self.box_vs = False
+            self.manual_vs_z.setEnabled(False)
+            self.manual_vs_y.setEnabled(False)
+            self.manual_vs_x.setEnabled(False)
+            
+    def cropBox(self, state): 
+        if state == QtCore.Qt.Checked:
+            self.box_crop = True
+            self.manual_crop_z_s.setEnabled(True)
+            self.manual_crop_z_e.setEnabled(True)
+            self.manual_crop_y_s.setEnabled(True)
+            self.manual_crop_y_e.setEnabled(True)
+            self.manual_crop_x_s.setEnabled(True)
+            self.manual_crop_x_e.setEnabled(True)
+        else:
+            self.box_crop = False
+            self.manual_crop_z_s.setEnabled(False)
+            self.manual_crop_z_e.setEnabled(False)
+            self.manual_crop_y_s.setEnabled(False)
+            self.manual_crop_y_e.setEnabled(False)
+            self.manual_crop_x_s.setEnabled(False)
+            self.manual_crop_x_e.setEnabled(False)
+    
+    def cropGuiBox(self, state):
+        if state == QtCore.Qt.Checked:
+            self.box_crgui = True
+        else:
+            self.box_crgui = False
     
     def loadDataDir(self,event):
         self.mainWindow.setStatusBarText('Reading directory...')
@@ -849,7 +1006,7 @@ class LoadDialog(QDialog):
             
         return dcmdir
         
-    def importDataWithGui(self,voxelsize=None):
+    def importDataWithGui(self):
         if self.inputfile is None:
             ### Generating data if no input file
             logger.info('Generating sample data...')
@@ -867,9 +1024,6 @@ class LoadDialog(QDialog):
                 return
             
             self.text_dcm_dir.setText('Data path: '+str(self.inputfile))
-        
-        if voxelsize is not None:
-            self.metadata['voxelsize_mm'] = voxelsize
             
         voxelsize = self.metadata['voxelsize_mm']
         shape = self.data3d.shape
