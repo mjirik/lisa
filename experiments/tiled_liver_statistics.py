@@ -418,6 +418,8 @@ def __params_to_string_for_filename(params):
     sarg = sarg.replace(" ", '')
     sarg = sarg.replace(",", '_')
     sarg = sarg.replace(":", '-')
+    if len(sarg) > 100:
+        sarg = sarg[:100]
     return sarg
 
 
