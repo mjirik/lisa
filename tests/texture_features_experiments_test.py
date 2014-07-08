@@ -44,9 +44,9 @@ class TextureFeaturesExperimentTest(unittest.TestCase):
             # [haralick.feats_haralick, [True]]
         ]
         list_of_classifiers = [
-            [GaussianNB, []],  # {'covariance_type': 'full'}],
-            [svm.SVC, []],
-            [classification.GMMClassifier, []],
+            #[GaussianNB, []],
+            #[svm.SVC, []],
+            [classification.GMMClassifier,  {'n_components':2, 'covariance_type': 'full'}],
             ]
         featrs_plus_classifs = tls.make_product_list(list_of_feature_fcn,
                                                      list_of_classifiers)

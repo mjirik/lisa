@@ -1,5 +1,8 @@
 # ! /usr/bin/python
 # -*- coding: utf-8 -*-
+import logging
+logger = logging.getLogger(__name__)
+
 import numpy as np
 
 
@@ -18,6 +21,8 @@ class GMMClassifier():
         self.models = []
 
     def fit(self, X_train, y_train):
+        X_train = np.asarray(X_train)
+        y_train = np.asarray(y_train)
         from sklearn.mixture import GMM
 
         unlabels = range(0, np.max(y_train) + 1)
@@ -33,15 +38,28 @@ class GMMClassifier():
                 # print 'ewe ', model
             else:
                 model = GMM()
-            model.fit(X_train[y_train == lab])
+            X_train_lab = X_train[y_train == lab]
+            # logger.debug('xtr lab shape ' + str(X_train_lab))
+            model.fit(X_train_lab)
 
             self.models.insert(lab, model)
 
+    def __str__(self):
+        if self.each_class_params is not None:
+            return "GMMClassificator(" + str(self.each_class_params) + ')'
+        else:
+            return "GMMClassificator(" + str(self.same_params) + ')'
+
     def predict(self, X_test):
+        X_test = np.asarray(X_test)
+
+        logger.debug(str(X_test.shape))
+        logger.debug(str(X_test))
         scores = np.zeros([X_test.shape[0], len(self.models)])
 
         for lab in range(0, len(self.models)):
 
+            logger.debug('means shape' + str(self.models[lab].means_.shape))
             sc = self.models[lab].score(X_test)
             scores[:, lab] = sc
 
