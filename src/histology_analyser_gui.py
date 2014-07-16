@@ -199,6 +199,7 @@ class HistologyAnalyserWindow(QMainWindow):
     def showSegmQueryDialog(self):
         logger.debug('Segmentation Query Dialog')
         newapp = SegmQueryDialog(self)
+        newapp.signal_finished.connect(self.runSegmentation)
         self.embedWidget(newapp)
         self.fixWindow()
         
@@ -267,11 +268,14 @@ class HistologyAnalyserWindow(QMainWindow):
                             voxelsize = voxelsize,
                             crop = crop)
         self.embedWidget(newapp)
+        newapp.signal_finished.connect(self.processDataGUI)
         self.fixWindow()
         newapp.exec_()
         
 # TODO - nicer look
 class SegmQueryDialog(QDialog):
+    signal_finished = pyqtSignal(bool)
+    
     def __init__(self, mainWindow=None):
         self.mainWindow = mainWindow
         
@@ -309,10 +313,10 @@ class SegmQueryDialog(QDialog):
         self.show()
         
     def runSegmDefault(self):
-        self.mainWindow.runSegmentation(default=True)
+        self.signal_finished.emit(True)
         
     def runSegmManual(self):
-        self.mainWindow.runSegmentation(default=False)
+        self.signal_finished.emit(False)
 
 # TODO - more detailed info about what is happening + dont show help when using default parameters + nicer look
 class SegmWaitDialog(QDialog):
@@ -670,6 +674,8 @@ class HistogramMplCanvas(FigureCanvas):
             self.axes.set_ylabel(self.text_ylabel)
         
 class LoadDialog(QDialog):
+    signal_finished = pyqtSignal(np.ndarray,dict,bool)
+    
     def __init__(self, mainWindow=None, inputfile=None, voxelsize=None, crop=None):
         self.mainWindow = mainWindow
         
@@ -890,14 +896,13 @@ class LoadDialog(QDialog):
                             crop.append(int(c))
                             
                     logger.debug('Croping data: %s', str(crop))
-                    self.data3d = self.data3d[crop[0]:crop[1], crop[2]:crop[3], crop[4]:crop[5]]
+                    self.data3d = self.data3d[crop[0]:crop[1], crop[2]:crop[3], crop[4]:crop[5]].copy()
                 except:
                     logger.warning('Error when manually croping data - bad parameters')
                     QMessageBox.warning(self, 'Error', 'Bad manual crop parameters!!!')
                     return
             
-            # @TODO - emit signal -> processDataGUI
-            self.mainWindow.processDataGUI(self.data3d, self.metadata, self.box_crgui)
+            self.signal_finished.emit(self.data3d, self.metadata, self.box_crgui)
         
         else:
             # if no data3d or metadata loaded

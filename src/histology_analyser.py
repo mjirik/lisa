@@ -78,7 +78,7 @@ class HistologyAnalyser:
             biggestObjects=False,
             useSeedsOfCompactObjects=False,
             interactivity=not self.nogui,
-            binaryClosingIterations=self.binaryClosing, # noqa 5,  # TODO !!! - vytvari na stranach oblasti ktere se pak nenasegmentuji
+            binaryClosingIterations=self.binaryClosing, # noqa 5,
             binaryOpeningIterations=self.binaryOpening # 1 # noqa
             )
         del(filteredData)
@@ -359,7 +359,7 @@ def processData(inputfile=None, threshold=None, skeleton=False,
         # ## Crop data
         if crop is not None:
             logger.debug('Croping data: %s', str(crop))
-            data3d = data3d[crop[0]:crop[1], crop[2]:crop[3], crop[4]:crop[5]]
+            data3d = data3d[crop[0]:crop[1], crop[2]:crop[3], crop[4]:crop[5]].copy()
 
         # ## Init HistologyAnalyser object
         logger.debug('Init HistologyAnalyser object')
