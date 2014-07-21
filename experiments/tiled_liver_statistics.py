@@ -344,7 +344,8 @@ def save_labels(
         'processing_information': {
             'feature_fcn': str(feature_fcn),
             'feature_fcn_params': str(feature_fcn_params),
-            'classif_fcn': str(classif_inst.__class__.__name__)
+            'classif_fcn_name': str(classif_inst.__class__.__name__),
+            'classif_fcn': str(classif_inst)
         },
         'voxelsize_mm': voxelsize,
         'slab': slab}
@@ -372,8 +373,9 @@ def save_labels(
 
 # save info to dir
     info = {
-        'feature': str(feature_fcn_params),
-        'classifs': str(classif_inst)
+        'feature_fcn': str(feature_fcn),
+        'feature_fcn_params': str(feature_fcn_params),
+        'classif_fcn': str(classif_inst)
         }
     infofilepath = os.path.join(path_subdirectory,
                                 experiment_dirname, 'info.yaml')
