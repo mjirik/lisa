@@ -315,12 +315,16 @@ def save_labels(
         feature_fcn,
         feature_fcn_params,
         classif_inst,
+        classif_fcn_plus_params,
         voxelsize,
         tile_shape):
+    """
+    classif_fcn_plus_params: used for directory name
+    """
     path_directory = 'lisa_data/'
     subdirectory = 'experiments/'
-    actual = os.getcwd()
-    os.chdir(os.path.expanduser('~'))
+    # actual = os.getcwd()
+    path_directory = os.path.join(os.path.expanduser('~'), path_directory)
     # Ukládání výsledku do souboru
     if(os.path.exists(path_directory) is False):
         os.makedirs(path_directory)
@@ -339,24 +343,41 @@ def save_labels(
         'data3d': data3d.astype(np.int16),
         'processing_information': {
             'feature_fcn': str(feature_fcn),
-            'feature_fcn': str(feature_fcn_params),
+            'feature_fcn_params': str(feature_fcn_params),
             'classif_fcn': str(classif_inst.__class__.__name__)
         },
         'voxelsize_mm': voxelsize,
         'slab': slab}
     # inputfilename = path_leaf(inputfile)
-    filename = feature_fcn.__name__ + '_' + \
-        __params_to_string_for_filename(feature_fcn_params) + '_' +\
-        classif_inst.__class__.__name__ + '_' + \
-        __params_to_string_for_filename(str(classif_inst)) + '_' +\
-        inputfile
+    str_feat_params = __struct_to_string_for_filename(feature_fcn_params)
+    str_clf_params = __struct_to_string_for_filename(str(classif_inst))
+    str_clf_params = __struct_to_string_for_filename(
+        str(classif_fcn_plus_params))
 
-    filename = filename + '_' + \
-        str(tile_shape[0]) + '_' + str(tile_shape[1]) + '_'
-    filename = filename + str(tile_shape[2]) + '.pklz'
-    path_to_file = os.path.join(path_subdirectory, filename)
+# construct filename
+    experiment_dirname =\
+        feature_fcn.__name__ + '_' + \
+        str_feat_params + '_' +\
+        classif_inst.__class__.__name__ + '_' + \
+        str_clf_params + '_' +\
+        str(tile_shape[0]) + '_' + str(tile_shape[1]) + '_' +\
+        str(tile_shape[2])
+
+    filename = __struct_to_string_for_filename(inputfile + '.pklz')
+
+    path_to_file = os.path.join(path_subdirectory, experiment_dirname, filename)
     misc.obj_to_file(dataplus, path_to_file, filetype='pklz')
-    os.chdir(actual)
+    # os.chdir(actual)
+
+
+# save info to dir
+    info = {
+        'feature': str(feature_fcn_params),
+        'classifs': str(classif_inst)
+        }
+    infofilepath = os.path.join(path_subdirectory,
+                                experiment_dirname, 'info.yaml')
+    misc.obj_to_file(info, infofilepath, 'yaml')
 
 
 def one_exp_set_training(inputdata, tile_shape,
@@ -405,7 +426,7 @@ def one_exp_set_training(inputdata, tile_shape,
     return clf
 
 
-def __params_to_string_for_filename(params):
+def __struct_to_string_for_filename(params):
     sarg = str(params)
     sarg = sarg.replace('{', '')
     sarg = sarg.replace('}', '')
@@ -418,6 +439,8 @@ def __params_to_string_for_filename(params):
     sarg = sarg.replace(" ", '')
     sarg = sarg.replace(",", '_')
     sarg = sarg.replace(":", '-')
+    sarg = sarg.replace("\\", '-')
+    sarg = sarg.replace("/", '-')
     if len(sarg) > 100:
         sarg = sarg[:100]
     return sarg
@@ -425,7 +448,9 @@ def __params_to_string_for_filename(params):
 
 def one_exp_set_testing(
         inputdata, tile_shape,
-        feature_fcn_plus_params, clf,
+        feature_fcn_plus_params,
+        clf,
+        classif_fcn_plus_params,
         visualization=False):
     indata_len = len(inputdata['data'])
     # indata_len = 3
@@ -456,7 +481,8 @@ def one_exp_set_testing(
 # natrénovaný klasifikátor.
         save_labels(
             inputdata['data'][i]['sliverorig'], data3d_orig, segmentation,
-            feature_fcn, feature_fcn_params, clf, voxelsize_mm, tile_shape)
+            feature_fcn, feature_fcn_params, clf,
+            classif_fcn_plus_params, voxelsize_mm, tile_shape)
         # ltl = (labels_train_lin_float * 10).astype(np.int8)
         # labels_train = arrange_to_tiled_data(cidxs, tile_shape,
         #                                     d_shp, ltl)
@@ -474,22 +500,23 @@ def one_exp_set_for_whole_dataset(
         training_yaml,
         testing_yaml,
         tile_shape,
-        feature_fcn,
-        classif_fcn,
+        feature_fcn_plus_params,
+        classif_fcn_plus_params,
         train,
         visualization=False):
     fvall = []
     # fv_tiles = []
-    print "classif_fcn ", classif_fcn
-    print "feature_fcn ", feature_fcn
+    print "classif_fcn ", classif_fcn_plus_params
+    print "feature_fcn ", feature_fcn_plus_params
     clf = one_exp_set_training(
         training_yaml, tile_shape,
-        feature_fcn, classif_fcn,
+        feature_fcn_plus_params, classif_fcn_plus_params,
         visualization=False)
 
     logger.info('run testing')
     one_exp_set_testing(testing_yaml, tile_shape,
-                        feature_fcn, clf,
+                        feature_fcn_plus_params, clf,
+                        classif_fcn_plus_params,
                         visualization=visualization)
 
 # @TODO vracet něco inteligentního, fvall je prázdný
@@ -590,10 +617,12 @@ def main():
     import classification
 
     list_of_classifiers = [
-        # [GaussianNB, []],
-        # [svm.SVC, []],
+        [GaussianNB, []],
+        [svm.SVC, []],
         [classification.GMMClassifier, {'n_components': 2, 'covariance_type': 'full'}],
         [svm.SVC, {'kernel': 'linear'}],
+        [svm.SVC, {'kernel': 'rbf'}],
+        [svm.SVC, {'kernel': 'poly'}],
         [RandomForestClassifier, []],
         [LDA, []],
         [QDA, []],
