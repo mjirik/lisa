@@ -38,6 +38,16 @@ Tested with Ubuntu 14.04 32-bit and Linux Mint 16 Petra
     make
     sudo python setup.py install
     cd ..
+    
+    # 4. skelet3d - for Histology Analyser
+    sudo apt-get install cmake python-numpy libinsighttoolkit3-dev
+    cd ~/projects
+    git clone https://github.com/mjirik/skelet3d.git
+    cd build
+    cmake ..
+    make
+    sudo make install
+    
 
 1. First use package manager to satisfy requirements. 
 2. SimpleITK is not in ubuntu packages. You can use easy_install
@@ -51,6 +61,11 @@ or for current developement (if you want to participate)
 
     git clone --recursive git@github.com:mjirik/lisa.git
 
+
+Make an icon
+
+    cd lisa
+    python mysetup.py -icn
 
 Install (L)Ubuntu 12.04 (13.10)
 =========================
