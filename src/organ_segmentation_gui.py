@@ -339,8 +339,6 @@ class OrganSegmentation():
         if 'slab' in dpkeys:
             self.slab = datap['slab']
 
-        print dataplus['segmentation']
-        print np.unique(dataplus['segmentation'])
         if ('segmentation' in dpkeys) and datap['segmentation'] is not None:
             self.segmentation = datap['segmentation']
         else:
