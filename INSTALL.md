@@ -40,7 +40,7 @@ Tested with Ubuntu 14.04 32-bit and Linux Mint 16 Petra
     cd ..
     
     # 4. skelet3d - for Histology Analyser
-    sudo apt-get install cmake python-numpy libinsighttoolkit3-dev
+    sudo apt-get install cmake python-numpy libinsighttoolkit3-dev libpng12-dev
     cd ~/projects
     git clone https://github.com/mjirik/skelet3d.git
     cd skelet3d
