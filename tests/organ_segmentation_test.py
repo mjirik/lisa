@@ -196,6 +196,8 @@ and background")
             working_voxelsize_mm=5,
             manualroi=False)
 
+        # from PyQt4.QtGui import QApplication
+        # app = QApplication(sys.argv)
         # oseg.interactivity(min_val=0, max_val=30)
         oseg.ninteractivity()
 

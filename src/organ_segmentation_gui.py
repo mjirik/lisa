@@ -357,13 +357,15 @@ class OrganSegmentation():
                 'organ_segmentation']['seeds']
         except:
             logger.debug('seeds not found in dataplus')
-            self.seeds = None
+            # self.seeds = None
 
         # for each mm on boundary there will be sum of penalty equal 10
 
         if self.seeds is None:
+
+            logger.debug("Seeds are generated")
             self.seeds = np.zeros(self.data3d.shape, dtype=np.int8)
-        logger.info("seeds " + str(self.seeds))
+        logger.debug("unique seeds labels " + str(np.unique(self.seeds)))
         logger.info('dir ' + str(self.datapath) + ", series_number" +
                     str(datap['series_number']) + 'voxelsize_mm' +
                     str(self.voxelsize_mm))
@@ -550,6 +552,7 @@ class OrganSegmentation():
         self.processing_time = time.time() - self.time_start
 
 #    def interactivity(self, min_val=800, max_val=1300):
+# @TODO generovat QApplication
     def interactivity(self, min_val=None, max_val=None):
         from seed_editor_qt import QTSeedEditor
         import_gui()
