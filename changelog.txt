@@ -1,3 +1,7 @@
+2014-07-23 v1.3
+Histology Analyser added. It is dependent on skelet3d module.
+In stable version is lession button dissabled.
+
 2014-04-09
 Input data path start is in ~/lisa_data and can be defined in config.
 New button "Open file" can import .pklz or .raw data
