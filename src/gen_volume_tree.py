@@ -89,7 +89,7 @@ class TreeVolumeGenerator:
         # a lot faster)
         cut_up = max(
             0, round(min(p1[0], p2[0]) - (rad / min(self.voxelsize_mm)) - 2))
-                     # ta 2 je kuli tomu abyh omylem nurizl
+        # ta 2 je kuli tomu abyh omylem nurizl
         cut_down = min(self.shape[0], round(
             max(p1[0], p2[0]) + (rad / min(self.voxelsize_mm)) + 2))
         cut_yu = max(
@@ -103,7 +103,9 @@ class TreeVolumeGenerator:
         logger.debug("cutter_px: z_up-" + str(cut_up) + " z_down-" + str(cut_down) + " y_up-" + str(
             cut_yu) + " y_down-" + str(cut_yd) + " x_left-" + str(cut_xl) + " x_right-" + str(cut_xr))
         cyl_data3d_cut = cyl_data3d[
-            cut_up:cut_down, cut_yu:cut_yd, cut_xl:cut_xr]
+            int(cut_up):int(cut_down),
+            int(cut_yu):int(cut_yd),
+            int(cut_xl):int(cut_xr)]
 
         # calculating distances
         # spotrebovava naprostou vetsinu casu (pro 200^3  je to kolem 1.2
