@@ -11,7 +11,7 @@ import numpy as np
 import time
 
 import datareader
-import segmentation
+# import segmentation
 from seg2mesh import gen_mesh_from_voxels, mesh2vtk, smooth_mesh
 import virtual_resection
 
@@ -186,6 +186,8 @@ class OrganSegmentationWindow(QMainWindow):
 
         btn_lesions = QPushButton("Lesions localization", self)
         btn_lesions.clicked.connect(self.btnLesionLocalization)
+# @TODO make button active by removing next line
+        btn_lesions.setEnabled(False)
 
         btn_resection = QPushButton("Virtual resection", self)
         btn_resection.clicked.connect(self.btnVirtualResection)
