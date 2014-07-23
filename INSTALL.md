@@ -43,7 +43,7 @@ Tested with Ubuntu 14.04 32-bit and Linux Mint 16 Petra
     sudo apt-get install cmake python-numpy libinsighttoolkit3-dev
     cd ~/projects
     git clone https://github.com/mjirik/skelet3d.git
-    cd build
+    cd skelet3d/build
     cmake ..
     make
     sudo make install
