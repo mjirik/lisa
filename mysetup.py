@@ -288,6 +288,14 @@ def get_sample_data():
     datafile.extractall('./sample_data/')
     remove(local_file_name)
 
+# get biodur samples
+    url = "http://147.228.240.61/queetech/sample-data/biodur_sample.zip"
+    local_file_name = './sample_data/biodur_sample.zip'
+    urllibr.urlretrieve(url, local_file_name)
+    datafile = zipfile.ZipFile(local_file_name)
+    datafile.extractall('./sample_data/')
+    remove(local_file_name)
+
 def windows_get_gco():
     url = "http://147.228.240.61/queetech/install/pygco-py27-32bit/pygco.pyd"
 
@@ -303,7 +311,7 @@ def download_and_run(url, local_file_name):
 def make_icon():
     import fileinput
     import shutil
-    
+
     print "path to script:"
     print path_to_script
     lisa_path = os.path.abspath(path_to_script)
@@ -312,9 +320,9 @@ def make_icon():
     in_path_ha = os.path.join(path_to_script, "applications/ha.desktop.in")
     print "icon input path:"
     print in_path, in_path_ha
-    
+
     home_path = os.path.expanduser('~')
-    
+
     if os.path.exists(os.path.join(home_path, 'Desktop')):
         desktop_path = os.path.join(home_path, 'Desktop')
     elif os.path.exists(os.path.join(home_path, 'Plocha')):
@@ -322,12 +330,12 @@ def make_icon():
     else:
         print "Cannot find desktop directory"
         desktop_path = None
-    
+
     # copy desktop files to desktop
     if desktop_path is not None:
         out_path = os.path.join(desktop_path, "lisa.desktop")
         shutil.copy2(in_path, out_path)
-        
+
         out_path_ha = os.path.join(desktop_path, "ha.desktop")
         shutil.copy2(in_path_ha, out_path_ha)
 
@@ -338,28 +346,28 @@ def make_icon():
         for line in fileinput.input(out_path, inplace=True):
             #coma on end makes no linebreak
             print line.replace("@{LISA_PATH}", lisa_path),
-            
+
         for line in fileinput.input(out_path_ha, inplace=True):
             #coma on end makes no linebreak
             print line.replace("@{LISA_PATH}", lisa_path),
-            
+
     # copy desktop files to $HOME/.local/share/applications/
     # to be accesable in application menu (Linux)
     local_app_path = os.path.join(home_path, '.local/share/applications')
     if os.path.exists(local_app_path) and os.path.isdir(local_app_path):
         out_path = os.path.join(local_app_path, "lisa.desktop")
         shutil.copy2(in_path, out_path)
-        
+
         out_path_ha = os.path.join(local_app_path, "ha.desktop")
         shutil.copy2(in_path_ha, out_path_ha)
-        
+
         print "icon output path:"
         print out_path, out_path_ha
 
         for line in fileinput.input(out_path, inplace=True):
             #coma on end makes no linebreak
             print line.replace("@{LISA_PATH}", lisa_path),
-            
+
         for line in fileinput.input(out_path_ha, inplace=True):
             #coma on end makes no linebreak
             print line.replace("@{LISA_PATH}", lisa_path),
