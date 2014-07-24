@@ -40,16 +40,21 @@ class HistologyReport:
                     delimiter=';',
                     quotechar='"',
                     quoting=csv.QUOTE_MINIMAL
-                    )                    
-            writer.writerow([data['Avg length mm']])
-            writer.writerow([data['Total length mm']])
-            writer.writerow([data['Length density']])
-            writer.writerow([data['Avg tortuosity']])
-            writer.writerow([data['Avg radius mm']])
-            writer.writerow(data['Radius histogram'][0])
-            writer.writerow(data['Radius histogram'][1])
-            writer.writerow(data['Length histogram'][0])
-            writer.writerow(data['Length histogram'][1])
+                    )   
+            # Main
+            writer.writerow([data['Main']['Vessel volume fraction (Vv)']])
+            writer.writerow([data['Main']['Surface density (Sv)']])
+            writer.writerow([data['Main']['Length density (Lv)']])
+            writer.writerow([data['Main']['Tortuosity']])
+            writer.writerow([data['Main']['Nv']])
+            # Other
+            writer.writerow([data['Other']['Avg length mm']])
+            writer.writerow([data['Other']['Total length mm']])
+            writer.writerow([data['Other']['Avg radius mm']])
+            writer.writerow(data['Other']['Radius histogram'][0])
+            writer.writerow(data['Other']['Radius histogram'][1])
+            writer.writerow(data['Other']['Length histogram'][0])
+            writer.writerow(data['Other']['Length histogram'][1])
 
     def generateStats(self,binNum=40):
         # TODO - upravit dokumentaci
