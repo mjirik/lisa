@@ -161,7 +161,6 @@ class HistologyAnalyser:
         logger.debug('writeStatsToYAML')
         misc.obj_to_file(self.stats, filename=filename, filetype='yaml')
 
-    # TODO - fix this to save everything
     def writeStatsToCSV(self, filename='hist_stats.csv'):
         info = self.stats['General']
         data = self.stats['Graph']

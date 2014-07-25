@@ -18,7 +18,6 @@ class HistologyReport:
     def __init__(self):
         self.data = None
         self.stats = None
-        pass
 
     def importFromYaml(self, filename):
         data = misc.obj_from_file(filename=filename, filetype='yaml')
