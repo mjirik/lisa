@@ -163,6 +163,7 @@ class HistologyAnalyser:
 
     # TODO - fix this to save everything
     def writeStatsToCSV(self, filename='hist_stats.csv'):
+        info = self.stats['General']
         data = self.stats['Graph']
 
         with open(filename, 'wb') as csvfile:
@@ -172,29 +173,58 @@ class HistologyAnalyser:
                 quotechar='"',
                 quoting=csv.QUOTE_MINIMAL
             )
-
+            # save csv info
+            info_labels = ['shape_px', 'vessel_volume_fraction', 'volume_mm3', 'volume_px', 'voxel_size_mm', 'voxel_volume_mm3']
+            entry_labels = ['connectedEdgesA', 'connectedEdgesB', 'curve_params_start', 'curve_params_vector', 'id', 'lengthEstimation', 'nodeA_ZYX', 'nodeA_ZYX_mm', 'nodeB_ZYX', 'nodeB_ZYX_mm', 'nodeIdA', 'nodeIdB', 'nodesDistance', 'radius_mm', 'tortuosity', 'vectorA', 'vectorB']
+            
+            try:
+                writer.writerow(info_labels)
+                writer.writerow(entry_labels)
+            except Exception, e:
+                logger.error('Error when saving line (csv info) to csv: '+str(e))
+            
+            # save info
+            try:
+                writer.writerow(['__info__'])
+                writer.writerow(info['shape_px'])
+                writer.writerow([info['vessel_volume_fraction']])
+                writer.writerow([info['volume_mm3']])
+                writer.writerow([info['volume_px']])
+                writer.writerow(info['voxel_size_mm'])
+                writer.writerow([info['voxel_volume_mm3']])
+            except Exception, e:
+                logger.error('Error when saving line (info) to csv: '+str(e))
+            
+            # save data
             for lineid in data:
                 dataline = data[lineid]
-                writer.writerow(self.__dataToCSVLine(dataline))
+                try:
+                    writer.writerow(['__entry__'])
+                    writer.writerow(dataline['connectedEdgesA'])
+                    writer.writerow(dataline['connectedEdgesB'])
+                    writer.writerow(dataline['curve_params']['start'])
+                    writer.writerow(dataline['curve_params']['vector'])
+                    writer.writerow([dataline['id']])
+                    writer.writerow([dataline['lengthEstimation']])
+                    writer.writerow(dataline['nodeA_ZYX'])
+                    writer.writerow(dataline['nodeA_ZYX_mm'])
+                    writer.writerow(dataline['nodeB_ZYX'])
+                    writer.writerow(dataline['nodeB_ZYX_mm'])
+                    writer.writerow([dataline['nodeIdA']])
+                    writer.writerow([dataline['nodeIdB']])
+                    writer.writerow([dataline['nodesDistance']])
+                    writer.writerow([dataline['radius_mm']])
+                    writer.writerow([dataline['tortuosity']])
+                    writer.writerow(dataline['vectorA'])
+                    writer.writerow(dataline['vectorB'])
+                    
+                except Exception, e:
+                    logger.error('Error when saving line (data) to csv: '+str(e))
+                    
 
     def writeSkeletonToPickle(self, filename='skel.pkl'):
         misc.obj_to_file(self.sklabel, filename=filename, filetype='pickle')
-
-    def __dataToCSVLine(self, dataline):  # TODO - finish this
-        arr = []
-# @TODO arr.append
-        try:
-            arr = [
-                dataline['id'],
-                dataline['nodeIdA'],
-                dataline['nodeIdB'],
-                dataline['radius'],
-                dataline['lengthEstimation']
-            ]
-        except:
-            arr = []
-
-        return arr
+        
 
 # TODO - include this in generate_sample_data()
 # def muxImage(self, data3d, metadata):
