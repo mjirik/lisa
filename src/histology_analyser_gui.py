@@ -489,18 +489,28 @@ class StatsRunDialog(QDialog):
         self.ui_progressInfo_label.setText('Progress: '+str(part)+'/'+str(whole))
 
 class StatsResultDialog(QDialog):
-    def __init__(self, mainWindow=None, histologyAnalyser=None):
+    def __init__(self, mainWindow=None, histologyAnalyser=None, stats=None):
         self.mainWindow = mainWindow
         self.ha = histologyAnalyser
         
         self.hr = HistologyReport()
-        self.hr.data = self.ha.stats
+        if stats is None:
+            self.hr.data = self.ha.stats
+        else:
+            self.hr.data = stats
         self.hr.generateStats()
         
         QDialog.__init__(self)
         self.initUI()
         
+        if self.mainWindow is None:
+            self.mainWindow = self
+            self.resize(800, 600)
+            
         self.mainWindow.setStatusBarText('Finished')
+            
+    def setStatusBarText(self,text=""):
+        logger.info(text)
     
     def initUI(self):
         self.ui_gridLayout = QGridLayout()
