@@ -62,15 +62,91 @@ class HistologyAnalyser:
 
     def get_data3d_skeleton(self):
         return self.data3d_skel
+        
+    def create_border_for_segmentation(self, data3d, size=50):
+        logger.debug('Generating border for segmentation')
+        data3d = data3d.copy()
+        for i in range(size):
+            logger.debug('iteration num '+str(i))
+            
+            new_shape = (data3d.shape[0]+2,
+                         data3d.shape[1]+2, 
+                         data3d.shape[2]+2)
+            logger.debug('new shape: '+str(new_shape))
+            work_array = np.ones(new_shape, dtype = type(data3d[0][0][0]))
+            
+            # copy sides
+            work_array[1:-1, 0, 1:-1] = data3d[:, 0, :]
+            work_array[1:-1, -1, 1:-1] = data3d[:, -1, :]
+            
+            work_array[0, 1:-1, 1:-1] = data3d[0, :, :]
+            work_array[-1, 1:-1, 1:-1] = data3d[-1, :, :]
+            
+            work_array[1:-1, 1:-1, 0] = data3d[:, :, 0]
+            work_array[1:-1, 1:-1, -1] = data3d[:, :, -1]
+            
+            # copy corners sides
+            work_array[1:-1, 0, 0] = data3d[:, 0, 0]
+            work_array[1:-1, -1, 0] = data3d[:, -1, 0]
+            work_array[1:-1, 0, -1] = data3d[:, 0, -1]
+            work_array[1:-1, -1, -1] = data3d[:, -1, -1]
+            
+            work_array[0, 1:-1, 0] = data3d[0, :, 0]
+            work_array[0, 1:-1, -1] = data3d[0, :, -1]
+            work_array[-1, 1:-1, 0] = data3d[-1, :, 0]
+            work_array[-1, 1:-1, -1] = data3d[-1, :, -1]
+            
+            work_array[0, 0, 1:-1] = data3d[0, 0, :]
+            work_array[0, -1, 1:-1] = data3d[0, -1, :]
+            work_array[-1, 0, 1:-1] = data3d[-1, 0, :]
+            work_array[-1, -1, 1:-1] = data3d[-1, -1, :]
+            
+            # copy corners
+            work_array[0, 0, 0] = data3d[0, 0, 0]
+            work_array[0, 0, -1] = data3d[0, 0, -1]
+            
+            work_array[0, -1, 0] = data3d[0, -1, 0]
+            work_array[0, -1, -1] = data3d[0, -1, -1]
+            
+            work_array[-1, 0, 0] = data3d[-1, 0, 0]
+            work_array[-1, 0, -1] = data3d[-1, 0, -1]
+            
+            work_array[-1, -1, 0] = data3d[-1, -1, 0]
+            work_array[-1, -1, -1] = data3d[-1, -1, -1]
+            
+            # erode
+            work_array = scipy.ndimage.morphology.binary_erosion(work_array, border_value = 1, iterations = 2)
+            
+            # check if everything is eroded -> exit
+            work_array[1:-1, 1:-1, 1:-1] = np.ones(data3d.shape, dtype = type(data3d[0][0][0]))
+            eroded_sum = np.sum(np.sum(np.sum(work_array)))
+            orig_sum = data3d.shape[0]*data3d.shape[1]*data3d.shape[2]
+
+            if eroded_sum==orig_sum:
+                eroded = True
+            else:
+                eroded = False
+
+            # copy original data to center
+            work_array[1:-1, 1:-1, 1:-1] = data3d
+            
+            data3d = work_array.copy()
+            
+            # if everything eroded -> exit
+            if eroded:
+                logger.debug('Everything eroded -> exiting early')
+                break
+            
+        return data3d
 
     def data_to_binar(self):
         # ## Median filter
         filteredData = scipy.ndimage.filters.median_filter(self.data3d, size=2)
-
+        
         # ## Segmentation
         data3d_thr = segmentation.vesselSegmentation(
             filteredData,  # self.data3d,
-            segmentation=np.ones(self.data3d.shape, dtype='int8'),
+            segmentation=np.ones(filteredData.shape, dtype='int8'),
             threshold=self.threshold,
             inputSigma=0,  # 0.15,
             dilationIterations=2,
@@ -90,9 +166,20 @@ class HistologyAnalyser:
         self.data3d_thr = data3d_thr
 
     def binar_to_skeleton(self):
-        self.data3d_skel = skelet3d.skelet3d(
-            (self.data3d_thr > 0).astype(np.int8)
+        # create border with generated stuff for segmentation
+        expanded_data = self.create_border_for_segmentation(self.data3d_thr, size=50)
+        #expanded_data = self.data3d_thr
+        
+        expanded_skel = skelet3d.skelet3d(
+            (expanded_data > 0).astype(np.int8)
         )
+        
+        # cut data shape back to original size
+        border = (expanded_data.shape[0]-self.data3d_thr.shape[0])/2
+        if border!=0:
+            self.data3d_skel = expanded_skel[border:-border, border:-border, border:-border].copy()
+        else:
+            self.data3d_skel = expanded_skel
 
     def data_to_skeleton(self):
         self.data_to_binar()
