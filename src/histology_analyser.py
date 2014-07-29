@@ -63,8 +63,8 @@ class HistologyAnalyser:
     def get_data3d_skeleton(self):
         return self.data3d_skel
         
-    def create_border_for_segmentation(self, data3d, size=50):
-        logger.debug('Generating border for segmentation')
+    def create_border_for_skeletonization(self, data3d, size=50):
+        logger.debug('Generating border for skeletonization')
         data3d = data3d.copy()
         for i in range(size):
             logger.debug('iteration num '+str(i))
@@ -166,9 +166,8 @@ class HistologyAnalyser:
         self.data3d_thr = data3d_thr
 
     def binar_to_skeleton(self):
-        # create border with generated stuff for segmentation
-        expanded_data = self.create_border_for_segmentation(self.data3d_thr, size=50)
-        #expanded_data = self.data3d_thr
+        # create border with generated stuff for skeletonization 
+        expanded_data = self.create_border_for_skeletonization(self.data3d_thr, size=50)
         
         expanded_skel = skelet3d.skelet3d(
             (expanded_data > 0).astype(np.int8)
