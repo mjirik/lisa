@@ -511,15 +511,26 @@ class SkeletonAnalyser:
         output:
             'lengthEstimation'  - Estimated length of edge
             'nodesDistance'     - Distance between connected nodes
-            'tortuosity'         - Tortuosity
+            'tortuosity'        - Tortuosity
         """
         # test for needed data
         try:
             edg_stats['nodeIdA']
-            edg_stats['nodeIdB']
             edg_stats['nodeA_ZYX']
+        except:
+            hasNodeA = False
+        else:
+            hasNodeA = True
+            
+        try:
+            edg_stats['nodeIdB']
             edg_stats['nodeB_ZYX']
         except:
+            hasNodeB = False
+        else:
+            hasNodeB = True
+            
+        if (not hasNodeA) and (not hasNodeB):
             logger.warning('__edge_length doesnt have needed data!!! Using unreliable method.')            
             length = float(np.sum(self.sklabel[self.elm_box[edg_number]] == edg_number) + 2) 
             medium_voxel_length = (self.voxelsize_mm[0]+self.voxelsize_mm[1]+self.voxelsize_mm[2])/3.0
@@ -538,14 +549,27 @@ class SkeletonAnalyser:
         sklabelcr = self.sklabel[box]
         
         # get absolute position of nodes
-        nodeA_pos_abs = edg_stats['nodeA_ZYX']
-        nodeB_pos_abs = edg_stats['nodeB_ZYX']
+        if hasNodeA and not hasNodeB:
+            logger.warning('__edge_length has only one node!!! using one node mode.') 
+            nodeA_pos_abs = edg_stats['nodeA_ZYX']
+            one_node_mode = True
+        elif hasNodeB and not hasNodeA:
+            logger.warning('__edge_length has only one node!!! using one node mode.') 
+            nodeA_pos_abs = edg_stats['nodeB_ZYX']
+            one_node_mode = True
+        else:
+            nodeA_pos_abs = edg_stats['nodeA_ZYX']
+            nodeB_pos_abs = edg_stats['nodeB_ZYX']
+            one_node_mode = False
+            
         # get realtive position of nodes [Z,Y,X]
         nodeA_pos = np.array([nodeA_pos_abs[0]-box[0].start,nodeA_pos_abs[1]-box[1].start,nodeA_pos_abs[2]-box[2].start])
-        nodeB_pos = np.array([nodeB_pos_abs[0]-box[0].start,nodeB_pos_abs[1]-box[1].start,nodeB_pos_abs[2]-box[2].start])
+        if not one_node_mode:
+            nodeB_pos = np.array([nodeB_pos_abs[0]-box[0].start,nodeB_pos_abs[1]-box[1].start,nodeB_pos_abs[2]-box[2].start])
         # get position in mm
         nodeA_pos = nodeA_pos*self.voxelsize_mm
-        nodeB_pos = nodeB_pos*self.voxelsize_mm
+        if not one_node_mode:
+            nodeB_pos = nodeB_pos*self.voxelsize_mm
         
         # get positions of edge points
         points = (sklabelcr == edg_number).nonzero()
@@ -559,7 +583,7 @@ class SkeletonAnalyser:
         startpoint = nodeA_pos
         while len(points_mm[0])!=0:
             # get closest point to startpoint
-            p_length = np.linalg.norm(nodeA_pos-nodeB_pos) # get max length
+            p_length = float('Inf') # get max length
             closest_num = -1 
             for p in range(0,len(points_mm[0])):
                 test_point = np.array([points_mm[0][p],points_mm[1][p],points_mm[2][p]])
@@ -576,10 +600,14 @@ class SkeletonAnalyser:
             points_mm = [np.delete(points_mm[0], closest_num),np.delete(points_mm[1], closest_num),np.delete(points_mm[2], closest_num)]
               
         # add length to nodeB
-        length += np.linalg.norm(nodeB_pos-startpoint)
+        if not one_node_mode:
+            length += np.linalg.norm(nodeB_pos-startpoint)
         
         # get distance between nodes
-        nodes_distance = np.linalg.norm(nodeA_pos-nodeB_pos)
+        if one_node_mode:
+            nodes_distance = np.linalg.norm(nodeA_pos-startpoint)
+        else:
+            nodes_distance = np.linalg.norm(nodeA_pos-nodeB_pos)
         
         stats = {
                 'lengthEstimation':float(length),
@@ -660,10 +688,38 @@ class SkeletonAnalyser:
         """
         edg_neigh = self.elm_neigh[edg_number]
         
-        if len(edg_neigh) != 2:
-            print ('Wrong number (' + str(edg_neigh) +
-                    ') of connected edges in connection_analysis() for\
-                    edge number ' + str(edg_number))
+        if len(edg_neigh) == 1:
+            logger.warning('Only one ('+str(edg_neigh)+
+                    ') connected node in connection_analysis()'+
+                    ' for edge number '+str(edg_number))
+            
+            # get edges connected to end nodes
+            connectedEdgesA = self.elm_neigh[edg_neigh[0]]
+            # remove edg_number from connectedEdges list
+            connectedEdgesA = connectedEdgesA[connectedEdgesA != edg_number]
+            
+            ## get pixel and mm position of end nodes
+            # node A
+            box0 = self.elm_box[edg_neigh[0]]
+            nd00, nd01, nd02 = (edg_neigh[0] == self.sklabel[box0]).nonzero()
+            point0_mean = [np.mean(nd00), np.mean(nd01), np.mean(nd02)]
+            point0 = np.array([float(point0_mean[0]+box0[0].start),float(point0_mean[1]+box0[1].start),float(point0_mean[2]+box0[2].start)])
+            
+            # node position -> mm
+            point0_mm = point0 * self.voxelsize_mm
+            
+            edg_stats = {
+                    'id':edg_number,
+                    'nodeIdA':int(edg_neigh[0]),
+                    'connectedEdgesA':connectedEdgesA.tolist(),
+                    'nodeA_ZYX': point0.tolist(),
+                    'nodeA_ZYX_mm': point0_mm.tolist()
+                    }
+        
+        elif len(edg_neigh) != 2:
+            logger.warning('Wrong number ('+str(edg_neigh)+
+                    ') of connected nodes in connection_analysis()'+
+                    ' for edge number '+str(edg_number))
             edg_stats = {
                     'id':edg_number
                     }

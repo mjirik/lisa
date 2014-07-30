@@ -115,7 +115,9 @@ class HistologyAnalyser:
             work_array[-1, -1, -1] = data3d[-1, -1, -1]
             
             # erode
-            work_array = scipy.ndimage.morphology.binary_erosion(work_array, border_value = 1, iterations = 2)
+            erode_iterations = int(round(i/8))
+            if erode_iterations>=1:
+                work_array = scipy.ndimage.morphology.binary_erosion(work_array, border_value = 1, iterations = erode_iterations)
             
             # check if everything is eroded -> exit
             work_array[1:-1, 1:-1, 1:-1] = np.ones(data3d.shape, dtype = type(data3d[0][0][0]))
