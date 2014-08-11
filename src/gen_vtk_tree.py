@@ -9,6 +9,7 @@ import numpy as nm
 import yaml
 import sys
 
+
 def get_cylinder(upper, height, radius,
                  direction,
                  resolution=10):
@@ -27,7 +28,7 @@ def get_cylinder(upper, height, radius,
     rot2 = vtk.vtkTransform()
     if u > 1.0e-6:
 
-# sometimes d[0]/u little bit is over 1
+        # sometimes d[0]/u little bit is over 1
         d0_over_u = direction[0] / u
         if d0_over_u > 1:
             psi = 0
@@ -61,6 +62,7 @@ def get_cylinder(upper, height, radius,
 
     return tr2.GetOutput()
 
+
 def gen_tree(tree_data):
 
     points = vtk.vtkPoints()
@@ -80,7 +82,7 @@ def gen_tree(tree_data):
             points.InsertPoint(poffset + ii, cyl.GetPoint(ii))
 
         for ii in xrange(cyl.GetNumberOfCells()):
-            cell  = cyl.GetCell(ii)
+            cell = cyl.GetCell(ii)
             cellIds = cell.GetPointIds()
             for jj in xrange(cellIds.GetNumberOfIds()):
                 oldId = cellIds.GetId(jj)
@@ -93,6 +95,7 @@ def gen_tree(tree_data):
 
     return polyData
 
+
 def process_tree(indata):
     scale = 1e-3
     scale = 1
@@ -103,19 +106,24 @@ def process_tree(indata):
         logger.debug(ii)
         br = {}
         try:
+            # old version of yaml tree
             vA = ii['upperVertexXYZmm']
             vB = ii['lowerVertexXYZmm']
             radi = ii['radius']
             lengthEstimation = ii['length']
         except:
-            vA = ii['nodeA_XYZ_mm']
-            vB = ii['nodeB_XYZ_mm']
-            radi = ii['radius_mm']
-            lengthEstimation = ii['lengthEstimation']
+            # new version of yaml
+            try:
+                vA = ii['nodeA_ZYX_mm']
+                vB = ii['nodeB_ZYX_mm']
+                radi = ii['radius_mm']
+                lengthEstimation = ii['lengthEstimation']
+            except:
+                continue
 
         br['upperVertex'] = nm.array(vA) * scale
         br['radius'] = radi * scale
-        br['real_length'] =  lengthEstimation* scale
+        br['real_length'] = lengthEstimation * scale
 
         vv = nm.array(vB) * scale - br['upperVertex']
         br['direction'] = vv / nm.linalg.norm(vv)
@@ -124,10 +132,11 @@ def process_tree(indata):
 
     return outdata
 
+
 def main():
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
-    
+
     infile = sys.argv[1]
     if len(sys.argv) >= 3:
         outfile = sys.argv[2]
@@ -138,7 +147,7 @@ def main():
     yaml_file = open(infile, 'r')
     tree_raw_data = yaml.load(yaml_file)
 
-    tree_data = process_tree(tree_raw_data['Graph'])
+    tree_data = process_tree(tree_raw_data['Graph']['porta'])
     polyData = gen_tree(tree_data)
 
     writer = vtk.vtkPolyDataWriter()
