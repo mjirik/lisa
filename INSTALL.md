@@ -68,6 +68,14 @@ Make an icon
 
     cd lisa
     python mysetup.py -icn
+    
+Download sample data
+
+    cd ~/projects/lisa
+    python mysetup.py -d
+    mkdir ~/lisa_data
+    cp -r sample_data/ ~/lisa_data/
+    
 
 Install (L)Ubuntu 12.04 (13.10)
 =========================
