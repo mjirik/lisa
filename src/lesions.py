@@ -23,7 +23,13 @@ import scipy
 # ----------------- my scripts --------
 import misc
 import py3DSeedEditor
-import dcmreaddata
+
+try:
+    import dcmreaddata
+except:
+    from pysegbase import dcmreaddata
+
+
 # import show3
 # import vessel_cut
 import scipy.ndimage.measurements as scimeas

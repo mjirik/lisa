@@ -28,8 +28,12 @@ import traceback
 
 # ----------------- my scripts --------
 import py3DSeedEditor
-#import dcmreaddata1 as dcmr
-import dcmreaddata as dcmr
+# import dcmreaddata1 as dcmr
+# try:
+#    import dcmreaddata as dcmr
+# except:
+#    from pysegbase import dcmreaddata as dcmr
+
 import argparse
 #import py3DSeedEditor
 

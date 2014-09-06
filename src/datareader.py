@@ -19,7 +19,10 @@ logger = logging.getLogger(__name__)
 
 # -------------------- my scripts ------------
 
-import dcmreaddata as dcmr
+try:
+    import dcmreaddata as dcmr
+except:
+    from pysegbase import dcmreaddata as dcmr
 
 # import numpy as np
 

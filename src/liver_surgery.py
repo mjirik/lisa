@@ -33,7 +33,10 @@ import traceback
 # ----------------- my scripts --------
 import py3DSeedEditor
 #
-import dcmreaddata as dcmr
+try:
+    import dcmreaddata as dcmr
+except:
+    from pysegbase import dcmreaddata as dcmr
 import pycut
 import argparse
 #import py3DSeedEditor
@@ -66,7 +69,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(cw)
         grid = QGridLayout()
         grid.setSpacing(15)
-         
+
         # status bar
         self.statusBar().showMessage('Ready')
 
@@ -74,7 +77,7 @@ class MainWindow(QMainWindow):
         font_label.setBold(True)
         ################ dicom reader
         rstart = 0
-        text_dcm = QLabel('DICOM reader') 
+        text_dcm = QLabel('DICOM reader')
         text_dcm.setFont(font_label)
         self.text_dcm_dir = QLabel('DICOM dir:')
         self.text_dcm_data = QLabel('DICOM data:')
@@ -104,7 +107,7 @@ class MainWindow(QMainWindow):
         btn_quit = QPushButton("Quit", self)
         btn_quit.clicked.connect(self.quit)
         grid.addWidget(btn_quit, 24, 2, 1, 2)
-         
+
         cw.setLayout(grid)
         self.setWindowTitle('liver-surgery')
         self.show()
@@ -128,12 +131,12 @@ class MainWindow(QMainWindow):
 
                 self.setLabelText(self.text_dcm_out, filename)
                 self.statusBar().showMessage('Ready')
-            
+
             else:
                 self.statusBar().showMessage('No output file specified!')
 
         else:
-            self.statusBar().showMessage('No DICOM data!')      
+            self.statusBar().showMessage('No DICOM data!')
 
     def loadDcmDir(self, event=None, filename=None):
         self.statusBar().showMessage('Loading DICOM data...')
@@ -155,21 +158,21 @@ class MainWindow(QMainWindow):
         self.inps['datadir'] = datadir
 
         self.statusBar().showMessage('DICOM data loaded')
-        
+
         #QApplication.processEvents()
 #        if len(filename) > 0:
 #
 #            data = loadmat(filename,
 #                           variable_names=['data', 'voxelsize_mm', 'offsetmm'],
 #                           appendmat=False)
-#            
+#
 #            self.dcm_3Ddata = data['data']
 #            self.voxel_size_mm = data['voxelsize_mm']
-#            self.dcm_offsetmm = data['offsetmm'] 
+#            self.dcm_offsetmm = data['offsetmm']
 #            self.setVoxelVolume(self.voxel_size_mm.reshape((3,)))
 #            self.setLabelText(self.text_seg_in, filename)
 #            self.statusBar().showMessage('Ready')
-#            
+#
 #        else:
 #            self.statusBar().showMessage('No input file specified!')
 #    def loadDcmDir(self):
@@ -242,8 +245,8 @@ def main():
             -vs [3,3,5]')
     parser.add_argument('-mroi', '--manualroi', action='store_true',
             help='manual crop before data processing')
-    parser.add_argument('-iparams', '--iparams', 
-            default=None, 
+    parser.add_argument('-iparams', '--iparams',
+            default=None,
             help='filename of ipars file with stored interactivity')
     parser.add_argument('-t', '--tests', action='store_true',
             help='run unittest')

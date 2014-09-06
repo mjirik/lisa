@@ -26,7 +26,11 @@ import scipy
 
 # ----------------- my scripts --------
 import py3DSeedEditor
-import dcmreaddata as dcmr
+try:
+    import dcmreaddata as dcmr
+except:
+    from pysegbase import dcmreaddata as dcmr
+
 import pycut
 import argparse
 #import py3DSeedEditor
@@ -40,19 +44,19 @@ import qmisc
 
 
 class SupportStructureSegmentation():
-    def __init__(self,  
-            data3d = None, 
-            voxelsize_mm = None, 
-            autocrop = True, 
-            autocrop_margin_mm = [10,10,10], 
+    def __init__(self,
+            data3d = None,
+            voxelsize_mm = None,
+            autocrop = True,
+            autocrop_margin_mm = [10,10,10],
             modality = 'CT',
             slab = {'none':0, 'bone':8,'lungs':9,'heart':10}
             ):
         """
-        Segmentaton of support structures for liver segmentatio based on 
+        Segmentaton of support structures for liver segmentatio based on
         location prior.
         """
-        
+
 
 
         self.data3d = data3d
@@ -64,17 +68,17 @@ class SupportStructureSegmentation():
         self.segmentation = None
         self.slab = slab
 
-        
+
 
         #import pdb; pdb.set_trace()
 
 
-#    def 
+#    def
     def import_data(self, data):
         self.data = data
         self.data3d = data['data3d']
         self.voxelsize_mm = data['voxelsize_mm']
-    
+
     def import_dir(self, datadir):
         reader = dcmr.DicomReader(datadir)
         self.data3d = reader.get_3Ddata()
@@ -113,7 +117,7 @@ class SupportStructureSegmentation():
         y1 = np.min(nzi[1]) - margin[0]
         y2 = np.max(nzi[1]) + margin[0] + 1
         z1 = np.min(nzi[2]) - margin[0]
-        z2 = np.max(nzi[2]) + margin[0] + 1 
+        z2 = np.max(nzi[2]) + margin[0] + 1
 
 # ošetření mezí polí
         if x1 < 0:
@@ -144,7 +148,7 @@ class SupportStructureSegmentation():
                 roi_start[2]:roi_stop[2],\
                 ]
         return  im_out
-    
+
     def export(self):
         slab={}
         slab['none'] = 0
@@ -181,12 +185,12 @@ class SupportStructureSegmentation():
 
         #import pdb; pdb.set_trace()
 
-        
+
         #pyed = QTSeedEditor(deletemask, mode='draw')
         #pyed.exec_()
 
         app.exit()
-        
+
 
 
 
@@ -211,9 +215,9 @@ def main():
             help='path to data dir')
     parser.add_argument('-d', '--debug', action='store_true',
             help='run in debug mode')
-    parser.add_argument('-exd', '--exampledata', action='store_true', 
+    parser.add_argument('-exd', '--exampledata', action='store_true',
             help='run unittest')
-    parser.add_argument('-so', '--show_output', action='store_true', 
+    parser.add_argument('-so', '--show_output', action='store_true',
             help='Show output data in viewer')
     args = parser.parse_args()
 
@@ -226,7 +230,7 @@ def main():
     if args.exampledata:
 
         args.dcmdir = '../sample_data/matlab/examples/sample_data/DICOM/digest_article/'
-        
+
 #    if dcmdir == None:
 
     #else:
@@ -237,12 +241,12 @@ def main():
     self.metadata = reader.get_metaData()
 
 
-    sseg = SupportStructureSegmentation(data3d = data3d, 
-            voxelsize_mm = metadata['voxelsize_mm'], 
+    sseg = SupportStructureSegmentation(data3d = data3d,
+            voxelsize_mm = metadata['voxelsize_mm'],
             )
 
     sseg.bone_segmentation()
-    
+
 
     #print ("Data size: " + str(data3d.nbytes) + ', shape: ' + str(data3d.shape) )
 
@@ -253,10 +257,10 @@ def main():
     #igc.make_gc()
     #igc.show_segmentation()
 
-    # volume 
+    # volume
     #volume_mm3 = np.sum(oseg.segmentation > 0) * np.prod(oseg.voxelsize_mm)
 
-    
+
     #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour = oseg.segmentation)
     #pyed.show()
 
@@ -272,7 +276,7 @@ def main():
 
         misc.obj_to_file(data, "organ.pickle", filetype = 'pickle')
     #output = segmentation.vesselSegmentation(oseg.data3d, oseg.orig_segmentation)
-    
+
 
 if __name__ == "__main__":
     main()
