@@ -10,34 +10,26 @@ import copy
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
-#sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
-#sys.path.append(os.path.join(path_to_script, "../src/"))
+# sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
+# sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
 
 
-from PyQt4.QtGui import QFileDialog, QApplication, QMainWindow
+from PyQt4.QtGui import QApplication
 
 import numpy as np
 
 
 try:
-    from pysegbase try:
     from pysegbase import pycut
+    from pysegbase import seed_editor_qt
+    import pysegbase.dcmreaddata as dcmr
 except:
-    logger.warning("Deprecated of pyseg_base as submodule")
+    print("Deprecated of pyseg_base as submodule")
     import pycut
-except:
-    logger.warning("Deprecated of pyseg_base as submodule")
-    try:
-    from pysegbase import pycut
-except:
-    logger.warning("Deprecated of pyseg_base as submodule")
-    import pycut
+    import seed_editor_qt
+    import dcmreaddata as dcmr
 
-
-#
-import dcmreaddata as dcmr
-import seed_editor_qt
 
 print sys.argv
 class PycutTest(unittest.TestCase):
