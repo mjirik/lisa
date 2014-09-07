@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 import numpy as np
 
 
-#import dcmreaddata as dcmr
 import experiments
 import volumetry_evaluation
 
