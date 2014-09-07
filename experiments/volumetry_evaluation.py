@@ -33,9 +33,7 @@ import scipy
 import py3DSeedEditor
 #import dcmreaddata1 as dcmr
 #import dcmreaddata as dcmr
-#import pycut
 import argparse
-#import py3DSeedEditor
 
 #import segmentation
 import qmisc
