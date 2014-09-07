@@ -20,7 +20,19 @@ from PyQt4.QtGui import QFileDialog, QApplication, QMainWindow
 import numpy as np
 
 
-import pycut
+try:
+    from pysegbase try:
+    from pysegbase import pycut
+except:
+    logger.warning("Deprecated of pyseg_base as submodule")
+    import pycut
+except:
+    logger.warning("Deprecated of pyseg_base as submodule")
+    try:
+    from pysegbase import pycut
+except:
+    logger.warning("Deprecated of pyseg_base as submodule")
+    import pycut
 
 
 #

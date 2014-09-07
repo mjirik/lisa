@@ -27,7 +27,11 @@ import scipy.ndimage
 import numpy as np
 
 # import dcmreaddata as dcmreader
-import pycut
+try:
+    from pysegbase import pycut
+except:
+    logger.warning("Deprecated of pyseg_base as submodule")
+    import pycut
 # from seg2fem import gen_mesh_from_voxels, gen_mesh_from_voxels_mc
 # from viewer import QVTKViewer
 import qmisc

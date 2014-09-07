@@ -37,7 +37,11 @@ try:
     import dcmreaddata as dcmr
 except:
     from pysegbase import dcmreaddata as dcmr
-import pycut
+try:
+    from pysegbase import pycut
+except:
+    logger.warning("Deprecated of pyseg_base as submodule")
+    import pycut
 import argparse
 #import py3DSeedEditor
 

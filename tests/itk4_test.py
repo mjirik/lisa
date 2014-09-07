@@ -22,7 +22,19 @@ import itk
 #import SimpleITK as sitk
 
 
-import pycut
+try:
+    from pysegbase try:
+    from pysegbase import pycut
+except:
+    logger.warning("Deprecated of pyseg_base as submodule")
+    import pycut
+except:
+    logger.warning("Deprecated of pyseg_base as submodule")
+    try:
+    from pysegbase import pycut
+except:
+    logger.warning("Deprecated of pyseg_base as submodule")
+    import pycut
 
 
 #

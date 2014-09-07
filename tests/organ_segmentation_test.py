@@ -333,7 +333,19 @@ sample_data/DICOM/digest_article/')
         """
         Test dicomread module and graphcut module
         """
-        import pycut
+        try:
+    from pysegbase try:
+    from pysegbase import pycut
+except:
+    logger.warning("Deprecated of pyseg_base as submodule")
+    import pycut
+except:
+    logger.warning("Deprecated of pyseg_base as submodule")
+    try:
+    from pysegbase import pycut
+except:
+    logger.warning("Deprecated of pyseg_base as submodule")
+    import pycut
         dcmdir = os.path.join(path_to_script, './../sample_data/matlab/examples/sample_data/DICOM/digest_article/') #noqa
         data3d, metadata = dcmr.dcm_read_from_dir(dcmdir)
 
