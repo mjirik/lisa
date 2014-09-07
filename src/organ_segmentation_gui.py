@@ -81,7 +81,7 @@ def import_gui():
     #     QGridLayout, QLabel, QPushButton, QFrame, \
     #     QFont, QPixmap
     # from PyQt4.Qt import QString
-    # from seed_editor_qt import QTSeedEditor
+    
     pass
 
 

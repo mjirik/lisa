@@ -524,7 +524,7 @@ class OrganSegmentation():
             #import py3DSeedEditor
             #rr=py3DSeedEditor.py3DSeedEditor(self.seeds); rr.show()
 
-            #from seed_editor_qt import QTSeedEditor
+            
             #from PyQt4.QtGui import QApplication
             #app = QApplication(sys.argv)
             #pyed = QTSeedEditor(circle)

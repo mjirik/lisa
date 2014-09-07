@@ -14,7 +14,7 @@ sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
 
 import numpy as np
-#from seed_editor_qt import QTSeedEditor
+
 #from PyQt4.QtGui import QApplication
 import py3DSeedEditor
 

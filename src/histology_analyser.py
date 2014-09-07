@@ -24,7 +24,6 @@ import misc
 import datareader
 import csv
 
-# import seed_editor_qt as seqt
 import skelet3d
 import segmentation
 import py3DSeedEditor as se
@@ -62,63 +61,63 @@ class HistologyAnalyser:
 
     def get_data3d_skeleton(self):
         return self.data3d_skel
-        
+
     def create_border_for_skeletonization(self, data3d, size=50):
         logger.debug('Generating border for skeletonization')
         data3d = data3d.copy()
         for i in range(size):
             logger.debug('iteration num '+str(i))
-            
+
             new_shape = (data3d.shape[0]+2,
-                         data3d.shape[1]+2, 
+                         data3d.shape[1]+2,
                          data3d.shape[2]+2)
             logger.debug('new shape: '+str(new_shape))
             work_array = np.ones(new_shape, dtype = type(data3d[0][0][0]))
-            
+
             # copy sides
             work_array[1:-1, 0, 1:-1] = data3d[:, 0, :]
             work_array[1:-1, -1, 1:-1] = data3d[:, -1, :]
-            
+
             work_array[0, 1:-1, 1:-1] = data3d[0, :, :]
             work_array[-1, 1:-1, 1:-1] = data3d[-1, :, :]
-            
+
             work_array[1:-1, 1:-1, 0] = data3d[:, :, 0]
             work_array[1:-1, 1:-1, -1] = data3d[:, :, -1]
-            
+
             # copy corners sides
             work_array[1:-1, 0, 0] = data3d[:, 0, 0]
             work_array[1:-1, -1, 0] = data3d[:, -1, 0]
             work_array[1:-1, 0, -1] = data3d[:, 0, -1]
             work_array[1:-1, -1, -1] = data3d[:, -1, -1]
-            
+
             work_array[0, 1:-1, 0] = data3d[0, :, 0]
             work_array[0, 1:-1, -1] = data3d[0, :, -1]
             work_array[-1, 1:-1, 0] = data3d[-1, :, 0]
             work_array[-1, 1:-1, -1] = data3d[-1, :, -1]
-            
+
             work_array[0, 0, 1:-1] = data3d[0, 0, :]
             work_array[0, -1, 1:-1] = data3d[0, -1, :]
             work_array[-1, 0, 1:-1] = data3d[-1, 0, :]
             work_array[-1, -1, 1:-1] = data3d[-1, -1, :]
-            
+
             # copy corners
             work_array[0, 0, 0] = data3d[0, 0, 0]
             work_array[0, 0, -1] = data3d[0, 0, -1]
-            
+
             work_array[0, -1, 0] = data3d[0, -1, 0]
             work_array[0, -1, -1] = data3d[0, -1, -1]
-            
+
             work_array[-1, 0, 0] = data3d[-1, 0, 0]
             work_array[-1, 0, -1] = data3d[-1, 0, -1]
-            
+
             work_array[-1, -1, 0] = data3d[-1, -1, 0]
             work_array[-1, -1, -1] = data3d[-1, -1, -1]
-            
+
             # erode
             erode_iterations = int(round(i/8))
             if erode_iterations>=1:
                 work_array = scipy.ndimage.morphology.binary_erosion(work_array, border_value = 1, iterations = erode_iterations)
-            
+
             # check if everything is eroded -> exit
             work_array[1:-1, 1:-1, 1:-1] = np.ones(data3d.shape, dtype = type(data3d[0][0][0]))
             eroded_sum = np.sum(np.sum(np.sum(work_array)))
@@ -131,20 +130,20 @@ class HistologyAnalyser:
 
             # copy original data to center
             work_array[1:-1, 1:-1, 1:-1] = data3d
-            
+
             data3d = work_array.copy()
-            
+
             # if everything eroded -> exit
             if eroded:
                 logger.debug('Everything eroded -> exiting early')
                 break
-            
+
         return data3d
 
     def data_to_binar(self):
         # ## Median filter
         filteredData = scipy.ndimage.filters.median_filter(self.data3d, size=2)
-        
+
         # ## Segmentation
         data3d_thr = segmentation.vesselSegmentation(
             filteredData,  # self.data3d,
@@ -168,13 +167,13 @@ class HistologyAnalyser:
         self.data3d_thr = data3d_thr
 
     def binar_to_skeleton(self):
-        # create border with generated stuff for skeletonization 
+        # create border with generated stuff for skeletonization
         expanded_data = self.create_border_for_skeletonization(self.data3d_thr, size=50)
-        
+
         expanded_skel = skelet3d.skelet3d(
             (expanded_data > 0).astype(np.int8)
         )
-        
+
         # cut data shape back to original size
         border = (expanded_data.shape[0]-self.data3d_thr.shape[0])/2
         if border!=0:
@@ -263,13 +262,13 @@ class HistologyAnalyser:
             # save csv info
             info_labels = ['shape_px', 'vessel_volume_fraction', 'volume_mm3', 'volume_px', 'voxel_size_mm', 'voxel_volume_mm3']
             entry_labels = ['connectedEdgesA', 'connectedEdgesB', 'curve_params_start', 'curve_params_vector', 'id', 'lengthEstimation', 'nodeA_ZYX', 'nodeA_ZYX_mm', 'nodeB_ZYX', 'nodeB_ZYX_mm', 'nodeIdA', 'nodeIdB', 'nodesDistance', 'radius_mm', 'tortuosity', 'vectorA', 'vectorB']
-            
+
             try:
                 writer.writerow(info_labels)
                 writer.writerow(entry_labels)
             except Exception, e:
                 logger.error('Error when saving line (csv info) to csv: '+str(e))
-            
+
             # save info
             try:
                 writer.writerow(['__info__'])
@@ -281,7 +280,7 @@ class HistologyAnalyser:
                 writer.writerow([info['voxel_volume_mm3']])
             except Exception, e:
                 logger.error('Error when saving line (info) to csv: '+str(e))
-            
+
             # save data
             for lineid in data:
                 dataline = data[lineid]
@@ -304,14 +303,14 @@ class HistologyAnalyser:
                     writer.writerow([dataline['tortuosity']])
                     writer.writerow(dataline['vectorA'])
                     writer.writerow(dataline['vectorB'])
-                    
+
                 except Exception, e:
                     logger.error('Error when saving line (data) to csv: '+str(e))
-                    
+
 
     def writeSkeletonToPickle(self, filename='skel.pkl'):
         misc.obj_to_file(self.sklabel, filename=filename, filetype='pickle')
-        
+
 
 # TODO - include this in generate_sample_data()
 # def muxImage(self, data3d, metadata):
