@@ -22,14 +22,10 @@ logger = logging.getLogger(__name__)
 import numpy as np
 
 # ----------------- my scripts --------
-#import dcmreaddata
-#import pycut
 import argparse
-#import py3DSeedEditor
 
 import segmentation
 import inspector
-#import organ_segmentation
 import misc
 
 # Import garbage collector

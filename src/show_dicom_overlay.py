@@ -30,10 +30,6 @@ import numpy as np
 #import audiosupport
 
 # ----------------- my scripts --------
-#import py3DSeedEditor
-#
-#import dcmreaddata as dcmr
-#import pycut
 import argparse
 import py3DSeedEditor
 
