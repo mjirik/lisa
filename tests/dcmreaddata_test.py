@@ -23,7 +23,7 @@ import dicom
 dicom.debug(False)
 
 #
-import dcmreaddata as dcmr
+import pysegbase.dcmreaddata as dcmr
 
 class DicomReaderTest(unittest.TestCase):
     interactivetTest = False

@@ -22,24 +22,8 @@ import itk
 #import SimpleITK as sitk
 
 
-try:
-    from pysegbase try:
-    from pysegbase import pycut
-except:
-    logger.warning("Deprecated of pyseg_base as submodule")
-    import pycut
-except:
-    logger.warning("Deprecated of pyseg_base as submodule")
-    try:
-    from pysegbase import pycut
-except:
-    logger.warning("Deprecated of pyseg_base as submodule")
-    import pycut
-
-
-#
-import dcmreaddata as dcmr
-import seed_editor_qt
+# from pysegbase import pycut
+# from pysegbase import seed_editor_qt
 
 print sys.argv
 class PycutTest(unittest.TestCase):

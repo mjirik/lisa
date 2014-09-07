@@ -42,7 +42,12 @@ def isSparseMatrix(obj):
 
 def manualcrop(data):  # pragma: no cover
 
-    import seed_editor_qt
+    try:
+        from pysegbase import seed_editor_qt
+    except:
+        logger.warning("Deprecated of pyseg_base as submodule")
+        import seed_editor_qt
+
     pyed = seed_editor_qt.QTSeedEditor(data, mode='crop')
     pyed.exec_()
     # pyed = py3DSeedEditor.py3DSeedEditor(data)
@@ -146,7 +151,7 @@ def getVersionString():
     except:
         logger.warning('Command "git describe" is not working')
 
-    if version_string == None:
+    if version_string == None:  # noqa
         try:
             path_to_version = os.path.join(path_to_script, '../.git/refs/heads/master')
             with file(path_to_version) as f:
@@ -154,7 +159,7 @@ def getVersionString():
         except:
             logger.warning('Problem with reading file ".git/refs/heads/master"')
 
-    if version_string == None:
+    if version_string == None:  # noqa
         try:
             path_to_version = os.path.join(path_to_script, '../__VERSION__')
             with file(path_to_version) as f:

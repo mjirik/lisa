@@ -9,7 +9,7 @@ sys.path.append(os.path.join(path_to_script, "../src/"))
 import numpy as np
 
 import organ_segmentation
-import dcmreaddata as dcmr
+import pysegbase.dcmreaddata as dcmr
 import os.path
 
 

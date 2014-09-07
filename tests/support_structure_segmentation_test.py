@@ -18,7 +18,7 @@ import numpy as np
 
 
 #
-import dcmreaddata as dcmr
+import pysegbase.dcmreaddata as dcmr
 import support_structure_segmentation
 
 class SupportStructureSegmentationTest(unittest.TestCase):

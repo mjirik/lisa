@@ -177,7 +177,11 @@ class SupportStructureSegmentation():
         Run viewer with output data3d and segmentation
         """
 
-        from seed_editor_qt import QTSeedEditor
+        try:
+            from pysegbase.seed_editor_qt import QTSeedEditor
+        except:
+            logger.warning("Deprecated of pyseg_base as submodule")
+            from seed_editor_qt import QTSeedEditor
         from PyQt4.QtGui import QApplication
         import numpy as np
 #, QMainWindow

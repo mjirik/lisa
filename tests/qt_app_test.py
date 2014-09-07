@@ -14,14 +14,22 @@ sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
 
 from PyQt4.QtGui import QFileDialog, QApplication
-from seed_editor_qt import QTSeedEditor
+try:
+    from pysegbase.seed_editor_qt import QTSeedEditor
+except:
+    logger.warning("Deprecated of pyseg_base as submodule")
+    try:
+        from pysegbase.seed_editor_qt import QTSeedEditor
+    except:
+        logger.warning("Deprecated of pyseg_base as submodule")
+        from seed_editor_qt import QTSeedEditor
 
 
 import numpy as np
 
 
 import organ_segmentation
-import dcmreaddata as dcmr
+import pysegbase.dcmreaddata as dcmr
 
 
 #  nosetests tests/organ_segmentation_test.py:OrganSegmentationTest.test_create_iparams

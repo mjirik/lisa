@@ -558,7 +558,11 @@ class OrganSegmentation():
 #    def interactivity(self, min_val=800, max_val=1300):
 # @TODO generovat QApplication
     def interactivity(self, min_val=None, max_val=None):
-        from seed_editor_qt import QTSeedEditor
+        try:
+            from pysegbase.seed_editor_qt import QTSeedEditor
+        except:
+            logger.warning("Deprecated of pyseg_base as submodule")
+            from seed_editor_qt import QTSeedEditor
         import_gui()
         logger.debug('interactivity')
         # if self.edit_data:

@@ -28,7 +28,15 @@ from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
     QGridLayout, QLabel, QPushButton, QFrame, \
     QFont, QPixmap
 from PyQt4.Qt import QString
-from seed_editor_qt import QTSeedEditor
+try:
+    from pysegbase.seed_editor_qt import QTSeedEditor
+except:
+    logger.warning("Deprecated of pyseg_base as submodule")
+    try:
+        from pysegbase.seed_editor_qt import QTSeedEditor
+    except:
+        logger.warning("Deprecated of pyseg_base as submodule")
+        from seed_editor_qt import QTSeedEditor
 
 
 # GUI

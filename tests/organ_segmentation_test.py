@@ -16,7 +16,7 @@ import numpy as np
 
 
 import organ_segmentation_gui as organ_segmentation
-import dcmreaddata as dcmr
+import pysegbase.dcmreaddata as dcmr
 
 
 # nosetests tests/organ_segmentation_test.py:OrganSegmentationTest.test_create_iparams # noqa
@@ -43,7 +43,11 @@ class OrganSegmentationTest(unittest.TestCase):
     @unittest.skipIf(not interactiveTest, "interactive test")
     def test_viewer_seeds(self):
 
-        from seed_editor_qt import QTSeedEditor
+        try:
+            from pysegbase.seed_editor_qt import QTSeedEditor
+        except:
+            print("Deprecated of pyseg_base as submodule")
+            from seed_editor_qt import QTSeedEditor
         from PyQt4.QtGui import QApplication
         import numpy as np
         img3d = (np.random.rand(30, 30, 30)*10).astype(np.int16)
@@ -334,18 +338,11 @@ sample_data/DICOM/digest_article/')
         Test dicomread module and graphcut module
         """
         try:
-    from pysegbase try:
-    from pysegbase import pycut
-except:
-    logger.warning("Deprecated of pyseg_base as submodule")
-    import pycut
-except:
-    logger.warning("Deprecated of pyseg_base as submodule")
-    try:
-    from pysegbase import pycut
-except:
-    logger.warning("Deprecated of pyseg_base as submodule")
-    import pycut
+            from pysegbase import pycut
+        except:
+            print("Deprecated of pyseg_base as submodule")
+            import pycut
+
         dcmdir = os.path.join(path_to_script, './../sample_data/matlab/examples/sample_data/DICOM/digest_article/') #noqa
         data3d, metadata = dcmr.dcm_read_from_dir(dcmdir)
 

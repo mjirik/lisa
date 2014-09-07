@@ -22,7 +22,15 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 import datareader
-from seed_editor_qt import QTSeedEditor
+try:
+    from pysegbase.seed_editor_qt import QTSeedEditor
+except:
+    logger.warning("Deprecated of pyseg_base as submodule")
+    try:
+        from pysegbase.seed_editor_qt import QTSeedEditor
+    except:
+        logger.warning("Deprecated of pyseg_base as submodule")
+        from seed_editor_qt import QTSeedEditor
 import misc
 
 import histology_analyser as HA

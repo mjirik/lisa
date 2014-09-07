@@ -17,7 +17,7 @@ import numpy as np
 
 
 import organ_segmentation
-import dcmreaddata as dcmr
+import pysegbase.dcmreaddata as dcmr
 
 class QTSeedEditorTest(unittest.TestCase):
     interactive_tests = False
@@ -30,7 +30,11 @@ class QTSeedEditorTest(unittest.TestCase):
         #pyed = py3DSeedEditor.py3DSeedEditor(self.data3d, contour = oseg.segmentation)
         #pyed.show()
 
-        from seed_editor_qt import QTSeedEditor
+        try:
+            from pysegbase.seed_editor_qt import QTSeedEditor
+        except:
+            logger.warning("Deprecated of pyseg_base as submodule")
+            from seed_editor_qt import QTSeedEditor
         from PyQt4.QtGui import QApplication
         import numpy as np
         im3d = np.random.rand(15,15,15)

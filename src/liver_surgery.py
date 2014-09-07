@@ -49,7 +49,11 @@ import segmentation
 import qmisc
 import misc
 import organ_segmentation
-import seed_editor_qt
+try:
+    from pysegbase import seed_editor_qt
+except:
+    logger.warning("Deprecated of pyseg_base as submodule")
+    import seed_editor_qt
 
 
 
