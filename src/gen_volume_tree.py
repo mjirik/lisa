@@ -43,28 +43,12 @@ class TreeVolumeGenerator:
         data = misc.obj_from_file(filename=filename, filetype='yaml')
         self.data = data
 
-    def add_cylinder(self, cyl_id):
+    def add_cylinder(self, p1m, p2m, rad):
         """
         Funkce na vykresleni jednoho segmentu do 3D dat
         """
-        try:
-            cyl_data = self.data['graph']['porta'][cyl_id]
-        except:
-            cyl_data = self.data['Graph'][cyl_id]
+
         cyl_data3d = np.ones(self.shape, dtype=np.bool)
-
-        # prvni a koncovy bod, v mm + radius v mm
-        try:
-            p1m = cyl_data['nodeA_ZYX_mm']  # souradnice ulozeny [Z,Y,X]
-            p2m = cyl_data['nodeB_ZYX_mm']
-            rad = cyl_data['radius_mm']
-        except:
-            # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
-
-            logger.error(
-                "Segment id " + str(cyl_id) + ": grror reading data from yaml!")
-            return
-
         # prvni a koncovy bod, ve pixelech
         p1 = [p1m[0] / self.voxelsize_mm[0], p1m[1] /
               self.voxelsize_mm[1], p1m[2] / self.voxelsize_mm[2]]
@@ -92,7 +76,6 @@ class TreeVolumeGenerator:
                 cyl_data3d[int(zvalues[i])][int(yvalues[i])][int(xvalues[i])] = 0
             except:
                 import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
-
 
         # cuting size of 3d space needed for calculating distances (smaller ==
         # a lot faster)
@@ -143,9 +126,27 @@ class TreeVolumeGenerator:
             sdata = self.data['graph']['porta']
         except:
             sdata = self.data['Graph']
-        for br in sdata:
-            logger.debug("CylinderId: " + str(br))
-            self.add_cylinder(br)
+        for cyl_id in sdata:
+            logger.debug("CylinderId: " + str(cyl_id))
+
+            try:
+                cyl_data = self.data['graph']['porta'][cyl_id]
+            except:
+                cyl_data = self.data['Graph'][cyl_id]
+
+            # prvni a koncovy bod, v mm + radius v mm
+            try:
+                p1m = cyl_data['nodeA_ZYX_mm']  # souradnice ulozeny [Z,Y,X]
+                p2m = cyl_data['nodeB_ZYX_mm']
+                rad = cyl_data['radius_mm']
+            except:
+                # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+
+                logger.error(
+                    "Segment id " + str(cyl_id) + ": grror reading data from yaml!")
+                return
+
+            self.add_cylinder(p1m, p2m, rad)
 
     def generateTree_vtk(self):
         """
