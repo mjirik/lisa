@@ -38,6 +38,7 @@ class TreeVolumeGenerator:
         self.data3d = None
         self.voxelsize_mm = [1, 1, 1]
         self.shape = None
+        self.use_lar = False
 
     def importFromYaml(self, filename):
         data = misc.obj_from_file(filename=filename, filetype='yaml')
@@ -120,6 +121,11 @@ class TreeVolumeGenerator:
         Funkce na vygenerování objemu stromu ze zadaných dat.
 
         """
+# LAR init
+        if self.use_lar:
+            import lar_vessels
+            self.lv = lar_vessels.LarVessels()
+
         self.data3d = np.zeros(self.shape, dtype=np.int)
 
         try:
@@ -147,6 +153,11 @@ class TreeVolumeGenerator:
                 return
 
             self.add_cylinder(p1m, p2m, rad)
+            if self.use_lar:
+                self.lv.add_cylinder(p1m, p2m, rad)
+
+        if self.use_lar:
+            self.lv.show()
 
     def generateTree_vtk(self):
         """
@@ -256,6 +267,9 @@ if __name__ == "__main__":
     parser.add_argument(
         '-d', '--debug', action='store_true',
         help='Debug mode')
+    parser.add_argument(
+        '-l', '--useLar', action='store_true',
+        help='Use LAR')
     args = parser.parse_args()
 
     if args.debug:
@@ -267,6 +281,7 @@ if __name__ == "__main__":
     hr.importFromYaml(args.inputfile)
     hr.voxelsize_mm = args.voxelsize
     hr.shape = args.datashape
+    hr.use_lar = args.useLar
     hr.generateTree()
 
     logger.info("TimeUsed:" + str(datetime.now() - startTime))
