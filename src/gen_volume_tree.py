@@ -47,7 +47,10 @@ class TreeVolumeGenerator:
         """
         Funkce na vykresleni jednoho segmentu do 3D dat
         """
-        cyl_data = self.data['Graph'][cyl_id]
+        try:
+            cyl_data = self.data['graph']['porta'][cyl_id]
+        except:
+            cyl_data = self.data['Graph'][cyl_id]
         cyl_data3d = np.ones(self.shape, dtype=np.bool)
 
         # prvni a koncovy bod, v mm + radius v mm
@@ -56,8 +59,10 @@ class TreeVolumeGenerator:
             p2m = cyl_data['nodeB_ZYX_mm']
             rad = cyl_data['radius_mm']
         except:
+            # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+
             logger.error(
-                "Segment id " + str(cyl_id) + ": Error reading data from yaml!")
+                "Segment id " + str(cyl_id) + ": grror reading data from yaml!")
             return
 
         # prvni a koncovy bod, ve pixelech
@@ -83,7 +88,11 @@ class TreeVolumeGenerator:
 
         # drawing a line
         for i in range(0, len(xvalues)):
-            cyl_data3d[int(zvalues[i])][int(yvalues[i])][int(xvalues[i])] = 0
+            try:
+                cyl_data3d[int(zvalues[i])][int(yvalues[i])][int(xvalues[i])] = 0
+            except:
+                import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+
 
         # cuting size of 3d space needed for calculating distances (smaller ==
         # a lot faster)
@@ -130,7 +139,11 @@ class TreeVolumeGenerator:
         """
         self.data3d = np.zeros(self.shape, dtype=np.int)
 
-        for br in self.data['Graph']:
+        try:
+            sdata = self.data['graph']['porta']
+        except:
+            sdata = self.data['Graph']
+        for br in sdata:
             logger.debug("CylinderId: " + str(br))
             self.add_cylinder(br)
 
@@ -189,9 +202,9 @@ class TreeVolumeGenerator:
 
         self.data3d = numpy_data
 
-    def saveToFile(self, outputfile):
+    def saveToFile(self, outputfile, filetype):
         dw = datawriter.DataWriter()
-        dw.Write3DData(self.data3d, outputfile)
+        dw.Write3DData(self.data3d, outputfile, filetype)
 
 
 if __name__ == "__main__":
@@ -217,6 +230,11 @@ if __name__ == "__main__":
         '-o', '--outputfile',
         default=None,
         help='output file, .raw, .dcm, .tiff, given by extension '
+    )
+    parser.add_argument(
+        '-ot', '--outputfiletype',
+        default='pkl',
+        help='output file type.  raw, dcm, tiff, or pkl,   default is pkl, '
     )
     parser.add_argument(
         '-vs', '--voxelsize',
@@ -263,4 +281,4 @@ if __name__ == "__main__":
 
 # ukládání do souboru
     if args.outputfile is not None:
-        hr.saveToFile(args.outputfile)
+        hr.saveToFile(args.outputfile, args.outputfiletype)

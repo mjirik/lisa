@@ -147,7 +147,11 @@ def main():
     yaml_file = open(infile, 'r')
     tree_raw_data = yaml.load(yaml_file)
 
-    tree_data = process_tree(tree_raw_data['Graph']['porta'])
+    tree_data = process_tree(tree_raw_data['graph']['porta'])
+    try:
+        tree_data = process_tree(tree_raw_data['graph']['porta'])
+    except:
+        tree_data = process_tree(tree_raw_data['Graph']['porta'])
     polyData = gen_tree(tree_data)
 
     writer = vtk.vtkPolyDataWriter()
