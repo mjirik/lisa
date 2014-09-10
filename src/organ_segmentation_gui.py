@@ -16,8 +16,6 @@ import sys
 import os
 import os.path as op
 
-path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 
 import exceptionProcessing
 
@@ -30,6 +28,8 @@ import numpy as np
 try:
     from pysegbase import pycut
 except:
+    path_to_script = os.path.dirname(os.path.abspath(__file__))
+    sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
     logger.warning("Deprecated of pyseg_base as submodule")
     import pycut
 # from seg2fem import gen_mesh_from_voxels, gen_mesh_from_voxels_mc
@@ -81,7 +81,7 @@ def import_gui():
     #     QGridLayout, QLabel, QPushButton, QFrame, \
     #     QFont, QPixmap
     # from PyQt4.Qt import QString
-    
+
     pass
 
 
