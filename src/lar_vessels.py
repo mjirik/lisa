@@ -14,6 +14,7 @@ class LarVessels:
         pass
 
     def add_cylinder(self, nodeA, nodeB, radius):
+        print 'nodeA ', nodeA
         pass
 
     def show(self):
