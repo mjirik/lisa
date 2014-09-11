@@ -69,10 +69,16 @@ def crop(data, crinfo):
     crop(data, crinfo)
     """
     return data[
-        int(crinfo[0][0]):int(crinfo[0][1]),
-        int(crinfo[1][0]):int(crinfo[1][1]),
-        int(crinfo[2][0]):int(crinfo[2][1])
+        __int_or_none(crinfo[0][0]):__int_or_none(crinfo[0][1]),
+        __int_or_none(crinfo[1][0]):__int_or_none(crinfo[1][1]),
+        __int_or_none(crinfo[2][0]):__int_or_none(crinfo[2][1])
         ]
+
+
+def __int_or_none(number):
+    if number is not None:
+        number = int(number)
+    return number
 
 
 def combinecrinfo(crinfo1, crinfo2):
