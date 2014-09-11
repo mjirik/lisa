@@ -63,6 +63,11 @@ def manualcrop(data):  # pragma: no cover
 
 
 def crop(data, crinfo):
+    """
+    Crop the data.
+
+    crop(data, crinfo)
+    """
     return data[
         int(crinfo[0][0]):int(crinfo[0][1]),
         int(crinfo[1][0]):int(crinfo[1][1]),
