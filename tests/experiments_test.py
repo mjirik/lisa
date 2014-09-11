@@ -4,7 +4,6 @@
 # import funkcí z jiného adresáře
 import sys
 import os.path
-#import copy
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
@@ -62,7 +61,6 @@ class ExperimentsTest(unittest.TestCase):
         eval1 = ve.distance_matrics(vol1, vol2, [1, 1, 1])
 
         self.assertAlmostEquals(eval1[2], 3 ** (0.5) * 2)
-        #print eval1
 
     def test_eval_sliver_distance_two_points(self):
         """
@@ -78,7 +76,6 @@ class ExperimentsTest(unittest.TestCase):
 
         eval1 = ve.distance_matrics(vol1, vol2, [1, 1, 1])
         self.assertAlmostEquals(eval1[2], np.sqrt(2) * 2)
-        #print eval1
 
     def test_eval_sliver_distance_two_points_with_half_voxelsize(self):
         """
@@ -93,7 +90,6 @@ class ExperimentsTest(unittest.TestCase):
         vol2[10, 12, 12] = 1
 
         eval1 = ve.distance_matrics(vol1, vol2, [0.5, 0.5, 0.5])
-        #print eval1
         self.assertAlmostEquals(eval1[2], np.sqrt(2))
 
     def test_volumetry_evaluation_yaml_generator(self):
@@ -109,18 +105,18 @@ class ExperimentsTest(unittest.TestCase):
         sliver_dir = '__test_sliver_dir'
         pklz_dir = '__test_pklz_dir'
 
-        #d = os.path.dirname(sliver_dir)
+        # d = os.path.dirname(sliver_dir)
         d = sliver_dir
         if os.path.exists(d):
             shutil.rmtree(d)
-        #if not os.path.exists(d):
+        # if not os.path.exists(d):
         os.makedirs(d)
 
-        #d = os.path.dirname(pklz_dir)
+        # d = os.path.dirname(pklz_dir)
         d = pklz_dir
         if os.path.exists(d):
             shutil.rmtree(d)
-        #if not os.path.exists(d):
+        # if not os.path.exists(d):
         os.makedirs(d)
 
         filelist1 = ['liver-seg001.mhd', 'liver-seg002.mhd',
@@ -146,9 +142,9 @@ class ExperimentsTest(unittest.TestCase):
         self.assertEqual(yamldata['data'][0]['ourseg'], flp0)
 
 # Clean
-        #if os.path.exists(d):
+        # if os.path.exists(d):
         shutil.rmtree(sliver_dir)
-        #if os.path.exists(d):
+        # if os.path.exists(d):
         shutil.rmtree(pklz_dir)
 
     def test_volumetry_evaluation_sliver_score(self):
