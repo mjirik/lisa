@@ -1,6 +1,11 @@
 #! /opt/local/bin/python
 # -*- coding: utf-8 -*-
+"""
+delete this module
 
+it is unused
+"""
+adfssdf
 import logging
 logger = logging.getLogger(__name__)
 
@@ -524,7 +529,7 @@ class OrganSegmentation():
             #import py3DSeedEditor
             #rr=py3DSeedEditor.py3DSeedEditor(self.seeds); rr.show()
 
-            
+
             #from PyQt4.QtGui import QApplication
             #app = QApplication(sys.argv)
             #pyed = QTSeedEditor(circle)
