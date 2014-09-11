@@ -143,7 +143,7 @@ class OrganSegmentation():
         self.datapath = datapath
         self.output_datapath = output_datapath
         self.input_datapath_start = input_datapath_start
-        self.crinfo = [[0, -1], [0, -1], [0, -1]]
+        self.crinfo = [[0, None], [0, None], [0, None]]
         self.slab = slab
         self.output_label = output_label
         self.working_voxelsize_mm = None
@@ -309,6 +309,19 @@ class OrganSegmentation():
         vol2 = np.sum(self.segmentation)
         logger.debug("volume ratio " + str(vol2 / float(vol1)))
         # import ipdb; ipdb.set_trace()
+
+    def import_segmentation_from_file(self, filepath):
+        """
+        Loads data from file. Expected are uncropped data.
+        """
+        # logger.debug("import segmentation from file")
+        # logger.debug(str(self.crinfo))
+        reader = datareader.DataReader()
+        datap = reader.Get3DData(filepath, dataplus_format=True)
+        segmentation = datap['data3d']
+        segmentation = qmisc.crop(segmentation, self.crinfo)
+        logger.debug(str(segmentation.shape))
+        self.segmentation = segmentation
 
     def import_dataplus(self, dataplus):
         datap = {

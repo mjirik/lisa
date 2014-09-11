@@ -1,5 +1,8 @@
 # /usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Modul is used for GUI of Lisa
+"""
 
 import logging
 logger = logging.getLogger(__name__)
@@ -108,6 +111,7 @@ class OrganSegmentationWindow(QMainWindow):
 
         btn_datafile = QPushButton("Load file", self)
         btn_datafile.clicked.connect(self.loadDataFile)
+        btn_datafile.setToolTip("Load data from pkl file, 3D Dicom, tiff, ...")
 
         btn_dcmcrop = QPushButton("Crop", self)
         btn_dcmcrop.clicked.connect(self.cropDcm)
@@ -141,6 +145,11 @@ class OrganSegmentationWindow(QMainWindow):
         hr.setFrameShape(QFrame.HLine)
         text_seg = QLabel('Segmentation')
         text_seg.setFont(font_label)
+
+        btn_segfile = QPushButton("Seg. from file", self)
+        btn_segfile.clicked.connect(self.loadSegmentationFromFile)
+        btn_segfile.setToolTip("Load segmentation from pkl file, raw, ...")
+
         btn_mask = QPushButton("Mask region", self)
         btn_mask.clicked.connect(self.maskRegion)
         btn_segauto = QPushButton("Automatic seg.", self)
@@ -150,11 +159,12 @@ class OrganSegmentationWindow(QMainWindow):
         self.text_seg_data = QLabel('segmented data:')
         grid.addWidget(hr, rstart + 0, 2, 1, 4)
         grid.addWidget(text_seg, rstart + 0, 1)
-        grid.addWidget(btn_mask, rstart + 1, 1)
-        grid.addWidget(btn_segauto, rstart + 1, 2)
-        grid.addWidget(btn_segman, rstart + 1, 3)
-        grid.addWidget(self.text_seg_data, rstart + 2, 1, 1, 3)
-        rstart += 3
+        grid.addWidget(btn_segfile, rstart + 1, 1)
+        grid.addWidget(btn_mask, rstart + 2, 1)
+        grid.addWidget(btn_segauto, rstart + 2, 2)
+        grid.addWidget(btn_segman, rstart + 2, 3)
+        grid.addWidget(self.text_seg_data, rstart + 3, 1, 1, 3)
+        rstart += 4
 
         # # # # # # # # #  save/view
         # hr = QFrame()
@@ -415,6 +425,27 @@ class OrganSegmentationWindow(QMainWindow):
         pyed.changeW(width)
         pyed.exec_()
 
+        self.statusBar().showMessage('Ready')
+
+    def loadSegmentationFromFile(self):
+        """
+        Function make GUI for reading segmentaion file and calls
+        organ_segmentation function to do the work.
+        """
+        self.statusBar().showMessage('Reading segmentation from file ...')
+        QApplication.processEvents()
+        logger.debug("import segmentation from file")
+        logger.debug(str(self.oseg.crinfo))
+        logger.debug(str(self.oseg.data3d.shape))
+        logger.debug(str(self.oseg.segmentation.shape))
+        seg_path = self.__get_datafile(
+            app=True,
+            directory=self.oseg.input_datapath_start
+        )
+        if seg_path is None:
+            self.statusBar().showMessage('No data path specified!')
+            return
+        self.oseg.import_segmentation_from_file(seg_path)
         self.statusBar().showMessage('Ready')
 
     def autoSeg(self):
