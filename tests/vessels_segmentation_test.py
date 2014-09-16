@@ -17,7 +17,7 @@ import numpy as np
 # from PyQt4.QtGui import QApplication
 # import py3DSeedEditor
 
-import organ_segmentation
+import organ_segmentation_gui as organ_segmentation
 import segmentation
 
 
