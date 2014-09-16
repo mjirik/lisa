@@ -13,11 +13,11 @@ sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
 
-import numpy as np
+# import numpy as np
 
 
-import organ_segmentation
-import pysegbase.dcmreaddata as dcmr
+# import organ_segmentation as organ_segmentation_gui
+# import pysegbase.dcmreaddata as dcmr
 
 class QTSeedEditorTest(unittest.TestCase):
     interactive_tests = False
@@ -46,7 +46,7 @@ class QTSeedEditorTest(unittest.TestCase):
 
 
         deletemask = pyed.getSeeds()
-        
+
 
         print ("If it is ok, press 'Return'. If it is wrong, click into image and press 'Return'")
         # rewrite input data
@@ -60,14 +60,14 @@ class QTSeedEditorTest(unittest.TestCase):
     ##@unittest.skipIf(True,"interactive test")
     #def test_vincentka_06_slice_thickness_interactive(self):
     #    """
-    #    Interactive test. SliceThickness is not voxel depth. If it is, this 
+    #    Interactive test. SliceThickness is not voxel depth. If it is, this
     #    test will fail.
     #    """
     #    #dcmdir = os.path.join(path_to_script,'./../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
     #    dcmdir = os.path.expanduser('~/data/medical/data_orig/vincentka/13021610/10200000/')
     #    dcmdir = os.path.expanduser('~/data/medical/data_orig/vincentka/13021610/12460000/')
     #    oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4)
-    #    
+    #
 # ma#nual seeds setting
     #    print ("with left mouse button select some pixels of the bottle content")
     #    print ("with right mouse button select some pixels of background")

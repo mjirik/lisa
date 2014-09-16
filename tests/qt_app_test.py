@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 
-
 # import funkcí z jiného adresáře
 import sys
 import os.path
@@ -28,8 +27,8 @@ except:
 import numpy as np
 
 
-import organ_segmentation
-import pysegbase.dcmreaddata as dcmr
+# import organ_segmentation_gui as organ_segmentation
+# import pysegbase.dcmreaddata as dcmr
 
 
 #  nosetests tests/organ_segmentation_test.py:OrganSegmentationTest.test_create_iparams
