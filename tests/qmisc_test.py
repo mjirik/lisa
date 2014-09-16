@@ -6,7 +6,7 @@ import sys
 import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-#sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
+# sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
 sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
@@ -24,7 +24,7 @@ import misc
 
 class QmiscTest(unittest.TestCase):
     interactivetTest = False
-    #interactivetTest = True
+    # interactivetTest = True
 
     def test_store_to_SparseMatrix_and_back(self):
         data = np.zeros([4, 4, 4])
@@ -66,7 +66,7 @@ class QmiscTest(unittest.TestCase):
 
         os.remove(filename)
 
-    #def test_obj_to_and_from_file_exeption(self):
+    # def test_obj_to_and_from_file_exeption(self):
     #    test_object = [1]
     #    filename = 'test_obj_to_and_from_file_exeption'
     #    self.assertRaises(misc.obj_to_file(test_object, filename ,'yaml'))
@@ -119,7 +119,7 @@ class QmiscTest(unittest.TestCase):
 
         self.assertTrue(img_uncropped[4, 4, 3] == img_in[4, 4, 3])
 
-    #@unittest.skip("waiting for implementation")
+    # @unittest.skip("waiting for implementation")
     def test_suggest_filename(self):
         """
         Testing some files. Not testing recursion in filenames. It is situation
@@ -127,7 +127,7 @@ class QmiscTest(unittest.TestCase):
         """
         import misc
         filename = "mujsoubor"
-        #import ipdb; ipdb.set_trace() # BREAKPOINT
+        # import ipdb; ipdb.set_trace() # BREAKPOINT
         new_filename = misc.suggest_filename(filename, exists=True)
         self.assertTrue(new_filename == "mujsoubor2")
 
@@ -150,6 +150,27 @@ class QmiscTest(unittest.TestCase):
 
         self.assertTrue(type(verstr) == str)
 
+    def test_resize_to_shape(self):
+
+        data = np.random.rand(3, 4, 5)
+        new_shape = [5, 6, 6]
+        data_out = qmisc.resize_to_shape(data, new_shape)
+        # print data_out.shape
+        # print data
+        # print data_out
+        self.assertItemsEqual(new_shape, data_out.shape)
+
+    def test_resize_to_mm(self):
+
+        data = np.random.rand(3, 4, 5)
+        voxelsize_mm = [2, 3, 1]
+        new_voxelsize_mm = [1, 3, 2]
+        expected_shape = [6, 4, 3]
+        data_out = qmisc.resize_to_mm(data, voxelsize_mm, new_voxelsize_mm)
+        print data_out.shape
+        # print data
+        # print data_out
+        self.assertItemsEqual(expected_shape, data_out.shape)
 
 if __name__ == "__main__":
     unittest.main()

@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 import subprocess
 import scipy
+import scipy.ndimage
 
 
 class SparseMatrix():
@@ -207,3 +208,30 @@ def max_area_index(labels, num):
             mxi = l
 
     return mxi
+
+
+def resize_to_mm(data3d, voxelsize_mm, new_voxelsize_mm):
+    """
+    Function can resize data3d or segmentation to specifed voxelsize_mm
+    """
+    zoom = voxelsize_mm / (1.0 * np.array(new_voxelsize_mm))
+    data3d_res = scipy.ndimage.zoom(
+        data3d,
+        zoom,
+        mode='nearest',
+        order=1
+    ).astype(data3d.dtype)
+    return data3d_res
+
+
+def resize_to_shape(segmentation, shape):
+    nzoom = shape / np.array(segmentation.shape).astype(np.double)
+
+    segm_orig_scale = scipy.ndimage.zoom(
+        segmentation,
+        nzoom,
+        mode='nearest',
+        order=0
+    ).astype(segmentation.dtype)
+
+    return segm_orig_scale
