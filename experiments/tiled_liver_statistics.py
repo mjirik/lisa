@@ -47,6 +47,7 @@ import argparse
 # import py3DSeedEditor
 
 import misc
+import qmisc
 import datareader
 import matplotlib.pyplot as plt
 import experiments
@@ -285,6 +286,7 @@ def read_data_orig_and_seg(inputdata, i):
 
 
 def data_preprocessing(data3d, voxelsize_mm, working_voxelsize_mm):
+    # @TODO unused delete it
     # working_voxelsize_mm = np.array([2.0, 1.0, 1.0])
     zoom = voxelsize_mm / (1.0 * working_voxelsize_mm)
 
@@ -298,6 +300,7 @@ def data_preprocessing(data3d, voxelsize_mm, working_voxelsize_mm):
 
 
 def data_postprocessing(segmentation_res, voxelsize_mm, working_voxelsize_mm):
+    # @TODO unused delete it
     zoom = voxelsize_mm / (1.0 * working_voxelsize_mm)
     segm_orig_scale = scipy.ndimage.zoom(
         segmentation_res,
@@ -317,7 +320,9 @@ def save_labels(
         classif_inst,
         classif_fcn_plus_params,
         voxelsize,
-        tile_shape):
+        tile_shape,
+        use_voxelsize_norm
+        ):
     """
     classif_fcn_plus_params: used for directory name
     """
@@ -355,10 +360,15 @@ def save_labels(
     str_clf_params = __struct_to_string_for_filename(
         str(classif_fcn_plus_params))
 
+    vsnorm_string = "vsnF_"
+    if use_voxelsize_norm:
+        vsnorm_string = "vsnT_"
+
 # construct filename
     experiment_dirname =\
         feature_fcn.__name__ + '_' + \
         str_feat_params + '_' +\
+        vsnorm_string +\
         classif_inst.__class__.__name__ + '_' + \
         str_clf_params + '_' +\
         str(tile_shape[0]) + '_' + str(tile_shape[1]) + '_' +\
@@ -382,9 +392,22 @@ def save_labels(
     misc.obj_to_file(info, infofilepath, 'yaml')
 
 
+def norm_voxelsize(data3d_orig, data3d_seg, voxelsize_mm,
+                   working_voxelsize_mm):
+
+    data3d_orig_res = qmisc.resize_to_mm(data3d_orig,
+                                         voxelsize_mm, working_voxelsize_mm)
+    data3d_seg_res = qmisc.resize_to_mm(data3d_seg,
+                                        voxelsize_mm, working_voxelsize_mm)
+
+    return data3d_orig_res, data3d_seg_res
+
+
 def one_exp_set_training(inputdata, tile_shape,
                          feature_fcn_plus_params,
                          classif_fcn_plus_params,
+                         use_voxelsize_norm=False,
+                         working_voxelsize_mm=[1, 1, 1],
                          visualization=False):
     """
     Training of experiment.
@@ -400,6 +423,11 @@ def one_exp_set_training(inputdata, tile_shape,
     for i in range(0, indata_len):
         data3d_orig, data3d_seg, voxelsize_mm = read_data_orig_and_seg(
             inputdata, i)
+
+        if use_voxelsize_norm:
+            data3d_orig, data3d_seg = norm_voxelsize(
+                data3d_orig, data3d_seg,
+                voxelsize_mm, working_voxelsize_mm)
 
         if visualization:
             pyed = py3DSeedEditor.py3DSeedEditor(data3d_orig,
@@ -453,38 +481,54 @@ def one_exp_set_testing(
         feature_fcn_plus_params,
         clf,
         classif_fcn_plus_params,
+        use_voxelsize_norm=False,
+        working_voxelsize_mm=[1, 1, 1],
         visualization=False):
     indata_len = len(inputdata['data'])
     # indata_len = 3
     feature_fcn, feature_fcn_params = feature_fcn_plus_params
 
     for i in range(0, indata_len):
-        data3d_orig, data3d_seg, voxelsize_mm = read_data_orig_and_seg(
+        data3d_orig_orig, data3d_seg_orig, voxelsize_mm = read_data_orig_and_seg(
             inputdata, i)
+        data3d_orig = data3d_orig_orig
+        data3d_seg = data3d_seg_orig
+
+        if use_voxelsize_norm:
+            data3d_orig, data3d_seg = norm_voxelsize(
+                data3d_orig_orig, data3d_seg_orig,
+                voxelsize_mm, working_voxelsize_mm)
 
         if visualization:
             pyed = py3DSeedEditor.py3DSeedEditor(data3d_orig,
                                                  contour=data3d_seg)
             pyed.show()
+
         fv_t = get_features_in_tiles(data3d_orig, data3d_seg, tile_shape,
                                      feature_fcn,
                                      feature_fcn_params)
         cidxs, features_t, seg_cover_t = fv_t
+        # we are ignoring seg_cover_t which gives us information about
+        # segmentation
 
-        # labels_train_lin_float = np.array(seg_cover_t)
-        # labels_train_lin = labels_train_lin_float > 0.5
         labels_lin = clf.predict(features_t)
 
         d_shp = data3d_orig.shape
 
         segmentation = arrange_to_tiled_data(cidxs, tile_shape, d_shp,
                                              labels_lin)
+
+        if use_voxelsize_norm:
+            segmentation = qmisc.resize_to_shape(
+                segmentation,
+                data3d_orig_orig.shape)
 # @TODO změnil jsem to. Už zde není ukazatel na klasifikátor, ale přímo
 # natrénovaný klasifikátor.
         save_labels(
-            inputdata['data'][i]['sliverorig'], data3d_orig, segmentation,
+            inputdata['data'][i]['sliverorig'], data3d_orig_orig, segmentation,
             feature_fcn, feature_fcn_params, clf,
-            classif_fcn_plus_params, voxelsize_mm, tile_shape)
+            classif_fcn_plus_params, voxelsize_mm, tile_shape,
+            use_voxelsize_norm)
         # ltl = (labels_train_lin_float * 10).astype(np.int8)
         # labels_train = arrange_to_tiled_data(cidxs, tile_shape,
         #                                     d_shp, ltl)
@@ -505,6 +549,8 @@ def one_exp_set_for_whole_dataset(
         feature_fcn_plus_params,
         classif_fcn_plus_params,
         train,
+        use_voxelsize_norm,
+        working_voxelsize_mm,
         visualization=False):
     fvall = []
     # fv_tiles = []
@@ -512,13 +558,18 @@ def one_exp_set_for_whole_dataset(
     print "feature_fcn ", feature_fcn_plus_params
     clf = one_exp_set_training(
         training_yaml, tile_shape,
-        feature_fcn_plus_params, classif_fcn_plus_params,
+        feature_fcn_plus_params,
+        classif_fcn_plus_params,
+        use_voxelsize_norm,
+        working_voxelsize_mm,
         visualization=False)
 
     logger.info('run testing')
     one_exp_set_testing(testing_yaml, tile_shape,
                         feature_fcn_plus_params, clf,
                         classif_fcn_plus_params,
+                        use_voxelsize_norm,
+                        working_voxelsize_mm,
                         visualization=visualization)
 
 # @TODO vracet něco inteligentního, fvall je prázdný
@@ -532,8 +583,11 @@ def make_product_list(list_of_feature_fcn, list_of_classifiers):
     return featrs_plus_classifs
 
 
-def experiment(training_yaml_path, testing_yaml_path,  featrs_plus_classifs,
-               tile_shape, visualization=False, train=False):
+def experiment(training_yaml_path, testing_yaml_path,  featers_plus_classifs,
+               tile_shape,
+               use_voxelsize_norm,
+               working_voxelsize_mm,
+               visualization=False, train=False):
 
     training_yaml = misc.obj_from_file(training_yaml_path, filetype='yaml')
     testing_yaml = misc.obj_from_file(testing_yaml_path, filetype='yaml')
@@ -542,13 +596,18 @@ def experiment(training_yaml_path, testing_yaml_path,  featrs_plus_classifs,
 
     results = []
 
-    for fpc in featrs_plus_classifs:
+
+    for fpc in featers_plus_classifs:
         feature_fcn = fpc[0]
         classif_fcn = fpc[1]
 
         fvall = one_exp_set_for_whole_dataset(
             training_yaml, testing_yaml, tile_shape,
-            feature_fcn, classif_fcn, train, visualization)
+            feature_fcn, classif_fcn,
+            train,
+            use_voxelsize_norm,
+            working_voxelsize_mm,
+            visualization)
 
         result = {'params': str(fpc), 'fvall': fvall}
         results.append(result)
@@ -570,9 +629,11 @@ def main():
 
     parser = argparse.ArgumentParser(
         description='Compute features on liver and other tissue.')
-    parser.add_argument('-tr', '--training_yaml_path', help='input yaml file',
+    parser.add_argument('-tr', '--training_yaml_path', help='Input yaml file.' +
+                        " You can check sample with -si parameter.",
                         default="20130919_liver_statistics.yaml")
-    parser.add_argument('-te', '--testing_yaml_path', help='input yaml file',
+    parser.add_argument('-te', '--testing_yaml_path', help='Input yaml file.' +
+                        " You can check sample with -si parameter.",
                         default=None)
     parser.add_argument('-si', '--sampleInput', action='store_true',
                         help='generate sample intput data', default=False)
@@ -622,7 +683,7 @@ def main():
         [GaussianNB, []],
         [svm.SVC, []],
         [classification.GMMClassifier, {'n_components': 2, 'covariance_type': 'full'}],
-        [svm.SVC, {'kernel': 'linear'}],
+        # [svm.SVC, {'kernel': 'linear'}],
         [svm.SVC, {'kernel': 'rbf'}],
         [svm.SVC, {'kernel': 'poly'}],
         [RandomForestClassifier, []],
@@ -641,6 +702,8 @@ def main():
 
     result = experiment(args.training_yaml_path, args.testing_yaml_path,
                         featrs_plus_classifs, tile_shape=tile_shape,
+                        use_voxelsize_norm=True,
+                        working_voxelsize_mm=[1, 1, 1],
                         visualization=args.visualization, train=args.train)
 
 # Ukládání výsledku do souboru
