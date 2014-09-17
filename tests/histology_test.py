@@ -14,9 +14,19 @@ import unittest
 from gen_volume_tree import TreeGenerator
 from histology_analyser import HistologyAnalyser
 from histology_report import HistologyReport
+import gt_lar
 
 
 class HistologyTest(unittest.TestCase):
+
+    def test_vessel_tree_lar(self):
+        tvg = TreeGenerator(gt_lar.GTLar)
+        yaml_path = os.path.join(path_to_script, "./hist_stats_test.yaml")
+        tvg.importFromYaml(yaml_path)
+        tvg.voxelsize_mm = [1, 1, 1]
+        tvg.shape = [100, 100, 100]
+        output = tvg.generateTree()
+        tvg.show()
 
     def test_synthetic_data_vessel_tree_evaluation(self):
         """

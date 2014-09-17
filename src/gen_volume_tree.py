@@ -31,14 +31,109 @@ from vtk.util import numpy_support
 from datetime import datetime
 
 
+class VolumeTreeGenerator:
+    """
+    This generator is called by generateTree() function as a general form.
+    Other similar generator is used for generating LAR outputs.
+    """
+    def __init__(self, gtree):
+        self.shape = gtree.shape
+        self.data3d = np.zeros(gtree.shape, dtype=np.int)
+        self.voxelsize_mm = gtree.voxelsize_mm
+
+    def add_cylinder(self, p1m, p2m, rad):
+        """
+        Funkce na vykresleni jednoho segmentu do 3D dat
+        """
+
+        cyl_data3d = np.ones(self.shape, dtype=np.bool)
+        # prvni a koncovy bod, ve pixelech
+        p1 = [p1m[0] / self.voxelsize_mm[0], p1m[1] /
+              self.voxelsize_mm[1], p1m[2] / self.voxelsize_mm[2]]
+        p2 = [p2m[0] / self.voxelsize_mm[0], p2m[1] /
+              self.voxelsize_mm[1], p2m[2] / self.voxelsize_mm[2]]
+        logger.debug(
+            "p1_px: " + str(p1[0]) + " " + str(p1[1]) + " " + str(p1[2]))
+        logger.debug(
+            "p2_px: " + str(p2[0]) + " " + str(p2[1]) + " " + str(p2[2]))
+        logger.debug("radius_mm:" + str(rad))
+
+        # vzdalenosti mezi prvnim a koncovim bodem (pro jednotlive osy)
+        pdiff = [abs(p1[0] - p2[0]), abs(p1[1] - p2[1]), abs(p1[2] - p2[2])]
+
+        # generovani hodnot pro osu segmentu
+        num_points = max(pdiff) * \
+            2  # na jeden "pixel nejdelsi osy" je 2 bodu primky (shannon)
+        zvalues = np.linspace(p1[0], p2[0], num_points)
+        yvalues = np.linspace(p1[1], p2[1], num_points)
+        xvalues = np.linspace(p1[2], p2[2], num_points)
+
+        # drawing a line
+        for i in range(0, len(xvalues)):
+            try:
+                cyl_data3d[int(zvalues[i])][int(yvalues[i])][int(xvalues[i])] = 0
+            except:
+                import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+
+        # cuting size of 3d space needed for calculating distances (smaller ==
+        # a lot faster)
+        cut_up = max(
+            0, round(min(p1[0], p2[0]) - (rad / min(self.voxelsize_mm)) - 2))
+        # ta 2 je kuli tomu abyh omylem nurizl
+        cut_down = min(self.shape[0], round(
+            max(p1[0], p2[0]) + (rad / min(self.voxelsize_mm)) + 2))
+        cut_yu = max(
+            0, round(min(p1[1], p2[1]) - (rad / min(self.voxelsize_mm)) - 2))
+        cut_yd = min(self.shape[1], round(
+            max(p1[1], p2[1]) + (rad / min(self.voxelsize_mm)) + 2))
+        cut_xl = max(
+            0, round(min(p1[2], p2[2]) - (rad / min(self.voxelsize_mm)) - 2))
+        cut_xr = min(self.shape[2], round(
+            max(p1[2], p2[2]) + (rad / min(self.voxelsize_mm)) + 2))
+        logger.debug("cutter_px: z_up-" + str(cut_up) + " z_down-" + str(cut_down) + " y_up-" + str(
+            cut_yu) + " y_down-" + str(cut_yd) + " x_left-" + str(cut_xl) + " x_right-" + str(cut_xr))
+        cyl_data3d_cut = cyl_data3d[
+            int(cut_up):int(cut_down),
+            int(cut_yu):int(cut_yd),
+            int(cut_xl):int(cut_xr)]
+
+        # calculating distances
+        # spotrebovava naprostou vetsinu casu (pro 200^3  je to kolem 1.2
+        # sekundy, proto jsou data osekana)
+        lineDst = scipy.ndimage.distance_transform_edt(
+            cyl_data3d_cut, self.voxelsize_mm)
+
+        # zkopirovani vyrezu zpet do celeho rozsahu dat
+        for z in xrange(0, len(cyl_data3d_cut)):
+            for y in xrange(0, len(cyl_data3d_cut[z])):
+                for x in xrange(0, len(cyl_data3d_cut[z][y])):
+                    if lineDst[z][y][x] <= rad:
+                        iX = int(z + cut_up)
+                        iY = int(y + cut_yu)
+                        iZ = int(x + cut_xl)
+                        self.data3d[iX][iY][iZ] = 1
+
+    def get_output(self):
+        return self.data3d
+
+    def save(self, outputfile, filetype):
+        dw = datawriter.DataWriter()
+        dw.Write3DData(self.data3d, outputfile, filetype)
+
+    def show(self):
+        pyed = se.py3DSeedEditor(self.data3d)
+        pyed.show()
+
+
 class TreeGenerator:
 
-    def __init__(self):
+    def __init__(self, generator_class=VolumeTreeGenerator):
         self.data = None
         self.data3d = None
         self.voxelsize_mm = [1, 1, 1]
         self.shape = None
         self.use_lar = False
+        self.generator_class = generator_class
 
     def importFromYaml(self, filename):
         data = misc.obj_from_file(filename=filename, filetype='yaml')
@@ -57,7 +152,7 @@ class TreeGenerator:
             self.lv = lar_vessels.LarVessels()
 
         # use generator init
-        self.generator = VolumeTreeGenerator(self)
+        self.generator = self.generator_class(self)
 
         try:
             sdata = self.data['graph']['porta']
@@ -157,100 +252,6 @@ class TreeGenerator:
         self.generator.show()
 
 
-class VolumeTreeGenerator:
-    """
-    This generator is called by generateTree() function as a general form.
-    Other similar generator is used for generating LAR outputs.
-    """
-    def __init__(self, gtree):
-        self.shape = gtree.shape
-        self.data3d = np.zeros(gtree.shape, dtype=np.int)
-        self.voxelsize_mm = gtree.voxelsize_mm
-
-    def add_cylinder(self, p1m, p2m, rad):
-        """
-        Funkce na vykresleni jednoho segmentu do 3D dat
-        """
-
-        cyl_data3d = np.ones(self.shape, dtype=np.bool)
-        # prvni a koncovy bod, ve pixelech
-        p1 = [p1m[0] / self.voxelsize_mm[0], p1m[1] /
-              self.voxelsize_mm[1], p1m[2] / self.voxelsize_mm[2]]
-        p2 = [p2m[0] / self.voxelsize_mm[0], p2m[1] /
-              self.voxelsize_mm[1], p2m[2] / self.voxelsize_mm[2]]
-        logger.debug(
-            "p1_px: " + str(p1[0]) + " " + str(p1[1]) + " " + str(p1[2]))
-        logger.debug(
-            "p2_px: " + str(p2[0]) + " " + str(p2[1]) + " " + str(p2[2]))
-        logger.debug("radius_mm:" + str(rad))
-
-        # vzdalenosti mezi prvnim a koncovim bodem (pro jednotlive osy)
-        pdiff = [abs(p1[0] - p2[0]), abs(p1[1] - p2[1]), abs(p1[2] - p2[2])]
-
-        # generovani hodnot pro osu segmentu
-        num_points = max(pdiff) * \
-            2  # na jeden "pixel nejdelsi osy" je 2 bodu primky (shannon)
-        zvalues = np.linspace(p1[0], p2[0], num_points)
-        yvalues = np.linspace(p1[1], p2[1], num_points)
-        xvalues = np.linspace(p1[2], p2[2], num_points)
-
-        # drawing a line
-        for i in range(0, len(xvalues)):
-            try:
-                cyl_data3d[int(zvalues[i])][int(yvalues[i])][int(xvalues[i])] = 0
-            except:
-                import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
-
-        # cuting size of 3d space needed for calculating distances (smaller ==
-        # a lot faster)
-        cut_up = max(
-            0, round(min(p1[0], p2[0]) - (rad / min(self.voxelsize_mm)) - 2))
-        # ta 2 je kuli tomu abyh omylem nurizl
-        cut_down = min(self.shape[0], round(
-            max(p1[0], p2[0]) + (rad / min(self.voxelsize_mm)) + 2))
-        cut_yu = max(
-            0, round(min(p1[1], p2[1]) - (rad / min(self.voxelsize_mm)) - 2))
-        cut_yd = min(self.shape[1], round(
-            max(p1[1], p2[1]) + (rad / min(self.voxelsize_mm)) + 2))
-        cut_xl = max(
-            0, round(min(p1[2], p2[2]) - (rad / min(self.voxelsize_mm)) - 2))
-        cut_xr = min(self.shape[2], round(
-            max(p1[2], p2[2]) + (rad / min(self.voxelsize_mm)) + 2))
-        logger.debug("cutter_px: z_up-" + str(cut_up) + " z_down-" + str(cut_down) + " y_up-" + str(
-            cut_yu) + " y_down-" + str(cut_yd) + " x_left-" + str(cut_xl) + " x_right-" + str(cut_xr))
-        cyl_data3d_cut = cyl_data3d[
-            int(cut_up):int(cut_down),
-            int(cut_yu):int(cut_yd),
-            int(cut_xl):int(cut_xr)]
-
-        # calculating distances
-        # spotrebovava naprostou vetsinu casu (pro 200^3  je to kolem 1.2
-        # sekundy, proto jsou data osekana)
-        lineDst = scipy.ndimage.distance_transform_edt(
-            cyl_data3d_cut, self.voxelsize_mm)
-
-        # zkopirovani vyrezu zpet do celeho rozsahu dat
-        for z in xrange(0, len(cyl_data3d_cut)):
-            for y in xrange(0, len(cyl_data3d_cut[z])):
-                for x in xrange(0, len(cyl_data3d_cut[z][y])):
-                    if lineDst[z][y][x] <= rad:
-                        iX = int(z + cut_up)
-                        iY = int(y + cut_yu)
-                        iZ = int(x + cut_xl)
-                        self.data3d[iX][iY][iZ] = 1
-
-    def get_output(self):
-        return self.data3d
-
-    def save(self, outputfile, filetype):
-        dw = datawriter.DataWriter()
-        dw.Write3DData(self.data3d, outputfile, filetype)
-
-    def show(self):
-        pyed = se.py3DSeedEditor(self.data3d)
-        pyed.show()
-
-
 if __name__ == "__main__":
     logger = logging.getLogger()
 
@@ -262,7 +263,8 @@ if __name__ == "__main__":
 
     # input parser
     parser = argparse.ArgumentParser(
-        description='Histology analyser reporter'
+        description='Histology analyser reporter. Try: \
+python src/gen_volume_tree.py -i ./tests/hist_stats_test.yaml'
     )
     parser.add_argument(
         '-i', '--inputfile',
@@ -297,6 +299,14 @@ if __name__ == "__main__":
         help='size of output data in pixels for each axis (ZYX)'
     )
     parser.add_argument(
+        '-g', '--generator',
+        default='vol',
+        type=str,
+        help='Volume or surface model can be generated by use this option. \
+                Use "vol", "volume" for volumetric model. For LAR surface model\
+                use "lar".'
+    )
+    parser.add_argument(
         '-d', '--debug', action='store_true',
         help='Debug mode')
     parser.add_argument(
@@ -309,15 +319,21 @@ if __name__ == "__main__":
 
     startTime = datetime.now()
 
-    tg = TreeGenerator()
+    if args.generator in ['vol', 'volume']:
+        generator_class = VolumeTreeGenerator
+    if args.generator in ['lar']:
+        import gt_lar
+        generator_class = gt_lar.GTLar
+
+    tg = TreeGenerator(generator_class)
     tg.importFromYaml(args.inputfile)
     tg.voxelsize_mm = args.voxelsize
     tg.shape = args.datashape
     tg.use_lar = args.useLar
-    tg.generateTree()
+    data3d = tg.generateTree()
 
     logger.info("TimeUsed:" + str(datetime.now() - startTime))
-    volume_px = sum(sum(sum(tg.data3d)))
+    volume_px = sum(sum(sum(data3d)))
     volume_mm3 = volume_px * \
         (tg.voxelsize_mm[0] * tg.voxelsize_mm[1] * tg.voxelsize_mm[2])
     logger.info("Volume px:" + str(volume_px))
