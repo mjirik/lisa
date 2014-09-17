@@ -31,14 +31,23 @@ class GTLar:
         pass
 
     def add_cylinder(self, nodeA, nodeB, radius):
+        nodeA = np.array(nodeA)
+        nodeB = np.array(nodeB)
+
         print nodeB
         ln = len(self.V)
-        self.V.append(nodeB)
-        self.V.append((np.array(nodeB)+[2, 0, 0]).tolist())
-        self.V.append((np.array(nodeB)+[2, 2, 0]).tolist())
-        self.V.append((np.array(nodeB)+[2, 2, 2]).tolist())
-        self.V.append((np.array(nodeA)+[0, 0, 0]).tolist())
+        self.V.append(nodeB.tolist())
+        self.V.append((nodeB+[2, 0, 0]).tolist())
+        self.V.append((nodeB+[2, 2, 0]).tolist())
+        self.V.append((nodeB+[2, 2, 2]).tolist())
+        self.V.append((nodeA+[0, 0, 0]).tolist())
         self.CV.append([ln, ln+1, ln+2, ln+3, ln+4])
+
+
+        print '--------------------------------'
+        # vect = nodeA - nodeB
+        # self.__draw_circle(nodeB, vect, radius)
+
 
 
     def show(self):
@@ -64,11 +73,31 @@ class GTLar:
         self.V.append((np.array(nodeB)+[2, 2, 2]).tolist())
         self.CV.append([ln, ln + 1, ln + 2, ln + 3])
 
+
+    def __add_cone(self, nodeA, nodeB, radius):
+        vect = nodeA - nodeB
+        ptl = self.__circle(nodeA, vect, radius)
+
+        ln = len(self.V)
+        self.V.append(nodeB)
+        CVlist = []
+
+        for i, pt in enumerate(ptl):
+            self.V.append(pt)
+            CVlist.append(ln + i + 1)
+
+    def __draw_circle(self, center, perp_vect, radius):
+        for pt in self.__circle(center, perp_vect, radius):
+            self.__add_tetr(pt.tolist())
+
+
+
+
     def __circle(self, center, perp_vect, radius):
         """
         perp_vect is vector perpendicular to plane of circle
         """
-        tl = [0, 0.2,0.4,0.6,0.8, 1.0]
+        tl = [0, 0.3,0.6]
 
         # vector form center to edge of circle
         # u is a unit vector from the centre of the circle to any point on the circumference
@@ -85,9 +114,9 @@ class GTLar:
                 radius * np.sin(t * 2 * np.pi) * np.cross(u, n) +\
                 center
 
-            print 'pt ', pt
 
-            self.__add_tetr(pt.tolist())
+        return tl
+
 
     def __perpendicular_vector(self, v):
         r""" Finds an arbitrary perpendicular vector to *v*."""
