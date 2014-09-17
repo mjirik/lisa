@@ -1,7 +1,6 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
 
-
 # import funkcí z jiného adresáře
 import sys
 import os.path
@@ -11,6 +10,10 @@ sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
 sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
+
+from gen_volume_tree import TreeGenerator
+from histology_analyser import HistologyAnalyser
+from histology_report import HistologyReport
 
 
 class HistologyTest(unittest.TestCase):
@@ -22,23 +25,20 @@ class HistologyTest(unittest.TestCase):
 
 
         """
-        from gen_volume_tree import TreeVolumeGenerator
-        from histology_analyser import HistologyAnalyser
-        from histology_report import HistologyReport
         # import segmentation
         # import misc
 
         # generate 3d data from yaml for testing
-        tvg = TreeVolumeGenerator()
+        tvg = TreeGenerator()
         yaml_path = os.path.join(path_to_script, "./hist_stats_test.yaml")
         tvg.importFromYaml(yaml_path)
         tvg.voxelsize_mm = [1, 1, 1]
         tvg.shape = [100, 100, 100]
-        tvg.generateTree()
+        data3d = tvg.generateTree()
 
         # init histology Analyser
         metadata = {'voxelsize_mm': tvg.voxelsize_mm}
-        data3d = tvg.data3d*10
+        data3d = data3d * 10
         threshold = 2.5
         ha = HistologyAnalyser(data3d, metadata, threshold)
 

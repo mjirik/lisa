@@ -20,7 +20,7 @@ import scipy.ndimage
 import datawriter
 import misc
 
-import datareader
+# import datareader
 import py3DSeedEditor as se
 
 import gen_vtk_tree
@@ -31,7 +31,7 @@ from vtk.util import numpy_support
 from datetime import datetime
 
 
-class TreeVolumeGenerator:
+class TreeGenerator:
 
     def __init__(self):
         self.data = None
@@ -43,6 +43,129 @@ class TreeVolumeGenerator:
     def importFromYaml(self, filename):
         data = misc.obj_from_file(filename=filename, filetype='yaml')
         self.data = data
+
+    def generateTree(self):
+        """
+        Funkce na vygenerování objemu stromu ze zadaných dat.
+        Generates output by defined generator. If VolumeTreeGenerator is used,
+        output is data3d.
+
+        """
+# LAR init
+        if self.use_lar:
+            import lar_vessels
+            self.lv = lar_vessels.LarVessels()
+
+        # use generator init
+        self.generator = VolumeTreeGenerator(self)
+
+        try:
+            sdata = self.data['graph']['porta']
+        except:
+            sdata = self.data['Graph']
+
+        for cyl_id in sdata:
+            logger.debug("CylinderId: " + str(cyl_id))
+
+            try:
+                cyl_data = self.data['graph']['porta'][cyl_id]
+            except:
+                cyl_data = self.data['Graph'][cyl_id]
+
+            # prvni a koncovy bod, v mm + radius v mm
+            try:
+                p1m = cyl_data['nodeA_ZYX_mm']  # souradnice ulozeny [Z,Y,X]
+                p2m = cyl_data['nodeB_ZYX_mm']
+                rad = cyl_data['radius_mm']
+            except:
+                # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+
+                logger.error(
+                    "Segment id " + str(cyl_id) + ": grror reading data from yaml!")
+                return
+
+            self.generator.add_cylinder(p1m, p2m, rad)
+            if self.use_lar:
+                self.lv.add_cylinder(p1m, p2m, rad)
+
+        output = self.generator.get_output()
+
+        if self.use_lar:
+            self.lv.show()
+        return output
+
+    def generateTree_vtk(self):
+        """
+        Funkce na vygenerování objemu stromu ze zadaných dat.
+        Veze pro generování pomocí VTK
+        !!! funguje špatně -> vstupní data musí být pouze povrchové body, jinak generuje ve výstupních datech dutiny
+
+        """
+        # get vtkPolyData
+        tree_data = gen_vtk_tree.process_tree(self.data['Graph'])
+        polyData = gen_vtk_tree.gen_tree(tree_data)
+
+        polyData.GetBounds()
+        # bounds = polyData.GetBounds()
+
+        white_image = vtk.vtkImageData()
+        white_image.SetSpacing(self.voxelsize_mm)
+        white_image.SetDimensions(self.shape)
+        white_image.SetExtent(
+            [0, self.shape[0] - 1, 0, self.shape[1] - 1, 0, self.shape[2] - 1])
+        # origin = [(bounds[0] + self.shape[0])/2, (bounds[1] + self.shape[1])/2, (bounds[2] + self.shape[2])/2]
+        # white_image.SetOrigin(origin) #neni potreba?
+        # white_image.SetScalarTypeToUnsignedChar()
+        white_image.AllocateScalars()
+
+        # fill the image with foreground voxels: (still black until stecil)
+        inval = 255
+        outval = 0
+        count = white_image.GetNumberOfPoints()
+        for i in range(0, count):
+            white_image.GetPointData().GetScalars().SetTuple1(i, inval)
+
+        pol2stencil = vtk.vtkPolyDataToImageStencil()
+        pol2stencil.SetInput(polyData)
+
+        # pol2stencil.SetOutputOrigin(origin) # TOHLE BLBNE
+        pol2stencil.SetOutputSpacing(self.voxelsize_mm)
+        pol2stencil.SetOutputWholeExtent(white_image.GetExtent())
+        pol2stencil.Update()
+
+        imgstenc = vtk.vtkImageStencil()
+        imgstenc.SetInput(white_image)
+        imgstenc.SetStencil(pol2stencil.GetOutput())
+        imgstenc.ReverseStencilOff()
+        imgstenc.SetBackgroundValue(outval)
+        imgstenc.Update()
+
+        # VTK -> Numpy
+        vtk_img_data = imgstenc.GetOutput()
+        vtk_data = vtk_img_data.GetPointData().GetScalars()
+        numpy_data = numpy_support.vtk_to_numpy(vtk_data)
+        numpy_data = numpy_data.reshape(
+            self.shape[0], self.shape[1], self.shape[2])
+        numpy_data = numpy_data.transpose(2, 1, 0)
+
+        self.data3d = numpy_data
+
+    def saveToFile(self, outputfile, filetype):
+        self.generator.save(outputfile, filetype)
+
+    def show(self):
+        self.generator.show()
+
+
+class VolumeTreeGenerator:
+    """
+    This generator is called by generateTree() function as a general form.
+    Other similar generator is used for generating LAR outputs.
+    """
+    def __init__(self, gtree):
+        self.shape = gtree.shape
+        self.data3d = np.zeros(gtree.shape, dtype=np.int)
+        self.voxelsize_mm = gtree.voxelsize_mm
 
     def add_cylinder(self, p1m, p2m, rad):
         """
@@ -116,107 +239,16 @@ class TreeVolumeGenerator:
                         iZ = int(x + cut_xl)
                         self.data3d[iX][iY][iZ] = 1
 
-    def generateTree(self):
-        """
-        Funkce na vygenerování objemu stromu ze zadaných dat.
+    def get_output(self):
+        return self.data3d
 
-        """
-# LAR init
-        if self.use_lar:
-            import lar_vessels
-            self.lv = lar_vessels.LarVessels()
-
-        self.data3d = np.zeros(self.shape, dtype=np.int)
-
-        try:
-            sdata = self.data['graph']['porta']
-        except:
-            sdata = self.data['Graph']
-        for cyl_id in sdata:
-            logger.debug("CylinderId: " + str(cyl_id))
-
-            try:
-                cyl_data = self.data['graph']['porta'][cyl_id]
-            except:
-                cyl_data = self.data['Graph'][cyl_id]
-
-            # prvni a koncovy bod, v mm + radius v mm
-            try:
-                p1m = cyl_data['nodeA_ZYX_mm']  # souradnice ulozeny [Z,Y,X]
-                p2m = cyl_data['nodeB_ZYX_mm']
-                rad = cyl_data['radius_mm']
-            except:
-                # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
-
-                logger.error(
-                    "Segment id " + str(cyl_id) + ": grror reading data from yaml!")
-                return
-
-            self.add_cylinder(p1m, p2m, rad)
-            if self.use_lar:
-                self.lv.add_cylinder(p1m, p2m, rad)
-
-        if self.use_lar:
-            self.lv.show()
-
-    def generateTree_vtk(self):
-        """
-        Funkce na vygenerování objemu stromu ze zadaných dat.
-        Veze pro generování pomocí VTK
-        !!! funguje špatně -> vstupní data musí být pouze povrchové body, jinak generuje ve výstupních datech dutiny
-
-        """
-        # get vtkPolyData
-        tree_data = gen_vtk_tree.process_tree(self.data['Graph'])
-        polyData = gen_vtk_tree.gen_tree(tree_data)
-
-        bounds = polyData.GetBounds()
-
-        white_image = vtk.vtkImageData()
-        white_image.SetSpacing(self.voxelsize_mm)
-        white_image.SetDimensions(self.shape)
-        white_image.SetExtent(
-            [0, self.shape[0] - 1, 0, self.shape[1] - 1, 0, self.shape[2] - 1])
-        # origin = [(bounds[0] + self.shape[0])/2, (bounds[1] + self.shape[1])/2, (bounds[2] + self.shape[2])/2]
-        # white_image.SetOrigin(origin) #neni potreba?
-        # white_image.SetScalarTypeToUnsignedChar()
-        white_image.AllocateScalars()
-
-        # fill the image with foreground voxels: (still black until stecil)
-        inval = 255
-        outval = 0
-        count = white_image.GetNumberOfPoints()
-        for i in range(0, count):
-            white_image.GetPointData().GetScalars().SetTuple1(i, inval)
-
-        pol2stencil = vtk.vtkPolyDataToImageStencil()
-        pol2stencil.SetInput(polyData)
-
-        # pol2stencil.SetOutputOrigin(origin) # TOHLE BLBNE
-        pol2stencil.SetOutputSpacing(self.voxelsize_mm)
-        pol2stencil.SetOutputWholeExtent(white_image.GetExtent())
-        pol2stencil.Update()
-
-        imgstenc = vtk.vtkImageStencil()
-        imgstenc.SetInput(white_image)
-        imgstenc.SetStencil(pol2stencil.GetOutput())
-        imgstenc.ReverseStencilOff()
-        imgstenc.SetBackgroundValue(outval)
-        imgstenc.Update()
-
-        # VTK -> Numpy
-        vtk_img_data = imgstenc.GetOutput()
-        vtk_data = vtk_img_data.GetPointData().GetScalars()
-        numpy_data = numpy_support.vtk_to_numpy(vtk_data)
-        numpy_data = numpy_data.reshape(
-            self.shape[0], self.shape[1], self.shape[2])
-        numpy_data = numpy_data.transpose(2, 1, 0)
-
-        self.data3d = numpy_data
-
-    def saveToFile(self, outputfile, filetype):
+    def save(self, outputfile, filetype):
         dw = datawriter.DataWriter()
         dw.Write3DData(self.data3d, outputfile, filetype)
+
+    def show(self):
+        pyed = se.py3DSeedEditor(self.data3d)
+        pyed.show()
 
 
 if __name__ == "__main__":
@@ -277,24 +309,23 @@ if __name__ == "__main__":
 
     startTime = datetime.now()
 
-    hr = TreeVolumeGenerator()
-    hr.importFromYaml(args.inputfile)
-    hr.voxelsize_mm = args.voxelsize
-    hr.shape = args.datashape
-    hr.use_lar = args.useLar
-    hr.generateTree()
+    tg = TreeGenerator()
+    tg.importFromYaml(args.inputfile)
+    tg.voxelsize_mm = args.voxelsize
+    tg.shape = args.datashape
+    tg.use_lar = args.useLar
+    tg.generateTree()
 
     logger.info("TimeUsed:" + str(datetime.now() - startTime))
-    volume_px = sum(sum(sum(hr.data3d)))
+    volume_px = sum(sum(sum(tg.data3d)))
     volume_mm3 = volume_px * \
-        (hr.voxelsize_mm[0] * hr.voxelsize_mm[1] * hr.voxelsize_mm[2])
+        (tg.voxelsize_mm[0] * tg.voxelsize_mm[1] * tg.voxelsize_mm[2])
     logger.info("Volume px:" + str(volume_px))
     logger.info("Volume mm3:" + str(volume_mm3))
 
 # vizualizace
-    pyed = se.py3DSeedEditor(hr.data3d)
-    pyed.show()
+    tg.show()
 
 # ukládání do souboru
     if args.outputfile is not None:
-        hr.saveToFile(args.outputfile, args.outputfiletype)
+        tg.saveToFile(args.outputfile, args.outputfiletype)
