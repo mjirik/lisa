@@ -333,11 +333,11 @@ python src/gen_volume_tree.py -i ./tests/hist_stats_test.yaml'
     data3d = tg.generateTree()
 
     logger.info("TimeUsed:" + str(datetime.now() - startTime))
-    volume_px = sum(sum(sum(data3d)))
-    volume_mm3 = volume_px * \
-        (tg.voxelsize_mm[0] * tg.voxelsize_mm[1] * tg.voxelsize_mm[2])
-    logger.info("Volume px:" + str(volume_px))
-    logger.info("Volume mm3:" + str(volume_mm3))
+    # volume_px = sum(sum(sum(data3d)))
+    # volume_mm3 = volume_px * \
+    #     (tg.voxelsize_mm[0] * tg.voxelsize_mm[1] * tg.voxelsize_mm[2])
+    # logger.info("Volume px:" + str(volume_px))
+    # logger.info("Volume mm3:" + str(volume_mm3))
 
 # vizualizace
     tg.show()
