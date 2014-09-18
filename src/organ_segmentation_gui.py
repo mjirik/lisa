@@ -285,6 +285,11 @@ class OrganSegmentation():
         criterium = (wanted_volume - vol2) ** 2
         return criterium
 
+    def sliver_compare_with_other_volume_from_file(self, filepath):
+        reader = datareader.DataReader()
+        segmentation_datap = reader.Get3DData(filepath, dataplus_format=True)
+        self.sliver_compare_with_other_volume(segmentation_datap)
+
     def sliver_compare_with_other_volume(self, segmentation_datap):
         """
         Compares actual Lisa data with other which are given by

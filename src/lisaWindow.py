@@ -150,6 +150,10 @@ class OrganSegmentationWindow(QMainWindow):
         btn_segfile.clicked.connect(self.loadSegmentationFromFile)
         btn_segfile.setToolTip("Load segmentation from pkl file, raw, ...")
 
+        btn_segcompare = QPushButton("Compare", self)
+        btn_segcompare.clicked.connect(self.compareSegmentationWithFile)
+        btn_segcompare.setToolTip("Compare data with segmentation from pkl file, raw, ...")
+
         btn_mask = QPushButton("Mask region", self)
         btn_mask.clicked.connect(self.maskRegion)
         btn_segauto = QPushButton("Automatic seg.", self)
@@ -160,6 +164,7 @@ class OrganSegmentationWindow(QMainWindow):
         grid.addWidget(hr, rstart + 0, 2, 1, 4)
         grid.addWidget(text_seg, rstart + 0, 1)
         grid.addWidget(btn_segfile, rstart + 1, 1)
+        grid.addWidget(btn_segcompare, rstart + 1, 3)
         grid.addWidget(btn_mask, rstart + 2, 1)
         grid.addWidget(btn_segauto, rstart + 2, 2)
         grid.addWidget(btn_segman, rstart + 2, 3)
@@ -446,6 +451,28 @@ class OrganSegmentationWindow(QMainWindow):
             self.statusBar().showMessage('No data path specified!')
             return
         self.oseg.import_segmentation_from_file(seg_path)
+        self.statusBar().showMessage('Ready')
+
+    def compareSegmentationWithFile(self):
+        """
+        Function make GUI for reading segmentaion file to compare it with
+        actual segmentation using Sliver methodics. It calls
+        organ_segmentation function to do the work.
+        """
+        self.statusBar().showMessage('Reading segmentation from file ...')
+        QApplication.processEvents()
+        logger.debug("import segmentation from file to compare by sliver")
+        logger.debug(str(self.oseg.crinfo))
+        logger.debug(str(self.oseg.data3d.shape))
+        logger.debug(str(self.oseg.segmentation.shape))
+        seg_path = self.__get_datafile(
+            app=True,
+            directory=self.oseg.input_datapath_start
+        )
+        if seg_path is None:
+            self.statusBar().showMessage('No data path specified!')
+            return
+        self.oseg.sliver_compare_with_other_volume_from_file(seg_path)
         self.statusBar().showMessage('Ready')
 
     def autoSeg(self):
