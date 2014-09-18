@@ -362,6 +362,20 @@ def sliverScore(measure, metric_type):
     return score
 
 
+def sliver_score_one_couple(data):
+    """
+    Convert data from compare_volumes() function.
+    """
+    score = {
+        'vd': sliverScore(data['vd'], 'vd'),
+        'voe': sliverScore(data['voe'], 'voe'),
+        'avgd': sliverScore(data['avgd'], 'avgd'),
+        'rmsd': sliverScore(data['rmsd'], 'rmsd'),
+        'maxd': sliverScore(data['maxd'], 'maxd'),
+    }
+    return score
+
+
 def sliverScoreAll(data):
     """
     Computers score by Sliver07
