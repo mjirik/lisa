@@ -357,7 +357,13 @@ def sliverScore(measure, metric_type):
         slope = -1.31578947368421
 
     score = intercept + np.abs(measure) * slope
-    score[score < 0] = 0
+
+    try:
+        score[score < 0] = 0
+    except:
+        # if score is scalar
+        if score < 0:
+            score = 0
 
     return score
 
