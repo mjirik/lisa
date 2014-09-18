@@ -20,7 +20,9 @@ from larcc import *
 from largrid import *
 from scipy.spatial import Delaunay
 
+
 class GTLar:
+
     def __init__(self, gtree=None):
         """
         gtree is information about input data structure. Not used here.
@@ -37,29 +39,25 @@ class GTLar:
         print nodeB
         ln = len(self.V)
         self.V.append(nodeB.tolist())
-        self.V.append((nodeB+[2, 0, 0]).tolist())
-        self.V.append((nodeB+[2, 2, 0]).tolist())
-        self.V.append((nodeB+[2, 2, 2]).tolist())
-        self.V.append((nodeA+[0, 0, 0]).tolist())
-        self.CV.append([ln, ln+1, ln+2, ln+3, ln+4])
-
+        self.V.append((nodeB + [2, 0, 0]).tolist())
+        self.V.append((nodeB + [2, 2, 0]).tolist())
+        self.V.append((nodeB + [2, 2, 2]).tolist())
+        self.V.append((nodeA + [0, 0, 0]).tolist())
+        self.CV.append([ln, ln + 1, ln + 2, ln + 3, ln + 4])
 
         print '--------------------------------'
         # vect = nodeA - nodeB
         # self.__draw_circle(nodeB, vect, radius)
 
-
-
     def show(self):
-        self.__circle([30,30,30], [0,2,1], 10)
+        self.__circle([30, 30, 30], [0, 2, 1], 10)
         V = self.V
         CV = self.CV
-
 
         # V = [[0,0,0],[5,5,1],[0,5,5],[5,5,5]]
         # CV = [[0,1,2,3]]
         # print 'V, CV ', V, CV
-        VIEW(MKPOL([V,AA(AA(lambda k:k+1))(CV),[]]))
+        VIEW(MKPOL([V, AA(AA(lambda k:k + 1))(CV), []]))
 # characteristic matrices
 
     def get_output(self):
@@ -68,11 +66,10 @@ class GTLar:
     def __add_tetr(self, nodeB):
         ln = len(self.V)
         self.V.append(nodeB)
-        self.V.append((np.array(nodeB)+[2, 0, 0]).tolist())
-        self.V.append((np.array(nodeB)+[2, 2, 0]).tolist())
-        self.V.append((np.array(nodeB)+[2, 2, 2]).tolist())
+        self.V.append((np.array(nodeB) + [2, 0, 0]).tolist())
+        self.V.append((np.array(nodeB) + [2, 2, 0]).tolist())
+        self.V.append((np.array(nodeB) + [2, 2, 2]).tolist())
         self.CV.append([ln, ln + 1, ln + 2, ln + 3])
-
 
     def __add_cone(self, nodeA, nodeB, radius):
         vect = nodeA - nodeB
@@ -90,17 +87,15 @@ class GTLar:
         for pt in self.__circle(center, perp_vect, radius):
             self.__add_tetr(pt.tolist())
 
-
-
-
     def __circle(self, center, perp_vect, radius):
         """
         perp_vect is vector perpendicular to plane of circle
         """
-        tl = [0, 0.3,0.6]
+        tl = [0, 0.3, 0.6]
 
         # vector form center to edge of circle
-        # u is a unit vector from the centre of the circle to any point on the circumference
+        # u is a unit vector from the centre of the circle to any point on the
+        # circumference
 
         u = self.__perpendicular_vector(perp_vect)
         u = u / np.linalg.norm(u)
@@ -114,9 +109,7 @@ class GTLar:
                 radius * np.sin(t * 2 * np.pi) * np.cross(u, n) +\
                 center
 
-
         return tl
-
 
     def __perpendicular_vector(self, v):
         r""" Finds an arbitrary perpendicular vector to *v*."""
@@ -126,5 +119,3 @@ class GTLar:
             else:
                 return np.cross(v, [0, 1, 0])
         return np.cross(v, [1, 0, 0])
-
-
