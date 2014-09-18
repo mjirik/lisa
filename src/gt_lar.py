@@ -15,10 +15,10 @@ import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../../lar-cc/lib/py/"))
-# import sys; sys.path.insert(0, 'lib/py/')
-from larcc import *
-from largrid import *
-from scipy.spatial import Delaunay
+import numpy as np
+
+from larcc import VIEW, MKPOL, AA
+# from largrid import *
 
 
 class GTLar:
@@ -33,19 +33,7 @@ class GTLar:
         pass
 
     def add_cylinder(self, nodeA, nodeB, radius):
-        # nodeA = np.array(nodeA)
-        # nodeB = np.array(nodeB)
 
-        # print nodeB
-        # ln = len(self.V)
-        # self.V.append(nodeB.tolist())
-        # self.V.append((nodeB + [2, 0, 0]).tolist())
-        # self.V.append((nodeB + [2, 2, 0]).tolist())
-        # self.V.append((nodeB + [2, 2, 2]).tolist())
-        # self.V.append((nodeA + [0, 0, 0]).tolist())
-        # self.CV.append([ln, ln + 1, ln + 2, ln + 3, ln + 4])
-
-        print '--------------------------------'
         # vect = nodeA - nodeB
         # self.__draw_circle(nodeB, vect, radius)
 
@@ -70,6 +58,22 @@ class GTLar:
 
         self.CV.append(CVlist)
 
+    def __add_old_cylinder(self, nodeA, nodeB, radius):
+        """
+        deprecated simple representation of cylinder
+        """
+        nodeA = np.array(nodeA)
+        nodeB = np.array(nodeB)
+
+        print nodeB
+        ln = len(self.V)
+        self.V.append(nodeB.tolist())
+        self.V.append((nodeB + [2, 0, 0]).tolist())
+        self.V.append((nodeB + [2, 2, 0]).tolist())
+        self.V.append((nodeB + [2, 2, 2]).tolist())
+        self.V.append((nodeA + [0, 0, 0]).tolist())
+        self.CV.append([ln, ln + 1, ln + 2, ln + 3, ln + 4])
+
     def show(self):
         # self.__add_circle([30, 30, 30], [0, 2, 1], 10)
 
@@ -81,12 +85,14 @@ class GTLar:
         # CV = [[0,1,2,3]]
         # print 'V, CV ', V, CV
         VIEW(MKPOL([V, AA(AA(lambda k:k + 1))(CV), []]))
-# characteristic matrices
 
     def get_output(self):
         pass
 
     def __add_tetr(self, nodeB):
+        """
+        Creates tetrahedron in specified position.
+        """
         try:
             nodeB = nodeB.tolist()
         except:
@@ -115,6 +121,9 @@ class GTLar:
         self.CV.append(CVlist)
 
     def __add_circle(self, center, perp_vect, radius, polygon_element_number=10):
+        """
+        Draw circle some circle points as tetrahedrons.
+        """
         pts = self.__circle(center, perp_vect, radius,
                             polygon_element_number=polygon_element_number)
         for pt in pts:
@@ -122,11 +131,11 @@ class GTLar:
 
     def __circle(self, center, perp_vect, radius, polygon_element_number=10):
         """
+        Function computed the circle points. No drawing.
         perp_vect is vector perpendicular to plane of circle
         """
         # tl = [0, 0.2, 0.4, 0.6, 0.8]
         tl = np.linspace(0, 1, polygon_element_number)
-        print tl
 
         # vector form center to edge of circle
         # u is a unit vector from the centre of the circle to any point on the
