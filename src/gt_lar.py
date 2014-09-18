@@ -50,7 +50,7 @@ class GTLar:
         # self.__draw_circle(nodeB, vect, radius)
 
     def show(self):
-        self.__circle([30, 30, 30], [0, 2, 1], 10)
+        self.__draw_circle([30, 30, 30], [0, 2, 1], 10)
         V = self.V
         CV = self.CV
 
@@ -64,6 +64,11 @@ class GTLar:
         pass
 
     def __add_tetr(self, nodeB):
+        try:
+            nodeB = nodeB.tolist()
+        except:
+            pass
+
         ln = len(self.V)
         self.V.append(nodeB)
         self.V.append((np.array(nodeB) + [2, 0, 0]).tolist())
@@ -84,23 +89,32 @@ class GTLar:
             CVlist.append(ln + i + 1)
 
     def __draw_circle(self, center, perp_vect, radius):
-        for pt in self.__circle(center, perp_vect, radius):
-            self.__add_tetr(pt.tolist())
+        pts = self.__circle(center, perp_vect, radius)
+        print 'pts ', type(pts), pts
+        for pt in pts:
+            self.__add_tetr(pt)
 
     def __circle(self, center, perp_vect, radius):
         """
         perp_vect is vector perpendicular to plane of circle
         """
-        tl = [0, 0.3, 0.6]
+        # tl = [0, 0.2, 0.4, 0.6, 0.8]
+        tl = np.linspace(0,1,10)
+        print tl
 
         # vector form center to edge of circle
         # u is a unit vector from the centre of the circle to any point on the
         # circumference
 
-        u = self.__perpendicular_vector(perp_vect)
+        # normalized perpendicular vector
+        n = perp_vect / np.linalg.norm(perp_vect)
+
+        # normalized vector from the centre to point on the circumference
+        u = self.__perpendicular_vector(n)
         u = u / np.linalg.norm(u)
 
-        n = perp_vect
+
+        pts = []
 
         for t in tl:
             # u = np.array([0, 1, 0])
@@ -109,7 +123,10 @@ class GTLar:
                 radius * np.sin(t * 2 * np.pi) * np.cross(u, n) +\
                 center
 
-        return tl
+            pt.tolist()
+            pts.append(pt)
+
+        return pts
 
     def __perpendicular_vector(self, v):
         r""" Finds an arbitrary perpendicular vector to *v*."""
