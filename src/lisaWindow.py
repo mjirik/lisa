@@ -453,6 +453,13 @@ class OrganSegmentationWindow(QMainWindow):
         self.oseg.import_segmentation_from_file(seg_path)
         self.statusBar().showMessage('Ready')
 
+
+    def __evaluation_to_text(self, comparation):
+        normal, score = comparation
+        return str(score)
+
+
+
     def compareSegmentationWithFile(self):
         """
         Function make GUI for reading segmentaion file to compare it with
@@ -472,7 +479,10 @@ class OrganSegmentationWindow(QMainWindow):
         if seg_path is None:
             self.statusBar().showMessage('No data path specified!')
             return
-        self.oseg.sliver_compare_with_other_volume_from_file(seg_path)
+        evaluation = self.oseg.sliver_compare_with_other_volume_from_file(seg_path)
+        text = self.__evaluation_to_text(evaluation)
+
+        self.setLabelText(self.text_seg_data, text)
         self.statusBar().showMessage('Ready')
 
     def autoSeg(self):

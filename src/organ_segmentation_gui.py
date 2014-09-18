@@ -288,7 +288,8 @@ class OrganSegmentation():
     def sliver_compare_with_other_volume_from_file(self, filepath):
         reader = datareader.DataReader()
         segmentation_datap = reader.Get3DData(filepath, dataplus_format=True)
-        self.sliver_compare_with_other_volume(segmentation_datap)
+        evaluation = self.sliver_compare_with_other_volume(segmentation_datap)
+        return evaluation
 
     def sliver_compare_with_other_volume(self, segmentation_datap):
         """
@@ -326,8 +327,10 @@ class OrganSegmentation():
             data3d_segmentation,
             self.voxelsize_mm
             )
+        score = volumetry_evaluation.sliver_score_one_couple(eval)
         print eval
-        return eval
+        print score
+        return eval, score
 
     def segm_smoothing(self, sigma_mm):
         """
