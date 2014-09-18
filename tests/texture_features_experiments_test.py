@@ -55,6 +55,8 @@ class TextureFeaturesExperimentTest(unittest.TestCase):
 
         tls.experiment(yaml_file, yaml_file,
                        featrs_plus_classifs, tile_shape=tile_shape,
+                       use_voxelsize_norm=False,
+                       working_voxelsize_mm=[1,1,1],
                        visualization=False)
 
 
