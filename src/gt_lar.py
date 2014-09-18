@@ -33,24 +33,47 @@ class GTLar:
         pass
 
     def add_cylinder(self, nodeA, nodeB, radius):
-        nodeA = np.array(nodeA)
-        nodeB = np.array(nodeB)
+        # nodeA = np.array(nodeA)
+        # nodeB = np.array(nodeB)
 
-        print nodeB
-        ln = len(self.V)
-        self.V.append(nodeB.tolist())
-        self.V.append((nodeB + [2, 0, 0]).tolist())
-        self.V.append((nodeB + [2, 2, 0]).tolist())
-        self.V.append((nodeB + [2, 2, 2]).tolist())
-        self.V.append((nodeA + [0, 0, 0]).tolist())
-        self.CV.append([ln, ln + 1, ln + 2, ln + 3, ln + 4])
+        # print nodeB
+        # ln = len(self.V)
+        # self.V.append(nodeB.tolist())
+        # self.V.append((nodeB + [2, 0, 0]).tolist())
+        # self.V.append((nodeB + [2, 2, 0]).tolist())
+        # self.V.append((nodeB + [2, 2, 2]).tolist())
+        # self.V.append((nodeA + [0, 0, 0]).tolist())
+        # self.CV.append([ln, ln + 1, ln + 2, ln + 3, ln + 4])
 
         print '--------------------------------'
         # vect = nodeA - nodeB
         # self.__draw_circle(nodeB, vect, radius)
 
+        vect = (np.array(nodeA) - np.array(nodeB)).tolist()
+
+        CVlist = []
+        # 1st base
+        pts = self.__circle(nodeA, vect, radius)
+        ln = len(self.V)
+
+        for i, pt in enumerate(pts):
+            self.V.append(pt)
+            CVlist.append(ln + i)
+
+        # 2nd base
+        pts = self.__circle(nodeB, vect, radius)
+        ln = len(self.V)
+
+        for i, pt in enumerate(pts):
+            self.V.append(pt)
+            CVlist.append(ln + i)
+
+        self.CV.append(CVlist)
+
     def show(self):
-        self.__draw_circle([30, 30, 30], [0, 2, 1], 10)
+        # self.__add_circle([30, 30, 30], [0, 2, 1], 10)
+
+        # self.__add_cone([10,10,10],[20,20,20],5)
         V = self.V
         CV = self.CV
 
@@ -77,29 +100,32 @@ class GTLar:
         self.CV.append([ln, ln + 1, ln + 2, ln + 3])
 
     def __add_cone(self, nodeA, nodeB, radius):
-        vect = nodeA - nodeB
-        ptl = self.__circle(nodeA, vect, radius)
+        vect = (np.array(nodeA) - np.array(nodeB)).tolist()
+        pts = self.__circle(nodeA, vect, radius)
 
         ln = len(self.V)
         self.V.append(nodeB)
-        CVlist = []
+        # first object is top of cone
+        CVlist = [ln]
 
-        for i, pt in enumerate(ptl):
+        for i, pt in enumerate(pts):
             self.V.append(pt)
             CVlist.append(ln + i + 1)
 
-    def __draw_circle(self, center, perp_vect, radius):
-        pts = self.__circle(center, perp_vect, radius)
-        print 'pts ', type(pts), pts
+        self.CV.append(CVlist)
+
+    def __add_circle(self, center, perp_vect, radius, polygon_element_number=10):
+        pts = self.__circle(center, perp_vect, radius,
+                            polygon_element_number=polygon_element_number)
         for pt in pts:
             self.__add_tetr(pt)
 
-    def __circle(self, center, perp_vect, radius):
+    def __circle(self, center, perp_vect, radius, polygon_element_number=10):
         """
         perp_vect is vector perpendicular to plane of circle
         """
         # tl = [0, 0.2, 0.4, 0.6, 0.8]
-        tl = np.linspace(0,1,10)
+        tl = np.linspace(0, 1, polygon_element_number)
         print tl
 
         # vector form center to edge of circle
@@ -113,7 +139,6 @@ class GTLar:
         u = self.__perpendicular_vector(n)
         u = u / np.linalg.norm(u)
 
-
         pts = []
 
         for t in tl:
@@ -123,7 +148,7 @@ class GTLar:
                 radius * np.sin(t * 2 * np.pi) * np.cross(u, n) +\
                 center
 
-            pt.tolist()
+            pt = pt.tolist()
             pts.append(pt)
 
         return pts
