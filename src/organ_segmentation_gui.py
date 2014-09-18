@@ -23,6 +23,8 @@ import exceptionProcessing
 import scipy
 import scipy.ndimage
 import numpy as np
+import time
+import argparse
 
 # import dcmreaddata as dcmreader
 try:
@@ -32,6 +34,15 @@ except:
     sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
     logger.warning("Deprecated of pyseg_base as submodule")
     import pycut
+
+try:
+    import volumetry_evaluation
+except:
+
+    path_to_script = os.path.dirname(os.path.abspath(__file__))
+    sys.path.append(os.path.join(path_to_script, "../experiments/"))
+    import volumetry_evaluation
+
 # from seg2fem import gen_mesh_from_voxels, gen_mesh_from_voxels_mc
 # from viewer import QVTKViewer
 import qmisc
@@ -40,9 +51,7 @@ import config
 import datareader
 import datawriter
 
-import time
 # import audiosupport
-import argparse
 # import skimage
 # import skimage.transform
 
@@ -275,6 +284,45 @@ class OrganSegmentation():
         vol2 = np.sum(segm)
         criterium = (wanted_volume - vol2) ** 2
         return criterium
+
+    def sliver_compare_with_other_volume(self, segmentation_datap):
+        """
+        Compares actual Lisa data with other which are given by
+        segmentation_datap. That means
+        segmentation_datap = {
+            'segmentation': 3d np.array,
+            'crinfo': information about crop (optional)
+            }
+
+        """
+        # if there is no segmentation, data can be stored in data3d. It is the
+        # way how are data stored in sliver.
+        if 'segmentation' in segmentation_datap.keys():
+            segm_key = 'segmentation'
+        else:
+            segm_key = 'data3d'
+        if 'crinfo' in segmentation_datap.keys():
+            data3d_segmentation = qmisc.uncrop(
+                segmentation_datap[segm_key],
+                segmentation_datap['crinfo'],
+                self.orig_shape)
+        else:
+            data3d_segmentation = segmentation_datap[segm_key]
+        pass
+
+        # now we can uncrop actual Lisa data
+        data3d_segmentation_actual = qmisc.uncrop(
+            self.segmentation,
+            self.crinfo,
+            self.orig_shape)
+
+        eval = volumetry_evaluation.compare_volumes(
+            data3d_segmentation_actual,
+            data3d_segmentation,
+            self.voxelsize_mm
+            )
+        print eval
+        return eval
 
     def segm_smoothing(self, sigma_mm):
         """
