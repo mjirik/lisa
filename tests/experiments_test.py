@@ -33,7 +33,8 @@ class ExperimentsTest(unittest.TestCase):
         self.assertTrue('src' in dirlist)
         self.assertFalse('README.md' in dirlist)
 
-    def atest_eval_sliver_matrics(self):
+    def test_eval_sliver_matrics(self):
+        voxelsize_mm = [1, 2, 3]
         import volumetry_evaluation as ve
 
         vol1 = np.zeros([20, 21, 22], dtype=np.int8)
@@ -42,8 +43,16 @@ class ExperimentsTest(unittest.TestCase):
         vol2 = np.zeros([20, 21, 22], dtype=np.int8)
         vol2[10:15, 10:16, 10:15] = 1
 
-        eval1 = ve.compare_volumes(vol1, vol2, [1, 1, 1])
-        print eval1
+        eval1 = ve.compare_volumes(vol1, vol2, voxelsize_mm)
+        #print ve.sliverScore(eval1['vd'], 'vd')
+
+        self.assertAlmostEqual(eval1['vd'], 20.0)
+
+        score = ve.sliver_score_one_couple(eval1)
+        # score is 21.875
+        self.assertGreater(score['vd'], 20)
+        self.assertLess(score['vd'], 25)
+
 
     def test_eval_sliver_distance_for_two_pixels_bigger_volume(self):
         """
