@@ -44,7 +44,7 @@ class ExperimentsTest(unittest.TestCase):
         vol2[10:15, 10:16, 10:15] = 1
 
         eval1 = ve.compare_volumes(vol1, vol2, voxelsize_mm)
-        #print ve.sliverScore(eval1['vd'], 'vd')
+        # print ve.sliverScore(eval1['vd'], 'vd')
 
         self.assertAlmostEqual(eval1['vd'], 20.0)
 
@@ -52,7 +52,6 @@ class ExperimentsTest(unittest.TestCase):
         # score is 21.875
         self.assertGreater(score['vd'], 20)
         self.assertLess(score['vd'], 25)
-
 
     def test_eval_sliver_distance_for_two_pixels_bigger_volume(self):
         """
