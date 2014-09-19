@@ -332,8 +332,13 @@ def write_sum_to_csv(evaluation, writer):
     writer.writerow(['avg'] + avg)
     writer.writerow([])
 
-
 def sliverScore(measure, metric_type):
+    """
+    deprecated name of sliver_score. Use new sliver_score() function.
+    """
+    return sliver_score(measure, metric_type)
+
+def sliver_score(measure, metric_type):
     """
     Based on sliver metodics
     http://sliver07.org/p7.pdf
@@ -373,11 +378,11 @@ def sliver_score_one_couple(data):
     Convert data from compare_volumes() function.
     """
     score = {
-        'vd': sliverScore(data['vd'], 'vd'),
-        'voe': sliverScore(data['voe'], 'voe'),
-        'avgd': sliverScore(data['avgd'], 'avgd'),
-        'rmsd': sliverScore(data['rmsd'], 'rmsd'),
-        'maxd': sliverScore(data['maxd'], 'maxd'),
+        'vd': sliver_score(data['vd'], 'vd'),
+        'voe': sliver_score(data['voe'], 'voe'),
+        'avgd': sliver_score(data['avgd'], 'avgd'),
+        'rmsd': sliver_score(data['rmsd'], 'rmsd'),
+        'maxd': sliver_score(data['maxd'], 'maxd'),
     }
     return score
 
@@ -401,11 +406,11 @@ def sliverScoreAll(data):
     scoreMetrics = []
     for dat in data:
         score = {
-            'vd': sliverScore(dat['vd'], 'vd'),
-            'voe': sliverScore(dat['voe'], 'voe'),
-            'avgd': sliverScore(dat['avgd'], 'avgd'),
-            'rmsd': sliverScore(dat['rmsd'], 'rmsd'),
-            'maxd': sliverScore(dat['maxd'], 'maxd'),
+            'vd': sliver_score(dat['vd'], 'vd'),
+            'voe': sliver_score(dat['voe'], 'voe'),
+            'avgd': sliver_score(dat['avgd'], 'avgd'),
+            'rmsd': sliver_score(dat['rmsd'], 'rmsd'),
+            'maxd': sliver_score(dat['maxd'], 'maxd'),
         }
         scoreAll.append(score)
 
