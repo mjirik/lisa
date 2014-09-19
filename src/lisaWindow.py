@@ -24,6 +24,7 @@ try:
 
 except ImportError:
     viewer3D_available = False
+
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 
@@ -40,6 +41,9 @@ except:
     except:
         logger.warning("Deprecated of pyseg_base as submodule")
         from seed_editor_qt import QTSeedEditor
+
+sys.path.append(os.path.join(path_to_script, "../experiments"))
+import volumetry_evaluation
 
 
 # GUI
@@ -453,12 +457,14 @@ class OrganSegmentationWindow(QMainWindow):
         self.oseg.import_segmentation_from_file(seg_path)
         self.statusBar().showMessage('Ready')
 
+    def __evaluation_to_text(self, score):
+        overall_score =\
+            volumetry_evaluation.sliver_overall_score_for_one_couple(
+                score
+            )
 
-    def __evaluation_to_text(self, comparation):
-        normal, score = comparation
-        return str(score)
-
-
+        logger.info('overall score: ' + str(overall_score))
+        return "Sliver score: " + str(overall_score)
 
     def compareSegmentationWithFile(self):
         """
@@ -479,8 +485,11 @@ class OrganSegmentationWindow(QMainWindow):
         if seg_path is None:
             self.statusBar().showMessage('No data path specified!')
             return
-        evaluation = self.oseg.sliver_compare_with_other_volume_from_file(seg_path)
-        text = self.__evaluation_to_text(evaluation)
+        evaluation, score = self.oseg.sliver_compare_with_other_volume_from_file(seg_path)
+        print 'Evaluation: ', evaluation
+        print 'Score: ', score
+
+        text = self.__evaluation_to_text(score)
 
         self.setLabelText(self.text_seg_data, text)
         self.statusBar().showMessage('Ready')

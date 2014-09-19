@@ -43,8 +43,8 @@ class ExperimentsTest(unittest.TestCase):
             'maxd': 10,
         }
 
-        score_overall = ve.sliver_overall_score_for_one_couple(score)
-        self.assertAlmostEqual(15.1, score_overall)
+        overall_score = ve.sliver_overall_score_for_one_couple(score)
+        self.assertAlmostEqual(15.1, overall_score)
 
     def test_eval_sliver_matrics(self):
         voxelsize_mm = [1, 2, 3]

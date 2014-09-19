@@ -322,15 +322,13 @@ class OrganSegmentation():
             self.crinfo,
             self.orig_shape)
 
-        eval = volumetry_evaluation.compare_volumes(
+        evaluation = volumetry_evaluation.compare_volumes(
             data3d_segmentation_actual,
             data3d_segmentation,
             self.voxelsize_mm
             )
-        score = volumetry_evaluation.sliver_score_one_couple(eval)
-        print eval
-        print score
-        return eval, score
+        score = volumetry_evaluation.sliver_score_one_couple(evaluation)
+        return evaluation, score
 
     def segm_smoothing(self, sigma_mm):
         """
