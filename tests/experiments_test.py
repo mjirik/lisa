@@ -19,7 +19,7 @@ import numpy as np
 
 
 import experiments
-import volumetry_evaluation
+import volumetry_evaluation as ve
 
 
 class ExperimentsTest(unittest.TestCase):
@@ -33,9 +33,21 @@ class ExperimentsTest(unittest.TestCase):
         self.assertTrue('src' in dirlist)
         self.assertFalse('README.md' in dirlist)
 
+    def test_sliver_overall_score_for_one_couple(self):
+
+        score = {
+            'vd': 15.5,
+            'voe': 15.6,
+            'avgd': 14.4,
+            'rmsd': 20,
+            'maxd': 10,
+        }
+
+        score_overall = ve.sliver_overall_score_for_one_couple(score)
+        self.assertAlmostEqual(15.1, score_overall)
+
     def test_eval_sliver_matrics(self):
         voxelsize_mm = [1, 2, 3]
-        import volumetry_evaluation as ve
 
         vol1 = np.zeros([20, 21, 22], dtype=np.int8)
         vol1[10:15, 10:15, 10:15] = 1
@@ -44,7 +56,7 @@ class ExperimentsTest(unittest.TestCase):
         vol2[10:15, 10:16, 10:15] = 1
 
         eval1 = ve.compare_volumes(vol1, vol2, voxelsize_mm)
-        # print ve.sliverScore(eval1['vd'], 'vd')
+        # print ve.sliver_score(eval1['vd'], 'vd')
 
         self.assertAlmostEqual(eval1['vd'], 20.0)
 
@@ -57,8 +69,6 @@ class ExperimentsTest(unittest.TestCase):
         """
         maxd is measured in corner. It is  space diagonal of 2 pixels cube.
         """
-
-        import volumetry_evaluation as ve
 
         vol1 = np.zeros([20, 21, 22], dtype=np.int8)
         vol1[10:15, 10:15, 10:15] = 1
@@ -74,7 +84,6 @@ class ExperimentsTest(unittest.TestCase):
         """
         Two points 2 by 2 pixels diagonal.
         """
-        import volumetry_evaluation as ve
 
         vol1 = np.zeros([20, 21, 22], dtype=np.int8)
         vol1[10, 10, 10] = 1
@@ -89,7 +98,6 @@ class ExperimentsTest(unittest.TestCase):
         """
         Two points 2 by 2 pixels diagonal and voxelsize is 0.5
         """
-        import volumetry_evaluation as ve
 
         vol1 = np.zeros([20, 21, 22], dtype=np.int8)
         vol1[10, 10, 10] = 1
@@ -138,7 +146,7 @@ class ExperimentsTest(unittest.TestCase):
             open(os.path.join(pklz_dir, fl), 'a').close()
 
 # construct yaml data
-        yamldata = volumetry_evaluation.generate_input_yaml(
+        yamldata = ve.generate_input_yaml(
             sliver_dir, pklz_dir)
 
 # assert
@@ -160,7 +168,7 @@ class ExperimentsTest(unittest.TestCase):
         Testing Volume Difference score. Score for negative values must be
         equal. Score for far high values must be 0.
         """
-        score = volumetry_evaluation.sliverScore([1, -1, 30, 50, 100], 'vd')
+        score = ve.sliver_score([1, -1, 30, 50, 100], 'vd')
         self.assertAlmostEquals(score[0], score[1])
         self.assertEqual(score[2], 0)
 

@@ -332,11 +332,24 @@ def write_sum_to_csv(evaluation, writer):
     writer.writerow(['avg'] + avg)
     writer.writerow([])
 
+
+def sliver_overall_score_for_one_couple(score):
+    """
+    Computes overall score
+    """
+    score_list = score.values()
+    overall_score = np.average(np.array(score_list))
+
+    return overall_score
+
+
 def sliverScore(measure, metric_type):
     """
     deprecated name of sliver_score. Use new sliver_score() function.
     """
+    print "Deprecated function sliverScore(). Use sliver_score()."
     return sliver_score(measure, metric_type)
+
 
 def sliver_score(measure, metric_type):
     """
