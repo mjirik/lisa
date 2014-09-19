@@ -24,4 +24,4 @@ sed -i s/christmas2013/$2/g ~/data/medical/processed/$2/liver_volumetry_$1.yaml
 
 cp ~/lisa_data/*$1*.pklz ~/data/medical/processed/$2/$1
 
-python experiments/volumetry_evaluation.py -d -i ~/data/medical/processed/$2/liver_volumetry_$1.yaml -o ~/data/medical/processed/$2/eval_$1.csv
+python src/volumetry_evaluation.py -d -i ~/data/medical/processed/$2/liver_volumetry_$1.yaml -o ~/data/medical/processed/$2/eval_$1.csv

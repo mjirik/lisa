@@ -42,7 +42,6 @@ except:
         logger.warning("Deprecated of pyseg_base as submodule")
         from seed_editor_qt import QTSeedEditor
 
-sys.path.append(os.path.join(path_to_script, "../experiments"))
 import volumetry_evaluation
 
 

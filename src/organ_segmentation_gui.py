@@ -35,13 +35,7 @@ except:
     logger.warning("Deprecated of pyseg_base as submodule")
     import pycut
 
-try:
-    import volumetry_evaluation
-except:
-
-    path_to_script = os.path.dirname(os.path.abspath(__file__))
-    sys.path.append(os.path.join(path_to_script, "../experiments/"))
-    import volumetry_evaluation
+import volumetry_evaluation
 
 # from seg2fem import gen_mesh_from_voxels, gen_mesh_from_voxels_mc
 # from viewer import QVTKViewer
