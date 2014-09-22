@@ -17,8 +17,8 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../../lar-cc/lib/py/"))
 import numpy as np
 
-from larcc import VIEW, MKPOL, AA, STRUCT, MKPOLS, PI
-import mapper
+from larcc import VIEW, MKPOL, AA
+# import mapper
 # from largrid import *
 
 
@@ -45,44 +45,16 @@ class GTLar:
         # vect = nodeA - nodeB
         # self.__draw_circle(nodeB, vect, radius)
 
-        vect = (np.array(nodeA) - np.array(nodeB)).tolist()
+        vector = (np.array(nodeA) - np.array(nodeB)).tolist()
 
 # mov circles to center of cylinder by size of radius
-        nodeA = self.__translate(nodeA, vect,
+        nodeA = self.__translate(nodeA, vector,
                                  -radius * self.endDistMultiplicator)
-        nodeB = self.__translate(nodeB, vect,
+        nodeB = self.__translate(nodeB, vector,
                                  radius * self.endDistMultiplicator)
 
-        CVlistA = []
-        CVlistB = []
-        # 1st base
-        pts = self.__circle(nodeA, vect, radius)
-        ln = len(self.V)
-
-        for i, pt in enumerate(pts):
-            self.V.append(pt)
-            CVlistA.append(ln + i)
-
-        try:
-            self.balls[idA] = self.balls[idA] + CVlistA
-        except:
-            self.balls[idA] = CVlistA
-
-        # 2nd base
-        pts = self.__circle(nodeB, vect, radius)
-        ln = len(self.V)
-
-        for i, pt in enumerate(pts):
-            self.V.append(pt)
-            CVlistB.append(ln + i)
-        try:
-            self.balls[idB] = self.balls[idB] + CVlistB
-            print 'used id ', idB, ' ', CVlistB, ' ', self.balls[idB]
-        except:
-            import traceback
-            traceback.print_exc()
-
-            self.balls[idB] = CVlistB
+        CVlistA = self.__construct_cylinder_end(nodeA, vector, radius, idA)
+        CVlistB = self.__construct_cylinder_end(nodeB, vector, radius, idB)
 
         CVlist = CVlistA + CVlistB
 
@@ -101,6 +73,26 @@ class GTLar:
 #         self.V = self.V + (np.array(V) + np.array(nodeA)).tolist()
 #         self.CV = self.CV + (np.array(CV) + lenV).tolist()
 
+    def __construct_cylinder_end(self, node, vector, radius, id):
+        """
+        creates end of cylinder and prepares for joints
+        """
+        CVlist = []
+        # 1st base
+        pts = self.__circle(node, vector, radius)
+        ln = len(self.V)
+
+        for i, pt in enumerate(pts):
+            self.V.append(pt)
+            CVlist.append(ln + i)
+
+        try:
+            self.balls[id].append(CVlist)
+        except:
+            self.balls[id] = [CVlist]
+
+        return CVlist
+
     def __translate(self, point, vector, length=None):
         vector = np.array(vector)
         if length is not None:
@@ -114,7 +106,6 @@ class GTLar:
         nodeA = np.array(nodeA)
         nodeB = np.array(nodeB)
 
-        # print nodeB
         ln = len(self.V)
         self.V.append(nodeB.tolist())
         self.V.append((nodeB + [2, 0, 0]).tolist())
@@ -123,15 +114,14 @@ class GTLar:
         self.V.append((nodeA + [0, 0, 0]).tolist())
         self.CV.append([ln, ln + 1, ln + 2, ln + 3, ln + 4])
 
+
     def show(self):
-        # print 'balls ', self.balls
-        print 'len V ', len(self.V)
-        print 'mx ', np.max(np.array(self.balls))
-        # print self.balls[self.balls.keys()[0]]
         for joint in self.balls.values():
-            print "joint ", joint, type(joint)
-            self.CV.append(joint)
-            # print 'joint id ', joint_id, " balls  ", self.balls[joint_id]
+            # There is more then just one circle in this joint, so it
+            # is not end of vessel
+            if len(joint) > 1:
+                joint = (np.array(joint).reshape(-1)).tolist()
+                self.CV.append(joint)
 
         V = self.V
         CV = self.CV
