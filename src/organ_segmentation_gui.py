@@ -778,6 +778,9 @@ class OrganSegmentation():
     def portalVeinSegmentation(self):
 
         import segmentation
+        logger.info('segmentation max label ' + str(np.max(self.segmentation)))
+        if np.max(self.segmentation) == 0:
+            self.segmentation = self.segmentation + 1
         outputSegmentation = segmentation.vesselSegmentation(
             self.data3d,
             self.segmentation,
@@ -787,6 +790,7 @@ class OrganSegmentation():
             nObj=1,
             biggestObjects=False,
             useSeedsOfCompactObjects=True,
+            # useSeedsOfCompactObjects=False,
             interactivity=True,
             binaryClosingIterations=2,
             binaryOpeningIterations=0)

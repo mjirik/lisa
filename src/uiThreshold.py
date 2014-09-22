@@ -17,17 +17,19 @@ sys.path.append("../src/")
 sys.path.append("../extern/")
 
 import logging as logger
+import traceback
 
 import numpy
-import scipy.ndimage
+# import scipy.ndimage
 
 import thresholding_functions
 
 import matplotlib
 import matplotlib.pyplot as matpyplot
-from matplotlib.widgets import Slider, Button#, RadioButtons
+from matplotlib.widgets import Slider, Button  # , RadioButtons
 
 import gc as garbage
+
 
 class uiThreshold:
 
@@ -181,7 +183,11 @@ class uiThreshold:
 
             thres = self.threshold
             if thres == -1:
-                thres = thresholding_functions.calculateAutomaticThreshold(self.data, self.arrSeed)
+                try:
+                    thres = thresholding_functions.calculateAutomaticThreshold(self.data, self.arrSeed)
+                except:
+                    logger.info(traceback.format_exc())
+                    thres = (self.max0 + self.min0) / 2
 
             self.smin = Slider(self.axmin, 'Minimal threshold   ' + str(self.min0),
                                self.min0, self.max0, valinit = thres, dragging = True)
@@ -387,8 +393,8 @@ class uiThreshold:
 
         """
 
-        print '-------------'
-        print self.biggestObjects, self.seeds
+        logger.debug('biggest objects ' + str(self.biggestObjects))
+        logger.debug('self.seeds ' + str(self.seeds))
         if (self.biggestObjects == True or
             (self.seeds != None and self.useSeedsOfCompactObjects)) :
 
