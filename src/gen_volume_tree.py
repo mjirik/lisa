@@ -128,7 +128,8 @@ class VolumeTreeGenerator:
 class TreeGenerator:
 
     def __init__(self, generator_class=VolumeTreeGenerator):
-        self.data = None
+        self.rawdata = None
+        self.tree_data = None
         self.data3d = None
         self.voxelsize_mm = [1, 1, 1]
         self.shape = None
@@ -136,8 +137,13 @@ class TreeGenerator:
         self.generator_class = generator_class
 
     def importFromYaml(self, filename):
-        data = misc.obj_from_file(filename=filename, filetype='yaml')
-        self.data = data
+        rawdata = misc.obj_from_file(filename=filename, filetype='yaml')
+        self.rawdata = rawdata
+
+        try:
+            self.tree_data = self.rawdata['graph']['porta']
+        except:
+            self.tree_data = self.rawdata['Graph']
 
     def generateTree(self):
         """
@@ -154,18 +160,14 @@ class TreeGenerator:
         # use generator init
         self.generator = self.generator_class(self)
 
-        try:
-            sdata = self.data['graph']['porta']
-        except:
-            sdata = self.data['Graph']
-
-        for cyl_id in sdata:
+        for cyl_id in self.tree_data:
             logger.debug("CylinderId: " + str(cyl_id))
+            cyl_data = self.tree_data[cyl_id]
 
-            try:
-                cyl_data = self.data['graph']['porta'][cyl_id]
-            except:
-                cyl_data = self.data['Graph'][cyl_id]
+            # try:
+            #     cyl_data = self.data['graph']['porta'][cyl_id]
+            # except:
+            #     cyl_data = self.data['Graph'][cyl_id]
 
             # prvni a koncovy bod, v mm + radius v mm
             try:
@@ -179,9 +181,9 @@ class TreeGenerator:
                     "Segment id " + str(cyl_id) + ": grror reading data from yaml!")
                 return
 
-            self.generator.add_cylinder(p1m, p2m, rad)
-            if self.use_lar:
-                self.lv.add_cylinder(p1m, p2m, rad)
+            self.generator.add_cylinder(p1m, p2m, rad, cyl_id)
+            # if self.use_lar:
+            #     self.generator.add_cylinder(p1m, p2m, rad, in)
 
         output = self.generator.get_output()
 
@@ -197,7 +199,7 @@ class TreeGenerator:
 
         """
         # get vtkPolyData
-        tree_data = gen_vtk_tree.process_tree(self.data['Graph'])
+        tree_data = gen_vtk_tree.process_tree(self.rawdata['Graph'])
         polyData = gen_vtk_tree.gen_tree(tree_data)
 
         polyData.GetBounds()

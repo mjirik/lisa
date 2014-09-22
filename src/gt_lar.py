@@ -17,7 +17,8 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../../lar-cc/lib/py/"))
 import numpy as np
 
-from larcc import VIEW, MKPOL, AA
+from larcc import VIEW, MKPOL, AA, STRUCT, MKPOLS, PI
+import mapper
 # from largrid import *
 
 
@@ -25,28 +26,47 @@ class GTLar:
 
     def __init__(self, gtree=None):
         """
-        gtree is information about input data structure. Not used here.
+        gtree is information about input data structure.
+        endDistMultiplicator: make cylinder shorter by multiplication of radius
         """
 # input of geometry and topology
         self.V = []
         self.CV = []
+        self.balls = {}
+        self.gtree = gtree
+        self.endDistMultiplicator = 1
         pass
 
-    def add_cylinder(self, nodeA, nodeB, radius):
+    def add_cylinder(self, nodeA, nodeB, radius, cylinder_id):
+
+        idA = self.gtree.tree_data[cylinder_id]['nodeIdA']
+        idB = self.gtree.tree_data[cylinder_id]['nodeIdB']
 
         # vect = nodeA - nodeB
         # self.__draw_circle(nodeB, vect, radius)
 
         vect = (np.array(nodeA) - np.array(nodeB)).tolist()
 
-        CVlist = []
+# mov circles to center of cylinder by size of radius
+        nodeA = self.__translate(nodeA, vect,
+                                 -radius * self.endDistMultiplicator)
+        nodeB = self.__translate(nodeB, vect,
+                                 radius * self.endDistMultiplicator)
+
+        CVlistA = []
+        CVlistB = []
         # 1st base
         pts = self.__circle(nodeA, vect, radius)
         ln = len(self.V)
 
         for i, pt in enumerate(pts):
             self.V.append(pt)
-            CVlist.append(ln + i)
+            CVlistA.append(ln + i)
+
+        try:
+            self.balls[idA] = self.balls[idA] + CVlistA
+        except:
+            self.balls[idA] = CVlistA
 
         # 2nd base
         pts = self.__circle(nodeB, vect, radius)
@@ -54,9 +74,38 @@ class GTLar:
 
         for i, pt in enumerate(pts):
             self.V.append(pt)
-            CVlist.append(ln + i)
+            CVlistB.append(ln + i)
+        try:
+            self.balls[idB] = self.balls[idB] + CVlistB
+            print 'used id ', idB, ' ', CVlistB, ' ', self.balls[idB]
+        except:
+            import traceback
+            traceback.print_exc()
+
+            self.balls[idB] = CVlistB
+
+        CVlist = CVlistA + CVlistB
 
         self.CV.append(CVlist)
+
+# lar add ball
+#         ball0 = mapper.larBall(radius, angle1=PI, angle2=2*PI)([10, 16])
+#         V, CV = ball0
+#         # mapper.T
+#         # ball = STRUCT(MKPOLS(ball0))
+#
+#         # mapper.T(1)(nodeA[0])(mapper.T(2)(nodeA[1])(mapper.T(3)(nodeA[1])(ball)))
+#
+#         lenV = len(self.V)
+#
+#         self.V = self.V + (np.array(V) + np.array(nodeA)).tolist()
+#         self.CV = self.CV + (np.array(CV) + lenV).tolist()
+
+    def __translate(self, point, vector, length=None):
+        vector = np.array(vector)
+        if length is not None:
+            vector = length * vector / np.linalg.norm(vector)
+        return (np.array(point) + vector).tolist()
 
     def __add_old_cylinder(self, nodeA, nodeB, radius):
         """
@@ -65,7 +114,7 @@ class GTLar:
         nodeA = np.array(nodeA)
         nodeB = np.array(nodeB)
 
-        print nodeB
+        # print nodeB
         ln = len(self.V)
         self.V.append(nodeB.tolist())
         self.V.append((nodeB + [2, 0, 0]).tolist())
@@ -75,9 +124,15 @@ class GTLar:
         self.CV.append([ln, ln + 1, ln + 2, ln + 3, ln + 4])
 
     def show(self):
-        # self.__add_circle([30, 30, 30], [0, 2, 1], 10)
+        # print 'balls ', self.balls
+        print 'len V ', len(self.V)
+        print 'mx ', np.max(np.array(self.balls))
+        # print self.balls[self.balls.keys()[0]]
+        for joint in self.balls.values():
+            print "joint ", joint, type(joint)
+            self.CV.append(joint)
+            # print 'joint id ', joint_id, " balls  ", self.balls[joint_id]
 
-        # self.__add_cone([10,10,10],[20,20,20],5)
         V = self.V
         CV = self.CV
 
@@ -129,7 +184,7 @@ class GTLar:
         for pt in pts:
             self.__add_tetr(pt)
 
-    def __circle(self, center, perp_vect, radius, polygon_element_number=10):
+    def __circle(self, center, perp_vect, radius, polygon_element_number=8):
         """
         Function computed the circle points. No drawing.
         perp_vect is vector perpendicular to plane of circle
