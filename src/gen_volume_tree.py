@@ -185,6 +185,12 @@ class TreeGenerator:
             # if self.use_lar:
             #     self.generator.add_cylinder(p1m, p2m, rad, in)
 
+        try:
+            # generator could have finish() function
+            self.generator.finish()
+        except:
+            pass
+
         output = self.generator.get_output()
 
         if self.use_lar:

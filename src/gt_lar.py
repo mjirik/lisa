@@ -32,15 +32,21 @@ class GTLar:
 # input of geometry and topology
         self.V = []
         self.CV = []
-        self.balls = {}
+        self.joints = {}
         self.gtree = gtree
         self.endDistMultiplicator = 1
+        self.use_joints = True
         pass
 
     def add_cylinder(self, nodeA, nodeB, radius, cylinder_id):
 
-        idA = self.gtree.tree_data[cylinder_id]['nodeIdA']
-        idB = self.gtree.tree_data[cylinder_id]['nodeIdB']
+        try:
+            idA = self.gtree.tree_data[cylinder_id]['nodeIdA']
+            idB = self.gtree.tree_data[cylinder_id]['nodeIdB']
+        except:
+            idA = 0
+            idB = 0
+            self.use_joints = False
 
         # vect = nodeA - nodeB
         # self.__draw_circle(nodeB, vect, radius)
@@ -87,9 +93,9 @@ class GTLar:
             CVlist.append(ln + i)
 
         try:
-            self.balls[id].append(CVlist)
+            self.joints[id].append(CVlist)
         except:
-            self.balls[id] = [CVlist]
+            self.joints[id] = [CVlist]
 
         return CVlist
 
@@ -114,14 +120,16 @@ class GTLar:
         self.V.append((nodeA + [0, 0, 0]).tolist())
         self.CV.append([ln, ln + 1, ln + 2, ln + 3, ln + 4])
 
+    def finish(self):
+        if self.use_joints:
+            for joint in self.joints.values():
+                # There is more then just one circle in this joint, so it
+                # is not end of vessel
+                if len(joint) > 1:
+                    joint = (np.array(joint).reshape(-1)).tolist()
+                    self.CV.append(joint)
 
     def show(self):
-        for joint in self.balls.values():
-            # There is more then just one circle in this joint, so it
-            # is not end of vessel
-            if len(joint) > 1:
-                joint = (np.array(joint).reshape(-1)).tolist()
-                self.CV.append(joint)
 
         V = self.V
         CV = self.CV

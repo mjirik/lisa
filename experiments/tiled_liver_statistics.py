@@ -682,14 +682,14 @@ def main():
     list_of_classifiers = [
         [GaussianNB, []],
         [svm.SVC, []],
+        [tree.DecisionTreeClassifier, []],
         [classification.GMMClassifier, {'n_components': 2, 'covariance_type': 'full'}],
         # [svm.SVC, {'kernel': 'linear'}],
-        [svm.SVC, {'kernel': 'rbf'}],
-        [svm.SVC, {'kernel': 'poly'}],
-        [RandomForestClassifier, []],
-        [LDA, []],
-        [QDA, []],
-        # [tree.DecisionTreeClassifier, []],
+        # [svm.SVC, {'kernel': 'rbf'}],
+        # [svm.SVC, {'kernel': 'poly'}],
+        # [RandomForestClassifier, []],
+        # [LDA, []],
+        # [QDA, []],
         ]
     tile_shape = [10, 50, 50]
 
