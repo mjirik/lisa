@@ -189,6 +189,8 @@ class TreeGenerator:
             # generator could have finish() function
             self.generator.finish()
         except:
+            import traceback
+            traceback.print_exc()
             pass
 
         output = self.generator.get_output()

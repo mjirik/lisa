@@ -17,7 +17,8 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../../lar-cc/lib/py/"))
 import numpy as np
 
-from larcc import VIEW, MKPOL, AA
+from larcc import VIEW, MKPOL, AA, INTERVALS
+from splines import *
 # import mapper
 # from largrid import *
 
@@ -33,6 +34,7 @@ class GTLar:
         self.V = []
         self.CV = []
         self.joints = {}
+        self.joints_lar = []
         self.gtree = gtree
         self.endDistMultiplicator = 1
         self.use_joints = True
@@ -121,13 +123,39 @@ class GTLar:
         self.CV.append([ln, ln + 1, ln + 2, ln + 3, ln + 4])
 
     def finish(self):
+	print 'use joints? ', self.use_joints
         if self.use_joints:
             for joint in self.joints.values():
                 # There is more then just one circle in this joint, so it
                 # is not end of vessel
+                print joint
                 if len(joint) > 1:
-                    joint = (np.array(joint).reshape(-1)).tolist()
-                    self.CV.append(joint)
+                    print 'generate joints'
+                    self.__generate_joint(joint)
+                    print 'after gj'
+                    
+
+    def __generate_joint(self, joint):
+        print 'gj', joint
+        #joint = (np.array(joint).reshape(-1)).tolist()
+        #self.CV.append(joint)
+        print "generate_joint"
+        for circle in joint:
+            for vertex_id in circle:
+		print 'v id ', vertex_id
+                self.V[vertex_id]
+        dom1D = INTERVALS(1)(32);
+        dom2D = TRIANGLE_DOMAIN(32, [[1,0,0],[0,1,0],[0,0,1]]);
+        Cab0 = BEZIER(S0)([[0,2,0],[-2,2,0],[-2,0,0],[-2,-2,0],[0,-2,0]]);
+        Cbc0 = BEZIER(S0)([[0,2,0],[-1,2,0],[-1,1,1],[-1,0,2],[0,0,2]]);
+        Cca0 = BEZIER(S0)([[0,0,2],[-1,0,2],[-1,-1,1],[-1,-2,0],[0,-2,0]]);
+        Cbc1 = BEZIER(S1)([[0,2,0],[-1,2,0],[-1,1,1],[-1,0,2],[0,0,2]]);
+        out1 = MAP(TRIANGULAR_COONS_PATCH([Cab0,Cbc1,Cca0]))(dom2D);
+        self.joints_lar.append(out1)
+
+	 
+
+
 
     def show(self):
 
@@ -137,6 +165,7 @@ class GTLar:
         # V = [[0,0,0],[5,5,1],[0,5,5],[5,5,5]]
         # CV = [[0,1,2,3]]
         # print 'V, CV ', V, CV
+	#DRAW(self.joints_lar[0])
         VIEW(MKPOL([V, AA(AA(lambda k:k + 1))(CV), []]))
 
     def get_output(self):
