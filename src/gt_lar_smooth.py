@@ -25,7 +25,7 @@ from splines import *
 import geometry3d as g3
 
 
-class GTLar:
+class GTLarSmooth:
 
     def __init__(self, gtree=None):
         """

@@ -331,9 +331,12 @@ python src/gen_volume_tree.py -i ./tests/hist_stats_test.yaml'
 
     if args.generator in ['vol', 'volume']:
         generator_class = VolumeTreeGenerator
-    if args.generator in ['lar']:
+    elif args.generator in ['lar']:
         import gt_lar
         generator_class = gt_lar.GTLar
+    elif args.generator in ['larsm']:
+        import gt_lar_smooth
+        generator_class = gt_lar_smooth.GTLarSmooth
 
     tg = TreeGenerator(generator_class)
     tg.importFromYaml(args.inputfile)
