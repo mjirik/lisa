@@ -22,6 +22,8 @@ from splines import *
 # import mapper
 # from largrid import *
 
+import geometry3d as g3
+
 
 class GTLar:
 
@@ -43,8 +45,8 @@ class GTLar:
     def add_cylinder(self, nodeA, nodeB, radius, cylinder_id):
 
         try:
-            idA = self.gtree.tree_data[cylinder_id]['nodeIdA']
-            idB = self.gtree.tree_data[cylinder_id]['nodeIdB']
+            idA = tuple(nodeA)  # self.gtree.tree_data[cylinder_id]['nodeIdA']
+            idB = tuple(nodeB)  # self.gtree.tree_data[cylinder_id]['nodeIdB']
         except:
             idA = 0
             idB = 0
@@ -55,14 +57,15 @@ class GTLar:
 
         vector = (np.array(nodeA) - np.array(nodeB)).tolist()
 
-# mov circles to center of cylinder by size of radius
-        nodeA = self.__translate(nodeA, vector,
-                                 -radius * self.endDistMultiplicator)
-        nodeB = self.__translate(nodeB, vector,
-                                 radius * self.endDistMultiplicator)
+# mov circles to center of cylinder by size of radius because of joint
+        nodeA = g3.translate(nodeA, vector,
+                             -radius * self.endDistMultiplicator)
+        nodeB = g3.translate(nodeB, vector,
+                             radius * self.endDistMultiplicator)
 
-        CVlistA = self.__construct_cylinder_end(nodeA, vector, radius, idA)
-        CVlistB = self.__construct_cylinder_end(nodeB, vector, radius, idB)
+        ptsA, ptsB = g3.cylinder_circles(nodeA, nodeB, radius)
+        CVlistA = self.__construct_cylinder_end(ptsA, idA)
+        CVlistB = self.__construct_cylinder_end(ptsB, idB)
 
         CVlist = CVlistA + CVlistB
 
@@ -81,13 +84,12 @@ class GTLar:
 #         self.V = self.V + (np.array(V) + np.array(nodeA)).tolist()
 #         self.CV = self.CV + (np.array(CV) + lenV).tolist()
 
-    def __construct_cylinder_end(self, node, vector, radius, id):
+    def __construct_cylinder_end(self, pts, id):
         """
         creates end of cylinder and prepares for joints
         """
         CVlist = []
-        # 1st base
-        pts = self.__circle(node, vector, radius)
+        # base
         ln = len(self.V)
 
         for i, pt in enumerate(pts):
@@ -100,12 +102,6 @@ class GTLar:
             self.joints[id] = [CVlist]
 
         return CVlist
-
-    def __translate(self, point, vector, length=None):
-        vector = np.array(vector)
-        if length is not None:
-            vector = length * vector / np.linalg.norm(vector)
-        return (np.array(point) + vector).tolist()
 
     def __add_old_cylinder(self, nodeA, nodeB, radius):
         """
@@ -123,39 +119,29 @@ class GTLar:
         self.CV.append([ln, ln + 1, ln + 2, ln + 3, ln + 4])
 
     def finish(self):
-	print 'use joints? ', self.use_joints
+        print 'use joints? ', self.use_joints
         if self.use_joints:
             for joint in self.joints.values():
                 # There is more then just one circle in this joint, so it
                 # is not end of vessel
-                print joint
                 if len(joint) > 1:
-                    print 'generate joints'
                     self.__generate_joint(joint)
-                    print 'after gj'
-                    
 
     def __generate_joint(self, joint):
-        print 'gj', joint
-        #joint = (np.array(joint).reshape(-1)).tolist()
-        #self.CV.append(joint)
-        print "generate_joint"
-        for circle in joint:
-            for vertex_id in circle:
-		print 'v id ', vertex_id
-                self.V[vertex_id]
-        dom1D = INTERVALS(1)(32);
-        dom2D = TRIANGLE_DOMAIN(32, [[1,0,0],[0,1,0],[0,0,1]]);
-        Cab0 = BEZIER(S0)([[0,2,0],[-2,2,0],[-2,0,0],[-2,-2,0],[0,-2,0]]);
-        Cbc0 = BEZIER(S0)([[0,2,0],[-1,2,0],[-1,1,1],[-1,0,2],[0,0,2]]);
-        Cca0 = BEZIER(S0)([[0,0,2],[-1,0,2],[-1,-1,1],[-1,-2,0],[0,-2,0]]);
-        Cbc1 = BEZIER(S1)([[0,2,0],[-1,2,0],[-1,1,1],[-1,0,2],[0,0,2]]);
-        out1 = MAP(TRIANGULAR_COONS_PATCH([Cab0,Cbc1,Cca0]))(dom2D);
-        self.joints_lar.append(out1)
-
-	 
-
-
+        joint = (np.array(joint).reshape(-1)).tolist()
+        self.CV.append(joint)
+        # for circle in joint:
+        #     for vertex_id in circle:
+        #         print 'v id ', vertex_id
+        #         self.V[vertex_id]
+        # dom1D = INTERVALS(1)(32);
+        # dom2D = TRIANGLE_DOMAIN(32, [[1,0,0],[0,1,0],[0,0,1]]);
+        # Cab0 = BEZIER(S0)([[0,2,0],[-2,2,0],[-2,0,0],[-2,-2,0],[0,-2,0]]);
+        # Cbc0 = BEZIER(S0)([[0,2,0],[-1,2,0],[-1,1,1],[-1,0,2],[0,0,2]]);
+        # Cca0 = BEZIER(S0)([[0,0,2],[-1,0,2],[-1,-1,1],[-1,-2,0],[0,-2,0]]);
+        # Cbc1 = BEZIER(S1)([[0,2,0],[-1,2,0],[-1,1,1],[-1,0,2],[0,0,2]]);
+        # out1 = MAP(TRIANGULAR_COONS_PATCH([Cab0,Cbc1,Cca0]))(dom2D);
+        # self.joints_lar.append(out1)
 
     def show(self):
 
@@ -165,7 +151,7 @@ class GTLar:
         # V = [[0,0,0],[5,5,1],[0,5,5],[5,5,5]]
         # CV = [[0,1,2,3]]
         # print 'V, CV ', V, CV
-	#DRAW(self.joints_lar[0])
+        # DRAW(self.joints_lar[0])
         VIEW(MKPOL([V, AA(AA(lambda k:k + 1))(CV), []]))
 
     def get_output(self):
@@ -206,49 +192,7 @@ class GTLar:
         """
         Draw circle some circle points as tetrahedrons.
         """
-        pts = self.__circle(center, perp_vect, radius,
-                            polygon_element_number=polygon_element_number)
+        pts = g3.circle(center, perp_vect, radius,
+                        polygon_element_number=polygon_element_number)
         for pt in pts:
             self.__add_tetr(pt)
-
-    def __circle(self, center, perp_vect, radius, polygon_element_number=8):
-        """
-        Function computed the circle points. No drawing.
-        perp_vect is vector perpendicular to plane of circle
-        """
-        # tl = [0, 0.2, 0.4, 0.6, 0.8]
-        tl = np.linspace(0, 1, polygon_element_number)
-
-        # vector form center to edge of circle
-        # u is a unit vector from the centre of the circle to any point on the
-        # circumference
-
-        # normalized perpendicular vector
-        n = perp_vect / np.linalg.norm(perp_vect)
-
-        # normalized vector from the centre to point on the circumference
-        u = self.__perpendicular_vector(n)
-        u = u / np.linalg.norm(u)
-
-        pts = []
-
-        for t in tl:
-            # u = np.array([0, 1, 0])
-            # n = np.array([1, 0, 0])
-            pt = radius * np.cos(t * 2 * np.pi) * u +\
-                radius * np.sin(t * 2 * np.pi) * np.cross(u, n) +\
-                center
-
-            pt = pt.tolist()
-            pts.append(pt)
-
-        return pts
-
-    def __perpendicular_vector(self, v):
-        r""" Finds an arbitrary perpendicular vector to *v*."""
-        if v[1] == 0 and v[2] == 0:
-            if v[0] == 0:
-                raise ValueError('zero vector')
-            else:
-                return np.cross(v, [0, 1, 0])
-        return np.cross(v, [1, 0, 0])
