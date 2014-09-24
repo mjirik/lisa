@@ -561,33 +561,23 @@ class OrganSegmentationWindow(QMainWindow):
             self.statusBar().showMessage('No segmentation!')
 
     def saveOut(self, event=None, filename=None):
+        """
+        Open dialog for selecting file output filename. Uniqe name is as
+        suggested.
+        """
         if self.oseg.segmentation is not None:
             self.statusBar().showMessage('Saving segmentation data...')
             QApplication.processEvents()
-            filename = QFileDialog.getSaveFileName(
-                self, "Save file", "", ".conf")
-            # if filename is None:
-            #     filename = \
-            #         str(QFileDialog.getSaveFileName(self,
-            #                                         'Save SEG file',
-            #                                         filter='Files (*.seg)'))
+            ofilename = self.oseg.get_standard_ouptut_filename()
+            filename = str(QFileDialog.getSaveFileName(
+                self,
+                "Save file",
+                ofilename,
+                filter="*.pklz"))
 
-            # if len(filename) > 0:
+            logger.info('Data saved to: ' + ofilename)
 
-            #     outdata = {'data': self.dcm_3Ddata,
-            #                'segdata': self.segmentation_data,
-            #                'voxelsize_mm': self.voxel_sizemm,
-            #                'offset_mm': self.dcm_offsetmm}
-
-            #     if self.segmentation_seeds is not None:
-            #         outdata['segseeds'] = self.segmentation_seeds
-
-            #     savemat(filename, outdata, appendmat=False)
-
-            # else:
-            #     self.statusBar().showMessage('No output file specified!')
-
-            self.oseg.save_outputs()
+            self.oseg.save_outputs(filename)
             self.statusBar().showMessage('Ready')
 
         else:

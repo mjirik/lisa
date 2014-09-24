@@ -877,10 +877,12 @@ class OrganSegmentation():
 #        if savestring in ['a', 'A']:
 # save renamed file too
         filename = '' + filename + '.' + self.save_filetype
+        filepath = op.join(output_dir, filename)
+        filepath = misc.suggest_filename(filepath)
 
-        return output_dir, filename
+        return filepath
 
-    def save_outputs(self):
+    def save_outputs(self, filepath=None):
 
         # savestring_qt, ok = QInputDialog.getText(
         #     None,
@@ -905,17 +907,18 @@ class OrganSegmentation():
 #         filepath = 'org-' + filename + '.' + self.save_filetype
 #         # rint filepath
 #         # rint 'op ', op
-        odp, filename = self.get_standard_ouptut_filename()
+        odp = self.output_datapath
         if not op.exists(odp):
             os.makedirs(odp)
-        filepath = op.join(odp, filename)
-        filepath = misc.suggest_filename(filepath)
+
+        if filepath is None:
+            filepath = self.get_standard_ouptut_filename()
         misc.obj_to_file(data, filepath, filetype=self.save_filetype)
 
-        filepath = 'organ_last.' + self.save_filetype
-        filepath = op.join(odp, filepath)
+        filepath2 = 'organ_last.' + self.save_filetype
+        filepath2 = op.join(odp, filepath2)
         # ilepath = misc.suggest_filename(filepath)
-        misc.obj_to_file(data, filepath, filetype=self.save_filetype)
+        misc.obj_to_file(data, filepath2, filetype=self.save_filetype)
 # save to mat
 
 #        iparams = self.get_iparams()
