@@ -29,8 +29,11 @@ Tested with Ubuntu 14.04 32-bit and Linux Mint 16 Petra
     
     # 2. easy_install requirements simpleITK  
     sudo easy_install -U SimpleITK mahotas
+
+    # 3. pip install our packages pyseg_base and dicom2fem
+    sudo pip install pysegbase dicom2fem
     
-    # 3. install gco_python
+    # 4. install gco_python
     mkdir ~/projects
     cd ~/projects
     git clone https://github.com/mjirik/gco_python.git
@@ -39,7 +42,7 @@ Tested with Ubuntu 14.04 32-bit and Linux Mint 16 Petra
     sudo python setup.py install
     cd ..
     
-    # 4. skelet3d - for Histology Analyser
+    # 5. skelet3d - optional for Histology Analyser
     sudo apt-get install cmake python-numpy libinsighttoolkit3-dev libpng12-dev
     cd ~/projects
     git clone https://github.com/mjirik/skelet3d.git

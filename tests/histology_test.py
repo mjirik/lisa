@@ -18,17 +18,19 @@ import gt_lar
 
 
 class HistologyTest(unittest.TestCase):
+    interactiveTests = False
 
+    @unittest.skipIf(not interactiveTests, "skipping while developing lar functions")
     def test_vessel_tree_lar(self):
         tvg = TreeGenerator(gt_lar.GTLar)
         yaml_path = os.path.join(path_to_script, "./hist_stats_test.yaml")
         tvg.importFromYaml(yaml_path)
         tvg.voxelsize_mm = [1, 1, 1]
         tvg.shape = [100, 100, 100]
-        output = tvg.generateTree()
-        tvg.show()
+        output = tvg.generateTree() # noqa
+        if self.interactiveTests:
+            tvg.show()
 
-    @unittest.skip("skipping while developing lar functions")
     def test_synthetic_data_vessel_tree_evaluation(self):
         """
         Generovani umeleho stromu do 3D a jeho evaluace.
