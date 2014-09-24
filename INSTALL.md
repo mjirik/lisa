@@ -31,7 +31,7 @@ Tested with Ubuntu 14.04 32-bit and Linux Mint 16 Petra
     sudo easy_install -U SimpleITK mahotas
 
     # 3. pip install our packages pyseg_base and dicom2fem
-    sudo pip install pysegbase dicom2fem
+    sudo pip install pysegbase dicom2fem py3DSeedEditor
     
     # 4. install gco_python
     mkdir ~/projects
@@ -56,7 +56,9 @@ Tested with Ubuntu 14.04 32-bit and Linux Mint 16 Petra
 
 1. First use package manager to satisfy requirements. 
 2. SimpleITK is not in ubuntu packages. You can use easy_install
-3. For pygco use following (more info https://github.com/mjirik/pyseg_base/blob/master/INSTALL)
+3. Our support packages can be installed with pip
+4. For pygco use following (more info https://github.com/mjirik/pyseg_base/blob/master/INSTALL)
+5. Last step is optional for Histology Analyser and some functions Lisa
 
 Get stable branche
 
@@ -78,6 +80,11 @@ Download sample data
     python mysetup.py -d
     mkdir ~/lisa_data
     cp -r sample_data/ ~/lisa_data/
+
+Test
+
+    cd ~/projects/lisa
+    nosetests
     
 
 Install (L)Ubuntu 12.04 (13.10)
