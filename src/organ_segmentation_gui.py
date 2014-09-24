@@ -786,7 +786,7 @@ class OrganSegmentation():
             self.segmentation,
             threshold=-1,
             inputSigma=0.15,
-            dilationIterations=5,
+            dilationIterations=10,
             nObj=1,
             biggestObjects=False,
             useSeedsOfCompactObjects=True,
@@ -842,7 +842,7 @@ class OrganSegmentation():
             self.segmentation,
             threshold=-1,
             inputSigma=0.15,
-            dilationIterations=5,
+            dilationIterations=10,
             nObj=1,
             biggestObjects=False,
             useSeedsOfCompactObjects=True,
@@ -867,6 +867,19 @@ class OrganSegmentation():
         volume_mm3 = np.sum(self.segmentation > 0) * voxelvolume_mm3
         return volume_mm3
 
+    def get_standard_ouptut_filename(self):
+        """
+        """
+        output_dir = self.output_datapath
+
+        pth, filename = op.split(op.normpath(self.datapath))
+        filename += "-" + self.experiment_caption
+#        if savestring in ['a', 'A']:
+# save renamed file too
+        filename = '' + filename + '.' + self.save_filetype
+
+        return output_dir, filename
+
     def save_outputs(self):
 
         # savestring_qt, ok = QInputDialog.getText(
@@ -879,23 +892,23 @@ class OrganSegmentation():
         # savestring = str(savestring_qt)
 
         #    if savestring in ['Y', 'y', 'a', 'A']:
-        odp = self.output_datapath
-        if not op.exists(odp):
-            os.makedirs(odp)
 
         data = self.export()
         data['version'] = self.version  # qmisc.getVersionString()
         data['experiment_caption'] = self.experiment_caption
         data['lisa_operator_identifier'] = self.lisa_operator_identifier
 #       data['organ_interactivity_counter'] = self.organ_interactivity_counter
-        pth, filename = op.split(op.normpath(self.datapath))
-        filename += "-" + self.experiment_caption
-#        if savestring in ['a', 'A']:
 # save renamed file too
-        filepath = 'org-' + filename + '.' + self.save_filetype
-        # rint filepath
-        # rint 'op ', op
-        filepath = op.join(odp, filepath)
+#         pth, filename = op.split(op.normpath(self.datapath))
+#         filename += "-" + self.experiment_caption
+# #        if savestring in ['a', 'A']:
+#         filepath = 'org-' + filename + '.' + self.save_filetype
+#         # rint filepath
+#         # rint 'op ', op
+        odp, filename = self.get_standard_ouptut_filename()
+        if not op.exists(odp):
+            os.makedirs(odp)
+        filepath = op.join(odp, filename)
         filepath = misc.suggest_filename(filepath)
         misc.obj_to_file(data, filepath, filetype=self.save_filetype)
 
