@@ -786,7 +786,7 @@ class OrganSegmentation():
             self.segmentation,
             threshold=-1,
             inputSigma=0.15,
-            dilationIterations=2,
+            dilationIterations=5,
             nObj=1,
             biggestObjects=False,
             useSeedsOfCompactObjects=True,
@@ -802,7 +802,16 @@ class OrganSegmentation():
         self.slab = slab
         self.segmentation[outputSegmentation == 1] = slab['porta']
 
-        self.__vesselTree(outputSegmentation, 'porta')
+        # self.__vesselTree(outputSegmentation, 'porta')
+
+    def saveVesselTree(self, textLabel):
+        """
+        textLabel: 'porta' or 'hepatic_veins'
+        """
+        self.__vesselTree(
+            self.segmentation == self.slab[textLabel],
+            textLabel
+        )
 
     def __vesselTree(self, binaryData3d, textLabel):
         import skelet3d
@@ -833,7 +842,7 @@ class OrganSegmentation():
             self.segmentation,
             threshold=-1,
             inputSigma=0.15,
-            dilationIterations=2,
+            dilationIterations=5,
             nObj=1,
             biggestObjects=False,
             useSeedsOfCompactObjects=True,

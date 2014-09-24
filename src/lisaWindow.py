@@ -30,7 +30,8 @@ sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 
 from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
     QGridLayout, QLabel, QPushButton, QFrame, \
-    QFont, QPixmap
+    QFont, QPixmap, QFileDialog
+
 from PyQt4.Qt import QString
 try:
     from pysegbase.seed_editor_qt import QTSeedEditor
@@ -155,7 +156,8 @@ class OrganSegmentationWindow(QMainWindow):
 
         btn_segcompare = QPushButton("Compare", self)
         btn_segcompare.clicked.connect(self.compareSegmentationWithFile)
-        btn_segcompare.setToolTip("Compare data with segmentation from pkl file, raw, ...")
+        btn_segcompare.setToolTip(
+            "Compare data with segmentation from pkl file, raw, ...")
 
         btn_mask = QPushButton("Mask region", self)
         btn_mask.clicked.connect(self.maskRegion)
@@ -206,9 +208,15 @@ class OrganSegmentationWindow(QMainWindow):
 
         btn_pvseg = QPushButton("Portal vein seg.", self)
         btn_pvseg.clicked.connect(self.btnPortalVeinSegmentation)
+        btn_svpv = QPushButton("Save PV tree", self)
+        btn_svpv.clicked.connect(self.btnSavePortalVeinTree)
+        btn_svpv.setToolTip("Save Portal Vein 1D model into vessel_tree.yaml")
 
         btn_hvseg = QPushButton("Hepatic veins seg.", self)
         btn_hvseg.clicked.connect(self.btnHepaticVeinsSegmentation)
+        btn_svhv = QPushButton("Save HV tree", self)
+        btn_svhv.clicked.connect(self.btnSaveHepaticVeinsTree)
+        btn_svhv.setToolTip("Save Hepatic Veins 1D model into vessel_tree.yaml")
 
         btn_lesions = QPushButton("Lesions localization", self)
         btn_lesions.clicked.connect(self.btnLesionLocalization)
@@ -224,6 +232,8 @@ class OrganSegmentationWindow(QMainWindow):
         grid.addWidget(btn_hvseg, rstart + 1, 2)
         grid.addWidget(btn_lesions, rstart + 1, 3)
         grid.addWidget(btn_resection, rstart + 2, 3)
+        grid.addWidget(btn_svpv, rstart + 2, 1)
+        grid.addWidget(btn_svhv, rstart + 2, 2)
 
         # # # # # # #
 
@@ -484,7 +494,8 @@ class OrganSegmentationWindow(QMainWindow):
         if seg_path is None:
             self.statusBar().showMessage('No data path specified!')
             return
-        evaluation, score = self.oseg.sliver_compare_with_other_volume_from_file(seg_path)
+        evaluation, score = \
+            self.oseg.sliver_compare_with_other_volume_from_file(seg_path)
         print 'Evaluation: ', evaluation
         print 'Score: ', score
 
@@ -553,7 +564,8 @@ class OrganSegmentationWindow(QMainWindow):
         if self.oseg.segmentation is not None:
             self.statusBar().showMessage('Saving segmentation data...')
             QApplication.processEvents()
-
+            filename = QFileDialog.getSaveFileName(
+                self, "Save file", "", ".conf")
             # if filename is None:
             #     filename = \
             #         str(QFileDialog.getSaveFileName(self,
@@ -632,13 +644,28 @@ class OrganSegmentationWindow(QMainWindow):
         """
         Function calls segmentation.vesselSegmentation function.
         """
+
+        self.statusBar().showMessage('Vessel segmentation ...')
         self.oseg.portalVeinSegmentation()
+        self.statusBar().showMessage('Ready')
+
+    def btnSavePortalVeinTree(self):
+        self.statusBar().showMessage('Saving vessel tree ...')
+        self.oseg.saveVesselTree('porta')
+        self.statusBar().showMessage('Ready')
+
+    def btnSaveHepaticVeinsTree(self):
+        self.statusBar().showMessage('Saving vessel tree ...')
+        self.oseg.saveVesselTree('hepatic_veins')
+        self.statusBar().showMessage('Ready')
 
     def btnHepaticVeinsSegmentation(self):
         """
         Function calls segmentation.vesselSegmentation function.
         """
+        self.statusBar().showMessage('Vessel segmentation ...')
         self.oseg.hepaticVeinsSegmentation()
+        self.statusBar().showMessage('Ready')
 
     def view3D(self):
         # rom seg2mesh import gen_mesh_from_voxels, mesh2vtk, smooth_mesh
