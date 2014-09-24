@@ -1,3 +1,9 @@
+New Save dialog
+Save 1D model
+Connected Threshod Segmentation is not dependent on prev organ segmentation
+
+
+
 2014-07-23 v1.3
 Histology Analyser added. It is dependent on skelet3d module.
 In stable version is lession button dissabled.
