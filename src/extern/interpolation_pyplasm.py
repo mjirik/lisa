@@ -70,6 +70,6 @@ def TRIANGLE_DOMAIN(n, points):
                 cells.append([c1, c0, c1 - 1])
                 cells.append([c1, c0 + 1, c0])
 
-        print net[:10]
-        print cells[:10]
+        print net[:2]
+        print cells[:2]
     return MKPOLS([net, cells])
