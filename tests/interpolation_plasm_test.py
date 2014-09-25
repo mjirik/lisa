@@ -13,8 +13,7 @@ import unittest
 
 
 class InterpolationPlasmTest(unittest.TestCase):
-    skipInteractiveTests = True
-    skipInteractiveTests = False
+    interactiveTests = True
     # interactivetTest = True
 
     def test_store_to_SparseMatrix_and_back(self):
@@ -25,7 +24,7 @@ class InterpolationPlasmTest(unittest.TestCase):
 
         dom2D = ip.TRIANGLE_DOMAIN(5, [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
 
-    @unittest.skipIf(skipInteractiveTests, "test is with visualization")
+    @unittest.skipIf(not interactiveTests, "test is with visualization")
     def test_complex_sample(self):
         from larcc import *
         from splines import *
