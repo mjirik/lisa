@@ -8,10 +8,16 @@ from splines import *
 
 
 def TRIANGULAR_COONS_PATCH(params):
-    ab0Fn, bc1Fn, ca0Fn = params
+    ab0Fn = params[0]
+    bc1Fn = params[1] 
+    ca0Fn = params[2]
+    print 'aaaaaaaa', ab0Fn
 
     def TRIANGULAR_COONS_PATCH0(point):
-        u, v, w = points
+        u = point[0]
+        v = point[1]
+        w = point[2]
+        print 'uuuuuuuuuuuuu', u
 
         if(hasattr(ab0Fn, '__call__')):
             Sab0 = ab0Fn(point)
@@ -50,25 +56,34 @@ def TRIANGULAR_COONS_PATCH(params):
 
 
 def TRIANGLE_DOMAIN(n, points):
-    pa, pb, pc = points
+    pa = points[0]
+    pb = points[1]
+    pc = points[2]
     net = []
     cells = []
 
     for i in range(0, n + 1):
-        net.append([pa[0] + i * (pb[0] - pa[0]) / double(n), pa[1] + i *
-                   (pb[1] - pa[1]) / n, pa[2] + i * (pb[2] - pa[2]) / double(n)])
+        net.append([
+            (pa[0] + i * (pb[0] - pa[0]) / double(n)),
+            (pa[1] + i * (pb[1] - pa[1]) / double(n)),
+            (pa[2] + i * (pb[2] - pa[2]) / double(n))
+        ])
 
-    for y in range(0, n + 1):
+    for y in range(1, n + 1):
         r0 = (y - 1) * (n + 2) - (y - 1) * y / 2
         r1 = y * (n + 2) - y * (y + 1) / 2
-        for x in range(0, n + 1):
+        for x in range(0, n - y +1):
             c0 = r0 + x
             c1 = r1 + x
-            net.append([pa[0] + x * (pb[0] - pa[0]) / double(n) + y * (pc[0] - pa[0]) / double(n), pa[1] + x * (pb[1] - pa[1])
-                       / n + y * (pc[1] - pa[1]) / n, pa[2] + x * (pb[2] - pa[2]) / double(n) + y * (pc[2] - pa[2]) / double(n)])
+            net.append([
+                pa[0] + x * (pb[0] - pa[0]) / double(n) + y * (pc[0] - pa[0]) / double(n),
+                pa[1] + x * (pb[1] - pa[1]) / double(n) + y * (pc[1] - pa[1]) / double(n),
+                pa[2] + x * (pb[2] - pa[2]) / double(n) + y * (pc[2] - pa[2]) / double(n)
+            ])
             if (x > 0):
                 cells.append([c1, c0, c1 - 1])
-                cells.append([c1, c0 + 1, c0])
+
+            cells.append([c1, c0 + 1, c0])
 
         print net[:2]
         print cells[:2]
