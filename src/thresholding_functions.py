@@ -47,7 +47,7 @@ def gaussFilter(data, sigma):
         scipy.ndimage.filters.gaussian_filter(data, sigma, order = 0, output = data, mode = 'nearest')
 
         return data
-        
+
 def thresholding(data, min_threshold, max_threshold, use_min_threshold = True, use_max_Threshold = True):
 
         """
@@ -57,7 +57,7 @@ def thresholding(data, min_threshold, max_threshold, use_min_threshold = True, u
         """
 
         if use_min_threshold:
-            
+
             data = data * (data >= min_threshold)
 
         if use_max_Threshold:
@@ -73,23 +73,23 @@ def binaryClosingOpening(data, closeNum, openNum, firstClosing = True, fixBorder
         Aplikace binarniho uzavreni a pote binarniho otevreni.
 
         """
-        
+
         # This creates empty border around data, so closing operations wont cut off parts of segmented data on the sides
         if fixBorder and closeNum>=1:
             shape = data.shape
             new_shape = (shape[0]+closeNum*2,
-                         shape[1]+closeNum*2, 
+                         shape[1]+closeNum*2,
                          shape[2]+closeNum*2)
             logger.debug('Creating empty border for closeing operation...')
             logger.debug('orig shape: '+str(shape)+' new shape: '+str(new_shape))
-            
+
             new_data = numpy.zeros(new_shape, dtype = type(data[0][0][0]))
             new_data[closeNum:closeNum+shape[0],
                      closeNum:closeNum+shape[1],
                      closeNum:closeNum+shape[2]] = data
             data = new_data
             del(new_data)
-        
+
         # @TODO - not used!!!, why was this here?
         #numpyDataOnes = numpy.ones(data.shape, dtype = type(data[0][0][0]))
 
@@ -105,7 +105,7 @@ def binaryClosingOpening(data, closeNum, openNum, firstClosing = True, fixBorder
 
                 data = data * scipy.ndimage.binary_opening(data, iterations = openNum)
 
-        else:          
+        else:
 
             ## Vlastni binarni otevreni.
             if (openNum >= 1):
@@ -116,7 +116,7 @@ def binaryClosingOpening(data, closeNum, openNum, firstClosing = True, fixBorder
             if (closeNum >= 1):
 
                 data = data * scipy.ndimage.binary_closing(data, iterations = closeNum)
-                
+
         # Removes added empty border. Returns data matrix to original size.
         if fixBorder and closeNum>=1:
             data = data[closeNum:closeNum+shape[0],
@@ -146,7 +146,7 @@ def calculateSigma(voxel, input):
             sigmaZ = (5.0 / voxel[2]) * input
 
             return (sigmaX, sigmaY, sigmaZ) / voxelV
-         
+
 def calculateAutomaticThreshold(data, arrSeed = None):
 
         """
@@ -159,7 +159,7 @@ def calculateAutomaticThreshold(data, arrSeed = None):
         if arrSeed != None:
 
             threshold = numpy.round(min(arrSeed), 2) - 1
-            print('Zjisten automaticky threshold ze seedu (o 1 zmenseny): ' + str(threshold))
+            logger.debug('Zjisten automaticky threshold ze seedu (o 1 zmenseny): ' + str(threshold))
             return threshold
 
         ## Hustota hist
@@ -371,11 +371,10 @@ def getPriorityObjects(data, nObj = 1, seeds = None, debug = False):
     ## length - pocet rozdilnych oznaceni.
     dataLabels, length = scipy.ndimage.label(data)
 
-    print 'Olabelovano oblasti: ' + str(length)
+    logger.info('Olabelovano oblasti: ' + str(length))
 
     if debug:
-       print 'data labels:'
-       print dataLabels
+        logger.debug('data labels: ' + str(dataLabels))
 
     ## Podminka maximalniho mnozstvi objektu.
     maxN = 250
@@ -385,8 +384,8 @@ def getPriorityObjects(data, nObj = 1, seeds = None, debug = False):
     ## Uzivatel si nevybral specificke objekty.
     if (seeds == None) :
 
-        print 'Vraceni bez seedu'
-        print 'Objekty: ' + str(nObj)
+        logger.info('Vraceni bez seedu')
+        logger.debug('Objekty: ' + str(nObj))
 
         ## Zjisteni nejvetsich objektu.
         arrayLabelsSum, arrayLabels = areaIndexes(dataLabels, length)
@@ -417,18 +416,18 @@ def getPriorityObjects(data, nObj = 1, seeds = None, debug = False):
             label = label + 1
 
             if debug:
-                print (str(label - 1)) + ':'
-                print returning
+                logger.debug(str(label - 1) + ': ' + str(returning))
 
         if returning == None:
-           print 'Zadna validni olabelovana data! (DEBUG: returning == None)'
+           logger.info(
+                   'Zadna validni olabelovana data! (DEBUG: returning == None)')
 
         return returning
 
     ## Uzivatel si vybral specificke objekty (seeds != None).
     else:
 
-        print 'Vraceni se seedy'
+        logger.info('Vraceni se seedy')
 
         ## Zalozeni pole pro ulozeni seedu
         arrSeed = []
@@ -457,10 +456,12 @@ def getPriorityObjects(data, nObj = 1, seeds = None, debug = False):
             ## Zbaveni se duplikatu.
             arrSeed = list( set ( arrSeed ) )
             if debug:
-                print 'seed list:'
-                print arrSeed
+                logger.debug('seed list:' + str(arrSeed))
 
-            print 'Ruznych prioritnich objektu k vraceni: ' + str(len(arrSeed))
+            logger.info(
+                'Ruznych prioritnich objektu k vraceni: ' +
+                str(len(arrSeed))
+            )
 
             ## Vytvoreni vystupu - postupne pricitani dat prislunych specif. labelu.
             returning = None
@@ -472,14 +473,16 @@ def getPriorityObjects(data, nObj = 1, seeds = None, debug = False):
                     returning = returning + data * (dataLabels == arrSeed[index])
 
                 if debug:
-                    print (str(index)) + ':'
-                    print returning
+                    logger.debug((str(index)) + ':' + str(returning))
 
             return returning
 
         else:
 
-            print 'Zadna validni data k vraceni - zadne prioritni objekty nenalezeny (DEBUG: function getPriorityObjects: len(arrSeed) == 0)'
+            logger.info(
+                'Zadna validni data k vraceni - zadne prioritni objekty ' +
+                'nenalezeny (DEBUG: function getPriorityObjects:' +
+                str(len(arrSeed) == 0))
             return None
 
 def areaIndexes(labels, num):
