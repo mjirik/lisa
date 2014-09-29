@@ -27,3 +27,20 @@ Graph:
     nodeIdA: -29
     nodeIdB: -3
 
+  4:
+    nodeA_ZYX_mm: [90, 30, 40]
+    nodeB_ZYX_mm: [60, 20, 20]
+    lengthEstimation: 30.0
+    tortuosity: 1
+    radius_mm: 7
+    nodeIdA: -29
+    nodeIdB: -3
+  5:
+    nodeA_ZYX_mm: [90, 20, 10]
+    nodeB_ZYX_mm: [60, 20, 20]
+    lengthEstimation: 30.0
+    tortuosity: 1
+    radius_mm: 7
+    nodeIdA: -29
+    nodeIdB: -3
+

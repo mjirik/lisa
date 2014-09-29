@@ -13,16 +13,21 @@ logger = logging.getLogger(__name__)
 import sys
 import os.path
 
+
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../../lar-cc/lib/py/"))
+sys.path.append(os.path.join(path_to_script, "../src/extern"))
 import numpy as np
+
 
 from larcc import VIEW, MKPOL, AA, INTERVALS
 from splines import *
 # import mapper
 # from largrid import *
 
+
 import geometry3d as g3
+import interpolation_pyplasm as ip
 
 
 class GTLarSmooth:
@@ -38,7 +43,7 @@ class GTLarSmooth:
         self.joints = {}
         self.joints_lar = []
         self.gtree = gtree
-        self.endDistMultiplicator = 1
+        self.endDistMultiplicator = 2
         self.use_joints = True
         pass
 
@@ -63,7 +68,7 @@ class GTLarSmooth:
         nodeB = g3.translate(nodeB, vector,
                              radius * self.endDistMultiplicator)
 
-        ptsA, ptsB = g3.cylinder_circles(nodeA, nodeB, radius)
+        ptsA, ptsB = g3.cylinder_circles(nodeA, nodeB, radius, element_number=32)
         CVlistA = self.__construct_cylinder_end(ptsA, idA, nodeA)
         CVlistB = self.__construct_cylinder_end(ptsB, idB, nodeB)
 
@@ -148,25 +153,130 @@ class GTLarSmooth:
         perp = np.cross(vec0, vec1)
 
 
-
-        
+        curvelist = []
 
         for vessel_connection in joint:
+            curve_t = []
+            curve_pts_indexes_t = []
+            brake_point_t = None
             center, circle = vessel_connection
             print 'center ', center
             print 'circle ', circle
             for vertex_id in circle:
-                hp = self.__half_plane(perp, center, self.V[vertex_id])
-                print '  ', self.V[vertex_id], '  hp: ', hp
+                if ((len(curve_pts_indexes_t) > 0) and 
+                    (vertex_id - curve_pts_indexes_t[-1]) > 1):
+                    brake_point_t = len(curve_pts_indexes_t)
 
-        # dom1D = INTERVALS(1)(32);
-        # dom2D = TRIANGLE_DOMAIN(32, [[1,0,0],[0,1,0],[0,0,1]]);
-        # Cab0 = BEZIER(S0)([[0,2,0],[-2,2,0],[-2,0,0],[-2,-2,0],[0,-2,0]]);
-        # Cbc0 = BEZIER(S0)([[0,2,0],[-1,2,0],[-1,1,1],[-1,0,2],[0,0,2]]);
-        # Cca0 = BEZIER(S0)([[0,0,2],[-1,0,2],[-1,-1,1],[-1,-2,0],[0,-2,0]]);
-        # Cbc1 = BEZIER(S1)([[0,2,0],[-1,2,0],[-1,1,1],[-1,0,2],[0,0,2]]);
-        # out1 = MAP(TRIANGULAR_COONS_PATCH([Cab0,Cbc1,Cca0]))(dom2D);
-        # self.joints_lar.append(out1)
+                hp = self.__half_plane(perp, center, self.V[vertex_id])
+                if( hp):
+                    curve_t.append(self.V[vertex_id])
+                    curve_pts_indexes_t.append(vertex_id)
+
+            ordered_curve_t = curve_t[brake_point_t:] + curve_t[:brake_point_t]
+            ordered_pts_indexes_t = \
+                curve_pts_indexes_t[brake_point_t:] +\
+                curve_pts_indexes_t[:brake_point_t]
+            print '    hp v id ', curve_pts_indexes_t    
+            print 'ord hp v id ', ordered_pts_indexes_t
+
+            #print 'hp circle ', curve_one
+            curvelist.append(ordered_curve_t)
+                #print '  ', self.V[vertex_id], '  hp: ', hp
+
+        Betacurve_id, Astart, Alphacurve_id, Bstart, Gammacurve_id, Cstart = self.__find_couples(curvelist)
+        
+        print 'ABC ', Betacurve_id, Astart, Alphacurve_id, Bstart
+
+        dom2D = ip.TRIANGLE_DOMAIN(32, [[1,0,0],[0,1,0],[0,0,1]])
+        Cab0 = BEZIER(S1)(self.__order_curve(curvelist[Gammacurve_id][-1:0:-1], Cstart))
+        Cbc0 = BEZIER(S1)(self.__order_curve(curvelist[Alphacurve_id], Bstart))
+        Cbc1 = BEZIER(S2)(self.__order_curve(curvelist[Alphacurve_id], Bstart))
+        Cca0 = BEZIER(S1)(self.__order_curve(curvelist[Betacurve_id][-1:0:-1], Astart))
+        
+        out1 = MAP(ip.TRIANGULAR_COONS_PATCH([Cab0,Cbc1,Cca0]))(STRUCT(dom2D))
+        self.joints_lar.append(out1)
+
+    def __find_couples(self, curvelist):
+        """
+        try find all posible couples with minimal energy. 
+        Energy is defined like sum of distances
+        """
+        energy = None
+        mn_ind = None
+        output = None
+        for i in range(0,3):
+            Betacurve_id, Astart, dist0 = self.__find_nearest(
+                curvelist, i, 0, [i])
+            Alphacurve_id, Bstart, dist1 = self.__find_nearest(
+                curvelist, i, -1, [i, Betacurve_id])
+            this_energy = dist0 + dist1
+
+            if energy is None or this_energy < energy:
+                energy = this_energy
+                mn_ind = i
+                #Gammacurve_id = i
+                output = Betacurve_id, Astart, Alphacurve_id, Bstart, i, 0
+
+
+            Betacurve_id, Astart, dist0 = self.__find_nearest(
+                curvelist, i, -1, [i])
+            Alphacurve_id, Bstart, dist1 = self.__find_nearest(
+                curvelist, i, 0, [i, Betacurve_id])
+            this_energy = dist0 + dist1
+
+            if energy is None or this_energy < energy:
+                energy = this_energy
+                mn_ind = i
+                output = Betacurve_id, Astart, Alphacurve_id, Bstart, i, -1
+
+        print 'output'
+        print output
+
+        return output
+
+
+    def __order_curve(self, curve, start):
+        if start is 0:
+            return curve
+        else:
+            return curve[-1:0:-1]
+
+    def __find_nearest(self, curvelist, this_curve_index, start, wrong_curve=None):
+        """
+        start: use 0 or -1
+        """
+        #if start:
+        #    start_index = 0
+        #else:
+        #    start_index = -1
+        if wrong_curve is None:
+            wrong_curve = [this_curve_index]
+        dist = None
+        min_cv_ind = None
+        min_cv_start = None
+
+        for curve_index in range(0, len(curvelist)):
+            if curve_index not in wrong_curve:
+                pt0 = np.array(curvelist[this_curve_index][start])
+                pt1 = np.array(curvelist[curve_index][0])
+                this_dist = np.linalg.norm(pt0 - pt1)
+                if (dist is None) or (this_dist < dist):
+                    dist = this_dist
+                    min_cv_ind = curve_index
+                    min_cv_start = 0
+
+                pt1 = np.array(curvelist[curve_index][-1])
+                this_dist = np.linalg.norm(pt0 - pt1)
+                if (dist is None) or (this_dist < dist):
+                    dist = this_dist
+                    min_cv_ind = curve_index
+                    min_cv_start = -1
+
+        return min_cv_ind, min_cv_start, dist
+
+
+
+
 
     def show(self):
 
@@ -176,9 +286,12 @@ class GTLarSmooth:
         # V = [[0,0,0],[5,5,1],[0,5,5],[5,5,5]]
         # CV = [[0,1,2,3]]
         # print 'V, CV ', V, CV
-        # DRAW(self.joints_lar[0])
-        VIEW(MKPOL([V, AA(AA(lambda k:k + 1))(CV), []]))
+        #for joint in self.joints_lar:
 
+        out = STRUCT([MKPOL([V, AA(AA(lambda k:k + 1))(CV), []])] + self.joints_lar)
+        #VIEW(self.joints_lar[0])
+        #VIEW(MKPOL([V, AA(AA(lambda k:k + 1))(CV), []]))
+        VIEW(out)
     def get_output(self):
         pass
 
