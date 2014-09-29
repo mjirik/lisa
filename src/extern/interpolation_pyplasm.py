@@ -11,13 +11,12 @@ def TRIANGULAR_COONS_PATCH(params):
     ab0Fn = params[0]
     bc1Fn = params[1] 
     ca0Fn = params[2]
-    print 'aaaaaaaa', ab0Fn
 
     def TRIANGULAR_COONS_PATCH0(point):
         u = point[0]
         v = point[1]
         w = point[2]
-        print 'uuuuuuuuuuuuu', u
+
 
         if(hasattr(ab0Fn, '__call__')):
             Sab0 = ab0Fn(point)
@@ -38,19 +37,21 @@ def TRIANGULAR_COONS_PATCH(params):
         if (u == 1):
             ur = 0
         else:
-            ur = u * v / (v + w)
+            ur = ((u * v) / double(v + w))
         if (v == 1):
             vs = 0
         else:
-            vs = v * w / (w + u)
+            vs = ((v * w) / double(w + u))
         if (w == 1):
             wt = 0
         else:
-            wt = w * u / (v + u)
+            wt = ((w * u) / double(v + u))
 
         for i in range(0, rn):
-            mapped[i] = u * Sab0[i] + ur * (Sca0[i] - Sab0[i]) + v * Sca0[
-                i] + vs * (Sbc1[i] - Sca0[i]) + w * Sbc1[i] + wt * (Sab0[i] - Sbc1[i])
+            mapped[i] = \
+                u * Sab0[i] + ur * (Sca0[i] - Sab0[i]) + \
+                v * Sca0[i] + vs * (Sbc1[i] - Sca0[i]) + \
+                w * Sbc1[i] + wt * (Sab0[i] - Sbc1[i])
         return mapped
     return TRIANGULAR_COONS_PATCH0
 
@@ -76,15 +77,21 @@ def TRIANGLE_DOMAIN(n, points):
             c0 = r0 + x
             c1 = r1 + x
             net.append([
-                pa[0] + x * (pb[0] - pa[0]) / double(n) + y * (pc[0] - pa[0]) / double(n),
-                pa[1] + x * (pb[1] - pa[1]) / double(n) + y * (pc[1] - pa[1]) / double(n),
-                pa[2] + x * (pb[2] - pa[2]) / double(n) + y * (pc[2] - pa[2]) / double(n)
+                pa[0] + 
+                x * (pb[0] - pa[0]) / double(n) +
+                y * (pc[0] - pa[0]) / double(n),
+                pa[1] + 
+                x * (pb[1] - pa[1]) / double(n) + 
+                y * (pc[1] - pa[1]) / double(n),
+                pa[2] + 
+                x * (pb[2] - pa[2]) / double(n) + 
+                y * (pc[2] - pa[2]) / double(n)
             ])
             if (x > 0):
                 cells.append([c1, c0, c1 - 1])
 
             cells.append([c1, c0 + 1, c0])
 
-        print net[:2]
-        print cells[:2]
+        #print net[:2]
+        #print cells[:2]
     return MKPOLS([net, cells])

@@ -50,16 +50,26 @@ class InterpolationPlasmTest(unittest.TestCase):
         #print 'dom1d', dom1D
         #map_input = ip.TRIANGULAR_COONS_PATCH([Cab0, Cbc1, Cca0])(dom2D)
         #VIEW(SKELETON(1)(STRUCT(dom2D)))
-        map_input = MAP(ip.TRIANGULAR_COONS_PATCH(
-            [Cab0, Cbc1, Cca0]))(dom2D)
+        #print 'tp d2d', type(dom2D)
+
+        #print 'tp d2d', type(dom2D[0])
+        #print dom2D[0]
+        #import pdb
+        #pdb.set_trace()
+
+        var = ip.TRIANGULAR_COONS_PATCH([Cab0, Cbc1, Cca0])
+        #print var(dom2D[0])
+
+
+        map_input = MAP(var)(STRUCT(dom2D))
         #map_function = MAP(map_input)
         #print 'Cab0 ', Cab0
         #print 'map_input', map_input
         #print 'map_i0 ', Cca0
 
         #out = map_function(dom2D)
-        VIEW(STRUCT(MKPOLS(map_input)))
-        VIEW(SKELETON(1)(out))
+        VIEW(map_input)
+        VIEW(SKELETON(1)(map_input))
         # self.assertTrue(np.all(data == data2))
 
 if __name__ == "__main__":
