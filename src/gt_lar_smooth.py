@@ -64,8 +64,8 @@ class GTLarSmooth:
                              radius * self.endDistMultiplicator)
 
         ptsA, ptsB = g3.cylinder_circles(nodeA, nodeB, radius)
-        CVlistA = self.__construct_cylinder_end(ptsA, idA)
-        CVlistB = self.__construct_cylinder_end(ptsB, idB)
+        CVlistA = self.__construct_cylinder_end(ptsA, idA, nodeA)
+        CVlistB = self.__construct_cylinder_end(ptsB, idB, nodeB)
 
         CVlist = CVlistA + CVlistB
 
@@ -84,7 +84,7 @@ class GTLarSmooth:
 #         self.V = self.V + (np.array(V) + np.array(nodeA)).tolist()
 #         self.CV = self.CV + (np.array(CV) + lenV).tolist()
 
-    def __construct_cylinder_end(self, pts, id):
+    def __construct_cylinder_end(self, pts, id, node):
         """
         creates end of cylinder and prepares for joints
         """
@@ -97,9 +97,9 @@ class GTLarSmooth:
             CVlist.append(ln + i)
 
         try:
-            self.joints[id].append(CVlist)
+            self.joints[id].append([node, CVlist])
         except:
-            self.joints[id] = [CVlist]
+            self.joints[id] = [[node, CVlist]]
 
         return CVlist
 
@@ -127,13 +127,38 @@ class GTLarSmooth:
                 if len(joint) > 1:
                     self.__generate_joint(joint)
 
+
+    def __half_plane(self, perp, plane_point, point):
+        cdf = (np.array(point) - np.array(plane_point))
+        out = perp[0] * cdf[0] +\
+            perp[1] * cdf[1] + \
+            perp[2] * cdf[2]
+        return  out > 0
+
     def __generate_joint(self, joint):
-        joint = (np.array(joint).reshape(-1)).tolist()
-        self.CV.append(joint)
-        # for circle in joint:
-        #     for vertex_id in circle:
-        #         print 'v id ', vertex_id
-        #         self.V[vertex_id]
+        #joint = (np.array(joint).reshape(-1)).tolist()
+        #self.CV.append(joint)
+        cc0 = np.array(joint[0][0])
+        cc1 = np.array(joint[1][0])
+        cc2 = np.array(joint[2][0])
+
+        vec0 = cc0 - cc1
+        vec1 = cc1 - cc2
+
+        perp = np.cross(vec0, vec1)
+
+
+
+        
+
+        for vessel_connection in joint:
+            center, circle = vessel_connection
+            print 'center ', center
+            print 'circle ', circle
+            for vertex_id in circle:
+                hp = self.__half_plane(perp, center, self.V[vertex_id])
+                print '  ', self.V[vertex_id], '  hp: ', hp
+
         # dom1D = INTERVALS(1)(32);
         # dom2D = TRIANGLE_DOMAIN(32, [[1,0,0],[0,1,0],[0,0,1]]);
         # Cab0 = BEZIER(S0)([[0,2,0],[-2,2,0],[-2,0,0],[-2,-2,0],[0,-2,0]]);
