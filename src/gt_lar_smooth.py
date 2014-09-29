@@ -153,12 +153,16 @@ class GTLarSmooth:
         perp = np.cross(vec0, vec1)
 
 
-        curvelist = []
+        curvelistT = []
+        curvelistD = []
 
         for vessel_connection in joint:
             curve_t = []
+            curve_d = []
             curve_pts_indexes_t = []
+            curve_pts_indexes_d = []
             brake_point_t = None
+            brake_point_d = None
             center, circle = vessel_connection
             print 'center ', center
             print 'circle ', circle
@@ -166,35 +170,73 @@ class GTLarSmooth:
                 if ((len(curve_pts_indexes_t) > 0) and 
                     (vertex_id - curve_pts_indexes_t[-1]) > 1):
                     brake_point_t = len(curve_pts_indexes_t)
+                if ((len(curve_pts_indexes_d) > 0) and 
+                    (vertex_id - curve_pts_indexes_d[-1]) > 1):
+                    brake_point_d = len(curve_pts_indexes_d)
 
                 hp = self.__half_plane(perp, center, self.V[vertex_id])
-                if( hp):
+                if(hp):
                     curve_t.append(self.V[vertex_id])
                     curve_pts_indexes_t.append(vertex_id)
+                else:
+                    curve_d.append(self.V[vertex_id])
+                    curve_pts_indexes_d.append(vertex_id)
 
             ordered_curve_t = curve_t[brake_point_t:] + curve_t[:brake_point_t]
             ordered_pts_indexes_t = \
                 curve_pts_indexes_t[brake_point_t:] +\
                 curve_pts_indexes_t[:brake_point_t]
-            print '    hp v id ', curve_pts_indexes_t    
-            print 'ord hp v id ', ordered_pts_indexes_t
+
+            ordered_curve_d = curve_d[brake_point_d:] + curve_d[:brake_point_d]
+            ordered_pts_indexes_d = \
+                curve_pts_indexes_d[brake_point_t:] +\
+                curve_pts_indexes_d[:brake_point_d]
+            #print '    hp v id ', curve_pts_indexes_t    
+            #print 'ord hp v id ', ordered_pts_indexes_t
 
             #print 'hp circle ', curve_one
-            curvelist.append(ordered_curve_t)
+
+            # add point from oposit half-circle
+            first_pt_d = ordered_curve_d[0]
+            last_pt_d = ordered_curve_d[-1]
+            first_pt_t = ordered_curve_t[0]
+            last_pt_t = ordered_curve_t[-1]
+
+            ordered_curve_t.append(first_pt_d)
+            ordered_curve_t.insert(0, last_pt_d)
+
+            ordered_curve_t.append(last_pt_t)
+            ordered_curve_t.insert(0, first_pt_t)
+
+            curvelistT.append(ordered_curve_t)
+            curvelistD.append(ordered_curve_d)
                 #print '  ', self.V[vertex_id], '  hp: ', hp
 
-        Betacurve_id, Astart, Alphacurve_id, Bstart, Gammacurve_id, Cstart = self.__find_couples(curvelist)
+        Betacurve_id, Astart, Alphacurve_id, Bstart, Gammacurve_id, Cstart = self.__find_couples(curvelistT)
         
-        print 'ABC ', Betacurve_id, Astart, Alphacurve_id, Bstart
+        #print 'ABC ', Betacurve_id, Astart, Alphacurve_id, Bstart
 
         dom2D = ip.TRIANGLE_DOMAIN(32, [[1,0,0],[0,1,0],[0,0,1]])
-        Cab0 = BEZIER(S1)(self.__order_curve(curvelist[Gammacurve_id][-1:0:-1], Cstart))
-        Cbc0 = BEZIER(S1)(self.__order_curve(curvelist[Alphacurve_id], Bstart))
-        Cbc1 = BEZIER(S2)(self.__order_curve(curvelist[Alphacurve_id], Bstart))
-        Cca0 = BEZIER(S1)(self.__order_curve(curvelist[Betacurve_id][-1:0:-1], Astart))
+        Cab0 = BEZIER(S1)(self.__order_curve(curvelistT[Gammacurve_id][-1:0:-1], Cstart))
+        Cbc0 = BEZIER(S1)(self.__order_curve(curvelistT[Alphacurve_id], Bstart))
+        Cbc1 = BEZIER(S2)(self.__order_curve(curvelistT[Alphacurve_id], Bstart))
+        Cca0 = BEZIER(S1)(self.__order_curve(curvelistT[Betacurve_id][-1:0:-1], Astart))
         
         out1 = MAP(ip.TRIANGULAR_COONS_PATCH([Cab0,Cbc1,Cca0]))(STRUCT(dom2D))
         self.joints_lar.append(out1)
+
+        Betacurve_id, Astart, Alphacurve_id, Bstart, Gammacurve_id, Cstart = self.__find_couples(curvelistD)
+        
+        #print 'ABC ', Betacurve_id, Astart, Alphacurve_id, Bstart
+
+        dom2D = ip.TRIANGLE_DOMAIN(32, [[1,0,0],[0,1,0],[0,0,1]])
+        Cab0 = BEZIER(S1)(self.__order_curve(curvelistD[Gammacurve_id][-1:0:-1], Cstart))
+        Cbc0 = BEZIER(S1)(self.__order_curve(curvelistD[Alphacurve_id], Bstart))
+        Cbc1 = BEZIER(S2)(self.__order_curve(curvelistD[Alphacurve_id], Bstart))
+        Cca0 = BEZIER(S1)(self.__order_curve(curvelistD[Betacurve_id][-1:0:-1], Astart))
+        
+        out2 = MAP(ip.TRIANGULAR_COONS_PATCH([Cab0,Cbc1,Cca0]))(STRUCT(dom2D))
+        self.joints_lar.append(out2)
 
     def __find_couples(self, curvelist):
         """
