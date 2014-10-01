@@ -27,7 +27,10 @@ import geometry3d as g3
 
 class GTLar:
 
-    def __init__(self, gtree=None):
+    def __init__(self, gtree=None,
+                 endDistMultiplicator=1,
+                 use_joints=True
+                 ):
         """
         gtree is information about input data structure.
         endDistMultiplicator: make cylinder shorter by multiplication of radius
@@ -38,8 +41,8 @@ class GTLar:
         self.joints = {}
         self.joints_lar = []
         self.gtree = gtree
-        self.endDistMultiplicator = 1
-        self.use_joints = True
+        self.endDistMultiplicator = endDistMultiplicator
+        self.use_joints = use_joints
         pass
 
     def add_cylinder(self, nodeA, nodeB, radius, cylinder_id):

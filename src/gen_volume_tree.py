@@ -127,7 +127,7 @@ class VolumeTreeGenerator:
 
 class TreeGenerator:
 
-    def __init__(self, generator_class=VolumeTreeGenerator):
+    def __init__(self, generator_class=VolumeTreeGenerator, generator_params=None):
         self.rawdata = None
         self.tree_data = None
         self.data3d = None
@@ -135,6 +135,7 @@ class TreeGenerator:
         self.shape = None
         self.use_lar = False
         self.generator_class = generator_class
+        self.generator_params = generator_params
 
     def importFromYaml(self, filename):
         rawdata = misc.obj_from_file(filename=filename, filetype='yaml')
@@ -158,7 +159,10 @@ class TreeGenerator:
             self.lv = lar_vessels.LarVessels()
 
         # use generator init
-        self.generator = self.generator_class(self)
+        if self.generator_params is None:
+            self.generator = self.generator_class(self)
+        else:
+            self.generator = self.generator_class(self, **generator_params)
 
         for cyl_id in self.tree_data:
             logger.debug("CylinderId: " + str(cyl_id))
@@ -329,6 +333,7 @@ python src/gen_volume_tree.py -i ./tests/hist_stats_test.yaml'
 
     startTime = datetime.now()
 
+    generator_params = None
     if args.generator in ['vol', 'volume']:
         generator_class = VolumeTreeGenerator
     elif args.generator in ['lar']:
@@ -337,8 +342,15 @@ python src/gen_volume_tree.py -i ./tests/hist_stats_test.yaml'
     elif args.generator in ['larsm']:
         import gt_lar_smooth
         generator_class = gt_lar_smooth.GTLarSmooth
+    elif args.generator in ['lar_nojoints']:
+        import gt_lar
+        generator_class = gt_lar.GTLar
+        generator_params = {
+            'endDistMultiplicator': 0,
+            'use_joints': False
+        }
 
-    tg = TreeGenerator(generator_class)
+    tg = TreeGenerator(generator_class, generator_params)
     tg.importFromYaml(args.inputfile)
     tg.voxelsize_mm = args.voxelsize
     tg.shape = args.datashape
