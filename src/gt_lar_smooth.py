@@ -17,13 +17,17 @@ import os.path
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../../lar-cc/lib/py/"))
 sys.path.append(os.path.join(path_to_script, "../src/extern"))
+sys.path.append(os.path.join(path_to_script, "../../pyplasm/src/pyplasm"))
+
 import numpy as np
 
 
-from larcc import VIEW, MKPOL, AA, INTERVALS
-from splines import *
+from larcc import VIEW, MKPOL, AA, INTERVALS, STRUCT, MAP, PROD
+from splines import BEZIER, S1, S2, COONSPATCH
+# from splines import *
 # import mapper
-# from largrid import *
+#import hpc
+#import pyplasm.hpc
 
 
 import geometry3d as g3
@@ -45,6 +49,7 @@ class GTLarSmooth:
         self.gtree = gtree
         self.endDistMultiplicator = 2
         self.use_joints = True
+        #dir(splines)
         pass
 
     def add_cylinder(self, nodeA, nodeB, radius, cylinder_id):
@@ -140,6 +145,62 @@ class GTLarSmooth:
             perp[2] * cdf[2]
         return  out > 0
 
+    def __get_vessel_connection_curve(self, vessel_connection, perp):
+        curve_t = []
+        curve_d = []
+        curve_pts_indexes_t = []
+        curve_pts_indexes_d = []
+        brake_point_t = None
+        brake_point_d = None
+        center, circle = vessel_connection
+        print 'center ', center
+        print 'circle ', circle
+        for vertex_id in circle:
+            if ((len(curve_pts_indexes_t) > 0) and 
+                (vertex_id - curve_pts_indexes_t[-1]) > 1):
+                brake_point_t = len(curve_pts_indexes_t)
+            if ((len(curve_pts_indexes_d) > 0) and 
+                (vertex_id - curve_pts_indexes_d[-1]) > 1):
+                brake_point_d = len(curve_pts_indexes_d)
+
+            hp = self.__half_plane(perp, center, self.V[vertex_id])
+
+            
+            if(hp):
+                curve_t.append(self.V[vertex_id])
+                curve_pts_indexes_t.append(vertex_id)
+            else:
+                curve_d.append(self.V[vertex_id])
+                curve_pts_indexes_d.append(vertex_id)
+
+        ordered_curve_t = curve_t[brake_point_t:] + curve_t[:brake_point_t]
+        ordered_pts_indexes_t = \
+            curve_pts_indexes_t[brake_point_t:] +\
+            curve_pts_indexes_t[:brake_point_t]
+
+        ordered_curve_d = curve_d[brake_point_d:] + curve_d[:brake_point_d]
+        ordered_pts_indexes_d = \
+            curve_pts_indexes_d[brake_point_t:] +\
+            curve_pts_indexes_d[:brake_point_d]
+        #print '    hp v id ', curve_pts_indexes_t    
+        #print 'ord hp v id ', ordered_pts_indexes_t
+
+        #print 'hp circle ', curve_one
+
+        # add point from oposit half-circle
+        first_pt_d = ordered_curve_d[0]
+        last_pt_d = ordered_curve_d[-1]
+        first_pt_t = ordered_curve_t[0]
+        last_pt_t = ordered_curve_t[-1]
+
+        ordered_curve_t.append(first_pt_d)
+        ordered_curve_t.insert(0, last_pt_d)
+
+        ordered_curve_t.append(last_pt_t)
+        ordered_curve_t.insert(0, first_pt_t)
+
+        return ordered_curve_t, ordered_curve_d
+
     def __generate_joint(self, joint):
         #joint = (np.array(joint).reshape(-1)).tolist()
         #self.CV.append(joint)
@@ -157,56 +218,10 @@ class GTLarSmooth:
         curvelistD = []
 
         for vessel_connection in joint:
-            curve_t = []
-            curve_d = []
-            curve_pts_indexes_t = []
-            curve_pts_indexes_d = []
-            brake_point_t = None
-            brake_point_d = None
-            center, circle = vessel_connection
-            print 'center ', center
-            print 'circle ', circle
-            for vertex_id in circle:
-                if ((len(curve_pts_indexes_t) > 0) and 
-                    (vertex_id - curve_pts_indexes_t[-1]) > 1):
-                    brake_point_t = len(curve_pts_indexes_t)
-                if ((len(curve_pts_indexes_d) > 0) and 
-                    (vertex_id - curve_pts_indexes_d[-1]) > 1):
-                    brake_point_d = len(curve_pts_indexes_d)
+            ordered_curve_t, ordered_curve_d = self.__get_vessel_connection_curve(
+                vessel_connection, perp)
+            
 
-                hp = self.__half_plane(perp, center, self.V[vertex_id])
-                if(hp):
-                    curve_t.append(self.V[vertex_id])
-                    curve_pts_indexes_t.append(vertex_id)
-                else:
-                    curve_d.append(self.V[vertex_id])
-                    curve_pts_indexes_d.append(vertex_id)
-
-            ordered_curve_t = curve_t[brake_point_t:] + curve_t[:brake_point_t]
-            ordered_pts_indexes_t = \
-                curve_pts_indexes_t[brake_point_t:] +\
-                curve_pts_indexes_t[:brake_point_t]
-
-            ordered_curve_d = curve_d[brake_point_d:] + curve_d[:brake_point_d]
-            ordered_pts_indexes_d = \
-                curve_pts_indexes_d[brake_point_t:] +\
-                curve_pts_indexes_d[:brake_point_d]
-            #print '    hp v id ', curve_pts_indexes_t    
-            #print 'ord hp v id ', ordered_pts_indexes_t
-
-            #print 'hp circle ', curve_one
-
-            # add point from oposit half-circle
-            first_pt_d = ordered_curve_d[0]
-            last_pt_d = ordered_curve_d[-1]
-            first_pt_t = ordered_curve_t[0]
-            last_pt_t = ordered_curve_t[-1]
-
-            ordered_curve_t.append(first_pt_d)
-            ordered_curve_t.insert(0, last_pt_d)
-
-            ordered_curve_t.append(last_pt_t)
-            ordered_curve_t.insert(0, first_pt_t)
 
             curvelistT.append(ordered_curve_t)
             curvelistD.append(ordered_curve_d)
@@ -234,7 +249,7 @@ class GTLarSmooth:
         Cbc0 = BEZIER(S1)(self.__order_curve(curvelistD[Alphacurve_id], Bstart))
         Cbc1 = BEZIER(S2)(self.__order_curve(curvelistD[Alphacurve_id], Bstart))
         Cca0 = BEZIER(S1)(self.__order_curve(curvelistD[Betacurve_id][-1:0:-1], Astart))
-        
+
         out2 = MAP(ip.TRIANGULAR_COONS_PATCH([Cab0,Cbc1,Cca0]))(STRUCT(dom2D))
         self.joints_lar.append(out2)
 
