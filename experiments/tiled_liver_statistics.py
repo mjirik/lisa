@@ -647,12 +647,15 @@ def prepared_texture_features_by_string(names):
     gf = tfeat.GaborFeatures()  # noqa
     glcmf = tfeat.GlcmFeatures()  # noqa
     haralick = tfeat.HaralickFeatures()  # noqa
+    hist_gf = tfeat.FeaturesCombinedFeatures(feat_hist, gf.feats_gabor)
+
 
     dict_of_feature_fcn = {
         'hist': [feat_hist, []],
         'gf': [gf.feats_gabor, []],
         'glcm': [glcmf.feats_glcm, []],
-        'haralick': [haralick.feats_haralick, [True]]
+        'haralick': [haralick.feats_haralick, [True]],
+        'hist_gf' : [hist_gf.features, []],
     }
 
     selected_classifiers = [dict_of_feature_fcn[name] for name in names]
