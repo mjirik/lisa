@@ -398,7 +398,7 @@ def save_labels(
 
 # save info to dir
     info = {
-        'feature_fcn': str(feature_fcn),
+        'feature_fcn': feature_fcn_description,
         'feature_fcn_params': str(feature_fcn_params),
         'classif_fcn': str(classif_inst)
         }
@@ -668,6 +668,11 @@ def prepared_texture_features_by_string(names):
     haralick = tfeat.HaralickFeatures()  # noqa
     hist_gf = tfeat.FeaturesCombinedFeatures(feat_hist, gf.feats_gabor)
     hist_glcm = tfeat.FeaturesCombinedFeatures(feat_hist, glcmf.feats_glcm)
+    hist_glcm_gf = tfeat.FeaturesCombinedFeatures(
+        feat_hist,
+        glcmf.feats_glcm,
+        gf.feats_gabor
+    )
 
     dict_of_feature_fcn = {
         'hist': [feat_hist, []],
@@ -676,6 +681,7 @@ def prepared_texture_features_by_string(names):
         'haralick': [haralick.feats_haralick, [True]],
         'hist_gf': [hist_gf, []],
         'hist_glcm': [hist_glcm, []],
+        'hist_glcm_gf': [hist_glcm_gf, []],
     }
 
     selected_classifiers = [dict_of_feature_fcn[name] for name in names]
