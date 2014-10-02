@@ -381,7 +381,7 @@ def save_labels(
 
 # construct filename
     experiment_dirname =\
-        feature_fcn.__name__ + '_' + \
+        feature_fcn_description + '_' + \
         str_feat_params + '_' +\
         vsnorm_string +\
         classif_inst.__class__.__name__ + '_' + \
@@ -668,13 +668,12 @@ def prepared_texture_features_by_string(names):
     haralick = tfeat.HaralickFeatures()  # noqa
     hist_gf = tfeat.FeaturesCombinedFeatures(feat_hist, gf.feats_gabor)
 
-
     dict_of_feature_fcn = {
         'hist': [feat_hist, []],
         'gf': [gf.feats_gabor, []],
         'glcm': [glcmf.feats_glcm, []],
         'haralick': [haralick.feats_haralick, [True]],
-        'hist_gf' : [hist_gf, []],
+        'hist_gf': [hist_gf, []],
     }
 
     selected_classifiers = [dict_of_feature_fcn[name] for name in names]
