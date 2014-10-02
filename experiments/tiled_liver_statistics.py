@@ -139,8 +139,14 @@ def get_features(data3d_orig, data3d_seg, feature_fcn, feature_fcn_params=[],
     data3d_seg: jedničky tam, kde jsou játra
     feature_fcn_plus_params: list of size 2: [feature_function, [3, 'real']]
 
+    There are two possible feature_fcn formats
+     * method
+     * object with method 'features' and attribute 'description'
     """
     # feature_fcn, feature_fcn_params = feature_fcn_plus_params
+
+    if hasattr(feature_fcn, 'description'):
+        feature_fcn = feature_fcn.features
 
     featur = feature_fcn(data3d_orig, *feature_fcn_params)
     # featur = {}
@@ -342,13 +348,21 @@ def save_labels(
     slab = {}
     slab['liver'] = 1
     slab['none'] = 0
+
+# there are two possible ways for fature_fcn. One is function, other is object
+# with "description" attribute and function 'features'
+    if hasattr(feature_fcn, 'description'):
+        feature_fcn_description = feature_fcn.description
+    else:
+        feature_fcn_description = str(feature_fcn)
+
     dataplus = {
         # 'segmentation': segmentation[:10, :10, :10].astype(np.int8),
         # 'data3d': data3d[:10, :10, :10].astype(np.int16),
         'segmentation': segmentation.astype(np.int8),
         'data3d': data3d.astype(np.int16),
         'processing_information': {
-            'feature_fcn': str(feature_fcn),
+            'feature_fcn': feature_fcn_description,
             'feature_fcn_params': str(feature_fcn_params),
             'classif_fcn_name': str(classif_inst.__class__.__name__),
             'classif_fcn': str(classif_inst)
@@ -644,6 +658,11 @@ def prepared_classifiers_by_string(names):
 
 
 def prepared_texture_features_by_string(names):
+    """
+    There are two possible feature_fcn formats
+     * method
+     * object with method 'features' and attribute 'description'
+    """
     gf = tfeat.GaborFeatures()  # noqa
     glcmf = tfeat.GlcmFeatures()  # noqa
     haralick = tfeat.HaralickFeatures()  # noqa
@@ -655,7 +674,7 @@ def prepared_texture_features_by_string(names):
         'gf': [gf.feats_gabor, []],
         'glcm': [glcmf.feats_glcm, []],
         'haralick': [haralick.feats_haralick, [True]],
-        'hist_gf' : [hist_gf.features, []],
+        'hist_gf' : [hist_gf, []],
     }
 
     selected_classifiers = [dict_of_feature_fcn[name] for name in names]

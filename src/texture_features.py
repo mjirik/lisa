@@ -30,6 +30,9 @@ class FeaturesCombinedFeatures():
         self.ff1 = feature_function1
         self.ff2 = feature_function2
         self.ff3 = feature_function3
+        self.description = self.ff1.__name__ + "+" + self.ff2.__name__
+        if feature_function3 is not None:
+            self.description +=  "+" + self.ff3.__name__
 
     def features(self, data3d):
         fv1 = self.ff1(data3d)
