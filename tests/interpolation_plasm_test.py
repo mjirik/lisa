@@ -13,25 +13,28 @@ import unittest
 
 
 class InterpolationPlasmTest(unittest.TestCase):
-    interactiveTests = True
-    interactiveTests = True
+    interactiveTests = False
     # interactiveTest = True
 
     def test_store_to_SparseMatrix_and_back(self):
         """
-        Test has no assert part. Its passed if any funcion does throw exception.
+        Test has not strong assert part.
+        Its passed if any funcion does throw exception.
         """
         from interpolation_pyplasm import TRIANGLE_DOMAIN
-        from larcc import VIEW
+        import pyplasm
 
         dom2D = TRIANGLE_DOMAIN(5, [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
-        # VIEW(STRUCT(dom2D))
+        self.assertIsInstance(dom2D, list)
+        self.assertIsInstance(dom2D[0], pyplasm.xgepy.Hpc)
+
 
     # @unittest.skipIf(not interactiveTests, "test is with visualization")
     def test_complex_sample(self):
-        from larcc import INTERVALS, BEZIER, S2, S1, MAP, STRUCT, VIEW, SKELETON
+        from larcc import INTERVALS, BEZIER, S2, S1, MAP, STRUCT, SKELETON, VIEW
         from interpolation_pyplasm import TRIANGLE_DOMAIN,\
             TRIANGULAR_COONS_PATCH
+        import pyplasm
 
         BEZIER(S2)
         dom1D = INTERVALS(1)(32)
@@ -49,6 +52,10 @@ class InterpolationPlasmTest(unittest.TestCase):
             VIEW(map_input)
             VIEW(SKELETON(1)(map_input))
         # self.assertTrue(np.all(data == data2))
+        # print dom1D
+        # self.assertIsInstance(dom2D, pyplasm.xgepy.Hpc)
+        self.assertIsInstance(dom2D[0], pyplasm.xgepy.Hpc)
+        self.assertIsInstance(map_input, pyplasm.xgepy.Hpc)
 
 if __name__ == "__main__":
     unittest.main()
