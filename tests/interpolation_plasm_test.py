@@ -14,62 +14,40 @@ import unittest
 
 class InterpolationPlasmTest(unittest.TestCase):
     interactiveTests = True
-    # interactivetTest = True
+    interactiveTests = True
+    # interactiveTest = True
 
     def test_store_to_SparseMatrix_and_back(self):
         """
         Test has no assert part. Its passed if any funcion does throw exception.
         """
-        import interpolation_pyplasm as ip
+        from interpolation_pyplasm import TRIANGLE_DOMAIN
+        from larcc import VIEW
 
-        #dom2D = ip.TRIANGLE_DOMAIN(5, [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+        dom2D = TRIANGLE_DOMAIN(5, [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+        # VIEW(STRUCT(dom2D))
 
-    @unittest.skipIf(not interactiveTests, "test is with visualization")
+    # @unittest.skipIf(not interactiveTests, "test is with visualization")
     def test_complex_sample(self):
-        from larcc import *
-        from splines import *
-        import interpolation_pyplasm as ip
+        from larcc import INTERVALS, BEZIER, S2, S1, MAP, STRUCT, VIEW, SKELETON
+        from interpolation_pyplasm import TRIANGLE_DOMAIN,\
+            TRIANGULAR_COONS_PATCH
 
-        # DRAW = COMP([VIEW, STRUCT, MKPOLS])
-        # print 'S1 bezier ', S1
-        # S0 = SEL(0)
         BEZIER(S2)
-        # dom1D = INTERVALS(1)(32)
         dom1D = INTERVALS(1)(32)
-        dom2D = ip.TRIANGLE_DOMAIN(32, [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+        dom2D = TRIANGLE_DOMAIN(32, [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
         Cab0 = BEZIER(S1)([[10, 0, 0], [6, 0, 3], [3, 0, 3], [0, 0, 0]])
-        #VIEW(MAP(Cab0)(dom1D))
         Cbc0 = BEZIER(S1)(
             [[10, 0, 0], [10, 2, 4], [8, 8, -4], [2, 10, 4], [0, 10, 0]])
         Cbc1 = BEZIER(S2)(
             [[10, 0, 0], [10, 2, 4], [8, 8, -4], [2, 10, 4], [0, 10, 0]])
-        #VIEW(MAP(Cbc0)(dom1D))
         Cca0 = BEZIER(S1)([[0, 10, 0], [0, 6, -5], [0, 3, 5], [0, 0, 0]])
-        #VIEW(MAP(Cca0)(dom1D))
-        #print dom2D
-        #print 'dom1d', dom1D
-        #map_input = ip.TRIANGULAR_COONS_PATCH([Cab0, Cbc1, Cca0])(dom2D)
-        #VIEW(SKELETON(1)(STRUCT(dom2D)))
-        #print 'tp d2d', type(dom2D)
 
-        #print 'tp d2d', type(dom2D[0])
-        #print dom2D[0]
-        #import pdb
-        #pdb.set_trace()
-
-        var = ip.TRIANGULAR_COONS_PATCH([Cab0, Cbc1, Cca0])
-        #print var(dom2D[0])
-
-
-        map_input = MAP(var)(STRUCT(dom2D))
-        #map_function = MAP(map_input)
-        #print 'Cab0 ', Cab0
-        #print 'map_input', map_input
-        #print 'map_i0 ', Cca0
-
-        #out = map_function(dom2D)
-        VIEW(map_input)
-        VIEW(SKELETON(1)(map_input))
+        patch = TRIANGULAR_COONS_PATCH([Cab0, Cbc1, Cca0])
+        map_input = MAP(patch)(STRUCT(dom2D))
+        if self.interactiveTests:
+            VIEW(map_input)
+            VIEW(SKELETON(1)(map_input))
         # self.assertTrue(np.all(data == data2))
 
 if __name__ == "__main__":
