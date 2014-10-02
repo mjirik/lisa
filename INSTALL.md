@@ -266,9 +266,9 @@ Install Windows
         python.exe setup.py install --skip-build
         
 * Get requested modules
-    
-    pip install pysegbase dicom2fem py3DSeedEditor
-   
+
+        pip install pysegbase dicom2fem py3DSeedEditor
+
 Problems on Windows:
 
 * Cython not found. Install cython from https://code.google.com/p/pythonxy/wiki/Downloads#Plugin_updates
