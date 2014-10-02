@@ -77,10 +77,10 @@ def feat_hist_by_segmentation(data3d_orig, data3d_seg, voxelsize_mm=[1],
 
 
 def feat_hist(data3d_orig):
-    bins = range(-1024, 1024, 1)
-    bins = range(-512, 512, 1)
-    bins = range(-512, 512, 10)
-    bins = range(-512, 512, 64)
+    # bins = range(-1024, 1024, 1)
+    # bins = range(-512, 512, 1)
+    # bins = range(-512, 512, 10)
+    # bins = range(-512, 512, 64)
     bins = range(-512, 512, 100)
     hist1, bin_edges1 = np.histogram(data3d_orig, bins=bins)
     return hist1
@@ -128,7 +128,8 @@ def f_lbp3d(data3d_orig):
         True)
 
 
-def get_features(data3d_orig, data3d_seg, feature_fcn, feature_fcn_params=[], visualization=True):
+def get_features(data3d_orig, data3d_seg, feature_fcn, feature_fcn_params=[],
+                 visualization=True):
     u"""
     Sem doplníme všechny naše měření.
 
@@ -489,8 +490,8 @@ def one_exp_set_testing(
     feature_fcn, feature_fcn_params = feature_fcn_plus_params
 
     for i in range(0, indata_len):
-        data3d_orig_orig, data3d_seg_orig, voxelsize_mm = read_data_orig_and_seg(
-            inputdata, i)
+        data3d_orig_orig, data3d_seg_orig, voxelsize_mm = \
+            read_data_orig_and_seg(inputdata, i)
         data3d_orig = data3d_orig_orig
         data3d_seg = data3d_seg_orig
 
@@ -596,7 +597,6 @@ def experiment(training_yaml_path, testing_yaml_path,  featers_plus_classifs,
 
     results = []
 
-
     for fpc in featers_plus_classifs:
         feature_fcn = fpc[0]
         classif_fcn = fpc[1]
@@ -614,6 +614,49 @@ def experiment(training_yaml_path, testing_yaml_path,  featers_plus_classifs,
         print results
 
     return results
+
+
+def prepared_classifiers_by_string(names):
+    from sklearn import svm
+    from sklearn.naive_bayes import GaussianNB  # noqa
+    from sklearn.mixture import GMM  # noqa
+    from sklearn import tree  # noqa
+    from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier  # noqa
+    from sklearn.lda import LDA  # noqa
+    from sklearn.qda import QDA  # noqa
+    import classification
+    dict_of_classifiers = {
+        'GaussianNB': [GaussianNB, []],
+        'SVC': [svm.SVC, []],
+        'DT': [tree.DecisionTreeClassifier, []],
+        'GMM2': [classification.GMMClassifier,
+                 {'n_components': 2, 'covariance_type': 'full'}],
+        'SVClin': [svm.SVC, {'kernel': 'linear'}],
+        'SVCrbf': [svm.SVC, {'kernel': 'rbf'}],
+        'SVCpoly': [svm.SVC, {'kernel': 'poly'}],
+        'RF': [RandomForestClassifier, []],
+        'LDA': [LDA, []],
+        'QDA': [QDA, []],
+        }
+
+    selected_classifiers = [dict_of_classifiers[name] for name in names]
+    return selected_classifiers
+
+
+def prepared_texture_features_by_string(names):
+    gf = tfeat.GaborFeatures()  # noqa
+    glcmf = tfeat.GlcmFeatures()  # noqa
+    haralick = tfeat.HaralickFeatures()  # noqa
+
+    dict_of_feature_fcn = {
+        'hist': [feat_hist, []],
+        'gf': [gf.feats_gabor, []],
+        'glcm': [glcmf.feats_glcm, []],
+        'haralick': [haralick.feats_haralick, [True]]
+    }
+
+    selected_classifiers = [dict_of_feature_fcn[name] for name in names]
+    return selected_classifiers
 
 
 def main():
@@ -647,6 +690,16 @@ def main():
     parser.add_argument('-t', '--train', help='Training', default=False,
                         action='store_true'
                         )
+    parser.add_argument(
+        '-cl', '--classifers',
+        help='classifer by string: "SVC", or "GaussianNB", ...',
+        nargs='+', type=str, default=['SVC']
+    )
+    parser.add_argument(
+        '-fe', '--features',
+        help='features by string: "hist", or "glcm", ...',
+        nargs='+', type=str, default=['hist']
+    )
     args = parser.parse_args()
 
     if args.sampleInput:
@@ -664,33 +717,9 @@ def main():
     glcmf = tfeat.GlcmFeatures()  # noqa
     haralick = tfeat.HaralickFeatures()  # noqa
 
-    list_of_feature_fcn = [
-        [feat_hist, []],
-        [gf.feats_gabor, []],
-        [glcmf.feats_glcm, []]
-        # [haralick.feats_haralick, [True]]
-    ]
-    from sklearn import svm
-    from sklearn.naive_bayes import GaussianNB  # noqa
-    from sklearn.mixture import GMM  # noqa
-    from sklearn import tree  # noqa
-    from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier  # noqa
-    from sklearn.lda import LDA  # noqa
-    from sklearn.qda import QDA  # noqa
-    import classification
+    list_of_feature_fcn = prepared_texture_features_by_string(args.features)
 
-    list_of_classifiers = [
-        [GaussianNB, []],
-        [svm.SVC, []],
-        [tree.DecisionTreeClassifier, []],
-        [classification.GMMClassifier, {'n_components': 2, 'covariance_type': 'full'}],
-        # [svm.SVC, {'kernel': 'linear'}],
-        # [svm.SVC, {'kernel': 'rbf'}],
-        # [svm.SVC, {'kernel': 'poly'}],
-        # [RandomForestClassifier, []],
-        # [LDA, []],
-        # [QDA, []],
-        ]
+    list_of_classifiers = prepared_classifiers_by_string(args.classifers)
     tile_shape = [10, 50, 50]
 
     if args.features_classifs:
