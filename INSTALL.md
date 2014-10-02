@@ -264,6 +264,10 @@ Install Windows
         python setup.py build_ext -i --compiler=mingw32
         python.exe setup.py build --compiler=mingw32
         python.exe setup.py install --skip-build
+        
+* Get requested modules
+    
+    pip install pysegbase dicom2fem py3DSeedEditor
    
 Problems on Windows:
 
