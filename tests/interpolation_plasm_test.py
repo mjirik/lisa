@@ -28,7 +28,6 @@ class InterpolationPlasmTest(unittest.TestCase):
         self.assertIsInstance(dom2D, list)
         self.assertIsInstance(dom2D[0], pyplasm.xgepy.Hpc)
 
-
     # @unittest.skipIf(not interactiveTests, "test is with visualization")
     def test_complex_sample(self):
         from larcc import INTERVALS, BEZIER, S2, S1, MAP, STRUCT, SKELETON, VIEW
@@ -37,10 +36,10 @@ class InterpolationPlasmTest(unittest.TestCase):
         import pyplasm
 
         BEZIER(S2)
-        dom1D = INTERVALS(1)(32)
+        dom1D = INTERVALS(1)(32) # noqa
         dom2D = TRIANGLE_DOMAIN(32, [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
         Cab0 = BEZIER(S1)([[10, 0, 0], [6, 0, 3], [3, 0, 3], [0, 0, 0]])
-        Cbc0 = BEZIER(S1)(
+        Cbc0 = BEZIER(S1)( # noqa
             [[10, 0, 0], [10, 2, 4], [8, 8, -4], [2, 10, 4], [0, 10, 0]])
         Cbc1 = BEZIER(S2)(
             [[10, 0, 0], [10, 2, 4], [8, 8, -4], [2, 10, 4], [0, 10, 0]])
@@ -51,12 +50,8 @@ class InterpolationPlasmTest(unittest.TestCase):
         if self.interactiveTests:
             VIEW(map_input)
             VIEW(SKELETON(1)(map_input))
-        # self.assertTrue(np.all(data == data2))
-        # print dom1D
-        # self.assertIsInstance(dom2D, pyplasm.xgepy.Hpc)
         self.assertIsInstance(dom2D[0], pyplasm.xgepy.Hpc)
         self.assertIsInstance(map_input, pyplasm.xgepy.Hpc)
 
 if __name__ == "__main__":
     unittest.main()
-
