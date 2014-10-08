@@ -21,8 +21,10 @@ sys.path.append(os.path.join(path_to_script, "../../pyplasm/src/pyplasm"))
 
 import numpy as np
 
+from scipy import mat, cos, sin
 
 from larcc import VIEW, MKPOL, AA, INTERVALS, STRUCT, MAP, PROD
+from larcc import UNITVECT, VECTPROD, PI, SUM, CAT, IDNT, UNITVECT
 from splines import BEZIER, S1, S2, COONSPATCH
 # from splines import *
 # import mapper
@@ -62,24 +64,41 @@ class GTLarSmooth:
             idB = 0
             self.use_joints = False
 
-        # vect = nodeA - nodeB
-        # self.__draw_circle(nodeB, vect, radius)
+        vect = np.array(nodeA) - np.array(nodeB)
+        u = g3.perpendicular_vector(vect)
+        u = u / np.linalg.norm(u)
+        u = u.tolist()
+        vect = vect.tolist()
 
-        vector = (np.array(nodeA) - np.array(nodeB)).tolist()
+
+
+        c1 = self.__circle(nodeA, radius, vect)
+        c2 = self.__circle(nodeB, radius, vect)
+        tube = BEZIER(S2)([c1,c2])
+        domain = PROD([ INTERVALS(2*PI)(36), INTERVALS(1)(4) ])
+        tube = MAP(tube)(domain)
+
+
+        self.joints_lar.append(tube)
+
+
+        #self.__draw_circle(nodeB, vect, radius)
+
+        ##vector = (np.array(nodeA) - np.array(nodeB)).tolist()
 
 # mov circles to center of cylinder by size of radius because of joint
-        nodeA = g3.translate(nodeA, vector,
-                             -radius * self.endDistMultiplicator)
-        nodeB = g3.translate(nodeB, vector,
-                             radius * self.endDistMultiplicator)
+        ##nodeA = g3.translate(nodeA, vector,
+        ##                     -radius * self.endDistMultiplicator)
+        ##nodeB = g3.translate(nodeB, vector,
+        ##                     radius * self.endDistMultiplicator)
 
-        ptsA, ptsB = g3.cylinder_circles(nodeA, nodeB, radius, element_number=32)
-        CVlistA = self.__construct_cylinder_end(ptsA, idA, nodeA)
-        CVlistB = self.__construct_cylinder_end(ptsB, idB, nodeB)
+        ##ptsA, ptsB = g3.cylinder_circles(nodeA, nodeB, radius, element_number=32)
+        ##CVlistA = self.__construct_cylinder_end(ptsA, idA, nodeA)
+        ##CVlistB = self.__construct_cylinder_end(ptsB, idB, nodeB)
 
-        CVlist = CVlistA + CVlistB
+        ##CVlist = CVlistA + CVlistB
 
-        self.CV.append(CVlist)
+        ##self.CV.append(CVlist)
 
 # lar add ball
 #         ball0 = mapper.larBall(radius, angle1=PI, angle2=2*PI)([10, 16])
@@ -93,6 +112,23 @@ class GTLarSmooth:
 #
 #         self.V = self.V + (np.array(V) + np.array(nodeA)).tolist()
 #         self.CV = self.CV + (np.array(CV) + lenV).tolist()
+
+    def __circle(self, center=[0,0,0],radius=1,normal=[0,0,1],sign=1,shift=0):
+        N = UNITVECT(normal)
+        if N == [0,0,1] or N == [0,0,-1]: Q = mat(IDNT(3))
+        else: 
+            QX = UNITVECT((VECTPROD([[0,0,1],N])))
+            QZ = N
+            QY = VECTPROD([QZ,QX])
+            Q = mat([QX,QY,QZ]).T
+        def circle0(p):
+            u = p[0]
+            x = radius*cos(sign*u+shift)
+            y = radius*sin(sign*u+shift)
+            z = 0
+            return SUM([ center, CAT((Q*[[x],[y],[z]]).tolist()) ])
+        return circle0
+
 
     def __construct_cylinder_end(self, pts, id, node):
         """
@@ -145,7 +181,11 @@ class GTLarSmooth:
             perp[2] * cdf[2]
         return  out > 0
 
-    def __get_vessel_connection_curve(self, vessel_connection, perp):
+    def __get_vessel_connection_curve(self, vessel_connection, perp, vec0, vec1):
+        """
+        perp is perpendicular to plane given by centers of circles
+        vec1, vec0 are vectors from circle centers
+        """
         curve_t = []
         curve_d = []
         curve_pts_indexes_t = []
@@ -153,6 +193,10 @@ class GTLarSmooth:
         brake_point_t = None
         brake_point_d = None
         center, circle = vessel_connection
+
+        # left to right
+        perp_lr = np.cross(perp, vec1)
+
         print 'center ', center
         print 'circle ', circle
         for vertex_id in circle:
@@ -163,6 +207,7 @@ class GTLarSmooth:
                 (vertex_id - curve_pts_indexes_d[-1]) > 1):
                 brake_point_d = len(curve_pts_indexes_d)
 
+            #hp = self.__half_plane(perp_lr, center, self.V[vertex_id])
             hp = self.__half_plane(perp, center, self.V[vertex_id])
 
             
@@ -196,8 +241,8 @@ class GTLarSmooth:
         ordered_curve_t.append(first_pt_d)
         ordered_curve_t.insert(0, last_pt_d)
 
-        ordered_curve_t.append(last_pt_t)
-        ordered_curve_t.insert(0, first_pt_t)
+        ordered_curve_d.append(first_pt_t)
+        ordered_curve_d.insert(0, last_pt_t)
 
         return ordered_curve_t, ordered_curve_d
 
@@ -219,7 +264,7 @@ class GTLarSmooth:
 
         for vessel_connection in joint:
             ordered_curve_t, ordered_curve_d = self.__get_vessel_connection_curve(
-                vessel_connection, perp)
+                vessel_connection, perp, vec0, vec1)
             
 
 
@@ -345,7 +390,8 @@ class GTLarSmooth:
         # print 'V, CV ', V, CV
         #for joint in self.joints_lar:
 
-        out = STRUCT([MKPOL([V, AA(AA(lambda k:k + 1))(CV), []])] + self.joints_lar)
+        # out = STRUCT([MKPOL([V, AA(AA(lambda k:k + 1))(CV), []])] + self.joints_lar)
+        out = STRUCT(self.joints_lar)
         #VIEW(self.joints_lar[0])
         #VIEW(MKPOL([V, AA(AA(lambda k:k + 1))(CV), []]))
         VIEW(out)
