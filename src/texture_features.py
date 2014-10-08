@@ -17,6 +17,34 @@ def feat_hist2(data3d_orig):
     return hist1
 
 
+class FeaturesCombinedFeatures():
+    """
+    This object alows combine two or three features into one.
+    """
+    def __init__(
+        self,
+        feature_function1,
+        feature_function2,
+        feature_function3=None,
+    ):
+        self.ff1 = feature_function1
+        self.ff2 = feature_function2
+        self.ff3 = feature_function3
+        self.description = self.ff1.__name__ + "+" + self.ff2.__name__
+        if feature_function3 is not None:
+            self.description +=  "+" + self.ff3.__name__
+
+    def features(self, data3d):
+        fv1 = self.ff1(data3d)
+        fv2 = self.ff2(data3d)
+        feats = np.concatenate((fv1, fv2))
+        if self.ff3 is not None:
+            fv3 = self.ff3(data3d)
+            feats = np.concatenate((feats, fv3))
+
+        return np.array(feats).reshape(-1)
+
+
 # Gabor filters --------
 class GaborFeatures():
     def __init__(self):

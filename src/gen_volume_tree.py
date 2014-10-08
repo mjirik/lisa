@@ -41,7 +41,7 @@ class VolumeTreeGenerator:
         self.data3d = np.zeros(gtree.shape, dtype=np.int)
         self.voxelsize_mm = gtree.voxelsize_mm
 
-    def add_cylinder(self, p1m, p2m, rad):
+    def add_cylinder(self, p1m, p2m, rad, id):
         """
         Funkce na vykresleni jednoho segmentu do 3D dat
         """
@@ -116,9 +116,16 @@ class VolumeTreeGenerator:
     def get_output(self):
         return self.data3d
 
-    def save(self, outputfile, filetype):
-        dw = datawriter.DataWriter()
-        dw.Write3DData(self.data3d, outputfile, filetype)
+    def save(self, outputfile, filetype='pklz'):
+        data = {
+            'data3d': self.data3d,
+            'voxelsize_mm': self.voxelsize_mm
+        }
+
+        misc.obj_to_file(data, outputfile, filetype=filetype)
+        print "saved"
+        #dw = datawriter.DataWriter()
+        #dw.Write3DData(self.data3d, outputfile, filetype)
 
     def show(self):
         pyed = se.py3DSeedEditor(self.data3d)

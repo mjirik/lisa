@@ -66,7 +66,8 @@ class GTLar:
         nodeB = g3.translate(nodeB, vector,
                              radius * self.endDistMultiplicator)
 
-        ptsA, ptsB = g3.cylinder_circles(nodeA, nodeB, radius)
+        ptsA, ptsB = g3.cylinder_circles(nodeA, nodeB, radius,
+                                         element_number=30)
         CVlistA = self.__construct_cylinder_end(ptsA, idA)
         CVlistB = self.__construct_cylinder_end(ptsB, idB)
 

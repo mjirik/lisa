@@ -45,7 +45,12 @@ from PyQt4.QtCore import *
 import vtk
 from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from Tkinter import *
-import seg2fem
+try:
+    from dicom2fem import seg2fem
+except:
+    print "deprecated import of seg2fem"
+
+    import seg2fem
 
 import misc
 
