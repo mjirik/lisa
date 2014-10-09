@@ -123,7 +123,6 @@ class GTLar:
         self.CV.append([ln, ln + 1, ln + 2, ln + 3, ln + 4])
 
     def finish(self):
-        print 'use joints? ', self.use_joints
         if self.use_joints:
             for joint in self.joints.values():
                 # There is more then just one circle in this joint, so it
