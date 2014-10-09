@@ -193,7 +193,7 @@ class TreeGenerator:
                 # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
                 logger.error(
-                    "Segment id " + str(cyl_id) + ": grror reading data from yaml!")
+                    "Segment id " + str(cyl_id) + ": error reading data from yaml!")
                 # return
 
             # if self.use_lar:
