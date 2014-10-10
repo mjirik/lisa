@@ -198,10 +198,12 @@ class TreeGenerator:
 
             # if self.use_lar:
             #     self.generator.add_cylinder(p1m, p2m, rad, in)
+        logger.debug("cylinders generated")
 
         try:
             # generator could have finish() function
             self.generator.finish()
+            logger.debug("joints generated")
         except:
             import traceback
             traceback.print_exc()
@@ -209,6 +211,7 @@ class TreeGenerator:
 
         output = self.generator.get_output()
 
+        logger.debug("before visualization")
         if self.use_lar:
             self.lv.show()
         return output
@@ -375,7 +378,9 @@ python src/gen_volume_tree.py -i ./tests/hist_stats_test.yaml'
     # logger.info("Volume mm3:" + str(volume_mm3))
 
 # vizualizace
+    logger.debug("before visualization")
     tg.show()
+    logger.debug("after visualization")
 
 # ukládání do souboru
     if args.outputfile is not None:

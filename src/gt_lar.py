@@ -23,7 +23,8 @@ from splines import *
 # from largrid import *
 
 import geometry3d as g3
-
+# import warnings
+# warnings.filterwarnings('error')
 
 class GTLar:
 
@@ -65,6 +66,9 @@ class GTLar:
                              -radius * self.endDistMultiplicator)
         nodeB = g3.translate(nodeB, vector,
                              radius * self.endDistMultiplicator)
+
+        if all(nodeA == nodeB):
+            logger.error("End points are on same place")
 
         ptsA, ptsB = g3.cylinder_circles(nodeA, nodeB, radius,
                                          element_number=30)
