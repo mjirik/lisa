@@ -776,11 +776,31 @@ class OrganSegmentation():
         self.segmentation = tumory.segmentation
 
     def portalVeinSegmentation(self):
+        """
+        Segmentation of vein in specified volume. It is given by label "liver" -
+        usualy it is number 1. If there is no specified volume all image is
+        used.
+
+        If this function is used repeatedly (if there is some segmentation in
+        this image) all segmentation labeled as 'porta' is removed and setted to
+        'liver' before processing.
+
+        """
 
         import segmentation
         logger.info('segmentation max label ' + str(np.max(self.segmentation)))
+        # if there is no organ segmentation, use all image
+        slab = {'porta': 2}
+        slab.update(self.slab)
+        self.slab = slab
+
+        # if there is no liver segmentation, use whole image
         if np.max(self.segmentation) == 0:
             self.segmentation = self.segmentation + 1
+
+        # remove prev segmentation
+        self.segmentation[self.segmentation == slab['porta']] = slab['liver']
+
         outputSegmentation = segmentation.vesselSegmentation(
             self.data3d,
             self.segmentation,
@@ -794,12 +814,9 @@ class OrganSegmentation():
             interactivity=True,
             binaryClosingIterations=2,
             binaryOpeningIterations=0)
-        slab = {'porta': 2}
-        slab.update(self.slab)
         # rom PyQt4.QtCore import pyqtRemoveInputHook
         # yqtRemoveInputHook()
         # mport ipdb; ipdb.set_trace() # BREAKPOINT
-        self.slab = slab
         self.segmentation[outputSegmentation == 1] = slab['porta']
 
         # self.__vesselTree(outputSegmentation, 'porta')
@@ -915,10 +932,10 @@ class OrganSegmentation():
             filepath = self.get_standard_ouptut_filename()
         misc.obj_to_file(data, filepath, filetype=self.save_filetype)
 
-        filepath2 = 'organ_last.' + self.save_filetype
-        filepath2 = op.join(odp, filepath2)
-        # ilepath = misc.suggest_filename(filepath)
-        misc.obj_to_file(data, filepath2, filetype=self.save_filetype)
+        # filepath2 = 'organ_last.' + self.save_filetype
+        # filepath2 = op.join(odp, filepath2)
+        # # ilepath = misc.suggest_filename(filepath)
+        # misc.obj_to_file(data, filepath2, filetype=self.save_filetype)
 # save to mat
 
 #        iparams = self.get_iparams()
@@ -927,13 +944,6 @@ class OrganSegmentation():
         # misc.obj_to_file(iparams, filepath, filetype='pklz')
 
         # f savestring in ['a', 'A']:
-        if False:
-            # save renamed file too
-            data['data3d'] = None
-            filepath = 'organ_small-' + filename + '.pklz'
-            filepath = op.join(odp, filepath)
-            filepath = misc.suggest_filename(filepath)
-            misc.obj_to_file(data, filepath, filetype='pklz')
 
     def save_outputs_dcm(self):
         # TODO add
