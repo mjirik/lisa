@@ -43,7 +43,7 @@ class uiThreshold:
                  number=100.0, inputSigma=-1, nObj=10,  biggestObjects=True,
                  useSeedsOfCompactObjects=True,
                  binaryClosingIterations=2, binaryOpeningIterations=0,
-                 seeds=None, cmap=matplotlib.cm.Greys_r):
+                 seeds=None, cmap=matplotlib.cm.Greys_r, fillHoles=True):
 
         """
 
@@ -88,6 +88,7 @@ class uiThreshold:
         self.ICBinaryOpeningIterations = binaryOpeningIterations
         self.seeds = seeds
         self.useSeedsOfCompactObjects=useSeedsOfCompactObjects
+        self.fillHoles = fillHoles
 
         if (sys.version_info[0] < 3):
 
@@ -356,7 +357,14 @@ class uiThreshold:
             closeNum = self.ICBinaryClosingIterations
             openNum = self.ICBinaryOpeningIterations
 
-        self.imgFiltering = thresholding_functions.binaryClosingOpening(self.imgFiltering, closeNum, openNum, True)
+        self.imgFiltering = thresholding_functions.binaryClosingOpening(
+            self.imgFiltering, closeNum, openNum, True)
+
+# Fill holes
+        if self.fillHoles:
+
+            self.imgFiltering = thresholding_functions.fillHoles(
+                self.imgFiltering)
 
         ## Zjisteni nejvetsich objektu.
         self.getBiggestObjects()

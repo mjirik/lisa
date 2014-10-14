@@ -22,6 +22,7 @@ from scipy import stats
 import matplotlib
 import matplotlib.pyplot as matpyplot
 
+
 def prepareVisualization(data):
 
     img0 = numpy.sum(data, axis = 0)
@@ -34,6 +35,12 @@ def prepareVisualization(data):
     img2[img2 > 0] += numpy.max(img2)
 
     return img0, img1, img2
+
+
+def fillHoles(data):
+    return scipy.ndimage.binary_fill_holes(
+        data).astype(int)
+
 
 def gaussFilter(data, sigma):
 
