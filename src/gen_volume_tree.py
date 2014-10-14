@@ -73,6 +73,9 @@ class VolumeTreeGenerator:
             try:
                 cyl_data3d[int(zvalues[i])][int(yvalues[i])][int(xvalues[i])] = 0
             except:
+                import traceback
+                traceback.print_exc()
+                print "except in drawing line"
                 import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
         # cuting size of 3d space needed for calculating distances (smaller ==
@@ -185,20 +188,22 @@ class TreeGenerator:
                 p1m = cyl_data['nodeA_ZYX_mm']  # souradnice ulozeny [Z,Y,X]
                 p2m = cyl_data['nodeB_ZYX_mm']
                 rad = cyl_data['radius_mm']
+                self.generator.add_cylinder(p1m, p2m, rad, cyl_id)
             except:
                 # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
                 logger.error(
-                    "Segment id " + str(cyl_id) + ": grror reading data from yaml!")
-                return
+                    "Segment id " + str(cyl_id) + ": error reading data from yaml!")
+                # return
 
-            self.generator.add_cylinder(p1m, p2m, rad, cyl_id)
             # if self.use_lar:
             #     self.generator.add_cylinder(p1m, p2m, rad, in)
+        logger.debug("cylinders generated")
 
         try:
             # generator could have finish() function
             self.generator.finish()
+            logger.debug("joints generated")
         except:
             import traceback
             traceback.print_exc()
@@ -206,6 +211,7 @@ class TreeGenerator:
 
         output = self.generator.get_output()
 
+        logger.debug("before visualization")
         if self.use_lar:
             self.lv.show()
         return output
@@ -313,7 +319,7 @@ python src/gen_volume_tree.py -i ./tests/hist_stats_test.yaml'
     )
     parser.add_argument(
         '-ds', '--datashape',
-        default=[100, 100, 100],
+        default=[200, 200, 200],
         type=int,
         metavar='N',
         nargs='+',
@@ -372,7 +378,9 @@ python src/gen_volume_tree.py -i ./tests/hist_stats_test.yaml'
     # logger.info("Volume mm3:" + str(volume_mm3))
 
 # vizualizace
+    logger.debug("before visualization")
     tg.show()
+    logger.debug("after visualization")
 
 # ukládání do souboru
     if args.outputfile is not None:
