@@ -932,10 +932,10 @@ class OrganSegmentation():
             filepath = self.get_standard_ouptut_filename()
         misc.obj_to_file(data, filepath, filetype=self.save_filetype)
 
-        filepath2 = 'organ_last.' + self.save_filetype
-        filepath2 = op.join(odp, filepath2)
-        # ilepath = misc.suggest_filename(filepath)
-        misc.obj_to_file(data, filepath2, filetype=self.save_filetype)
+        # filepath2 = 'organ_last.' + self.save_filetype
+        # filepath2 = op.join(odp, filepath2)
+        # # ilepath = misc.suggest_filename(filepath)
+        # misc.obj_to_file(data, filepath2, filetype=self.save_filetype)
 # save to mat
 
 #        iparams = self.get_iparams()
