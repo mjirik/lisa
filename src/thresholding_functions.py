@@ -19,7 +19,7 @@ import scipy
 import scipy.ndimage
 from scipy import stats
 
-import matplotlib
+# import matplotlib
 import matplotlib.pyplot as matpyplot
 
 
@@ -56,7 +56,8 @@ def gaussFilter(data, sigma):
     return data
 
 
-def thresholding(data, min_threshold, max_threshold, use_min_threshold=True, use_max_Threshold=True):
+def thresholding(data, min_threshold, max_threshold, use_min_threshold=True,
+                 use_max_Threshold=True):
     """
 
     Prahovani podle minimalniho a maximalniho prahu.
@@ -74,7 +75,8 @@ def thresholding(data, min_threshold, max_threshold, use_min_threshold=True, use
     return data
 
 
-def binaryClosingOpening(data, closeNum, openNum, firstClosing=True, fixBorder=True):
+def binaryClosingOpening(data, closeNum, openNum, firstClosing=True,
+                         fixBorder=True):
     """
 
     Aplikace binarniho uzavreni a pote binarniho otevreni.
@@ -164,8 +166,9 @@ def calculateSigma(voxel, input):
 def calculateAutomaticThreshold(data, arrSeed=None):
     """
 
-    Automaticky vypocet prahu - pokud jsou data bez oznacenych objektu, tak vraci nekolik nejvetsich objektu.
-    Pokud jsou ale definovany prioritni seedy, tak je na jejich zaklade vypocitan prah.
+    Automaticky vypocet prahu - pokud jsou data bez oznacenych objektu, tak
+    vraci nekolik nejvetsich objektu.  Pokud jsou ale definovany prioritni
+    seedy, tak je na jejich zaklade vypocitan prah.
 
     """
 
@@ -173,7 +176,8 @@ def calculateAutomaticThreshold(data, arrSeed=None):
 
         threshold = numpy.round(min(arrSeed), 2) - 1
         logger.debug(
-            'Zjisten automaticky threshold ze seedu (o 1 zmenseny): ' + str(threshold))
+            'Zjisten automaticky threshold ze seedu (o 1 zmenseny): ' +
+            str(threshold))
         return threshold
 
     # Hustota hist
@@ -245,8 +249,10 @@ def calculateAutomaticThreshold(data, arrSeed=None):
     x2 = []
     y2 = []
     place = 0
-    for index in range(init_index + pointsFrom + pointsSkip, init_index + pointsFrom + pointsSkip + pointsTo):  # len(muj_histogram) - 5 - int(0.1 * len(muj_histogram)), len(muj_histogram) -
-                                                                                                               # 5
+    for index in range(init_index + pointsFrom + pointsSkip,
+                       init_index + pointsFrom + pointsSkip + pointsTo):
+        # len(muj_histogram) - 5 - int(0.1 * len(muj_histogram)),
+        # len(muj_histogram) - 5
         x2.insert(place, bin_centers[index])
         y2.insert(place, muj_histogram[index])
 # print("[ " + str(x2[place]) + ", " + str(y2[place]) + " ]")
@@ -292,28 +298,27 @@ def calculateAutomaticThreshold(data, arrSeed=None):
 
     print('Zjisten threshold: ' + str(threshold))
 
-    """
-        muj_histogram_graph = []
-        bin_centers_graph = []
-        place = 0
-        for index in range(len(muj_histogram) / 2, len(muj_histogram)):
-            bin_centers_graph.insert(place, bin_centers[index])
-            muj_histogram_graph.insert(place, muj_histogram[index])
-            place += 1
-
-
-        matpyplot.figure(figsize = (11, 4))
-        matpyplot.plot(bin_centers_graph, muj_histogram_graph, lw = 2)
-        #matpyplot.plot([1100*slope1], [1200*slope1], label='one', color='green')
-        #matpyplot.plot([1100*slope2], [1200*slope2], label='two', color='blue')
-        matpyplot.axvline(self.threshold, color = 'r', ls = '--', lw = 2)
-        matpyplot.show()
-        """
+    # muj_histogram_graph = []
+    # bin_centers_graph = []
+    # place = 0
+    # for index in range(len(muj_histogram) / 2, len(muj_histogram)):
+    #     bin_centers_graph.insert(place, bin_centers[index])
+    #     muj_histogram_graph.insert(place, muj_histogram[index])
+    #     place += 1
+    #
+    #
+    # matpyplot.figure(figsize = (11, 4))
+    # matpyplot.plot(bin_centers_graph, muj_histogram_graph, lw = 2)
+    # #matpyplot.plot([1100*slope1], [1200*slope1], label='one', color='green')
+    # #matpyplot.plot([1100*slope2], [1200*slope2], label='two', color='blue')
+    # matpyplot.axvline(self.threshold, color = 'r', ls = '--', lw = 2)
+    # matpyplot.show()
 
     return threshold
 
 
-def histogram(data, interactivity, histogram_points=1000, start=-1, end=-1, line=-1):
+def histogram(data, interactivity, histogram_points=1000, start=-1, end=-1,
+              line=-1):
 
     # hist: funkce(threshold)
     hist, bin_edges = numpy.histogram(
@@ -325,7 +330,7 @@ def histogram(data, interactivity, histogram_points=1000, start=-1, end=-1, line
 
         matpyplot.figure(figsize=(11, 4))
         matpyplot.plot(bin_centers, hist, lw=2)
-        # matpyplot.plot([1100*slope1], [1200*slope1], label='one', color='green')
+        # matpyplot.plot([1100*slope1],[1200*slope1],label='one', color='green')
         # matpyplot.plot([1100*slope2], [1200*slope2], label='two',
         # color='blue')
 
@@ -376,7 +381,8 @@ def getPriorityObjects(data, nObj=1, seeds=None, debug=False):
         input:
             data - data, ve kterych chceme zachovat pouze nejvetsi objekty
             nObj - pocet nejvetsich objektu k vraceni
-            seeds - dvourozmerne pole s umistenim pixelu, ktere chce uzivatel vratit (odpovidaji matici "data")
+            seeds - dvourozmerne pole s umistenim pixelu, ktere chce uzivatel
+                vratit (odpovidaji matici "data")
 
         returns:
             data s nejvetsimi objekty
@@ -392,12 +398,6 @@ def getPriorityObjects(data, nObj=1, seeds=None, debug=False):
 
     if debug:
         logger.debug('data labels: ' + str(dataLabels))
-
-    # Podminka maximalniho mnozstvi objektu.
-    maxN = 250
-#    if ( length > maxN ) :
-# print('Varovani: Existuje prilis mnoho objektu! (' + str ( length ) +
-# ')')
 
     # Uzivatel si nevybral specificke objekty.
     if (seeds == None):
@@ -543,10 +543,12 @@ def selectSort(list1, list2):
     Razeni 2 poli najednou (list) pomoci metody select sort
         input:
             list1 - prvni pole (hlavni pole pro razeni)
-            list2 - druhe pole (vedlejsi pole) (kopirujici pozice pro razeni podle hlavniho pole list1)
+            list2 - druhe pole (vedlejsi pole) (kopirujici pozice pro razeni
+                podle hlavniho pole list1)
 
         returns:
-            dve serazena pole - hodnoty se ridi podle prvniho pole, druhe "kopiruje" razeni
+            dve serazena pole - hodnoty se ridi podle prvniho pole, druhe
+                "kopiruje" razeni
     """
 
     length = len(list1)
