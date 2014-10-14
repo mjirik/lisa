@@ -44,7 +44,6 @@ class uiThreshold:
                  useSeedsOfCompactObjects=True,
                  binaryClosingIterations=2, binaryOpeningIterations=0,
                  seeds=None, cmap=matplotlib.cm.Greys_r, fillHoles=True):
-
         """
 
         Inicialitacni metoda.
@@ -59,7 +58,8 @@ class uiThreshold:
             biggestObjects - oznacuje, zda se maji vracet nejvetsi objekty
             binaryClosingIterations - iterace binary closing
             binaryOpeningIterations - iterace binary opening
-            seeds - matice s kliknutim uzivatele- pokud se maji vracet specifikce objekty
+            seeds - matice s kliknutim uzivatele- pokud se maji vracet
+                specifikce objekty
             cmap - grey
 
         """
@@ -69,7 +69,9 @@ class uiThreshold:
         self.inputDimension = numpy.ndim(data)
         if(self.inputDimension != 3):
 
-            logger.debug('Vstup nema 3 dimenze! Ma jich ' + str(self.inputDimension) + '.')
+            logger.debug(
+                'Vstup nema 3 dimenze! Ma jich ' + str(self.inputDimension)
+                + '.')
             self.errorsOccured = True
             return
 
@@ -87,7 +89,7 @@ class uiThreshold:
         self.ICBinaryClosingIterations = binaryClosingIterations
         self.ICBinaryOpeningIterations = binaryOpeningIterations
         self.seeds = seeds
-        self.useSeedsOfCompactObjects=useSeedsOfCompactObjects
+        self.useSeedsOfCompactObjects = useSeedsOfCompactObjects
         self.fillHoles = fillHoles
 
         if (sys.version_info[0] < 3):
@@ -101,7 +103,7 @@ class uiThreshold:
             self.data = data.copy()
             self.voxel = voxel.copy()
 
-        ## Kalkulace objemove jednotky (voxel) (V = a*b*c)
+        # Kalkulace objemove jednotky (voxel) (V = a*b*c)
         voxel1 = self.voxel[0]
         voxel2 = self.voxel[1]
         voxel3 = self.voxel[2]
@@ -115,66 +117,85 @@ class uiThreshold:
 
             self.fig = matpyplot.figure()
 
-            ## Maximalni a minimalni pouzita hodnota prahovani v datech (bud v
-            ## celych datech nebo vybranych seedu)
-            self.min0 = numpy.amin(numpy.amin(self.data, axis = 0))
+            # Maximalni a minimalni pouzita hodnota prahovani v datech (bud v
+            # celych datech nebo vybranych seedu)
+            self.min0 = numpy.amin(numpy.amin(self.data, axis=0))
             if self.seeds == None:
 
-                self.max0 = numpy.amax(numpy.amax(self.data, axis = 0))
-                self.max0 = self.max0 + abs(abs(self.min0) - abs(self.max0)) / 10
+                self.max0 = numpy.amax(numpy.amax(self.data, axis=0))
+                self.max0 = self.max0 + \
+                    abs(abs(self.min0) - abs(self.max0)) / 10
 
             else:
 
-                self.arrSeed = thresholding_functions.getSeeds(data, self.seeds)
+                self.arrSeed = thresholding_functions.getSeeds(
+                    data, self.seeds)
 
-                ## Pokud existuji vhodne labely, vytvori se nova data k
-                ## vraceni.
-                ## Pokud ne, vrati se "None" typ.  { Deprecated: Pokud ne,
-                ## vrati se cela nafiltrovana data, ktera do funkce prisla
-                ## (nedojde k vraceni specifickych objektu).  }
+                # Pokud existuji vhodne labely, vytvori se nova data k
+                # vraceni.
+                # Pokud ne, vrati se "None" typ.  { Deprecated: Pokud ne,
+                # vrati se cela nafiltrovana data, ktera do funkce prisla
+                # (nedojde k vraceni specifickych objektu).  }
                 if len(self.arrSeed) > 0:
 
-                    ## Zbaveni se duplikatu.
+                    # Zbaveni se duplikatu.
                     self.arrSeed = list(set(self.arrSeed))
-                    logger.debug( 'Hodnoty seedu: ')
-                    logger.debug( self.arrSeed)
+                    logger.debug('Hodnoty seedu: ')
+                    logger.debug(self.arrSeed)
 
                     self.max0 = max(self.arrSeed)
-                    self.max0 = self.max0 + abs(abs(self.min0) - abs(self.max0)) / 10
+                    self.max0 = self.max0 + \
+                        abs(abs(self.min0) - abs(self.max0)) / 10
 
                     # Prahy
-                    logger.debug( '')
-                    logger.debug( 'Minimalni doporucena hodnota prahu: ' + str(min(self.arrSeed)))
-                    logger.debug( 'Maximalni doporucena hodnota prahu: ' + str(max(self.arrSeed)))
-                    logger.debug( '')
+                    logger.debug('')
+                    logger.debug(
+                        'Minimalni doporucena hodnota prahu: ' +
+                        str(min(self.arrSeed)))
+                    logger.debug(
+                        'Maximalni doporucena hodnota prahu: ' +
+                        str(max(self.arrSeed)))
+                    logger.debug('')
 
                 else:
 
-                    self.max0 = numpy.amax(numpy.amax(self.data, axis = 0))
-                    self.max0 = self.max0 + abs(abs(self.min0) - abs(self.max0)) / 10
+                    self.max0 = numpy.amax(numpy.amax(self.data, axis=0))
+                    self.max0 = self.max0 + \
+                        abs(abs(self.min0) - abs(self.max0)) / 10
 
-            ## Pridani subplotu do okna (do figure)
+            # Pridani subplotu do okna (do figure)
             self.ax1 = self.fig.add_subplot(131)
             self.ax2 = self.fig.add_subplot(132)
             self.ax3 = self.fig.add_subplot(133)
 
-            ## Upraveni subplotu
-            self.fig.subplots_adjust(left = 0.1, bottom = 0.3)
+            # Upraveni subplotu
+            self.fig.subplots_adjust(left=0.1, bottom=0.3)
 
-            ## Vykreslit obrazek
-            self.ax1.imshow(numpy.amax(self.data, axis = 0, keepdims = self.numpyAMaxKeepDims), self.cmap)
-            self.ax2.imshow(numpy.amax(self.data, axis = 1, keepdims = self.numpyAMaxKeepDims), self.cmap)
-            self.ax3.imshow(numpy.amax(self.data, axis = 2, keepdims = self.numpyAMaxKeepDims), self.cmap)
+            # Vykreslit obrazek
+            self.ax1.imshow(
+                numpy.amax(self.data, axis=0, keepdims=self.numpyAMaxKeepDims),
+                self.cmap)
+            self.ax2.imshow(
+                numpy.amax(self.data, axis=1, keepdims=self.numpyAMaxKeepDims),
+                self.cmap)
+            self.ax3.imshow(
+                numpy.amax(self.data, axis=2, keepdims=self.numpyAMaxKeepDims),
+                self.cmap)
 
-            ## Zalozeni mist pro slidery
-            self.axcolor = 'white' # lightgoldenrodyellow
-            self.axmin = self.fig.add_axes([0.20, 0.24, 0.55, 0.03], axisbg = self.axcolor)
-            self.axmax = self.fig.add_axes([0.20, 0.20, 0.55, 0.03], axisbg = self.axcolor)
-            self.axclosing = self.fig.add_axes([0.20, 0.16, 0.55, 0.03], axisbg = self.axcolor)
-            self.axopening = self.fig.add_axes([0.20, 0.12, 0.55, 0.03], axisbg = self.axcolor)
-            self.axsigma = self.fig.add_axes([0.20, 0.08, 0.55, 0.03], axisbg = self.axcolor)
+            # Zalozeni mist pro slidery
+            self.axcolor = 'white'  # lightgoldenrodyellow
+            self.axmin = self.fig.add_axes(
+                [0.20, 0.24, 0.55, 0.03], axisbg=self.axcolor)
+            self.axmax = self.fig.add_axes(
+                [0.20, 0.20, 0.55, 0.03], axisbg=self.axcolor)
+            self.axclosing = self.fig.add_axes(
+                [0.20, 0.16, 0.55, 0.03], axisbg=self.axcolor)
+            self.axopening = self.fig.add_axes(
+                [0.20, 0.12, 0.55, 0.03], axisbg=self.axcolor)
+            self.axsigma = self.fig.add_axes(
+                [0.20, 0.08, 0.55, 0.03], axisbg=self.axcolor)
 
-            ## Vlastni vytvoreni slideru
+            # Vlastni vytvoreni slideru
 
             minBinaryClosing = 0
             minBinaryOpening = 0
@@ -185,48 +206,71 @@ class uiThreshold:
             thres = self.threshold
             if thres == -1:
                 try:
-                    thres = thresholding_functions.calculateAutomaticThreshold(self.data, self.arrSeed)
+                    thres = thresholding_functions.calculateAutomaticThreshold(
+                        self.data, self.arrSeed)
                 except:
                     logger.info(traceback.format_exc())
                     thres = (self.max0 + self.min0) / 2
 
-            self.smin = Slider(self.axmin, 'Minimal threshold   ' + str(self.min0),
-                               self.min0, self.max0, valinit = thres, dragging = True)
-            self.smax = Slider(self.axmax, 'Maximal threshold   ' + str(self.min0),
-                               self.min0, self.max0, valinit = self.max0, dragging = True)
+            self.smin = Slider(
+                self.axmin, 'Minimal threshold   ' + str(self.min0),
+                self.min0, self.max0, valinit=thres, dragging=True)
+            self.smax = Slider(
+                self.axmax, 'Maximal threshold   ' + str(self.min0),
+                self.min0, self.max0, valinit=self.max0, dragging=True)
 
             if(self.ICBinaryClosingIterations >= 1):
-                self.sclose = Slider(self.axclosing, 'Binary closing', minBinaryClosing, 100, valinit = self.ICBinaryClosingIterations, dragging = False)
+                self.sclose = Slider(
+                    self.axclosing, 'Binary closing', minBinaryClosing,
+                    100, valinit=self.ICBinaryClosingIterations, dragging=False)
             else:
-                self.sclose = Slider(self.axclosing, 'Binary closing', minBinaryClosing, 100, valinit = 0, dragging = False)
+                self.sclose = Slider(
+                    self.axclosing, 'Binary closing', minBinaryClosing, 100,
+                    valinit=0, dragging=False)
 
             if(self.ICBinaryOpeningIterations >= 1):
-                self.sopen = Slider(self.axopening, 'Binary opening',minBinaryOpening, 100, valinit = self.ICBinaryOpeningIterations, dragging = False)
+                self.sopen = Slider(
+                    self.axopening, 'Binary opening', minBinaryOpening,
+                    100, valinit=self.ICBinaryOpeningIterations, dragging=False)
             else:
-                self.sopen = Slider(self.axopening, 'Binary opening', minBinaryOpening, 100, valinit = 0, dragging = False)
+                self.sopen = Slider(
+                    self.axopening, 'Binary opening', minBinaryOpening, 100,
+                    valinit=0, dragging=False)
 
-            self.ssigma = Slider(self.axsigma, 'Sigma', 0.00, self.number, valinit = self.inputSigma, dragging = False)
+            self.ssigma = Slider(
+                self.axsigma, 'Sigma', 0.00, self.number,
+                valinit=self.inputSigma, dragging=False)
 
-            ## Funkce slideru pri zmene jeho hodnoty
+            # Funkce slideru pri zmene jeho hodnoty
             self.smin.on_changed(self.updateImage)
             self.smax.on_changed(self.updateImage)
             self.sclose.on_changed(self.updateImage)
             self.sopen.on_changed(self.updateImage)
             self.ssigma.on_changed(self.updateImage)
 
-            ## Zalozeni mist pro tlacitka
-            self.axbuttnext1 = self.fig.add_axes([0.86, 0.24, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttprev1 = self.fig.add_axes([0.81, 0.24, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttnext2 = self.fig.add_axes([0.86, 0.20, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttprev2 = self.fig.add_axes([0.81, 0.20, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttnextclosing = self.fig.add_axes([0.86, 0.16, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttprevclosing = self.fig.add_axes([0.81, 0.16, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttnextopening = self.fig.add_axes([0.86, 0.12, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttprevopening = self.fig.add_axes([0.81, 0.12, 0.04, 0.03], axisbg = self.axcolor)
-            self.axbuttreset = self.fig.add_axes([0.79, 0.08, 0.06, 0.03], axisbg = self.axcolor)
-            self.axbuttcontinue = self.fig.add_axes([0.86, 0.08, 0.06, 0.03], axisbg = self.axcolor)
+            # Zalozeni mist pro tlacitka
+            self.axbuttnext1 = self.fig.add_axes(
+                [0.86, 0.24, 0.04, 0.03], axisbg=self.axcolor)
+            self.axbuttprev1 = self.fig.add_axes(
+                [0.81, 0.24, 0.04, 0.03], axisbg=self.axcolor)
+            self.axbuttnext2 = self.fig.add_axes(
+                [0.86, 0.20, 0.04, 0.03], axisbg=self.axcolor)
+            self.axbuttprev2 = self.fig.add_axes(
+                [0.81, 0.20, 0.04, 0.03], axisbg=self.axcolor)
+            self.axbuttnextclosing = self.fig.add_axes(
+                [0.86, 0.16, 0.04, 0.03], axisbg=self.axcolor)
+            self.axbuttprevclosing = self.fig.add_axes(
+                [0.81, 0.16, 0.04, 0.03], axisbg=self.axcolor)
+            self.axbuttnextopening = self.fig.add_axes(
+                [0.86, 0.12, 0.04, 0.03], axisbg=self.axcolor)
+            self.axbuttprevopening = self.fig.add_axes(
+                [0.81, 0.12, 0.04, 0.03], axisbg=self.axcolor)
+            self.axbuttreset = self.fig.add_axes(
+                [0.79, 0.08, 0.06, 0.03], axisbg=self.axcolor)
+            self.axbuttcontinue = self.fig.add_axes(
+                [0.86, 0.08, 0.06, 0.03], axisbg=self.axcolor)
 
-            ## Zalozeni tlacitek
+            # Zalozeni tlacitek
             self.bnext1 = Button(self.axbuttnext1, '+1.0')
             self.bprev1 = Button(self.axbuttprev1, '-1.0')
             self.bnext2 = Button(self.axbuttnext2, '+1.0')
@@ -238,7 +282,7 @@ class uiThreshold:
             self.breset = Button(self.axbuttreset, 'Reset')
             self.bcontinue = Button(self.axbuttcontinue, 'Next UI')
 
-            ## Funkce tlacitek pri jejich aktivaci
+            # Funkce tlacitek pri jejich aktivaci
             self.bnext1.on_clicked(self.buttonMinNext)
             self.bprev1.on_clicked(self.buttonMinPrev)
             self.bnext2.on_clicked(self.buttonMaxNext)
@@ -254,7 +298,6 @@ class uiThreshold:
             self.smax.valtext.set_text('{}'.format(self.smax.val))
 
     def run(self):
-
         """
 
             Spusteni UI.
@@ -269,14 +312,14 @@ class uiThreshold:
 
         if self.interactivity == False:
 
-             self.updateImage(-1)
-             garbage.collect()
+            self.updateImage(-1)
+            garbage.collect()
 
         else:
 
-             self.updateImage(-1)
-             garbage.collect()
-             matpyplot.show()
+            self.updateImage(-1)
+            garbage.collect()
+            matpyplot.show()
 
         del(self.data)
 
@@ -289,11 +332,11 @@ class uiThreshold:
         return self.threshold
 
     def updateImage(self, val):
-
         """
 
         Hlavni update metoda.
-        Cinny kod pro gaussovske filtrovani, prahovani, binarni uzavreni a otevreni a vraceni nejvetsich nebo oznacenych objektu.
+        Cinny kod pro gaussovske filtrovani, prahovani, binarni uzavreni a
+        otevreni a vraceni nejvetsich nebo oznacenych objektu.
 
         """
 
@@ -306,20 +349,21 @@ class uiThreshold:
 
             self.imgFiltering = self.data.copy()
 
-        ## Filtrovani
+        # Filtrovani
 
-        ## Zjisteni jakou sigmu pouzit
+        # Zjisteni jakou sigmu pouzit
         if(self.firstRun == True and self.inputSigma >= 0):
             sigma = numpy.round(self.inputSigma, 2)
         else:
             sigma = numpy.round(self.ssigma.val, 2)
         sigmaNew = thresholding_functions.calculateSigma(self.voxel, sigma)
 
-        self.imgFiltering = thresholding_functions.gaussFilter(self.imgFiltering, sigmaNew)
+        self.imgFiltering = thresholding_functions.gaussFilter(
+            self.imgFiltering, sigmaNew)
 
         del(sigmaNew)
 
-        ## Prahovani (smin, smax)
+        # Prahovani (smin, smax)
 
         max_threshold = -1
         min_threshold = self.threshold
@@ -338,14 +382,17 @@ class uiThreshold:
 
         if (self.threshold == -1) and self.firstRun:
 
-            min_threshold = thresholding_functions.calculateAutomaticThreshold(self.imgFiltering, self.arrSeed)
+            min_threshold = thresholding_functions.calculateAutomaticThreshold(
+                self.imgFiltering, self.arrSeed)
 
-        self.imgFiltering = thresholding_functions.thresholding(self.imgFiltering, min_threshold, max_threshold, True, self.interactivity)
+        self.imgFiltering = thresholding_functions.thresholding(
+            self.imgFiltering, min_threshold, max_threshold, True,
+            self.interactivity)
 
-        ## Operace binarni otevreni a uzavreni.
+        # Operace binarni otevreni a uzavreni.
 
-        ## Nastaveni hodnot slideru.
-        if (self.interactivity == True) :
+        # Nastaveni hodnot slideru.
+        if (self.interactivity == True):
 
             closeNum = int(numpy.round(self.sclose.val, 0))
             openNum = int(numpy.round(self.sopen.val, 0))
@@ -366,14 +413,14 @@ class uiThreshold:
             self.imgFiltering = thresholding_functions.fillHoles(
                 self.imgFiltering)
 
-        ## Zjisteni nejvetsich objektu.
+        # Zjisteni nejvetsich objektu.
         self.getBiggestObjects()
 
-        ## Vykresleni dat
+        # Vykresleni dat
         if (self.interactivity == True):
             self.drawVisualization()
 
-        ## Nastaveni kontrolnich hodnot
+        # Nastaveni kontrolnich hodnot
         self.firstRun = False
 
         garbage.collect()
@@ -382,80 +429,86 @@ class uiThreshold:
 
     def debugInfo(self):
 
-        logger.debug( '======')
-        logger.debug( '!Debug')
-        logger.debug( '\tUpdate cycle:' )
-        logger.debug( '\t\tThreshold min: ' + str(numpy.round(self.threshold, 2)))
+        logger.debug('======')
+        logger.debug('!Debug')
+        logger.debug('\tUpdate cycle:')
+        logger.debug('\t\tThreshold min: ' +
+                     str(numpy.round(self.threshold, 2)))
         if (self.interactivity == True):
-            logger.debug( '\t\tThreshold max: ' + str(numpy.round(self.smax.val, 2)))
-            logger.debug( '\t\tBinary closing: ' + str(numpy.round(self.sclose.val, 0)))
-            logger.debug( '\t\tBinary opening: ' + str(numpy.round(self.sopen.val, 0)))
-            logger.debug( '\t\tSigma filter param: ' + str(numpy.round(self.ssigma.val, 2)))
-        logger.debug( '======')
+            logger.debug(
+                '\t\tThreshold max: ' + str(numpy.round(self.smax.val, 2)))
+            logger.debug(
+                '\t\tBinary closing: ' + str(numpy.round(self.sclose.val, 0)))
+            logger.debug(
+                '\t\tBinary opening: ' + str(numpy.round(self.sopen.val, 0)))
+            logger.debug(
+                '\t\tSigma filter param: ' + str(numpy.round(self.ssigma.val,
+                                                             2)))
+        logger.debug('======')
 
     def getBiggestObjects(self):
-
         """
 
-        Vraceni nejvetsich objektu (nebo objektu, ktere obsahuji prioritni seedy).
+        Vraceni nejvetsich objektu (nebo objektu, ktere obsahuji prioritni
+        seedy).
 
         """
 
         logger.debug('biggest objects ' + str(self.biggestObjects))
         logger.debug('self.seeds ' + str(self.seeds))
         if (self.biggestObjects == True or
-            (self.seeds != None and self.useSeedsOfCompactObjects)) :
+                (self.seeds != None and self.useSeedsOfCompactObjects)):
 
-           self.imgFiltering = thresholding_functions.getPriorityObjects(self.imgFiltering, self.nObj, self.seeds)
+            self.imgFiltering = thresholding_functions.getPriorityObjects(
+                self.imgFiltering, self.nObj, self.seeds)
 
     def drawVisualization(self):
-
         """
 
         Vykresleni dat.
 
         """
 
-        ## Predani dat k vykresleni
-        if (self.imgFiltering == None) :
+        # Predani dat k vykresleni
+        if (self.imgFiltering == None):
 
-            #print '(DEBUG) Typ dat: ' + str(type(self.data[0][0][0]))
+            # print '(DEBUG) Typ dat: ' + str(type(self.data[0][0][0]))
 
-            self.ax1.imshow(numpy.amax(numpy.zeros(self.data.shape), axis = 0, keepdims = self.numpyAMaxKeepDims), self.cmap)
-            self.ax2.imshow(numpy.amax(numpy.zeros(self.data.shape), axis = 1, keepdims = self.numpyAMaxKeepDims), self.cmap)
-            self.ax3.imshow(numpy.amax(numpy.zeros(self.data.shape), axis = 2, keepdims = self.numpyAMaxKeepDims), self.cmap)
+            self.ax1.imshow(
+                numpy.amax(numpy.zeros(self.data.shape), axis=0,
+                           keepdims=self.numpyAMaxKeepDims), self.cmap)
+            self.ax2.imshow(
+                numpy.amax(numpy.zeros(self.data.shape), axis=1,
+                           keepdims=self.numpyAMaxKeepDims), self.cmap)
+            self.ax3.imshow(
+                numpy.amax(numpy.zeros(self.data.shape), axis=2,
+                           keepdims=self.numpyAMaxKeepDims), self.cmap)
 
         else:
 
-            #print '(DEBUG) Typ dat: ' + str(type(self.imgFiltering[0][0][0]))
+            img0, img1, img2 = thresholding_functions.prepareVisualization(
+                self.imgFiltering)
 
-            #import time
-            #t0 = time.time()
-            #im0 = numpy.amax(self.imgFiltering, axis=0, keepdims=self.numpyAMaxKeepDims)
-            #im1 = numpy.amax(self.imgFiltering, axis=1, keepdims=self.numpyAMaxKeepDims)
-            #im2 = numpy.amax(self.imgFiltering, axis=2, keepdims=self.numpyAMaxKeepDims)
-            #t1 = time.time()
-
-            img0, img1, img2 = thresholding_functions.prepareVisualization(self.imgFiltering)
-
-            #t2 = time.time()
-            #print 't1 %f t2 %f ' % (t1 - t0, t2 - t1)
+            # t2 = time.time()
+            # print 't1 %f t2 %f ' % (t1 - t0, t2 - t1)
 
             self.ax1.imshow(img0, self.cmap)
             self.ax2.imshow(img1, self.cmap)
             self.ax3.imshow(img2, self.cmap)
 
-            #del(img0)
-            #del(img1)
-            #del(img2)
+            # del(img0)
+            # del(img1)
+            # del(img2)
 
-        ## Prekresleni
+        # Prekresleni
         self.fig.canvas.draw()
 
     def buttonReset(self, event):
 
-        self.sclose.valtext.set_text('{}'.format(self.ICBinaryClosingIterations))
-        self.sopen.valtext.set_text('{}'.format(self.ICBinaryOpeningIterations))
+        self.sclose.valtext.set_text(
+            '{}'.format(self.ICBinaryClosingIterations))
+        self.sopen.valtext.set_text(
+            '{}'.format(self.ICBinaryOpeningIterations))
         self.ssigma.valtext.set_text('{}'.format(self.inputSigma))
 
         self.firstRun = True
