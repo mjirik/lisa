@@ -375,19 +375,12 @@ class OrganSegmentation():
             'dcmfilelist': None,
         }
         datap.update(dataplus)
-        # voxelsize processing
-        # self.parameters = {}
 
         dpkeys = datap.keys()
-        # self.segparams['pairwise_alpha']=25
         self.data3d = datap['data3d']
 
         if self.roi is not None:
             self.crop(self.roi)
-            # self.data3d = qmisc.crop(self.data3d, self.roi)
-            # self.crinfo = self.roi
-            # self.iparams['roi'] = self.roi
-            # self.iparams['manualroi'] = False
 
         self.voxelsize_mm = np.array(datap['voxelsize_mm'])
         self.process_wvx_size_mm(datap)
@@ -409,30 +402,12 @@ class OrganSegmentation():
             self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
 
         self.dcmfilelist = datap['dcmfilelist']
-        # self.segparams = {'pairwiseAlpha':2, 'use_boundary_penalties':True,
-        # 'boundary_penalties_sigma':50}
 
         self.segparams['pairwise_alpha'] = \
             self.segparams['pairwise_alpha_per_mm2'] / \
             np.mean(self.working_voxelsize_mm)
 
-        try:
-            self.seeds = datap['processing_information'][
-                'organ_segmentation']['seeds']
-        except:
-            logger.debug('seeds not found in dataplus')
-            # self.seeds = None
-
-        # for each mm on boundary there will be sum of penalty equal 10
-
-        if self.seeds is None:
-
-            logger.debug("Seeds are generated")
-            self.seeds = np.zeros(self.data3d.shape, dtype=np.int8)
-        logger.debug("unique seeds labels " + str(np.unique(self.seeds)))
-        logger.info('dir ' + str(self.datapath) + ", series_number" +
-                    str(datap['series_number']) + 'voxelsize_mm' +
-                    str(self.voxelsize_mm))
+        self.__import_dataplus_seeds(datap)
 
         # try read prev information about time processing
         try:
@@ -441,6 +416,24 @@ class OrganSegmentation():
             self.time_start = time.time() - time_prev
         except:
             self.time_start = time.time()
+
+    def __import_dataplus_seeds(self, datap):
+        try:
+            self.seeds = datap['processing_information'][
+                'organ_segmentation']['seeds']
+        except:
+            logger.info('seeds not found in dataplus')
+            # self.seeds = None
+
+        # for each mm on boundary there will be sum of penalty equal 10
+
+        if self.seeds is None:
+            logger.debug("Seeds are generated")
+            self.seeds = np.zeros(self.data3d.shape, dtype=np.int8)
+        logger.debug("unique seeds labels " + str(np.unique(self.seeds)))
+        logger.info('dir ' + str(self.datapath) + ", series_number" +
+                    str(datap['series_number']) + 'voxelsize_mm' +
+                    str(self.voxelsize_mm))
 
     def crop(self, tmpcrinfo):
         """
