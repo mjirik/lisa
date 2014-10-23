@@ -16,7 +16,6 @@ import sys
 import os
 import os.path as op
 
-
 import exceptionProcessing
 
 # from scipy.io import loadmat, savemat
@@ -25,7 +24,7 @@ import scipy.ndimage
 import numpy as np
 import time
 import argparse
-
+# tady uz je logger
 # import dcmreaddata as dcmreader
 try:
     from pysegbase import pycut
@@ -974,20 +973,27 @@ class OrganSegmentation():
 
 
 def logger_init():
-    logger.setLevel(logging.WARNING)
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+
     ch = logging.StreamHandler()
     ch.setLevel(logging.ERROR)
-    fh = logging.FileHandler('lisa.log')
-
     formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        '%(name)s - %(levelname)s - %(message)s'
     )
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
+    logger.debug('sample debug')
+    logger.error('sample error')
+
+    fh = logging.FileHandler('lisa.log')
     fh.setFormatter(formatter)
     fh.setLevel(logging.DEBUG)
-    logger.addHandler(ch)
     logger.addHandler(fh)
 
     logger.debug('logger started')
+
+    return ch, fh
 
 
 def lisa_config_init():
@@ -1160,7 +1166,7 @@ def main():
 
     #    import ipdb; ipdb.set_trace() # BREAKPOINT
     try:
-        logger_init()
+        ch, fh = logger_init()
         cfg = lisa_config_init()
         args = parser_init(cfg)
 
@@ -1169,7 +1175,7 @@ def main():
             OrganSegmentation.__init__)
 
         if args["debug"]:
-            logger.setLevel(logging.DEBUG)
+            ch.setLevel(logging.DEBUG)
 
         if args["iparams"] is not None:
             params = misc.obj_from_file(args["iparams"], filetype='pickle')

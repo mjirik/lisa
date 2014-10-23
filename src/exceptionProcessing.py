@@ -4,8 +4,6 @@
 
 import logging
 logger = logging.getLogger(__name__)
-#print '__name__ = ', __name__
-#logger = logging.getLogger()
 
 
 import traceback
@@ -14,8 +12,6 @@ import smtplib
 
 # Import the email modules we'll need
 from email.mime.text import MIMEText
-
-logging.debug('Test logování')
 
 
 def reportException(exception):
