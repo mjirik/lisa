@@ -30,8 +30,8 @@ def sendMail(mailcontent, subject='None'):
 
 # Open a plain text file for reading.  For this example, assume that
 # the text file contains only ASCII characters.
-#fp = open(textfile, 'rb')
-## Create a text/plain message
+# fp = open(textfile, 'rb')
+# # Create a text/plain message
     msg = MIMEText(mailcontent)
 
 # me == the sender's email address
@@ -45,7 +45,6 @@ def sendMail(mailcontent, subject='None'):
     s = smtplib.SMTP('localhost')
     s.sendmail(me, [you], msg.as_string())
     s.quit()
-    #print mailcontent
     logger.debug('Subject: ', subject)
     logger.warn('Mail content')
     logger.debug(mailcontent)

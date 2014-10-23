@@ -776,13 +776,13 @@ class OrganSegmentation():
 
     def portalVeinSegmentation(self):
         """
-        Segmentation of vein in specified volume. It is given by label "liver" -
-        usualy it is number 1. If there is no specified volume all image is
+        Segmentation of vein in specified volume. It is given by label "liver".
+        Usualy it is number 1. If there is no specified volume all image is
         used.
 
         If this function is used repeatedly (if there is some segmentation in
-        this image) all segmentation labeled as 'porta' is removed and setted to
-        'liver' before processing.
+        this image) all segmentation labeled as 'porta' is removed and setted
+        to 'liver' before processing.
 
         """
 

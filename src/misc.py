@@ -56,7 +56,7 @@ def obj_from_file(filename='annotation.yaml', filetype='yaml'):
         fcontent = read_pkl_and_pklz(filename)
         # import pickle
         import cPickle as pickle
-        #import sPickle as pickle
+        # import sPickle as pickle
         obj = pickle.loads(fcontent)
     else:
         logger.error('Unknown filetype ' + filetype)
