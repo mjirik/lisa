@@ -46,7 +46,11 @@ def suggest_filename(file_path, exists=None):
 
 def obj_from_file(filename='annotation.yaml', filetype='yaml'):
     ''' Read object from file '''
-# TODO solution for file extensions
+
+    if filetype == 'auto':
+        _, ext = os.path.splitext(filename)
+        filetype = ext[1:]
+
     if filetype == 'yaml':
         import yaml
         f = open(filename, 'rb')
@@ -104,6 +108,10 @@ def obj_to_file(obj, filename='annotation.yaml', filetype='yaml'):
     d = os.path.dirname(os.path.abspath(filename))
     if not os.path.exists(d):
         os.makedirs(d)
+
+    if filetype == 'auto':
+        _, ext = os.path.splitext(filename)
+        filetype = ext[1:]
 
     if filetype == 'yaml':
         f = open(filename, 'wb')
