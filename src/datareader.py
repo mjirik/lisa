@@ -54,9 +54,11 @@ class DataReader:
         if os.path.isfile(datapath):
             data3d, metadata = self.__ReadFromFile(datapath)
 
-        else:
+        elif os.path.exists(datapath):
             data3d, metadata = self.__ReadFromDirectory(
                 datapath, start, stop, step)
+        else:
+            logger.error('Data path "%s" not found' % (datapath))
 
         if dataplus_format:
             logger.debug('dataplus format')
