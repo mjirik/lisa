@@ -29,6 +29,7 @@ class SkeletonAnalyser:
 
         # get array with 1 for edge, 2 is node and 3 is terminal
         logger.debug('Generating sklabel...')
+        data3d_skel = self.__filter_small(data3d_skel)
         skelet_nodes = self.__skeleton_nodes(data3d_skel)
         self.sklabel = self.__generate_sklabel(skelet_nodes)
         self.cut_wrong_skeleton = False
@@ -230,6 +231,21 @@ class SkeletonAnalyser:
         data3d_skel[terminals == 1] = 3
 
         return data3d_skel
+
+    def __filter_small(self, skel, threshold = 3):
+        """
+        terminals are connected to edges
+        """
+        skeleton_nodes = self.__skeleton_nodes(skel)
+        skeleton_nodes[skeleton_nodes==3] == 1
+        sklabel = self.__generate_sklabel(skeleton_nodes)
+        for i in range(1, np.max(sklabel)):
+            if np.sum(sklabel == i) < threshold:
+# delete small
+                sklabel[sklabel == i] == 0
+                print "mazani "
+        return (sklabel != 0).astype(np.int)
+
 
     def __generate_sklabel(self, skelet_nodes):
 
