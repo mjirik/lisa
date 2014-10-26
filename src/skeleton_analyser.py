@@ -126,11 +126,13 @@ class SkeletonAnalyser:
 
     def __cut_wrong_skeleton(self, stats, cut_ratio=2.0):
         """
-        cut_ratio = 2.0 -> if radius of vessel is 2x its lenght or more, remove it
+        cut_ratio = 2.0 -> if radius of vessel is 2x its lenght or more,
+        remove it
         """
         # remove edges that are not connected to rest of the skeleton
         logger.debug(
-            'skeleton_analysis: Cut - Removing edges that are not connected to rest of skeleton')
+            'skeleton_analysis: Cut - Removing edges that are not connected' +
+            ' to rest of skeleton')
         for s in dict(stats):
             connected_edgs = []
             try:
@@ -145,12 +147,14 @@ class SkeletonAnalyser:
 
             if len(connected_edgs) == 0:
                 logger.debug(
-                    'Edge id:' + str(s) + ' is not connected to rest of skeleton')
+                    'Edge id:' + str(s) + ' is not connected to rest of' +
+                    ' skeleton')
                 stats = self.__remove_edge_from_stats(stats, s)
         logger.debug('skeleton_analysis: Cut - Unconnected edges removed')
 
         logger.debug(
-            'skeleton_analysis: Cut - Getting lists of nodes, edges and end nodes')
+            'skeleton_analysis: Cut - Getting lists of nodes,' +
+            ' edges and end nodes')
         # dict of connected nodes to edge
         edg_neigh = {}
         for s in dict(stats):
@@ -190,14 +194,18 @@ class SkeletonAnalyser:
 
         # removes end edges based on radius/length ratio
         logger.debug(
-            'skeleton_analysis: Cut - Removing bad segments based on radius/length ratio')
+            'skeleton_analysis: Cut - Removing bad segments based on' +
+            ' radius/length ratio')
         for end_node in end_nodes:
             edge_end_id = end_nodes[end_node]
             edge_end_stat = stats[edge_end_id]
 
-            if edge_end_stat['radius_mm'] / float(edge_end_stat['lengthEstimation']) > cut_ratio:
-                logger.debug('bad rad/len: ' + str(edge_end_stat['radius_mm']) + ' ' + str(
-                    edge_end_stat['lengthEstimation']))
+            if edge_end_stat['radius_mm'] /\
+                    float(edge_end_stat['lengthEstimation']) > cut_ratio:
+                logger.debug(
+                    'bad rad/len: ' +
+                    str(edge_end_stat['radius_mm']) + ' ' +
+                    str(edge_end_stat['lengthEstimation']))
                 stats = self.__remove_edge_from_stats(stats, edge_end_id)
 
         logger.debug('skeleton_analysis: Cut - Bad segments removed')
@@ -295,8 +303,9 @@ class SkeletonAnalyser:
         # import pdb; pdb.set_trace()
 
         if stats[edg_number][ndid] == connectedEdgeStats['nodeIdA']:
-# sousední hrana u uzlu na konci 0 má stejný node na svém konci 0 jako
-# nynější hrana
+            # sousední hrana u uzlu na konci 0 má stejný node na
+            # svém konci 0 jako
+            # nynější hrana
             vector = connectedEdgeStats['vectorA']
         elif stats[edg_number][ndid] == connectedEdgeStats['nodeIdB']:
             vector = connectedEdgeStats['vectorB']
@@ -304,7 +313,7 @@ class SkeletonAnalyser:
         return vector
 
     def perpendicular_to_two_vects(self, v1, v2):
-# determinant
+        # determinant
         a = (v1[1] * v2[2]) - (v1[2] * v2[1])
         b = -((v1[0] * v2[2]) - (v1[2] * v2[0]))
         c = (v1[0] * v2[1]) - (v1[1] * v2[0])
@@ -325,7 +334,8 @@ class SkeletonAnalyser:
         stats: dictionary with all statistics and computations
         edg_end: letter 'A' or 'B'
         creates phiXa, phiXb and phiXc.
-        See Schwen2012 : Analysis and algorithmic generation of hepatic vascular system.
+        See Schwen2012 : Analysis and algorithmic generation of hepatic
+            vascular system.
         """
         out = {}
 
@@ -382,7 +392,7 @@ class SkeletonAnalyser:
         try:
             vectorA = stats[edg_number]['vectorA']
             vectorB = stats[edg_number]['vectorB']
-        except Exception as e:
+        except Exception:
             traceback.print_exc()
         try:
             vectorA0 = self.__vector_of_connected_edge(
@@ -391,17 +401,19 @@ class SkeletonAnalyser:
             angleA0 = self.__vectors_to_angle_deg(vectorA, vectorA0)
             print 'va ', vectorA0, 'a0a', angleA0, 'a0', angleA0
             out.update({'angleA0': angleA0.tolist()})
-        except Exception as e:
+        except Exception:
             traceback.print_exc()
             print (
-                "connected edge (number " + str(edg_number) + ") vectorA not found 0 ")
+                "connected edge (number " + str(edg_number) +
+                ") vectorA not found 0 ")
 
         try:
             vectorA1 = self.__vector_of_connected_edge(
                 edg_number, stats, 'A', 1)
         except:
             print (
-                "connected edge (number " + str(edg_number) + ") vectorA not found 1")
+                "connected edge (number " + str(edg_number) +
+                ") vectorA not found 1")
 
         out.update(
             self.__connected_edge_angle_on_one_end(edg_number, stats, 'A'))
@@ -413,16 +425,18 @@ class SkeletonAnalyser:
 #        try:
 # we need find end of edge connected to our node
 # import pdb; pdb.set_trace()
-#            if stats[edg_number]['nodeIdA'] == stats[connectedEdgesA[0]]['nodeId0']:
-# sousední hrana u uzlu na konci 0 má stejný node na svém konci 0 jako nynější hrana
+# if stats[edg_number]['nodeIdA'] == stats[connectedEdgesA[0]]['nodeId0']:
+# sousední hrana u uzlu na konci 0 má stejný node na svém
+# konci 0 jako nynější hrana
 #                vectorA0 = stats[connectedEdgesA[0]]['vectorA']
 #            else:
 #                vectorA0 = stats[connectedEdgesA[0]]['vectorB']
 #        except:
 #
 # second neighbors on end "0"
-#            if  stats[edg_number]['nodeIdA'] == stats[connectedEdgesA[1]]['nodeId0']:
-# sousední hrana u uzlu na konci 0 má stejný node na svém konci 0 jako nynější hrana
+# if  stats[edg_number]['nodeIdA'] == stats[connectedEdgesA[1]]['nodeId0']:
+# sousední hrana u uzlu na konci 0 má
+# stejný node na svém konci 0 jako nynější hrana
 #                vectorA1 = stats[connectedEdgesA[1]]['vectorA']
 #            else:
 #                vectorA1 = stats[connectedEdgesA[1]]['vectorB']
@@ -471,8 +485,9 @@ class SkeletonAnalyser:
         BOUNDARY_PX = 5
 
         if el_number < 0:
+            # cant have max_label<0
             box = scipy.ndimage.find_objects(
-                self.shifted_sklabel, max_label=el_number_shifted)  # cant have max_label<0
+                self.shifted_sklabel, max_label=el_number_shifted)
         else:
             box = scipy.ndimage.find_objects(
                 self.sklabel, max_label=el_number)
@@ -517,7 +532,8 @@ class SkeletonAnalyser:
 
     def __edge_length(self, edg_number, edg_stats):
         """
-        Computes estimated length of edge, distance from end nodes and tortosity.
+        Computes estimated length of edge, distance from end nodes and
+        tortosity.
         needs:
             edg_stats['nodeIdA']
             edg_stats['nodeIdB']
@@ -547,11 +563,14 @@ class SkeletonAnalyser:
 
         if (not hasNodeA) and (not hasNodeB):
             logger.warning(
-                '__edge_length doesnt have needed data!!! Using unreliable method.')
+                '__edge_length doesnt have needed data!!! Using unreliable' +
+                'method.')
             length = float(
-                np.sum(self.sklabel[self.elm_box[edg_number]] == edg_number) + 2)
+                np.sum(
+                    self.sklabel[self.elm_box[edg_number]] == edg_number) + 2)
             medium_voxel_length = (
-                self.voxelsize_mm[0] + self.voxelsize_mm[1] + self.voxelsize_mm[2]) / 3.0
+                self.voxelsize_mm[0] + self.voxelsize_mm[1] +
+                self.voxelsize_mm[2]) / 3.0
             length = length * medium_voxel_length
 
             stats = {
@@ -584,10 +603,14 @@ class SkeletonAnalyser:
 
         # get realtive position of nodes [Z,Y,X]
         nodeA_pos = np.array(
-            [nodeA_pos_abs[0] - box[0].start, nodeA_pos_abs[1] - box[1].start, nodeA_pos_abs[2] - box[2].start])
+            [nodeA_pos_abs[0] - box[0].start,
+             nodeA_pos_abs[1] - box[1].start,
+             nodeA_pos_abs[2] - box[2].start])
         if not one_node_mode:
             nodeB_pos = np.array(
-                [nodeB_pos_abs[0] - box[0].start, nodeB_pos_abs[1] - box[1].start, nodeB_pos_abs[2] - box[2].start])
+                [nodeB_pos_abs[0] - box[0].start,
+                 nodeB_pos_abs[1] - box[1].start,
+                 nodeB_pos_abs[2] - box[2].start])
         # get position in mm
         nodeA_pos = nodeA_pos * self.voxelsize_mm
         if not one_node_mode:
@@ -615,14 +638,17 @@ class SkeletonAnalyser:
                     p_length = p_length_new
                     closest_num = p
             closest = np.array(
-                [points_mm[0][closest_num], points_mm[1][closest_num], points_mm[2][closest_num]])
+                [points_mm[0][closest_num],
+                 points_mm[1][closest_num],
+                 points_mm[2][closest_num]])
             # add length
             length += np.linalg.norm(closest - startpoint)
             # replace startpoint with used point
             startpoint = closest
             # remove used point from points
             points_mm = [np.delete(points_mm[0], closest_num), np.delete(
-                points_mm[1], closest_num), np.delete(points_mm[2], closest_num)]
+                points_mm[1], closest_num), np.delete(
+                    points_mm[2], closest_num)]
 
         # add length to nodeB
         if not one_node_mode:
@@ -655,11 +681,10 @@ class SkeletonAnalyser:
             point0_mm = np.array(edg_stats['nodeA_ZYX_mm'])
             point1_mm = np.array(edg_stats['nodeB_ZYX_mm'])
             retval = {'curve_params':
-                     {
-                      'start': point0_mm.tolist(),
-                      'vector': (point1_mm - point0_mm).tolist()
-                      }
-                      }
+                      {
+                          'start': point0_mm.tolist(),
+                          'vector': (point1_mm - point0_mm).tolist()
+                      }}
         except Exception as ex:
             logger.warning("Problem in __edge_curve()")
             print (ex)
@@ -722,7 +747,8 @@ class SkeletonAnalyser:
             nd00, nd01, nd02 = (edg_neigh[0] == self.sklabel[box0]).nonzero()
             point0_mean = [np.mean(nd00), np.mean(nd01), np.mean(nd02)]
             point0 = np.array([float(point0_mean[0] + box0[0].start), float(
-                point0_mean[1] + box0[1].start), float(point0_mean[2] + box0[2].start)])
+                point0_mean[1] + box0[1].start),
+                float(point0_mean[2] + box0[2].start)])
 
             # node position -> mm
             point0_mm = point0 * self.voxelsize_mm
@@ -756,13 +782,15 @@ class SkeletonAnalyser:
             nd00, nd01, nd02 = (edg_neigh[0] == self.sklabel[box0]).nonzero()
             point0_mean = [np.mean(nd00), np.mean(nd01), np.mean(nd02)]
             point0 = np.array([float(point0_mean[0] + box0[0].start), float(
-                point0_mean[1] + box0[1].start), float(point0_mean[2] + box0[2].start)])
+                point0_mean[1] + box0[1].start), float(point0_mean[2] +
+                                                       box0[2].start)])
             # node B
             box1 = self.elm_box[edg_neigh[1]]
             nd10, nd11, nd12 = (edg_neigh[1] == self.sklabel[box1]).nonzero()
             point1_mean = [np.mean(nd10), np.mean(nd11), np.mean(nd12)]
             point1 = np.array([float(point1_mean[0] + box1[0].start), float(
-                point1_mean[1] + box1[1].start), float(point1_mean[2] + box1[2].start)])
+                point1_mean[1] + box1[1].start), float(point1_mean[2] +
+                                                       box1[2].start)])
             # node position -> mm
             point0_mm = point0 * self.voxelsize_mm
             point1_mm = point1 * self.voxelsize_mm
