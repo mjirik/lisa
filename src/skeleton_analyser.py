@@ -24,12 +24,13 @@ class SkeletonAnalyser:
     def __init__(self, data3d_skel, volume_data=None, voxelsize_mm=[1,1,1]):
         self.volume_data = volume_data
         self.voxelsize_mm = voxelsize_mm
-        
+
         # get array with 1 for edge, 2 is node and 3 is terminal
         logger.debug('Generating sklabel...')
         skelet_nodes = self.__skeleton_nodes(data3d_skel)
         self.sklabel = self.__generate_sklabel(skelet_nodes)
-        
+        self.cut_wrong_skeleton = False
+
         logger.debug('Inited SkeletonAnalyser - voxelsize:'+str(voxelsize_mm)+' volumedata:'+str(volume_data is not None))
 
     def skeleton_analysis(self, guiUpdateFunction = None):
@@ -44,7 +45,7 @@ class SkeletonAnalyser:
                 logger.info('skeleton_analysis: processed '+str(num)+'/'+str(length)+', part '+str(part))
             if guiUpdateFunction is not None:
                 guiUpdateFunction(num,length,part)
-        
+
         logger.debug('__radius_analysis_init')
         if self.volume_data is not None:
             skdst = self.__radius_analysis_init()
@@ -53,67 +54,67 @@ class SkeletonAnalyser:
         len_edg = np.max(self.sklabel)
         len_node = np.min(self.sklabel)
         logger.debug('len_edg: '+str(len_edg)+' len_node: '+str(len_node))
-        
+
         logger.debug('skeleton_analysis: starting element_neighbors processing')
         self.elm_neigh = {}
         self.elm_box = {}
         for edg_number in (range(len_node,0) + range(1,len_edg+1)):
-            self.elm_neigh[edg_number], self.elm_box[edg_number] = self.__element_neighbors(edg_number) 
+            self.elm_neigh[edg_number], self.elm_box[edg_number] = self.__element_neighbors(edg_number)
             updateFunction(edg_number+abs(len_node)+1,abs(len_node)+len_edg+1,0) # update gui progress
         logger.debug('skeleton_analysis: finished element_neighbors processing')
-        
-        
+
+
         logger.debug('skeleton_analysis: starting first processing part')
         for edg_number in range(1,len_edg+1):
             edgst = {}
-            edgst.update(self.__connection_analysis(edg_number)) 
-            edgst.update(self.__edge_length(edg_number, edgst)) 
+            edgst.update(self.__connection_analysis(edg_number))
+            edgst.update(self.__edge_length(edg_number, edgst))
             edgst.update(self.__edge_curve(edg_number, edgst))
-            edgst.update(self.__edge_vectors(edg_number, edgst)) 
+            edgst.update(self.__edge_vectors(edg_number, edgst))
             #edgst = edge_analysis(sklabel, i)
             if self.volume_data is not None:
                 edgst['radius_mm'] = float(self.__radius_analysis(edg_number,skdst)) # slow (this takes most of time)
             stats[edgst['id']] = edgst
-            
+
             updateFunction(edg_number,len_edg,1) # update gui progress
         logger.debug('skeleton_analysis: finished first processing part')
-        
-        
-        stats = self.__cut_wrong_skeleton(stats)
-        
+
+        if self.cut_wrong_skeleton:
+            stats = self.__cut_wrong_skeleton(stats)
+
         ##@TODO dokončit
         #logger.debug('skeleton_analysis: starting second processing part')
         #for edg_number in range (1,len_edg+1):
             #edgst = stats[edg_number]
             #edgst.update(self.__connected_edge_angle(edg_number, stats))
-            
+
             #updateFunction(edg_number,len_edg,2) # update gui progress
         #logger.debug('skeleton_analysis: finished second processing part')
 
 
         return stats
-    
+
     def __remove_edge_from_stats(self, stats, edge):
         logger.debug('Cutting edge id:'+str(edge)+' from stats')
         edg_stats = stats[edge]
-        
+
         connected_edgs = edg_stats['connectedEdgesA']+edg_stats['connectedEdgesB']
-        
+
         for connected in connected_edgs:
             try:
                 stats[connected]['connectedEdgesA'].remove(edge)
             except:
                 pass
-                
+
             try:
                 stats[connected]['connectedEdgesB'].remove(edge)
             except:
                 pass
-                
+
         del stats[edge]
-        
+
         return stats
-    
+
     def __cut_wrong_skeleton(self, stats, cut_ratio = 2.0):
         """
         cut_ratio = 2.0 -> if radius of vessel is 2x its lenght or more, remove it
@@ -126,48 +127,48 @@ class SkeletonAnalyser:
                 connected_edgs += stats[s]['connectedEdgesA']
             except Exception, e:
                 stats[s]['connectedEdgesA'] = []
-                
+
             try:
                 connected_edgs += stats[s]['connectedEdgesB']
             except Exception, e:
                 stats[s]['connectedEdgesB'] = []
-                
+
             if len(connected_edgs) == 0:
                 logger.debug('Edge id:'+str(s)+' is not connected to rest of skeleton')
                 stats = self.__remove_edge_from_stats(stats, s)
         logger.debug('skeleton_analysis: Cut - Unconnected edges removed')
-        
-        
-        
+
+
+
         logger.debug('skeleton_analysis: Cut - Getting lists of nodes, edges and end nodes')
         # dict of connected nodes to edge
         edg_neigh = {}
         for s in dict(stats):
             if not s in edg_neigh:
                 edg_neigh[s] = []
-                
+
             try:
                 if not stats[s]['nodeIdA'] in edg_neigh[s]:
                     edg_neigh[s].append(stats[s]['nodeIdA'])
             except KeyError:
                 logger.debug('Edge id:'+str(s)+' is missing nodeIdA')
-                
+
             try:
                 if not stats[s]['nodeIdB'] in edg_neigh[s]:
                     edg_neigh[s].append(stats[s]['nodeIdB'])
             except KeyError:
                 logger.debug('Edge id:'+str(s)+' is missing nodeIdB')
-        
+
         # dict of connected edges to node
         node_neigh = {}
         for e in edg_neigh:
             for node in edg_neigh[e]:
                 if not node in node_neigh:
                     node_neigh[node] = []
-                    
-                if not e in node_neigh[node]: 
+
+                if not e in node_neigh[node]:
                     node_neigh[node].append(e)
-             
+
         # get end nodes
         end_nodes = {}
         for i in node_neigh:
@@ -176,21 +177,21 @@ class SkeletonAnalyser:
                 logger.debug('end node/edge: '+str(i)+'/'+str(neigh[0]))
                 end_nodes[i] = neigh[0]
         logger.debug('skeleton_analysis: Cut - Got all lists')
-        
-        
+
+
         # removes end edges based on radius/length ratio
         logger.debug('skeleton_analysis: Cut - Removing bad segments based on radius/length ratio')
         for end_node in end_nodes:
             edge_end_id = end_nodes[end_node]
             edge_end_stat = stats[edge_end_id]
-            
+
             if edge_end_stat['radius_mm']/float(edge_end_stat['lengthEstimation']) > cut_ratio:
                 logger.debug('bad rad/len: '+str(edge_end_stat['radius_mm'])+' '+str(edge_end_stat['lengthEstimation']))
                 stats = self.__remove_edge_from_stats(stats, edge_end_id)
-                
-        logger.debug('skeleton_analysis: Cut - Bad segments removed')      
-        
-            
+
+        logger.debug('skeleton_analysis: Cut - Bad segments removed')
+
+
         return stats
 
     def __skeleton_nodes(self, data3d_skel):
@@ -217,7 +218,7 @@ class SkeletonAnalyser:
         sklabel_nod, len_nod = scipy.ndimage.label(skelet_nodes > 1, structure=np.ones([3,3,3]))
 
         sklabel = sklabel_edg - sklabel_nod
-        
+
         return sklabel
 
     def __edge_vectors(self, edg_number, edg_stats):
@@ -433,16 +434,16 @@ class SkeletonAnalyser:
         input:
             self.sklabel - original labeled data
             el_number - element label
-            
+
         uses/creates:
             self.shifted_sklabel - all labels shifted to positive numbers
             self.shifted_zero - value of original 0
-            
+
         returns:
             array of neighbor values
                 - nodes for edge, edges for node
             element bounding box (with border)
-        """ 
+        """
         # check if we have shifted sklabel, if not create it.
         try:
             self.shifted_zero
@@ -451,11 +452,11 @@ class SkeletonAnalyser:
             logger.debug('Generating shifted sklabel...')
             self.shifted_zero = abs(np.min(self.sklabel))+1
             self.shifted_sklabel = self.sklabel + self.shifted_zero
-        
+
         el_number_shifted = el_number + self.shifted_zero
-        
+
         BOUNDARY_PX = 5
-        
+
         if el_number<0:
             box = scipy.ndimage.find_objects(self.shifted_sklabel, max_label = el_number_shifted) # cant have max_label<0
         else:
@@ -472,9 +473,9 @@ class SkeletonAnalyser:
         u = min(self.sklabel.shape[2],box[2].stop+BOUNDARY_PX)
         slice_x = slice(d,u)
         box = (slice_z,slice_y,slice_x)
-            
+
         sklabelcr = self.sklabel[box]
-        
+
         # element crop
         element = (sklabelcr == el_number)
 
@@ -488,7 +489,7 @@ class SkeletonAnalyser:
         neighbors = np.unique(neighborhood)
         neighbors = neighbors [neighbors != 0]
         neighbors = neighbors [neighbors != el_number]
-        
+
         if el_number>0: # elnumber is edge
             neighbors = neighbors [neighbors < 0] # return nodes
         elif el_number<0: # elnumber is node
@@ -496,7 +497,7 @@ class SkeletonAnalyser:
         else:
             logger.warning('Element is zero!!')
             neighbors = []
-        
+
         return neighbors, box
 
 
@@ -521,7 +522,7 @@ class SkeletonAnalyser:
             hasNodeA = False
         else:
             hasNodeA = True
-            
+
         try:
             edg_stats['nodeIdB']
             edg_stats['nodeB_ZYX']
@@ -529,39 +530,39 @@ class SkeletonAnalyser:
             hasNodeB = False
         else:
             hasNodeB = True
-            
+
         if (not hasNodeA) and (not hasNodeB):
-            logger.warning('__edge_length doesnt have needed data!!! Using unreliable method.')            
-            length = float(np.sum(self.sklabel[self.elm_box[edg_number]] == edg_number) + 2) 
+            logger.warning('__edge_length doesnt have needed data!!! Using unreliable method.')
+            length = float(np.sum(self.sklabel[self.elm_box[edg_number]] == edg_number) + 2)
             medium_voxel_length = (self.voxelsize_mm[0]+self.voxelsize_mm[1]+self.voxelsize_mm[2])/3.0
             length = length*medium_voxel_length
-            
+
             stats = {
                 'lengthEstimation':float(length),
                 'nodesDistance': None,
                 'tortuosity': 1
                 }
-                
+
             return stats
-            
+
         # crop used area
         box = self.elm_box[edg_number]
         sklabelcr = self.sklabel[box]
-        
+
         # get absolute position of nodes
         if hasNodeA and not hasNodeB:
-            logger.warning('__edge_length has only one node!!! using one node mode.') 
+            logger.warning('__edge_length has only one node!!! using one node mode.')
             nodeA_pos_abs = edg_stats['nodeA_ZYX']
             one_node_mode = True
         elif hasNodeB and not hasNodeA:
-            logger.warning('__edge_length has only one node!!! using one node mode.') 
+            logger.warning('__edge_length has only one node!!! using one node mode.')
             nodeA_pos_abs = edg_stats['nodeB_ZYX']
             one_node_mode = True
         else:
             nodeA_pos_abs = edg_stats['nodeA_ZYX']
             nodeB_pos_abs = edg_stats['nodeB_ZYX']
             one_node_mode = False
-            
+
         # get realtive position of nodes [Z,Y,X]
         nodeA_pos = np.array([nodeA_pos_abs[0]-box[0].start,nodeA_pos_abs[1]-box[1].start,nodeA_pos_abs[2]-box[2].start])
         if not one_node_mode:
@@ -570,7 +571,7 @@ class SkeletonAnalyser:
         nodeA_pos = nodeA_pos*self.voxelsize_mm
         if not one_node_mode:
             nodeB_pos = nodeB_pos*self.voxelsize_mm
-        
+
         # get positions of edge points
         points = (sklabelcr == edg_number).nonzero()
         points_mm = [
@@ -578,43 +579,43 @@ class SkeletonAnalyser:
                         np.array(points[1]*self.voxelsize_mm[1]),
                         np.array(points[2]*self.voxelsize_mm[2])
                     ]
-        
+
         length = 0
         startpoint = nodeA_pos
         while len(points_mm[0])!=0:
             # get closest point to startpoint
             p_length = float('Inf') # get max length
-            closest_num = -1 
+            closest_num = -1
             for p in range(0,len(points_mm[0])):
                 test_point = np.array([points_mm[0][p],points_mm[1][p],points_mm[2][p]])
                 p_length_new = np.linalg.norm(startpoint-test_point)
                 if p_length_new<p_length:
                     p_length = p_length_new
-                    closest_num = p     
+                    closest_num = p
             closest = np.array([points_mm[0][closest_num],points_mm[1][closest_num],points_mm[2][closest_num]])
             # add length
             length += np.linalg.norm(closest-startpoint)
             # replace startpoint with used point
             startpoint = closest
-            # remove used point from points 
+            # remove used point from points
             points_mm = [np.delete(points_mm[0], closest_num),np.delete(points_mm[1], closest_num),np.delete(points_mm[2], closest_num)]
-              
+
         # add length to nodeB
         if not one_node_mode:
             length += np.linalg.norm(nodeB_pos-startpoint)
-        
+
         # get distance between nodes
         if one_node_mode:
             nodes_distance = np.linalg.norm(nodeA_pos-startpoint)
         else:
             nodes_distance = np.linalg.norm(nodeA_pos-nodeB_pos)
-        
+
         stats = {
                 'lengthEstimation':float(length),
                 'nodesDistance': float(nodes_distance),
                 'tortuosity': float(length/nodes_distance)
                 }
-        
+
         return stats
 
     def __edge_curve(self,  edg_number, edg_stats):
@@ -687,27 +688,27 @@ class SkeletonAnalyser:
         Analysis of which edge is connected
         """
         edg_neigh = self.elm_neigh[edg_number]
-        
+
         if len(edg_neigh) == 1:
             logger.warning('Only one ('+str(edg_neigh)+
                     ') connected node in connection_analysis()'+
                     ' for edge number '+str(edg_number))
-            
+
             # get edges connected to end nodes
             connectedEdgesA = self.elm_neigh[edg_neigh[0]]
             # remove edg_number from connectedEdges list
             connectedEdgesA = connectedEdgesA[connectedEdgesA != edg_number]
-            
+
             ## get pixel and mm position of end nodes
             # node A
             box0 = self.elm_box[edg_neigh[0]]
             nd00, nd01, nd02 = (edg_neigh[0] == self.sklabel[box0]).nonzero()
             point0_mean = [np.mean(nd00), np.mean(nd01), np.mean(nd02)]
             point0 = np.array([float(point0_mean[0]+box0[0].start),float(point0_mean[1]+box0[1].start),float(point0_mean[2]+box0[2].start)])
-            
+
             # node position -> mm
             point0_mm = point0 * self.voxelsize_mm
-            
+
             edg_stats = {
                     'id':edg_number,
                     'nodeIdA':int(edg_neigh[0]),
@@ -715,7 +716,7 @@ class SkeletonAnalyser:
                     'nodeA_ZYX': point0.tolist(),
                     'nodeA_ZYX_mm': point0_mm.tolist()
                     }
-        
+
         elif len(edg_neigh) != 2:
             logger.warning('Wrong number ('+str(edg_neigh)+
                     ') of connected nodes in connection_analysis()'+
@@ -730,7 +731,7 @@ class SkeletonAnalyser:
             # remove edg_number from connectedEdges list
             connectedEdgesA = connectedEdgesA[connectedEdgesA != edg_number]
             connectedEdgesB = connectedEdgesB[connectedEdgesB != edg_number]
-            
+
             ## get pixel and mm position of end nodes
             # node A
             box0 = self.elm_box[edg_neigh[0]]
@@ -759,7 +760,7 @@ class SkeletonAnalyser:
                     }
 
         return edg_stats
-        
+
 def curve_model(t, params):
     p0 = params['start'][0] + t*params['vector'][0]
     p1 = params['start'][1] + t*params['vector'][1]
