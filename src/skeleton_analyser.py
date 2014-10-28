@@ -30,6 +30,12 @@ class SkeletonAnalyser:
         # get array with 1 for edge, 2 is node and 3 is terminal
         logger.debug('Generating sklabel...')
         data3d_skel = self.__filter_small(data3d_skel)
+        logger.debug('after filtering')
+        print "sdfafasfafas"
+        import py3DSeedEditor as ped
+        pe = ped.py3DSeedEditor(data3d_skel)
+        pe.show()
+        asda
         skelet_nodes = self.__skeleton_nodes(data3d_skel)
         self.sklabel = self.__generate_sklabel(skelet_nodes)
         self.cut_wrong_skeleton = False
@@ -232,19 +238,55 @@ class SkeletonAnalyser:
 
         return data3d_skel
 
-    def __filter_small(self, skel, threshold = 3):
+    def __label_edge_by_its_terminal(self, labeled_terminals):
+        import functools
+        import scipy
+
+        def max_or_zero(a):
+            return min(np.max(a), 0)
+        fp = np.ones([3, 3, 3], dtype=np.int)
+        median_filter = functools.partial(
+            scipy.ndimage.generic_filter, function=np.max, footprint=fp)
+        mf = median_filter(labeled_terminals)
+
+        for label in range(np.min(labeled_terminals), 0):
+            neigh = np.min(mf[labeled_terminals == label])
+            labeled_terminals[labeled_terminals == neigh] = label
+        return labeled_terminals
+
+    def __filter_small(self, skel, threshold=4):
         """
         terminals are connected to edges
         """
+        import py3DSeedEditor as ped
         skeleton_nodes = self.__skeleton_nodes(skel)
-        skeleton_nodes[skeleton_nodes==3] == 1
-        sklabel = self.__generate_sklabel(skeleton_nodes)
-        for i in range(1, np.max(sklabel)):
-            if np.sum(sklabel == i) < threshold:
-# delete small
-                sklabel[sklabel == i] == 0
-                print "mazani "
-        return (sklabel != 0).astype(np.int)
+        logger.debug('skn 2 ' + str(np.sum(skeleton_nodes == 2)))
+        logger.debug('skn 3 ' + str(np.sum(skeleton_nodes == 3)))
+# delete nodes
+        skeleton_nodes[skeleton_nodes == 2] = 0
+        # pe = ped.py3DSeedEditor(skeleton_nodes)
+        # pe.show()
+        labeled_terminals = self.__generate_sklabel(skeleton_nodes)
+        logger.debug('deleted nodes')
+
+        print "labeled terminals"
+        print np.unique(labeled_terminals)
+        pe = ped.py3DSeedEditor(labeled_terminals)
+        pe.show()
+        labeled_terminals = self.__label_edge_by_its_terminal(labeled_terminals)
+        print "labeled edges + terminals"
+        print np.unique(labeled_terminals)
+        pe = ped.py3DSeedEditor(labeled_terminals)
+        pe.show()
+        for i in range(np.min(labeled_terminals), 0):
+            lti = labeled_terminals == i
+            if np.sum(lti) < threshold:
+                # delete small
+                labeled_terminals[lti] == 0
+                logger.debug('mazani %s %s' % (str(i), np.sum(lti)))
+        # bring nodes back
+        labeled_terminals[skeleton_nodes == 3] = 1
+        return (labeled_terminals != 0).astype(np.int)
 
 
     def __generate_sklabel(self, skelet_nodes):

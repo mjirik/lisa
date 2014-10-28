@@ -19,13 +19,20 @@ import py3DSeedEditor as ped
 class TemplateTest(unittest.TestCase):
 
     @attr('actual')
+    @attr('interactive')
     def test_skeleton(self):
+        import skelet3d
+
         data = np.zeros([20, 20, 20], dtype=np.int8)
-        data [3:17, 5, 5] = 1
+        data[5, 3:17, 5] = 1
         # crossing
-        data [12, 5:13, 5] = 1
+        data[5, 12, 5:13] = 1
         # vyrustek
-        data [8, 5, 5:8] = 1
+        data[5, 8, 5:9] = 1
+
+        pe = ped.py3DSeedEditor(data)
+        pe.show()
+        data = skelet3d.skelet3d(data)
 
         skan = sk.SkeletonAnalyser(data)
         skan.skeleton_analysis()
@@ -33,7 +40,6 @@ class TemplateTest(unittest.TestCase):
         pe = ped.py3DSeedEditor(skan.sklabel)
         pe.show()
 
-        pass
 
 if __name__ == "__main__":
     unittest.main()
