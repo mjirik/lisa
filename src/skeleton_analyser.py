@@ -24,7 +24,7 @@ class SkeletonAnalyser:
     """
 
     def __init__(self, data3d_skel, volume_data=None, voxelsize_mm=[1, 1, 1],
-                 use_filter_small=True, filter_small_threshold=3):
+                 use_filter_small=False, filter_small_threshold=3):
         """
         use_filter_small: removing small objects
         filter_small_threshold: threshold for small filtering
