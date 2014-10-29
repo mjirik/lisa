@@ -37,13 +37,27 @@ class LisaServer:
 
 class hello:
     def __init__(self):
-        self.oseg = osg.OrganSegmentation()
+        # self.oseg = osg.OrganSegmentation()
+        pass
 
-    def GET(self, name):
-        if not name:
-            name = 'world'
-        return str(eval(name))
+    def process_msg(self, data):
+        if not data:
+            data = 'abs(50)'
+        web.header('Access-Control-Allow-Origin',      '*')
+        web.header('Access-Control-Allow-Credentials', 'true')
+        retval = \
+            "<!DOCTYPE html><html><body><div>" + \
+            data +\
+            "</div></body></html>"
+            # "<b>" + str(eval(data)) + "</b>" +
+        str(eval(data))
+        return str(retval)
 
+    def GET(self, data):
+        return self.process_msg(data)
+
+    def POST(self, data):
+        return self.process_msg(data)
 
 def main():
     logger = logging.getLogger()
