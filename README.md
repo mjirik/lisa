@@ -69,6 +69,11 @@ Virtual liver resection is based on data stored in previous step
 In this script is selected cut on vessel by user interactivity. Resected and
 remaining volume is then calculated.
 
+Documentation
+-------------
+
+Generated documentation can be found [here](http://147.228.240.61/queetech/Lisa-docs/html/)
+
 
 Tests
 -----

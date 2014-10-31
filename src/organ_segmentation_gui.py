@@ -1,12 +1,19 @@
 # /usr/bin/env python
 # -*- coding: utf-8 -*-
 """
+
 LISA - organ segmentation tool.
 
-'Liver Surgery Analyser
+Liver Surgery Analyser
 
-    npython organ_segmentation.py
-    npython organ_segmentation.py -mroi -vs 0.6
+python organ_segmentation.py
+
+python organ_segmentation.py -mroi -vs 0.6
+
+Author: Miroslav Jirik
+Email: miroslav.jirik@gmail.com
+
+
 """
 
 import logging
@@ -122,7 +129,7 @@ class OrganSegmentation():
     ):
         """ Segmentation of objects from CT data.
 
-        datapath: path to directory with dicom files
+        :param datapath: path to directory with dicom files
         manualroi: manual set of ROI before data processing, there is a
              problem with correct coordinates
         data3d, metadata: it can be used for data loading not from directory.
@@ -245,6 +252,15 @@ class OrganSegmentation():
         return oseg_params
 
     def process_wvx_size_mm(self, metadata):
+        """This function does something.
+
+            Args:
+                name (str):  The name to use.
+
+            Kwargs:
+                state (bool): Current state to be in.
+
+        """
 
         # vx_size = self.working_voxelsize_mm
         vx_size = self.input_wvx_size
