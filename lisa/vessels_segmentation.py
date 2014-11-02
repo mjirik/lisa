@@ -8,7 +8,7 @@ import sys
 import os.path
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
-sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
+sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
 #import featurevector
 import unittest
 
@@ -92,17 +92,17 @@ if __name__ == "__main__":
     else:
         data = misc.obj_from_file(args.inputfile, filetype = 'pickle')
 
-    import py3DSeedEditor
-    # pyed = py3DSeedEditor.py3DSeedEditor(oseg.orig_scale_segmentation)
+    import sed3
+    # pyed = sed3.sed3(oseg.orig_scale_segmentation)
     #pyed.show()
 # information about crop
     #cri = oseg.crinfo
     #oseg.data3d = oseg.data3d[cri[0][0]:cri[0][1],cri[1][0]:cri[1][1],cri[2][0]:cri[2][1]]
-    #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour = oseg.orig_scale_segmentation)
+    #pyed = sed3.sed3(oseg.data3d, contour = oseg.orig_scale_segmentation)
 
     print 'slab', data['slab']
     #import ipdb; ipdb.set_trace()  # BREAKPOINT
-    #pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], contour = data['segmentation'])
+    #pyed = sed3.sed3(data['data3d'], contour = data['segmentation'])
     #pyed.show()
     #import pdb; pdb.set_trace()
 
@@ -130,7 +130,7 @@ if __name__ == "__main__":
     del(inspect)
     garbage.collect()
 
-    #pyed = py3DSeedEditor.py3DSeedEditor(outputTmp)
+    #pyed = sed3.sed3(outputTmp)
     #pyed.show()
 # segmentation labeling
     #slab={}
@@ -149,10 +149,10 @@ if __name__ == "__main__":
     #data['slab'] = slab
 
 
-    pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'],  contour=data['segmentation']==data['slab']['porta'])
+    pyed = sed3.sed3(data['data3d'],  contour=data['segmentation']==data['slab']['porta'])
     pyed.show()
 
-    #pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
+    #pyed = sed3.sed3(data['segmentation'])
     #pyed.show()
     # Uvolneni pameti
     garbage.collect()

@@ -7,7 +7,7 @@
 import sys
 import os.path
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
+sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
 #import featurevector
 import unittest
 
@@ -19,13 +19,13 @@ import scipy.ndimage
 
 # ----------------- my scripts --------
 import misc
-import py3DSeedEditor
+import sed3
 import show3
 import vessel_cut
 
 
 def resection(data):
-    #pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
+    #pyed = sed3.sed3(data['segmentation'])
     #pyed.show()
     # vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
     vessels = data['segmentation'] == data['slab']['porta']
@@ -36,11 +36,11 @@ def resection(data):
 
     #data['segmentation'][vessels == 1] = data['slab']['porta']
     #segm = data['segmentation']
-    #pyed = py3DSeedEditor.py3DSeedEditor(vessels)
+    #pyed = sed3.sed3(vessels)
     #pyed.show()
     print ("Select cut")
     lab = vessel_cut.cut_editor_old(data)
-    pyed = py3DSeedEditor.py3DSeedEditor(lab )#, contour=segm)
+    pyed = sed3.sed3(lab )#, contour=segm)
     pyed.show()
     l1 = 1
     l2 = 2
@@ -57,16 +57,16 @@ def resection(data):
     segm = (((data['segmentation'] != 0) * (dist1 < dist2)).astype('int8') + (data['segmentation'] != 0).astype('int8'))
 
 # vizualizace 1
-#    pyed = py3DSeedEditor.py3DSeedEditor(segm)
+#    pyed = sed3.sed3(segm)
 #    pyed.show()
 #    import pdb; pdb.set_trace()
-#    pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], contour=segm)
+#    pyed = sed3.sed3(data['data3d'], contour=segm)
 #    pyed.show()
 #    import pdb; pdb.set_trace()
 
 # vizualizace 2
     linie = np.abs(dist1 - dist2) < 1
-    pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], contour = data['segmentation']==data['slab']['liver'] ,seeds = linie)
+    pyed = sed3.sed3(data['data3d'], contour = data['segmentation']==data['slab']['liver'] ,seeds = linie)
     pyed.show()
 
     #show3.show3(data['segmentation'])
@@ -140,7 +140,7 @@ class SectorDisplay2__:
 if __name__ == "__main__":
     data = misc.obj_from_file("vessels.pickle", filetype = 'pickle')
     #ds = data['segmentation'] == data['slab']['liver']
-    #pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
+    #pyed = sed3.sed3(data['segmentation'])
     #pyed.show()
     resection(data)
 

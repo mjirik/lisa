@@ -11,7 +11,7 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 sys.path.append(os.path.join(path_to_script,
-                             "../extern/py3DSeedEditor/"))
+                             "../extern/sed3/"))
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
 import argparse
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 import datareader
 #import misc
 import qmisc
-import py3DSeedEditor
+import sed3
 
 
 def show(data3d_a_path, sliver_seg_path, ourSegmentation):
@@ -53,7 +53,7 @@ def show(data3d_a_path, sliver_seg_path, ourSegmentation):
         else:
             sliver_seg = sliver_datap['data3d']
 
-        pyed = py3DSeedEditor.py3DSeedEditor(data3d_a, contour=sliver_seg)
+        pyed = sed3.sed3(data3d_a, contour=sliver_seg)
         print "Sliver07 segmentation"
         pyed.show()
 
@@ -66,7 +66,7 @@ def show(data3d_a_path, sliver_seg_path, ourSegmentation):
                                data3d_a.shape)
 
     if ourSegmentation != None:
-        pyed = py3DSeedEditor.py3DSeedEditor(data3d_a, contour=our_seg)
+        pyed = sed3.sed3(data3d_a, contour=our_seg)
         print "Our segmentation"
         pyed.show()
 
@@ -74,7 +74,7 @@ def show(data3d_a_path, sliver_seg_path, ourSegmentation):
         diff = (our_seg.astype(np.int8) - sliver_seg)
         diff[diff==-1] = 2
         #import ipdb; ipdb.set_trace() # BREAKPOINT
-        pyed = py3DSeedEditor.py3DSeedEditor(data3d_a, contour=our_seg,
+        pyed = sed3.sed3(data3d_a, contour=our_seg,
                                              seeds=diff)
         print "Sliver07 and our segmentation differences"
         pyed.show()

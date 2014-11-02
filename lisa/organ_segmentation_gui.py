@@ -358,7 +358,7 @@ class OrganSegmentation():
             self.segmentation.astype(np.float32), sigma)
         # import ipdb; ipdb.set_trace()
         # import pdb; pdb.set_trace()
-        # pyed = py3DSeedEditor.py3DSeedEditor(self.orig_scale_segmentation)
+        # pyed = sed3.sed3(self.orig_scale_segmentation)
         # pyed.show()
 
         critf = lambda x: self.__volume_blowup_criterial_funcion(x, wvol, # noqa
@@ -759,8 +759,8 @@ class OrganSegmentation():
             self.seeds[slicen, :, :] = slicetmp
 
 #  QMainWindow
-            # mport py3DSeedEditor
-            # r=py3DSeedEditor.py3DSeedEditor(self.seeds); rr.show()
+            # mport sed3
+            # r=sed3.sed3(self.seeds); rr.show()
 
             # rom seed_editor_qt import QTSeedEditor
             # rom PyQt4.QtGui import QApplication

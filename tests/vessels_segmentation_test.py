@@ -8,7 +8,7 @@ import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 # sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
-# sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
+# sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
 # sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
 
@@ -16,7 +16,7 @@ from nose.plugins.attrib import attr
 import numpy as np
 
 # from PyQt4.QtGui import QApplication
-# import py3DSeedEditor
+# import sed3
 
 import lisa.organ_segmentation_gui as organ_segmentation
 from lisa import segmentation
@@ -64,7 +64,7 @@ class VesselsSegmentationTest(unittest.TestCase):
 #        pyed.exec_()
 #        #img3d = np.zeros([256,256,80], dtype=np.int16)
 
-        # pyed = py3DSeedEditor.py3DSeedEditor(data3d)
+        # pyed = sed3.sed3(data3d)
         # pyed.show()
 
         outputTmp = segmentation.vesselSegmentation(
@@ -82,7 +82,7 @@ class VesselsSegmentationTest(unittest.TestCase):
             binaryOpeningIterations=1)
 
 # ověření výsledku
-        # pyed = py3DSeedEditor.py3DSeedEditor(outputTmp, contour=segm==slab['porta'])
+        # pyed = sed3.sed3(outputTmp, contour=segm==slab['porta'])
         # pyed.show()
 
 # @TODO opravit chybu v vesselSegmentation
@@ -90,7 +90,7 @@ class VesselsSegmentationTest(unittest.TestCase):
         errim = np.abs(outputTmp.astype(np.int) - (segm == slab['porta']).astype(np.int))
 
 # ověření výsledku
-        # pyed = py3DSeedEditor.py3DSeedEditor(errim, contour=segm==slab['porta'])
+        # pyed = sed3.sed3(errim, contour=segm==slab['porta'])
         # pyed.show()
 # evaluation
         sum_of_wrong_voxels = np.sum(errim)

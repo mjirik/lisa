@@ -5,7 +5,7 @@ import ctypes
 import math
 import numpy as np
 import scipy as sp
-import py3DSeedEditor
+import sed3
 
 import sys
 import os.path
@@ -34,7 +34,7 @@ def segmentation(data3d, segmentation, params):
     params[2] = 0
     data3d = data3d * segmentation;
     data3d = sp.ndimage.filters.gaussian_filter(data3d,params*2.5)  
-    pyed = py3DSeedEditor.py3DSeedEditor(data3d)
+    pyed = sed3.sed3(data3d)
     pyed.show()
     
     lbp = lbpLib.loadLbpLibrary()    
@@ -94,7 +94,7 @@ def segmentation(data3d, segmentation, params):
             minMaxData[16*(j/numOfPartsX):16*(j/numOfPartsX)+16,16*(j % numOfPartsX):16*(j % numOfPartsX)+16,i] = minmaxBestVal        
 
     # zobrazeni vysledku
-    pyed2 = py3DSeedEditor.py3DSeedEditor(minMaxData)
+    pyed2 = sed3.sed3(minMaxData)
     pyed2.show()
 
     return segmentation

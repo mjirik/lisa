@@ -20,7 +20,7 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 sys.path.append(os.path.join(path_to_script,
-                             "../extern/py3DSeedEditor/"))
+                             "../extern/sed3/"))
 sys.path.append(os.path.join(path_to_script,
                              "../extern/lbp/"))
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
@@ -40,11 +40,11 @@ import numpy as np
 import itertools
 
 # ----------------- my scripts --------
-import py3DSeedEditor
+import sed3
 #import dcmreaddata1 as dcmr
 #import dcmreaddata as dcmr
 import argparse
-#import py3DSeedEditor
+#import sed3
 
 import misc
 import datareader
@@ -166,7 +166,7 @@ def one_experiment_setting_for_whole_dataset(inputdata, tile_shape,
         feat_hist_by_segmentation(data3d_orig, data3d_seg, visualization)
 
         if visualization:
-            pyed = py3DSeedEditor.py3DSeedEditor(data3d_orig,
+            pyed = sed3.sed3(data3d_orig,
                                                  contour=data3d_seg)
             pyed.show()
 
@@ -177,7 +177,7 @@ def one_experiment_setting_for_whole_dataset(inputdata, tile_shape,
             #labels_train = arrange_to_tiled_data(cidxs, tile_shape,
             #                                     d_shp, ltl)
 
-            #pyed = py3DSeedEditor.py3DSeedEditor(labels_train, contour=labels)
+            #pyed = sed3.sed3(labels_train, contour=labels)
 
 # @TODO vracet něco inteligentního, fvall je prázdný
     return fvall

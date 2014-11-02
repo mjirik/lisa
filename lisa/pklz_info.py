@@ -8,7 +8,7 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 sys.path.append(os.path.join(path_to_script,
-                             "../extern/py3DSeedEditor/"))
+                             "../extern/sed3/"))
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
 import argparse
@@ -17,7 +17,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 import misc
-import py3DSeedEditor
+import sed3
 
 def main():
 
@@ -41,12 +41,12 @@ def main():
     print data
 
     try:
-        pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], contour=data['segmentation'])
+        pyed = sed3.sed3(data['data3d'], contour=data['segmentation'])
         pyed.show()
     except:
         try:
 
-            pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'])
+            pyed = sed3.sed3(data['data3d'])
             pyed.show()
         except:
             print "Problem with visualization"

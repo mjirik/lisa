@@ -5,8 +5,8 @@
 import sys
 import os.path
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
-#from ..extern.py3DSeedEditor import py3DSeedEditor
+sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
+#from ..extern.sed3 import sed3
 #import featurevector
 
 import logging
@@ -27,7 +27,7 @@ from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
 
 # ----------------- my scripts --------
 import misc
-import py3DSeedEditor
+import sed3
 #import show3
 import qmisc
 
@@ -83,7 +83,7 @@ def Rez_podle_roviny(plane,data,voxel):
 #---------------------------------------------------------------
 def cut_editor_old(data):
 
-    pyed = py3DSeedEditor.py3DSeedEditor(data['segmentation'])
+    pyed = sed3.sed3(data['segmentation'])
     pyed.show()
 
     return pyed.seeds
@@ -114,7 +114,7 @@ def split_vessel(data, seeds):
         lab, n_obj = scipy.ndimage.label(vesselstmp)
 
     # všechny objekty, na které se to rozpadlo
-    #pyed = py3DSeedEditor.py3DSeedEditor(lab)
+    #pyed = sed3.sed3(lab)
     #pyed.show()
     obj1 = get_biggest_object(lab)
 
@@ -247,7 +247,7 @@ def virtual_resection_visualization(data, segm, dist1, dist2, cut):
     print "volume1: %.4g l  (%.3g %%)" % ((v1) * 1e-6, 100 * v1 / (v1 + v2))
     print "volume2: %.4g l  (%.3g %%)" % ((v2) * 1e-6, 100 * v2 / (v1 + v2))
 
-    #pyed = py3DSeedEditor.py3DSeedEditor(segm)
+    #pyed = sed3.sed3(segm)
     #pyed.show()
     #import pdb; pdb.set_trace()
     linie = (((data['segmentation'] != 0) *
@@ -255,7 +255,7 @@ def virtual_resection_visualization(data, segm, dist1, dist2, cut):
     linie_vis = 2 * linie
     linie_vis[cut == 1] = 1
     linie_vis = linie_vis.astype(np.int8)
-    pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'],
+    pyed = sed3.sed3(data['data3d'],
                                          seeds=linie_vis,
                                          contour=(data['segmentation'] != 0))
     pyed.show()

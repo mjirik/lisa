@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 # import skimage.exposure as skexp
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
+sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
 # import featurevector
 
@@ -22,7 +22,7 @@ import scipy
 
 # ----------------- my scripts --------
 import misc
-import py3DSeedEditor
+import sed3
 
 try:
     import dcmreaddata
@@ -122,7 +122,7 @@ class Lesions:
         print 'analyzing histogram...'
         class1 = tools.analyse_histogram(self.data3d,
                                          roi=self.segmentation != 0)
-        # py3DSeedEditor.py3DSeedEditor(self.data3d, seeds=class1).show()
+        # sed3.sed3(self.data3d, seeds=class1).show()
         print 'getting seeds...'
         seeds = self.get_seeds_using_prob_class1(
             liver,
@@ -130,7 +130,7 @@ class Lesions:
             thresholdType='percOfMaxDist',
             percT=0.3)
 
-        # py3DSeedEditor.py3DSeedEditor(self.data3d, seeds=seeds).show()
+        # sed3.sed3(self.data3d, seeds=seeds).show()
 
         print('Starting random walker...')
         rw = random_walker(liver, seeds, mode='cg_mg')
@@ -139,7 +139,7 @@ class Lesions:
         label_l = self.data['slab']['lesions']
 
         lessions = rw == 2
-        py3DSeedEditor.py3DSeedEditor(self.data3d, contour=lessions).show()
+        sed3.sed3(self.data3d, contour=lessions).show()
         lessions = self.filter_objects(lessions)
 
         self.segmentation = np.where(lessions, label_l, self.segmentation)
@@ -199,7 +199,7 @@ class Lesions:
 
             print 'size = %i' % size
             print 'compactness = %.3f' % compactness
-            # py3DSeedEditor.py3DSeedEditor(self.data3d, contour=(labels==lab)).show() # noqa
+            # sed3.sed3(self.data3d, contour=(labels==lab)).show() # noqa
         print features[:, 1]
         return features
 
@@ -334,7 +334,7 @@ class Lesions:
 # ---------------------------------------------------------------------------
 # ---------------------------------------------------------------------------
     def visualization(self):
-        pyed = py3DSeedEditor.py3DSeedEditor(
+        pyed = sed3.sed3(
             self.segmentation == self.data['slab']['lesions'])
         pyed.show()
 
@@ -364,8 +364,8 @@ class Lesions:
                                     thresholdType='percOfMaxDist', percT=0.5):
         # calculates probability based on similarity of intensities
         probs, mu = tools.intensity_probability(data, std=10)
-        # py3DSeedEditor.py3DSeedEditor(data).show()
-        # py3DSeedEditor.py3DSeedEditor(probs).show()
+        # sed3.sed3(data).show()
+        # sed3.sed3(probs).show()
         # normalizing and calculating reciprocal values
         # weights_ints = skexp.rescale_intensity(probs,
         # in_range=(0,probs.max()), out_range=(1,0))
@@ -373,16 +373,16 @@ class Lesions:
 
         weights_h = np.where(data > mu, 1 - probs, 0)
         weights_l = np.where(data < mu, 1 - probs, 0)
-        # py3DSeedEditor.py3DSeedEditor(1 - probs).show()
-        py3DSeedEditor.py3DSeedEditor(weights_h).show()
-        py3DSeedEditor.py3DSeedEditor(weights_l).show()
+        # sed3.sed3(1 - probs).show()
+        sed3.sed3(weights_h).show()
+        sed3.sed3(weights_l).show()
 
         if roi is None:
             roi = np.logical_and(data >= dens_min, data <= dens_max)
         dist_data = np.where(class1 == 1, False, True)
         dist_data *= roi > 0
         # dists = distance_transform_edt(dist_data)
-        # py3DSeedEditor.py3DSeedEditor(dists).show()
+        # sed3.sed3(dists).show()
 
         # print 'dists max = %i' % dists.max()
         # print 'dists min = %i' % dists.min()
@@ -393,7 +393,7 @@ class Lesions:
 
         # energy = dists * weights_ints
         energy = weights_ints
-        # py3DSeedEditor.py3DSeedEditor(energy).show()
+        # sed3.sed3(energy).show()
 
         seeds = np.zeros(data.shape, dtype=np.bool)
         if thresholdType == 'percOfMaxDist':
@@ -410,7 +410,7 @@ class Lesions:
         print seeds.max()
         print 'seed perc = %.2f' % (
             (energy > percT * energy.max()).sum()/np.float(energy.nbytes))
-        py3DSeedEditor.py3DSeedEditor(seeds).show()
+        sed3.sed3(seeds).show()
 
         # removing to small objects
         min_size_of_seed_area = 60
@@ -428,7 +428,7 @@ class Lesions:
         # segmentovana jatra a cevy
         all_seeds = np.where(roi == 0, -1, all_seeds)
 
-        py3DSeedEditor.py3DSeedEditor(all_seeds).show()
+        sed3.sed3(all_seeds).show()
 
         return all_seeds
 
@@ -512,7 +512,7 @@ def main():
     # more total-variation
     # data['data3d'] = tools.smoothing_tv(data['data3d'], weight=0.2,
     # multichannel=False, sliceId=0)
-    # py3DSeedEditor.py3DSeedEditor(data['data3d']).show()
+    # sed3.sed3(data['data3d']).show()
 
     tumory = Lesions()
     # tumory.overlay_test()
@@ -520,7 +520,7 @@ def main():
     tumory.automatic_localization()
 
     tumors = tumory.segmentation == tumory.data['slab']['lesions']
-    py3DSeedEditor.py3DSeedEditor(tumory.data3d, contour=tumors).show()
+    sed3.sed3(tumory.data3d, contour=tumors).show()
 
 #    SectorDisplay2__()
 

@@ -11,7 +11,7 @@ import os.path
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 sys.path.append(os.path.join(path_to_script,
-                             "../extern/py3DSeedEditor/"))
+                             "../extern/sed3/"))
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
 
@@ -31,7 +31,7 @@ import numpy as np
 
 # ----------------- my scripts --------
 import argparse
-import py3DSeedEditor
+import sed3
 
 #import segmentation
 import qmisc
@@ -114,7 +114,7 @@ def main():
         overlay += overlays[key]
 
     #import ipdb; ipdb.set_trace() # BREAKPOINT
-    pyed = py3DSeedEditor.py3DSeedEditor(data3d, contour=overlay)
+    pyed = sed3.sed3(data3d, contour=overlay)
     pyed.show()
 
     #print savestring

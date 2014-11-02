@@ -145,7 +145,7 @@ class SupportStructureSegmentationTest(unittest.TestCase):
 # pyed.exec_()
 # img3d = np.zeros([256,256,80], dtype=np.int16)
 #
-# pyed = py3DSeedEditor.py3DSeedEditor(data3d)
+# pyed = sed3.sed3(data3d)
 # pyed.show()
 #
 #        tumory = lesions.Lesions()
@@ -157,7 +157,7 @@ class SupportStructureSegmentationTest(unittest.TestCase):
 #
 #
 # ověření výsledku
-# pyed = py3DSeedEditor.py3DSeedEditor(outputTmp, contour=segm==slab['porta'])
+# pyed = sed3.sed3(outputTmp, contour=segm==slab['porta'])
 # pyed.show()
 #
 #        errim = np.abs(
@@ -165,7 +165,7 @@ class SupportStructureSegmentationTest(unittest.TestCase):
 #                (segm == slab['lesions']).astype(np.int))
 #
 # ověření výsledku
-# pyed = py3DSeedEditor.py3DSeedEditor(errim, contour=segm==slab['porta'])
+# pyed = sed3.sed3(errim, contour=segm==slab['porta'])
 # pyed.show()
 # evaluation
 #        sum_of_wrong_voxels = np.sum(errim)

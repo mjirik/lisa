@@ -20,7 +20,7 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../lisa/"))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 sys.path.append(os.path.join(path_to_script,
-                             "../extern/py3DSeedEditor/"))
+                             "../extern/sed3/"))
 sys.path.append(os.path.join(path_to_script,
                              "../extern/lbp/"))
 # sys.path.append(os.path.join(path_to_script, "../extern/"))
@@ -40,11 +40,11 @@ import scipy
 import itertools
 
 # ----------------- my scripts --------
-import py3DSeedEditor
+import sed3
 # import dcmreaddata1 as dcmr
 # import dcmreaddata as dcmr
 import argparse
-# import py3DSeedEditor
+# import sed3
 
 import misc
 import qmisc
@@ -446,7 +446,7 @@ def one_exp_set_training(inputdata, tile_shape,
                 voxelsize_mm, working_voxelsize_mm)
 
         if visualization:
-            pyed = py3DSeedEditor.py3DSeedEditor(data3d_orig,
+            pyed = sed3.sed3(data3d_orig,
                                                  contour=data3d_seg)
             pyed.show()
         logger.debug('data shape ' + str(data3d_orig.shape))
@@ -516,7 +516,7 @@ def one_exp_set_testing(
                 voxelsize_mm, working_voxelsize_mm)
 
         if visualization:
-            pyed = py3DSeedEditor.py3DSeedEditor(data3d_orig,
+            pyed = sed3.sed3(data3d_orig,
                                                  contour=data3d_seg)
             pyed.show()
 
@@ -549,9 +549,9 @@ def one_exp_set_testing(
         # labels_train = arrange_to_tiled_data(cidxs, tile_shape,
         #                                     d_shp, ltl)
 
-        # pyed = py3DSeedEditor.py3DSeedEditor(labels_train, contour=labels)
+        # pyed = sed3.sed3(labels_train, contour=labels)
         if visualization:
-            pyed = py3DSeedEditor.py3DSeedEditor(
+            pyed = sed3.sed3(
                 data3d_seg,
                 contour=segmentation)
             pyed.show()

@@ -21,7 +21,7 @@ dicom.debug(False)
 import lisa.datawriter as dwriter
 import lisa.datareader as dreader
 
-# import py3DSeedEditor as pyed
+# import sed3 as pyed
 
 
 class DicomWriterTest(unittest.TestCase):
@@ -90,7 +90,7 @@ class DicomWriterTest(unittest.TestCase):
         newoverlay = dr.GetOverlay()
         # print overlay
 
-        # ed = pyed.py3DSeedEditor(newoverlay[6])
+        # ed = pyed.sed3(newoverlay[6])
         # ed.show()
         self.assertTrue((newoverlay[i_overlay] == overlay).all())
 

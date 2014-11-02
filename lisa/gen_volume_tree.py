@@ -21,7 +21,7 @@ import datawriter
 import misc
 
 # import datareader
-import py3DSeedEditor as se
+import sed3 as se
 
 import gen_vtk_tree
 
@@ -131,7 +131,7 @@ class VolumeTreeGenerator:
         #dw.Write3DData(self.data3d, outputfile, filetype)
 
     def show(self):
-        pyed = se.py3DSeedEditor(self.data3d)
+        pyed = se.sed3(self.data3d)
         pyed.show()
 
 

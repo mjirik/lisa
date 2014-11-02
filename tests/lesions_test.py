@@ -10,7 +10,7 @@ import copy
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
-sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
+sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
 
@@ -72,7 +72,7 @@ class LesionsTest(unittest.TestCase):
 #        pyed.exec_()
 #        #img3d = np.zeros([256,256,80], dtype=np.int16)
         
-       # pyed = py3DSeedEditor.py3DSeedEditor(data3d)
+       # pyed = sed3.sed3(data3d)
        # pyed.show()
 
         tumory = lesions.Lesions()
@@ -84,7 +84,7 @@ class LesionsTest(unittest.TestCase):
 
 
 # ověření výsledku
-        #pyed = py3DSeedEditor.py3DSeedEditor(outputTmp, contour=segm==slab['porta'])
+        #pyed = sed3.sed3(outputTmp, contour=segm==slab['porta'])
         #pyed.show()
 
         errim = np.abs(
@@ -92,7 +92,7 @@ class LesionsTest(unittest.TestCase):
                 (segm == slab['lesions']).astype(np.int))
 
 # ověření výsledku
-        #pyed = py3DSeedEditor.py3DSeedEditor(errim, contour=segm==slab['porta'])
+        #pyed = sed3.sed3(errim, contour=segm==slab['porta'])
         #pyed.show()
 #evaluation
         sum_of_wrong_voxels = np.sum(errim)

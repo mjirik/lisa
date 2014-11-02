@@ -10,7 +10,7 @@ import copy
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
-sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
+sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
 
@@ -56,7 +56,7 @@ class DicomReaderTest(unittest.TestCase):
         each bit is stored as array element.
         """
         import dicom
-        # import py3DSeedEditor
+        # import sed3
         #import matplotlib.pyplot as plt
         dcmfile = os.path.join(path_to_script, '../sample_data/volumetrie/volumetry_slice.DCM')
         data = dicom.read_file(dcmfile)
@@ -96,7 +96,7 @@ class DicomReaderTest(unittest.TestCase):
 
         self. assertEqual(overlay[200,200],1)
         self. assertEqual(overlay[100,100],0)
-        #pyed = py3DSeedEditor.py3DSeedEditor(overlay)
+        #pyed = sed3.sed3(overlay)
         #pyed.show()
         #import pdb; pdb.set_trace()
 
@@ -204,7 +204,7 @@ class DicomReaderTest(unittest.TestCase):
 ##        pyed.exec_()
 ##        #img3d = np.zeros([256,256,80], dtype=np.int16)
 #
-#       # pyed = py3DSeedEditor.py3DSeedEditor(data3d)
+#       # pyed = sed3.sed3(data3d)
 #       # pyed.show()
 #
 #        tumory = lesions.Lesions()
@@ -216,7 +216,7 @@ class DicomReaderTest(unittest.TestCase):
 #
 #
 ## ověření výsledku
-#        #pyed = py3DSeedEditor.py3DSeedEditor(outputTmp, contour=segm==slab['porta'])
+#        #pyed = sed3.sed3(outputTmp, contour=segm==slab['porta'])
 #        #pyed.show()
 #
 #        errim = np.abs(
@@ -224,7 +224,7 @@ class DicomReaderTest(unittest.TestCase):
 #                (segm == slab['lesions']).astype(np.int))
 #
 ## ověření výsledku
-#        #pyed = py3DSeedEditor.py3DSeedEditor(errim, contour=segm==slab['porta'])
+#        #pyed = sed3.sed3(errim, contour=segm==slab['porta'])
 #        #pyed.show()
 ##evaluation
 #        sum_of_wrong_voxels = np.sum(errim)

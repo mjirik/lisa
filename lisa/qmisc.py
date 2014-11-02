@@ -6,7 +6,7 @@ import sys
 import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor"))
+sys.path.append(os.path.join(path_to_script, "../extern/sed3"))
 
 import numpy as np
 
@@ -39,7 +39,7 @@ def isSparseMatrix(obj):
         return False
 
 
-# import py3DSeedEditor
+# import sed3
 
 def manualcrop(data):  # pragma: no cover
 
@@ -51,7 +51,7 @@ def manualcrop(data):  # pragma: no cover
 
     pyed = seed_editor_qt.QTSeedEditor(data, mode='crop')
     pyed.exec_()
-    # pyed = py3DSeedEditor.py3DSeedEditor(data)
+    # pyed = sed3.sed3(data)
     # pyed.show()
     nzs = pyed.seeds.nonzero()
     crinfo = [

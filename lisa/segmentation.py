@@ -155,8 +155,8 @@ ok)')
         logger.debug(
             ('Nyni si levym nebo pravym tlacitkem mysi (klepnutim nebo tazenim)\
  oznacte specificke oblasti k vraceni.'))
-        import py3DSeedEditor
-        pyed = py3DSeedEditor.py3DSeedEditor(preparedData)
+        import sed3
+        pyed = sed3.sed3(preparedData)
         pyed.show()
         seeds = pyed.seeds
 

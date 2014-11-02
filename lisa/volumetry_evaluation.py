@@ -15,7 +15,7 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 sys.path.append(os.path.join(path_to_script,
-                             "../extern/py3DSeedEditor/"))
+                             "../extern/sed3/"))
 # sys.path.append(os.path.join(path_to_script, "../extern/"))
 # import featurevector
 
@@ -32,7 +32,7 @@ import scipy
 # import traceback
 
 # ----------------- my scripts --------
-import py3DSeedEditor
+import sed3
 # import dcmreaddata1 as dcmr
 # import dcmreaddata as dcmr
 import argparse
@@ -90,7 +90,7 @@ def evaluateAndWriteToFile(
     # volume
     # volume_mm3 = np.sum(oseg.segmentation > 0) * np.prod(oseg.voxelsize_mm)
 
-    # pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour =
+    # pyed = sed3.sed3(oseg.data3d, contour =
     # oseg.segmentation)
     # pyed.show()
 
@@ -167,7 +167,7 @@ def eval_all_from_dataset_metadata(inputdata, visualization=False):
         data3d_b = (data3d_b > 0).astype(np.int8)
 
         if visualization:
-            pyed = py3DSeedEditor.py3DSeedEditor(data3d_a,  # + (4 * data3d_b)
+            pyed = sed3.sed3(data3d_a,  # + (4 * data3d_b)
                                                  contour=data3d_b)
             pyed.show()
 
@@ -236,7 +236,7 @@ def compare_volumes(vol1, vol2, voxelsize_mm):
     logger.debug('VD [%]' + str(vd))
     # import pdb; pdb.set_trace()
 
-    # pyed = py3DSeedEditor.py3DSeedEditor(vol1, contour=vol2)
+    # pyed = sed3.sed3(vol1, contour=vol2)
     # pyed.show()
 
     # get_border(vol1)
@@ -272,7 +272,7 @@ def distance_matrics(vol1, vol2, voxelsize_mm):
     border1 = get_border(vol1)
     border2 = get_border(vol2)
 
-    # pyed = py3DSeedEditor.py3DSeedEditor(vol1, contour=vol1)
+    # pyed = sed3.sed3(vol1, contour=vol1)
     # pyed.show()
     b1dst = scipy.ndimage.morphology.distance_transform_edt(
         1 - border1,
@@ -281,7 +281,7 @@ def distance_matrics(vol1, vol2, voxelsize_mm):
 
     dst_b1_to_b2 = border2 * b1dst
     # import ipdb; ipdb.set_trace() # BREAKPOINT
-    # pyed = py3DSeedEditor.py3DSeedEditor(dst_b1_to_b2, contour=vol1)
+    # pyed = sed3.sed3(dst_b1_to_b2, contour=vol1)
     # pyed.show()
     # print np.nonzero(border1)
     # avgd = np.average(dst_b1_to_b2[np.nonzero(border2)])
@@ -301,7 +301,7 @@ def get_border(image3d):
 
     conv = conv > 0
 
-    # pyed = py3DSeedEditor.py3DSeedEditor(conv, contour =
+    # pyed = sed3.sed3(conv, contour =
     # image3d)
     # pyed.show()
 

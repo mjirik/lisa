@@ -9,7 +9,7 @@ import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
-sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
+sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
 
@@ -27,7 +27,7 @@ class QTSeedEditorTest(unittest.TestCase):
         """
         Funkce provádí změnu vstupních dat - data3d
         """
-        #pyed = py3DSeedEditor.py3DSeedEditor(self.data3d, contour = oseg.segmentation)
+        #pyed = sed3.sed3(self.data3d, contour = oseg.segmentation)
         #pyed.show()
 
         try:

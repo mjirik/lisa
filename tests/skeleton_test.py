@@ -13,7 +13,7 @@ import numpy as np
 import unittest
 from nose.plugins.attrib import attr
 import lisa.skeleton_analyser as sk
-# import py3DSeedEditor as ped
+# import sed3 as ped
 import copy
 
 
@@ -31,14 +31,14 @@ class TemplateTest(unittest.TestCase):
         data[5, 8, 5:9] = 1
 
         data = skelet3d.skelet3d(data)
-        # pe = ped.py3DSeedEditor(data)
+        # pe = ped.sed3(data)
         # pe.show()
 
         skan = sk.SkeletonAnalyser(copy.copy(data))
         output = skan.filter_small(data, 3)
         # skan.skeleton_analysis()
 
-        # pe = ped.py3DSeedEditor(output)
+        # pe = ped.sed3(output)
         # pe.show()
 
         self.assertEqual(output[5, 8, 7], 0)

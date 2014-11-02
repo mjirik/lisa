@@ -26,7 +26,7 @@ import csv
 
 import skelet3d
 import segmentation
-import py3DSeedEditor as se
+import sed3 as se
 
 import histology_analyser_gui as HA_GUI
 from skeleton_analyser import SkeletonAnalyser
@@ -237,7 +237,7 @@ class HistologyAnalyser:
         data3d_nodes_vis[data3d_nodes_vis < 0] = 2
 
         if not self.nogui:
-            pyed = se.py3DSeedEditor(
+            pyed = se.sed3(
                 self.data3d,
                 seeds=(data3d_nodes_vis).astype(np.int8),
                 contour=self.data3d_thr.astype(np.int8)

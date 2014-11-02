@@ -8,7 +8,7 @@ import os.path
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 sys.path.append(os.path.join(path_to_script,
-                             "../extern/py3DSeedEditor/"))
+                             "../extern/sed3/"))
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
 import unittest
@@ -31,7 +31,7 @@ import scipy
 import traceback
 
 # ----------------- my scripts --------
-import py3DSeedEditor
+import sed3
 #
 try:
     import dcmreaddata as dcmr
@@ -43,7 +43,7 @@ except:
     logger.warning("Deprecated of pyseg_base as submodule")
     import pycut
 import argparse
-#import py3DSeedEditor
+#import sed3
 
 import segmentation
 import qmisc
@@ -321,7 +321,7 @@ def main():
     print (
             "Volume " +
             str(oseg.get_segmented_volume_size_mm3() / 1000000.0) + ' [l]')
-    #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour =
+    #pyed = sed3.sed3(oseg.data3d, contour =
     # oseg.segmentation)
     #pyed.show()
 

@@ -9,7 +9,7 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 sys.path.append(os.path.join(path_to_script,
-                             "../extern/py3DSeedEditor/"))
+                             "../extern/sed3/"))
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
 import unittest
@@ -27,7 +27,7 @@ import scipy
 import traceback
 
 # ----------------- my scripts --------
-import py3DSeedEditor
+import sed3
 # import dcmreaddata1 as dcmr
 # try:
 #    import dcmreaddata as dcmr
@@ -35,7 +35,7 @@ import py3DSeedEditor
 #    from pysegbase import dcmreaddata as dcmr
 
 import argparse
-#import py3DSeedEditor
+#import sed3
 
 import segmentation
 import qmisc
@@ -109,7 +109,7 @@ def main():
     # volume
     #volume_mm3 = np.sum(oseg.segmentation > 0) * np.prod(oseg.voxelsize_mm)
 
-    #pyed = py3DSeedEditor.py3DSeedEditor(oseg.data3d, contour =
+    #pyed = sed3.sed3(oseg.data3d, contour =
     # oseg.segmentation)
     #pyed.show()
 

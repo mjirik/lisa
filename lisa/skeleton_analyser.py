@@ -266,7 +266,7 @@ class SkeletonAnalyser:
 # delete nodes
         nodes = skeleton_nodes == 2
         skeleton_nodes[nodes] = 0
-        # pe = ped.py3DSeedEditor(skeleton_nodes)
+        # pe = ped.sed3(skeleton_nodes)
         # pe.show()
         labeled_terminals = self.__generate_sklabel(skeleton_nodes)
 
@@ -275,7 +275,7 @@ class SkeletonAnalyser:
             labeled_terminals)
         # print "labeled edges + terminals"
         # print np.unique(labeled_terminals)
-        # pe = ped.py3DSeedEditor(labeled_terminals)
+        # pe = ped.sed3(labeled_terminals)
         # pe.show()
         for i in range(np.min(labeled_terminals), 0):
             lti = labeled_terminals == i

@@ -14,7 +14,7 @@ import sys
 import os.path
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pycat/"))
-sys.path.append(os.path.join(path_to_script, "../extern/pycat/extern/py3DSeedEditor/"))
+sys.path.append(os.path.join(path_to_script, "../extern/pycat/extern/sed3/"))
 sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
 #import featurevector
 
@@ -32,7 +32,7 @@ import argparse
 
 # ----------------- my scripts --------
 import misc
-import py3DSeedEditor
+import sed3
 
 
 
@@ -55,11 +55,11 @@ class SimpleSegmentation:
 	
 	#nalzení páteře
 	spine_finder = scipy.ndimage.filters.convolve((simple_seg).astype(np.int), KONV_MASK)
-	#pyed = py3DSeedEditor.py3DSeedEditor(simple_seg)
+	#pyed = sed3.sed3(simple_seg)
 	#
 				
 	simple_seg += ((spine_finder>25)*SPINE_ID)
-	pyed = py3DSeedEditor.py3DSeedEditor(simple_seg)
+	pyed = sed3.sed3(simple_seg)
 	pyed.show()	
 
 	return simple_seg
@@ -92,7 +92,7 @@ def main():
     simple_seg = ss.simple_segmentation(data3d, voxelsize_mm)
 
     #visualization
-    pyed = py3DSeedEditor.py3DSeedEditor(data['data3d'], seeds=simple_seg)
+    pyed = sed3.sed3(data['data3d'], seeds=simple_seg)
     pyed.show()
 
     # save

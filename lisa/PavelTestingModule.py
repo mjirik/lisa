@@ -88,7 +88,7 @@ def main2():
     #        pyed.exec_()
     #        #img3d = np.zeros([256,256,80], dtype=np.int16)
 
-    # pyed = py3DSeedEditor.py3DSeedEditor(data3d)
+    # pyed = sed3.sed3(data3d)
     # pyed.show()
 
     outputTmp = sg.vesselSegmentation(
