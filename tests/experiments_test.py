@@ -6,10 +6,6 @@ import sys
 import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
-sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
-sys.path.append(os.path.join(path_to_script, "../src/"))
-sys.path.append(os.path.join(path_to_script, "../experiments/"))
 import unittest
 
 import logging
@@ -18,19 +14,19 @@ logger = logging.getLogger(__name__)
 import numpy as np
 
 
-import experiments
-import volumetry_evaluation as ve
+import lisa.experiments
+import lisa.volumetry_evaluation as ve
 
 
 class ExperimentsTest(unittest.TestCase):
 
     def test_get_subdirs(self):
         dirpath = os.path.join(path_to_script, "..")
-        dirlist = experiments.get_subdirs(dirpath)
+        dirlist = lisa.experiments.get_subdirs(dirpath)
         # import pdb; pdb.set_trace()
 
         self.assertTrue('tests' in dirlist)
-        self.assertTrue('src' in dirlist)
+        self.assertTrue('lisa' in dirlist)
         self.assertFalse('README.md' in dirlist)
 
     def test_sliver_overall_score_for_one_couple(self):

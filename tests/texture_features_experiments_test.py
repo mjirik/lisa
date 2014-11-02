@@ -7,23 +7,24 @@ import os.path
 import logging
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../experiments/"))
-sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
-sys.path.append(os.path.join(path_to_script, "../src/"))
+# sys.path.append(os.path.join(path_to_script, "../experiments/"))
+# sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
+# sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
+from nose.plugins.attrib import attr
 
-
-import tiled_liver_statistics
+import experiments.tiled_liver_statistics as tls
 
 
 class TextureFeaturesExperimentTest(unittest.TestCase):
 
     # @unittest.skip("comment after implementation")
+
+    @attr('slow')
     def test_run_experiments(self):
         """
         """
-        import tiled_liver_statistics as tls
-        import texture_features as tfeat
+        import lisa.texture_features as tfeat
         from sklearn import svm
         from sklearn.naive_bayes import GaussianNB
         import classification

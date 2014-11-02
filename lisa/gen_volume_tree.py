@@ -206,7 +206,7 @@ class TreeGenerator:
             logger.debug("joints generated")
         except:
             import traceback
-            traceback.print_exc()
+            logger.debug(traceback.format_exc())
             pass
 
         output = self.generator.get_output()

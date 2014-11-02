@@ -7,25 +7,27 @@ import sys
 import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
-sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
-sys.path.append(os.path.join(path_to_script, "../src/"))
+# sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
+# sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
+# sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
 
+from nose.plugins.attrib import attr
 import numpy as np
 
 # from PyQt4.QtGui import QApplication
 # import py3DSeedEditor
 
-import organ_segmentation_gui as organ_segmentation
-import segmentation
+import lisa.organ_segmentation_gui as organ_segmentation
+from lisa import segmentation
 
 
 class VesselsSegmentationTest(unittest.TestCase):
     interactiveTest = False
 
     # @unittest.skip("demonstrating skipping")
-    @unittest.skipIf(not interactiveTest, "interactive test")
+    # @unittest.skipIf(not interactiveTest, "interactive test")
+    @attr('interactive')
     def test_whole_organ_segmentation_interactive(self):
         pass
 
@@ -103,6 +105,7 @@ class VesselsSegmentationTest(unittest.TestCase):
 
         self.assertLess(errorrate, 0.1)
 
+    @attr('slow')
     def test_real_data_segmentation(self):
 
         dcmdir = os.path.join(path_to_script, './../sample_data/jatra_5mm')

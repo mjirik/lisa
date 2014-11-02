@@ -6,21 +6,19 @@ import sys
 import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
-sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
-sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
+from nose.plugins.attrib import attr
 
-from gen_volume_tree import TreeGenerator
-from histology_analyser import HistologyAnalyser
-from histology_report import HistologyReport
-import gt_lar
+from lisa.gen_volume_tree import TreeGenerator
+from lisa.histology_analyser import HistologyAnalyser
+from lisa.histology_report import HistologyReport
+import lisa.gt_lar
 
 
 class HistologyTest(unittest.TestCase):
     interactiveTests = False
 
-    @unittest.skipIf(not interactiveTests, "skipping while developing lar functions")
+    @attr("interactive")
     def test_vessel_tree_lar(self):
         tvg = TreeGenerator(gt_lar.GTLar)
         yaml_path = os.path.join(path_to_script, "./hist_stats_test.yaml")

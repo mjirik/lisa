@@ -7,15 +7,13 @@ import sys
 import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
-sys.path.append(os.path.join(path_to_script, "../extern/py3DSeedEditor/"))
-sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
 
 import numpy as np
+from nose.plugins.attrib import attr
 
 
-import organ_segmentation_gui as organ_segmentation
+import lisa.organ_segmentation_gui as organ_segmentation
 import pysegbase.dcmreaddata as dcmr
 
 
@@ -40,7 +38,8 @@ class OrganSegmentationTest(unittest.TestCase):
         metadata = {'voxelsize_mm': voxelsize_mm}
         return img3d, metadata, seeds, segmentation
 
-    @unittest.skipIf(not interactiveTest, "interactive test")
+    # @unittest.skipIf(not interactiveTest, "interactive test")
+    @attr("interactive")
     def test_viewer_seeds(self):
 
         try:
@@ -68,7 +67,7 @@ class OrganSegmentationTest(unittest.TestCase):
         app.exit()
     # @unittest.skip("demonstrating skipping")
 
-    @unittest.skipIf(not interactiveTest, "interactive test")
+    @attr("interactive")
     def test_whole_organ_segmentation_interactive(self):
         """
         Interactive test uses dicom data for segmentation
@@ -104,8 +103,8 @@ and background")
 
 
 # @TODO doladit boundary penalties
-    @unittest.skipIf(not interactiveTest, "interactive test")
-    # @unittest.skip("interactivity params are obsolete")
+    # @unittest.skipIf(not interactiveTest, "interactive test")
+    @unittest.skip("interactivity params are obsolete")
     def test_organ_segmentation_with_boundary_penalties(self):
         """
         Interactivity is stored to file
@@ -169,7 +168,8 @@ and background")
 
         self.assertGreater(volume, 1000000)
 
-    @unittest.skipIf(not interactiveTest, "interactive test")
+    # @unittest.skipIf(not interactiveTest, "interactive test")
+    @attr("interactive")
     def test_stored_interactivity(self):
         pass
 
@@ -258,7 +258,8 @@ and background")
         pass
 
     # @unittest.skipIf(True, "interactive test")
-    @unittest.skipIf(not interactiveTest, "interactive test")
+    # @unittest.skipIf(not interactiveTest, "interactive test")
+    @attr("interactive")
     def test_vincentka_06_slice_thickness_interactive(self):
         """
         Interactive test. SliceThickness is not voxel depth. If it is, this

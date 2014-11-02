@@ -17,7 +17,7 @@ import sys
 import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../src/"))
+sys.path.append(os.path.join(path_to_script, "../lisa/"))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 sys.path.append(os.path.join(path_to_script,
                              "../extern/py3DSeedEditor/"))
@@ -50,7 +50,7 @@ import misc
 import qmisc
 import datareader
 import matplotlib.pyplot as plt
-import experiments
+from lisa import experiments
 import texture_features as tfeat
 
 
@@ -391,7 +391,8 @@ def save_labels(
 
     filename = __struct_to_string_for_filename(inputfile + '.pklz')
 
-    path_to_file = os.path.join(path_subdirectory, experiment_dirname, filename)
+    path_to_file = os.path.join(path_subdirectory,
+                                experiment_dirname, filename)
     misc.obj_to_file(dataplus, path_to_file, filetype='pklz')
     # os.chdir(actual)
 
@@ -701,7 +702,8 @@ def main():
 
     parser = argparse.ArgumentParser(
         description='Compute features on liver and other tissue.')
-    parser.add_argument('-tr', '--training_yaml_path', help='Input yaml file.' +
+    parser.add_argument('-tr', '--training_yaml_path',
+                        help='Input yaml file.' +
                         " You can check sample with -si parameter.",
                         default="20130919_liver_statistics.yaml")
     parser.add_argument('-te', '--testing_yaml_path', help='Input yaml file.' +

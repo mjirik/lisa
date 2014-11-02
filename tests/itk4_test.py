@@ -18,7 +18,7 @@ import unittest
 from PyQt4.QtGui import QFileDialog, QApplication, QMainWindow
 
 import numpy as np
-import itk
+# import itk
 #import SimpleITK as sitk
 
 

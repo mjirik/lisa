@@ -12,7 +12,7 @@
 import numpy as np
 import unittest
 from nose.plugins.attrib import attr
-import src.skeleton_analyser as sk
+import lisa.skeleton_analyser as sk
 # import py3DSeedEditor as ped
 import copy
 

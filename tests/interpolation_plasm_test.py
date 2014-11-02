@@ -5,7 +5,6 @@ import sys
 import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../src/extern"))
 sys.path.append(os.path.join(path_to_script, "../../lar-cc/lib/py/"))
 import unittest
 
@@ -21,7 +20,7 @@ class InterpolationPlasmTest(unittest.TestCase):
         Test has not strong assert part.
         Its passed if any funcion does throw exception.
         """
-        from interpolation_pyplasm import TRIANGLE_DOMAIN
+        from lisa.extern.interpolation_pyplasm import TRIANGLE_DOMAIN
         import pyplasm
 
         dom2D = TRIANGLE_DOMAIN(5, [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
@@ -31,7 +30,7 @@ class InterpolationPlasmTest(unittest.TestCase):
     # @unittest.skipIf(not interactiveTests, "test is with visualization")
     def test_complex_sample(self):
         from larcc import INTERVALS, BEZIER, S2, S1, MAP, STRUCT, SKELETON, VIEW
-        from interpolation_pyplasm import TRIANGLE_DOMAIN,\
+        from lisa.extern.interpolation_pyplasm import TRIANGLE_DOMAIN,\
             TRIANGULAR_COONS_PATCH
         import pyplasm
 

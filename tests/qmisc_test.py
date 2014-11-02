@@ -16,8 +16,8 @@ import numpy as np
 import os
 
 
-import qmisc
-import misc
+from lisa import qmisc
+from lisa import misc
 
 
 #
