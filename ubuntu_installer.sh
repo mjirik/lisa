@@ -36,6 +36,7 @@ cd ~/projects
 git clone --recursive -b stable https://github.com/mjirik/lisa.git
 cd lisa
 python mysetup.py -d
+python mysetup.py -icn
 
 # python src/update_stable.py
 # python lisa.py $@
