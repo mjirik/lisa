@@ -22,6 +22,15 @@ Installing requires you to have installed:
 Install (L)Ubuntu 14.04
 =======================
 
+### Script way
+
+    wget https://raw.githubusercontent.com/mjirik/lisa/master/ubuntu_installer.sh
+    chmod a+x ubuntu_installer.sh
+    ./ubuntu_installer.sh
+    
+### Manual way
+
+
 Tested with Ubuntu 14.04 32-bit and Linux Mint 16 Petra
 
     # 1. deb package requirements
