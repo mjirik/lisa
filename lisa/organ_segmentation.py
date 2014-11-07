@@ -48,8 +48,8 @@ import volumetry_evaluation
 import qmisc
 import misc
 import config
-import datareader
-import datawriter
+from io3d import datareader
+from io3d import datawriter
 
 # import audiosupport
 # import skimage
@@ -77,9 +77,11 @@ default_segmodelparams = {
     'params': {cvtype_name: 'full', 'n_components': 3}
 }
 
-default_segparams = {'pairwise_alpha_per_mm2': 40,
-                     'use_boundary_penalties': False,
-                     'boundary_penalties_sigma': 50}
+default_segparams = {
+    'method': 'GC',
+    'pairwise_alpha_per_mm2': 40,
+    'use_boundary_penalties': False,
+    'boundary_penalties_sigma': 50}
 
 config_version = [1, 0, 0]
 
@@ -490,17 +492,26 @@ class OrganSegmentation():
         logger.debug('pycut segparams ' + str(self.segparams) +
                      '\nmodelparams ' + str(self.segmodelparams)
                      )
-        igc = pycut.ImageGraphCut(
-            # self.data3d,
-            data3d_res,
-            segparams=self.segparams,
-            voxelsize=self.working_voxelsize_mm,
-            modelparams=self.segmodelparams,
-            volume_unit='ml'
-            # oxelsize=self.voxelsize_mm
-        )
+        if 'method' not in self.segparams.keys() or\
+                self.segparams['method'] == 'GC':
+            igc = pycut.ImageGraphCut(
+                # self.data3d,
+                data3d_res,
+                segparams=self.segparams,
+                voxelsize=self.working_voxelsize_mm,
+                modelparams=self.segmodelparams,
+                volume_unit='ml'
+                # oxelsize=self.voxelsize_mm
+            )
+        # elif self.segparams['method'] == '':
+        else:
+            import liver_segmentation
+            igc = liver_segmentation.LiverSegmentation(
+                data3d_res,
+                segparams=self.segparams
+            )
 
-        igc.modelparams = self.segmodelparams
+        # igc.modelparams = self.segmodelparams
 # @TODO uncomment this for kernel model
 #        igc.modelparams = {
 #            'type': 'kernel',
@@ -671,7 +682,8 @@ class OrganSegmentation():
         # mport pdb; pdb.set_trace()
         igc = self._interactivity_begin()
         # gc.interactivity()
-        igc.make_gc()
+        # igc.make_gc()
+        igc.run()
         self.segmentation = (igc.segmentation == 0).astype(np.int8)
         self._interactivity_end(igc)
 
