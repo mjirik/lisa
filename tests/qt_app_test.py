@@ -27,7 +27,6 @@ except:
 import numpy as np
 
 
-# import organ_segmentation_gui as organ_segmentation
 # import pysegbase.dcmreaddata as dcmr
 
 

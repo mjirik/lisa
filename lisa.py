@@ -12,6 +12,6 @@
 
 if __name__ == "__main__":
 
-    import lisa.organ_segmentation_gui as osegg
+    import lisa.organ_segmentation as osegg
     osegg.main()
     exit()

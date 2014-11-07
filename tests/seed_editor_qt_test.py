@@ -16,7 +16,6 @@ import unittest
 # import numpy as np
 
 
-# import organ_segmentation as organ_segmentation_gui
 # import pysegbase.dcmreaddata as dcmr
 
 class QTSeedEditorTest(unittest.TestCase):

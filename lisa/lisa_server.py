@@ -17,9 +17,6 @@ import argparse
 import web
 
 
-import organ_segmentation_gui as osg
-
-
 class LisaServer:
     def __init__(self):
         """TODO: Docstring for __import__.
@@ -49,7 +46,7 @@ class hello:
             "<!DOCTYPE html><html><body><div>" + \
             data +\
             "</div></body></html>"
-            # "<b>" + str(eval(data)) + "</b>" +
+        # "<b>" + str(eval(data)) + "</b>" +
         str(eval(data))
         return str(retval)
 
@@ -58,6 +55,7 @@ class hello:
 
     def POST(self, data):
         return self.process_msg(data)
+
 
 def main():
     logger = logging.getLogger()
@@ -89,7 +87,6 @@ def main():
 
     server = LisaServer()
     server.run()
-
 
 
 if __name__ == "__main__":

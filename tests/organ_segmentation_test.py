@@ -13,7 +13,7 @@ import numpy as np
 from nose.plugins.attrib import attr
 
 
-import lisa.organ_segmentation_gui as organ_segmentation
+from lisa import organ_segmentation
 import pysegbase.dcmreaddata as dcmr
 
 

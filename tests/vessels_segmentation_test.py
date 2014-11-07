@@ -18,7 +18,7 @@ import numpy as np
 # from PyQt4.QtGui import QApplication
 # import sed3
 
-import lisa.organ_segmentation_gui as organ_segmentation
+from lisa import organ_segmentation
 from lisa import segmentation
 
 
