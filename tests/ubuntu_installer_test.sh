@@ -67,7 +67,10 @@ echo "Mount HDD and DVD"
 VBoxManage storageattach $VMNAME --storagectl SATA --port 0 --device 0 --type hdd --medium "/home/mjirik/tmp/Ubuntu1404_32-bit.vdi"
 VBoxManage modifyvm $VMNAME --nic1 nat --nictype1 82540EM --cableconnected1 on
 VBoxManage modifyvm $VMNAME --natpf1 "guestssh,tcp,,2222,,22"
-# VBoxManage startvm $VMNAME
+VBoxManage startvm $VMNAME
+
+echo "Waiting for VirtualBox start"
+sleep 90
 
 echo "SSH connection to VirtualBox"
 echo $SCRIPTPATH
@@ -75,7 +78,7 @@ echo $SCRIPTPATH
 cd ${SCRIPTPATH} > /dev/null
 # go to directory with install script
 cd ..
-# sshpass -p trustz ssh -p 2222 ubuntu@localhost 'bash -s' < ubuntu_installer.sh
-sshpass -p trustz ssh -p 2222 ubuntu@localhost 
+sshpass -p trustz ssh -p 2222 ubuntu@localhost 'bash -s' < ubuntu_installer.sh
+# sshpass -p trustz ssh -p 2222 ubuntu@localhost 
 
 
