@@ -4,12 +4,12 @@ cd `dirname ${SCRIPT_PATH}` > /dev/null
 cd ..
 #cd ../../../../
 
-python src/update_stable.py
+python lisa/update_stable.py
 python lisa.py $@
 
 #git pull
 #git submodule update --init --recursive
-#python src/organ_segmentation.py
+#python lisa/organ_segmentation.py
 
 
 #cd /Users/mjirik/projects/liver-surgery/
@@ -17,5 +17,5 @@ python lisa.py $@
 #git pull
 #echo `pwd`
 #echo $SCRIPT_PATH
-#python /Users/mjirik/projects/liver-surgery/src/organ_segmentation.py
-#python /Users/mjirik/projects/liver-surgery/src/organ_segmentation.py
+#python /Users/mjirik/projects/liver-surgery/lisa/organ_segmentation.py
+#python /Users/mjirik/projects/liver-surgery/lisa/organ_segmentation.py

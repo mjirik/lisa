@@ -1,3 +1,3 @@
 cd ..
-python src\update_stable.py
-python src\organ_segmentation.py
+python lisa\update_stable.py
+python lisa\organ_segmentation.py

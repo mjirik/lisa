@@ -1,3 +1,3 @@
 cd ..
-python src\update_stable.py
-python src\histology_analyser.py
+python lisa\update_stable.py
+python lisa\histology_analyser.py
