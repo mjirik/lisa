@@ -78,7 +78,7 @@ echo $SCRIPTPATH
 cd ${SCRIPTPATH} > /dev/null
 # go to directory with install script
 cd ..
-sshpass -p trustz ssh -p 2222 ubuntu@localhost 'bash -s' < ubuntu_installer.sh
+sshpass -p trustz ssh -p 2222 ubuntu@localhost 'bash -s' < tests/run_this_in_vm.sh
 # sshpass -p trustz ssh -p 2222 ubuntu@localhost 
 
 
