@@ -33,7 +33,7 @@ sudo -u $USER python ~/projects/gco_python/setup.py --user
 sudo apt-get install -y cmake python-numpy libinsighttoolkit3-dev libpng12-dev
 # sudo -u $USER cd ~/projects
 sudo -u $USER mkdir ~/projects/skelet3d
-sudo -u $USER mkdir ~/projects/skelet3d/build
+# sudo -u $USER mkdir ~/projects/skelet3d/build
 sudo -u $USER git clone https://github.com/mjirik/skelet3d.git ~/projects/skelet3d
 cd $HOMEDIR
 cd projects/skelet3d/build

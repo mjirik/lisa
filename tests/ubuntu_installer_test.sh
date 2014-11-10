@@ -68,6 +68,7 @@ VBoxManage storageattach $VMNAME --storagectl SATA --port 0 --device 0 --type hd
 VBoxManage modifyvm $VMNAME --nic1 nat --nictype1 82540EM --cableconnected1 on
 VBoxManage modifyvm $VMNAME --natpf1 "guestssh,tcp,,2222,,22"
 VBoxManage startvm $VMNAME
+echo $?
 
 echo "Waiting for VirtualBox start"
 # sleep 90
