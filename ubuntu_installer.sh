@@ -1,4 +1,5 @@
 #!
+HOMEDIR="`pwd`"
 USER="$(echo `pwd` | sed 's|.*home/\([^/]*\).*|\1|')"
 
 # echo $USER
@@ -21,12 +22,11 @@ sudo -u $USER pip install pysegbase dicom2fem sed3 sed3 io3d --user
 
 # 4. install gco_python
 sudo -u $USER mkdir ~/projects
-sudo -u $USER cd ~/projects
-sudo -u $USER git clone https://github.com/mjirik/gco_python.git
-sudo -u $USER cd gco_python
-sudo -u $USER make
-sudo -u $USER sudo python setup.py install
-sudo -u $USER cd ..
+sudo -u $USER git clone https://github.com/mjirik/gco_python.git ~/projects
+sudo -u $USER cd ~/projects/gco_python && make && python setup.py install --user
+# sudo -u $USER make
+# sudo -u $USER cd ~/projects/gco_python 
+# sudo -u $USER cd ..
 
 # 5. skelet3d - optional for Histology Analyser
 sudo apt-get install cmake python-numpy libinsighttoolkit3-dev libpng12-dev
