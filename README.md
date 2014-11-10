@@ -16,16 +16,15 @@ See our [install notes](https://github.com/mjirik/lisa/blob/master/INSTALL.md) f
 
 Get stable branche
 
-    git clone --recursive -b stable https://github.com/mjirik/lisa.git
+    wget https://raw.githubusercontent.com/mjirik/lisa/master/ubuntu_installer.sh
+    chmod a+x ubuntu_installer.sh
+    ./ubuntu_installer.sh
 
 or for current developement
 
-    git clone --recursive git@github.com:mjirik/lisa.git
-
-or
-
-    git clone git@github.com:mjirik/lisa.git
-    git submodule update --init --recursive
+    wget https://raw.githubusercontent.com/mjirik/lisa/master/ubuntu_installer.sh
+    chmod a+x ubuntu_installer.sh
+    ./ubuntu_installer.sh devel
 
 or use [Lisa in Ubuntu for VirtualBox](http://147.228.240.61/queetech/install/lisa_ubuntu14.04.vdi)
 
