@@ -70,7 +70,7 @@ VBoxManage modifyvm $VMNAME --natpf1 "guestssh,tcp,,2222,,22"
 VBoxManage startvm $VMNAME
 
 echo "Waiting for VirtualBox start"
-sleep 90
+# sleep 90
 
 echo "SSH connection to VirtualBox"
 echo $SCRIPTPATH
@@ -78,7 +78,10 @@ echo $SCRIPTPATH
 cd ${SCRIPTPATH} > /dev/null
 # go to directory with install script
 cd ..
-sshpass -p trustz ssh -p 2222 ubuntu@localhost 'bash -s' < tests/run_this_in_vm.sh
+# add host fingerpritn to avoid :
+# Are you suder to continue connecting (yes/no)
+# ssh -p 2222 -o StrictHostKeyChecking=no ubuntu@localhost
+sshpass -p trustz ssh -p 2222 -o StrictHostKeyChecking=no ubuntu@localhost 'bash -s' < tests/run_this_in_vm.sh
 # sshpass -p trustz ssh -p 2222 ubuntu@localhost 
 
 

@@ -11,7 +11,7 @@ USER="$(echo `pwd` | sed 's|.*home/\([^/]*\).*|\1|')"
 #cd ../../../../
 
 # 1. deb package requirements
-apt-get install python git python-dev g++ python-numpy python-scipy python-matplotlib python-sklearn python-skimage python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools curl
+apt-get install -y python git python-dev g++ python-numpy python-scipy python-matplotlib python-sklearn python-skimage python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools curl
 
 # 2. easy_install requirements simpleITK  
 easy_install -U SimpleITK mahotas
