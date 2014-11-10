@@ -18,13 +18,13 @@ Get stable branche
 
     wget https://raw.githubusercontent.com/mjirik/lisa/master/ubuntu_installer.sh
     chmod a+x ubuntu_installer.sh
-    ./ubuntu_installer.sh
+    sudo ./ubuntu_installer.sh
 
 or for current developement
 
     wget https://raw.githubusercontent.com/mjirik/lisa/master/ubuntu_installer.sh
     chmod a+x ubuntu_installer.sh
-    ./ubuntu_installer.sh devel
+    sudo ./ubuntu_installer.sh devel
 
 or use [Lisa in Ubuntu for VirtualBox](http://147.228.240.61/queetech/install/lisa_ubuntu14.04.vdi)
 

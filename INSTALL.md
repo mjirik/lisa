@@ -28,6 +28,10 @@ Install (L)Ubuntu 14.04
     chmod a+x ubuntu_installer.sh
     ./ubuntu_installer.sh
     
+
+Installer uses sudo for installing standard Ubuntu packages. Other procedures 
+uses only normal user permission.
+    
 ### Manual way
 
 
