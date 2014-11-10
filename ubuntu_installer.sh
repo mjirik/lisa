@@ -1,15 +1,10 @@
 #!
+#
+# if script is called with any argument, developer install is used
+
+
 HOMEDIR="`pwd`"
 USER="$(echo `pwd` | sed 's|.*home/\([^/]*\).*|\1|')"
-
-# echo $USER
-# touch aa
-# sudo -u $USER touch aaa
-#
-#
-# SCRIPT_PATH="${BASH_SOURCE[0]}";
-# cd `dirname ${SCRIPT_PATH}` > /dev/null
-#cd ../../../../
 
 # 1. deb package requirements
 apt-get install -y python git python-dev g++ python-numpy python-scipy python-matplotlib python-sklearn python-skimage python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools curl python-pip cmake
@@ -27,7 +22,6 @@ sudo -u $USER mkdir ~/projects/gco_python
 sudo -u $USER git clone https://github.com/mjirik/gco_python.git ~/projects/gco_python
 sudo -u $USER make -C ~/projects/gco_python
 sudo -u $USER python ~/projects/gco_python/setup.py --user
-# sudo -u $USER cd ..
 
 # 5. skelet3d - optional for Histology Analyser
 sudo apt-get install -y cmake python-numpy libinsighttoolkit3-dev libpng12-dev
@@ -46,7 +40,12 @@ sudo make install
 
 # Clone Lisa, make icons
 cd ~/projects
-sudo -u $USER git clone --recursive -b stable https://github.com/mjirik/lisa.git
+if [[ $# -eq 0 ]] ; then
+    sudo -u $USER git clone --recursive -b stable https://github.com/mjirik/lisa.git
+else
+    # if there is an any argument, install as developer
+    sudo -u $USER git clone --recursive git@github.com:mjirik/lisa.git
+fi
 cd lisa
 sudo -u $USER python mysetup.py -d
 sudo -u $USER python mysetup.py -icn
