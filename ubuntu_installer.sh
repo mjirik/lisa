@@ -12,7 +12,7 @@ USER="$(echo `pwd` | sed 's|.*home/\([^/]*\).*|\1|')"
 #cd ../../../../
 
 # 1. deb package requirements
-apt-get install -y python git python-dev g++ python-numpy python-scipy python-matplotlib python-sklearn python-skimage python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools curl
+apt-get install -y python git python-dev g++ python-numpy python-scipy python-matplotlib python-sklearn python-skimage python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools curl python-pip
 
 # 2. easy_install requirements simpleITK  
 easy_install -U SimpleITK mahotas
@@ -29,8 +29,8 @@ sudo -u $USER python ~/projects/gco_python/setup.py --user
 
 # 5. skelet3d - optional for Histology Analyser
 sudo apt-get install cmake python-numpy libinsighttoolkit3-dev libpng12-dev
-sudo -u $USER cd ~/projects
-sudo -u $USER git clone https://github.com/mjirik/skelet3d.git
+# sudo -u $USER cd ~/projects
+sudo -u $USER git clone https://github.com/mjirik/skelet3d.git ~/projects
 sudo -u $USER cd skelet3d
 sudo -u $USER mkdir build
 sudo -u $USER cd build
