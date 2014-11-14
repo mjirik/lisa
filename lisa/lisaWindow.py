@@ -248,7 +248,6 @@ class OrganSegmentationWindow(QMainWindow):
         grid.addWidget(btn_quit, rstart + 1, 1, 1, 2)
 
         if self.oseg.debug_mode:
-            logger.debug('== Starting debug mode, leave it with command "c" =')
             btn_debug = QPushButton("Debug", self)
             btn_debug.clicked.connect(self.run_debug)
             grid.addWidget(btn_debug, rstart + 1, 3)
@@ -266,6 +265,7 @@ class OrganSegmentationWindow(QMainWindow):
         pressing "Debug" button wich is availeble after starting Lisa with
         -d parameter.
         """
+        logger.debug('== Starting debug mode, leave it with command "c" =')
         from PyQt4.QtCore import pyqtRemoveInputHook
         pyqtRemoveInputHook()
         import ipdb; ipdb.set_trace()  # noqa BREAKPOINT

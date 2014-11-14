@@ -50,6 +50,7 @@ import misc
 import config
 from io3d import datareader
 from io3d import datawriter
+import data_plus
 
 # import audiosupport
 # import skimage
@@ -156,7 +157,8 @@ class OrganSegmentation():
         self.output_datapath = output_datapath
         self.input_datapath_start = input_datapath_start
         self.crinfo = [[0, None], [0, None], [0, None]]
-        self.slab = slab
+        self.slab = data_plus.default_slab()
+        self.slab.update(slab)
         self.output_label = output_label
         self.working_voxelsize_mm = None
         self.input_wvx_size = working_voxelsize_mm
