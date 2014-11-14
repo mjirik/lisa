@@ -35,7 +35,7 @@ apt-get install -y python git python-dev g++ python-numpy python-scipy python-ma
 easy_install -U SimpleITK mahotas
 
 # 3. pip install our packages pyseg_base and dicom2fem
-sudo -u $USER pip install pysegbase dicom2fem sed3 sed3 io3d --user
+sudo -u $USER pip install pysegbase dicom2fem sed3 io3d --user
 
 sudo -u $USER mkdir ~/projects
 
