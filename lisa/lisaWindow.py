@@ -13,7 +13,7 @@ import numpy as np
 
 import time
 
-import datareader
+from io3d import datareader
 # import segmentation
 from seg2mesh import gen_mesh_from_voxels, mesh2vtk, smooth_mesh
 import virtual_resection
@@ -247,12 +247,23 @@ class OrganSegmentationWindow(QMainWindow):
         btn_quit.clicked.connect(self.quit)
         grid.addWidget(btn_quit, rstart + 1, 1, 1, 2)
 
+        if self.oseg.debug_mode:
+            logger.debug('===== Starting debug mode, leave it with command "c" =====')
+            btn_debug = QPushButton("Debug", self)
+            btn_debug.clicked.connect(self.run_debug)
+            grid.addWidget(btn_debug, rstart + 1, 3)
+
         cw.setLayout(grid)
         self.setWindowTitle('LISA')
         self.show()
 
     def quit(self, event):
         self.close()
+
+    def run_debug(self, event):
+        from PyQt4.QtCore import pyqtRemoveInputHook
+        pyqtRemoveInputHook()
+        import ipdb; ipdb.set_trace()  # noqa BREAKPOINT
 
     def changeVoxelSize(self, val):
         self.scaling_mode = str(val)

@@ -126,6 +126,7 @@ class OrganSegmentation():
         lisa_operator_identifier='',
         volume_unit='ml',
         save_filetype='pklz',
+        debug_mode=False,
 
         #           iparams=None,
     ):
@@ -190,6 +191,8 @@ class OrganSegmentation():
         self.dcmfilelist = None
         self.save_filetype = save_filetype
         self.vessel_tree = {}
+        self.debug_mode = debug_mode
+
 
 #
         oseg_input_params = locals()
@@ -633,6 +636,8 @@ class OrganSegmentation():
 # @TODO make faster
         self.segmentation[self.segmentation == 1] = self.output_label
 #
+        logger.debug('self.slab')
+        logger.debug(str(self.slab))
         self.processing_time = time.time() - self.time_start
 
 #    def interactivity(self, min_val=800, max_val=1300):
@@ -812,6 +817,8 @@ class OrganSegmentation():
         # if there is no organ segmentation, use all image
         slab = {'porta': 2}
         slab.update(self.slab)
+        logger.debug('self.slab')
+        logger.debug(str(self.slab))
         self.slab = slab
 
         # if there is no liver segmentation, use whole image
@@ -1197,6 +1204,7 @@ def main():
 
         if args["debug"]:
             ch.setLevel(logging.DEBUG)
+            args["debug_mode"] = True
 
         if args["iparams"] is not None:
             params = misc.obj_from_file(args["iparams"], filetype='pickle')
