@@ -46,6 +46,8 @@ sudo make install
 
 # Clone Lisa, make icons
 cd ~/projects
+echo "Number of inputs"
+echo "$#"
 if [[ $# -eq 0 ]] ; then
     # stable version
     sudo -u $USER git clone --recursive -b stable https://github.com/mjirik/lisa.git
