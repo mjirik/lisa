@@ -46,7 +46,7 @@ sudo -u $USER git clone https://github.com/mjirik/gco_python.git ~/projects/gco_
 cd $HOMEDIR
 cd projects/gco_python
 sudo -u $USER make
-sudo -u $USER python setup.py --user
+# sudo -u $USER python setup.py --user
 
 # 5. skelet3d - optional for Histology Analyser
 sudo apt-get install -y cmake python-numpy libinsighttoolkit3-dev libpng12-dev
