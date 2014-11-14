@@ -1,8 +1,21 @@
 #!
 #
 # if script is called with any argument, developer install is used
-NPARAMS=$#
+NARGS=$#
+ARG1=$1
 
+# echo "$ARG1"
+# if [ "$ARG1" = "" ] ; then
+#     echo "asdfa"
+#     # stable version
+# elif [ "$ARG1" = "devel" ] ; then
+#     echo "Cloning unstable branch using ssh"
+#         # if there is an any argument, install as developer
+#         # apt-get install -y sshpass virtualbox
+# else
+#     echo "Cloning unstable branch using http"
+# fi
+# exit
 HOMEDIR="`pwd`"
 USER="$(echo `pwd` | sed 's|.*home/\([^/]*\).*|\1|')"
 
@@ -46,16 +59,19 @@ sudo make install
 
 # Clone Lisa, make icons
 cd ~/projects
-echo "Number of inputs"
-echo "$#"
-if [ $NPARAMS -eq 0 ] ; then
+if [ "$ARG1" = "" ] ; then
+    echo "Cloning stable version"
     # stable version
     sudo -u $USER git clone --recursive -b stable https://github.com/mjirik/lisa.git
-else
-    echo "Cloning unstable branch"
+elif [ $ARG1 -eq "devel" ] ; then
+    echo "Cloning unstable branch using ssh"
     # if there is an any argument, install as developer
     # apt-get install -y sshpass virtualbox
     sudo -u $USER git clone --recursive git@github.com:mjirik/lisa.git
+else
+    echo "Cloning unstable branch using http"
+    sudo -u $USER git clone --recursive https://github.com/mjirik/lisa.git
+
 fi
 cd lisa
 sudo -u $USER python mysetup.py -d
