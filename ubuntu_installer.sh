@@ -48,7 +48,7 @@ cd projects/gco_python
 echo `pwd`
 sudo -u $USER make
 sudo -u $USER python setup.py install --user
-exit
+
 
 # 5. skelet3d - optional for Histology Analyser
 sudo apt-get install -y cmake python-numpy libinsighttoolkit3-dev libpng12-dev
