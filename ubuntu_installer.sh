@@ -1,7 +1,24 @@
 #!
 #
 # if script is called with any argument, developer install is used
+NPARAMS=$#
+echo "$#"
+echo "$#"
+echo "$NPARAMS"
 
+if [ $NPARAMS -eq 0 ] ; then
+    echo "sdasdfas"
+    echo "AAAAAA"
+    # stable version
+else
+    echo "Cloning unstable branch"
+    echo "Cloning unstable branch"
+    echo "Cloning unstable branch"
+    # if there is an any argument, install as developer
+    # apt-get install -y sshpass virtualbox
+fi
+
+exit
 
 HOMEDIR="`pwd`"
 USER="$(echo `pwd` | sed 's|.*home/\([^/]*\).*|\1|')"
@@ -48,7 +65,7 @@ sudo make install
 cd ~/projects
 echo "Number of inputs"
 echo "$#"
-if [ $# -eq 0 ] ; then
+if [ $NPARAMS -eq 0 ] ; then
     # stable version
     sudo -u $USER git clone --recursive -b stable https://github.com/mjirik/lisa.git
 else
