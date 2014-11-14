@@ -32,9 +32,9 @@ sudo -u $USER python ~/projects/gco_python/setup.py --user
 # 5. skelet3d - optional for Histology Analyser
 sudo apt-get install -y cmake python-numpy libinsighttoolkit3-dev libpng12-dev
 # sudo -u $USER cd ~/projects
+sudo -u $USER git clone https://github.com/mjirik/skelet3d.git ~/projects/skelet3d
 sudo -u $USER mkdir ~/projects/skelet3d
 sudo -u $USER mkdir ~/projects/skelet3d/build
-sudo -u $USER git clone https://github.com/mjirik/skelet3d.git ~/projects/skelet3d
 cd $HOMEDIR
 cd projects/skelet3d/build
 sudo -u $USER cmake ..
