@@ -61,7 +61,10 @@ fi
 VBoxManage createvm --name $VMNAME --register
 VBoxManage modifyvm $VMNAME --ostype Ubuntu
 VBoxManage modifyvm $VMNAME --memory 2048
+# must set next line for run wvbox on ubuntu 32 bit
 VBoxManage modifyvm $VMNAME --pae on
+# on wmbox 64 bit it must be setted this way
+VBoxManage modifyvm $VMNAME --hwvirtex off
 VBoxManage storagectl $VMNAME --name SATA --add sata --controller IntelAhci --bootable on
 echo "Mount HDD and DVD"
 VBoxManage storageattach $VMNAME --storagectl SATA --port 0 --device 0 --type hdd --medium "/home/mjirik/tmp/Ubuntu1404_32-bit.vdi"
@@ -71,7 +74,7 @@ VBoxManage startvm $VMNAME
 echo $?
 
 echo "Waiting for VirtualBox start"
-# sleep 90
+sleep 90
 
 echo "SSH connection to VirtualBox"
 echo $SCRIPTPATH

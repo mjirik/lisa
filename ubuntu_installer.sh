@@ -6,6 +6,12 @@
 HOMEDIR="`pwd`"
 USER="$(echo `pwd` | sed 's|.*home/\([^/]*\).*|\1|')"
 
+echo "installing for user:"
+echo "$USER"
+
+apt-get update
+apt-get upgrade -y
+
 # 1. deb package requirements
 apt-get install -y python git python-dev g++ python-numpy python-scipy python-matplotlib python-sklearn python-skimage python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools curl python-pip cmake
 
@@ -41,9 +47,11 @@ sudo make install
 # Clone Lisa, make icons
 cd ~/projects
 if [[ $# -eq 0 ]] ; then
+    # stable version
     sudo -u $USER git clone --recursive -b stable https://github.com/mjirik/lisa.git
 else
     # if there is an any argument, install as developer
+    # apt-get install -y sshpass virtualbox
     sudo -u $USER git clone --recursive git@github.com:mjirik/lisa.git
 fi
 cd lisa
