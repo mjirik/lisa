@@ -47,7 +47,7 @@ cd $HOMEDIR
 cd projects/gco_python
 echo `pwd`
 sudo -u $USER make
-sudo -u $USER python setup.py --user
+sudo -u $USER python setup.py install --user
 exit
 
 # 5. skelet3d - optional for Histology Analyser
