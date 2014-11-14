@@ -21,7 +21,7 @@ from PyQt4.QtGui import QApplication
 import numpy as np
 import scipy.ndimage
 import misc
-import datareader
+from io3d import datareader
 import csv
 
 import skelet3d

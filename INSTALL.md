@@ -44,7 +44,7 @@ Tested with Ubuntu 14.04 32-bit and Linux Mint 16 Petra
     sudo easy_install -U SimpleITK mahotas
 
     # 3. pip install our packages pyseg_base and dicom2fem
-    sudo pip install pysegbase dicom2fem sed3 sed3 io3d
+    sudo pip install pysegbase dicom2fem sed3 sed3 io3d skelet3d
     
     # 4. install gco_python
     mkdir ~/projects

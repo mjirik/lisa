@@ -17,7 +17,7 @@ sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
 import argparse
 import numpy as np
 import scipy.ndimage
-import datawriter
+from io3d import datawriter
 import misc
 
 # import datareader
@@ -354,7 +354,7 @@ python src/gen_volume_tree.py -i ./tests/hist_stats_test.yaml'
         generator_class = gt_lar.GTLar
     elif args.generator in ['kunes']:
         import gt_lar_kunes
-        generator_class = gt_lar_kunes.GTLar
+        generator_class = gt_lar.GTLar
     elif args.generator in ['larsm']:
         import gt_lar_smooth
         generator_class = gt_lar_smooth.GTLarSmooth

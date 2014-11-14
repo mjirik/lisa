@@ -48,7 +48,7 @@ import argparse
 
 import misc
 import qmisc
-import datareader
+from io3d import datareader
 import matplotlib.pyplot as plt
 from lisa import experiments
 import texture_features as tfeat

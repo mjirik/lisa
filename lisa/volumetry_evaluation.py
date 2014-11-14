@@ -42,7 +42,7 @@ import qmisc
 import misc
 # import organ_segmentation
 # import experiments
-import datareader
+from io3d import datareader
 
 # okraj v pixelech využitý pro snížení výpočetní náročnosti během vyhodnocování
 # AvgD
