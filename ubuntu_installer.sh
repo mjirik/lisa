@@ -2,22 +2,6 @@
 #
 # if script is called with any argument, developer install is used
 NPARAMS=$#
-echo "$#"
-echo "$#"
-echo "$NPARAMS"
-
-if [ $NPARAMS -eq 0 ] ; then
-    echo "sdasdfas"
-    echo "AAAAAA"
-    # stable version
-else
-    echo "Cloning unstable branch"
-    echo "Cloning unstable branch"
-    echo "Cloning unstable branch"
-    # if there is an any argument, install as developer
-    # apt-get install -y sshpass virtualbox
-fi
-
 
 HOMEDIR="`pwd`"
 USER="$(echo `pwd` | sed 's|.*home/\([^/]*\).*|\1|')"
