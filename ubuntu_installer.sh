@@ -50,6 +50,7 @@ if [[ $# -eq 0 ]] ; then
     # stable version
     sudo -u $USER git clone --recursive -b stable https://github.com/mjirik/lisa.git
 else
+    echo "Cloning unstable branch"
     # if there is an any argument, install as developer
     # apt-get install -y sshpass virtualbox
     sudo -u $USER git clone --recursive git@github.com:mjirik/lisa.git
