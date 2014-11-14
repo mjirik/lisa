@@ -1,6 +1,9 @@
 #!
 #
-# if script is called with any argument, developer install is used
+# if script is called with:
+#   no argument: stable version is installed 
+#   devel: devel version with ssh 
+#   any other argument: devel version with https is used
 NARGS=$#
 ARG1=$1
 
