@@ -18,7 +18,6 @@ else
     # apt-get install -y sshpass virtualbox
 fi
 
-exit
 
 HOMEDIR="`pwd`"
 USER="$(echo `pwd` | sed 's|.*home/\([^/]*\).*|\1|')"
