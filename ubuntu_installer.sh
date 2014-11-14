@@ -40,10 +40,13 @@ sudo -u $USER pip install pysegbase dicom2fem sed3 io3d --user
 sudo -u $USER mkdir ~/projects
 
 # 4. install gco_python
+
 sudo -u $USER mkdir ~/projects/gco_python
 sudo -u $USER git clone https://github.com/mjirik/gco_python.git ~/projects/gco_python
-sudo -u $USER make -C ~/projects/gco_python
-sudo -u $USER python ~/projects/gco_python/setup.py --user
+cd $HOMEDIR
+cd projects/gco_python
+sudo -u $USER make
+sudo -u $USER python setup.py --user
 
 # 5. skelet3d - optional for Histology Analyser
 sudo apt-get install -y cmake python-numpy libinsighttoolkit3-dev libpng12-dev
