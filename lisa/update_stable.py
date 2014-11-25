@@ -23,7 +23,8 @@ def update():
         subprocess.call('pip install -U --no-deps pysegbase --user', shell=True)
         subprocess.call('pip install -U --no-deps io3d --user', shell=True)
         subprocess.call('pip install -U --no-deps sed3 --user', shell=True)
-        subprocess.call('pip install -U --no-deps skelet3d --user', shell=True)
+# skelet3d is not in pipy
+        # subprocess.call('pip install -U --no-deps skelet3d --user', shell=True)
     except:
         print ('Probem with git submodules')
 
