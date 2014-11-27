@@ -16,7 +16,7 @@ import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../../lar-cc/lib/py/"))
-sys.path.append(os.path.join(path_to_script, "../src/extern"))
+sys.path.append(os.path.join(path_to_script, "../lisa/extern"))
 sys.path.append(os.path.join(path_to_script, "../../pyplasm/src/pyplasm"))
 
 import numpy as np
