@@ -354,7 +354,7 @@ python src/gen_volume_tree.py -i ./tests/hist_stats_test.yaml'
         generator_class = gt_lar.GTLar
     elif args.generator in ['kunes']:
         import gt_lar_kunes
-        generator_class = gt_lar.GTLar
+        generator_class = gt_lar_kunes.GTLar
     elif args.generator in ['larsm']:
         import gt_lar_smooth
         generator_class = gt_lar_smooth.GTLarSmooth
