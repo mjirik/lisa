@@ -211,7 +211,7 @@ class TreeGenerator:
 
         output = self.generator.get_output()
 
-        logger.debug("before visualization")
+        logger.debug("before visualization - generateTree()")
         if self.use_lar:
             self.lv.show()
         return output
@@ -280,13 +280,9 @@ class TreeGenerator:
 
 
 if __name__ == "__main__":
+    logging.basicConfig()
     logger = logging.getLogger()
-
     logger.setLevel(logging.WARNING)
-    # ch = logging.StreamHandler()
-    # logger.addHandler(ch)
-
-    # logger.debug('input params')
 
     # input parser
     parser = argparse.ArgumentParser(
