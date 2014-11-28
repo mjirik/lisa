@@ -104,15 +104,33 @@ class GTLar:
 
     def finish(self):
         if self.use_joints:
-            for joint in self.joints.values():
+            logger.debug('generating joints...')
+            
+            for i, joint in enumerate(self.joints.values()):
+                if i%10 == 0:
+                    logger.debug('joint '+str(i)+'/'+str(len(self.joints.values())))
                 # There is more then just one circle in this joint, so it
                 # is not end of vessel
                 if len(joint) > 1:
                     self.__generate_joint(joint)
-
-    def __generate_joint(self, joint):
-        # get cylinder info - get points of other side of cylinder, that is not 
-        # connected to current joint
+                    
+            logger.debug('joints generated')
+                    
+    def __get_cylinder_info_from_raw_joint(self, joint):
+        """
+        joint - joint value (list of lists), before being processed by finish(), or __generate_joint()
+        
+        Returns list of dictionaries with information about cylinders connected to current joint
+        
+            cylinders[i]['near_points'] = list of point ids of circle on the side connected to current joint (node)
+            cylinders[i]['far_points'] = list of point ids of circle on the other side of cylinder
+            cylinders[i]['radius'] = radius of cylinder
+            cylinders[i]['near_node'] = position of node that is connected to current joint
+            cylinders[i]['far_node'] = position of node on the other side of cylinder
+            cylinders[i]['vector'] = vector of line connection between nodes
+        """
+        # get points of other side of cylinder, that is not connected to 
+        # current joint
         cylinders = []
         for i, j in enumerate(joint):
             for cv_list in self.CV:
@@ -125,8 +143,7 @@ class GTLar:
                     cylinders.append({'near_points':j, 'far_points':far_points})               
                     break
         
-        # get cylinder info - get radiuses, node positions and vectors of 
-        # connected cylinders
+        # get radiuses, node positions and vectors of connected cylinders
         for c in cylinders:
             p1 = np.array(self.V[c['near_points'][0]])
             p2 = np.array(self.V[c['near_points'][len(c['near_points'])/2]])
@@ -143,21 +160,117 @@ class GTLar:
             
             c['vector'] = (np.array(c['near_node']) - 
                                 np.array(c['far_node'])).tolist()
+                                
+        return cylinders
         
+    def __point_in_cylinder(self, c_nodeA, c_nodeB, radius, point, length_sq=None, radius_sq=None):
+        """
+        Tests if point is inside a cylinder
+        http://www.flipcode.com/archives/Fast_Point-In-Cylinder_Test.shtml
+        """
+        if length_sq is None:
+            if c_nodeA == c_nodeB:
+                # wierd cylinder with 0 length
+                logger.warning('__point_in_cylinder: distance between nodeA and nodeB is zero!!')
+                raise Exception('distance between nodeA and nodeB is zero')
+            length_sq = np.linalg.norm(np.array(c_nodeA)-np.array(c_nodeB))**2
+        if radius_sq is None:
+            radius_sq = radius**2
+            
+        dx = c_nodeB[0] - c_nodeA[0]	
+        dy = c_nodeB[1] - c_nodeA[1]   
+        dz = c_nodeB[2] - c_nodeA[2]
+
+        pdx = point[0] - c_nodeA[0]	
+        pdy = point[1] - c_nodeA[1]
+        pdz = point[2] - c_nodeA[2]
         
-        # make cylinders shorter by max radius to create place for joint
-        max_radius = 0
+        dot = pdx * dx + pdy * dy + pdz * dz
+        
+        if (dot < 0) or (dot > length_sq):
+            # points is outside of end caps
+            return False
+        else:
+            dsq = (pdx*pdx + pdy*pdy + pdz*pdz) - (dot*dot)/float(length_sq)
+            
+            if dsq > radius_sq:
+                # point not inside cylinder
+                return False
+            else:
+                return True
+            
+
+    def __generate_joint(self, joint):
+        # get cylinder info
+        cylinders = self.__get_cylinder_info_from_raw_joint(joint)
+        
+        # move connected side of cylinders away from joint by (radius)/2.0 
+        # to create more place for joint
         for c in cylinders:
-            if c['radius'] > max_radius:
-                max_radius = c['radius'] 
-         
-        for c in cylinders:
+            if c['far_node'] == c['near_node']:
+                # wierd cylinder with 0 length
+                continue
+            
             start_id = c['near_points'][0]
             end_id = c['near_points'][len(c['near_points'])-1]
             
             for p_id in range(start_id, end_id+1):
                 self.V[p_id] = g3.translate(self.V[p_id], c['vector'],
-                                    -max_radius)
+                                    -c['radius']/2.0)
+                # TODO - detect when g3.translate would create negative length
+        # update cylinder info after moving points
+        cylinders = self.__get_cylinder_info_from_raw_joint(joint)
+                                    
+        
+        # cut out overlapping parts of cylinders (only in joint)
+        new_V = list(self.V)
+        for c in cylinders:
+            # for every cylinder in joint...
+            v = np.array(c['vector'])
+            c_len = np.linalg.norm(np.array(c['near_node'])-np.array(c['far_node']))
+            if c_len == 0:
+                # wierd cylinder with 0 length
+                continue
+            
+            for p_id in c['near_points']:
+                # for every point in cylinder that is on the side connected to 
+                # joint...
+                orig_near_point = np.array(self.V[p_id])
+                
+                # get position of coresponding point on the far side for the 
+                # point on the near side.
+                # cylinder must be uncut for this to work correctly
+                far_point = orig_near_point - v
+                
+                for cc in cylinders:
+                    # for other cylinders connected to joint...
+                    
+                    if cc['near_points'] == c['near_points']:
+                        # skip cylinder that owns tested point
+                        continue 
+                    elif cc['far_node'] == cc['near_node']:
+                        # different cylinder, but has 0 length
+                        continue
+                    
+                    current_point = far_point.copy()
+                    current_point_last = far_point.copy()
+                    
+                    if self.__point_in_cylinder(cc['near_node'], cc['far_node'], cc['radius'], current_point):
+                        continue # far point is inside !!! 
+                    
+                    while np.linalg.norm(current_point-far_point) <= c_len:
+                        # slowly go from position of far_point to near_point, 
+                        # and when the next step would be inside of cylinder, 
+                        # set position of near_node to current position...
+                        current_point_last = current_point.copy()
+                        current_point = current_point + v/10.0 # move by 10% of length
+                        
+                        if self.__point_in_cylinder(cc['near_node'], cc['far_node'], cc['radius'], current_point):
+                            if np.linalg.norm(current_point_last-far_point) < np.linalg.norm(np.array(new_V[p_id])-far_point):
+                                new_V[p_id] = list(current_point_last)
+                            break
+                            
+        self.V = list(new_V)
         
         
         # Takes all lists of points of circles that belong to joint and 
