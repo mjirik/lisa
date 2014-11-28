@@ -29,13 +29,15 @@ import geometry3d as g3
 class GTLar:
 
     def __init__(self, gtree=None,
-                 endDistMultiplicator=1,
+                 endDistMultiplicator=0.5,
                  use_joints=True
                  ):
         """
         gtree is information about input data structure.
-        endDistMultiplicator: make cylinder shorter by multiplication of radius
+        endDistMultiplicator: move connected side of cylinders away from joint by multiplication of radius
         """
+        logger.debug('__init__:use_joints = '+str(use_joints))
+        logger.debug('__init__:endDistMultiplicator = '+str(endDistMultiplicator))
         
         # input of geometry and topology
         self.V = []
@@ -58,14 +60,6 @@ class GTLar:
             idA = 0
             idB = 0
             self.use_joints = False
-
-        # # mov circles to center of cylinder by size of radius because of joint
-        # make cylinder shorter by multiplication of radius
-        #vector = (np.array(nodeA) - np.array(nodeB)).tolist()
-        #nodeA = g3.translate(nodeA, vector,
-                             #-radius * self.endDistMultiplicator)
-        #nodeB = g3.translate(nodeB, vector,
-                             #radius * self.endDistMultiplicator)
 
         if all(nodeA == nodeB):
             logger.error("End points are on same place")
@@ -204,8 +198,8 @@ class GTLar:
         # get cylinder info
         cylinders = self.__get_cylinder_info_from_raw_joint(joint)
         
-        # move connected side of cylinders away from joint by (radius)/2.0 
-        # to create more place for joint
+        # move connected side of cylinders away from joint by 
+        # radius*self.endDistMultiplicator to create more place for joint
         for c in cylinders:
             if c['far_node'] == c['near_node']:
                 # wierd cylinder with 0 length
@@ -216,7 +210,7 @@ class GTLar:
             
             for p_id in range(start_id, end_id+1):
                 self.V[p_id] = g3.translate(self.V[p_id], c['vector'],
-                                    -c['radius']/2.0)
+                                    -c['radius']*self.endDistMultiplicator)
                 # TODO - detect when g3.translate would create negative length
         # update cylinder info after moving points
         cylinders = self.__get_cylinder_info_from_raw_joint(joint)
