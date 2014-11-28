@@ -27,15 +27,15 @@ import geometry3d as g3
 # warnings.filterwarnings('error')
 
 class GTLar:
-
+    """
+    gtree is information about input data structure.
+    endDistMultiplicator: move connected side of cylinders away from joint by multiplication of radius
+    """
     def __init__(self, gtree=None,
                  endDistMultiplicator=0.5,
                  use_joints=True
                  ):
-        """
-        gtree is information about input data structure.
-        endDistMultiplicator: move connected side of cylinders away from joint by multiplication of radius
-        """
+        
         logger.debug('__init__:use_joints = '+str(use_joints))
         logger.debug('__init__:endDistMultiplicator = '+str(endDistMultiplicator))
         
@@ -97,6 +97,9 @@ class GTLar:
         return CVlist
 
     def finish(self):
+        """
+        Generate joints for cylindr connections
+        """
         if self.use_joints:
             logger.debug('generating joints...')
             
@@ -116,12 +119,12 @@ class GTLar:
         
         Returns list of dictionaries with information about cylinders connected to current joint
         
-            cylinders[i]['near_points'] = list of point ids of circle on the side connected to current joint (node)
-            cylinders[i]['far_points'] = list of point ids of circle on the other side of cylinder
-            cylinders[i]['radius'] = radius of cylinder
-            cylinders[i]['near_node'] = position of node that is connected to current joint
-            cylinders[i]['far_node'] = position of node on the other side of cylinder
-            cylinders[i]['vector'] = vector of line connection between nodes
+            | cylinders[i]['near_points'] = list of point ids of circle on the side connected to current joint (node) 
+            | cylinders[i]['far_points'] = list of point ids of circle on the other side of cylinder 
+            | cylinders[i]['radius'] = radius of cylinder |br|
+            | cylinders[i]['near_node'] = position of node that is connected to current joint 
+            | cylinders[i]['far_node'] = position of node on the other side of cylinder 
+            | cylinders[i]['vector'] = vector of line connection between nodes
         """
         # get points of other side of cylinder, that is not connected to 
         # current joint

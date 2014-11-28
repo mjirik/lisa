@@ -1,21 +1,21 @@
-src.extern package
+lisa.extern package
 ==================
 
 Submodules
 ----------
 
-src.extern.interpolation_pyplasm module
+lisa.extern.interpolation_pyplasm module
 ---------------------------------------
 
-.. automodule:: src.extern.interpolation_pyplasm
+.. automodule:: lisa.extern.interpolation_pyplasm
     :members:
     :undoc-members:
     :show-inheritance:
 
-src.extern.lar module
+lisa.extern.lar module
 ---------------------
 
-.. automodule:: src.extern.lar
+.. automodule:: lisa.extern.lar
     :members:
     :undoc-members:
     :show-inheritance:
@@ -24,7 +24,7 @@ src.extern.lar module
 Module contents
 ---------------
 
-.. automodule:: src.extern
+.. automodule:: lisa.extern
     :members:
     :undoc-members:
     :show-inheritance:
