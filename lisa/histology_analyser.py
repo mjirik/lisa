@@ -324,16 +324,17 @@ class HistologyAnalyser:
 def generate_sample_data(m=1, noise_level=0.005, gauss_sigma=0.1):
     """
     Generate sample vessel system.
+    
     J. Kunes
 
-    Input:
-        m - output will be (100*m)^3 numpy array
-        noise_level - noise power, disable noise with -1
-        gauss_sigma - gauss filter sigma, disable filter with -1
+    | Input:
+    |     m - output will be (100*m)^3 numpy array
+    |     noise_level - noise power, disable noise with -1
+    |     gauss_sigma - gauss filter sigma, disable filter with -1
 
-    Output:
-        (100*m)^3 numpy array
-            voxel size = [1,1,1]
+    | Output:
+    |     (100*m)^3 numpy array
+    |         voxel size = [1,1,1]
     """
     import thresholding_functions
 

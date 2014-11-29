@@ -298,6 +298,7 @@ lisa.skeleton_analyser module
 .. automodule:: lisa.skeleton_analyser
     :members:
     :undoc-members:
+    :private-members:
     :show-inheritance:
 
 lisa.support_structure_segmentation module

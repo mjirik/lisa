@@ -18,17 +18,16 @@ import scipy.ndimage
 class SkeletonAnalyser:
 
     """
-    Example:
-    skan = SkeletonAnalyser(data3d_skel, volume_data, voxelsize_mm)
-    stats = skan.skeleton_analysis()
+    | Example:
+    | skan = SkeletonAnalyser(data3d_skel, volume_data, voxelsize_mm)
+    | stats = skan.skeleton_analysis()
+    
+    | use_filter_small: removing small objects
+    | filter_small_threshold: threshold for small filtering
     """
 
     def __init__(self, data3d_skel, volume_data=None, voxelsize_mm=[1, 1, 1],
                  use_filter_small=False, filter_small_threshold=3):
-        """
-        use_filter_small: removing small objects
-        filter_small_threshold: threshold for small filtering
-        """
         # for not
         self.volume_data = volume_data
         self.voxelsize_mm = voxelsize_mm
@@ -47,10 +46,10 @@ class SkeletonAnalyser:
 
     def skeleton_analysis(self, guiUpdateFunction=None):
         """
-        Glossary:
-        element: line structure of skeleton connected to node on both ends
-        node: connection point of elements. It is one or few voxelsize_mm
-        terminal: terminal node
+        | Glossary:
+        | element: line structure of skeleton connected to node on both ends
+        | node: connection point of elements. It is one or few voxelsize_mm
+        | terminal: terminal node
         """
         def updateFunction(num, length, part):
             if (num % 5 == 0) or num == length:
@@ -225,7 +224,6 @@ class SkeletonAnalyser:
         """
         Return 3d ndarray where 0 is background, 1 is skeleton, 2 is node
         and 3 is terminal node
-
         """
         kernel = np.ones([3, 3, 3])
 
@@ -300,8 +298,8 @@ class SkeletonAnalyser:
 
     def __edge_vectors(self, edg_number, edg_stats):
         """
-        Return begin and end vector of edge.
-        run after __edge_curve()
+        | Return begin and end vector of edge.
+        | run after __edge_curve()
         """
 # this edge
         try:
@@ -342,9 +340,10 @@ class SkeletonAnalyser:
                                    edg_end,
                                    con_edg_order):
         """
-        find common node with connected edge and its vector
-        edg_end: Which end of edge you want (0 or 1)
-        con_edg_order: Which edge of selected end of edge you want (0,1)
+        | find common node with connected edge and its vector
+        
+        | edg_end: Which end of edge you want (0 or 1)
+        | con_edg_order: Which edge of selected end of edge you want (0,1)
         """
         if edg_end == 'A':
             connectedEdges = stats[edg_number]['connectedEdgesA']
@@ -386,12 +385,12 @@ class SkeletonAnalyser:
 
     def __connected_edge_angle_on_one_end(self, edg_number, stats, edg_end):
         """
-        edg_number: integer with edg_number
-        stats: dictionary with all statistics and computations
-        edg_end: letter 'A' or 'B'
-        creates phiXa, phiXb and phiXc.
-        See Schwen2012 : Analysis and algorithmic generation of hepatic
-            vascular system.
+        | edg_number: integer with edg_number
+        | stats: dictionary with all statistics and computations
+        | edg_end: letter 'A' or 'B'
+        |    creates phiXa, phiXb and phiXc.
+        
+        See Schwen2012 : Analysis and algorithmic generation of hepatic vascular system.
         """
         out = {}
 
@@ -514,18 +513,19 @@ class SkeletonAnalyser:
     def __element_neighbors(self, el_number):
         """
         Gives array of element neighbors numbers (edges+nodes/terminals)
-        input:
-            self.sklabel - original labeled data
-            el_number - element label
+        
+        | input:
+        |   self.sklabel - original labeled data
+        |   el_number - element label
 
-        uses/creates:
-            self.shifted_sklabel - all labels shifted to positive numbers
-            self.shifted_zero - value of original 0
+        | uses/creates:
+        |   self.shifted_sklabel - all labels shifted to positive numbers
+        |   self.shifted_zero - value of original 0
 
-        returns:
-            array of neighbor values
-                - nodes for edge, edges for node
-            element bounding box (with border)
+        | returns:
+        |   array of neighbor values
+        |        - nodes for edge, edges for node
+        |   element bounding box (with border)
         """
         # check if we have shifted sklabel, if not create it.
         try:
@@ -588,17 +588,18 @@ class SkeletonAnalyser:
 
     def __edge_length(self, edg_number, edg_stats):
         """
-        Computes estimated length of edge, distance from end nodes and
-        tortosity.
-        needs:
-            edg_stats['nodeIdA']
-            edg_stats['nodeIdB']
-            edg_stats['nodeA_ZYX']
-            edg_stats['nodeB_ZYX']
-        output:
-            'lengthEstimation'  - Estimated length of edge
-            'nodesDistance'     - Distance between connected nodes
-            'tortuosity'        - Tortuosity
+        Computes estimated length of edge, distance from end nodes and tortosity.
+        
+        | needs:
+        |   edg_stats['nodeIdA']
+        |   edg_stats['nodeIdB']
+        |   edg_stats['nodeA_ZYX']
+        |   edg_stats['nodeB_ZYX']
+            
+        | output:
+        |    'lengthEstimation'  - Estimated length of edge
+        |    'nodesDistance'     - Distance between connected nodes
+        |    'tortuosity'        - Tortuosity
         """
         # test for needed data
         try:
@@ -727,9 +728,10 @@ class SkeletonAnalyser:
     def __edge_curve(self,  edg_number, edg_stats):
         """
         Return params of curve and its starts and ends locations
-        needs:
-            edg_stats['nodeA_ZYX_mm']
-            edg_stats['nodeB_ZYX_mm']
+        
+        | needs:
+        |    edg_stats['nodeA_ZYX_mm']
+        |    edg_stats['nodeB_ZYX_mm']
         """
         retval = {}
         try:
@@ -754,8 +756,9 @@ class SkeletonAnalyser:
     def __radius_analysis_init(self):
         """
         Computes skeleton with distances from edge of volume.
-        sklabel: skeleton or labeled skeleton
-        volume_data: volumetric data with zeros and ones
+        
+        | sklabel: skeleton or labeled skeleton
+        | volume_data: volumetric data with zeros and ones
         """
         uq = np.unique(self.volume_data)
         if (uq[0] == 0) & (uq[1] == 1):
@@ -775,7 +778,7 @@ class SkeletonAnalyser:
 
     def __radius_analysis(self, edg_number, skdst):
         """
-        return smaller radius of tube
+        Return smaller radius of tube
         """
         # import ipdb; ipdb.set_trace() # BREAKPOINT
         edg_skdst = skdst * (self.sklabel == edg_number)

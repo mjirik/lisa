@@ -76,6 +76,7 @@ class HistologyAnalyserWindow(QMainWindow):
     def closeEvent(self, event):
         """
         Runs when user tryes to close main window.
+        
         sys.exit(0) - to fix wierd bug, where process is not terminated.
         """
         sys.exit(0)
@@ -993,7 +994,7 @@ class LoadDialog(QDialog):
 
     def __get_datafile(self, app=False, directory=''):
         """
-        Draw a dialog for directory selection.
+        Draw a dialog for file selection.
         """
 
         from PyQt4.QtGui import QFileDialog

@@ -158,10 +158,8 @@ class TreeGenerator:
 
     def generateTree(self):
         """
-        Funkce na vygenerování objemu stromu ze zadaných dat.
-        Generates output by defined generator. If VolumeTreeGenerator is used,
-        output is data3d.
-
+        | Funkce na vygenerování objemu stromu ze zadaných dat.
+        | Generates output by defined generator. If VolumeTreeGenerator is used, output is data3d.
         """
 # LAR init
         if self.use_lar:
@@ -218,9 +216,9 @@ class TreeGenerator:
 
     def generateTree_vtk(self):
         """
-        Funkce na vygenerování objemu stromu ze zadaných dat.
-        Veze pro generování pomocí VTK
-        !!! funguje špatně -> vstupní data musí být pouze povrchové body, jinak generuje ve výstupních datech dutiny
+        | Funkce na vygenerování objemu stromu ze zadaných dat.
+        | Veze pro generování pomocí VTK
+        | !!! funguje špatně -> vstupní data musí být pouze povrchové body, jinak generuje ve výstupních datech dutiny
 
         """
         # get vtkPolyData

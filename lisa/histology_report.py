@@ -60,14 +60,13 @@ class HistologyReport:
         """
         Funkce na vygenerování statistik.
 
-        Avg length mm: průměrná délka jednotlivých segmentů
-        Avg radius mm: průměrný poloměr jednotlivých segmentů
-        Total length mm: celková délka cév ve vzorku
-        Radius histogram: pole čísel, kde budou data typu: v poloměru od 1 do 5
-            je ve vzorku 12 cév, od 5 do 10 je jich 36, nad 10 je jich 12.
-            Využijte třeba funkci np.hist()
-        Length histogram: obdoba předchozího pro délky
-
+        | Avg length mm: průměrná délka jednotlivých segmentů
+        | Avg radius mm: průměrný poloměr jednotlivých segmentů
+        | Total length mm: celková délka cév ve vzorku
+        | Radius histogram: pole čísel, kde budou data typu: 
+        |    v poloměru od 1 do 5 je ve vzorku 12 cév, od 5 do 10 je jich 36, nad 10 je jich 12.
+        |    Využijte třeba funkci np.hist()
+        | Length histogram: obdoba předchozího pro délky
         """
         stats = {
             'Main':{

@@ -121,7 +121,7 @@ class GTLar:
         
             | cylinders[i]['near_points'] = list of point ids of circle on the side connected to current joint (node) 
             | cylinders[i]['far_points'] = list of point ids of circle on the other side of cylinder 
-            | cylinders[i]['radius'] = radius of cylinder |br|
+            | cylinders[i]['radius'] = radius of cylinder
             | cylinders[i]['near_node'] = position of node that is connected to current joint 
             | cylinders[i]['far_node'] = position of node on the other side of cylinder 
             | cylinders[i]['vector'] = vector of line connection between nodes
