@@ -1,5 +1,5 @@
 lisa package
-===========
+============
 
 Subpackages
 -----------
@@ -11,16 +11,8 @@ Subpackages
 Submodules
 ----------
 
-lisa.PavelTestingModule module
------------------------------
-
-.. automodule:: lisa.PavelTestingModule
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 lisa.audiosupport module
------------------------
+------------------------
 
 .. automodule:: lisa.audiosupport
     :members:
@@ -28,7 +20,7 @@ lisa.audiosupport module
     :show-inheritance:
 
 lisa.classification module
--------------------------
+--------------------------
 
 .. automodule:: lisa.classification
     :members:
@@ -36,7 +28,7 @@ lisa.classification module
     :show-inheritance:
 
 lisa.config module
------------------
+------------------
 
 .. automodule:: lisa.config
     :members:
@@ -44,7 +36,7 @@ lisa.config module
     :show-inheritance:
 
 lisa.convert_pkl module
-----------------------
+-----------------------
 
 .. automodule:: lisa.convert_pkl
     :members:
@@ -52,31 +44,23 @@ lisa.convert_pkl module
     :show-inheritance:
 
 lisa.cxpokus module
-------------------
+-------------------
 
 .. automodule:: lisa.cxpokus
     :members:
     :undoc-members:
     :show-inheritance:
-
-lisa.datareader module
+    
+lisa.data_plus module
 ---------------------
 
-.. automodule:: lisa.datareader
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-lisa.datawriter module
----------------------
-
-.. automodule:: lisa.datawriter
+.. automodule:: lisa.data_plus
     :members:
     :undoc-members:
     :show-inheritance:
 
 lisa.exceptionProcessing module
-------------------------------
+-------------------------------
 
 .. automodule:: lisa.exceptionProcessing
     :members:
@@ -84,15 +68,23 @@ lisa.exceptionProcessing module
     :show-inheritance:
 
 lisa.experiments module
-----------------------
+-----------------------
 
 .. automodule:: lisa.experiments
     :members:
     :undoc-members:
     :show-inheritance:
+    
+lisa.genfem_base module
+-----------------------
+
+.. automodule:: lisa.genfem_base
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 lisa.gen_volume_tree module
---------------------------
+---------------------------
 
 .. automodule:: lisa.gen_volume_tree
     :members:
@@ -100,47 +92,23 @@ lisa.gen_volume_tree module
     :show-inheritance:
 
 lisa.gen_vtk_tree module
------------------------
+------------------------
 
 .. automodule:: lisa.gen_vtk_tree
     :members:
     :undoc-members:
     :show-inheritance:
 
-lisa.genfem_base module
-----------------------
-
-.. automodule:: lisa.genfem_base
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 lisa.geometry3d module
----------------------
+----------------------
 
 .. automodule:: lisa.geometry3d
     :members:
     :undoc-members:
     :show-inheritance:
-
-lisa.gt_lar module
------------------
-
-.. automodule:: lisa.gt_lar
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-lisa.gt_lar_smooth module
-------------------------
-
-.. automodule:: lisa.gt_lar_smooth
-    :members:
-    :undoc-members:
-    :show-inheritance:
     
 lisa.gt_lar_kunes module
------------------
+------------------------
 
 .. automodule:: lisa.gt_lar_kunes
     :members:
@@ -148,64 +116,80 @@ lisa.gt_lar_kunes module
     :private-members:
     :show-inheritance:
 
-lisa.histology_analyser module
------------------------------
+lisa.gt_lar module
+------------------
 
-.. automodule:: lisa.histology_analyser
+.. automodule:: lisa.gt_lar
     :members:
     :undoc-members:
     :show-inheritance:
 
+lisa.gt_lar_smooth module
+-------------------------
+
+.. automodule:: lisa.gt_lar_smooth
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    
 lisa.histology_analyser_gui module
----------------------------------
+----------------------------------
 
 .. automodule:: lisa.histology_analyser_gui
     :members:
     :undoc-members:
     :show-inheritance:
 
+lisa.histology_analyser module
+------------------------------
+
+.. automodule:: lisa.histology_analyser
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 lisa.histology_report module
----------------------------
+----------------------------
 
 .. automodule:: lisa.histology_report
     :members:
     :undoc-members:
     :show-inheritance:
 
-lisa.lar_show_segmentation module
---------------------------------
-
-.. automodule:: lisa.lar_show_segmentation
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 lisa.lesions module
-------------------
+-------------------
 
 .. automodule:: lisa.lesions
     :members:
     :undoc-members:
     :show-inheritance:
-
-lisa.lisaWindow module
----------------------
-
-.. automodule:: lisa.lisaWindow
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+    
 lisa.lisa_server module
-----------------------
+-----------------------
 
 .. automodule:: lisa.lisa_server
     :members:
     :undoc-members:
     :show-inheritance:
 
+lisa.lisaWindow module
+----------------------
+
+.. automodule:: lisa.lisaWindow
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    
+lisa.liver_segmentation module
+------------------------------
+
+.. automodule:: lisa.liver_segmentation
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 lisa.liver_surgery module
-------------------------
+-------------------------
 
 .. automodule:: lisa.liver_surgery
     :members:
@@ -213,23 +197,31 @@ lisa.liver_surgery module
     :show-inheritance:
 
 lisa.misc module
----------------
+----------------
 
 .. automodule:: lisa.misc
     :members:
     :undoc-members:
     :show-inheritance:
 
-lisa.organ_segmentation_gui module
----------------------------------
+lisa.organ_segmentation module
+----------------------------------
 
-.. automodule:: lisa.organ_segmentation_gui
+.. automodule:: lisa.organ_segmentation
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    
+lisa.PavelTestingModule module
+------------------------------
+
+.. automodule:: lisa.PavelTestingModule
     :members:
     :undoc-members:
     :show-inheritance:
 
 lisa.pklz_info module
---------------------
+---------------------
 
 .. automodule:: lisa.pklz_info
     :members:
@@ -237,7 +229,7 @@ lisa.pklz_info module
     :show-inheritance:
 
 lisa.qmisc module
-----------------
+-----------------
 
 .. automodule:: lisa.qmisc
     :members:
@@ -245,7 +237,7 @@ lisa.qmisc module
     :show-inheritance:
 
 lisa.resection module
---------------------
+---------------------
 
 .. automodule:: lisa.resection
     :members:
@@ -253,7 +245,7 @@ lisa.resection module
     :show-inheritance:
 
 lisa.seg2mesh module
--------------------
+--------------------
 
 .. automodule:: lisa.seg2mesh
     :members:
@@ -261,7 +253,7 @@ lisa.seg2mesh module
     :show-inheritance:
 
 lisa.segmentation module
------------------------
+------------------------
 
 .. automodule:: lisa.segmentation
     :members:
@@ -269,7 +261,7 @@ lisa.segmentation module
     :show-inheritance:
 
 lisa.show_dicom_overlay module
------------------------------
+------------------------------
 
 .. automodule:: lisa.show_dicom_overlay
     :members:
@@ -277,7 +269,7 @@ lisa.show_dicom_overlay module
     :show-inheritance:
 
 lisa.show_segmentation module
-----------------------------
+-----------------------------
 
 .. automodule:: lisa.show_segmentation
     :members:
@@ -285,7 +277,7 @@ lisa.show_segmentation module
     :show-inheritance:
 
 lisa.simple_segmentation module
-------------------------------
+-------------------------------
 
 .. automodule:: lisa.simple_segmentation
     :members:
@@ -293,7 +285,7 @@ lisa.simple_segmentation module
     :show-inheritance:
 
 lisa.skeleton_analyser module
-----------------------------
+-----------------------------
 
 .. automodule:: lisa.skeleton_analyser
     :members:
@@ -302,7 +294,7 @@ lisa.skeleton_analyser module
     :show-inheritance:
 
 lisa.support_structure_segmentation module
------------------------------------------
+------------------------------------------
 
 .. automodule:: lisa.support_structure_segmentation
     :members:
@@ -310,7 +302,7 @@ lisa.support_structure_segmentation module
     :show-inheritance:
 
 lisa.texture_analysis module
----------------------------
+----------------------------
 
 .. automodule:: lisa.texture_analysis
     :members:
@@ -318,7 +310,7 @@ lisa.texture_analysis module
     :show-inheritance:
 
 lisa.texture_features module
----------------------------
+----------------------------
 
 .. automodule:: lisa.texture_features
     :members:
@@ -326,7 +318,7 @@ lisa.texture_features module
     :show-inheritance:
 
 lisa.thresholding_functions module
----------------------------------
+----------------------------------
 
 .. automodule:: lisa.thresholding_functions
     :members:
@@ -334,7 +326,7 @@ lisa.thresholding_functions module
     :show-inheritance:
 
 lisa.tools module
-----------------
+-----------------
 
 .. automodule:: lisa.tools
     :members:
@@ -342,7 +334,7 @@ lisa.tools module
     :show-inheritance:
 
 lisa.uiThreshold module
-----------------------
+-----------------------
 
 .. automodule:: lisa.uiThreshold
     :members:
@@ -350,7 +342,7 @@ lisa.uiThreshold module
     :show-inheritance:
 
 lisa.update_stable module
-------------------------
+-------------------------
 
 .. automodule:: lisa.update_stable
     :members:
@@ -358,31 +350,31 @@ lisa.update_stable module
     :show-inheritance:
 
 lisa.vessels_segmentation module
--------------------------------
+--------------------------------
 
 .. automodule:: lisa.vessels_segmentation
     :members:
     :undoc-members:
     :show-inheritance:
 
-lisa.viewer module
------------------
-
-.. automodule:: lisa.viewer
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 lisa.viewer3 module
-------------------
+-------------------
 
 .. automodule:: lisa.viewer3
     :members:
     :undoc-members:
     :show-inheritance:
 
+lisa.viewer module
+------------------
+
+.. automodule:: lisa.viewer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 lisa.virtual_resection module
-----------------------------
+-----------------------------
 
 .. automodule:: lisa.virtual_resection
     :members:
@@ -390,7 +382,7 @@ lisa.virtual_resection module
     :show-inheritance:
 
 lisa.volumetry_evaluation module
--------------------------------
+--------------------------------
 
 .. automodule:: lisa.volumetry_evaluation
     :members:

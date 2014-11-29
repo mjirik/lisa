@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """
--------------------------------------------------------------------------------
 Purpose:     (CZE-ZCU-FAV-KKY) Liver medical project
 
 Author:      Pavel Volkovinsky
@@ -8,7 +7,6 @@ Email:       volkovinsky.pavel@gmail.com
 
 Created:     2014/02/22
 Copyright:   (c) Pavel Volkovinsky
--------------------------------------------------------------------------------
 """
 
 import logging

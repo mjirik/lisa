@@ -65,8 +65,8 @@ def smooth_mesh(points, elems, etype,
     ISSN 0021-9290, 10.1016/j.jbiomech.2005.03.006.
     (http://www.sciencedirect.com/science/article/pii/S0021929005001442)
 
-    Parameters
-    ----------
+    Parameters:
+
     mesh : mesh
         FE mesh.
     n_iter : integer, optional
@@ -82,8 +82,8 @@ def smooth_mesh(points, elems, etype,
     volume_corr: logical, optional
         Correct volume after smoothing process.
 
-    Returns
-    -------
+    Returns:
+
     coors : array
         Coordinates of mesh nodes.
     """
@@ -204,8 +204,8 @@ def gen_mesh_from_voxels(voxels, dims, etype='q', mtype='v'):
     """
     Generate FE mesh from voxels (volumetric data).
 
-    Parameters
-    ----------
+    Parameters:
+
     voxels : array
         Voxel matrix, 1=material.
     dims : array
@@ -217,8 +217,8 @@ def gen_mesh_from_voxels(voxels, dims, etype='q', mtype='v'):
         'v' - volumetric mesh
         's' - surface mesh
 
-    Returns
-    -------
+    Returns:
+
     mesh : Mesh instance
         Finite element mesh.
     """
