@@ -5,7 +5,7 @@ Submodules
 ----------
 
 lisa.extern.interpolation_pyplasm module
----------------------------------------
+----------------------------------------
 
 .. automodule:: lisa.extern.interpolation_pyplasm
     :members:
@@ -13,7 +13,7 @@ lisa.extern.interpolation_pyplasm module
     :show-inheritance:
 
 lisa.extern.lar module
----------------------
+----------------------
 
 .. automodule:: lisa.extern.lar
     :members:

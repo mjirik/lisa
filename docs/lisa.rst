@@ -1,4 +1,4 @@
-src package
+lisa package
 ===========
 
 Subpackages
@@ -401,7 +401,7 @@ lisa.volumetry_evaluation module
 Module contents
 ---------------
 
-.. automodule:: src
+.. automodule:: lisa
     :members:
     :undoc-members:
     :show-inheritance:
