@@ -36,7 +36,7 @@ import sed3
 #import segmentation
 import qmisc
 import misc
-import datareader
+from io3d import datareader
 #import config
 #import numbers
 
