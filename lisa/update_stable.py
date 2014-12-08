@@ -15,11 +15,13 @@ logger = logging.getLogger(__name__)
 
 
 def update():
-    # release_type = 'stable'
     release_type = 'devel'
+    # release_type = 'stable'
 
     print ('Updating submodules')
-    if release_type == 'stable':
+    branch_name = subprocess.check_output(['git', 'branch'])
+    # if we found stabel (find is not -1), we should use specific version
+    if branch_name.find('* stable') != -1 or release_type == 'stable':
         print ('Stable version prerequisities')
         use_specifed_version = 1
     else:
