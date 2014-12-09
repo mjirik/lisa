@@ -21,7 +21,7 @@ class SkeletonAnalyser:
     | Example:
     | skan = SkeletonAnalyser(data3d_skel, volume_data, voxelsize_mm)
     | stats = skan.skeleton_analysis()
-    
+
     | use_filter_small: removing small objects
     | filter_small_threshold: threshold for small filtering
     """
@@ -166,7 +166,7 @@ class SkeletonAnalyser:
         # dict of connected nodes to edge
         edg_neigh = {}
         for s in dict(stats):
-            if not s in edg_neigh:
+            if s not in edg_neigh:
                 edg_neigh[s] = []
 
             try:
@@ -307,7 +307,8 @@ class SkeletonAnalyser:
             vectorA = self.__get_vector_from_curve(0.25, 0, curve_params)
             vectorB = self.__get_vector_from_curve(0.75, 1, curve_params)
         except Exception as ex:
-            print (ex)
+            logger.warning(traceback.format_exc())
+            # print(ex)
             return {}
 
         return {'vectorA': vectorA.tolist(), 'vectorB': vectorB.tolist()}
@@ -341,7 +342,7 @@ class SkeletonAnalyser:
                                    con_edg_order):
         """
         | find common node with connected edge and its vector
-        
+
         | edg_end: Which end of edge you want (0 or 1)
         | con_edg_order: Which edge of selected end of edge you want (0,1)
         """
@@ -389,7 +390,7 @@ class SkeletonAnalyser:
         | stats: dictionary with all statistics and computations
         | edg_end: letter 'A' or 'B'
         |    creates phiXa, phiXb and phiXc.
-        
+
         See Schwen2012 : Analysis and algorithmic generation of hepatic vascular system.
         """
         out = {}
@@ -398,8 +399,7 @@ class SkeletonAnalyser:
         try:
             vector = stats[edg_number][vector_key]
         except Exception as e:
-            print (e)
-            # traceback.print_exc()
+            logger.warning(traceback.print_exc())
 
         try:
             vectorX0 = self.__vector_of_connected_edge(
@@ -408,12 +408,12 @@ class SkeletonAnalyser:
 
             out.update({'phiA0' + edg_end + 'a': phiXa.tolist()})
         except Exception as e:
-            print (e)
+            logger.warning(traceback.print_exc())
         try:
             vectorX1 = self.__vector_of_connected_edge(
                 edg_number, stats, edg_end, 1)
         except Exception as e:
-            print (e)
+            logger.warning(traceback.print_exc())
 
         try:
 
@@ -433,7 +433,7 @@ class SkeletonAnalyser:
             })
 
         except Exception as e:
-            print (e)
+            logger.warning(traceback.print_exc())
 
         return out
 
@@ -513,7 +513,7 @@ class SkeletonAnalyser:
     def __element_neighbors(self, el_number):
         """
         Gives array of element neighbors numbers (edges+nodes/terminals)
-        
+
         | input:
         |   self.sklabel - original labeled data
         |   el_number - element label
@@ -589,13 +589,13 @@ class SkeletonAnalyser:
     def __edge_length(self, edg_number, edg_stats):
         """
         Computes estimated length of edge, distance from end nodes and tortosity.
-        
+
         | needs:
         |   edg_stats['nodeIdA']
         |   edg_stats['nodeIdB']
         |   edg_stats['nodeA_ZYX']
         |   edg_stats['nodeB_ZYX']
-            
+
         | output:
         |    'lengthEstimation'  - Estimated length of edge
         |    'nodesDistance'     - Distance between connected nodes
@@ -728,7 +728,7 @@ class SkeletonAnalyser:
     def __edge_curve(self,  edg_number, edg_stats):
         """
         Return params of curve and its starts and ends locations
-        
+
         | needs:
         |    edg_stats['nodeA_ZYX_mm']
         |    edg_stats['nodeB_ZYX_mm']
@@ -745,6 +745,7 @@ class SkeletonAnalyser:
                       }}
         except Exception as ex:
             logger.warning("Problem in __edge_curve()")
+            logger.warning(traceback.format_exc())
             print (ex)
 
         return retval
@@ -756,7 +757,7 @@ class SkeletonAnalyser:
     def __radius_analysis_init(self):
         """
         Computes skeleton with distances from edge of volume.
-        
+
         | sklabel: skeleton or labeled skeleton
         | volume_data: volumetric data with zeros and ones
         """
