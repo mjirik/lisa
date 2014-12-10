@@ -989,7 +989,8 @@ class OrganSegmentation():
         # TODO add
         logger.debug('save dcm')
         dw = datawriter.DataWriter()
-        dw.Write3DData(self.segmentation.astype(np.int16), filename, filetype='dcm',
+        dw.Write3DData(self.segmentation.astype(np.int16), filename,
+                       filetype='dcm',
                        metadata={'voxelsize_mm': self.voxelsize_mm})
 
     def save_outputs_dcm_overlay(self):
