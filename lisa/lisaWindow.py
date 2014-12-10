@@ -617,26 +617,27 @@ class OrganSegmentationWindow(QMainWindow):
         logger.info('Pressed button "Save Dicom"')
         self.statusBar().showMessage('Saving input data...')
         QApplication.processEvents()
-        ofilename = self.oseg.get_standard_ouptut_filename()
+        ofilename = self.oseg.get_standard_ouptut_filename(filetype='dcm')
         filename = str(QFileDialog.getSaveFileName(
             self,
             "Save file",
             ofilename,
             filter="*.*"))
 
-
-        self.oseg.save_outputs_dcm(filename)
-        logger.info('Data saved to: ' + filename)
+        self.oseg.save_input_dcm(filename)
+        logger.info('Input data saved to: ' + filename)
         self.statusBar().showMessage('Ready')
-        # if self.oseg.segmentation is not None:
-        #     self.statusBar().showMessage('Saving segmentation data...')
-        #     QApplication.processEvents()
-        #
-        #     self.oseg.save_outputs_dcm()
-        #     self.statusBar().showMessage('Ready')
-        #
-        # else:
-        #     self.statusBar().showMessage('No segmentation data!')
+        if self.oseg.segmentation is not None:
+            self.statusBar().showMessage('Saving segmentation data...')
+            QApplication.processEvents()
+            filename = filename[:-4] + '-seg' + filename[-4:]
+            logger.debug('saving to file: ' + filename)
+            # osfilename = self.oseg.get_standard_ouptut_filename(filetype='dcm')
+            self.oseg.save_outputs_dcm(filename)
+
+            self.statusBar().showMessage('Ready')
+        else:
+            self.statusBar().showMessage('No segmentation data!')
 
     def btnVirtualResection(self):
         # mport vessel_cut

@@ -913,16 +913,20 @@ class OrganSegmentation():
         volume_mm3 = np.sum(self.segmentation > 0) * voxelvolume_mm3
         return volume_mm3
 
-    def get_standard_ouptut_filename(self):
+    def get_standard_ouptut_filename(self, filetype=None, suffix=''):
         """
+        It can be settet filename, or filename end with suffix.
         """
+        if filetype is None:
+            filetype = self.save_filetype
+
         output_dir = self.output_datapath
 
         pth, filename = op.split(op.normpath(self.datapath))
         filename += "-" + self.experiment_caption
 #        if savestring in ['a', 'A']:
 # save renamed file too
-        filename = '' + filename + '.' + self.save_filetype
+        filename = '' + filename + suffix + '.' + filetype
         filepath = op.join(output_dir, filename)
         filepath = misc.suggest_filename(filepath)
 
@@ -974,11 +978,18 @@ class OrganSegmentation():
 
         # f savestring in ['a', 'A']:
 
-    def save_outputs_dcm(self, filename):
+    def save_input_dcm(self, filename):
         # TODO add
         logger.debug('save dcm')
         dw = datawriter.DataWriter()
         dw.Write3DData(self.data3d, filename, filetype='dcm',
+                       metadata={'voxelsize_mm': self.voxelsize_mm})
+
+    def save_outputs_dcm(self, filename):
+        # TODO add
+        logger.debug('save dcm')
+        dw = datawriter.DataWriter()
+        dw.Write3DData(self.segmentation.astype(np.int16), filename, filetype='dcm',
                        metadata={'voxelsize_mm': self.voxelsize_mm})
 
     def save_outputs_dcm_overlay(self):
