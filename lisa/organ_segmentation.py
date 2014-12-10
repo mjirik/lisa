@@ -974,7 +974,14 @@ class OrganSegmentation():
 
         # f savestring in ['a', 'A']:
 
-    def save_outputs_dcm(self):
+    def save_outputs_dcm(self, filename):
+        # TODO add
+        logger.debug('save dcm')
+        dw = datawriter.DataWriter()
+        dw.Write3DData(self.data3d, filename, filetype='dcm',
+                       metadata={'voxelsize_mm': self.voxelsize_mm})
+
+    def save_outputs_dcm_overlay(self):
         # TODO add
         logger.debug('save dcm')
         from PyQt4.QtCore import pyqtRemoveInputHook
