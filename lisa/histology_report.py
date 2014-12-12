@@ -108,14 +108,40 @@ class HistologyReport:
             tortuosity_array.append(self.data['Graph'][key]['tortuosity'])
         num_of_entries = len(tortuosity_array)
         stats['Main']['Tortuosity'] = sum(tortuosity_array)/float(num_of_entries)
-        stats['Main']['Length density (Lv)'] = float(stats['Other']['Total length mm'])/float(self.data['General']['volume_mm3'])
+        stats['Main']['Length density (Lv)'] = float(stats['Other']['Total length mm'])/float(self.data['General']['used_volume_mm3'])
         stats['Main']['Vessel volume fraction (Vv)'] = self.data['General']['vessel_volume_fraction']
         #stats['Main']['Surface density (Sv)'] =
-        #stats['Main']['Nv'] =
+        stats['Main']['Nv'] = float(self.getNv())
         
         # save stats
         self.stats = {'Report':stats}
         logger.debug('Main stats: '+str(stats['Main']))
+        
+    def getNv(self):
+        logger.debug('Computing Nv...')
+        nodes = []
+        for key in self.data['Graph']:
+            edge = self.data['Graph'][key]
+            try:
+                nodeIdA = edge['nodeIdA']
+                nodeIdB = edge['nodeIdB']
+                
+                if not nodeIdA in nodes:
+                    if len(edge['connectedEdgesA']) > 0:
+                        nodes.append(nodeIdA)
+                        
+                if not nodeIdB in nodes:
+                    if len(edge['connectedEdgesB']) > 0:
+                        nodes.append(nodeIdB)
+
+            except Exception, e:
+                logger.warning('getNv(): bad key '+str(e))
+                
+        logger.debug('Got '+str(len(nodes))+' connected nodes')
+        Nv = len(nodes) / float(self.data['General']['used_volume_mm3'])
+        
+        logger.debug('Nv is '+str(Nv))
+        return Nv
 
 
 if __name__ == "__main__":

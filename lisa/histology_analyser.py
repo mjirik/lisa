@@ -168,7 +168,8 @@ class HistologyAnalyser:
 
     def binar_to_skeleton(self):
         # create border with generated stuff for skeletonization
-        expanded_data = self.create_border_for_skeletonization(self.data3d_thr, size=50)
+        #expanded_data = self.create_border_for_skeletonization(self.data3d_thr, size=50)
+        expanded_data = self.data3d_thr
 
         expanded_skel = skelet3d.skelet3d(
             (expanded_data > 0).astype(np.int8)
@@ -199,14 +200,22 @@ class HistologyAnalyser:
         volume_px = self.data3d.shape[0] \
             * self.data3d.shape[1] * self.data3d.shape[2]
         volume_mm3 = volume_px*voxel_volume_mm3
+        
+        # TODO - pouzij oblast zajmu
+        used_volume_px = volume_px
+        used_volume_mm3 = volume_mm3
+        
         vessel_volume_fraction = float(np.sum(np.sum(np.sum(
-            self.data3d_thr)))) / float(volume_px)
+            self.data3d_thr)))) / float(used_volume_px)
+            
         info = {
             'voxel_size_mm': list(vs),
             'voxel_volume_mm3': float(voxel_volume_mm3),
             'shape_px': list(self.data3d.shape),
             'volume_px': float(volume_px),
-            'volume_mm3': float(volume_mm3),
+            'volume_mm3': float(volume_mm3), 
+            'used_volume_px': float(used_volume_px), 
+            'used_volume_mm3': float(used_volume_mm3), 
             'vessel_volume_fraction': float(vessel_volume_fraction)
         }
         self.stats.update({'General': info})
@@ -507,7 +516,8 @@ def processData(inputfile=None, threshold=None, skeleton=False,
 
 def main():
     args = parser_init()
-
+    
+    logging.basicConfig()
     logger = logging.getLogger()
     logger.setLevel(logging.WARNING)
     # ch = logging.StreamHandler()
