@@ -542,17 +542,20 @@ class StatsResultDialog(QDialog):
         report_m = report['Main']
         report_o = report['Other']
 
-        report_label_main = QLabel('Vessel volume fraction (Vv): '+str(report_m['Vessel volume fraction (Vv)'])+'\n'
-                                +'Surface density (Sv): '+str(report_m['Surface density (Sv)'])+'\n'
-                                +'Length density (Lv): '+str(report_m['Length density (Lv)'])+'\n'
-                                +'Tortuosity: '+str(report_m['Tortuosity'])+'\n'
-                                +'Nv: '+str(report_m['Nv'])
+        report_label_main = QLabel('Vessel volume fraction (Vv): \t'+str(report_m['Vessel volume fraction (Vv)'])+' [-]\n'
+                                +'Surface density (Sv): \t'+str(report_m['Surface density (Sv)'])+' [mm-1]\n'
+                                +'Length density (Lv): \t'+str(report_m['Length density (Lv)'])+' [mm-2]\n'
+                                +'Tortuosity: \t\t'+str(report_m['Tortuosity'])+' [length/distance]\n'
+                                +'Nv: \t\t'+str(report_m['Nv'])+' [mm-3]'
                                 )
+        report_label_main.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
 
-        report_label_other = QLabel('Total length mm: '+str(report_o['Total length mm'])+'\n'
-                                +'Avg length mm: '+str(report_o['Avg length mm'])+'\n'
-                                +'Avg radius mm: '+str(report_o['Avg radius mm'])
+        report_label_other = QLabel('Total vessel length: \t'+str(report_o['Total length mm'])+' [mm]\n'
+                                +'Average vessel length: \t'+str(report_o['Avg length mm'])+' [mm]\n'
+                                +'Average vessel radius: \t'+str(report_o['Avg radius mm'])+' [mm]'
                                 )
+        report_label_other.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
+        
         # mili -> mikro (becouse mili has to much 0)
         histogram_radius = HistogramMplCanvas(report_o['Radius histogram'][0],
                                         (np.array(report_o['Radius histogram'][1])*1000).tolist(),

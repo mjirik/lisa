@@ -182,8 +182,10 @@ class OrganSegmentationWindow(QMainWindow):
         # hr.setFrameShape(QFrame.HLine)
         btn_segsave = QPushButton("Save", self)
         btn_segsave.clicked.connect(self.saveOut)
+        btn_segsavedcmoverlay = QPushButton("Save Dicom Overlay", self)
+        btn_segsavedcmoverlay.clicked.connect(self.btnSaveOutDcmOverlay)
         btn_segsavedcm = QPushButton("Save Dicom", self)
-        btn_segsavedcm.clicked.connect(self.saveOutDcm)
+        btn_segsavedcm.clicked.connect(self.btnSaveOutDcm)
         btn_segview = QPushButton("View3D", self)
         if viewer3D_available:
             btn_segview.clicked.connect(self.view3D)
@@ -194,6 +196,7 @@ class OrganSegmentationWindow(QMainWindow):
         grid.addWidget(btn_segsave, rstart + 0, 1)
         grid.addWidget(btn_segview, rstart + 0, 3)
         grid.addWidget(btn_segsavedcm, rstart + 0, 2)
+        grid.addWidget(btn_segsavedcmoverlay, rstart + 1, 2)
         rstart += 2
 
         # # # # Virtual resection
@@ -612,14 +615,40 @@ class OrganSegmentationWindow(QMainWindow):
         else:
             self.statusBar().showMessage('No segmentation data!')
 
-    def saveOutDcm(self, event=None, filename=None):
+    def btnSaveOutDcmOverlay(self, event=None, filename=None):
         if self.oseg.segmentation is not None:
             self.statusBar().showMessage('Saving segmentation data...')
             QApplication.processEvents()
 
-            self.oseg.save_outputs_dcm()
+            self.oseg.save_outputs_dcm_overlay()
             self.statusBar().showMessage('Ready')
 
+        else:
+            self.statusBar().showMessage('No segmentation data!')
+
+    def btnSaveOutDcm(self, event=None, filename=None):
+        logger.info('Pressed button "Save Dicom"')
+        self.statusBar().showMessage('Saving input data...')
+        QApplication.processEvents()
+        ofilename = self.oseg.get_standard_ouptut_filename(filetype='dcm')
+        filename = str(QFileDialog.getSaveFileName(
+            self,
+            "Save file",
+            ofilename,
+            filter="*.*"))
+
+        self.oseg.save_input_dcm(filename)
+        logger.info('Input data saved to: ' + filename)
+        self.statusBar().showMessage('Ready')
+        if self.oseg.segmentation is not None:
+            self.statusBar().showMessage('Saving segmentation data...')
+            QApplication.processEvents()
+            filename = filename[:-4] + '-seg' + filename[-4:]
+            logger.debug('saving to file: ' + filename)
+            # osfilename = self.oseg.get_standard_ouptut_filename(filetype='dcm')
+            self.oseg.save_outputs_dcm(filename)
+
+            self.statusBar().showMessage('Ready')
         else:
             self.statusBar().showMessage('No segmentation data!')
 
