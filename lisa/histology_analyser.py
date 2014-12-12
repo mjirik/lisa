@@ -49,6 +49,8 @@ class HistologyAnalyser:
         self.binaryOpening = binaryOpening
 
         self.nogui = nogui
+        
+        self.data3d_masked = None
 
     def get_voxelsize(self):
         return self.metadata['voxelsize_mm']
@@ -201,9 +203,12 @@ class HistologyAnalyser:
             * self.data3d.shape[1] * self.data3d.shape[2]
         volume_mm3 = volume_px*voxel_volume_mm3
         
-        # TODO - pouzij oblast zajmu
-        used_volume_px = volume_px
-        used_volume_mm3 = volume_mm3
+        # pouzij oblast zajmu
+        if self.data3d_masked is None:
+            self.data3d_masked = np.ones(self.data3d.shape, np.int8)
+        self.data3d_masked[self.data3d_masked > 1] = 1
+        used_volume_px = np.sum(np.sum(np.sum(self.data3d_masked)))
+        used_volume_mm3 = used_volume_px*voxel_volume_mm3
         
         vessel_volume_fraction = float(np.sum(np.sum(np.sum(
             self.data3d_thr)))) / float(used_volume_px)

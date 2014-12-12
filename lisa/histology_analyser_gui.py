@@ -86,6 +86,7 @@ class HistologyAnalyserWindow(QMainWindow):
         GUI version of histology analysation algorithm
         """
         self.data3d = data3d
+        self.masked = None
         self.metadata = metadata
         self.crgui = crgui
 
@@ -115,6 +116,7 @@ class HistologyAnalyserWindow(QMainWindow):
         logger.debug('Remove area')
         self.setStatusBarText('Remove area')
         self.showRemoveDialog(self.ha.data3d)
+        self.ha.data3d_masked = self.masked
 
         ### Segmentation
         self.showSegmQueryDialog()
@@ -250,6 +252,8 @@ class HistologyAnalyserWindow(QMainWindow):
         self.embedWidget(newapp)
 
         newapp.exec_()
+        self.masked = newapp.masked 
+        
         self.changeHelpWidget(widget=None) # removes help
 
         self.fixWindow()
