@@ -1013,8 +1013,6 @@ def logger_init():
     )
     ch.setFormatter(formatter)
     logger.addHandler(ch)
-    logger.debug('sample debug')
-    logger.error('sample error')
 
     fh = logging.FileHandler('lisa.log')
     fh.setFormatter(formatter)
