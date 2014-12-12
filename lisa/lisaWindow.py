@@ -44,6 +44,7 @@ except:
         from seed_editor_qt import QTSeedEditor
 
 import volumetry_evaluation
+import sed3
 
 
 # GUI
@@ -216,7 +217,8 @@ class OrganSegmentationWindow(QMainWindow):
         btn_hvseg.clicked.connect(self.btnHepaticVeinsSegmentation)
         btn_svhv = QPushButton("Save HV tree", self)
         btn_svhv.clicked.connect(self.btnSaveHepaticVeinsTree)
-        btn_svhv.setToolTip("Save Hepatic Veins 1D model into vessel_tree.yaml")
+        btn_svhv.setToolTip(
+            "Save Hepatic Veins 1D model into vessel_tree.yaml")
 
         btn_lesions = QPushButton("Lesions localization", self)
         btn_lesions.clicked.connect(self.btnLesionLocalization)
@@ -510,12 +512,23 @@ class OrganSegmentationWindow(QMainWindow):
         if seg_path is None:
             self.statusBar().showMessage('No data path specified!')
             return
-        evaluation, score = \
+        evaluation, score, segdiff = \
             self.oseg.sliver_compare_with_other_volume_from_file(seg_path)
         print 'Evaluation: ', evaluation
         print 'Score: ', score
 
         text = self.__evaluation_to_text(score)
+
+        segdiff[segdiff == -1] = 2
+        logger.debug('segdif unique ' + str(np.unique(segdiff)))
+
+        QApplication.processEvents()
+        ed = sed3.sed3(
+            self.oseg.data3d,
+            seeds=segdiff,
+            contour=(self.oseg.segmentation == self.oseg.slab['liver'])
+        )
+        ed.show()
 
         self.setLabelText(self.text_seg_data, text)
         self.statusBar().showMessage('Ready')
