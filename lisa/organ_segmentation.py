@@ -344,7 +344,10 @@ class OrganSegmentation():
             self.voxelsize_mm
             )
         score = volumetry_evaluation.sliver_score_one_couple(evaluation)
-        return evaluation, score
+        segdiff = qmisc.crop(
+            ((data3d_segmentation) - data3d_segmentation_actual),
+            self.crinfo)
+        return evaluation, score, segdiff
 
     def segm_smoothing(self, sigma_mm):
         """
@@ -1032,8 +1035,6 @@ def logger_init():
     )
     ch.setFormatter(formatter)
     logger.addHandler(ch)
-    logger.debug('sample debug')
-    logger.error('sample error')
 
     fh = logging.FileHandler('lisa.log')
     fh.setFormatter(formatter)
