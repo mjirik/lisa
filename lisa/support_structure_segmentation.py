@@ -218,7 +218,7 @@ def main():
     # input parser
     parser = argparse.ArgumentParser(description=
             'Segmentation of bones, lungs and heart.')
-    parser.add_argument('-dd','--dcmdir',
+    parser.add_argument('-i','--datadir',
             default=None,
             help='path to data dir')
     parser.add_argument('-d', '--debug', action='store_true',
@@ -245,8 +245,8 @@ def main():
     #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
     #data3d, metadata = dcmr.dcm_read_from_dir(args.dcmdir)
     reader = dcmr.DicomReader(args.datadir)
-    self.data3d = reader.get_3Ddata()
-    self.metadata = reader.get_metaData()
+    data3d = reader.get_3Ddata()
+    metadata = reader.get_metaData()
 
 
     sseg = SupportStructureSegmentation(data3d = data3d,
@@ -273,7 +273,7 @@ def main():
     #pyed.show()
 
     if args.show_output:
-        sseg.show_output()
+        sseg.visualization()
 
     savestring = raw_input ('Save output data? (y/n): ')
     #sn = int(snstring)
