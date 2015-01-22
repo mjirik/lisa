@@ -8,7 +8,7 @@ python:
 virtualenv:
   system_site_packages: true
 before_install:
-
+    - sudo apt-get update -qq
     - sudo apt-get install -qq python git python-dev g++ python-numpy python-scipy python-matplotlib python-sklearn python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools curl python-pip cmake
     # python-skimage
     - sudo easy_install -U SimpleITK mahotas
@@ -17,7 +17,6 @@ before_install:
     # - wget http://147.228.240.61/queetech/sample-extra-data/io3d_sample_data.zip && unzip io3d_sample_data.zip
 # command to install dependencies
 install:
-    - sudo apt-get update -qq
     - 'sudo ./ubuntu_installer.sh devel'
     - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
     - 'sudo ldconfig -v'
