@@ -83,6 +83,21 @@ class HistologyTest(unittest.TestCase):
         self.assertGreater(stats_orig['Other']['Avg radius mm'],stats_new['Other']['Avg radius mm']*0.9)  # noqa
         self.assertLess(stats_orig['Other']['Avg radius mm'],stats_new['Other']['Avg radius mm']*1.1)  # noqa
 
+    @attr("actual")
+    def test_surface_measurement(self):
+        tvg = TreeGenerator()
+        yaml_path = os.path.join(path_to_script, "./hist_stats_test.yaml")
+        tvg.importFromYaml(yaml_path)
+        tvg.voxelsize_mm = [1, 1, 1]
+        tvg.shape = [100, 100, 100]
+        data3d = tvg.generateTree()
+
+        # init histology Analyser
+        metadata = {'voxelsize_mm': tvg.voxelsize_mm}
+        data3d = data3d * 10
+        threshold = 2.5
+
+
 
 if __name__ == "__main__":
     unittest.main()
