@@ -1,0 +1,21 @@
+language: python
+python:
+  #  - "2.6"
+  - "2.7"
+  # - "3.2"
+  # - "3.3"
+  # - "3.4"
+virtualenv:
+  system_site_packages: true
+before_install:
+    - sudo apt-get install -qq cmake python-numpy libinsighttoolkit3-dev libpng12-dev libgdcm2-dev
+    # - wget http://147.228.240.61/queetech/sample-extra-data/io3d_sample_data.zip && unzip io3d_sample_data.zip
+# command to install dependencies
+install:
+    - 'sudo ./ubuntu_installer.sh devel'
+    - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
+    - 'sudo ldconfig -v'
+# command to run tests
+script: nosetests --with-coverage --cover-package=lisa
+after_success:
+    - coveralls
