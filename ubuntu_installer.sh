@@ -25,8 +25,8 @@ USER="$(echo `pwd` | sed 's|.*home/\([^/]*\).*|\1|')"
 echo "installing for user:"
 echo "$USER"
 
-apt-get update
-apt-get upgrade -y
+# apt-get update
+# apt-get upgrade -y
 
 # 1. deb package requirements
 apt-get install -y python git python-dev g++ python-numpy python-scipy python-matplotlib python-sklearn python-skimage python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools curl python-pip cmake
