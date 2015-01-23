@@ -15,6 +15,7 @@ before_install:
     # - wget http://147.228.240.61/queetech/sample-extra-data/io3d_sample_data.zip && unzip io3d_sample_data.zip
 # command to install dependencies
 install:
+    - "pip install wheel scikits-learn --use-mirrors"
     - "easy_install SimpleITK mahotas"
     # scikit-image
     - "pip install pysegbase dicom2fem sed3 io3d"
