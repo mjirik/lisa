@@ -7,6 +7,7 @@ import os.path
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../../lar-cc/lib/py/"))
 import unittest
+from nose.plugins.attrib import attr
 
 # import numpy as np
 
