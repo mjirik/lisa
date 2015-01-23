@@ -33,7 +33,15 @@ install:
     # - "pip install pyyaml"
     - "easy_install SimpleITK mahotas"
     # my packages
+    # install skelet3d
     - "pip install pysegbase dicom2fem sed3 io3d"
+    - git clone https://github.com/mjirik/skelet3d.git
+    - mkdir skelet3d/build
+    - cd skelet3d/build
+    - cmake ..
+    - make
+    - sudo make install
+    - cd ..
     # gco_python
     - "git clone https://github.com/mjirik/gco_python.git"
     - "cd gco_python"
