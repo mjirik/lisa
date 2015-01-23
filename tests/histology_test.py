@@ -92,9 +92,10 @@ class HistologyTest(unittest.TestCase):
         import lisa.surface_measurement as sm
         data3d = np.zeros([30, 30, 30])
         voxelsize_mm = [1, 1, 1]
-
+        data3d[10:20, 10:20, 10:20] = 1
 
         surface = sm.surface_measurement(data3d, voxelsize_mm)
+        print surface
         # import sed3
         # ed = sed3.sed3(im_edg)
         # ed.show()
