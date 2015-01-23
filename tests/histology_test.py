@@ -8,6 +8,7 @@ import os.path
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 import unittest
 from nose.plugins.attrib import attr
+import numpy as np
 
 from lisa.gen_volume_tree import TreeGenerator
 from lisa.histology_analyser import HistologyAnalyser
@@ -17,10 +18,10 @@ from lisa.histology_report import HistologyReport
 class HistologyTest(unittest.TestCase):
     interactiveTests = False
 
-    @attr("interactive")
+    @attr("LAR")
     def test_vessel_tree_lar(self):
         import lisa.gt_lar
-        tvg = TreeGenerator(gt_lar.GTLar)
+        tvg = TreeGenerator(lisa.gt_lar.GTLar)
         yaml_path = os.path.join(path_to_script, "./hist_stats_test.yaml")
         tvg.importFromYaml(yaml_path)
         tvg.voxelsize_mm = [1, 1, 1]
@@ -30,6 +31,7 @@ class HistologyTest(unittest.TestCase):
             tvg.show()
 
     # TODO fix this test
+    @attr("fail")
     @unittest.skip("neprochazi testem")
     def test_synthetic_data_vessel_tree_evaluation(self):
         """
@@ -86,7 +88,19 @@ class HistologyTest(unittest.TestCase):
         self.assertLess(stats_orig['Other']['Avg radius mm'],stats_new['Other']['Avg radius mm']*1.1)  # noqa
 
     @attr("actual")
-    def test_surface_measurement(self):
+    def test_surface_measurement_find(self):
+        import lisa.surface_measurement as sm
+        data3d = np.zeros([30, 30, 30])
+        voxelsize_mm = [1, 1, 1]
+
+
+        surface = sm.surface_measurement(data3d, voxelsize_mm)
+        # import sed3
+        # ed = sed3.sed3(im_edg)
+        # ed.show()
+
+    def test_surface_measurement_find_edge(self):
+        import lisa.surface_measurement as sm
         tvg = TreeGenerator()
         yaml_path = os.path.join(path_to_script, "./hist_stats_test.yaml")
         tvg.importFromYaml(yaml_path)
@@ -96,8 +110,14 @@ class HistologyTest(unittest.TestCase):
 
         # init histology Analyser
         metadata = {'voxelsize_mm': tvg.voxelsize_mm}
-        data3d = data3d * 10
-        threshold = 2.5
+        # data3d = data3d * 10
+        # threshold = 2.5
+
+        im_edg = sm.find_edge(data3d, 0)
+        # import sed3
+        # ed = sed3.sed3(im_edg)
+        # ed.show()
+
 
 
 if __name__ == "__main__":
