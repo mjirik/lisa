@@ -12,7 +12,6 @@ from nose.plugins.attrib import attr
 from lisa.gen_volume_tree import TreeGenerator
 from lisa.histology_analyser import HistologyAnalyser
 from lisa.histology_report import HistologyReport
-import lisa.gt_lar
 
 
 class HistologyTest(unittest.TestCase):
@@ -20,6 +19,7 @@ class HistologyTest(unittest.TestCase):
 
     @attr("interactive")
     def test_vessel_tree_lar(self):
+        import lisa.gt_lar
         tvg = TreeGenerator(gt_lar.GTLar)
         yaml_path = os.path.join(path_to_script, "./hist_stats_test.yaml")
         tvg.importFromYaml(yaml_path)
