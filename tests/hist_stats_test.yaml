@@ -1,5 +1,7 @@
 General:
+    shape_px: [100, 100, 100]
     volume_mm3: 1000000
+    volume_px: 1000000
     vessel_volume_fraction: 0.0135
 Graph:
   1:
