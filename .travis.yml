@@ -30,7 +30,7 @@ install:
     # - if [ ${pack} == "old_mpl" ]; then conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy nose dateutil pandas statsmodels pil six; fi
     # - if [ ${pack} == "newest" ]; then conda install --yes pip python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib nose dateutil pandas statsmodels six; fi
     # scikit-image
-    - "pip install pyyaml"
+    # - "pip install pyyaml"
     - "easy_install SimpleITK mahotas"
     # my packages
     - "pip install pysegbase dicom2fem sed3 io3d"
@@ -44,6 +44,7 @@ install:
     # - 'sudo ./ubuntu_installer.sh devel'
     - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
     - 'sudo ldconfig -v'
+    - python mysetup.py -d
 # command to run tests
 script: nosetests --with-coverage --cover-package=lisa
 after_success:
