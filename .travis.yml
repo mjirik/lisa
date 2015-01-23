@@ -18,7 +18,15 @@ install:
     - "easy_install SimpleITK mahotas"
     # scikit-image
     - "pip install pysegbase dicom2fem sed3 io3d"
-    - 'sudo ./ubuntu_installer.sh devel'
+    - pwd
+    # gco_python
+    - "git clone https://github.com/mjirik/gco_python.git"
+    - "mkdir gco_python"
+    - "cd gco_python"
+    - make
+    - "pip install ."
+    # ubuntu installer is not working
+    # - 'sudo ./ubuntu_installer.sh devel'
     - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
     - 'sudo ldconfig -v'
 # command to run tests
