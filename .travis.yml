@@ -52,7 +52,9 @@ install:
     # - 'sudo ./ubuntu_installer.sh devel'
     - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
     - 'sudo ldconfig -v'
+    - pip install -r ci/requirements_ci.txt
     - python mysetup.py -d
+    
 # command to run tests
 script: nosetests --with-coverage --cover-package=lisa
 after_success:
