@@ -15,11 +15,15 @@ before_install:
     # python-skimage
     - sudo apt-get install -qq cmake libinsighttoolkit3-dev libpng12-dev libgdcm2-dev
     # - wget http://147.228.240.61/queetech/sample-extra-data/io3d_sample_data.zip && unzip io3d_sample_data.zip
+    - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
     - travis/miniconda.sh -b
-    - export PATH=/home/travis/anaconda/bin:$PATH
+    - chmod +x miniconda.sh
+    - ./miniconda.sh -b
+    - export PATH=/home/travis/miniconda/bin:$PATH
+    #  Update conda else if will result in a problem when conda updates the repos...
+    - conda update --yes conda
 # command to install dependencies
 install:
-    #  Update conda else if will result in a problem when conda updates the repos...
     - conda update --yes conda 
     # Install dependencies
     # No idea why a two step process is needed :-(
