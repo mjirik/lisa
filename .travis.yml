@@ -13,7 +13,7 @@ before_install:
     # python-skimage
     - sudo easy_install -U SimpleITK mahotas 
     # scikit-image
-    - pip install pysegbase dicom2fem sed3 io3d --user
+    - pip install pysegbase dicom2fem sed3 io3d
     - sudo apt-get install -qq cmake python-numpy libinsighttoolkit3-dev libpng12-dev libgdcm2-dev
     # - wget http://147.228.240.61/queetech/sample-extra-data/io3d_sample_data.zip && unzip io3d_sample_data.zip
 # command to install dependencies
