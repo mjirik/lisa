@@ -26,7 +26,7 @@ install:
     - conda update --yes conda 
     # Install dependencies
     # No idea why a two step process is needed :-(
-    - conda install --yes pip python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib scikits-learn scikits-image
+    - conda install --yes pip python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib scikit-learn scikit-image
     # - if [ ${pack} == "old_mpl" ]; then conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy nose dateutil pandas statsmodels pil six; fi
     # - if [ ${pack} == "newest" ]; then conda install --yes pip python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib nose dateutil pandas statsmodels six; fi
     # scikit-image
