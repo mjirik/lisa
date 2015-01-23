@@ -15,6 +15,7 @@ class InterpolationPlasmTest(unittest.TestCase):
     interactiveTests = False
     # interactiveTest = True
 
+    @attr("LAR")
     def test_store_to_SparseMatrix_and_back(self):
         """
         Test has not strong assert part.
@@ -28,6 +29,7 @@ class InterpolationPlasmTest(unittest.TestCase):
         self.assertIsInstance(dom2D[0], pyplasm.xgepy.Hpc)
 
     # @unittest.skipIf(not interactiveTests, "test is with visualization")
+    @attr("LAR")
     def test_complex_sample(self):
         from larcc import INTERVALS, BEZIER, S2, S1, MAP, STRUCT, SKELETON, VIEW
         from lisa.extern.interpolation_pyplasm import TRIANGLE_DOMAIN,\
