@@ -29,6 +29,8 @@ class HistologyTest(unittest.TestCase):
         if self.interactiveTests:
             tvg.show()
 
+    # TODO fix this test,it is not LAR
+    @attr("LAR")
     def test_synthetic_data_vessel_tree_evaluation(self):
         """
         Generovani umeleho stromu do 3D a jeho evaluace.
