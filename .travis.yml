@@ -13,7 +13,7 @@ before_install:
     - sudo apt-get install -qq cmake libinsighttoolkit3-dev libpng12-dev libgdcm2-dev
       # python packages
     # - sudo apt-get install -qq python-numpy python-scipy python-matplotlib python-sklearn python-dicom python-yaml 
-    - sudo apt-get install -qq python-qt4 python-vtk python-setuptools python-pip cython
+    # - sudo apt-get install -qq python-qt4 python-vtk python-setuptools python-pip cython
     # python-skimage
     # - wget http://147.228.240.61/queetech/sample-extra-data/io3d_sample_data.zip && unzip io3d_sample_data.zip
     - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
@@ -26,8 +26,7 @@ before_install:
 install:
     - conda update --yes conda 
     # Install dependencies
-    # No idea why a two step process is needed :-(
-    - conda install --yes pip python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib scikit-learn scikit-image
+    - conda install --yes pip python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib scikit-learn scikit-image cython pyqt pyyaml setuptools pip vtk
     # - if [ ${pack} == "old_mpl" ]; then conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy nose dateutil pandas statsmodels pil six; fi
     # - if [ ${pack} == "newest" ]; then conda install --yes pip python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib nose dateutil pandas statsmodels six; fi
     # scikit-image
