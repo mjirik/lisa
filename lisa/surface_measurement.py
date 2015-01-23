@@ -41,7 +41,7 @@ def surface_measurement(segmentation, voxelsize_mm, sond_raster_mm=None):
     # TODO
     surface = 2.0 / (im_sond.shape[1] * im_sond.shape[2]) * (
         np.sum(np.abs(im_sond)) * ippuv)
-    import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+    # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
     return surface
 

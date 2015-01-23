@@ -22,6 +22,17 @@ class HistologyReport:
     def importFromYaml(self, filename):
         data = misc.obj_from_file(filename=filename, filetype='yaml')
         self.data = data
+        self.data = self.fixData(self.data)
+        
+    def fixData(self, data):
+        try:
+            data['General']['used_volume_mm3']
+            data['General']['used_volume_px']
+        except:
+            data['General']['used_volume_mm3'] = data['General']['volume_mm3']
+            data['General']['used_volume_px'] = data['General']['volume_px']
+        return data
+        
         
     def writeReportToYAML(self, filename='hist_report'):
         logger.debug('write report to yaml')
