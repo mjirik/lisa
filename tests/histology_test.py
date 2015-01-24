@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 # import funkcí z jiného adresáře
-import sys
 import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
@@ -135,7 +134,6 @@ class HistologyTest(unittest.TestCase):
         # import sed3
         # ed = sed3.sed3(im_edg)
         # ed.show()
-
 
 
 if __name__ == "__main__":
