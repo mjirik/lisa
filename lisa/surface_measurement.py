@@ -38,11 +38,11 @@ def surface_per_volume(segmentation, voxelsize_mm, sond_raster_mm=None):
 
 
 # inverse of the probe per unit volume v/l_i
-    ippuv = (
-        (np.prod(sond_raster_mm) * im_sond.shape[axis])
-        /
-        (sond_raster_mm[axis] * im_sond.shape[axis])
-    )
+    # ippuv = (
+    #     (np.prod(sond_raster_mm) * im_sond.shape[axis])
+    #     /
+    #     (sond_raster_mm[axis] * im_sond.shape[axis])
+    # )
 # Pocet pruseciku
     Ii = np.sum(np.abs(im_sond))
 
