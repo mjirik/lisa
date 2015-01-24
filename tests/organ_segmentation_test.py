@@ -215,7 +215,7 @@ and background")
         """
         # dcmdir = os.path.join(path_to_script,'./../sample_data/matlab/examples/sample_data/DICOM/digest_article/') # noqa
 # data
-        img3d = np.random.rand(32, 64, 64) * 4
+        img3d = np.random.rand(32, 64, 64) * 3
         img3d[4:24, 12:32, 5:25] = img3d[4:24, 12:32, 5:25] + 25
 
 # seeds
