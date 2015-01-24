@@ -87,12 +87,26 @@ class HistologyTest(unittest.TestCase):
     @attr("actual")
     def test_surface_measurement_find(self):
         import lisa.surface_measurement as sm
-        data3d = np.zeros([30, 30, 30])
+        data1 = np.zeros([30, 30, 30])
         voxelsize_mm = [1, 1, 1]
-        data3d[10:20, 10:20, 10:20] = 1
+        data1[10:20, 10:20, 10:20] = 1
 
-        surface = sm.surface_measurement(data3d, voxelsize_mm)
-        print surface
+        Sv1 = sm.surface_per_volume(data1, voxelsize_mm)
+
+        data2 = np.zeros([30, 30, 30])
+        voxelsize_mm = [1, 1, 1]
+        data2[10:20, 10:20, 10:20] = 1
+        data2[10:15, 10:15, 10:15] = 0
+        Sv2 = sm.surface_per_volume(data2, voxelsize_mm)
+
+        self.assertEqual(Sv2, Sv1)
+
+        data3 = np.zeros([30, 30, 30])
+        voxelsize_mm = [1, 1, 1]
+        data3[10:20, 10:20, 10:20] = 1
+        data3[13:18, 13:18, 10:15] = 0
+        Sv3 = sm.surface_per_volume(data3, voxelsize_mm)
+        self.assertGreater(Sv3, Sv1)
         # import sed3
         # ed = sed3.sed3(im_edg)
         # ed.show()

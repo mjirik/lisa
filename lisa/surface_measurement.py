@@ -21,7 +21,7 @@ import numpy as np
 import scipy
 
 
-def surface_measurement(segmentation, voxelsize_mm, sond_raster_mm=None):
+def surface_per_volume(segmentation, voxelsize_mm, sond_raster_mm=None):
     axis = 0
     if sond_raster_mm is None:
         sond_raster_mm = voxelsize_mm
@@ -31,19 +31,30 @@ def surface_measurement(segmentation, voxelsize_mm, sond_raster_mm=None):
 
     # est S = 2 \frac{1}{n} \sum_{i=1}^{n} \frac{v}{l_i} \cdot l_i
 
+# celkova delka sond
+    n_needle = (im_sond.shape[1] * im_sond.shape[2])
+    one_needle_l = im_sond.shape[0] * voxelsize_mm[0]
+    length = n_needle * one_needle_l
+
+
 # inverse of the probe per unit volume v/l_i
     ippuv = (
         (np.prod(sond_raster_mm) * im_sond.shape[axis])
         /
         (sond_raster_mm[axis] * im_sond.shape[axis])
     )
+# Pocet pruseciku
+    Ii = np.sum(np.abs(im_sond))
 
-    # TODO
-    surface = 2.0 / (im_sond.shape[1] * im_sond.shape[2]) * (
-        np.sum(np.abs(im_sond)) * ippuv)
+    # import sed3
+    # ed = sed3.sed3(im_sond)
+    # ed.show()
+
+    # print "Ii = ", Ii
+    Sv = 2.0 * Ii / length
     # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
-    return surface
+    return Sv
 
 
 def find_edge(segmentation, axis):
