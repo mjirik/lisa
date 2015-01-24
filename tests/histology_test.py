@@ -121,11 +121,17 @@ class HistologyTest(unittest.TestCase):
         data3d = tvg.generateTree()
 
         # init histology Analyser
-        metadata = {'voxelsize_mm': tvg.voxelsize_mm}
+        # metadata = {'voxelsize_mm': tvg.voxelsize_mm}
         # data3d = data3d * 10
         # threshold = 2.5
 
         im_edg = sm.find_edge(data3d, 0)
+        # in this area should be positive edge
+        self.assertGreater(
+            np.sum(im_edg[25:30, 25:30, 30]),
+            3
+        )
+        # self.assert(im_edg
         # import sed3
         # ed = sed3.sed3(im_edg)
         # ed.show()
