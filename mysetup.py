@@ -4,7 +4,7 @@ import os
 import zipfile
 import subprocess
 import sys
-import traceback
+# import traceback
 
 import logging
 logger = logging.getLogger(__name__)
@@ -27,9 +27,9 @@ def submodule_update():
     # update submodules codes
     print ('Updating submodules')
     try:
-        #import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         subprocess.call('git submodule update --init --recursive', shell=True)
-        #subprocess.call('git submodule update --init --recursive')
+        # subprocess.call('git submodule update --init --recursive')
 
     except:
         print ('Probem with git submodules')
@@ -49,7 +49,9 @@ def check_python_architecture(pythondir, target_arch_str):
 
 
 def definitions_win64_py32():
-    global urlpython, urlmsysgit, urlmingw, urlnumpy, urlscipy, urlsklearn, urlmatplotlib, urlcython, urlgco_python, urlgco, urlcompiler, pythondir, pythonversion, target_arch_str
+    global urlpython, urlmsysgit, urlmingw, urlnumpy, urlscipy, urlsklearn,\
+        urlmatplotlib, urlcython, urlgco_python, urlgco, urlcompiler,\
+        pythondir, pythonversion, target_arch_str
     urlpython = "http://www.python.org/ftp/python/3.2.3/python-3.2.3.amd64.msi"
     urlmsysgit = "http://msysgit.googlecode.com/files/Git-1.8.0-preview20121022.exe"
     urlmingw = "http://downloads.sourceforge.net/project/mingw/Installer/mingw-get-inst/mingw-get-inst-20120426/mingw-get-inst-20120426.exe?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fmingw%2Ffiles%2Flatest%2Fdownload%3Fsource%3Dfiles&ts=1359726876&use_mirror=ignum",
@@ -62,7 +64,7 @@ def definitions_win64_py32():
     urlgco = "http://vision.csd.uwo.ca/code/gco-v3.0.zip"
     urlcompiler = "http://home.zcu.cz/~mjirik/liver/download/win64_py32/cygwinccompiler.py"
     pythondir = "c:/python32/"
-    pythonversion = (3,2)
+    pythonversion = (3, 2)
     target_arch_str = '64'
 
 
@@ -203,9 +205,8 @@ def windows_build_gco():
     subprocess.call(pythondir + "python.exe setup.py build --compiler=mingw32", cwd="./tmp/gco_python-master/")
     subprocess.call(pythondir + "python.exe setup.py install --skip-build", cwd="./tmp/gco_python-master/")
 
-
-
     #subprocess.call('envinstall\envwindows.bat')
+
 
 def remove(local_file_name):
     try:
@@ -215,8 +216,9 @@ def remove(local_file_name):
         it manually.")
         print (e)
 
+
 def get_sample_data():
-# download sample data
+    # download sample data
     print('Downloading sample data')
 
     try:
@@ -224,9 +226,9 @@ def get_sample_data():
     except:
         pass
 
-# Puvodni URL z mathworks
-    #url =  "http://www.mathworks.com/matlabcentral/fileexchange/2762-dicom-example-files?download=true"
-    #url = "http://www.mathworks.com/includes_content/domainRedirect/domainRedirect.html?uri=http%3A%2F%2Fwww.mathworks.com%2Fmatlabcentral%2Ffileexchange%2F2762-dicom-example-files%3Fdownload%3Dtrue%26nocookie%3Dtrue"
+    # Puvodni URL z mathworks
+    # url =  "http://www.mathworks.com/matlabcentral/fileexchange/2762-dicom-example-files?download=true"
+    # url = "http://www.mathworks.com/includes_content/domainRedirect/domainRedirect.html?uri=http%3A%2F%2Fwww.mathworks.com%2Fmatlabcentral%2Ffileexchange%2F2762-dicom-example-files%3Fdownload%3Dtrue%26nocookie%3Dtrue"
     url = "http://147.228.240.61/queetech/sample-data/head.zip"
     local_file_name = './sample_data/head.zip'
 
@@ -241,8 +243,8 @@ def get_sample_data():
 
 # get jatra_06mm_jenjatra
 
-    #url = "http://147.228.240.61/queetech/sample-data/jatra_06mm_jenjatraplus.zip"
-    #local_file_name = './sample_data/jatra_06mm_jenjatraplus.zip'
+    # url = "http://147.228.240.61/queetech/sample-data/jatra_06mm_jenjatraplus.zip"
+    # local_file_name = './sample_data/jatra_06mm_jenjatraplus.zip'
     url = "http://147.228.240.61/queetech/sample-data/jatra_06mm_jenjatra.zip"
     local_file_name = './sample_data/jatra_06mm_jenjatra.zip'
     urllibr.urlretrieve(url, local_file_name)
@@ -265,7 +267,7 @@ def get_sample_data():
     datafile.extractall('./sample_data/')
     remove(local_file_name)
 
-#get volumetry sample
+# get volumetry sample
     url = "http://147.228.240.61/queetech/sample-data/volumetrie.zip"
     local_file_name = './sample_data/volumetrie.zip'
     urllibr.urlretrieve(url, local_file_name)
@@ -295,6 +297,15 @@ def get_sample_data():
     datafile = zipfile.ZipFile(local_file_name)
     datafile.extractall('./sample_data/')
     remove(local_file_name)
+
+# get gensei samples
+    url = "http://147.228.240.61/queetech/sample-data/gensei_slices.zip"
+    local_file_name = './sample_data/gensei_slices.zip'
+    urllibr.urlretrieve(url, local_file_name)
+    datafile = zipfile.ZipFile(local_file_name)
+    datafile.extractall('./sample_data/')
+    remove(local_file_name)
+
 
 def windows_get_gco():
     url = "http://147.228.240.61/queetech/install/pygco-py27-32bit/pygco.pyd"

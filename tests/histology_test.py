@@ -84,7 +84,26 @@ class HistologyTest(unittest.TestCase):
         self.assertLess(stats_orig['Other']['Avg radius mm'],stats_new['Other']['Avg radius mm']*1.1)  # noqa
 
     @attr("actual")
-    def test_surface_measurement_find(self):
+    def test_surface_per_volume_gensei_data(self):
+        import lisa.surface_measurement as sm
+        import io3d
+        dr = io3d.datareader.DataReader()
+        datap = dr.Get3DData('sample_data/gensei_slices/',
+                             dataplus_format=True)
+        # total object volume fraction:           0.081000
+        # total object volume [(mm)^3]:           81.000000
+        # total object surface fraction [1/(mm)]: 0.306450
+        # total object surface [(mm)^2]:          306.449981
+        segmentation = (datap['data3d'] > 100).astype(np.int8)
+        voxelsize_mm = [0.2, 0.2, 0.2]
+        volume = np.sum(segmentation) * np.prod(voxelsize_mm)
+        import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+
+        Sv1 = sm.surface_per_volume(segmentation, voxelsize_mm)
+        print volume
+        print Sv1
+
+    def test_surface_measurement(self):
         import lisa.surface_measurement as sm
         data1 = np.zeros([30, 30, 30])
         voxelsize_mm = [1, 1, 1]

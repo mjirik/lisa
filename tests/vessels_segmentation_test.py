@@ -133,7 +133,6 @@ class VesselsSegmentationTest(unittest.TestCase):
         self.assertGreater(ratio, 0.17)
         self.assertLess(ratio, 0.19)
 
-
     @attr('slow')
     def test_real_data_segmentation(self):
 
