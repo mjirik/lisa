@@ -97,11 +97,12 @@ class HistologyTest(unittest.TestCase):
         segmentation = (datap['data3d'] > 100).astype(np.int8)
         voxelsize_mm = [0.2, 0.2, 0.2]
         volume = np.sum(segmentation) * np.prod(voxelsize_mm)
-        import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
-        Sv1 = sm.surface_per_volume(segmentation, voxelsize_mm)
-        print volume
-        print Sv1
+        Sv = sm.surface_per_volume(segmentation, voxelsize_mm)
+        self.assertGreater(volume, 80)
+        self.assertLess(volume, 85)
+        self.assertGreater(Sv, 0.3)
+        self.assertLess(Sv, 0.4)
 
     def test_surface_measurement(self):
         import lisa.surface_measurement as sm
