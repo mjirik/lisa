@@ -3,7 +3,6 @@
 
 
 # import funkcí z jiného adresáře
-import sys
 import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
@@ -31,13 +30,8 @@ class VesselsSegmentationTest(unittest.TestCase):
     def test_whole_organ_segmentation_interactive(self):
         pass
 
-    def test_synthetic_data_segmentation(self):
-        """
-        Function uses organ_segmentation  for synthetic box object
-        segmentation.
-        """
-        # dcmdir = os.path.join(path_to_script,'./../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
-# data
+    def synthetic_data(self):
+        # data
         slab = {'none': 0, 'liver': 1, 'porta': 2}
         voxelsize_mm = np.array([1.0, 1.0, 1.2])
 
@@ -45,7 +39,7 @@ class VesselsSegmentationTest(unittest.TestCase):
 
         # liver
         segm[70:180, 40:190, 30:60] = slab['liver']
-# port
+        # porta
         segm[120:130, 70:190, 40:45] = slab['porta']
         segm[80:130, 100:110, 40:45] = slab['porta']
         segm[120:170, 130:135, 40:44] = slab['porta']
@@ -53,10 +47,17 @@ class VesselsSegmentationTest(unittest.TestCase):
         data3d = np.zeros(segm.shape)
         data3d[segm == slab['liver']] = 156
         data3d[segm == slab['porta']] = 206
-        # noise = (np.random.rand(segm.shape[0], segm.shape[1], segm.shape[2])*30).astype(np.int16)
         noise = (np.random.normal(0, 30, segm.shape))  # .astype(np.int16)
         data3d = (data3d + noise).astype(np.int16)
+        return data3d, segm, voxelsize_mm, slab
 
+    def test_synthetic_data_segmentation(self):
+        """
+        Function uses organ_segmentation  for synthetic box object
+        segmentation.
+        """
+
+        data3d, segm, voxelsize_mm, slab = self.synthetic_data()
 # @TODO je tam bug, prohlížeč neumí korektně pracovat s doubly
 #        app = QApplication(sys.argv)
 #        #pyed = QTSeedEditor(noise )
@@ -87,7 +88,9 @@ class VesselsSegmentationTest(unittest.TestCase):
 
 # @TODO opravit chybu v vesselSegmentation
         outputTmp = (outputTmp == 2)
-        errim = np.abs(outputTmp.astype(np.int) - (segm == slab['porta']).astype(np.int))
+        errim = np.abs(
+            outputTmp.astype(np.int) - (segm == slab['porta']).astype(np.int)
+        )
 
 # ověření výsledku
         # pyed = sed3.sed3(errim, contour=segm==slab['porta'])
@@ -104,6 +107,32 @@ class VesselsSegmentationTest(unittest.TestCase):
         # import pdb; pdb.set_trace()
 
         self.assertLess(errorrate, 0.1)
+
+    def test_virtual_resection(self):
+        """
+        Make virtual resection on synthetic data
+        """
+        import lisa.virtual_resection as vr
+        data3d, segm, voxelsize_mm, slab = self.synthetic_data()
+        seeds = np.zeros([256, 256, 80], dtype=np.int16)
+        seeds[125, 160, 44] = 1
+        datap = {'data3d': data3d, 'segmentation': segm,
+                 'voxelsize_mm': voxelsize_mm, 'slab': slab}
+
+        datap = vr.resection(
+            datap, use_old_editor=True,
+            interactivity=False, seeds=seeds
+        )
+
+        resected = np.sum(
+            datap['segmentation'] == datap['slab']['resected_liver'])
+        remaining = np.sum(
+            datap['segmentation'] == datap['slab']['liver'])
+        ratio = np.double(resected)/(resected+remaining)
+
+        self.assertGreater(ratio, 0.17)
+        self.assertLess(ratio, 0.19)
+
 
     @attr('slow')
     def test_real_data_segmentation(self):

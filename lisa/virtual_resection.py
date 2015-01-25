@@ -6,8 +6,8 @@ import sys
 import os.path
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
-#from ..extern.sed3 import sed3
-#import featurevector
+# from ..extern.sed3 import sed3
+# import featurevector
 
 import logging
 logger = logging.getLogger(__name__)
@@ -180,34 +180,43 @@ def change(data, name):
     cut_editor(segmentation == data['slab'][name])
 
 
-def resection(data, name, use_old_editor=False):
+def resection(data, name=None, use_old_editor=False,
+              interactivity=True, seeds=None):
     if use_old_editor:
-        return resection_old(data)
+        return resection_old(data, interactivity=interactivity, seeds=seeds)
     else:
         return resection_new(data, name)
 
 
-def resection_old(data):
-    #vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
-# ostranění porty z více kusů, nastaví se jim hodnota liver
-    #data['segmentation'][data['segmentation'] == data['slab']['porta']] = data['slab']['liver']
-    #show3.show3(data['segmentation'])
+def resection_old(data, interactivity=True, seeds=None):
+    # vessels = get_biggest_object(data['segmentation'] == data['slab']['porta'])
+    #  ostranění porty z více kusů, nastaví se jim hodnota liver
+    # data['segmentation'][data['segmentation'] == data['slab']['porta']] = data['slab']['liver']
+    # show3.show3(data['segmentation'])
 
-    #data['segmentation'][vessels == 1] = data['slab']['porta']
-    #segmentation = data['segmentation']
-    print ("Select cut")
+    # data['segmentation'][vessels == 1] = data['slab']['porta']
+    # segmentation = data['segmentation']
 
-    #print data["slab"]
-    #lab = cut_editor(data)#== data['slab']['porta'])
-    #data['voxelsize_mm'] = np.squeeze([1,1,1])
-    #data['segmentation'] = data['segmentation'][::degrad,::degrad,::degrad]
-    #data['data3d'] = data['data3d'][::degrad,::degrad,::degrad]
-    seeds = cut_editor_old(data)
-    #seeds = np.zeros((data['segmentation'].shape[0],(data['segmentation'].shape[1]),(data['segmentation'].shape[2])))
-    #seeds[56][60][78] = 1
+    # print data["slab"]
+    # lab = cut_editor(data)#== data['slab']['porta'])
+    # data['voxelsize_mm'] = np.squeeze([1,1,1])
+    # data['segmentation'] = data['segmentation'][::degrad,::degrad,::degrad]
+    # data['data3d'] = data['data3d'][::degrad,::degrad,::degrad]
+    if interactivity:
+        print ("Select cut")
+        seeds = cut_editor_old(data)
+    elif seeds is None:
+        logger.error('seeds is None and interactivity is False')
+        return None
+
+    # seeds = np.zeros((data['segmentation'].shape[0],(data['segmentation'].shape[1]),(data['segmentation'].shape[2])))
+    # seeds[56][60][78] = 1
     lab, cut = split_vessel(data, seeds)
     segm, dist1, dist2 = split_organ_by_two_vessels(data, lab)
-    data = virtual_resection_visualization(data, segm, dist1, dist2, cut)
+# TODO split this function from visualization
+    data = virtual_resection_visualization(data, segm, dist1,
+                                           dist2, cut,
+                                           interactivity=interactivity)
     return data
 
 
@@ -240,12 +249,16 @@ def split_organ_by_two_vessels(data, lab):
     return segm, dist1, dist2
 
 
-def virtual_resection_visualization(data, segm, dist1, dist2, cut):
+def virtual_resection_visualization(data, segm, dist1, dist2, cut,
+                                    interactivity=True):
     v1, v2 = liver_spit_volume_mm3(segm, data['voxelsize_mm'])
 
-    print "Liver volume: %.4g l" % ((v1 + v2) * 1e-6)
-    print "volume1: %.4g l  (%.3g %%)" % ((v1) * 1e-6, 100 * v1 / (v1 + v2))
-    print "volume2: %.4g l  (%.3g %%)" % ((v2) * 1e-6, 100 * v2 / (v1 + v2))
+    if interactivity:
+        print "Liver volume: %.4g l" % ((v1 + v2) * 1e-6)
+        print "volume1: %.4g l  (%.3g %%)" % (
+            (v1) * 1e-6, 100 * v1 / (v1 + v2))
+        print "volume2: %.4g l  (%.3g %%)" % (
+            (v2) * 1e-6, 100 * v2 / (v1 + v2))
 
     #pyed = sed3.sed3(segm)
     #pyed.show()
@@ -255,10 +268,12 @@ def virtual_resection_visualization(data, segm, dist1, dist2, cut):
     linie_vis = 2 * linie
     linie_vis[cut == 1] = 1
     linie_vis = linie_vis.astype(np.int8)
-    pyed = sed3.sed3(data['data3d'],
-                                         seeds=linie_vis,
-                                         contour=(data['segmentation'] != 0))
-    pyed.show()
+    if interactivity:
+        pyed = sed3.sed3(
+            data['data3d'],
+            seeds=linie_vis,
+            contour=(data['segmentation'] != 0))
+        pyed.show()
 
     #import pdb; pdb.set_trace()
 
@@ -299,7 +314,7 @@ def resection_new(data, name):
 
     #data['segmentation'][vessels == 2] = data['slab']['porta']
     segmentation = data['segmentation']
-    print(data['slab'])
+    # print(data['slab'])
     change(data,name)
 
     #print data["slab"]

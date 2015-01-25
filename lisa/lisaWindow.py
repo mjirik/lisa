@@ -645,7 +645,8 @@ class OrganSegmentationWindow(QMainWindow):
             QApplication.processEvents()
             filename = filename[:-4] + '-seg' + filename[-4:]
             logger.debug('saving to file: ' + filename)
-            # osfilename = self.oseg.get_standard_ouptut_filename(filetype='dcm')
+            # osfilename = self.oseg.get_standard_ouptut_filename(
+            #     filetype='dcm')
             self.oseg.save_outputs_dcm(filename)
 
             self.statusBar().showMessage('Ready')
@@ -660,7 +661,7 @@ class OrganSegmentationWindow(QMainWindow):
                 'slab': self.oseg.slab,
                 'voxelsize_mm': self.oseg.voxelsize_mm
                 }
-        cut = virtual_resection.resection(data, None, use_old_editor=True)
+        cut = virtual_resection.resection(data, use_old_editor=True)
         self.oseg.segmentation = cut['segmentation']
         self.oseg.slab = cut['slab']
 
