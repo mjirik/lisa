@@ -204,9 +204,12 @@ and background")
         # app = QApplication(sys.argv)
         # oseg.interactivity(min_val=0, max_val=30)
         oseg.ninteractivity()
+        datap = oseg.export()
 
         volume = oseg.get_segmented_volume_size_mm3()
         self.assertGreater(volume, 500000)
+        self.assertIn('data3d', datap.keys())
+        self.assertIn('voxelsize_mm', datap.keys())
 
     def test_box_segmentation(self):
         """
