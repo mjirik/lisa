@@ -186,7 +186,7 @@ and background")
         slab = {'none': 0, 'liver': 1, 'porta': 2}
         voxelsize_mm = np.array([1.0, 1.0, 1.2])
 
-        segm = np.zeros([80, 256, 256], dtype=np.int16)
+        segm = np.zeros([80, 256, 250], dtype=np.int16)
 
         # liver
         segm[30:60, 70:180, 40:190] = slab['liver']
@@ -198,7 +198,7 @@ and background")
         data3d = np.zeros(segm.shape)
         data3d[segm == slab['liver']] = 146
         data3d[segm == slab['porta']] = 206
-        noise = (np.random.normal(0, 15, segm.shape))  # .astype(np.int16)
+        noise = (np.random.normal(0, 10, segm.shape))  # .astype(np.int16)
         data3d = (data3d + noise).astype(np.int16)
         return data3d, segm, voxelsize_mm, slab
 
@@ -244,7 +244,7 @@ and background")
 
         # mel by to být litr. tedy milion mm3
         self.assertGreater(volume, 579000)
-        self.assertLess(volume, 580000)
+        self.assertLess(volume, 585000)
 
     def test_roi(self):
         """
