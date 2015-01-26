@@ -801,7 +801,7 @@ class OrganSegmentation():
 
         self.segmentation = tumory.segmentation
 
-    def portalVeinSegmentation(self):
+    def portalVeinSegmentation(self, **inparams):
         """
         Segmentation of vein in specified volume. It is given by label "liver".
         Usualy it is number 1. If there is no specified volume all image is
@@ -811,6 +811,8 @@ class OrganSegmentation():
         this image) all segmentation labeled as 'porta' is removed and setted
         to 'liver' before processing.
 
+        You can use additional parameters from vesselSegmentation()
+        For example interactivity=False, biggestObjects=True, ...
         """
 
         import segmentation
@@ -829,19 +831,33 @@ class OrganSegmentation():
         # remove prev segmentation
         self.segmentation[self.segmentation == slab['porta']] = slab['liver']
 
+        params = {
+            'threshold': -1,
+            'inputSigma': 0.15,
+            'dilationIterations': 10,
+            'nObj': 1,
+            'biggestObjects': False,
+            'useSeedsOfCompactObjects': True,
+            'interactivity': True,
+            'binaryClosingIterations': 2,
+            'binaryOpeningIterations': 0
+        }
+        params.update(inparams)
         outputSegmentation = segmentation.vesselSegmentation(
             self.data3d,
             self.segmentation,
-            threshold=-1,
-            inputSigma=0.15,
-            dilationIterations=10,
-            nObj=1,
-            biggestObjects=False,
-            useSeedsOfCompactObjects=True,
-            # useSeedsOfCompactObjects=False,
-            interactivity=True,
-            binaryClosingIterations=2,
-            binaryOpeningIterations=0)
+            **params
+            # threshold=-1,
+            # inputSigma=0.15,
+            # dilationIterations=10,
+            # nObj=1,
+            # biggestObjects=False,
+            # useSeedsOfCompactObjects=True,
+            # # useSeedsOfCompactObjects=False,
+            # interactivity=True,
+            # binaryClosingIterations=2,
+            # binaryOpeningIterations=0
+        )
         # rom PyQt4.QtCore import pyqtRemoveInputHook
         # yqtRemoveInputHook()
         # mport ipdb; ipdb.set_trace() # BREAKPOINT

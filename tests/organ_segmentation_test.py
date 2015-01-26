@@ -174,11 +174,9 @@ and background")
         pass
 
 # TODO finish this test
-    @attr("interactive")
     def test_synth_liver(self):
         params = {}
         self.synthetic_liver_template(params)
-
 
     def synthetic_liver(self):
         """
@@ -188,19 +186,19 @@ and background")
         slab = {'none': 0, 'liver': 1, 'porta': 2}
         voxelsize_mm = np.array([1.0, 1.0, 1.2])
 
-        segm = np.zeros([256, 256, 80], dtype=np.int16)
+        segm = np.zeros([80, 256, 256], dtype=np.int16)
 
         # liver
-        segm[70:180, 40:190, 30:60] = slab['liver']
+        segm[30:60, 70:180, 40:190] = slab['liver']
         # porta
-        segm[120:130, 70:190, 40:45] = slab['porta']
-        segm[80:130, 100:110, 40:45] = slab['porta']
-        segm[120:170, 130:135, 40:44] = slab['porta']
+        segm[40:45, 120:130, 70:190] = slab['porta']
+        segm[40:45, 80:130, 100:110] = slab['porta']
+        segm[40:44, 120:170, 130:135] = slab['porta']
 
         data3d = np.zeros(segm.shape)
-        data3d[segm == slab['liver']] = 156
+        data3d[segm == slab['liver']] = 146
         data3d[segm == slab['porta']] = 206
-        noise = (np.random.normal(0, 30, segm.shape))  # .astype(np.int16)
+        noise = (np.random.normal(0, 15, segm.shape))  # .astype(np.int16)
         data3d = (data3d + noise).astype(np.int16)
         return data3d, segm, voxelsize_mm, slab
 
@@ -215,9 +213,9 @@ and background")
         data3d, segm, voxelsize_mm, slab = self.synthetic_liver()
 
 # seeds
-        seeds = np.zeros([256, 256, 80], np.int8)
-        seeds[90:120, 70:110, 40:45] = 1
-        seeds[190:200, 40:90, 30:35] = 2
+        seeds = np.zeros(data3d.shape, np.int8)
+        seeds[40:55, 90:120, 70:110] = 1
+        seeds[30:45, 190:200, 40:90] = 2
 # [mm]  10 x 10 x 10        # voxelsize_mm = [1, 4, 3]
         metadata = {'voxelsize_mm': voxelsize_mm}
 
@@ -227,29 +225,26 @@ and background")
             metadata=metadata,
             seeds=seeds,
             working_voxelsize_mm=10,
-            manualroi=False
-            # **params
+            manualroi=False,
+            autocrop=False,
+
+            **params
         )
 
-        # oseg.seeds = seeds
-        # oseg.make_gc()
-# manual seeds setting
-
-        # from PyQt4.QtGui import QApplication
-        # app = QApplication(sys.argv)
-        # oseg.interactivity()
         oseg.ninteractivity()
 
         volume = oseg.get_segmented_volume_size_mm3()
-        print volume
+        oseg.portalVeinSegmentation(interactivity=False, threshold=180)
 
         # import pdb; pdb.set_trace()
+        # import sed3
+        # ed = sed3.sed3(data3d, seeds=seeds,
+        #                contour=(oseg.segmentation == 2))
+        # ed.show()
 
         # mel by to být litr. tedy milion mm3
-        self.assertGreater(volume, 900000)
-        self.assertLess(volume, 1100000)
-
-
+        self.assertGreater(volume, 579000)
+        self.assertLess(volume, 580000)
 
     def test_roi(self):
         """
