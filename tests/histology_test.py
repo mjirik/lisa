@@ -84,7 +84,7 @@ class HistologyTest(unittest.TestCase):
         self.assertLess(stats_orig['Other']['Avg radius mm'],stats_new['Other']['Avg radius mm']*1.1)  # noqa
 
     @attr("actual")
-    def test_surface_per_volume_gensei_data(self):
+    def test_surface_density_gensei_data(self):
         import lisa.surface_measurement as sm
         import io3d
         dr = io3d.datareader.DataReader()
@@ -98,7 +98,7 @@ class HistologyTest(unittest.TestCase):
         voxelsize_mm = [0.2, 0.2, 0.2]
         volume = np.sum(segmentation) * np.prod(voxelsize_mm)
 
-        Sv = sm.surface_per_volume(segmentation, voxelsize_mm)
+        Sv = sm.surface_density(segmentation, voxelsize_mm)
         self.assertGreater(volume, 80)
         self.assertLess(volume, 85)
         self.assertGreater(Sv, 0.3)
@@ -110,13 +110,13 @@ class HistologyTest(unittest.TestCase):
         voxelsize_mm = [1, 1, 1]
         data1[10:20, 10:20, 10:20] = 1
 
-        Sv1 = sm.surface_per_volume(data1, voxelsize_mm)
+        Sv1 = sm.surface_density(data1, voxelsize_mm)
 
         data2 = np.zeros([30, 30, 30])
         voxelsize_mm = [1, 1, 1]
         data2[10:20, 10:20, 10:20] = 1
         data2[10:15, 10:15, 10:15] = 0
-        Sv2 = sm.surface_per_volume(data2, voxelsize_mm)
+        Sv2 = sm.surface_density(data2, voxelsize_mm)
 
         self.assertEqual(Sv2, Sv1)
 
@@ -124,7 +124,7 @@ class HistologyTest(unittest.TestCase):
         voxelsize_mm = [1, 1, 1]
         data3[10:20, 10:20, 10:20] = 1
         data3[13:18, 13:18, 10:15] = 0
-        Sv3 = sm.surface_per_volume(data3, voxelsize_mm)
+        Sv3 = sm.surface_density(data3, voxelsize_mm)
         self.assertGreater(Sv3, Sv1)
         # import sed3
         # ed = sed3.sed3(im_edg)

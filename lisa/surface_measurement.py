@@ -21,7 +21,7 @@ import numpy as np
 import scipy
 
 
-def surface_per_volume(segmentation, voxelsize_mm, sond_raster_mm=None):
+def surface_density(segmentation, voxelsize_mm, sond_raster_mm=None, aoi=None):
     axis = 0
     if sond_raster_mm is None:
         sond_raster_mm = voxelsize_mm
