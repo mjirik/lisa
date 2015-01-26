@@ -212,6 +212,19 @@ and background")
         self.assertIn('voxelsize_mm', datap.keys())
 
     def test_box_segmentation(self):
+        params = {'segmentation_smoothing': False}
+        self.box_segmentation_template(params)
+
+    def test_box_segmentation_with_smoothing(self):
+        """
+        Function uses organ_segmentation  for synthetic box object
+        segmentation.
+        """
+        params = {'segmentation_smoothing': False}
+        self.box_segmentation_template(params)
+        # dcmdir = os.path.join(path_to_script,'./../sample_data/matlab/examples/sample_data/DICOM/digest_article/') # noqa
+
+    def box_segmentation_template(self, params):
         """
         Function uses organ_segmentation  for synthetic box object
         segmentation.
@@ -235,7 +248,8 @@ and background")
             metadata=metadata,
             seeds=seeds,
             working_voxelsize_mm=10,
-            manualroi=False
+            manualroi=False,
+            **params
         )
 
         # oseg.seeds = seeds

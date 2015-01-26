@@ -214,10 +214,6 @@ class OrganSegmentation():
                 # self.iparams['series_number'] = metadata['series_number']
                 # self.iparams['datapath'] = datapath
                 self.import_dataplus(datap)
-            else:
-                # data will be selected from gui
-                pass
-                # logger.error('No input path or 3d data')
 
         else:
             # self.data3d = data3d
