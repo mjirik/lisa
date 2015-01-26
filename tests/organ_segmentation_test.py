@@ -220,7 +220,7 @@ and background")
         Function uses organ_segmentation  for synthetic box object
         segmentation.
         """
-        params = {'segmentation_smoothing': False}
+        params = {'segmentation_smoothing': True}
         self.box_segmentation_template(params)
         # dcmdir = os.path.join(path_to_script,'./../sample_data/matlab/examples/sample_data/DICOM/digest_article/') # noqa
 
