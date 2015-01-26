@@ -30,6 +30,7 @@ import sed3 as se
 
 import histology_analyser_gui as HA_GUI
 from skeleton_analyser import SkeletonAnalyser
+import surface_measurement
 
 
 class HistologyAnalyser:
@@ -49,7 +50,7 @@ class HistologyAnalyser:
         self.binaryOpening = binaryOpening
 
         self.nogui = nogui
-        
+
         self.data3d_masked = None
 
     def get_voxelsize(self):
@@ -202,26 +203,29 @@ class HistologyAnalyser:
         volume_px = self.data3d.shape[0] \
             * self.data3d.shape[1] * self.data3d.shape[2]
         volume_mm3 = volume_px*voxel_volume_mm3
-        
+
         # pouzij oblast zajmu
         if self.data3d_masked is None:
             self.data3d_masked = np.ones(self.data3d.shape, np.int8)
         self.data3d_masked[self.data3d_masked > 1] = 1
         used_volume_px = np.sum(np.sum(np.sum(self.data3d_masked)))
         used_volume_mm3 = used_volume_px*voxel_volume_mm3
-        
+
         vessel_volume_fraction = float(np.sum(np.sum(np.sum(
             self.data3d_thr)))) / float(used_volume_px)
-            
+        sv = surface_measurement.surface_density(
+            self.data3d_thr, self.metadata['voxelsize_mm'])
+
         info = {
             'voxel_size_mm': list(vs),
             'voxel_volume_mm3': float(voxel_volume_mm3),
             'shape_px': list(self.data3d.shape),
             'volume_px': float(volume_px),
-            'volume_mm3': float(volume_mm3), 
-            'used_volume_px': float(used_volume_px), 
-            'used_volume_mm3': float(used_volume_mm3), 
-            'vessel_volume_fraction': float(vessel_volume_fraction)
+            'volume_mm3': float(volume_mm3),
+            'used_volume_px': float(used_volume_px),
+            'used_volume_mm3': float(used_volume_mm3),
+            'vessel_volume_fraction': float(vessel_volume_fraction),
+            'surface_density': float(sv)
         }
         self.stats.update({'General': info})
 
@@ -338,7 +342,7 @@ class HistologyAnalyser:
 def generate_sample_data(m=1, noise_level=0.005, gauss_sigma=0.1):
     """
     Generate sample vessel system.
-    
+
     J. Kunes
 
     | Input:
@@ -521,7 +525,7 @@ def processData(inputfile=None, threshold=None, skeleton=False,
 
 def main():
     args = parser_init()
-    
+
     logging.basicConfig()
     logger = logging.getLogger()
     logger.setLevel(logging.WARNING)

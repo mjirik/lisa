@@ -21,9 +21,8 @@ class HistologyReport:
 
     def importFromYaml(self, filename):
         data = misc.obj_from_file(filename=filename, filetype='yaml')
-        self.data = data
-        self.data = self.fixData(self.data)
-        
+        self.data = self.fixData(data)
+
     def fixData(self, data):
         try:
             data['General']['used_volume_mm3']
@@ -31,14 +30,18 @@ class HistologyReport:
         except:
             data['General']['used_volume_mm3'] = data['General']['volume_mm3']
             data['General']['used_volume_px'] = data['General']['volume_px']
+        try:
+            data['General']['surface_density']
+        except:
+            data['General']['surface_density'] = None
         return data
-        
-        
+
+
     def writeReportToYAML(self, filename='hist_report'):
         logger.debug('write report to yaml')
         filename = filename+'.yaml'
         misc.obj_to_file(self.stats, filename=filename, filetype='yaml')
-        
+
     def writeReportToCSV(self, filename='hist_report'):
         logger.debug('write report to csv')
         filename = filename+'.csv'
@@ -50,7 +53,7 @@ class HistologyReport:
                     delimiter=';',
                     quotechar='"',
                     quoting=csv.QUOTE_MINIMAL
-                    )   
+                    )
             # Main
             writer.writerow([data['Main']['Vessel volume fraction (Vv)']])
             writer.writerow([data['Main']['Surface density (Sv)']])
@@ -62,7 +65,7 @@ class HistologyReport:
             writer.writerow([data['Other']['Total length mm']])
             writer.writerow([data['Other']['Avg radius mm']])
             writer.writerow(data['Other']['Radius histogram'][0])
-            writer.writerow(data['Other']['Radius histogram'][1])
+            writer.riterow(data['Other']['Radius histogram'][1])
             writer.writerow(data['Other']['Length histogram'][0])
             writer.writerow(data['Other']['Length histogram'][1])
 
@@ -74,7 +77,7 @@ class HistologyReport:
         | Avg length mm: průměrná délka jednotlivých segmentů
         | Avg radius mm: průměrný poloměr jednotlivých segmentů
         | Total length mm: celková délka cév ve vzorku
-        | Radius histogram: pole čísel, kde budou data typu: 
+        | Radius histogram: pole čísel, kde budou data typu:
         |    v poloměru od 1 do 5 je ve vzorku 12 cév, od 5 do 10 je jich 36, nad 10 je jich 12.
         |    Využijte třeba funkci np.hist()
         | Length histogram: obdoba předchozího pro délky
@@ -95,24 +98,24 @@ class HistologyReport:
                 'Length histogram': None
                 }
         }
-        
+
         # Get other stats
         radius_array = []
         length_array = []
         for key in self.data['Graph']:
             length_array.append(self.data['Graph'][key]['lengthEstimation'])
             radius_array.append(self.data['Graph'][key]['radius_mm'])
-            
+
         num_of_entries = len(length_array)
         stats['Other']['Total length mm'] = sum(length_array)
         stats['Other']['Avg length mm'] = stats['Other']['Total length mm']/float(num_of_entries)
         stats['Other']['Avg radius mm'] = sum(radius_array)/float(num_of_entries)
-        
+
         radiusHistogram = np.histogram(radius_array,bins=binNum)
         stats['Other']['Radius histogram'] = [radiusHistogram[0].tolist(),radiusHistogram[1].tolist()]
         lengthHistogram = np.histogram(length_array,bins=binNum)
         stats['Other']['Length histogram'] = [lengthHistogram[0].tolist(),lengthHistogram[1].tolist()]
-        
+
         # get main stats
         tortuosity_array = []
         for key in self.data['Graph']:
@@ -121,13 +124,13 @@ class HistologyReport:
         stats['Main']['Tortuosity'] = sum(tortuosity_array)/float(num_of_entries)
         stats['Main']['Length density (Lv)'] = float(stats['Other']['Total length mm'])/float(self.data['General']['used_volume_mm3'])
         stats['Main']['Vessel volume fraction (Vv)'] = self.data['General']['vessel_volume_fraction']
-        #stats['Main']['Surface density (Sv)'] =
+        stats['Main']['Surface density (Sv)'] = self.data['General']['surface_density']
         stats['Main']['Nv'] = float(self.getNv())
-        
+
         # save stats
         self.stats = {'Report':stats}
         logger.debug('Main stats: '+str(stats['Main']))
-        
+
     def getNv(self):
         logger.debug('Computing Nv...')
         nodes = []
@@ -136,21 +139,21 @@ class HistologyReport:
             try:
                 nodeIdA = edge['nodeIdA']
                 nodeIdB = edge['nodeIdB']
-                
+
                 if not nodeIdA in nodes:
                     if len(edge['connectedEdgesA']) > 0:
                         nodes.append(nodeIdA)
-                        
+
                 if not nodeIdB in nodes:
                     if len(edge['connectedEdgesB']) > 0:
                         nodes.append(nodeIdB)
 
             except Exception, e:
                 logger.warning('getNv(): bad key '+str(e))
-                
+
         logger.debug('Got '+str(len(nodes))+' connected nodes')
         Nv = len(nodes) / float(self.data['General']['used_volume_mm3'])
-        
+
         logger.debug('Nv is '+str(Nv))
         return Nv
 
@@ -182,12 +185,12 @@ if __name__ == "__main__":
 
     if args.debug:
         logger.setLevel(logging.DEBUG)
-    
+
     # get report
     hr = HistologyReport()
     hr.importFromYaml(args.inputfile)
     hr.generateStats()
-    
+
     # save report to files
     hr.writeReportToYAML(args.outputfile)
     hr.writeReportToCSV(args.outputfile)
