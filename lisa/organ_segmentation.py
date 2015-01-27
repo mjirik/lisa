@@ -538,6 +538,10 @@ class OrganSegmentation():
         return igc
 
     def _interactivity_end(self, igc):
+        """
+        This is called after processing step. All data are rescaled to original
+        resolution.
+        """
         logger.debug('_interactivity_end()')
         # @TODO remove old code in except part
         try:
