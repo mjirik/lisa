@@ -31,7 +31,8 @@ MOCK_MODULES = [
     'larcc.MAP', 'PyQt4', 'PyQt4.QtCore', 'PyQt4.QtGui',
     'scipy.ndimage.measurements', 'web', 'lar2psm', 'lar', 'splines',
     'scipy.sparse', 'skimage.filter', 'mapper', 'skelet3d', 'numpy.core',
-    'lbpLibrary', 'skimage.exposure', 'PyQt4.QVTKRenderWindowInteractor'
+    'lbpLibrary', 'skimage.exposure', 'PyQt4.QVTKRenderWindowInteractor',
+    'matplotlib.backends.backend_qt4agg', 'numpy.linalg'
 
 ]
 
