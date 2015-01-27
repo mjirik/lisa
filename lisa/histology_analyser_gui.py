@@ -14,8 +14,10 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
 
 from PyQt4 import QtCore
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt4.QtCore import pyqtSignal, QObject, QRunnable, QThreadPool, Qt
+from PyQt4.QtGui import QMainWindow, QWidget, QDialog, QLabel, QFont,\
+    QGridLayout, QFrame, QPushButton, QSizePolicy, QProgressBar, QSpacerItem,\
+    QCheckBox, QLineEdit, QApplication, QHBoxLayout
 
 import numpy as np
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -32,10 +34,10 @@ except:
     except:
         logger.warning("Deprecated of pyseg_base as submodule")
         from seed_editor_qt import QTSeedEditor
-import misc
 
 import histology_analyser as HA
 from histology_report import HistologyReport
+
 
 class HistologyAnalyserWindow(QMainWindow):
     HEIGHT = 350 #600
@@ -76,7 +78,7 @@ class HistologyAnalyserWindow(QMainWindow):
     def closeEvent(self, event):
         """
         Runs when user tryes to close main window.
-        
+
         sys.exit(0) - to fix wierd bug, where process is not terminated.
         """
         sys.exit(0)
@@ -252,8 +254,8 @@ class HistologyAnalyserWindow(QMainWindow):
         self.embedWidget(newapp)
 
         newapp.exec_()
-        self.masked = newapp.masked 
-        
+        self.masked = newapp.masked
+
         self.changeHelpWidget(widget=None) # removes help
 
         self.fixWindow()
@@ -559,7 +561,7 @@ class StatsResultDialog(QDialog):
                                 +'Average vessel radius: \t'+str(report_o['Avg radius mm'])+' [mm]'
                                 )
         report_label_other.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
-        
+
         # mili -> mikro (becouse mili has to much 0)
         histogram_radius = HistogramMplCanvas(report_o['Radius histogram'][0],
                                         (np.array(report_o['Radius histogram'][1])*1000).tolist(),
