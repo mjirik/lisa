@@ -98,6 +98,9 @@ def import_gui():
 
 
 class OrganSegmentation():
+    """
+    Main object of Lisa user interface.
+    """
     def __init__(
         self,
         datapath=None,
