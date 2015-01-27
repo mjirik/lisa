@@ -24,12 +24,12 @@ sys.path.insert(0, os.path.abspath('../'))
 import mock
 
 MOCK_MODULES = [
-    'numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot', 'scipy.interpolate',
+    'numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot', 'matplotlib.widgets', 'scipy.interpolate',
     'scipy.ndimage', 'pycut', 'io3d', 'sed3', 'pysegbase', 'pysegbase.pycut',
     'sklearn', 'skimage', 'dicom', 'vtk', 'vtk.util', 'larcc', 'larcc.VIEW',
     'larcc.MKPOL', 'larcc.AA', 'larcc.INTERVALS', 'larcc.MAP', 'PyQt4',
-    'PyQt4.QtCore', 'scipy.ndimage.measurements', 'web', 'lar2psm', 'lar',
-    'splines'
+    'PyQt4.QtCore', 'PyQt4.QtGui', 'scipy.ndimage.measurements', 'web',
+    'lar2psm', 'lar', 'splines', 'scipy.sparse', 'skimage.filter'
 ]
 
 for mod_name in MOCK_MODULES:
