@@ -45,14 +45,6 @@ lisa.convert_pkl module
     :undoc-members:
     :show-inheritance:
 
-lisa.cxpokus module
--------------------
-
-.. automodule:: lisa.cxpokus
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    
 lisa.data_plus module
 ---------------------
 
