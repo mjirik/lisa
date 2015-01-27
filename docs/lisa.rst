@@ -1,6 +1,8 @@
 lisa package
 ============
 
+Test text
+
 Subpackages
 -----------
 
