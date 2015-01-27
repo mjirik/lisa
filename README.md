@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.org/mjirik/lisa.svg)](https://travis-ci.org/mjirik/lisa)
 [![Coverage Status](https://coveralls.io/repos/mjirik/lisa/badge.svg)](https://coveralls.io/r/mjirik/lisa)
+[![Documentation Status](https://readthedocs.org/projects/liver-surgery-analyser/badge/?version=latest)](https://readthedocs.org/projects/liver-surgery-analyser/?badge=latest)
+  
 LISA 
 =============
 
