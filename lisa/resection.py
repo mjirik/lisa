@@ -20,7 +20,7 @@ import scipy.ndimage
 # ----------------- my scripts --------
 import misc
 import sed3
-import vessel_cut
+import virtual_resection
 
 
 def resection(data):
@@ -38,7 +38,7 @@ def resection(data):
     #pyed = sed3.sed3(vessels)
     #pyed.show()
     print ("Select cut")
-    lab = vessel_cut.cut_editor_old(data)
+    lab = virtual_resection.cut_editor_old(data)
     pyed = sed3.sed3(lab )#, contour=segm)
     pyed.show()
     l1 = 1
