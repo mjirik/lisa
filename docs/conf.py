@@ -29,9 +29,9 @@ MOCK_MODULES = [
     'pysegbase.pycut', 'sklearn', 'skimage', 'dicom', 'vtk', 'vtk.util',
     'larcc', 'larcc.VIEW', 'larcc.MKPOL', 'larcc.AA', 'larcc.INTERVALS',
     'larcc.MAP', 'PyQt4', 'PyQt4.QtCore', 'PyQt4.QtGui', 'web', 'lar2psm',
-    'scipy.ndimage.measurements',  'lar', 'splines',
-    'scipy.sparse', 'skimage.filter', 'mapper', 'skelet3d', 'numpy.core',
-    'lbpLibrary', 'skimage.exposure', 'PyQt4.QVTKRenderWindowInteractor',
+    'scipy.ndimage.measurements',  'lar', 'splines', 'scipy.sparse',
+    'skimage.filter', 'mapper', 'skelet3d', 'numpy.core', 'lbpLibrary',
+    'skimage.exposure', 'PyQt4.QVTKRenderWindowInteractor',
     'matplotlib.backends', 'matplotlib.backends.backend_qt4agg', 'numpy.linalg',
     'PyQt4.Qt', 'matplotlib.figure', 'skimage.morphology', 'gtk',
     'pysegbase.seed_editor_qt'
