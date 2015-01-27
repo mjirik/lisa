@@ -23,12 +23,16 @@ sys.path.insert(0, os.path.abspath('../'))
 # mock
 import mock
 
-MOCK_MODULES = ['numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot',
-                'scipy.interpolate', 'scipy.ndimage', 'pycut', 'io3d', 'sed3',
-                'pysegbase', 'pysegbase.pycut', 'sklearn', 'skimage', 'dicom',
-                'sklearn.__version__']
+MOCK_MODULES = [
+    'numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot', 'scipy.interpolate',
+    'scipy.ndimage', 'pycut', 'io3d', 'sed3', 'pysegbase', 'pysegbase.pycut',
+    'sklearn', 'skimage', 'dicom',
+]
+
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()
+import sklearn
+sklearn.__version__ = '0'
 
 # from unittest.mock import MagicMock
 #
