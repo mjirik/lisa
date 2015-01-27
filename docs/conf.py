@@ -25,7 +25,8 @@ import mock
 
 MOCK_MODULES = ['numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot',
                 'scipy.interpolate', 'scipy.ndimage', 'pycut', 'io3d', 'sed3',
-                'pysegbase', 'pysegbase.pycut', 'sklearn', 'skimage', 'dicom']
+                'pysegbase', 'pysegbase.pycut', 'sklearn', 'skimage', 'dicom',
+                'sklearn.__version__']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()
 
