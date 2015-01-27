@@ -24,7 +24,7 @@ sys.path.insert(0, os.path.abspath('../'))
 import mock
 
 MOCK_MODULES = ['numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot',
-                'scipy.interpolate']
+                'scipy.interpolate', 'scipy.ndimage']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()
 
