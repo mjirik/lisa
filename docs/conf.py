@@ -37,6 +37,7 @@ MOCK_MODULES = [
     'pysegbase.seed_editor_qt', 'vtk.qt4', 'vtk.qt4.QVTKRenderWindowInteractor',
     'seg2fem', 'skimage.segmentation', 'matplotlib.patches', 'skimage.feature',
     'scipy.ndimage.morphology', 'mpl_toolkits', 'mpl_toolkits.mplot3d',
+    'matplotlib.backends.backend_gtkagg'
     # 'mpl_toolkits.mplot3d.art3d',
     'cv2', 'skimage.measure', 'dicom2fem',
     'scipy.stats'
@@ -47,7 +48,9 @@ MOCK_MODULES = [
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()
 import sklearn
-sklearn.__version__ = '0'
+sklearn.__version__ = '0.0'
+import scipy
+scipy.__version__ = '0.0'
 
 # from unittest.mock import MagicMock
 #
