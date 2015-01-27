@@ -26,9 +26,10 @@ import mock
 MOCK_MODULES = [
     'numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot', 'scipy.interpolate',
     'scipy.ndimage', 'pycut', 'io3d', 'sed3', 'pysegbase', 'pysegbase.pycut',
-    'sklearn', 'skimage', 'dicom', 'vtk', 'larcc', 'larcc.VIEW', 'larcc.MKPOL',
-    'larcc.AA', 'larcc.INTERVALS', 'larcc.MAP', 'PyQt4', 'PyQt4.QtCore',
-    'scipy.ndimage.measurements', 'web', 'lar2psm', 'lar'
+    'sklearn', 'skimage', 'dicom', 'vtk', 'vtk.util', 'larcc', 'larcc.VIEW',
+    'larcc.MKPOL', 'larcc.AA', 'larcc.INTERVALS', 'larcc.MAP', 'PyQt4',
+    'PyQt4.QtCore', 'scipy.ndimage.measurements', 'web', 'lar2psm', 'lar',
+    'splines'
 ]
 
 for mod_name in MOCK_MODULES:
