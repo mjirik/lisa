@@ -32,7 +32,7 @@ MOCK_MODULES = [
     'scipy.ndimage.measurements', 'web', 'lar2psm', 'lar', 'splines',
     'scipy.sparse', 'skimage.filter', 'mapper', 'skelet3d', 'numpy.core',
     'lbpLibrary', 'skimage.exposure', 'PyQt4.QVTKRenderWindowInteractor',
-    'matplotlib.backends.backend_qt4agg', 'numpy.linalg'
+    'matplotlib.backends', 'matplotlib.backends.backend_qt4agg', 'numpy.linalg'
 
 ]
 
