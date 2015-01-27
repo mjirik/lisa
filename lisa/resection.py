@@ -104,9 +104,9 @@ def max_area_index(labels, num):
 
 
 import gtk
-import numpy as np
-from matplotlib.patches import Polygon, PathPatch
-import mpl_toolkits.mplot3d.art3d as art3d
+# import numpy as np
+from matplotlib.patches import Polygon  # , PathPatch
+from mpl_toolkits.mplot3d import art3d
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_gtkagg import FigureCanvasGTKAgg as FigureCanvas
 
