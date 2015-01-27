@@ -10,9 +10,9 @@ $ viewer.py -f head.vtk
 from optparse import OptionParser
 import sys
 
-from PyQt4.QtGui import QApplication, QDialog, QGridLayout, QPushButton 
-from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+from PyQt4.QtGui import QApplication, QDialog, QGridLayout, QPushButton
 import vtk
+from vtk.qt4 import QVTKRenderWindowInteractor
 
 class QVTKViewer(QDialog):
     """

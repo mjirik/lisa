@@ -34,7 +34,9 @@ MOCK_MODULES = [
     'skimage.exposure', 'PyQt4.QVTKRenderWindowInteractor',
     'matplotlib.backends', 'matplotlib.backends.backend_qt4agg', 'numpy.linalg',
     'PyQt4.Qt', 'matplotlib.figure', 'skimage.morphology', 'gtk',
-    'pysegbase.seed_editor_qt', 'vtk.qt4.QVTKRenderWindowInteractor', 'seg2fem'
+    'pysegbase.seed_editor_qt', 'vtk.qt4.QVTKRenderWindowInteractor', 'seg2fem',
+    'skimage.segmentation', 'matplotlib.patches', 'skimage.features'
+# vtk.qt4.QVTKRenderWindowInteractor
 
 ]
 

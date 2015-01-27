@@ -25,7 +25,6 @@ import numpy as np
 import argparse
 
 import segmentation
-import inspector
 import misc
 
 # Import garbage collector
@@ -123,6 +122,7 @@ if __name__ == "__main__":
     # Uvolneni pameti
     garbage.collect()
 
+    import inspector
     inspect = inspector.inspector(outputTmp)
     output = inspect.run()
 
