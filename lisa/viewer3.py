@@ -38,9 +38,11 @@ import scipy.ndimage
 import argparse
 
 from PyQt4 import QtCore, QtGui
-from PyQt4 import *
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+# from PyQt4.QtCore import pyqtSignal, QObject, QRunnable, QThreadPool, Qt
+from PyQt4.QtGui import QMainWindow, QGridLayout, QApplication
+# from PyQt4 import *
+# from PyQt4.QtGui import *
+# from PyQt4.QtCore import *
 
 import vtk
 from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor

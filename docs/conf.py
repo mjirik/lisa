@@ -36,7 +36,8 @@ MOCK_MODULES = [
     'PyQt4.Qt', 'matplotlib.figure', 'skimage.morphology', 'gtk',
     'pysegbase.seed_editor_qt', 'vtk.qt4', 'vtk.qt4.QVTKRenderWindowInteractor', 'seg2fem',
     'skimage.segmentation', 'matplotlib.patches', 'skimage.feature'
-    'scipy.ndimage.morphology', 'mpl_toolkits.mplot3d.art3d', 'cv2'
+    'scipy.ndimage.morphology', 'import mpl_toolkits', 'mpl_toolkits.mplot3d.art3d', 'cv2',
+    'skimage.measure', 'dicom2fem'
 # vtk.qt4.QVTKRenderWindowInteractor
 
 ]
