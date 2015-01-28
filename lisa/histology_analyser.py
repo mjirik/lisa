@@ -412,7 +412,7 @@ def generate_sample_data(m=1, noise_level=0.005, gauss_sigma=0.1):
     return data3d
 
 
-def parser_init():
+def parser_init():  # pragma: no cover
     # input parser
     parser = argparse.ArgumentParser(
         description='Histology analyser'
@@ -523,7 +523,7 @@ def processData(inputfile=None, threshold=None, skeleton=False,
     logger.info('Finished')
 
 
-def main():
+def main():  # pragma: no cover
     args = parser_init()
 
     logging.basicConfig()
@@ -558,5 +558,5 @@ def main():
         )
         sys.exit(app.exec_())
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()
