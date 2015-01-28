@@ -61,7 +61,6 @@ class HistologyTest(unittest.TestCase):
         ha.data_to_statistics()
         yaml_new = os.path.join(path_to_script, "hist_stats_new.yaml")
         ha.writeStatsToYAML(filename=yaml_new)
-        ha.writeStatsToCSV(filename=yaml_new)
 
         # get histology reports
         hr = HistologyReport()
@@ -74,6 +73,7 @@ class HistologyTest(unittest.TestCase):
         hr.generateStats()
         stats_new = hr.stats['Report']
 
+        ha.writeStatsToCSV(filename=yaml_new)
         # compare
         self.assertGreater(stats_orig['Other']['Total length mm'],stats_new['Other']['Total length mm']*0.9)  # noqa
         self.assertLess(stats_orig['Other']['Total length mm'],stats_new['Other']['Total length mm']*1.1)  # noqa
