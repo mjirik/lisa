@@ -1043,7 +1043,7 @@ class OrganSegmentation():
                 data['crinfo'], data['orig_shape'])
 
 
-def logger_init():
+def logger_init():  # pragma: no cover
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
@@ -1099,7 +1099,7 @@ def lisa_config_init():
     return cfg
 
 
-def parser_init(cfg):
+def parser_init(cfg):  # pragma: no cover
 
     # input parser
     conf_parser = argparse.ArgumentParser(
@@ -1231,7 +1231,7 @@ config and user config.")
     return args
 
 
-def main():
+def main():  # pragma: no cover
 
     #    import ipdb; ipdb.set_trace() # BREAKPOINT
     try:
