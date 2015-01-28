@@ -7,7 +7,7 @@ python:
   # - "3.4"
 virtualenv:
   - system_site_packages: true
-  - DISPLAY="99.0"
+  - DISPLAY: "99.0"
 before_install:
     - sudo apt-get update -qq
     - sudo apt-get install -qq python git python-dev g++ sox make  curl cmake
