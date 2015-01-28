@@ -235,6 +235,7 @@ and background")
 
         volume = oseg.get_segmented_volume_size_mm3()
         oseg.portalVeinSegmentation(interactivity=False, threshold=180)
+        oseg.saveVesselTree('porta')
 
         # import pdb; pdb.set_trace()
         # import sed3
