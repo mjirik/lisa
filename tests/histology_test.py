@@ -84,6 +84,14 @@ class HistologyTest(unittest.TestCase):
         self.assertGreater(stats_orig['Other']['Avg radius mm'],stats_new['Other']['Avg radius mm']*0.9)  # noqa
         self.assertLess(stats_orig['Other']['Avg radius mm'],stats_new['Other']['Avg radius mm']*1.1)  # noqa
 
+    def test_generate_sample_data(self):
+        """
+        Test has no strong part
+        """
+
+        import lisa.histology_analyser
+        lisa.histology_analyser.generate_sample_data()
+
     @attr("actual")
     def test_surface_density_gensei_data(self):
         import lisa.surface_measurement as sm
