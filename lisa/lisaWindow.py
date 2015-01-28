@@ -69,6 +69,7 @@ class OrganSegmentationWindow(QMainWindow):
         self.setCentralWidget(cw)
         grid = QGridLayout()
         grid.setSpacing(10)
+        self.uiw = {}
 
         # status bar
         self.statusBar().showMessage('Ready')
@@ -113,6 +114,7 @@ class OrganSegmentationWindow(QMainWindow):
         text_dcm.setFont(font_label)
         btn_dcmdir = QPushButton("Load DICOM", self)
         btn_dcmdir.clicked.connect(self.loadDataDir)
+        self.uiw['dcmdir'] = btn_dcmdir
 
         btn_datafile = QPushButton("Load file", self)
         btn_datafile.clicked.connect(self.loadDataFile)
@@ -251,6 +253,7 @@ class OrganSegmentationWindow(QMainWindow):
         btn_quit = QPushButton("Quit", self)
         btn_quit.clicked.connect(self.quit)
         grid.addWidget(btn_quit, rstart + 1, 1, 1, 2)
+        self.uiw['quit'] = btn_quit
 
         if self.oseg.debug_mode:
             btn_debug = QPushButton("Debug", self)
@@ -258,11 +261,14 @@ class OrganSegmentationWindow(QMainWindow):
             grid.addWidget(btn_debug, rstart + 1, 3)
 
         cw.setLayout(grid)
+        self.cw = cw
+        self.grid = grid
+
         self.setWindowTitle('LISA')
         self.show()
 
     def quit(self, event):
-        self.close()
+        return self.close()
 
     def run_debug(self, event):
         """
