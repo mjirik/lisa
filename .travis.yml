@@ -6,8 +6,7 @@ python:
   # - "3.3"
   # - "3.4"
 virtualenv:
-  - system_site_packages: true
-  - DISPLAY: "99.0"
+ system_site_packages: true
 before_install:
     - sudo apt-get update -qq
     - sudo apt-get install -qq python git python-dev g++ sox make  curl cmake
@@ -24,6 +23,7 @@ before_install:
     #  Update conda else if will result in a problem when conda updates the repos...
     - conda update --yes conda
     # GUI
+     - "export DISPLAY=:99.0"
     - sh -e /etc/init.d/xvfb start
 # command to install dependencies
 install:
