@@ -216,6 +216,8 @@ class HistologyAnalyserWindow(QMainWindow):
         newapp.signal_finished.connect(self.runSegmentation)
         self.embedWidget(newapp)
         self.fixWindow()
+        # TODO odstrani exec_() . Melo by to byt patrne volano vne tridy a jen
+        # jednou pro celou aplikaci.
 
         newapp.exec_()
 
@@ -877,11 +879,11 @@ class LoadDialog(QDialog):
         hr3 = QFrame()
         hr3.setFrameShape(QFrame.HLine)
 
-        btn_process = QPushButton("Continue", self)
-        btn_process.clicked.connect(self.finished)
+        self.btn_process = QPushButton("Continue", self)
+        self.btn_process.clicked.connect(self.finished)
 
         self.ui_gridLayout.addWidget(hr3, rstart + 0, 0, 1, 3)
-        self.ui_gridLayout.addWidget(btn_process, rstart + 1, 1)
+        self.ui_gridLayout.addWidget(self.btn_process, rstart + 1, 1)
         rstart +=2
 
         ### Stretcher

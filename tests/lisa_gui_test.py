@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # vim:fenc=utf-8
 #
-# Copyright © %YEAR% %USER% <%MAIL%>
+# Copyright © 2015 mjirik
 #
-# Distributed under terms of the %LICENSE% license.
+# Distributed under terms of the MIT license.
 
 """
 
@@ -21,7 +21,7 @@ import lisa.organ_segmentation
 from lisa.lisaWindow import OrganSegmentationWindow
 
 
-class TemplateTest(unittest.TestCase):
+class LisaGUITest(unittest.TestCase):
 
     def setUp(self):
         '''Create the GUI'''
