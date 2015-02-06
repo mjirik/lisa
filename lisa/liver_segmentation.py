@@ -22,8 +22,122 @@ import io3d
 import os
 import pickle
 
+def trenovaniCele(metoda):
+    '''Metoda je cislo INT, dane poradim metody pri implementaci prace
+    nacte cestu ze souboru Cesta.p, vsechny soubory v adresari
+     natrenuje podle zvolene metody a zapise vysledek do TrenC.p. 
+    ''', 
+    soubor = open('Cesta.p','r')
+    cesta = pickle.load(soubor)
+    #print cesta
+    seznamSouboru = vyhledejSoubory(cesta)
+    
+    vybrano = False
+    
+    if(metoda ==0):
+        def metoda(cesta,seznamSouboru):
+            vysledek =nahrazka(cesta,seznamSouboru)
+            return vysledek
+        vybrano = True
+    
+    if(metoda ==1):
+        def metoda(cesta,seznamSouboru):
+            vysledek =metoda1(cesta,seznamSouboru)
+            return vysledek
+        vybrano = True
+    
+    if(not vybrano):
+        print "spatne zvolena metoda trenovani"
+        return
+        
+    print "Probiha trenovani"
+    vysledek1= metoda(cesta,seznamSouboru)
+    soubor = open("TrenC.p","wb")
+    pickle.dump(vysledek1,soubor)
+    soubor.close()
+    print "trenovani  dokonceno"
 
+def nahrazka(cesta,seznamSouboru):
+    '''METODA 0 - nahrada
+    nahrazka trenovaci metody pro rychly beh a testovani'''
+    return [25,3]
 
+def trenovaniTri(metoda):
+    '''Metoda je cislo INT, dane poradim metody pri implementaci prace
+    nacte cestu ze souboru Cesta.p, vsechny soubory v adresari rozdeli na tri casti
+    pro casti 1+2,2+3 a 1+3 natrenuje podle zvolene metody. 
+    ''', 
+    soubor = open('Cesta.p','r')
+    cesta = pickle.load(soubor)
+    #print cesta
+    
+    def rozdelTrenovaciNaTri(cesta):
+        '''Rozdeli trenovaci mnozinu na tri dily'''
+        vektorSouboru = vyhledejSoubory(cesta)
+        delkaTrenovacich = len(vektorSouboru)/2
+        delka1= round(float(len(vektorSouboru))/6)
+        dily = [delka1,delka1,delkaTrenovacich-2*delka1]
+        Cast1 = vektorSouboru[0:int(dily[0])] + vektorSouboru[delkaTrenovacich:int(dily[0])+delkaTrenovacich]
+        Cast2 = vektorSouboru[int(dily[0]):int(dily[0])+int(dily[1])] + vektorSouboru[delkaTrenovacich+int(dily[0]):int(dily[0])+int(dily[1])+delkaTrenovacich]
+        Cast3 = vektorSouboru[int(dily[0])+int(dily[1]):int(dily[0])+int(dily[1])+int(dily[2])]
+        Cast3 = Cast3 + vektorSouboru[delkaTrenovacich+int(dily[0])+int(dily[1]):delkaTrenovacich+int(dily[0])+int(dily[1])+int(dily[2])]
+        return[Cast1,Cast2,Cast3]
+    
+    [cast1,cast2,cast3] = rozdelTrenovaciNaTri(cesta)
+    delka = len(cast1)/2
+    #print cast2
+    tren12 = cast1[0:delka]+cast2[0:delka]+cast1[delka:delka*2]+cast2[delka:delka*2]
+    #print tren12
+    tren23 = cast2[0:delka]+cast3[0:delka]+cast2[delka:delka*2]+cast3[delka:delka*2]
+    tren13 = cast1[0:delka]+cast3[0:delka]+cast1[delka:delka*2]+cast3[delka:delka*2]
+    
+    vybrano = False
+    
+    if(metoda ==0):
+        def metoda(cesta,seznamSouboru):
+            vysledek =nahrazka(cesta,seznamSouboru)
+            return vysledek
+        vybrano = True
+    
+    if(metoda ==1):
+        def metoda(cesta,seznamSouboru):
+            vysledek =metoda1(cesta,seznamSouboru)
+            return vysledek
+        vybrano = True
+    if(not vybrano):
+        print "spatne zvolena metoda trenovani"
+        return
+        
+    print "Probiha trenovani Prvni Casti"
+    vysledek1= metoda(cesta,tren12)
+    soubor = open("Tren1+2.p","wb")
+    pickle.dump(tren12,soubor)
+    pickle.dump(cast3,soubor)    
+    pickle.dump(vysledek1,soubor)
+    soubor.close()
+    print "Probiha trenovani druhe casti"
+    vysledek2= metoda(cesta,cast1)
+    soubor = open("Tren2+3.p","wb")
+    pickle.dump(tren23,soubor)
+    pickle.dump(cast1,soubor)    
+    pickle.dump(vysledek2,soubor)
+    soubor.close()
+    print "Probiha trenovani treti casti"   
+    soubor = open("Tren1+3.p","wb")
+    pickle.dump(tren13,soubor)
+    pickle.dump(cast2,soubor)    
+    pickle.dump(vysledek2,soubor)
+    soubor.close()
+    print "trenovani  dokonceno"
+    
+def zapisCestu():
+    cesta = 'C:/Users/asus/workspace/training'
+    print cesta
+    soubor = open('Cesta.p','w')
+    pickle.dump(cesta,soubor)
+    soubor.close()
+    print "cesta uspesne zapsana"
+    
 def vyhledejSoubory(cesta):
     ''' vrátí pole názvů všech souborů končících  .mhd v daném adresáři
     předpoklad je že jsou seřazeny nejprve originály, pak trénovací
@@ -163,8 +277,7 @@ class LiverSegmentation:
     def __init__(
         self,
         data3d,
-        segparams={'some_parameter': 22},
-        voxelsize=[1, 1, 1]
+        voxelsize=[1, 1, 1],segparams={'cisloMetody':0,'some_parameter': 22}
     ):
         """TODO: Docstring for __init__.
 
@@ -178,6 +291,7 @@ class LiverSegmentation:
         # 3D array with object and background selections by user
         self.seeds = None
         self.voxelsize = voxelsize
+        self.segparams = {'cisloMetody':0}
         self.segmentation = np.zeros(data3d.shape, dtype=np.int8)
         pass
 
@@ -201,8 +315,6 @@ class LiverSegmentation:
         # self.voxels2 = pyed.getSeedsVal(2)
         self.run()
         pass
-    
-    
 
 def main():
     logger = logging.getLogger()
