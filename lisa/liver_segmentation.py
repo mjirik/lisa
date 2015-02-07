@@ -21,6 +21,81 @@ import numpy as np
 import io3d
 import os
 import pickle
+from scipy import ndimage
+
+def segmentace0(tabulka,velikostVoxelu):
+    '''RYCHLA TESTOVACI METODA - PRO TESTOVANI
+    Vybere pouze prvky blizke nule a to je cele
+    vraci segmentaci ve formatu numpy Matrix'''
+    #print np.shape(tabulka)
+    segmentaceVysledek = []
+    odchylka = 5
+    prumer = 0
+
+    zeli3=0
+    for rez in tabulka:
+        print str(zeli3+1) + '/' + str(len(tabulka))
+        #print np.matrix(rez)
+        rezNovy1 = ( (np.matrix(rez)>=prumer -2*odchylka))
+        rezNovy2 = (np.matrix(rez)<=prumer +2*odchylka)
+        rezNovy =np.multiply( rezNovy1, rezNovy2)
+        rezNovy = rezNovy.astype(int)
+        #seznam = rezNovy.tolist()
+        seznam = rezNovy
+        #print rezNovy
+        segmentaceVysledek.append(seznam)       
+        zeli3 = zeli3+1 #prochazeni rezu
+    
+     
+    #print segmentaceVysledek  
+    #print np.shape(tabulka)
+    #print np.shape(segmentaceVysledek)
+    return segmentaceVysledek
+
+def segmentace1(tabulka,velikostVoxelu):
+    '''PRIMITIVNI METODA - PRAHOVANI
+    Nacte parametry prumer a odchylka ze souboru Metoda1.p
+    pak pomoci prahovani vybere z kazdeho rezu cast z intervalu
+    prumer +-2 sigma, nasledne provede binarni operace
+    otevreni (1x) a uzavreni (3x)  tak aby byly odstraneny drobne pixely'''
+    
+    def nactiPrumVar():
+        '''vrati pole [prumer,variance] nactene pomoci pickle ze souboru'''
+        soubor = open('Metoda1.p','rb')
+        vektor=pickle.load(soubor)
+        prumer = vektor[0]
+        variance = vektor[1]
+        return [prumer,variance]
+    
+    [prumer,var] = nactiPrumVar() 
+    odchylka = np.sqrt(var) 
+    #print np.shape(tabulka)
+    segmentaceVysledek = []
+    zeli3=0
+    for rez in tabulka:
+        print str(zeli3+1) + '/' + str(len(tabulka))
+        #print np.matrix(rez)
+        rezNovy1 = ( (np.matrix(rez)>=prumer -2*odchylka))
+        rezNovy2 = (np.matrix(rez)<=prumer +2*odchylka)
+        rezNovy =np.multiply( rezNovy1, rezNovy2)
+        rezNovy = rezNovy.astype(int)
+        
+        original = rezNovy
+        struktura = [[0,1,1,1,0],[0,1,1,1,0],[1,1,1,1,1],[0,1,1,1,0],[0,1,1,1,0]]
+        vylepseny = ndimage.binary_opening(original, struktura, 1)
+        rezNovy = ndimage.binary_closing(vylepseny, struktura,3)
+        
+        #seznam = rezNovy.tolist()
+        seznam = rezNovy
+        #print rezNovy
+        segmentaceVysledek.append(seznam)       
+        zeli3 = zeli3+1 #prochazeni rezu
+    
+     
+    #print segmentaceVysledek  
+    #print np.shape(tabulka)
+    #print np.shape(segmentaceVysledek)
+    return segmentaceVysledek
 
 def trenovaniCele(metoda):
     '''Metoda je cislo INT, dane poradim metody pri implementaci prace
@@ -287,18 +362,39 @@ class LiverSegmentation:
 
         """
         # used for user interactivity evaluation
+        self.data3d = data3d
         self.interactivity_counter = 0
         # 3D array with object and background selections by user
         self.seeds = None
-        self.voxelsize = voxelsize
-        self.segparams = {'cisloMetody':0}
+        self.voxelSize = voxelsize
+        self.segParams = {'cisloMetody':0}
         self.segmentation = np.zeros(data3d.shape, dtype=np.int8)
         pass
+    
+    def setCisloMetody(self,cislo):
+        self.segParams['cisloMetody'] = cislo
 
     def run(self):
         # @TODO dodělat
         self.segmentation[3:5, 13:17, :8] = 1
         pass
+    
+    def runVolby(self):
+        '''metoda s vice moznostmi vyberu metody-vybrana v segParams'''
+        numero = self.segParams['cisloMetody']
+        spatne = True
+        
+        if(numero == 0):
+            print('testovaci metoda')            
+            self.segmentation = segmentace0(self.data3d,self.voxelSize)
+            spatne = False
+        if(numero == 1):            
+            self.segmentation = segmentace1(self.data3d,self.voxelSize)
+            spatne = False
+        
+        if(spatne):
+            print('Zvolena metoda nenalezena')
+        
     
     
     def nacistTrenovaciData(self,path):
