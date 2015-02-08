@@ -252,18 +252,35 @@ def metoda1(cesta,seznamSouboru):
     vysledou hodnotu je pak mozno pouzit pro prahovani
     hodnota zapsana do souboru "Metoda1.p" '''
     
-    def vypoctiPrumer(pocetVzorku,cislo,prumer):
-        '''funkce na vypocet rekurzivniho prumeru'''
-        prumerNovy = ((pocetVzorku-1)/float(pocetVzorku)*prumer) + (cislo/float(pocetVzorku))
-        return prumerNovy
+    def vypoctiPrumer(poctyVzorku,prumery):
+        'vypocte prumer z prumeru a poctu vzorku vektoru ruzne delky'
+        sumaPrumeru = 0
+        sumaVzorku = 0
+        pomocny = 0
+        for pocet in poctyVzorku:
+            sumaVzorku = sumaVzorku+pocet
+            sumaPrumeru = sumaPrumeru+prumery[pomocny]*pocet
+            pomocny = pomocny+1
+        
+        prumerCelkem = float(sumaPrumeru)/float(sumaVzorku)
+        return prumerCelkem
 
-    def vypoctiVarianci(pocetVzorku,cislo,var,prumer):
-        '''funkce na vypocet rekurzivni variance VYZADUJE I VYPOCET PRUMERU'''
-        if(pocetVzorku ==1):
-            return 0
-        varNova = ((pocetVzorku-1)/float(pocetVzorku)*var) + (1/float(pocetVzorku-1))*((cislo-prumer)**2)
-        #print (1/float(pocetVzorku-1))*((cislo-prumer)**2)
-        return varNova
+    def vypoctiVar(poctyVzorku,prumery,variance,prumerCelkem):
+        'vypocte varianci z prumeru varianci a poctu vzorku vektoru ruzne delky'
+        sumaVar = 0
+        sumaVzorku = 0
+        pomocny = 0
+        for pocet in poctyVzorku:
+            sumaVzorku = sumaVzorku+pocet
+            pomocny = pomocny+1
+        #mam sumuVzorku
+        pomocny = 0
+        for minivar in variance:
+            scitanec = float( minivar*poctyVzorku[pomocny])/sumaVzorku
+            nasobitel = poctyVzorku[pomocny]*((prumery[pomocny]-prumerCelkem)**2)/sumaVzorku
+            sumaVar = sumaVar+nasobitel+scitanec
+            pomocny = pomocny+1        
+        return sumaVar
     
     def zapisPrumVar(prumer,variance):
         '''zapise pole [prumer,variance] pomoci pickle do souboru'''
@@ -278,18 +295,7 @@ def metoda1(cesta,seznamSouboru):
         [prumer,variance]=pickle.load(soubor)
         return [prumer,variance]
     
-    print "zahajeno trenovani metodou c.1"
-    pocetSouboru = len(seznamSouboru)
-    pocetOrig = pocetSouboru/2    
-    ctenar =  io3d.DataReader()
-    
-    rekPrumer = 0
-    rekOdchylka = 0
-    
-    pomocny = 0
-    for soubor in seznamSouboru:
-        ukazatel = str(pomocny+1) + "/" + str(pocetOrig)
-        print ukazatel
+    def zpracuj(cesta,seznamSouboru,pomocny,ctenar,pocetOrig):
         originalni = nactiSoubor(cesta,seznamSouboru,pomocny,ctenar) #originalni pole
         segmentovany = nactiSoubor(cesta,seznamSouboru,pomocny+pocetOrig,ctenar) #segmentovane pole(0)
 
@@ -297,54 +303,58 @@ def metoda1(cesta,seznamSouboru):
         #print segmentovany[1]
         pole1 = np.asarray(originalni[1])
         pole2 = np.asarray(segmentovany[1])
-        if (not(np.linalg.norm(pole1-pole2) <= 10**(-5))):
-            raise NameError('Chyba ve vstupnich datech original c.' + str(pomocny+1) + 'se neshoduje se segmentaci')
-        '''ZDE PRACOVAT S originalni A segmentovany'''
-       
-        poleSeg = segmentovany[0]
-        poleOri = originalni[0]
-        zeli1 = 0 #radek
-        zeli2 = 0 #sloupec
-        zeli3 = 0 #rez
-        pocetVzorku = 0
-        prumer = 0
-        var = 0
+        #print np.linalg.norm(pole1-pole2)
+
+        if (not(np.linalg.norm(pole1-pole2) <= 10**(-2))):
+            raise NameError('Chyba ve vstupnich datech original c.' + str(pomocny+1) + ' se neshoduje se segmentaci')
         
-        for rez in poleSeg:
-            print ukazatel +  " " + str(float(float(zeli3)/len(poleSeg)))
-            for radek in rez:
-                for cislo in radek:
-                    if(cislo ==0):
-                        pocetVzorku = pocetVzorku+1
-                        #souradnice = [zeli1,zeli2,zeli3]
-                        #print souradnice
-                        rezOrig = poleOri[zeli3]
-                        #print len(rezOrig)
-                        radekOrig = rezOrig[zeli2]
-                        #print len(radekOrig)
-                        cislo = radekOrig[zeli1]
-
-
-                        prumer = vypoctiPrumer(pocetVzorku,cislo,prumer)
-                        var = vypoctiVarianci(pocetVzorku,cislo,var,prumer)
-                    zeli1 = zeli1+1
-                zeli1 = 0 #novy radek
-                zeli2 = zeli2+1
-            zeli1 = 0
-            zeli2=0 #novy rez
-            zeli3= zeli3+1
-            print "prumer: "+ str(prumer) + " variance: " + str(var)
-        #print "prumer: "+ str(prumer) + "variance: " + str(var)
+        '''ZDE PRACOVAT S originalni A segmentovany'''       
+       
+        poleSeg = segmentovany[0]#nuly jsou kde neni segmentace jednicky kde je
+        poleOri = originalni[0]
+        
+        kombinace = np.multiply(poleSeg,poleOri)#skalarni soucin
+        X = np.ma.masked_equal(kombinace,0)
+        bezNul = X.compressed()
+        return bezNul
+    
+    print "zahajeno trenovani metodou c.1"
+    pocetSouboru = len(seznamSouboru)
+    pocetOrig = pocetSouboru/2    
+    ctenar =  io3d.DataReader()
+    
+    prumery = []
+    variance = []    
+    poctyVzorku=[]  
+    
+    
+    pomocny = 0
+    for soubor in seznamSouboru:
+        ukazatel = str(pomocny+1) + "/" + str(pocetOrig)
+        print ukazatel
+        bezNul = zpracuj(cesta,seznamSouboru,pomocny,ctenar,pocetOrig)
+        
+        prumery.append(np.mean(bezNul))
+        variance.append(np.var(bezNul))
+        poctyVzorku.append(len(bezNul))
+        originalni = 0
+        segmentovany = 0
+        
         pomocny = pomocny +1
         '''NASLEDUJICI RADEK LZE OMEZIT CISLEM PRO NETRENOVANI CELE MNOZINY'''
-        if(pomocny >= pocetOrig): #if(pomocny >= pocetOrig): 
+        #print (pomocny+1 >= pocetOrig)
+        if(pomocny+1 >= pocetOrig): #if(pomocny >= pocetOrig): 
+            print "trenovani ukonceno"
             break    
+    prumer = vypoctiPrumer(poctyVzorku,prumery)
+    var = vypoctiVar(poctyVzorku,prumery,variance,prumer)
+
     print "vysledny prumer a variance:"
     print prumer
     print var
     print "vysledky ukladany do souboru 'Metoda1.p'"
     zapisPrumVar(prumer,var)
-    return [prumer,var]    
+    return [prumer,var]  
 
 class LiverSegmentation:
     """
