@@ -66,7 +66,7 @@ class HistologyReport:
             writer.writerow([data['Other']['Total length mm']])
             writer.writerow([data['Other']['Avg radius mm']])
             writer.writerow(data['Other']['Radius histogram'][0])
-            writer.riterow(data['Other']['Radius histogram'][1])
+            writer.writerow(data['Other']['Radius histogram'][1])
             writer.writerow(data['Other']['Length histogram'][0])
             writer.writerow(data['Other']['Length histogram'][1])
 
