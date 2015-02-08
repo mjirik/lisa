@@ -141,6 +141,8 @@ def trenovaniTri(metoda):
     '''Metoda je cislo INT, dane poradim metody pri implementaci prace
     nacte cestu ze souboru Cesta.p, vsechny soubory v adresari rozdeli na tri casti
     pro casti 1+2,2+3 a 1+3 natrenuje podle zvolene metody. 
+    ulozene soubory: 1) seznam trenovanych souboru 2)seznam na kterych ma probehnout segmentace
+    3) vysledek trenovani (napr. prumer a odchylka u metody 1)
     ''', 
     soubor = open('Cesta.p','r')
     cesta = pickle.load(soubor)
@@ -160,11 +162,12 @@ def trenovaniTri(metoda):
     
     [cast1,cast2,cast3] = rozdelTrenovaciNaTri(cesta)
     delka = len(cast1)/2
+    delka3 = len(cast3)/2
     #print cast2
     tren12 = cast1[0:delka]+cast2[0:delka]+cast1[delka:delka*2]+cast2[delka:delka*2]
     #print tren12
-    tren23 = cast2[0:delka]+cast3[0:delka]+cast2[delka:delka*2]+cast3[delka:delka*2]
-    tren13 = cast1[0:delka]+cast3[0:delka]+cast1[delka:delka*2]+cast3[delka:delka*2]
+    tren23 = cast2[0:delka]+cast3[0:delka3]+cast2[delka:delka*2]+cast3[delka3:delka3*2]
+    tren13 = cast1[0:delka]+cast3[0:delka3]+cast1[delka:delka*2]+cast3[delka3:delka3*2]
     
     vybrano = False
     
@@ -191,17 +194,18 @@ def trenovaniTri(metoda):
     pickle.dump(vysledek1,soubor)
     soubor.close()
     print "Probiha trenovani druhe casti"
-    vysledek2= metoda(cesta,cast1)
+    vysledek2= metoda(cesta,tren23)
     soubor = open("Tren2+3.p","wb")
     pickle.dump(tren23,soubor)
     pickle.dump(cast1,soubor)    
     pickle.dump(vysledek2,soubor)
     soubor.close()
-    print "Probiha trenovani treti casti"   
+    print "Probiha trenovani treti casti"  
+    vysledek3= metoda(cesta,tren13) 
     soubor = open("Tren1+3.p","wb")
     pickle.dump(tren13,soubor)
     pickle.dump(cast2,soubor)    
-    pickle.dump(vysledek2,soubor)
+    pickle.dump(vysledek3,soubor)
     soubor.close()
     print "trenovani  dokonceno"
     
