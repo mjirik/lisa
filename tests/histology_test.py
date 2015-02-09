@@ -115,12 +115,15 @@ class HistologyTest(unittest.TestCase):
 
     def test_surface_measurement(self):
         import lisa.surface_measurement as sm
+
+# box
         data1 = np.zeros([30, 30, 30])
         voxelsize_mm = [1, 1, 1]
         data1[10:20, 10:20, 10:20] = 1
 
         Sv1 = sm.surface_density(data1, voxelsize_mm)
 
+# box without small box on corner
         data2 = np.zeros([30, 30, 30])
         voxelsize_mm = [1, 1, 1]
         data2[10:20, 10:20, 10:20] = 1
@@ -129,6 +132,7 @@ class HistologyTest(unittest.TestCase):
 
         self.assertEqual(Sv2, Sv1)
 
+# box with hole in one edge
         data3 = np.zeros([30, 30, 30])
         voxelsize_mm = [1, 1, 1]
         data3[10:20, 10:20, 10:20] = 1
@@ -138,6 +142,41 @@ class HistologyTest(unittest.TestCase):
         # import sed3
         # ed = sed3.sed3(im_edg)
         # ed.show()
+
+    def test_surface_measurement_voxelsize_mm(self):
+        import lisa.surface_measurement as sm
+        import scipy
+
+# data 1
+        data1 = np.zeros([30, 40, 55])
+        voxelsize_mm1 = [1, 1, 1]
+        data1[10:20, 10:20, 10:20] = 1
+        data1[13:18, 13:18, 10:15] = 0
+# data 2
+        voxelsize_mm2 = [0.1, 0.2, 0.3]
+        data2 = scipy.ndimage.interpolation.zoom(
+            data1,
+            zoom=1.0/np.asarray(voxelsize_mm2),
+            order=0
+        )
+        # import sed3
+        # ed = sed3.sed3(data1)
+        # ed.show()
+        # ed = sed3.sed3(data2)
+        # ed.show()
+
+        Sv1 = sm.surface_density(data1, voxelsize_mm1)
+        Sv2 = sm.surface_density(data2, voxelsize_mm2)
+        self.assertGreater(Sv1, Sv2*0.9)
+        self.assertLess(Sv1, Sv2*1.1)
+
+    def test_surface_measurement_use_roi(self):
+        import lisa.surface_measurement as sm
+        data1 = np.zeros([30, 40, 50])
+        voxelsize_mm = [1, 1, 1]
+        data1[10:20, 10:20, 10:20] = 1
+
+        Sv1 = sm.surface_density(data1, voxelsize_mm)
 
     def test_surface_measurement_find_edge(self):
         import lisa.surface_measurement as sm

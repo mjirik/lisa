@@ -50,6 +50,8 @@ def surface_density(segmentation, voxelsize_mm, sond_raster_mm=None, aoi=None):
     # ed = sed3.sed3(im_sond)
     # ed.show()
 
+
+    # Kubinova2001
     # print "Ii = ", Ii
     Sv = 2.0 * Ii / length
     # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
