@@ -5,6 +5,16 @@ Evaluation of liver volume error inspired by Sliver07.
 Input is YAML file with dataset metadata.
 
 Function compare_volumes can be used to compare two data.
+
+Compute Sliver07 score::
+
+eval_data = lisa.volumetry_evaluation.compare_volumes(
+    ndimage_3d_segmentation_1, 
+    ndimage_3d_segmentation_2, 
+    voxelsize_mm)
+    
+score = lisa.volumetry_evaluation.sliver_score_one_couple(eval_data)
+
 """
 
 # import funkcí z jiného adresáře
