@@ -20,8 +20,21 @@ import argparse
 import numpy as np
 import io3d
 import os
-import pickle
+import yaml
 from scipy import ndimage
+
+def zapisYamlSoubor(nazevSouboru,Data):
+    '''DATA NUTNO ZAPSAT V BEHU, nejlepe 1 pole
+    Zapise Data do souboru (.yml) nazevSouboru '''
+    with open(nazevSouboru, 'w') as outfile:
+        outfile.write( yaml.dump(Data, default_flow_style=True) )
+    return
+
+def nactiYamlSoubor(nazevSouboru):
+    '''nacte data z (.yml) souboru nazevSouboru'''
+    soubor = open(nazevSouboru,'r')
+    dataNova = yaml.load(soubor)
+    return dataNova
 
 def segmentace0(tabulka,velikostVoxelu):
     '''RYCHLA TESTOVACI METODA - PRO TESTOVANI
@@ -52,17 +65,18 @@ def segmentace0(tabulka,velikostVoxelu):
     #print np.shape(segmentaceVysledek)
     return segmentaceVysledek
 
-def segmentace1(tabulka,velikostVoxelu):
+def segmentace1(tabulka,velikostVoxelu,source='Metoda1.yml'):
     '''PRIMITIVNI METODA - PRAHOVANI
-    Nacte parametry prumer a odchylka ze souboru Metoda1.p
+    Nacte parametry prumer a odchylka ze souboru Metoda1.yml
+    (lze zmenit pomoci volitelneho argumentu source)
     pak pomoci prahovani vybere z kazdeho rezu cast z intervalu
     prumer +-2 sigma, nasledne provede binarni operace
-    otevreni (1x) a uzavreni (3x)  tak aby byly odstraneny drobne pixely'''
+    otevreni (1x) a uzavreni (3x)  tak aby byly odstraneny drobne pixely
+    '''
     
     def nactiPrumVar():
         '''vrati pole [prumer,variance] nactene pomoci pickle ze souboru'''
-        soubor = open('Metoda1.p','rb')
-        vektor=pickle.load(soubor)
+        vektor=nactiYamlSoubor(source)
         prumer = vektor[0]
         variance = vektor[1]
         return [prumer,variance]
@@ -99,11 +113,10 @@ def segmentace1(tabulka,velikostVoxelu):
 
 def trenovaniCele(metoda):
     '''Metoda je cislo INT, dane poradim metody pri implementaci prace
-    nacte cestu ze souboru Cesta.p, vsechny soubory v adresari
-     natrenuje podle zvolene metody a zapise vysledek do TrenC.p. 
-    ''', 
-    soubor = open('Cesta.p','r')
-    cesta = pickle.load(soubor)
+    nacte cestu ze souboru path.yml, vsechny soubory v adresari
+     natrenuje podle zvolene metody a zapise vysledek do TrenC.yml. 
+    '''
+    cesta = nactiYamlSoubor('path.yml')
     #print cesta
     seznamSouboru = vyhledejSoubory(cesta)
     
@@ -127,9 +140,8 @@ def trenovaniCele(metoda):
         
     print "Probiha trenovani"
     vysledek1= metoda(cesta,seznamSouboru)
-    soubor = open("TrenC.p","wb")
-    pickle.dump(vysledek1,soubor)
-    soubor.close()
+    soubor = open("TrenC.yml","wb")
+    zapisYamlSoubor("TrenC.yml",vysledek1)
     print "trenovani  dokonceno"
 
 def nahrazka(cesta,seznamSouboru):
@@ -139,13 +151,12 @@ def nahrazka(cesta,seznamSouboru):
 
 def trenovaniTri(metoda):
     '''Metoda je cislo INT, dane poradim metody pri implementaci prace
-    nacte cestu ze souboru Cesta.p, vsechny soubory v adresari rozdeli na tri casti
+    nacte cestu ze souboru path.yml, vsechny soubory v adresari rozdeli na tri casti
     pro casti 1+2,2+3 a 1+3 natrenuje podle zvolene metody. 
     ulozene soubory: 1) seznam trenovanych souboru 2)seznam na kterych ma probehnout segmentace
     3) vysledek trenovani (napr. prumer a odchylka u metody 1)
-    ''', 
-    soubor = open('Cesta.p','r')
-    cesta = pickle.load(soubor)
+    '''
+    cesta = nactiYamlSoubor('path.yml')
     #print cesta
     
     def rozdelTrenovaciNaTri(cesta):
@@ -188,33 +199,24 @@ def trenovaniTri(metoda):
         
     print "Probiha trenovani Prvni Casti"
     vysledek1= metoda(cesta,tren12)
-    soubor = open("Tren1+2.p","wb")
-    pickle.dump(tren12,soubor)
-    pickle.dump(cast3,soubor)    
-    pickle.dump(vysledek1,soubor)
-    soubor.close()
+    poleMega = [tren12,cast3,vysledek1]
+    zapisYamlSoubor("Tren1+2.yml",poleMega)
+    
     print "Probiha trenovani druhe casti"
     vysledek2= metoda(cesta,tren23)
-    soubor = open("Tren2+3.p","wb")
-    pickle.dump(tren23,soubor)
-    pickle.dump(cast1,soubor)    
-    pickle.dump(vysledek2,soubor)
-    soubor.close()
+    poleMega = [tren23,cast1,vysledek2]
+    zapisYamlSoubor("Tren2+3.yml",poleMega)
+    
     print "Probiha trenovani treti casti"  
     vysledek3= metoda(cesta,tren13) 
-    soubor = open("Tren1+3.p","wb")
-    pickle.dump(tren13,soubor)
-    pickle.dump(cast2,soubor)    
-    pickle.dump(vysledek3,soubor)
-    soubor.close()
+    poleMega = [tren13,cast2,vysledek3]
+    zapisYamlSoubor("Tren1+3.yml",poleMega)
     print "trenovani  dokonceno"
     
 def zapisCestu():
     cesta = 'C:/Users/asus/workspace/training'
     print cesta
-    soubor = open('Cesta.p','w')
-    pickle.dump(cesta,soubor)
-    soubor.close()
+    zapisYamlSoubor('path.yml',cesta)
     print "cesta uspesne zapsana"
     
 def vyhledejSoubory(cesta):
@@ -254,7 +256,7 @@ def metoda1(cesta,seznamSouboru):
     segmentovana. Kde je segmentace True je 0.
     vypocte prumer a varianci ze segmentovanych voxelu-
     vysledou hodnotu je pak mozno pouzit pro prahovani
-    hodnota zapsana do souboru "Metoda1.p" '''
+    hodnota zapsana do souboru "Metoda1.yml" '''
     
     def vypoctiPrumer(poctyVzorku,prumery):
         'vypocte prumer z prumeru a poctu vzorku vektoru ruzne delky'
@@ -289,15 +291,7 @@ def metoda1(cesta,seznamSouboru):
     def zapisPrumVar(prumer,variance):
         '''zapise pole [prumer,variance] pomoci pickle do souboru'''
         radek = [prumer,variance]
-        soubor = open('Metoda1.p','wb')
-        pickle.dump(radek,soubor)
-        soubor.close()
-    
-    def nactiPrumVar(prumer,variance):
-        '''vrati pole [prumer,variance] nactene pomoci pickle ze souboru'''
-        soubor = open('Metoda1.p','rb')
-        [prumer,variance]=pickle.load(soubor)
-        return [prumer,variance]
+        zapisYamlSoubor('Metoda1.yml',radek)
     
     def zpracuj(cesta,seznamSouboru,pomocny,ctenar,pocetOrig):
         originalni = nactiSoubor(cesta,seznamSouboru,pomocny,ctenar) #originalni pole
@@ -356,7 +350,7 @@ def metoda1(cesta,seznamSouboru):
     print "vysledny prumer a variance:"
     print prumer
     print var
-    print "vysledky ukladany do souboru 'Metoda1.p'"
+    print "vysledky ukladany do souboru 'Metoda1.yml'"
     zapisPrumVar(prumer,var)
     return [prumer,var]  
 
