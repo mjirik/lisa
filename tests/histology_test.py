@@ -170,13 +170,23 @@ class HistologyTest(unittest.TestCase):
         self.assertGreater(Sv1, Sv2*0.9)
         self.assertLess(Sv1, Sv2*1.1)
 
-    def test_surface_measurement_use_roi(self):
+    def test_surface_measurement_use_aoi(self):
+        """
+        Test of AOI. In Sv2 is AOI half in compare with Sv1.
+        Sv1 should be half of Sv2
+        """
         import lisa.surface_measurement as sm
-        data1 = np.zeros([30, 40, 50])
+        data1 = np.zeros([30, 60, 60])
+        aoi = np.zeros([30, 60, 60])
+        aoi[:30, :60, :30] = 1
         voxelsize_mm = [1, 1, 1]
         data1[10:20, 10:20, 10:20] = 1
+        data1[13:18, 13:18, 10:15] = 0
 
-        Sv1 = sm.surface_density(data1, voxelsize_mm)
+        Sv1 = sm.surface_density(data1, voxelsize_mm, aoi=None)
+        Sv2 = sm.surface_density(data1, voxelsize_mm, aoi=aoi)
+        self.assertGreater(2*Sv1, Sv2*0.9)
+        self.assertLess(2*Sv1, Sv2*1.1)
 
     def test_surface_measurement_find_edge(self):
         import lisa.surface_measurement as sm

@@ -21,7 +21,15 @@ import numpy as np
 import scipy
 
 
-def surface_density(segmentation, voxelsize_mm, sond_raster_mm=None, aoi=None):
+def surface_density(segmentation, voxelsize_mm, aoi=None, sond_raster_mm=None):
+    """
+    :segmentation: is ndarray with 0 and 1
+    :voxelsize_mm: is array of three numbers specifiing size of voxel for each
+        axis
+    :aoi: is specify area of interest. It is ndarray with 0 and 1
+    :sond_raster_mm: unimplemented. It is parametr of sonds design
+    """
+
     axis = 0
     if sond_raster_mm is None:
         sond_raster_mm = voxelsize_mm
