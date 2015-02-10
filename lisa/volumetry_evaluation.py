@@ -272,7 +272,7 @@ def compare_volumes(vol1, vol2, voxelsize_mm):
 
 def distance_matrics(vol1, vol2, voxelsize_mm):
     # crop data to reduce comutation time
-    crinfo = qmisc.crinfo_from_specific_data(vol1, CROP_MARGIN)
+    crinfo = qmisc.crinfo_from_specific_data(vol1 + vol2, CROP_MARGIN)
     logger.debug(str(crinfo) + ' m1 ' + str(np.max(vol1)) +
                  ' m2 ' + str(np.min(vol2)))
     logger.debug("crinfo " + str(crinfo))
@@ -288,16 +288,37 @@ def distance_matrics(vol1, vol2, voxelsize_mm):
         1 - border1,
         sampling=voxelsize_mm
     )
+    b2dst = scipy.ndimage.morphology.distance_transform_edt(
+        1 - border2,
+        sampling=voxelsize_mm
+    )
 
     dst_b1_to_b2 = border2 * b1dst
+    dst_b2_to_b1 = border1 * b2dst
+    dst_12 = dst_b1_to_b2[border2]
+    dst_21 = dst_b2_to_b1[border1]
+    dst_both = np.append(dst_12, dst_21)
+
+    # sum_d12 = np.sum(dst_12)
+    # sum_d21 = np.sum(dst_21)
+    # len_d12 = len(dst_12)
+    # len_d21 = len(dst_21)
     # import ipdb; ipdb.set_trace() # BREAKPOINT
     # pyed = sed3.sed3(dst_b1_to_b2, contour=vol1)
     # pyed.show()
     # print np.nonzero(border1)
     # avgd = np.average(dst_b1_to_b2[np.nonzero(border2)])
-    avgd = np.average(dst_b1_to_b2[border2])
-    rmsd = np.average(dst_b1_to_b2[border2] ** 2)
-    maxd = np.max(dst_b1_to_b2)
+    # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+    # avgd = (sum_d21 + sum_d12)/float(len_d21 + len_d12)
+    # rmsd = ((np.sum(dst_12**2) + dst_21**2)/float(len_d21 + len_d12))**0.5
+    avgd = np.average(dst_both)
+    rmsd = np.average(dst_both ** 2)**0.5
+    # rmsd = np.average(dst_b1_to_b2[border2] ** 2)
+    maxd = max(np.max(dst_b1_to_b2), np.max(dst_b2_to_b1))
+# old
+    # avgd = np.average(dst_b1_to_b2[border2])
+    # rmsd = np.average(dst_b1_to_b2[border2] ** 2)
+    # maxd = np.max(dst_b1_to_b2)
 
     return avgd, rmsd, maxd
 
