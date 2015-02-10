@@ -259,6 +259,13 @@ def get_sample_data():
     datafile.extractall('./sample_data/')
     remove(local_file_name)
 
+# get experiment data
+    url = "http://147.228.240.61/queetech/sample-data/exp.zip"
+    local_file_name = './sample_data/exp.zip'
+    urllibr.urlretrieve(url, local_file_name)
+    datafile = zipfile.ZipFile(local_file_name)
+    datafile.extractall('./sample_data/')
+    remove(local_file_name)
 # get sliver sample
     url = "http://147.228.240.61/queetech/sample-data/sliver_training_001.zip"
     local_file_name = './sample_data/sliver_training_001.zip'
