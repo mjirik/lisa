@@ -9,10 +9,10 @@ Function compare_volumes can be used to compare two data.
 Compute Sliver07 score::
 
 eval_data = lisa.volumetry_evaluation.compare_volumes(
-    ndimage_3d_segmentation_1, 
-    ndimage_3d_segmentation_2, 
+    ndimage_3d_segmentation_1,
+    ndimage_3d_segmentation_2,
     voxelsize_mm)
-    
+
 score = lisa.volumetry_evaluation.sliver_score_one_couple(eval_data)
 
 """
@@ -178,7 +178,7 @@ def eval_all_from_dataset_metadata(inputdata, visualization=False):
 
         if visualization:
             pyed = sed3.sed3(data3d_a,  # + (4 * data3d_b)
-                                                 contour=data3d_b)
+                             contour=data3d_b)
             pyed.show()
 
         evaluation_one = compare_volumes(data3d_a, data3d_b,
@@ -379,9 +379,9 @@ def sliver_score(measure, metric_type):
         slope = -5.31914893617021
     elif metric_type is 'avgd':
         slope = -25
-    elif metric_type is 'rmsdd':
+    elif metric_type is 'rmsd':
         slope = -14.7058823529412
-    elif metric_type is 'maxdd':
+    elif metric_type is 'maxd':
         slope = -1.31578947368421
 
     score = intercept + np.abs(measure) * slope
