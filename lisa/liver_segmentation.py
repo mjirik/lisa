@@ -23,6 +23,52 @@ import os
 import yaml
 from scipy import ndimage
 import volumetry_evaluation as ve
+import sed3
+
+def zobrazit(original,rucni,strojova):
+    '''Metoda pro srovnani rucni a 
+    automaticke segmentace z lidskeho pohledu
+    cerna oblast - shoda strojoveho a rucniho
+    bila oblast - neshoda strojoveho a rucniho'''
+    
+    '''
+    cesta2 = 'C:/Users/asus/workspace/training'
+    ctenar = io3d.DataReader()
+    datap = ctenar.Get3DData(cesta, dataplus_format=False)
+    seznamSouboru = main.vyhledejSoubory(cesta2)
+    vektor = main.nactiSoubor(cesta2,seznamSouboru,21,ctenar)
+    rucniPole = vektor[0]
+    rucniVelikost = vektor[1]
+    vektor2 = main.nactiSoubor(cesta2,seznamSouboru,1,ctenar)
+    originalPole = vektor2[0]
+    originalVelikost = vektor2[1]
+    segmentace = np.zeros(rucniPole.shape, dtype=np.int8)
+    segmentace[0:-1,100:400,100:400] = 1
+    #rez sloupec radek
+    zobrazit(originalPole,rucniPole,segmentace)
+    '''
+    souhlas = 1300
+    nesouhlas = -1000
+    ukazatel1 = -9000
+    ukazatel2 = 9000
+    ctenar = io3d.DataReader()
+    
+    opak = rucni*(-1)+1 #kde neni rucni segmentace   
+    opakStrojova = strojova*(-1)+1 
+    kombinaceSouhlas = np.multiply(rucni,strojova)#skalarni soucin
+    kombinaceSouhlas = kombinaceSouhlas * ukazatel1
+    kombinaceNesouhlas = np.multiply(opak,strojova)
+    kombinaceNesouhlas = kombinaceNesouhlas * ukazatel2
+    kombinaceNesouhlas2 = np.multiply(opakStrojova,rucni)
+    kombinaceNesouhlas2 = kombinaceNesouhlas2 * ukazatel2
+    kombinace = original+kombinaceNesouhlas+kombinaceSouhlas+kombinaceNesouhlas2
+    kombinace[kombinace > 4000] = souhlas
+    kombinace[kombinace < -4000] = nesouhlas
+    poleVysledek = kombinace   
+    ed = sed3.sed3(kombinace)
+    #print kombinaceNesouhlas
+    ed.show()
+    return
 
 def vyhodnoceniMetodyTri(metoda):
     '''metoda- int cislo metody (poradi pri vyvoji) 
