@@ -214,7 +214,7 @@ class HistologyAnalyser:
         vessel_volume_fraction = float(np.sum(np.sum(np.sum(
             self.data3d_thr)))) / float(used_volume_px)
         sv = surface_measurement.surface_density(
-            self.data3d_thr, self.metadata['voxelsize_mm'])
+            self.data3d_thr, self.metadata['voxelsize_mm'], self.data3d_masked)
 
         info = {
             'voxel_size_mm': list(vs),
