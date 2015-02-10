@@ -29,14 +29,15 @@ import segmentation
 import sed3 as se
 
 import histology_analyser_gui as HA_GUI
+from histology_report import HistologyReport
 from skeleton_analyser import SkeletonAnalyser
 import surface_measurement
 
 
 class HistologyAnalyser:
 
-    def __init__(self, data3d, metadata, threshold=-1, binaryClosing=1,
-                 binaryOpening=1, nogui=True):
+    def __init__(self, data3d, metadata, threshold=-1, binaryClosing=-1,
+                 binaryOpening=-1, nogui=True):
         self.data3d = data3d
         if 'voxelsize_mm' not in metadata.keys():
             metadata['voxelsize_mm'] = [1, 1, 1]
@@ -46,8 +47,15 @@ class HistologyAnalyser:
         self.data3d_skel = None
 
         self.threshold = threshold
-        self.binaryClosing = binaryClosing
-        self.binaryOpening = binaryOpening
+        
+        if binaryClosing == -1:
+            self.binaryClosing = 1
+        else:
+            self.binaryClosing = binaryClosing
+        if binaryOpening == -1:
+            self.binaryOpening = 1
+        else:
+            self.binaryOpening = binaryOpening
 
         self.nogui = nogui
 
@@ -430,6 +438,16 @@ def parser_init():  # pragma: no cover
         help='Size of one voxel. Format: "Z Y X"')
 
     parser.add_argument(
+        '--binaryclosing', type=int,
+        default=-1, # in HystologyAnalyser.__init__()
+        help='Sets number of binary closing operations. Only in --nogui mode')
+        
+    parser.add_argument(
+        '--binaryopening', type=int,
+        default=-1, # in HystologyAnalyser.__init__()
+        help='Sets number of binary opening operations. Only in --nogui mode')
+        
+    parser.add_argument(
         '-t', '--threshold', type=int,
         default=-1,
         help='Segmentation threshold. Default -1 (GUI/Automatic selection)')
@@ -448,7 +466,7 @@ None. Format: "z1 z2 y1 y2 x1 x2". -1 = None (start or end of axis).')
     parser.add_argument(
         '--nogui',
         action='store_true',
-        help='Disable GUI')
+        help='Disable GUI, requires threshold argument')
 
     parser.add_argument(
         '-d', '--debug',
@@ -465,7 +483,7 @@ None. Format: "z1 z2 y1 y2 x1 x2". -1 = None (start or end of axis).')
 
 
 def processData(inputfile=None, threshold=None, skeleton=False,
-                crop=None, voxelsize=None):
+                crop=None, voxelsize=None, binaryClosing=-1, binaryOpening=-1):
     # Processing data without gui
     if skeleton:  # when input is just skeleton
         # TODO - test if works or just delete
@@ -473,7 +491,9 @@ def processData(inputfile=None, threshold=None, skeleton=False,
         struct = misc.obj_from_file(filename='tmp0.pkl', filetype='pickle')
         data3d = struct['data3d']
         metadata = struct['metadata']
-        ha = HistologyAnalyser(data3d, metadata, threshold, nogui=True)
+        ha = HistologyAnalyser(data3d, metadata, threshold, 
+                 binaryClosing=binaryClosing, binaryOpening=binaryOpening, 
+                 nogui=True)
         ha.data3d_skel = struct['skel']
         ha.data3d_thr = struct['thr']
         logger.info("end of is skeleton")
@@ -498,7 +518,9 @@ def processData(inputfile=None, threshold=None, skeleton=False,
 
         # ## Init HistologyAnalyser object
         logger.debug('Init HistologyAnalyser object')
-        ha = HistologyAnalyser(data3d, metadata, threshold, nogui=True)
+        ha = HistologyAnalyser(data3d, metadata, threshold, 
+                 binaryClosing=binaryClosing, binaryOpening=binaryOpening, 
+                 nogui=True)
 
         # ## No GUI == No Remove Area
 
@@ -511,13 +533,21 @@ def processData(inputfile=None, threshold=None, skeleton=False,
     ha.data_to_statistics()
 
     # ## Saving files
-    logger.info("# ## ## write to file")
+    logger.info("# ## ## write stats to file")
     ha.writeStatsToCSV()
     ha.writeStatsToYAML()
     ha.writeSkeletonToPickle('skel.pkl')
     # struct = {'skel': data3d_skel, 'thr': data3d_thr, 'data3d': data3d,
     # 'metadata':metadata}
     # misc.obj_to_file(struct, filename='tmp0.pkl', filetype='pickle')
+    
+    # ## Histology report
+    logger.info("# ## ## Histology report")
+    hr = HistologyReport()
+    hr.data = ha.stats
+    hr.generateStats()
+    hr.writeReportToCSV()
+    hr.writeReportToYAML()
 
     # ## End
     logger.info('Finished')
@@ -546,7 +576,9 @@ def main():  # pragma: no cover
                     threshold=args.threshold,
                     skeleton=args.input_is_skeleton,
                     crop=args.crop,
-                    voxelsize=args.voxelsize
+                    voxelsize=args.voxelsize,
+                    binaryClosing=args.binaryopening,
+                    binaryOpening=args.binaryclosing
                     )
     else:
         app = QApplication(sys.argv)

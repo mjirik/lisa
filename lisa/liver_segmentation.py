@@ -22,9 +22,105 @@ import io3d
 import os
 import yaml
 from scipy import ndimage
+import volumetry_evaluation as ve
+
+def vyhodnoceniMetodyTri(metoda):
+    '''metoda- int cislo metody (poradi pri vyvoji) 
+    nacte cestu ze souboru path.yml, dale nacte soubory v adresari kde je situovana a sice 
+    Tren1+2.yml, Tren1+3.yml a Tren2+3.yml. Pri nacteni souboru vznikne pole:
+    [seznamSouboruTrenovaciMnoziny(nepodstatny),seznamSouboruTESTOVACImnoziny,vysledkyMETODY]
+    na souborech ze seznamuTestovacimnoziny provede segmentaci metodou s cislem METODA
+    a zapise do souboru vysledky.yml pole 
+    [vsechnyVysledky,prumerScore]
+    se vsemi vysledky a take vypise prumer na konzoli
+    '''
+    ctenar = io3d.DataReader()
+    cesta = nactiYamlSoubor('path.yml')
+    
+    def segmentujSubor(nazevSouboru):
+        [seznamTM,seznamTestovaci,vysledky]= nactiYamlSoubor(nazevSouboru)#'Tren1+2.yml'
+        seznamVsechVysledku = []
+        for x in seznamTM: #male overeni spravnosti testovacich a trenovacich dat
+            if(seznamTestovaci.count(x)>0):
+                print('TM obsahuje testovaci data!!!')
+                
+        def iterace(cesta,seznamTestovaci,ctenar,counter):
+            #print polozka
+            '''ZDE UPRAVIT'''
+            nacti = nactiSoubor(cesta,seznamTestovaci,counter,ctenar)#
+            poleTest = nacti[0]
+            voxelSizeTest = nacti[1]
+            slovnik = {'cisloMetody':metoda,'vysledkyDostupne':vysledky}
+            #print slovnik['vysledkyDostupne']
+            vytvoreny = LiverSegmentation(poleTest,voxelSizeTest,slovnik)
+            #vysledky ==> nenacitaji se data z trenovani cele
+            vytvoreny.setCisloMetody(metoda)#prirazeniMetody
+            #print vytvoreny.segParams
+            vytvoreny.runVolby()
+            segmentovany = vytvoreny.segmentation
+            segmentovanyVoxelSize = vytvoreny.voxelSize
+            nactiNovy = nactiSoubor(cesta,seznamTestovaci,counter+maximum,ctenar)
+            poleRucni = nactiNovy[0]
+            voxelSizeRucni = nactiNovy[1]
+            poleRucni = np.array(poleRucni)
+            print segmentovany 
+            print poleRucni
+            return[segmentovany,segmentovanyVoxelSize,poleRucni,voxelSizeRucni]
+            
+        counter = 0
+        maximum = len(seznamTestovaci)/2
+        for polozka in seznamTestovaci:
+            #[segmentovany,segmentovanyVoxelSize,poleRucni,voxelSizeRucni] = iterace(cesta,seznamTestovaci,ctenar,counter)
+            #skoreData = vyhodnoceniSnimku(segmentovany,segmentovanyVoxelSize,poleRucni,voxelSizeRucni)
+            '''PLACEHOLDER, NAHRADIT '''
+            skoreData = [polozka,0] #
+            seznamVsechVysledku.append(skoreData)
+            
+            counter = counter+1
+            if(counter >= maximum): #preruseni pro vycerpani originalu
+                break
+                #pass
+        return seznamVsechVysledku
+    print 'ANALYZA PRVNI TRETINY'
+    seznam1 = segmentujSubor('Tren1+2.yml')
+    print 'ANALYZA DRUHE TRETINY'
+    seznam2 = segmentujSubor('Tren1+3.yml')
+    print 'ANALYZA TRETI TRETINY'
+    seznam3 = segmentujSubor('Tren2+3.yml')
+    seznamVsech = seznam1+seznam2+seznam3
+    prumerSeznam = np.zeros(len(seznamVsech))
+    pomocnik = 0
+    for polozka in seznamVsech:
+        prumerSeznam[pomocnik] = polozka[1]
+        pomocnik = pomocnik+1
+    celkovyPrumer = np.mean(prumerSeznam)
+    zapsat = [seznamVsech,celkovyPrumer]
+
+    print 'celkovy prumer je: ' + str(celkovyPrumer)
+    zapisYamlSoubor('vysledky.yml',zapsat)
+    print 'soubory zapsany do vysledky.yml'
+    
+    return
+
+def vyhodnoceniSnimku(snimek1,voxelsize1,snimek2,voxelsize2):
+    '''Provede vyhodnoceni snimku pomoci metod z volumetry_evaluation,
+    slucuje dve metody a vraci pole [evalData (slovnik),score(%)],
+    dale protoze velikosti voxelu se mirne lisi u rucni segmentace
+    a originalniho obrazku (10^-2 a mene) udela z nich prumer
+    '''
+    print 'probiha vyhodnoceni snimku pockejte prosim'
+    voxelsize_mm = [((voxelsize1[0]+voxelsize2[0])/2.0),((voxelsize1[1]+voxelsize2[1])/2.0),((voxelsize1[2]+voxelsize2[2])/2.0)]#prumer z obou
+    snimek1 = np.array(snimek1)
+    snimek2 = np.array(snimek2)
+    evaluace = ve.compare_volumes(snimek1, snimek2, voxelsize_mm)
+    #score = ve.sliver_score_one_couple(evaluace)
+    score = 0
+    vysledky = [evaluace,score]
+    
+    return vysledky
 
 def zapisYamlSoubor(nazevSouboru,Data):
-    '''DATA NUTNO ZAPSAT V BEHU, nejlepe 1 pole
+    '''DATA NUTNO ZAPSAT V 1 BEHU, nejlepe 1 pole
     Zapise Data do souboru (.yml) nazevSouboru '''
     with open(nazevSouboru, 'w') as outfile:
         outfile.write( yaml.dump(Data, default_flow_style=True) )
@@ -36,7 +132,7 @@ def nactiYamlSoubor(nazevSouboru):
     dataNova = yaml.load(soubor)
     return dataNova
 
-def segmentace0(tabulka,velikostVoxelu):
+def segmentace0(tabulka,velikostVoxelu,vysledky = False):
     '''RYCHLA TESTOVACI METODA - PRO TESTOVANI
     Vybere pouze prvky blizke nule a to je cele
     vraci segmentaci ve formatu numpy Matrix'''
@@ -65,23 +161,29 @@ def segmentace0(tabulka,velikostVoxelu):
     #print np.shape(segmentaceVysledek)
     return segmentaceVysledek
 
-def segmentace1(tabulka,velikostVoxelu,source='Metoda1.yml'):
+def segmentace1(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     '''PRIMITIVNI METODA - PRAHOVANI
     Nacte parametry prumer a odchylka ze souboru Metoda1.yml
     (lze zmenit pomoci volitelneho argumentu source)
     pak pomoci prahovani vybere z kazdeho rezu cast z intervalu
     prumer +-2 sigma, nasledne provede binarni operace
     otevreni (1x) a uzavreni (3x)  tak aby byly odstraneny drobne pixely
+    metode lze take zadat vysledky
     '''
     
     def nactiPrumVar():
-        '''vrati pole [prumer,variance] nactene pomoci pickle ze souboru'''
+        '''vrati pole [prumer,variance] nactene pomoci yaml ze souboru'''
+        source = 'Metoda1.yml'
         vektor=nactiYamlSoubor(source)
         prumer = vektor[0]
         variance = vektor[1]
         return [prumer,variance]
     
-    [prumer,var] = nactiPrumVar() 
+    if(vysledky == False): #v pripade nezadani vysledku
+        [prumer,var] = nactiPrumVar()
+    else:
+        prumer = vysledky[0]  
+        var = vysledky[1]
     odchylka = np.sqrt(var) 
     #print np.shape(tabulka)
     segmentaceVysledek = []
@@ -360,12 +462,14 @@ class LiverSegmentation:
     def __init__(
         self,
         data3d,
-        voxelsize=[1, 1, 1],segparams={'cisloMetody':0,'some_parameter': 22}
+        voxelsize=[1, 1, 1],segparams={'cisloMetody':0,'vysledkyDostupne':False,'some_parameter': 22}
     ):
         """TODO: Docstring for __init__.
 
         :data3d: 3D array with data
         :segparams: parameters of segmentation
+        cisloMetody = INT, cislo pouzite metody (0-testovaci)
+        vysledkyDostupne = F/vysledek, F =>vysledek se nacte, jinak se vezme
         :returns: TODO
 
         """
@@ -375,7 +479,7 @@ class LiverSegmentation:
         # 3D array with object and background selections by user
         self.seeds = None
         self.voxelSize = voxelsize
-        self.segParams = {'cisloMetody':0}
+        self.segParams = segparams
         self.segmentation = np.zeros(data3d.shape, dtype=np.int8)
         pass
     
@@ -390,14 +494,16 @@ class LiverSegmentation:
     def runVolby(self):
         '''metoda s vice moznostmi vyberu metody-vybrana v segParams'''
         numero = self.segParams['cisloMetody']
+        print self.segParams
+        vysledek = self.segParams['vysledkyDostupne']
         spatne = True
         
         if(numero == 0):
             print('testovaci metoda')            
-            self.segmentation = segmentace0(self.data3d,self.voxelSize)
+            self.segmentation = segmentace0(self.data3d,self.voxelSize,vysledek)
             spatne = False
         if(numero == 1):            
-            self.segmentation = segmentace1(self.data3d,self.voxelSize)
+            self.segmentation = segmentace1(self.data3d,self.voxelSize,vysledek)
             spatne = False
         
         if(spatne):
