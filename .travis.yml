@@ -29,7 +29,7 @@ before_install:
 install:
     - conda update --yes conda 
     # Install dependencies
-    - conda install --yes pip python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib scikit-learn scikit-image cython pyqt pyyaml setuptools pip vtk
+    - conda install --yes pip python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib scikit-learn scikit-image cython pyqt pyyaml setuptools pip vtk pandas
     - pip install -r ci/requirements_ci.txt
     # - if [ ${pack} == "old_mpl" ]; then conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy nose dateutil pandas statsmodels pil six; fi
     # - if [ ${pack} == "newest" ]; then conda install --yes pip python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib nose dateutil pandas statsmodels six; fi
