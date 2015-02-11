@@ -41,7 +41,8 @@ class ExperimentsTest(unittest.TestCase):
 # this is setup for visualization
         markers = ['ks', 'r<']
         labels=['3gaus', '02smoothing']
-        input_data_path_pattern= "/home/mjirik/projects/lisa/sample_data/exp/seeds/*.pklz"
+        input_data_path_pattern = os.path.abspath(
+            path_to_script + "./../sample_data/seeds/*.pklz")
 
 
 # experiment_support.report(pklz_dirs, labels, markers)
