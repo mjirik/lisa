@@ -146,7 +146,7 @@ ok)')
     if(inputSigma > number):
         inputSigma = number
 
-    seeds = None
+    # seeds = None
     if biggestObjects == False and\
             seeds == None and interactivity == True and threshold == -1:
 

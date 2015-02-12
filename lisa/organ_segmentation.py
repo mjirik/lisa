@@ -604,6 +604,22 @@ class OrganSegmentation():
                 0:shp[1],
                 0:shp[2]] = seeds[0:shp[0], 0:shp[1], 0:shp[2]]
 
+        if False:
+# TODO dodělat postprocessing
+            outputSegmentation = segmentation.vesselSegmentation(
+                self.data3d,
+                self.segmentation,
+                threshold=-1,
+                inputSigma=0.15,
+                dilationIterations=10,
+                nObj=1,
+                biggestObjects=False,
+                seeds = (self.segmentation>0).astype(np.int8),
+                useSeedsOfCompactObjects=True,
+                interactivity=True,
+                binaryClosingIterations=2,
+                binaryOpeningIterations=0)
+
         if self.segmentation_smoothing:
             self.segm_smoothing(self.smoothing_mm)
 
@@ -1100,7 +1116,6 @@ def lisa_config_init():
 
 
 def parser_init(cfg):  # pragma: no cover
-    import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
     # input parser
     conf_parser = argparse.ArgumentParser(
