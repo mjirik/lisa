@@ -1100,6 +1100,7 @@ def lisa_config_init():
 
 
 def parser_init(cfg):  # pragma: no cover
+    import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
     # input parser
     conf_parser = argparse.ArgumentParser(

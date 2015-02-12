@@ -11,7 +11,7 @@ import unittest
 import logging
 logger = logging.getLogger(__name__)
 
-from nose.plugins.attrib import attr
+# from nose.plugins.attrib import attr
 import numpy as np
 
 
