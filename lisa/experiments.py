@@ -34,6 +34,7 @@ def run_and_make_report(pklz_dirs, labels, markers, sliver_reference_dir,
     # exp_conf_files = [os.path.join(os.path.normpath(path),
     # 'organ_segmentation.config') for path in pklz_dirs]
     logger.info("run experiments")
+    print "run experiments"
     # run experiments
     run_all_liver_segmentation_experiments_with_conf(
         exp_conf_files,
@@ -80,9 +81,13 @@ def run_all_liver_segmentation_experiments_with_conf(
                 logger.info('skipping dir "%s"' % (output_paths[i]))
 
         else:
-            logger.warning(
-                'config file "' + config_file_path +
-                '" does not exist. Create it with "lisa -cf" parameter.')
+
+            confs = \
+                'config file "' + config_file_path +\
+                '" does not exist. Create it with "lisa -cf" parameter.'
+            logger.warning(confs)
+
+            print confs
 
 
 def run_liver_segmentation_experiment_with_conf(
@@ -115,6 +120,7 @@ def run_liver_segmentation_experiment_with_conf(
     if len(filenames) == 0:
         logger.warning('input_data_path_pattern "%s" is empty'
                        % (input_data_path_pattern))
+        print "input data path is empty " + input_data_path_pattern
     for fn in filenames:
         bsh_data = " -dd " + fn + " "
 
@@ -128,12 +134,14 @@ def run_liver_segmentation_experiment_with_conf(
             if use_subprocess:
                 process = subprocess.Popen(bsh.split(), stdout=subprocess.PIPE)
                 output = process.communicate()[0]
+                print output
             else:
                 import lisa.organ_segmentation
                 import sys
-                sys.argv = bsh.split()
+                tmpargv = sys.argv
+                sys.argv = bsh.split()[1:]
                 lisa.organ_segmentation.main()
-            print output
+                sys.argv = tmpargv
 
 # <codecell>
 
