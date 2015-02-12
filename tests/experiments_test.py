@@ -16,6 +16,7 @@ import numpy as np
 
 
 import lisa.volumetry_evaluation as ve
+import lisa
 import lisa.experiments
 
 
