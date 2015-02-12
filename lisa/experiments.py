@@ -25,7 +25,7 @@ def run_and_make_report(pklz_dirs, labels, markers, sliver_reference_dir,
                         input_data_path_pattern, show=True):
     """
     sliver_dir: dir with sliver reference data
-    input_data_path_pattern: "/home/mjirik/data/medical/processed/spring2014/exp010-seeds/*-seeds.pklz"
+    input_data_path_pattern: "/home/mjirik/exp010-seeds/*-seeds.pklz"
     """
     sliver_dir = sliver_reference_dir
     yaml_files = [os.path.normpath(path) + '.yaml' for path in pklz_dirs]
@@ -98,7 +98,9 @@ def run_liver_segmentation_experiment_with_conf(
     dry_run: only print command
 
     Example::
-        run_experiment_with_conf("/home/mjirik/data/medical/processed/spring2014/exp026-03bl06sm/organ_segmentation.config", dry_run=True)
+        run_experiment_with_conf(
+            "/home/mjirik/exp026-03bl06sm/organ_segmentation.config",
+            dry_run=True)
     """
 #     bsh_lisa = "python /home/mjirik/projects/lisa/lisa.py -ni "
 # bsh_data = "-dd
@@ -128,6 +130,7 @@ def run_liver_segmentation_experiment_with_conf(
                 output = process.communicate()[0]
             else:
                 import lisa.organ_segmentation
+                import sys
                 sys.argv = bsh.split()
                 lisa.organ_segmentation.main()
             print output
@@ -146,18 +149,18 @@ def report(pklz_dirs, labels, markers, show=True):
     print eval_files
     data = [misc.obj_from_file(fname + '.pkl', filetype='pkl')
             for fname in eval_files]
-    dataplot(data, 'voe',
-             'Volume Difference Error [%]', markers=markers, labels=labels, loc=0, show=show)
-    dataplot(
-        data, 'vd', 'Total Volume Difference [%]', markers=markers, labels=labels, loc=0, show=show)
-    dataplot(data, 'processing_time',
-             'Processing time [s]', markers=markers, labels=labels, loc=0, show=show)
-    dataplot(data, 'maxd',
-             'MaxD [mm]', markers=markers, labels=labels, loc=0, show=show)
-    dataplot(data, 'avgd',
-             'AvgD [mm]', markers=markers, labels=labels, loc=0, show=show)
-    dataplot(data, 'rmsd',
-             'RMSD [mm]', markers=markers, labels=labels, loc=0, show=show)
+    dataplot(data, 'voe', 'Volume Difference Error [%]', markers=markers,
+             labels=labels, loc=0, show=show)
+    dataplot(data, 'vd', 'Total Volume Difference [%]', markers=markers,
+             labels=labels, loc=0, show=show)
+    dataplot(data, 'processing_time', 'Processing time [s]', markers=markers,
+             labels=labels, loc=0, show=show)
+    dataplot(data, 'maxd', 'MaxD [mm]', markers=markers, labels=labels, loc=0,
+             show=show)
+    dataplot(data, 'avgd', 'AvgD [mm]', markers=markers, labels=labels, loc=0,
+             show=show)
+    dataplot(data, 'rmsd', 'RMSD [mm]', markers=markers, labels=labels, loc=0,
+             show=show)
 
     print "Souhrn měření"
 
@@ -193,28 +196,28 @@ def report(pklz_dirs, labels, markers, show=True):
 
     df = pandas.DataFrame(tables[0], index=indexes[0], columns=columns[0])
     print df.to_string()
-    dataplot(scoreAll, 'voe',
-             'Volume Difference Error [points]', markers=markers, labels=labels, loc=0, show=show)
-    dataplot(scoreAll, 'vd',
-             'Total Volume Difference [points]', markers=markers, labels=labels, loc=0, show=show)
+    dataplot(scoreAll, 'voe', 'Volume Difference Error [points]',
+             markers=markers, labels=labels, loc=0, show=show)
+    dataplot(scoreAll, 'vd', 'Total Volume Difference [points]',
+             markers=markers, labels=labels, loc=0, show=show)
 
-    dataplot(scoreAll, 'maxd',
-             'MaxD [mm]', markers=markers, labels=labels, loc=0, show=show)
-    dataplot(scoreAll, 'avgd',
-             'AvgD [mm]', markers=markers, labels=labels, loc=0, show=show)
-    dataplot(scoreAll, 'rmsd',
-             'RMSD [mm]', markers=markers, labels=labels, loc=0, show=show)
+    dataplot(scoreAll, 'maxd', 'MaxD [mm]', markers=markers, labels=labels,
+             loc=0, show=show)
+    dataplot(scoreAll, 'avgd', 'AvgD [mm]', markers=markers, labels=labels,
+             loc=0, show=show)
+    dataplot(scoreAll, 'rmsd', 'RMSD [mm]', markers=markers, labels=labels,
+             loc=0, show=show)
 
-    vd_mn, tmp = sumplot(
-        scoreAll, 'vd', 'Total Volume Difference', expn, expn_labels, show=show)
-    voe_mn, tmp = sumplot(
-        scoreAll, 'voe', 'Volume Difference Error', expn, expn_labels, show=show)
-    avgd_mn, tmp = sumplot(
-        scoreAll, 'avgd', 'Average Distance', expn, expn_labels, show=show)
-    maxd_mn, tmp = sumplot(
-        scoreAll, 'maxd', 'Maxiamal Distance', expn, expn_labels, show=show)
-    rmsd_mn, tmp = sumplot(
-        scoreAll, 'rmsd', 'Square Distance', expn, expn_labels, show=show)
+    vd_mn, tmp = sumplot(scoreAll, 'vd', 'Total Volume Difference', expn,
+                         expn_labels, show=show)
+    voe_mn, tmp = sumplot(scoreAll, 'voe', 'Volume Difference Error', expn,
+                          expn_labels, show=show)
+    avgd_mn, tmp = sumplot(scoreAll, 'avgd', 'Average Distance', expn,
+                           expn_labels, show=show)
+    maxd_mn, tmp = sumplot(scoreAll, 'maxd', 'Maxiamal Distance', expn,
+                           expn_labels, show=show)
+    rmsd_mn, tmp = sumplot(scoreAll, 'rmsd', 'Square Distance', expn,
+                           expn_labels, show=show)
 
     print "Total score"
 
@@ -235,7 +238,8 @@ def recalculate_suggestion(eval_files):
     return recalculateThis
 
 
-def sliver_eval_all_to_yamls(yaml_files, pklz_dirs, sliver_dir, eval_files, recalculateThis=None):
+def sliver_eval_all_to_yamls(yaml_files, pklz_dirs, sliver_dir, eval_files,
+                             recalculateThis=None):
     """
     This is time consuming.
     It can be specified which should be evaluated with recalculateThis=[2,5]
@@ -262,7 +266,8 @@ def plotone(data, expn, keyword, ind, marker, legend):
             xdata, data[ind][keyword], marker, label=legend, alpha=0.7, ms=10)
 
 
-def dataplot(data, keyword, ylabel, expn=None, markers=None, labels=None, ymin=None, loc=0, filename='', show=True):
+def dataplot(data, keyword, ylabel, expn=None, markers=None, labels=None,
+             ymin=None, loc=0, filename='', show=True):
     """
     Plot data. Function is prepared for our dataset (for example 5 measures).
 
@@ -398,7 +403,8 @@ def sliverScoreAll(data):  # , returnScoreEachData=False):
     Computers score by Sliver07
     http://sliver07.org/p7.pdf
 
-    input: dataset = [{'vd':[1.1, ..., 0.1], 'voe':[...], 'avgd':[...], 'rmsd':[...], 'maxd':[...]}
+    input: dataset = [{'vd':[1.1, ..., 0.1], 'voe':[...], 'avgd':[...],
+                      'rmsd':[...], 'maxd':[...]},
                       {'vd':[...], 'voe':[...], ...}
                      ]
     return: scoreTotal, scoreMetrics, scoreAll
@@ -410,7 +416,6 @@ def sliverScoreAll(data):  # , returnScoreEachData=False):
     scoreAll = []
     scoreTotal = []
     scoreMetrics = []
-    scoreEachData = []
     for dat in data:
         score = {
             'vd': sliverScore(dat['vd'], 'vd'),
@@ -465,7 +470,7 @@ def scoreTableEvaluation(scoreMetrics):
         indexes.append(index)
 
         column = ['VD', 'VOE', 'AvgD', 'RMSD', 'MaxD', 'score']
-            # range(1, scm.shape[0])
+        # range(1, scm.shape[0])
         # column.append('score')
         # print 'len col', len(column)
         columns.append(column)
@@ -474,7 +479,8 @@ def scoreTableEvaluation(scoreMetrics):
     return tables, indexes, columns
 
 
-def plot_total(scoreMetrics, err_scale=1, expn=None, labels=None, labels_rotation=70, ymin=None, filename=None, show=True):
+def plot_total(scoreMetrics, err_scale=1, expn=None, labels=None,
+               labels_rotation=70, ymin=None, filename=None, show=True):
     """
     err_scale: scale factor of error bars, defalut err_scale=1
     ymin: minimum of graph. If it is set to None, it is automatic
@@ -522,10 +528,10 @@ def processIt(pklz_dirs, sliver_dir, yaml_files, eval_files, markers, labels):
             for fname in eval_files]
 
     print "Jednotlivá měření"
-    dataplot(
-        data, 'voe', 'Volume Difference Error [%]', markers=markers, labels=labels, loc=0)
-    dataplot(
-        data, 'vd', 'Total Volume Difference [%]', markers=markers, labels=labels, loc=0)
+    dataplot(data, 'voe', 'Volume Difference Error [%]', markers=markers,
+             labels=labels, loc=0)
+    dataplot(data, 'vd', 'Total Volume Difference [%]', markers=markers,
+             labels=labels, loc=0)
 
     dataplot(data, 'processing_time',
              'Processing time [s]', markers=markers, labels=labels, loc=0)
@@ -535,8 +541,6 @@ def processIt(pklz_dirs, sliver_dir, yaml_files, eval_files, markers, labels):
     dataplot(data, 'rmsd', 'RMSD [mm]', markers=markers, labels=labels, loc=0)
 
     print "Souhrn měření"
-    import numpy as np
-    import experiment_support
 
     # import "experiment_support.ipynb"
 
@@ -573,10 +577,10 @@ def processIt(pklz_dirs, sliver_dir, yaml_files, eval_files, markers, labels):
 
     df = pandas.DataFrame(tables[0], index=indexes[0], columns=columns[0])
     print df.to_string()
-    dataplot(scoreAll, 'voe',
-             'Volume Difference Error [points]', markers=markers, labels=labels, loc=0)
-    dataplot(scoreAll, 'vd',
-             'Total Volume Difference [points]', markers=markers, labels=labels, loc=0)
+    dataplot(scoreAll, 'voe', 'Volume Difference Error [points]',
+             markers=markers, labels=labels, loc=0)
+    dataplot(scoreAll, 'vd', 'Total Volume Difference [points]',
+             markers=markers, labels=labels, loc=0)
 
     dataplot(scoreAll, 'maxd',
              'MaxD [mm]', markers=markers, labels=labels, loc=0)
@@ -624,8 +628,8 @@ def get_subdirs(dirpath, wildcard='*', outputfile='experiment_data.yaml'):
     }
     # import pdb; pdb.set_trace()
 
-   # print [o for o in os.listdir(dirpath) if
-   # os.path.isdir(os.path.abspath(o))]
+    # print [o for o in os.listdir(dirpath) if
+    # os.path.isdir(os.path.abspath(o))]
 
     #    dirlist.append(infile)
     # print "current file is: " + infile
@@ -682,8 +686,7 @@ if __name__ == "__main__":
     # logger.debug('input params')
 
     # input parser
-    parser = argparse.ArgumentParser(description=
-                                     'Experiment support')
+    parser = argparse.ArgumentParser(description='Experiment support')
     parser.add_argument('--get_subdirs', action='store_true',
                         default=None,
                         help='path to data dir')
@@ -694,7 +697,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.get_subdirs:
-        if args.output == None:
+        if args.output is None:
             args.output = 'experiment_data.yaml'
         get_subdirs(dirpath=args.input, outputfile=args.output)
 
