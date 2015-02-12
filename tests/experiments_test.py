@@ -16,6 +16,7 @@ import numpy as np
 
 
 import lisa.volumetry_evaluation as ve
+import lisa
 
 
 class ExperimentsTest(unittest.TestCase):
@@ -24,15 +25,14 @@ class ExperimentsTest(unittest.TestCase):
     def test_experiment_set(self):
         import lisa.experiments
 
-
         os.path.join(path_to_script, "..")
-        pklz_dirs =  [
-                os.path.abspath(path_to_script + "./../sample_data/exp/exp1"),
-                os.path.abspath(path_to_script + "./../sample_data/exp/exp2"),
-                # "/home/mjirik/projects/lisa/sample_data/exp1",
-                # "/home/mjirik/projects/lisa/sample_data/exp2",
+        pklz_dirs = [
+            os.path.abspath(path_to_script + "./../sample_data/exp/exp1"),
+            os.path.abspath(path_to_script + "./../sample_data/exp/exp2"),
+            # "/home/mjirik/projects/lisa/sample_data/exp1",
+            # "/home/mjirik/projects/lisa/sample_data/exp2",
 
-                ]
+            ]
         sliver_reference_dir = os.path.abspath(
             path_to_script + "./../sample_data/exp/seg")
         # "/home/mjirik/data/medical/orig/sliver07/training/"
@@ -40,13 +40,15 @@ class ExperimentsTest(unittest.TestCase):
 
 # this is setup for visualization
         markers = ['ks', 'r<']
-        labels=['3gaus', '02smoothing']
+        labels = ['3gaus', '02smoothing']
         input_data_path_pattern = os.path.abspath(
             path_to_script + "./../sample_data/seeds/*.pklz")
 
 
 # experiment_support.report(pklz_dirs, labels, markers)
-        lisa.experiments.run_and_make_report(pklz_dirs, labels, markers, sliver_reference_dir, input_data_path_pattern, show=False)
+        lisa.experiments.run_and_make_report(
+            pklz_dirs, labels, markers, sliver_reference_dir,
+            input_data_path_pattern, show=False)
         # self.assertTrue(False)
 
     def test_get_subdirs(self):
