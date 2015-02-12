@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 import matplotlib.pyplot as plt
 import subprocess
 import glob
+import numpy as np
 
 # ----------------- my scripts --------
 import misc
@@ -338,7 +339,6 @@ def sumplot(data, keyword, ylabel, expn=None, expn_labels=None, loc=70,
 
 
 
-import numpy as np
 
 def sliverScore(measure, metric_type):
     """

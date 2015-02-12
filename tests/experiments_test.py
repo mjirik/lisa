@@ -15,14 +15,14 @@ from nose.plugins.attrib import attr
 import numpy as np
 
 
-import lisa.experiments
 import lisa.volumetry_evaluation as ve
 
 
 class ExperimentsTest(unittest.TestCase):
 
-    # @attr("interactive")
+    @attr("interactive")
     def test_experiment_set(self):
+        import lisa.experiments
 
 
         os.path.join(path_to_script, "..")
