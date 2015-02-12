@@ -22,7 +22,7 @@ import lisa.experiments
 
 class ExperimentsTest(unittest.TestCase):
 
-    @attr("interactive")
+    # @attr("interactive")
     def test_experiment_set(self):
         import lisa.experiments
 
