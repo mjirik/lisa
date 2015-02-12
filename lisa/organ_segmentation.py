@@ -604,8 +604,10 @@ class OrganSegmentation():
                 0:shp[1],
                 0:shp[2]] = seeds[0:shp[0], 0:shp[1], 0:shp[2]]
 
+        # if False:
         if False:
-# TODO dodělat postprocessing
+# TODO dodělat postprocessing PV
+            import segmentation
             outputSegmentation = segmentation.vesselSegmentation(
                 self.data3d,
                 self.segmentation,
