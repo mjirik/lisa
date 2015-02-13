@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 #import apdb
-#  apdb.set_trace();
+#  apdb.set_trace();\
 #import scipy.io
 import numpy as np
 import scipy
@@ -41,6 +41,9 @@ import sed3
 import collections
 import segmentation
 import qmisc
+import io3d
+
+
 from io3d import datareader
 from scipy.ndimage.measurements import label
 from scipy.ndimage import morphology
@@ -258,9 +261,8 @@ def main():
     #else:
     #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
     #data3d, metadata = dcmr.dcm_read_from_dir(args.dcmdir)
-    dr = datareader.DataReader()
-    data3d, metadata = dr.Get3DData(args.datadir)
 
+    data3d , metadata = io3d.datareader.read(args.datadir)
 
     sseg = SupportStructureSegmentation(data3d = data3d,
             voxelsize_mm = metadata['voxelsize_mm'],
