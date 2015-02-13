@@ -162,9 +162,10 @@ class uiThreshold:
                         abs(abs(self.min0) - abs(self.max0)) / 10
 
             # Pridani subplotu do okna (do figure)
-            self.ax1 = self.fig.add_subplot(131)
-            self.ax2 = self.fig.add_subplot(132)
-            self.ax3 = self.fig.add_subplot(133)
+            self.ax1 = self.fig.add_subplot(222)
+            self.ax2 = self.fig.add_subplot(223)
+            self.ax3 = self.fig.add_subplot(224)
+            self.ax4 = self.fig.add_subplot(221)
 
             # Upraveni subplotu
             self.fig.subplots_adjust(left=0.1, bottom=0.3)
@@ -460,6 +461,14 @@ class uiThreshold:
             self.imgFiltering = thresholding_functions.getPriorityObjects(
                 self.imgFiltering, self.nObj, self.seeds)
 
+    def __drawSegmentedSlice(self, ax, contour, i):
+        ax.cla()
+        ax.imshow(self.data[i, :, :], cmap=self.cmap)
+        if contour is not None:
+            ax.contour(contour[i, :, :])
+            # import sed3
+            # sed3.sed3(contour, show=True)
+
     def drawVisualization(self):
         """
 
@@ -498,6 +507,7 @@ class uiThreshold:
             # del(img1)
             # del(img2)
 
+        self.__drawSegmentedSlice(self.ax4, self.imgFiltering, self.imgFiltering.shape[0]/2)
         # Prekresleni
         self.fig.canvas.draw()
 

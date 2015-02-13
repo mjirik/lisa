@@ -364,7 +364,7 @@ def getSeeds(data, seeds):
 
         # Tady opet pocitam s tim, ze oznaceni nulou pripada cerne
         # oblasti (pozadi).
-        if tmpSeed != 0:
+        if not (tmpSeed == 0).all():
             # Pokud se nejedna o pozadi (cernou oblast), tak se
             # novy seed ulozi do pole "arrSeed"
             arrSeed.append(tmpSeed)
