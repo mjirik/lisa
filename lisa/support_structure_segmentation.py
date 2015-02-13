@@ -37,11 +37,13 @@ except:
     logger.warning("Deprecated of pyseg_base as submodule")
     import pycut
 import argparse
-#import sed3
-
+import sed3
+import collections
 import segmentation
 import qmisc
-
+from io3d import datareader
+from scipy.ndimage.measurements import label
+from scipy.ndimage import morphology
 
 
 
@@ -99,7 +101,19 @@ class SupportStructureSegmentation():
         pass
 
     def lungs_segmentation(self):
-        self.segmentation = np.zeros(self.data3d.shape)
+	LUNG_UP=-360 #horní hranice
+	self.segmentation = np.array(self.data3d <= LUNG_UP)
+	labeled_seg , num_seg = label(self.segmentation)
+	counts= [0]*(num_seg+1)	
+	self.segmentation=morphology.binary_closing(self.segmentation,iterations=3).astype(self.segmentation.dtype)
+	for x in np.nditer(labeled_seg, op_flags=['readwrite']):
+	    counts[x[...]]=counts[x[...]]+1
+	poradi = np.sort(counts)
+	#a=labeled_seg.shape
+	#if labeled_seg[0,0,0]==labeled_seg[0,0,a[2]-1]:
+	#	print("ok")
+	print(poradi)    
+        #self.segmentation = np.zeros(self.data3d.shape)
         pass
 
 
@@ -237,24 +251,23 @@ def main():
 
     if args.exampledata:
 
-        args.dcmdir = '../sample_data/matlab/examples/sample_data/DICOM/digest_article/'
+        args.dcmdir = '../sample_data/liver-orig001.raw'
 
 #    if dcmdir == None:
 
     #else:
     #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
     #data3d, metadata = dcmr.dcm_read_from_dir(args.dcmdir)
-    reader = dcmr.DicomReader(args.datadir)
-    data3d = reader.get_3Ddata()
-    metadata = reader.get_metaData()
+    dr = datareader.DataReader()
+    data3d, metadata = dr.Get3DData(args.datadir)
 
 
     sseg = SupportStructureSegmentation(data3d = data3d,
             voxelsize_mm = metadata['voxelsize_mm'],
             )
 
-    sseg.bone_segmentation()
-
+    #sseg.bone_segmentation()
+    sseg.lungs_segmentation()
 
     #print ("Data size: " + str(data3d.nbytes) + ', shape: ' + str(data3d.shape) )
 
