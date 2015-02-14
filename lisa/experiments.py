@@ -14,18 +14,30 @@ import matplotlib.pyplot as plt
 import subprocess
 import glob
 import numpy as np
+import copy
 
 # ----------------- my scripts --------
 import misc
 import volumetry_evaluation
+import io3d
+import io3d.misc
 # <codecell>
 
 
 def run_and_make_report(pklz_dirs, labels, markers, sliver_reference_dir,
-                        input_data_path_pattern, show=True):
+                        input_data_path_pattern, conf_default=None,
+                        conf_list=None, show=True):
     """
-    sliver_dir: dir with sliver reference data
-    input_data_path_pattern: "/home/mjirik/exp010-seeds/*-seeds.pklz"
+    Je potřeba mít připraven adresář s daty(pklz_dirs), v nichž jsou uloženy
+    seedy. Dále pak soubory s konfigurací a stejným jménem jako adresář +
+    přípona '.conf'.
+
+    :sliver_dir: dir with sliver reference data
+    :input_data_path_pattern: Directory containing data with seeds
+         "/home/mjirik/exp010-seeds/*-seeds.pklz"
+    :pklz_dirs: List of dirs. In each will be output for one experiment. There
+         is also required to have file with same name as directory with
+         extension.config. In this files is configuration of Lisa.
     """
     sliver_dir = sliver_reference_dir
     yaml_files = [os.path.normpath(path) + '.yaml' for path in pklz_dirs]
@@ -33,6 +45,9 @@ def run_and_make_report(pklz_dirs, labels, markers, sliver_reference_dir,
     exp_conf_files = [os.path.normpath(path) + '.config' for path in pklz_dirs]
     # exp_conf_files = [os.path.join(os.path.normpath(path),
     # 'organ_segmentation.config') for path in pklz_dirs]
+    if conf_list is not None:
+        logger.info("generate configuration")
+        generate_configs(pklz_dirs, conf_default, conf_list)
     logger.info("run experiments")
     print "run experiments"
     # run experiments
@@ -49,6 +64,19 @@ def run_and_make_report(pklz_dirs, labels, markers, sliver_reference_dir,
     # make report
 
     report(pklz_dirs, labels, markers, show=show)
+
+
+def generate_configs(pklz_dirs, conf_default, conf_list):
+    """
+    Based on conf_list and conf_default generate configs.
+
+    """
+    exp_conf_files = [os.path.normpath(path) + '.config' for path in pklz_dirs]
+    # exp_conf_files = [os.path.join(os.path.normpath(path),
+    for i in range(0, len(pklz_dirs)):
+        conf = copy.copy(conf_default)
+        conf.update(conf_list[i])
+        io3d.misc.obj_to_file(conf, exp_conf_files[i], filetype='yaml')
 
 
 def run_all_liver_segmentation_experiments_with_conf(
@@ -93,7 +121,7 @@ def run_all_liver_segmentation_experiments_with_conf(
 def run_liver_segmentation_experiment_with_conf(
         config_file_path=None,
         bsh_lisa="python ./lisa.py -ni ",
-        input_data_path_pattern="/home/mjirik/data/medical/processed/spring2014/exp010-seeds/org-liver-orig???.mhd-exp010-seeds.pklz",
+        input_data_path_pattern="/home/mjirik/data/medical/processed/spring2014/exp010-seeds/org-liver-orig???.mhd-exp010-seeds.pklz",  # noqa
         output_path=None,
         dry_run=False,
         use_subprocess=False):
