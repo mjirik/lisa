@@ -24,6 +24,221 @@ import yaml
 from scipy import ndimage
 import volumetry_evaluation as ve
 import sed3
+import qmisc
+import nearpy
+
+
+def otestujVzdalenost(vol1, vol2, voxelsize_mm):
+    engine = nearpy.Engine()
+    [avgd, rmsd, maxd] = vzdalenosti(vol1, vol2, voxelsize_mm,engine)
+    return [avgd, rmsd, maxd] 
+
+def compare_volumesUPRAVA(vol1, vol2, voxelsize_mm,engine):
+    """
+    vol1: reference
+    vol2: segmentation
+    """
+    volume1 = np.sum(vol1 > 0)
+    volume2 = np.sum(vol2 > 0)
+    volume1_mm3 = volume1 * np.prod(voxelsize_mm)
+    volume2_mm3 = volume2 * np.prod(voxelsize_mm)
+    logger.debug('vol1 [mm3]: ' + str(volume1_mm3))
+    logger.debug('vol2 [mm3]: ' + str(volume2_mm3))
+
+    df = vol1 - vol2
+    df1 = np.sum(df == 1) * np.prod(voxelsize_mm)
+    df2 = np.sum(df == -1) * np.prod(voxelsize_mm)
+
+    logger.debug('err- [mm3]: ' + str(df1) + ' err- [%]: '
+                 + str(df1 / volume1_mm3 * 100))
+    logger.debug('err+ [mm3]: ' + str(df2) + ' err+ [%]: '
+                 + str(df2 / volume1_mm3 * 100))
+
+    # VOE[%]
+    intersection = np.sum(df != 0).astype(float)
+    union = (np.sum(vol1 > 0) + np.sum(vol2 > 0)).astype(float)
+    voe = 100 * ((intersection / union))
+    logger.debug('VOE [%]' + str(voe))
+
+    # VD[%]
+    vd = 100 * (volume2 - volume1).astype(float) / volume1.astype(float)
+    logger.debug('VD [%]' + str(vd))
+    # import pdb; pdb.set_trace()
+
+    # pyed = sed3.sed3(vol1, contour=vol2)
+    # pyed.show()
+
+    # get_border(vol1)
+    [avgd, rmsd, maxd] = vzdalenosti(vol1, vol2, voxelsize_mm,engine)
+    logger.debug('AvgD [mm]' + str(avgd))
+    logger.debug('RMSD [mm]' + str(rmsd))
+    logger.debug('MaxD [mm]' + str(maxd))
+    evaluation = {
+        'volume1_mm3': volume1_mm3,
+        'volume2_mm3': volume2_mm3,
+        'err1_mm3': df1,
+        'err2_mm3': df2,
+        'err1_percent': df1 / volume1_mm3 * 100,
+        'err2_percent': df2 / volume1_mm3 * 100,
+        'voe': voe,
+        'vd': vd,
+        'avgd': avgd,
+        'rmsd': rmsd,
+        'maxd': maxd
+    }
+    return evaluation
+
+def vzdalenosti(pole1,pole2,voxelSize_mm,engine):
+    '''sample_MAX = maximalni pocet vzorku se kterym se pocita
+    vstup: pole1/2 = 3d T/F pole objektu1/2, voxelsize = pole velikosti voxelu
+    vystup = [asd,rmsd,maxd] prumerne a maximalni vzdalenosti mezi objekty
+    vypocteni vzdalenosti mezi povrchy poli presne podle PDF
+    pouziva metodu approximate nearest neighbout (ANN) z knihovny nearpy'''
+    
+    sample_MAX = 8000.0 #maximalni pocet vzorku objektu OPTIMALMI SE ZDA 8000
+    
+    def vypoctiPrumer(poctyVzorku,prumery):
+        'vypocte prumer z prumeru a poctu vzorku vektoru ruzne delky'
+        sumaPrumeru = 0
+        sumaVzorku = 0
+        pomocny = 0
+        for pocet in poctyVzorku:
+            sumaVzorku = sumaVzorku+pocet
+            sumaPrumeru = sumaPrumeru+prumery[pomocny]*pocet
+            pomocny = pomocny+1
+        
+        prumerCelkem = float(sumaPrumeru)/float(sumaVzorku)
+        return prumerCelkem
+    
+    def pridejVektor(a,b,c,voxelSize,engine):
+        vektor = np.array([a*voxelSize_mm[0],b*voxelSize_mm[1],c*voxelSize_mm[1]])
+        #print vektor
+        engine.store_vector(vektor)
+    
+    def nejblizsi(a,b,c,voxelSize,engine):
+        vzdalenost = 0
+        vektor = np.array([a*voxelSize_mm[0],b*voxelSize_mm[1],c*voxelSize_mm[1]])
+        #print vektor
+        vysledek = engine.neighbours(vektor)
+        if(vysledek != []):
+            vzdalenost = vysledek[0][2]
+        return vzdalenost
+    
+    
+    
+    print 'zahajuje se vypocet vzdalenosti mezi dvema objekty'
+    print 'maximalni pocet vzorku: '+str(sample_MAX)
+    
+    border1 = ve.get_border(pole1)
+    border2 = ve.get_border(pole2)
+    
+    vektory1 = np.where(border1 == 1) #pole s informaci o vektorech (jejich pozice v souradnicich)
+    vektory2= np.where(border2 == 1)
+    
+    
+    downsampling = float(len(vektory1[0]))/sample_MAX #'Downsampling pro urychleni vypoctu na unosnou mez'
+    downsampling = np.round(downsampling,2)
+    #print np.round(downsampling) 
+    print 'ukladaji se data o objektu 1 '    
+    counter = 0
+    for x in range(len(vektory1[0])):
+        if((x %100000) == 0):
+            print str(x) + '/' + str(len(vektory1[0]))
+        if((x % downsampling) == 0):
+            a = vektory1[0][x]
+            b = vektory1[1][x]
+            c = vektory1[2][x]  
+            pridejVektor(a,b,c,voxelSize_mm,engine)
+            counter = counter+1
+    vzdalenosti2k1 = []  #pole kde budou ulozeny vzdalenosti od objektu 1 k objektu 2
+    'v engine jsou ulozeny vektory z border1'
+    print 'probiha vypocet vzdalenosti mezi 2 a 1'
+    for x in range(len(vektory2[0])):
+        if((x %100000) == 0):
+            print str(x) + '/' + str(len(vektory1[0]))
+        if((x % downsampling) == 0):
+            #print str(x) + '/' + str(len(vektory1[0]))
+            a = vektory2[0][x]
+            b = vektory2[1][x]
+            c = vektory2[2][x] 
+            vysledek =nejblizsi(a,b,c+5,voxelSize_mm,engine)
+            vzdalenosti2k1.append( vysledek)
+    vzdalenosti2k1 = np.array( vzdalenosti2k1)
+            
+    print 'vzdalenosti 2-1 vypocteny, vyprazdnovani enginu'
+    #print vzdalenosti2k1.shape  
+    engine.clean_all_buckets()      
+    
+    print 'ukladaji se data o objektu 2 '    
+    counter = 0
+    for x in range(len(vektory2[0])):
+        if((x %100000) == 0):
+            print str(x) + '/' + str(len(vektory2[0]))
+        if((x % downsampling) == 0):
+            a = vektory2[0][x]
+            b = vektory2[1][x]
+            c = vektory2[2][x]  
+            pridejVektor(a,b,c,voxelSize_mm,engine)
+            counter = counter+1
+    vzdalenosti1k2 = []
+    'v engine jsou ulozeny vektory z border2'
+    print 'probiha vypocet vzdalenosti mezi 1 a 2'
+    for x in range(len(vektory1[0])): 
+        if((x %100000) == 0):
+            print str(x) + '/' + str(len(vektory1[0]))       
+        if((x % downsampling) == 0):
+            #print str(x) + '/' + str(len(vektory1[0]))
+            a = vektory1[0][x]
+            b = vektory1[1][x]
+            c = vektory1[2][x] 
+            vysledek =nejblizsi(a,b,c+5,voxelSize_mm,engine)
+            vzdalenosti1k2.append(vysledek)
+    engine.clean_all_buckets() 
+    vzdalenosti1k2 = np.array( vzdalenosti1k2)        
+    print 'vzdalenosti 1-2 vypocteny'    
+    #print vzdalenosti2k1  
+    #print vzdalenosti1k2  
+    print 'vypocet asd,rmsd,msd'
+    'vypocet prumeru ze VSECH vzdalenosti'  
+    prumery = [np.mean(vzdalenosti2k1),np.mean(vzdalenosti1k2)]
+    poctyVzorku = [len(vzdalenosti2k1),len(vzdalenosti1k2)]
+    celkovyPrumer = vypoctiPrumer(poctyVzorku,prumery)
+    asd = celkovyPrumer
+    rmsd =np.sqrt(1/float(len(vzdalenosti2k1)*len(vzdalenosti1k2)))#* np.sqrt(np.sum(vzdalenosti2k1**2)+np.sum(vzdalenosti1k2**2))
+    maxd = max(np.max(vzdalenosti2k1), np.max(vzdalenosti1k2))
+    print [asd,rmsd,maxd]
+    return [asd,rmsd,maxd]
+
+def souborAsegmentace(cisloSouboru,cisloMetody,cesta):
+    '''nacte soubor a vytvori jeho segmentaci, pomoci zvolene metody
+    vrati parametry potrebne pro evaluaci'''
+    ctenar = io3d.DataReader()
+    seznamSouboru = vyhledejSoubory(cesta)
+    print 'probiha nacitani souboru'
+    vektor = nactiSoubor(cesta,seznamSouboru,(cisloSouboru+len(seznamSouboru)/2),ctenar)
+    rucniPole = vektor[0]
+    rucniVelikost = vektor[1]
+    vektor2 = nactiSoubor(cesta,seznamSouboru,cisloSouboru,ctenar)
+    originalPole = vektor2[0]
+    originalVelikost = vektor2[1]
+    vytvoreny = LiverSegmentation(originalPole,originalVelikost)
+    vytvoreny.setCisloMetody(cisloMetody) #ZVOLENI METODY
+    vytvoreny.runVolby()
+    segmentovany = vytvoreny.segmentation
+    segmentovanyVelikost = vytvoreny.voxelSize
+    rucniPole = np.array(rucniPole)
+    segmentovany = np.array(segmentovany)
+    return [rucniPole,rucniVelikost,segmentovany,segmentovanyVelikost,originalPole]
+
+
+def zobrazUtil(cmetody,cisloObrazu = 1):
+    'utilita pro rychle zobrazeni metody s cislem cmetody'
+    cesta = nactiYamlSoubor('path.yml')
+    
+    [rucni,rucniVelikost,strojova,segmentovanyVelikost,original] = souborAsegmentace(cisloObrazu,cmetody,cesta)
+    #segmentace = np.zeros(rucni.shape, dtype=np.int8)
+    #segmentace[0:-1,100:400,100:400] = 1    
+    zobrazit(original,rucni,strojova)
 
 def zobrazit(original,rucni,strojova):
     '''Metoda pro srovnani rucni a 
@@ -52,19 +267,23 @@ def zobrazit(original,rucni,strojova):
     ukazatel1 = -9000
     ukazatel2 = 9000
     ctenar = io3d.DataReader()
-    
+    '''
     opak = rucni*(-1)+1 #kde neni rucni segmentace   
     opakStrojova = strojova*(-1)+1 
     kombinaceSouhlas = np.multiply(rucni,strojova)#skalarni soucin
     kombinaceSouhlas = kombinaceSouhlas * ukazatel1
     kombinaceNesouhlas = np.multiply(opak,strojova)
     kombinaceNesouhlas = kombinaceNesouhlas * ukazatel2
-    kombinaceNesouhlas2 = np.multiply(opakStrojova,rucni)
-    kombinaceNesouhlas2 = kombinaceNesouhlas2 * ukazatel2
-    kombinace = original+kombinaceNesouhlas+kombinaceSouhlas+kombinaceNesouhlas2
+    kombinace = original+kombinaceNesouhlas+kombinaceSouhlas
+  
+    '''
+    blbe = np.abs(-strojova+rucni)*9000
+    dobre = np.multiply(rucni,strojova)*(-9000)
+    kombinace = dobre+blbe+ original#obmena
+    
     kombinace[kombinace > 4000] = souhlas
     kombinace[kombinace < -4000] = nesouhlas
-    poleVysledek = kombinace   
+    #poleVysledek = kombinace   
     ed = sed3.sed3(kombinace)
     #print kombinaceNesouhlas
     ed.show()
@@ -78,10 +297,79 @@ def vyhodnoceniMetodyTri(metoda):
     na souborech ze seznamuTestovacimnoziny provede segmentaci metodou s cislem METODA
     a zapise do souboru vysledky.yml pole 
     [vsechnyVysledky,prumerScore]
+    se vsemi vysledky a take vypise prumer na konzoli'''
+    
+    def nacteniMnoziny(nazevSouboru,cesta,metoda):
+        [seznamTM,seznamTestovaci,vysledky]= nactiYamlSoubor(nazevSouboru)#'Tren1+2.yml'
+        #print seznamTM
+        ctenar = io3d.DataReader()
+        seznamVsechVysledku = []
+        for x in range(len(seznamTestovaci)): #male overeni spravnosti testovacich a trenovacich dat
+            if(x >= len(seznamTestovaci)/2):
+                break
+            vysledek = vyhodnotSoubor(cesta,x,seznamTestovaci,ctenar,vysledky,metoda)
+            seznamVsechVysledku.append(vysledek)
+        return seznamVsechVysledku
+                
+    def vyhodnotSoubor(cesta,x,seznamTestovaci,ctenar,vysledky,metoda):
+        originalNazev =  [seznamTestovaci[x]]
+        rucniNazev = [seznamTestovaci[x+len(seznamTestovaci)/2]]        
+        vektor = nactiSoubor(cesta,rucniNazev,0,ctenar)
+        rucniPole = vektor[0]
+        rucniVelikost = vektor[1]
+        vektor2 = nactiSoubor(cesta,originalNazev,0,ctenar)
+        originalPole = vektor2[0]
+        originalVelikost = vektor2[1]
+        slovnik = {'cisloMetody':metoda,'vysledkyDostupne':vysledky}
+        vytvoreny = LiverSegmentation(originalPole,originalVelikost,slovnik)
+        vytvoreny.setCisloMetody(metoda) #ZVOLENI METODY
+        vytvoreny.runVolby()
+        segmentovany = vytvoreny.segmentation
+        segmentovanyVelikost = vytvoreny.voxelSize
+        engine = nearpy.Engine(dim = 3)
+        vysledky = vyhodnoceniSnimku(rucniPole,rucniVelikost,segmentovany,segmentovanyVelikost,engine)   
+        #vysledky =[1,2]    
+        
+        return vysledky
+    
+    cesta = nactiYamlSoubor('path.yml')
+    print 'ANALYZA PRVNI TRETINY'
+    seznam1 =nacteniMnoziny('Tren1+2.yml',cesta,metoda)
+    print 'ANALYZA DRUHE TRETINY'
+    seznam2 = nacteniMnoziny('Tren1+3.yml',cesta,metoda)
+    print 'ANALYZA TRETI TRETINY'
+    seznam3 = nacteniMnoziny('Tren2+3.yml',cesta,metoda)
+    seznamVsech = seznam1+seznam2+seznam3
+    prumerSeznam = np.zeros(len(seznamVsech))
+    pomocnik = 0
+    for polozka in seznamVsech:
+        prumerSeznam[pomocnik] = polozka[1]
+        pomocnik = pomocnik+1
+    celkovyPrumer = np.mean(prumerSeznam)
+    zapsat = [seznamVsech,celkovyPrumer]
+
+    print 'celkovy prumer je: ' + str(celkovyPrumer)
+    zapisYamlSoubor('vysledky.yml',zapsat)
+    print 'soubory zapsany do vysledky.yml'
+    
+    return
+
+
+
+def vyhodnoceniMetodyTriX(metoda):
+    '''metoda- int cislo metody (poradi pri vyvoji) 
+    nacte cestu ze souboru path.yml, dale nacte soubory v adresari kde je situovana a sice 
+    Tren1+2.yml, Tren1+3.yml a Tren2+3.yml. Pri nacteni souboru vznikne pole:
+    [seznamSouboruTrenovaciMnoziny(nepodstatny),seznamSouboruTESTOVACImnoziny,vysledkyMETODY]
+    na souborech ze seznamuTestovacimnoziny provede segmentaci metodou s cislem METODA
+    a zapise do souboru vysledky.yml pole 
+    [vsechnyVysledky,prumerScore]
     se vsemi vysledky a take vypise prumer na konzoli
     '''
+    
     ctenar = io3d.DataReader()
     cesta = nactiYamlSoubor('path.yml')
+    engine = nearpy.Engine(dim = 3) #vytvoreni enginu
     
     def segmentujSubor(nazevSouboru):
         [seznamTM,seznamTestovaci,vysledky]= nactiYamlSoubor(nazevSouboru)#'Tren1+2.yml'
@@ -109,17 +397,19 @@ def vyhodnoceniMetodyTri(metoda):
             poleRucni = nactiNovy[0]
             voxelSizeRucni = nactiNovy[1]
             poleRucni = np.array(poleRucni)
-            print segmentovany 
-            print poleRucni
+            #print segmentovany 
+            #print poleRucni
             return[segmentovany,segmentovanyVoxelSize,poleRucni,voxelSizeRucni]
-            
+        def pomocna(cesta,seznamTestovaci,ctenar,counter):
+            [segmentovany,segmentovanyVoxelSize,poleRucni,voxelSizeRucni] = iterace(cesta,seznamTestovaci,ctenar,counter)
+            skoreData = vyhodnoceniSnimku(segmentovany,segmentovanyVoxelSize,poleRucni,voxelSizeRucni,engine)
+            return skoreData
         counter = 0
         maximum = len(seznamTestovaci)/2
         for polozka in seznamTestovaci:
-            #[segmentovany,segmentovanyVoxelSize,poleRucni,voxelSizeRucni] = iterace(cesta,seznamTestovaci,ctenar,counter)
-            #skoreData = vyhodnoceniSnimku(segmentovany,segmentovanyVoxelSize,poleRucni,voxelSizeRucni)
+            skoreData = pomocna(cesta,seznamTestovaci,ctenar,counter)
             '''PLACEHOLDER, NAHRADIT '''
-            skoreData = [polozka,0] #
+            #skoreData = [polozka,0] #
             seznamVsechVysledku.append(skoreData)
             
             counter = counter+1
@@ -127,8 +417,11 @@ def vyhodnoceniMetodyTri(metoda):
                 break
                 #pass
         return seznamVsechVysledku
+    
+    
+    
     print 'ANALYZA PRVNI TRETINY'
-    seznam1 = segmentujSubor('Tren1+2.yml')
+    seznam1 =segmentujSubor('Tren1+2.yml')
     print 'ANALYZA DRUHE TRETINY'
     seznam2 = segmentujSubor('Tren1+3.yml')
     print 'ANALYZA TRETI TRETINY'
@@ -148,7 +441,7 @@ def vyhodnoceniMetodyTri(metoda):
     
     return
 
-def vyhodnoceniSnimku(snimek1,voxelsize1,snimek2,voxelsize2):
+def vyhodnoceniSnimku(snimek1,voxelsize1,snimek2,voxelsize2,engine):
     '''Provede vyhodnoceni snimku pomoci metod z volumetry_evaluation,
     slucuje dve metody a vraci pole [evalData (slovnik),score(%)],
     dale protoze velikosti voxelu se mirne lisi u rucni segmentace
@@ -158,7 +451,7 @@ def vyhodnoceniSnimku(snimek1,voxelsize1,snimek2,voxelsize2):
     voxelsize_mm = [((voxelsize1[0]+voxelsize2[0])/2.0),((voxelsize1[1]+voxelsize2[1])/2.0),((voxelsize1[2]+voxelsize2[2])/2.0)]#prumer z obou
     snimek1 = np.array(snimek1)
     snimek2 = np.array(snimek2)
-    evaluace = ve.compare_volumes(snimek1, snimek2, voxelsize_mm)
+    evaluace = compare_volumesUPRAVA(snimek1, snimek2, voxelsize_mm,engine)
     #score = ve.sliver_score_one_couple(evaluace)
     score = 0
     vysledky = [evaluace,score]
@@ -183,28 +476,13 @@ def segmentace0(tabulka,velikostVoxelu,vysledky = False):
     Vybere pouze prvky blizke nule a to je cele
     vraci segmentaci ve formatu numpy Matrix'''
     #print np.shape(tabulka)
-    segmentaceVysledek = []
-    odchylka = 5
-    prumer = 0
+    velikost = np.shape(tabulka)
+    a = velikost[0]
+    b = velikost[1]
+    c = velikost[2]
+    segmentaceVysledek = np.zeros(tabulka.shape)
+    segmentaceVysledek[a/4:3*a/4,b/4:3*b/4,c/4:3*c/4] = 1
 
-    zeli3=0
-    for rez in tabulka:
-        print str(zeli3+1) + '/' + str(len(tabulka))
-        #print np.matrix(rez)
-        rezNovy1 = ( (np.matrix(rez)>=prumer -2*odchylka))
-        rezNovy2 = (np.matrix(rez)<=prumer +2*odchylka)
-        rezNovy =np.multiply( rezNovy1, rezNovy2)
-        rezNovy = rezNovy.astype(int)
-        #seznam = rezNovy.tolist()
-        seznam = rezNovy
-        #print rezNovy
-        segmentaceVysledek.append(seznam)       
-        zeli3 = zeli3+1 #prochazeni rezu
-    
-     
-    #print segmentaceVysledek  
-    #print np.shape(tabulka)
-    #print np.shape(segmentaceVysledek)
     return segmentaceVysledek
 
 def segmentace1(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
@@ -216,7 +494,8 @@ def segmentace1(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     otevreni (1x) a uzavreni (3x)  tak aby byly odstraneny drobne pixely
     metode lze take zadat vysledky
     '''
-    
+    print 'pouzita metoda 1'
+    konstanta = 0.5 #EXPERIMENTALNE NALEZENA KONSTANTA
     def nactiPrumVar():
         '''vrati pole [prumer,variance] nactene pomoci yaml ze souboru'''
         source = 'Metoda1.yml'
@@ -234,25 +513,24 @@ def segmentace1(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     #print np.shape(tabulka)
     segmentaceVysledek = []
     zeli3=0
+    mezHorni = prumer +konstanta*odchylka
+    mezDolni = prumer -konstanta*odchylka
+    
     for rez in tabulka:
         print str(zeli3+1) + '/' + str(len(tabulka))
-        #print np.matrix(rez)
-        rezNovy1 = ( (np.matrix(rez)>=prumer -2*odchylka))
-        rezNovy2 = (np.matrix(rez)<=prumer +2*odchylka)
+        rezNovy1 = ( (np.array(rez)>=mezDolni))
+        rezNovy2 = (np.array(rez)<=prumer +mezHorni)
         rezNovy =np.multiply( rezNovy1, rezNovy2)
         rezNovy = rezNovy.astype(int)
         
-        original = rezNovy
-        struktura = [[0,1,1,1,0],[0,1,1,1,0],[1,1,1,1,1],[0,1,1,1,0],[0,1,1,1,0]]
-        vylepseny = ndimage.binary_opening(original, struktura, 1)
-        rezNovy = ndimage.binary_closing(vylepseny, struktura,3)
-        
-        #seznam = rezNovy.tolist()
         seznam = rezNovy
-        #print rezNovy
         segmentaceVysledek.append(seznam)       
         zeli3 = zeli3+1 #prochazeni rezu
     
+    
+    #ed = sed3.sed3(np.array(segmentaceVysledek))
+    #print kombinaceNesouhlas
+    #ed.show()
      
     #print segmentaceVysledek  
     #print np.shape(tabulka)
@@ -540,7 +818,7 @@ class LiverSegmentation:
     def runVolby(self):
         '''metoda s vice moznostmi vyberu metody-vybrana v segParams'''
         numero = self.segParams['cisloMetody']
-        print self.segParams
+        #print self.segParams
         vysledek = self.segParams['vysledkyDostupne']
         spatne = True
         
