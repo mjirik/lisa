@@ -243,48 +243,16 @@ def zobrazUtil(cmetody,cisloObrazu = 1):
 def zobrazit(original,rucni,strojova):
     '''Metoda pro srovnani rucni a 
     automaticke segmentace z lidskeho pohledu
-    cerna oblast - shoda strojoveho a rucniho
-    bila oblast - neshoda strojoveho a rucniho'''
+    cerna oblast - NESHODA strojoveho a rucniho
+    bila oblast - SHODA strojoveho a rucniho
+    seda oblast - NULY u strojoveho i rucniho'''
     
-    '''
-    cesta2 = 'C:/Users/asus/workspace/training'
-    ctenar = io3d.DataReader()
-    datap = ctenar.Get3DData(cesta, dataplus_format=False)
-    seznamSouboru = main.vyhledejSoubory(cesta2)
-    vektor = main.nactiSoubor(cesta2,seznamSouboru,21,ctenar)
-    rucniPole = vektor[0]
-    rucniVelikost = vektor[1]
-    vektor2 = main.nactiSoubor(cesta2,seznamSouboru,1,ctenar)
-    originalPole = vektor2[0]
-    originalVelikost = vektor2[1]
-    segmentace = np.zeros(rucniPole.shape, dtype=np.int8)
-    segmentace[0:-1,100:400,100:400] = 1
-    #rez sloupec radek
-    zobrazit(originalPole,rucniPole,segmentace)
-    '''
-    souhlas = 1300
-    nesouhlas = -1000
-    ukazatel1 = -9000
-    ukazatel2 = 9000
-    ctenar = io3d.DataReader()
-    '''
-    opak = rucni*(-1)+1 #kde neni rucni segmentace   
-    opakStrojova = strojova*(-1)+1 
-    kombinaceSouhlas = np.multiply(rucni,strojova)#skalarni soucin
-    kombinaceSouhlas = kombinaceSouhlas * ukazatel1
-    kombinaceNesouhlas = np.multiply(opak,strojova)
-    kombinaceNesouhlas = kombinaceNesouhlas * ukazatel2
-    kombinace = original+kombinaceNesouhlas+kombinaceSouhlas
-  
-    '''
-    blbe = np.abs(-strojova+rucni)*9000
-    dobre = np.multiply(rucni,strojova)*(-9000)
-    kombinace = dobre+blbe+ original#obmena
-    
-    kombinace[kombinace > 4000] = souhlas
-    kombinace[kombinace < -4000] = nesouhlas
+    prunik = np.multiply(rucni,strojova)
+    opak = (strojova-1)*(-1)
+    prunikOpak =  np.multiply(opak,rucni)
+    vysledek = -strojova-rucni  +3*prunik 
     #poleVysledek = kombinace   
-    ed = sed3.sed3(kombinace)
+    ed = sed3.sed3(vysledek)
     #print kombinaceNesouhlas
     ed.show()
     return
@@ -495,7 +463,7 @@ def segmentace1(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     metode lze take zadat vysledky
     '''
     print 'pouzita metoda 1'
-    konstanta = 0.5 #EXPERIMENTALNE NALEZENA KONSTANTA
+    konstanta = 0.7 #EXPERIMENTALNE NALEZENA KONSTANTA
     def nactiPrumVar():
         '''vrati pole [prumer,variance] nactene pomoci yaml ze souboru'''
         source = 'Metoda1.yml'
@@ -518,7 +486,7 @@ def segmentace1(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     
     for rez in tabulka:
         print str(zeli3+1) + '/' + str(len(tabulka))
-        rezNovy1 = ( (np.array(rez)>=mezDolni))
+        rezNovy1 = ( (np.array(rez)>=prumer+mezDolni))
         rezNovy2 = (np.array(rez)<=prumer +mezHorni)
         rezNovy =np.multiply( rezNovy1, rezNovy2)
         rezNovy = rezNovy.astype(int)
@@ -530,6 +498,45 @@ def segmentace1(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     
     #ed = sed3.sed3(np.array(segmentaceVysledek))
     #print kombinaceNesouhlas
+    #ed.show()
+     
+    #print segmentaceVysledek  
+    #print np.shape(tabulka)
+    #print np.shape(segmentaceVysledek)
+    return segmentaceVysledek
+
+def segmentace2(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
+    '''PRIMITIVNI METODA - PRAHOVANI Z PDF -50 az 250   
+    optimalni se zda 0 az 200
+    pro metodu 0 az 180'''
+    print 'pouzita metoda 2'
+    segmentaceVysledek = []
+    zeli3 = 0
+    mezDolni = 0
+    mezHorni = 250
+    for rez in tabulka:
+        print str(zeli3+1) + '/' + str(len(tabulka))
+        rezNovy1 = ( (np.array(rez)>=mezDolni))
+        rezNovy2 = (np.array(rez)<=mezHorni)
+        rezNovy =np.multiply( rezNovy1, rezNovy2)
+        rezNovy2 = rezNovy.astype(int)
+        
+        'BINARNI OPERACE'
+        struktura1 = [[0,1,0],[1,1,1],[0,1,0]]
+        struktura4 = np.ones([7,1])
+        rezNovy = ndimage.binary_erosion(rezNovy2,struktura1, 5)
+        rezNovy2 = ndimage.binary_fill_holes(rezNovy)
+        rezNovy = ndimage.binary_erosion(rezNovy2,struktura1, 18)
+        rezNovy2 = ndimage.binary_erosion(rezNovy,struktura4, 8)
+        rezNOvy = rezNovy2
+        
+        
+        
+        segmentaceVysledek.append(rezNovy)       
+        zeli3 = zeli3+1 #prochazeni rezu
+    
+    
+    #ed = sed3.sed3(np.array(segmentaceVysledek))
     #ed.show()
      
     #print segmentaceVysledek  
@@ -786,7 +793,7 @@ class LiverSegmentation:
     def __init__(
         self,
         data3d,
-        voxelsize=[1, 1, 1],segparams={'cisloMetody':0,'vysledkyDostupne':False,'some_parameter': 22}
+        voxelsize=[1, 1, 1],segparams={'cisloMetody':2,'vysledkyDostupne':False,'some_parameter': 22}
     ):
         """TODO: Docstring for __init__.
 
@@ -811,9 +818,24 @@ class LiverSegmentation:
         self.segParams['cisloMetody'] = cislo
 
     def run(self):
-        # @TODO dodělat
-        self.segmentation[3:5, 13:17, :8] = 1
-        pass
+        numero = self.segParams['cisloMetody']
+        #print self.segParams
+        vysledek = self.segParams['vysledkyDostupne']
+        spatne = True
+        
+        if(numero == 0):
+            print('testovaci metoda')            
+            self.segmentation = segmentace0(self.data3d,self.voxelSize,vysledek)
+            spatne = False
+        if(numero == 1):            
+            self.segmentation = segmentace1(self.data3d,self.voxelSize,vysledek)
+            spatne = False
+        if(numero == 2):            
+            self.segmentation = segmentace2(self.data3d,self.voxelSize,vysledek)
+            spatne = False
+        
+        if(spatne):
+            print('Zvolena metoda nenalezena')
     
     def runVolby(self):
         '''metoda s vice moznostmi vyberu metody-vybrana v segParams'''
@@ -829,6 +851,11 @@ class LiverSegmentation:
         if(numero == 1):            
             self.segmentation = segmentace1(self.data3d,self.voxelSize,vysledek)
             spatne = False
+        
+        if(numero == 2):            
+            self.segmentation = segmentace2(self.data3d,self.voxelSize,vysledek)
+            spatne = False
+        
         
         if(spatne):
             print('Zvolena metoda nenalezena')
