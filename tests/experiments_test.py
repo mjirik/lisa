@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 from nose.plugins.attrib import attr
 import numpy as np
+import shutil
 
 
 import lisa.volumetry_evaluation as ve
@@ -22,7 +23,7 @@ import lisa.experiments
 
 class ExperimentsTest(unittest.TestCase):
 
-    @attr("interactive")
+    @attr("slow")
     def test_experiment_set(self):
         import lisa.experiments
 
@@ -45,6 +46,9 @@ class ExperimentsTest(unittest.TestCase):
         input_data_path_pattern = os.path.abspath(
             path_to_script + "./../sample_data/exp/seeds/*.pklz")
 
+# if directory exists, remove it
+        for dire in pklz_dirs:
+            shutil.rmtree(dire)
 
 # experiment_support.report(pklz_dirs, labels, markers)
         lisa.experiments.run_and_make_report(

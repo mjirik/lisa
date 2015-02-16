@@ -143,6 +143,8 @@ def run_liver_segmentation_experiment_with_conf(
     if output_path is None:
         output_path, teil = os.path.split(config_file_path)
 
+    if not os.path.isdir:
+        os.mkdir(output_path)
     bsh_output = " -op " + output_path + " "
     filenames = glob.glob(input_data_path_pattern)
     if len(filenames) == 0:
@@ -174,10 +176,25 @@ def run_liver_segmentation_experiment_with_conf(
 # <codecell>
 
 
-def report(pklz_dirs, labels, markers, show=True):
+def report(pklz_dirs, labels, markers, show=True, image_basename=''):
     """
     based on
     """
+    expn = np.array(range(0, len(markers)))
+    expn_labels = labels
+    dp_params = {
+        'markers': markers,
+        'labels': labels,
+        'loc': 0,
+        'show': show,
+        'filename': image_basename
+    }
+    sp_params = {
+        'expn': expn,
+        'expn_labels': expn_labels,
+        'show': show,
+        'filename': image_basename
+    }
     yaml_files = [os.path.normpath(path) + '.yaml' for path in pklz_dirs]
     print yaml_files
 
@@ -185,33 +202,22 @@ def report(pklz_dirs, labels, markers, show=True):
     print eval_files
     data = [misc.obj_from_file(fname + '.pkl', filetype='pkl')
             for fname in eval_files]
-    dataplot(data, 'voe', 'Volume Difference Error [%]', markers=markers,
-             labels=labels, loc=0, show=show)
-    dataplot(data, 'vd', 'Total Volume Difference [%]', markers=markers,
-             labels=labels, loc=0, show=show)
-    dataplot(data, 'processing_time', 'Processing time [s]', markers=markers,
-             labels=labels, loc=0, show=show)
-    dataplot(data, 'maxd', 'MaxD [mm]', markers=markers, labels=labels, loc=0,
-             show=show)
-    dataplot(data, 'avgd', 'AvgD [mm]', markers=markers, labels=labels, loc=0,
-             show=show)
-    dataplot(data, 'rmsd', 'RMSD [mm]', markers=markers, labels=labels, loc=0,
-             show=show)
+
+
+    dataplot(data, 'voe', 'Volume Difference Error [%]', **dp_params)
+    dataplot(data, 'vd', 'Total Volume Difference [%]', **dp_params)
+    dataplot(data, 'processing_time', 'Processing time [s]', **dp_params)
+    dataplot(data, 'maxd', 'MaxD [mm]', **dp_params)
+    dataplot(data, 'avgd', 'AvgD [mm]', **dp_params)
+    dataplot(data, 'rmsd', 'RMSD [mm]', **dp_params)
 
     print "Souhrn měření"
 
-    expn = np.array(range(0, len(markers)))
-    expn_labels = labels
-    vd_mn, tmp = sumplot(
-        data, 'vd', 'Total Volume Difference', expn, expn_labels, show=show)
-    voe_mn, tmp = sumplot(
-        data, 'voe', 'Volume Difference Error', expn, expn_labels, show=show)
-    avgd_mn, tmp = sumplot(
-        data, 'avgd', 'Average Distance', expn, expn_labels, show=show)
-    maxd_mn, tmp = sumplot(
-        data, 'maxd', 'Maxiamal Distance', expn, expn_labels, show=show)
-    rmsd_mn, tmp = sumplot(
-        data, 'rmsd', 'Square Distance', expn, expn_labels, show=show)
+    vd_mn, tmp = sumplot( data, 'vd', 'Total Volume Difference', **sp_params)
+    voe_mn, tmp = sumplot( data, 'voe', 'Volume Difference Error',  **sp_params)
+    avgd_mn, tmp = sumplot( data, 'avgd', 'Average Distance',       **sp_params)
+    maxd_mn, tmp = sumplot( data, 'maxd', 'Maxiamal Distance',      **sp_params)
+    rmsd_mn, tmp = sumplot( data, 'rmsd', 'Square Distance',        **sp_params)
 
     print "\n"
     print 'vd   ', vd_mn
@@ -232,28 +238,24 @@ def report(pklz_dirs, labels, markers, show=True):
 
     df = pandas.DataFrame(tables[0], index=indexes[0], columns=columns[0])
     print df.to_string()
+
     dataplot(scoreAll, 'voe', 'Volume Difference Error [points]',
-             markers=markers, labels=labels, loc=0, show=show)
+             **dp_params
+             )
     dataplot(scoreAll, 'vd', 'Total Volume Difference [points]',
-             markers=markers, labels=labels, loc=0, show=show)
+             **dp_params
+             )
 
-    dataplot(scoreAll, 'maxd', 'MaxD [mm]', markers=markers, labels=labels,
-             loc=0, show=show)
-    dataplot(scoreAll, 'avgd', 'AvgD [mm]', markers=markers, labels=labels,
-             loc=0, show=show)
-    dataplot(scoreAll, 'rmsd', 'RMSD [mm]', markers=markers, labels=labels,
-             loc=0, show=show)
 
-    vd_mn, tmp = sumplot(scoreAll, 'vd', 'Total Volume Difference', expn,
-                         expn_labels, show=show)
-    voe_mn, tmp = sumplot(scoreAll, 'voe', 'Volume Difference Error', expn,
-                          expn_labels, show=show)
-    avgd_mn, tmp = sumplot(scoreAll, 'avgd', 'Average Distance', expn,
-                           expn_labels, show=show)
-    maxd_mn, tmp = sumplot(scoreAll, 'maxd', 'Maxiamal Distance', expn,
-                           expn_labels, show=show)
-    rmsd_mn, tmp = sumplot(scoreAll, 'rmsd', 'Square Distance', expn,
-                           expn_labels, show=show)
+    dataplot(scoreAll, 'maxd', 'MaxD [mm]', **dp_params)
+    dataplot(scoreAll, 'avgd', 'AvgD [mm]', **dp_params)
+    dataplot(scoreAll, 'rmsd', 'RMSD [mm]',**dp_params)
+
+    vd_mn, tmp = sumplot(scoreAll, 'vd', 'Total Volume Difference', **sp_params)
+    voe_mn, tmp = sumplot(scoreAll, 'voe', 'Volume Difference Error',**sp_params)
+    avgd_mn, tmp = sumplot(scoreAll, 'avgd', 'Average Distance', **sp_params)
+    maxd_mn, tmp = sumplot(scoreAll, 'maxd', 'Maxiamal Distance',**sp_params)
+    rmsd_mn, tmp = sumplot(scoreAll, 'rmsd', 'Square Distance', **sp_params)
 
     print "Total score"
 
@@ -405,6 +407,46 @@ def sumplot(data, keyword, ylabel, expn=None, expn_labels=None, loc=70,
     return mn, va
 
 
+def plot_total(scoreMetrics, err_scale=1, expn=None, labels=None,
+               labels_rotation=70, ymin=None, filename=None, show=True):
+    """
+    err_scale: scale factor of error bars, defalut err_scale=1
+    ymin: minimum of graph. If it is set to None, it is automatic
+    """
+    ylabel = 'Overal Score, err bars %.2f of variance' % (err_scale)
+    if expn is None:
+        expn = range(0, len(scoreMetrics))
+
+    # print scoreMetrics
+
+    mn = np.array([np.mean(oneset.reshape(-1)) for oneset in scoreMetrics])
+    va = np.array([np.var(oneset.reshape(-1))
+                   for oneset in scoreMetrics]) * err_scale
+
+    plt.errorbar(expn, mn, fmt='ks', yerr=va)
+    x1, x2, y1, y2 = plt.axis()
+    # necheme grafy od 40 do 50. chceme grafy od nuly
+
+    if ymin is not None:
+        if y1 > 0:
+            y1 = ymin
+    plt.axis((x1, x2, y1, y2))
+    plt.ylabel(ylabel)
+    print expn
+    plt.xlim([np.min(expn) - 1, np.max(expn) + 1])
+    # plt.xticks([1,2,3],['hu','ha', 'te'])
+
+    if labels is not None:
+        # expn_labels = np.array(['1 gauss', '3 gauss', 'smoothing', 'blowup'])
+        labels = np.array(labels)
+        labels = labels[np.array(expn)]
+
+        plt.xticks(expn, labels, rotation=labels_rotation)
+
+    if filename is not None:
+        plt.savefig(filename + '-total.pdf', bbox_inches='tight')
+
+
 def sliverScore(measure, metric_type):
     """
     Based on sliver metodics
@@ -514,45 +556,6 @@ def scoreTableEvaluation(scoreMetrics):
 
     return tables, indexes, columns
 
-
-def plot_total(scoreMetrics, err_scale=1, expn=None, labels=None,
-               labels_rotation=70, ymin=None, filename=None, show=True):
-    """
-    err_scale: scale factor of error bars, defalut err_scale=1
-    ymin: minimum of graph. If it is set to None, it is automatic
-    """
-    ylabel = 'Overal Score, err bars %.2f of variance' % (err_scale)
-    if expn is None:
-        expn = range(0, len(scoreMetrics))
-
-    # print scoreMetrics
-
-    mn = np.array([np.mean(oneset.reshape(-1)) for oneset in scoreMetrics])
-    va = np.array([np.var(oneset.reshape(-1))
-                   for oneset in scoreMetrics]) * err_scale
-
-    plt.errorbar(expn, mn, fmt='ks', yerr=va)
-    x1, x2, y1, y2 = plt.axis()
-    # necheme grafy od 40 do 50. chceme grafy od nuly
-
-    if ymin is not None:
-        if y1 > 0:
-            y1 = ymin
-    plt.axis((x1, x2, y1, y2))
-    plt.ylabel(ylabel)
-    print expn
-    plt.xlim([np.min(expn) - 1, np.max(expn) + 1])
-    # plt.xticks([1,2,3],['hu','ha', 'te'])
-
-    if labels is not None:
-        # expn_labels = np.array(['1 gauss', '3 gauss', 'smoothing', 'blowup'])
-        labels = np.array(labels)
-        labels = labels[np.array(expn)]
-
-        plt.xticks(expn, labels, rotation=labels_rotation)
-
-    if filename is not None:
-        plt.savefig(filename, bbox_inches='tight')
 
 
 def processIt(pklz_dirs, sliver_dir, yaml_files, eval_files, markers, labels):
