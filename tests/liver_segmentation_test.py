@@ -16,6 +16,7 @@ from lisa import liver_segmentation
 import os
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 
+
 class LiverSegmentationTest(unittest.TestCase):
 
     # test se pouští ze složky lisa
@@ -23,12 +24,8 @@ class LiverSegmentationTest(unittest.TestCase):
 
     @attr('interactive')
     @attr('actual')
-
     def test_automatic(self):
-
-
-
-        return
+        pass
 
     def test_liver_segmentation(self):
         import numpy as np
@@ -53,7 +50,6 @@ class LiverSegmentationTest(unittest.TestCase):
 
         ed = sed3.sed3(img3d, contour=ls.segmentation, seeds=seeds)
         ed.show()
-
 
         # import pdb; pdb.set_trace()
 
@@ -97,31 +93,34 @@ class LiverSegmentationTest(unittest.TestCase):
         import nearpy
         import io3d
 
-
         path_to_script = os.path.dirname(os.path.abspath(__file__))
-        #print path_to_script
+        # print path_to_script
         b = path_to_script[0:-5]
-        b = b+ 'sample_data'
+        b = b + 'sample_data'
         cesta = b
 
         print 'probiha nacitani souboru z adresare sample_data'
         seznamSouboru = liver_segmentation.vyhledejSoubory(cesta)
         reader = io3d.DataReader()
-        vektorOriginal=liver_segmentation.nactiSoubor(cesta, seznamSouboru, 0, reader)
+        vektorOriginal = liver_segmentation.nactiSoubor(
+            cesta, seznamSouboru, 0, reader)
         originalPole = vektorOriginal[0]
         originalVelikost = vektorOriginal[1]
         print '***zahajeni segmentace***'
-        vytvoreny = liver_segmentation.LiverSegmentation(originalPole,originalVelikost)
+        vytvoreny = liver_segmentation.LiverSegmentation(
+            originalPole, originalVelikost)
         vytvoreny.run()
         segmentovany = vytvoreny.segmentation
         segmentovanyVelikost = vytvoreny.voxelSize
-        engine = nearpy.Engine(dim = 3)
+        engine = nearpy.Engine(dim=3)
         print 'segmentace dokoncena, nacitani rucni segmentace z adresare sample_data'
-        vektorOriginal=liver_segmentation.nactiSoubor(cesta, seznamSouboru, 1, reader)
+        vektorOriginal = liver_segmentation.nactiSoubor(
+            cesta, seznamSouboru, 1, reader)
         rucniPole = vektorOriginal[0]
         rucniVelikost = vektorOriginal[1]
         print 'zahajeni vyhodnoceni segmentace'
-        vysledky = liver_segmentation.vyhodnoceniSnimku(rucniPole,rucniVelikost,segmentovany,segmentovanyVelikost,engine)
+        vysledky = liver_segmentation.vyhodnoceniSnimku(
+            rucniPole, rucniVelikost, segmentovany, segmentovanyVelikost, engine)
         print vysledky
         skore = vysledky[1]
         pravda = True
