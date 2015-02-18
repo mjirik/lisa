@@ -34,6 +34,7 @@ install:
     # - if [ ${pack} == "old_mpl" ]; then conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy nose dateutil pandas statsmodels pil six; fi
     # - if [ ${pack} == "newest" ]; then conda install --yes pip python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib nose dateutil pandas statsmodels six; fi
     # scikit-image
+    - pip install nearpy
     # - "pip install pyyaml"
     - "easy_install SimpleITK mahotas"
     # my packages
