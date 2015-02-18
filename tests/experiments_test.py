@@ -107,7 +107,7 @@ class ExperimentsTest(unittest.TestCase):
         self.assertGreater(len(obj['data']), 0)
         # self.assertTrue(False)
 
-    def prepare_data_for_fast_experiment_test(self):
+    def prepare_data_for_fast_experiment(self):
         """
         not used
         """
