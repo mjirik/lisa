@@ -29,7 +29,7 @@ class LiverSegmentationTest(unittest.TestCase):
 
     def test_liver_segmentation(self):
         import numpy as np
-        import sed3
+        # import sed3
         img3d = np.random.rand(32, 64, 64) * 4
         img3d[4:24, 12:32, 5:25] = img3d[4:24, 12:32, 5:25] + 25
 
@@ -48,8 +48,8 @@ class LiverSegmentationTest(unittest.TestCase):
         ls.run()
         volume = np.sum(ls.segmentation == 1) * np.prod(voxelsize_mm)
 
-        ed = sed3.sed3(img3d, contour=ls.segmentation, seeds=seeds)
-        ed.show()
+        # ed = sed3.sed3(img3d, contour=ls.segmentation, seeds=seeds)
+        # ed.show()
 
         # import pdb; pdb.set_trace()
 
