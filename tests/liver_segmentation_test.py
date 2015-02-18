@@ -23,13 +23,13 @@ class LiverSegmentationTest(unittest.TestCase):
 
     @attr('interactive')
     @attr('actual')
-    
+
     def test_automatic(self):
-        
-        
-        
+
+
+
         return
-    
+
     def test_liver_segmentation(self):
         import numpy as np
         import sed3
@@ -85,24 +85,25 @@ class LiverSegmentationTest(unittest.TestCase):
 
         # ed = sed3.sed3(img3d, contour=ls.segmentation, seeds=seeds)
         # ed.show()
-        
+
+    @attr('interactive')
     def automatickyTest(self):
         ''' nacte prvni dva soubory koncici .mhd z adresare sample_data
         prvni povazuje za originalni a provede na nem segmentaci defaultni
         metodou z liver_segmentation. Pote nacte druhy a povazuje jej za
         rucni segmentaci, na vysledku a rucni provede srovnani a podle
         vysledku vypise verdikt na konzoli'''
-        
+
         import nearpy
         import io3d
-        
-        
+
+
         path_to_script = os.path.dirname(os.path.abspath(__file__))
         #print path_to_script
         b = path_to_script[0:-5]
         b = b+ 'sample_data'
         cesta = b
-        
+
         print 'probiha nacitani souboru z adresare sample_data'
         seznamSouboru = liver_segmentation.vyhledejSoubory(cesta)
         reader = io3d.DataReader()
@@ -133,8 +134,8 @@ class LiverSegmentationTest(unittest.TestCase):
         if(pravda):
             print'metoda funguje spatne'
             pravda = False
-            
+
         return
-        
+
 if __name__ == "__main__":
     unittest.main()
