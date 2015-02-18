@@ -108,15 +108,22 @@ class ExperimentsTest(unittest.TestCase):
         # self.assertTrue(False)
 
     def prepare_data_for_fast_experiment_test(self):
-        pass
+        """
+        not used
+        """
 
         pklz_dirs = [
             os.path.abspath(path_to_script + "./../sample_data/exp_synth/exp1"),
             os.path.abspath(path_to_script + "./../sample_data/exp_synth/exp2"),
 
             ]
+
+        os.mkdir(
+            os.path.abspath(path_to_script + "./../sample_data/exp_synth"),
+        )
         os.mkdir(pklz_dirs[0])
         os.mkdir(pklz_dirs[1])
+        pass
 
     def test_get_subdirs(self):
         dirpath = os.path.join(path_to_script, "..")

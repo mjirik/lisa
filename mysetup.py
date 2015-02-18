@@ -217,6 +217,19 @@ def remove(local_file_name):
         print (e)
 
 
+def downzip(url, destination='./sample_data/'):
+    """
+    Download, unzip and delete.
+    """
+
+    # url = "http://147.228.240.61/queetech/sample-data/jatra_06mm_jenjatra.zip"
+    local_file_name = './sample_data/tmp.zip'
+    urllibr.urlretrieve(url, local_file_name)
+    datafile = zipfile.ZipFile(local_file_name)
+    datafile.extractall(destination)
+    remove(local_file_name)
+
+
 def get_sample_data():
     # download sample data
     print('Downloading sample data')
@@ -312,6 +325,8 @@ def get_sample_data():
     datafile = zipfile.ZipFile(local_file_name)
     datafile.extractall('./sample_data/')
     remove(local_file_name)
+
+    downzip("http://147.228.240.61/queetech/sample-data/exp_small.zip")
 
 
 def windows_get_gco():
