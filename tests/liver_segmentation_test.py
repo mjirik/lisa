@@ -27,6 +27,7 @@ class LiverSegmentationTest(unittest.TestCase):
     def test_automatic(self):
         pass
 
+    @attr('interactive')
     def test_liver_segmentation(self):
         import numpy as np
         # import sed3
