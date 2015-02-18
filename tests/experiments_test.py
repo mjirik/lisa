@@ -34,11 +34,10 @@ class ExperimentsTest(unittest.TestCase):
             # "/home/mjirik/projects/lisa/sample_data/exp1",
             # "/home/mjirik/projects/lisa/sample_data/exp2",
 
-            ]
+        ]
         sliver_reference_dir = os.path.abspath(
             path_to_script + "./../sample_data/exp/seg")
         # "/home/mjirik/data/medical/orig/sliver07/training/"
-
 
 # this is setup for visualization
         markers = ['ks', 'r<']
@@ -58,6 +57,64 @@ class ExperimentsTest(unittest.TestCase):
         obj = io3d.misc.obj_from_file(pklz_dirs[0] + '.yaml', filetype='yaml')
         self.assertGreater(len(obj['data']), 0)
         # self.assertTrue(False)
+
+    @attr("actual")
+    def test_experiment_set_small(self):
+        import lisa.experiments
+
+        # os.path.join(path_to_script, "..")
+        pklz_dirs = [
+            os.path.abspath(
+                path_to_script + "./../sample_data/exp_small/exp1"),
+            os.path.abspath(
+                path_to_script + "./../sample_data/exp_small/exp2"),
+
+        ]
+        sliver_reference_dir = os.path.abspath(
+            path_to_script + "./../sample_data/exp/seg")
+        # "/home/mjirik/data/medical/orig/sliver07/training/"
+
+# this is setup for visualization
+        markers = ['ks', 'r<']
+        labels = ['3gaus', '02smoothing']
+        input_data_path_pattern = os.path.abspath(
+            path_to_script + "./../sample_data/exp_small/seeds/*.pklz")
+
+        conf_default = {
+            'config_version': [1, 0, 0], 'working_voxelsize_mm': 2.0,
+            'segmentation_smoothing': False,
+            'segparams': {'pairwise_alpha_per_mm2': 50,
+                          'return_only_object_with_seeds': True}
+        }
+        conf_list = [{'working_voxelsize_mm': 4},
+                     {'working_voxelsize_mm': 6}
+                     ]
+
+# if directory exists, remove it
+        for dire in pklz_dirs:
+            if os.path.exists(dire):
+                shutil.rmtree(dire)
+
+# experiment_support.report(pklz_dirs, labels, markers)
+        lisa.experiments.run_and_make_report(
+            pklz_dirs, labels, markers, sliver_reference_dir,
+            input_data_path_pattern,
+            conf_default=conf_default,
+            conf_list=conf_list,
+            show=False)
+        import io3d.misc
+        obj = io3d.misc.obj_from_file(pklz_dirs[0] + '.yaml', filetype='yaml')
+        self.assertGreater(len(obj['data']), 0)
+        # self.assertTrue(False)
+
+    def prepare_data(self):
+        pass
+
+        # pklz_dirs = [
+        #     os.path.abspath(path_to_script + "./../sample_data/exp_small/exp1"),
+        #     os.path.abspath(path_to_script + "./../sample_data/exp_small/exp2"),
+        #
+        #     ]
 
     def test_get_subdirs(self):
         dirpath = os.path.join(path_to_script, "..")

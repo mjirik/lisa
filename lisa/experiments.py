@@ -68,7 +68,8 @@ def run_and_make_report(pklz_dirs, labels, markers, sliver_reference_dir,
     if image_basename is None:
         image_basename, head = os.path.split(pklz_dirs[0])
 
-    report(pklz_dirs, labels, markers, show=show, image_basename=image_basename)
+    report(pklz_dirs, labels, markers,
+           show=show, image_basename=image_basename)
 
 
 def generate_configs(pklz_dirs, conf_default, conf_list):
@@ -88,7 +89,7 @@ def run_all_liver_segmentation_experiments_with_conf(
     exp_conf_files,
     input_data_path_pattern,
     output_paths,
-    dry_run=False):
+        dry_run=False):
     """
     Only if there is almost empty dir
     """
@@ -218,11 +219,11 @@ def report(pklz_dirs, labels, markers, show=True, image_basename=''):
 
     print "Souhrn měření"
 
-    vd_mn, tmp = sumplot( data, 'vd', 'Total Volume Difference', **sp_params)
-    voe_mn, tmp = sumplot( data, 'voe', 'Volume Difference Error',  **sp_params)
-    avgd_mn, tmp = sumplot( data, 'avgd', 'Average Distance',       **sp_params)
-    maxd_mn, tmp = sumplot( data, 'maxd', 'Maxiamal Distance',      **sp_params)
-    rmsd_mn, tmp = sumplot( data, 'rmsd', 'Square Distance',        **sp_params)
+    vd_mn, tmp = sumplot(data, 'vd', 'Total Volume Difference', **sp_params)
+    voe_mn, tmp = sumplot(data, 'voe', 'Volume Difference Error',  **sp_params)
+    avgd_mn, tmp = sumplot(data, 'avgd', 'Average Distance',       **sp_params)
+    maxd_mn, tmp = sumplot(data, 'maxd', 'Maxiamal Distance',      **sp_params)
+    rmsd_mn, tmp = sumplot(data, 'rmsd', 'Square Distance',        **sp_params)
 
     print "\n"
     print 'vd   ', vd_mn
@@ -251,15 +252,16 @@ def report(pklz_dirs, labels, markers, show=True, image_basename=''):
              **dp_params
              )
 
-
     dataplot(scoreAll, 'maxd', 'MaxD [mm]', **dp_params)
     dataplot(scoreAll, 'avgd', 'AvgD [mm]', **dp_params)
-    dataplot(scoreAll, 'rmsd', 'RMSD [mm]',**dp_params)
+    dataplot(scoreAll, 'rmsd', 'RMSD [mm]', **dp_params)
 
-    vd_mn, tmp = sumplot(scoreAll, 'vd', 'Total Volume Difference', **sp_params)
-    voe_mn, tmp = sumplot(scoreAll, 'voe', 'Volume Difference Error',**sp_params)
+    vd_mn, tmp = sumplot(
+        scoreAll, 'vd', 'Total Volume Difference', **sp_params)
+    voe_mn, tmp = sumplot(
+        scoreAll, 'voe', 'Volume Difference Error', **sp_params)
     avgd_mn, tmp = sumplot(scoreAll, 'avgd', 'Average Distance', **sp_params)
-    maxd_mn, tmp = sumplot(scoreAll, 'maxd', 'Maxiamal Distance',**sp_params)
+    maxd_mn, tmp = sumplot(scoreAll, 'maxd', 'Maxiamal Distance', **sp_params)
     rmsd_mn, tmp = sumplot(scoreAll, 'rmsd', 'Square Distance', **sp_params)
 
     print "Total score"
@@ -561,7 +563,6 @@ def scoreTableEvaluation(scoreMetrics):
         # print scm
 
     return tables, indexes, columns
-
 
 
 def processIt(pklz_dirs, sliver_dir, yaml_files, eval_files, markers, labels):
