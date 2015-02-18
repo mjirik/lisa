@@ -13,7 +13,8 @@ import unittest
 from nose.plugins.attrib import attr
 
 from lisa import liver_segmentation
-
+import os
+path_to_script = os.path.dirname(os.path.abspath(__file__))
 
 class LiverSegmentationTest(unittest.TestCase):
 
@@ -22,6 +23,13 @@ class LiverSegmentationTest(unittest.TestCase):
 
     @attr('interactive')
     @attr('actual')
+    
+    def test_automatic(self):
+        
+        
+        
+        return
+    
     def test_liver_segmentation(self):
         import numpy as np
         import sed3
@@ -77,5 +85,56 @@ class LiverSegmentationTest(unittest.TestCase):
 
         # ed = sed3.sed3(img3d, contour=ls.segmentation, seeds=seeds)
         # ed.show()
+        
+    def automatickyTest(self):
+        ''' nacte prvni dva soubory koncici .mhd z adresare sample_data
+        prvni povazuje za originalni a provede na nem segmentaci defaultni
+        metodou z liver_segmentation. Pote nacte druhy a povazuje jej za
+        rucni segmentaci, na vysledku a rucni provede srovnani a podle
+        vysledku vypise verdikt na konzoli'''
+        
+        import nearpy
+        import io3d
+        
+        
+        path_to_script = os.path.dirname(os.path.abspath(__file__))
+        #print path_to_script
+        b = path_to_script[0:-5]
+        b = b+ 'sample_data'
+        cesta = b
+        
+        print 'probiha nacitani souboru z adresare sample_data'
+        seznamSouboru = liver_segmentation.vyhledejSoubory(cesta)
+        reader = io3d.DataReader()
+        vektorOriginal=liver_segmentation.nactiSoubor(cesta, seznamSouboru, 0, reader)
+        originalPole = vektorOriginal[0]
+        originalVelikost = vektorOriginal[1]
+        print '***zahajeni segmentace***'
+        vytvoreny = liver_segmentation.LiverSegmentation(originalPole,originalVelikost)
+        vytvoreny.run()
+        segmentovany = vytvoreny.segmentation
+        segmentovanyVelikost = vytvoreny.voxelSize
+        engine = nearpy.Engine(dim = 3)
+        print 'segmentace dokoncena, nacitani rucni segmentace z adresare sample_data'
+        vektorOriginal=liver_segmentation.nactiSoubor(cesta, seznamSouboru, 1, reader)
+        rucniPole = vektorOriginal[0]
+        rucniVelikost = vektorOriginal[1]
+        print 'zahajeni vyhodnoceni segmentace'
+        vysledky = liver_segmentation.vyhodnoceniSnimku(rucniPole,rucniVelikost,segmentovany,segmentovanyVelikost,engine)
+        print vysledky
+        skore = vysledky[1]
+        pravda = True
+        if(skore > 75):
+            print'metoda funguje uspokojive'
+            pravda = False
+        if(pravda and (skore > 50)):
+            print'metoda funguje relativne dobre'
+            pravda = False
+        if(pravda):
+            print'metoda funguje spatne'
+            pravda = False
+            
+        return
+        
 if __name__ == "__main__":
     unittest.main()
