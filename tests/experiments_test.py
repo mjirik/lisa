@@ -59,7 +59,7 @@ class ExperimentsTest(unittest.TestCase):
         # self.assertTrue(False)
 
     @attr("actual")
-    @attr("incomplete")
+    # @attr("incomplete")
     def test_experiment_set_small(self):
         import lisa.experiments
 
