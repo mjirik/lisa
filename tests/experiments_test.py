@@ -75,8 +75,12 @@ class ExperimentsTest(unittest.TestCase):
         # "/home/mjirik/data/medical/orig/sliver07/training/"
 
 # this is setup for visualization
-        markers = ['ks', 'r<']
-        labels = ['3gaus', '02smoothing']
+        markers = ['ks',
+                   # 'r<'
+                   ]
+        labels = ['vs6mm',
+                  # '02smoothing'
+                  ]
         input_data_path_pattern = os.path.abspath(
             path_to_script + "./../sample_data/exp_small/seeds/*.pklz")
 
