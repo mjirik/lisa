@@ -67,12 +67,11 @@ class ExperimentsTest(unittest.TestCase):
         pklz_dirs = [
             os.path.abspath(
                 path_to_script + "./../sample_data/exp_small/exp1"),
-            os.path.abspath(
-                path_to_script + "./../sample_data/exp_small/exp2"),
-
+            # os.path.abspath(
+            #     path_to_script + "./../sample_data/exp_small/exp2"),
         ]
         sliver_reference_dir = os.path.abspath(
-            path_to_script + "./../sample_data/exp/seg")
+            path_to_script + "./../sample_data/exp_small/seg")
         # "/home/mjirik/data/medical/orig/sliver07/training/"
 
 # this is setup for visualization
@@ -87,9 +86,10 @@ class ExperimentsTest(unittest.TestCase):
             'segparams': {'pairwise_alpha_per_mm2': 50,
                           'return_only_object_with_seeds': True}
         }
-        conf_list = [{'working_voxelsize_mm': 4},
-                     {'working_voxelsize_mm': 6}
-                     ]
+        conf_list = [
+            # {'working_voxelsize_mm': 4},
+            {'working_voxelsize_mm': 6}
+        ]
 
 # if directory exists, remove it
         for dire in pklz_dirs:
