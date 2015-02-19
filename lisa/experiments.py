@@ -54,22 +54,22 @@ def run_and_make_report(pklz_dirs, labels, markers, sliver_reference_dir,
     logger.info("run experiments")
     print "run experiments"
     # run experiments
-    run_all_liver_segmentation_experiments_with_conf(
-        exp_conf_files,
-        input_data_path_pattern,
-        output_paths=pklz_dirs,
-        dry_run=False)
-    # run evaluation
-    print "run evaluation"
-    sliver_eval_all_to_yamls(
-        yaml_files, pklz_dirs, sliver_dir, eval_files, recalculateThis=None)
-    print "make report"
-    # make report
-    if image_basename is None:
-        image_basename, head = os.path.split(pklz_dirs[0])
-
-    report(pklz_dirs, labels, markers,
-           show=show, image_basename=image_basename)
+    # run_all_liver_segmentation_experiments_with_conf(
+    #     exp_conf_files,
+    #     input_data_path_pattern,
+    #     output_paths=pklz_dirs,
+    #     dry_run=False)
+    # # run evaluation
+    # print "run evaluation"
+    # sliver_eval_all_to_yamls(
+    #     yaml_files, pklz_dirs, sliver_dir, eval_files, recalculateThis=None)
+    # print "make report"
+    # # make report
+    # if image_basename is None:
+    #     image_basename, head = os.path.split(pklz_dirs[0])
+    #
+    # report(pklz_dirs, labels, markers,
+    #        show=show, image_basename=image_basename)
 
 
 def generate_configs(pklz_dirs, conf_default, conf_list):
