@@ -214,6 +214,52 @@ class ExperimentsTest(unittest.TestCase):
         eval1 = ve.distance_matrics(vol1, vol2, [0.5, 0.5, 0.5])
         self.assertAlmostEquals(eval1[2], np.sqrt(2))
 
+    @attr("incomplete")
+    def test_compare_eval_sliver_distance(self):
+        """
+        comparison of two methods for surface distance computation
+        """
+
+        vol1 = np.zeros([20, 21, 22], dtype=np.int8)
+        vol1[10:15, 10:15, 10:15] = 1
+
+        vol2 = np.zeros([20, 21, 22], dtype=np.int8)
+        vol2[8:17, 8:17, 8:17] = 1
+
+        eval1 = ve.distance_matrics(vol1, vol2, [1, 1, 1])
+
+        self.assertAlmostEquals(eval1[2], 3 ** (0.5) * 2)
+        import lisa.liver_segmentation as ls
+        import nearpy
+        engine = nearpy.Engine(dim=3)
+        eval2 = ls.vzdalenosti(vol1, vol2, [1, 1, 1], engine)
+        self.assertLess(eval1[0], 1.1 * eval2[0])
+        self.assertGreater(eval1[0], 0.9 * eval2[0])
+
+    @attr("actual")
+    @attr("incomplete")
+    def test_compare_eval_sliver_distance_bigger(self):
+        """
+        comparison of two methods for surface distance computation on bigger
+        object
+        """
+
+        vol1 = np.zeros([100, 210, 220], dtype=np.int8)
+        vol1[10:50, 50:150, 100:150] = 1
+
+        vol2 = np.zeros([100, 210, 220], dtype=np.int8)
+        vol2[12:52, 45:160, 100:150] = 1
+
+        eval1 = ve.distance_matrics(vol1, vol2, [1, 1, 1])
+
+        import lisa.liver_segmentation as ls
+        import nearpy
+        engine = nearpy.Engine(dim=3)
+        eval2 = ls.vzdalenosti(vol1, vol2, [1, 1, 1], engine)
+        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+        self.assertLess(eval1[0], 1.1 * eval2[0])
+        self.assertGreater(eval1[0], 0.9 * eval2[0])
+
     def test_volumetry_evaluation_yaml_generator(self):
         """
         Test creates two directories and some empty files. Based on this
