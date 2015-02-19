@@ -83,8 +83,8 @@ class LiverSegmentationTest(unittest.TestCase):
         # ed = sed3.sed3(img3d, contour=ls.segmentation, seeds=seeds)
         # ed.show()
 
-    @attr('interactive')
-    def automatickyTest(self):
+    @attr('incomplete')
+    def test_automatickyTest(self):
         ''' nacte prvni dva soubory koncici .mhd z adresare sample_data
         prvni povazuje za originalni a provede na nem segmentaci defaultni
         metodou z liver_segmentation. Pote nacte druhy a povazuje jej za
@@ -110,6 +110,7 @@ class LiverSegmentationTest(unittest.TestCase):
         print '***zahajeni segmentace***'
         vytvoreny = liver_segmentation.LiverSegmentation(
             originalPole, originalVelikost)
+        vytvoreny.setCisloMetody(2)
         vytvoreny.run()
         segmentovany = vytvoreny.segmentation
         segmentovanyVelikost = vytvoreny.voxelSize
@@ -134,6 +135,8 @@ class LiverSegmentationTest(unittest.TestCase):
         if(pravda):
             print'metoda funguje spatne'
             pravda = False
+        self.assertGreater(skore, 5)
+
 
         return
 
