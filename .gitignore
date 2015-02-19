@@ -56,3 +56,5 @@ experiments/20130812_liver_volumetry.yaml
 *.vtk
 
 *.yaml
+lisa/seed_editor_qt.py
+lisa/extern/seed_editor_qt.py
