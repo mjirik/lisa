@@ -24,6 +24,56 @@ import io3d.misc
 # <codecell>
 
 
+class RunAndMakeReport:
+    def __init__(self, pklz_dirs, labels, markers, sliver_reference_dir,
+                 input_data_path_pattern, conf_default=None,
+                 conf_list=None, show=True,
+                 image_basename=None):
+
+
+        self.sliver_dir = sliver_reference_dir
+        self.yaml_files = [os.path.normpath(path) + '.yaml' for path in pklz_dirs]
+        self.eval_files = [os.path.normpath(path) + '_eval' for path in pklz_dirs]
+        self.exp_conf_files = [os.path.normpath(path) + '.config' for path in pklz_dirs]
+        if image_basename is None:
+            self.image_basename, head = os.path.split(self.pklz_dirs[0])
+        self.show = show
+        self.input_data_path_pattern = input_data_path_pattern
+        self.conf_list = conf_list
+        self.labels = labels
+        self.markers = markers
+        self.pklz_dirs = pklz_dirs
+
+    def make_all(self):
+        self.config()
+        self.run_experiments()
+        self.evaluation()
+        self.report()
+
+    def config(self):
+        if self.conf_list is not None:
+            logger.info("generate configuration")
+            generate_configs(self.pklz_dirs, self.conf_default, self.conf_list)
+
+    def run_experiments(self):
+        logger.info("run experiments")
+        run_all_liver_segmentation_experiments_with_conf(
+            self.exp_conf_files,
+            self.input_data_path_pattern,
+            output_paths=self.pklz_dirs,
+            dry_run=False)
+
+    def evaluation(self):
+        sliver_eval_all_to_yamls(
+            self.yaml_files,
+            self.pklz_dirs,
+            self.sliver_dir,
+            self.eval_files, recalculateThis=None)
+
+    def report(self):
+        report(self.pklz_dirs, self.labels, self.markers,
+               show=self.show, image_basename=self.image_basename)
+
 def run_and_make_report(pklz_dirs, labels, markers, sliver_reference_dir,
                         input_data_path_pattern, conf_default=None,
                         conf_list=None, show=True,
@@ -42,34 +92,20 @@ def run_and_make_report(pklz_dirs, labels, markers, sliver_reference_dir,
     :image_basename: Basis for image names. It can be directory, or filename
          begining
     """
-    sliver_dir = sliver_reference_dir
-    yaml_files = [os.path.normpath(path) + '.yaml' for path in pklz_dirs]
-    eval_files = [os.path.normpath(path) + '_eval' for path in pklz_dirs]
-    exp_conf_files = [os.path.normpath(path) + '.config' for path in pklz_dirs]
+    rr = RunAndMakeReport(pklz_dirs, labels, markers, sliver_reference_dir,
+                        input_data_path_pattern, conf_default=None,
+                        conf_list=None, show=True,
+                        image_basename=None)
+    rr.make_all()
     # exp_conf_files = [os.path.join(os.path.normpath(path),
     # 'organ_segmentation.config') for path in pklz_dirs]
-    if conf_list is not None:
-        logger.info("generate configuration")
-        generate_configs(pklz_dirs, conf_default, conf_list)
-    logger.info("run experiments")
     print "run experiments"
     # run experiments
-    # run_all_liver_segmentation_experiments_with_conf(
-    #     exp_conf_files,
-    #     input_data_path_pattern,
-    #     output_paths=pklz_dirs,
-    #     dry_run=False)
     # # run evaluation
     # print "run evaluation"
-    # sliver_eval_all_to_yamls(
-    #     yaml_files, pklz_dirs, sliver_dir, eval_files, recalculateThis=None)
     # print "make report"
     # # make report
-    # if image_basename is None:
-    #     image_basename, head = os.path.split(pklz_dirs[0])
     #
-    # report(pklz_dirs, labels, markers,
-    #        show=show, image_basename=image_basename)
 
 
 def generate_configs(pklz_dirs, conf_default, conf_list):
@@ -156,7 +192,7 @@ def run_liver_segmentation_experiment_with_conf(
     if len(filenames) == 0:
         logger.warning('input_data_path_pattern "%s" is empty'
                        % (input_data_path_pattern))
-        print "input data path is empty " + input_data_path_pattern
+        # print "input data path is empty " + input_data_path_pattern
     for fn in filenames:
         bsh_data = " -dd " + fn + " "
 
