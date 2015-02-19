@@ -148,10 +148,10 @@ class ExperimentsTest(unittest.TestCase):
             {'working_voxelsize_mm': 6}
         ]
 
-# # if directory exists, remove it
-#         for dire in pklz_dirs:
-#             if os.path.exists(dire):
-#                 shutil.rmtree(dire)
+# if directory exists, remove it
+        for dire in pklz_dirs:
+            if os.path.exists(dire):
+                shutil.rmtree(dire)
 #
 # # experiment_support.report(pklz_dirs, labels, markers)
 #         ramr = lisa.experiments.RunAndMakeReport(
