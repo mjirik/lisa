@@ -154,12 +154,12 @@ class ExperimentsTest(unittest.TestCase):
                 shutil.rmtree(dire)
 #
 # # experiment_support.report(pklz_dirs, labels, markers)
-#         ramr = lisa.experiments.RunAndMakeReport(
-#             pklz_dirs, labels, markers, sliver_reference_dir,
-#             input_data_path_pattern,
-#             conf_default=conf_default,
-#             conf_list=conf_list,
-#             show=False)
+        ramr = lisa.experiments.RunAndMakeReport(
+            pklz_dirs, labels, markers, sliver_reference_dir,
+            input_data_path_pattern,
+            conf_default=conf_default,
+            conf_list=conf_list,
+            show=False)
 #         ramr.config()
 #         # import io3d.misc
 #         # obj = io3d.misc.obj_from_file(pklz_dirs[0] + '.yaml', filetype='yaml')
