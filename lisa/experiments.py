@@ -30,19 +30,22 @@ class RunAndMakeReport:
                  conf_list=None, show=True,
                  image_basename=None):
 
-
+        self.conf_list = conf_list
+        self.conf_default = conf_default
+        self.labels = labels
+        self.markers = markers
+        self.pklz_dirs = pklz_dirs
         self.sliver_dir = sliver_reference_dir
-        self.yaml_files = [os.path.normpath(path) + '.yaml' for path in pklz_dirs]
-        self.eval_files = [os.path.normpath(path) + '_eval' for path in pklz_dirs]
-        self.exp_conf_files = [os.path.normpath(path) + '.config' for path in pklz_dirs]
+        self.yaml_files = \
+            [os.path.normpath(path) + '.yaml' for path in pklz_dirs]
+        self.eval_files = \
+            [os.path.normpath(path) + '_eval' for path in pklz_dirs]
+        self.exp_conf_files = \
+            [os.path.normpath(path) + '.config' for path in pklz_dirs]
         if image_basename is None:
             self.image_basename, head = os.path.split(self.pklz_dirs[0])
         self.show = show
         self.input_data_path_pattern = input_data_path_pattern
-        self.conf_list = conf_list
-        self.labels = labels
-        self.markers = markers
-        self.pklz_dirs = pklz_dirs
 
     def make_all(self):
         self.config()
@@ -74,6 +77,7 @@ class RunAndMakeReport:
         report(self.pklz_dirs, self.labels, self.markers,
                show=self.show, image_basename=self.image_basename)
 
+
 def run_and_make_report(pklz_dirs, labels, markers, sliver_reference_dir,
                         input_data_path_pattern, conf_default=None,
                         conf_list=None, show=True,
@@ -93,9 +97,9 @@ def run_and_make_report(pklz_dirs, labels, markers, sliver_reference_dir,
          begining
     """
     rr = RunAndMakeReport(pklz_dirs, labels, markers, sliver_reference_dir,
-                        input_data_path_pattern, conf_default=None,
-                        conf_list=None, show=True,
-                        image_basename=None)
+                          input_data_path_pattern, conf_default=None,
+                          conf_list=None, show=show,
+                          image_basename=None)
     rr.make_all()
     # exp_conf_files = [os.path.join(os.path.normpath(path),
     # 'organ_segmentation.config') for path in pklz_dirs]
