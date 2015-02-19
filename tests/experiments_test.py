@@ -58,7 +58,7 @@ class ExperimentsTest(unittest.TestCase):
         self.assertGreater(len(obj['data']), 0)
         # self.assertTrue(False)
 
-    # @attr("incomplete")
+    @attr("incomplete")
     def test_experiment_set_small(self):
         import lisa.experiments
 
@@ -112,7 +112,7 @@ class ExperimentsTest(unittest.TestCase):
         # self.assertTrue(False)
 
     @attr("actual")
-    # @attr("incomplete")
+    @attr("incomplete")
     def test_experiment_set_small_per_partes(self):
         import lisa.experiments
 
