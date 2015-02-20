@@ -272,7 +272,7 @@ def report(pklz_dirs, labels, markers, show=True, image_basename='',
 
     vd_mn, tmp = sumplot(data, 'vd', 'Total Volume Difference', **sp_params)
     voe_mn, tmp = sumplot(data, 'voe', 'Volume Difference Error',
-                            **sp_params)
+                          **sp_params)
     avgd_mn, tmp = sumplot(data, 'avgd', 'Average Distance', **sp_params)
     maxd_mn, tmp = sumplot(data, 'maxd', 'Maxiamal Distance', **sp_params)
     rmsd_mn, tmp = sumplot(data, 'rmsd', 'Square Distance', **sp_params)
@@ -305,14 +305,11 @@ def report(pklz_dirs, labels, markers, show=True, image_basename='',
         dataplot(scoreAll, 'avgd', 'AvgD [mm]', **dp_params)
         dataplot(scoreAll, 'rmsd', 'RMSD [mm]', **dp_params)
 
-    vd_mn, tmp = sumplot(scoreAll, 'vd', 'Total Volume Difference',
-                            **sp_params)
+    vd_mn, tmp = sumplot(scoreAll, 'vd', 'Total Volume Difference', **sp_params)
     voe_mn, tmp = sumplot(scoreAll, 'voe', 'Volume Difference Error',
-                            **sp_params)
-    avgd_mn, tmp = sumplot(scoreAll, 'avgd', 'Average Distance',
-                            **sp_params)
-    maxd_mn, tmp = sumplot(scoreAll, 'maxd', 'Maxiamal Distance',
-                            **sp_params)
+                          **sp_params)
+    avgd_mn, tmp = sumplot(scoreAll, 'avgd', 'Average Distance', **sp_params)
+    maxd_mn, tmp = sumplot(scoreAll, 'maxd', 'Maxiamal Distance', **sp_params)
     rmsd_mn, tmp = sumplot(scoreAll, 'rmsd', 'Square Distance', **sp_params)
 
     logger.info("Overall score")
