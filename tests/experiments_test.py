@@ -165,21 +165,17 @@ class ExperimentsTest(unittest.TestCase):
         ramr.config()
         ramr.run_experiments()
         ramr.evaluation()
-        print "--------------------------------------"
-        data_path = os.path.abspath(
-            path_to_script + "./../sample_data/")
-        print os.listdir(data_path)
+        ramr.report()
         data_path = os.path.abspath(
             path_to_script + "./../sample_data/exp_small/")
-        print os.listdir(data_path)
-        data_path = os.path.abspath(
-            path_to_script + "./../sample_data/exp_small/exp1")
-        print os.listdir(data_path)
-        # self.assertTrue(False)
-        ramr.report()
-#         # import io3d.misc
-#         # obj = io3d.misc.obj_from_file(pklz_dirs[0] + '.yaml', filetype='yaml')
-#         # self.assertGreater(len(obj['data']), 0)
+        dir_eval = os.listdir(data_path)
+        self.assertIn('exp1_eval.pkl', dir_eval)
+        self.assertIn('exp1_eval.csv', dir_eval)
+        self.assertIn('exp1.config', dir_eval)
+        self.assertIn('exp1.yaml', dir_eval)
+        import io3d.misc
+        obj = io3d.misc.obj_from_file(pklz_dirs[0] + '.yaml', filetype='yaml')
+        self.assertGreater(len(obj['data']), 0)
 #         # self.assertTrue(False)
 
     def prepare_data_for_fast_experiment(self):
