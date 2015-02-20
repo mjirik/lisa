@@ -173,8 +173,8 @@ class ExperimentsTest(unittest.TestCase):
         data_path = os.path.abspath(
             path_to_script + "./../sample_data/exp_small/exp1")
         print os.listdir(data_path)
-        self.assertTrue(False)
-        # ramr.report()
+        # self.assertTrue(False)
+        ramr.report()
 #         # import io3d.misc
 #         # obj = io3d.misc.obj_from_file(pklz_dirs[0] + '.yaml', filetype='yaml')
 #         # self.assertGreater(len(obj['data']), 0)
