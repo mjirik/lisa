@@ -254,6 +254,9 @@ def report(pklz_dirs, labels, markers, show=True, image_basename=''):
     data = [misc.obj_from_file(fname + '.pkl', filetype='pkl')
             for fname in eval_files]
 
+    print "first plot"
+    return
+
     dataplot(data, 'voe', 'Volume Difference Error [%]', **dp_params)
     dataplot(data, 'vd', 'Total Volume Difference [%]', **dp_params)
     dataplot(data, 'processing_time', 'Processing time [s]', **dp_params)
@@ -262,7 +265,7 @@ def report(pklz_dirs, labels, markers, show=True, image_basename=''):
     dataplot(data, 'rmsd', 'RMSD [mm]', **dp_params)
 
     print "Souhrn měření"
-    return
+    # return
 
     vd_mn, tmp = sumplot(data, 'vd', 'Total Volume Difference', **sp_params)
     voe_mn, tmp = sumplot(data, 'voe', 'Volume Difference Error',  **sp_params)
