@@ -15,6 +15,7 @@ from nose.plugins.attrib import attr
 import numpy as np
 import shutil
 
+import matplotlib.pyplot as plt
 
 import lisa.volumetry_evaluation as ve
 import lisa
@@ -114,6 +115,7 @@ class ExperimentsTest(unittest.TestCase):
     @attr("actual")
     # @attr("incomplete")
     def test_experiment_set_small_per_partes(self):
+        plt.ioff()
         # import lisa.experiments
 
         # os.path.join(path_to_script, "..")
