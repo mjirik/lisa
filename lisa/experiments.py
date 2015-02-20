@@ -44,6 +44,7 @@ class RunAndMakeReport:
             [os.path.normpath(path) + '.config' for path in pklz_dirs]
         if image_basename is None:
             self.image_basename, head = os.path.split(self.pklz_dirs[0])
+            self.image_basename = os.path.join(self.image_basename, 'fig')
         self.show = show
         self.input_data_path_pattern = input_data_path_pattern
 
@@ -226,6 +227,7 @@ def report(pklz_dirs, labels, markers, show=True, image_basename=''):
     """
     based on
     """
+
 # TODO image_basename  generovat obrazky
     expn = np.array(range(0, len(markers)))
     expn_labels = labels
@@ -242,6 +244,8 @@ def report(pklz_dirs, labels, markers, show=True, image_basename=''):
         'show': show,
         'filename': image_basename
     }
+    print "#####################š"
+    return
     yaml_files = [os.path.normpath(path) + '.yaml' for path in pklz_dirs]
     print yaml_files
 
