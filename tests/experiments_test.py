@@ -162,6 +162,7 @@ class ExperimentsTest(unittest.TestCase):
             show=False)
         ramr.config()
         ramr.run_experiments()
+        ramr.evaluation()
 #         # import io3d.misc
 #         # obj = io3d.misc.obj_from_file(pklz_dirs[0] + '.yaml', filetype='yaml')
 #         # self.assertGreater(len(obj['data']), 0)
