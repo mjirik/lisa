@@ -356,7 +356,7 @@ def sliver_eval_all_to_yamls(yaml_files, pklz_dirs, sliver_dir, eval_files,
 def plotone(data, expn, keyword, ind, marker, legend):
     if ind in expn:
         xdata = range(1, len(data[ind][keyword]) + 1)
-        return
+        # return
         plt.plot(
             xdata, data[ind][keyword], marker, label=legend, alpha=0.7, ms=10)
 
@@ -374,7 +374,6 @@ def dataplot(data, keyword, ylabel, expn=None, markers=None, labels=None,
 
     if labels is None:
         labels = [''] * len(data)
-
 
     for i in range(0, len(expn)):
         try:
