@@ -269,7 +269,7 @@ def report(pklz_dirs, labels, markers, show=True, image_basename=''):
     maxd_mn, tmp = sumplot(data, 'maxd', 'Maxiamal Distance',      **sp_params)
     rmsd_mn, tmp = sumplot(data, 'rmsd', 'Square Distance',        **sp_params)
 
-    return
+    # return
     print "\n"
     print 'vd   ', vd_mn
     print "voe ", voe_mn
@@ -300,6 +300,8 @@ def report(pklz_dirs, labels, markers, show=True, image_basename=''):
     dataplot(scoreAll, 'maxd', 'MaxD [mm]', **dp_params)
     dataplot(scoreAll, 'avgd', 'AvgD [mm]', **dp_params)
     dataplot(scoreAll, 'rmsd', 'RMSD [mm]', **dp_params)
+    print "before sumplot"
+    return
 
     vd_mn, tmp = sumplot(
         scoreAll, 'vd', 'Total Volume Difference', **sp_params)
