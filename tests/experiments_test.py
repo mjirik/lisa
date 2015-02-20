@@ -161,7 +161,7 @@ class ExperimentsTest(unittest.TestCase):
             input_data_path_pattern,
             conf_default=conf_default,
             conf_list=conf_list,
-            show=False)
+            show=False, use_plt=False)
         ramr.config()
         ramr.run_experiments()
         ramr.evaluation()

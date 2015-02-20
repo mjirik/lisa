@@ -27,7 +27,7 @@ import io3d.misc
 class RunAndMakeReport:
     def __init__(self, pklz_dirs, labels, markers, sliver_reference_dir,
                  input_data_path_pattern, conf_default=None,
-                 conf_list=None, show=True,
+                 conf_list=None, show=True, use_plt=True,
                  image_basename=None):
 
         self.conf_list = conf_list
@@ -47,6 +47,7 @@ class RunAndMakeReport:
             self.image_basename = os.path.join(self.image_basename, 'fig')
         self.show = show
         self.input_data_path_pattern = input_data_path_pattern
+        self.use_plt = use_plt
 
     def make_all(self):
         self.config()
@@ -76,7 +77,8 @@ class RunAndMakeReport:
 
     def report(self):
         report(self.pklz_dirs, self.labels, self.markers,
-               show=self.show, image_basename=self.image_basename)
+               show=self.show, image_basename=self.image_basename,
+               use_plt=self.use_plt)
 
 
 def run_and_make_report(pklz_dirs, labels, markers, sliver_reference_dir,
@@ -223,9 +225,11 @@ def run_liver_segmentation_experiment_with_conf(
 # <codecell>
 
 
-def report(pklz_dirs, labels, markers, show=True, image_basename=''):
+def report(pklz_dirs, labels, markers, show=True, image_basename='',
+           use_plt=True):
     """
     based on
+    use_plt: can supress using of matplotlib
     """
 
 # TODO image_basename  generovat obrazky
@@ -242,7 +246,8 @@ def report(pklz_dirs, labels, markers, show=True, image_basename=''):
         'expn': expn,
         'expn_labels': expn_labels,
         'show': show,
-        'filename': image_basename
+        'filename': image_basename,
+        'use_plt': use_plt
     }
     # return
     yaml_files = [os.path.normpath(path) + '.yaml' for path in pklz_dirs]
@@ -253,34 +258,33 @@ def report(pklz_dirs, labels, markers, show=True, image_basename=''):
     data = [misc.obj_from_file(fname + '.pkl', filetype='pkl')
             for fname in eval_files]
 
-    print "first plot"
+    if use_plt:
+        logger.debug("first plot")
 
-    dataplot(data, 'voe', 'Volume Difference Error [%]', **dp_params)
-    dataplot(data, 'vd', 'Total Volume Difference [%]', **dp_params)
-    dataplot(data, 'processing_time', 'Processing time [s]', **dp_params)
-    dataplot(data, 'maxd', 'MaxD [mm]', **dp_params)
-    dataplot(data, 'avgd', 'AvgD [mm]', **dp_params)
-    dataplot(data, 'rmsd', 'RMSD [mm]', **dp_params)
+        dataplot(data, 'voe', 'Volume Difference Error [%]', **dp_params)
+        dataplot(data, 'vd', 'Total Volume Difference [%]', **dp_params)
+        dataplot(data, 'processing_time', 'Processing time [s]', **dp_params)
+        dataplot(data, 'maxd', 'MaxD [mm]', **dp_params)
+        dataplot(data, 'avgd', 'AvgD [mm]', **dp_params)
+        dataplot(data, 'rmsd', 'RMSD [mm]', **dp_params)
 
-    print "Souhrn měření"
-    return
+        logger.debug("Souhrn měření")
 
     vd_mn, tmp = sumplot(data, 'vd', 'Total Volume Difference', **sp_params)
-    voe_mn, tmp = sumplot(data, 'voe', 'Volume Difference Error',  **sp_params)
-    avgd_mn, tmp = sumplot(data, 'avgd', 'Average Distance',       **sp_params)
-    maxd_mn, tmp = sumplot(data, 'maxd', 'Maxiamal Distance',      **sp_params)
-    rmsd_mn, tmp = sumplot(data, 'rmsd', 'Square Distance',        **sp_params)
+    voe_mn, tmp = sumplot(data, 'voe', 'Volume Difference Error',
+                            **sp_params)
+    avgd_mn, tmp = sumplot(data, 'avgd', 'Average Distance', **sp_params)
+    maxd_mn, tmp = sumplot(data, 'maxd', 'Maxiamal Distance', **sp_params)
+    rmsd_mn, tmp = sumplot(data, 'rmsd', 'Square Distance', **sp_params)
 
-    print "\n"
-    print 'vd   ', vd_mn
-    print "voe ", voe_mn
-    print 'maxd ', maxd_mn
-    print 'avgd ', avgd_mn
-    print 'rmsd ', rmsd_mn
+    logger.info("\n")
+    logger.info('vd   ' + str(vd_mn))
+    logger.info("voe " + str(voe_mn))
+    logger.info('maxd ' + str(maxd_mn))
+    logger.info('avgd ' + str(avgd_mn))
+    logger.info('rmsd ' + str(rmsd_mn))
 
-    print "\n"
-
-    print "Přepočteno na skóre"
+    logger.info("Přepočteno na skóre")
     import pandas
     # print tables[0].shape
     # pandas.set_option('display.max_columns', None)
@@ -291,34 +295,34 @@ def report(pklz_dirs, labels, markers, show=True, image_basename=''):
     df = pandas.DataFrame(tables[0], index=indexes[0], columns=columns[0])
     print df.to_string()
 
-    dataplot(scoreAll, 'voe', 'Volume Difference Error [points]',
-             **dp_params
-             )
-    dataplot(scoreAll, 'vd', 'Total Volume Difference [points]',
-             **dp_params
-             )
+    if use_plt:
+        dataplot(scoreAll, 'voe', 'Volume Difference Error [points]',
+                 **dp_params)
+        dataplot(scoreAll, 'vd', 'Total Volume Difference [points]',
+                 **dp_params)
 
-    dataplot(scoreAll, 'maxd', 'MaxD [mm]', **dp_params)
-    dataplot(scoreAll, 'avgd', 'AvgD [mm]', **dp_params)
-    dataplot(scoreAll, 'rmsd', 'RMSD [mm]', **dp_params)
-    print "before sumplot"
-    # return
+        dataplot(scoreAll, 'maxd', 'MaxD [mm]', **dp_params)
+        dataplot(scoreAll, 'avgd', 'AvgD [mm]', **dp_params)
+        dataplot(scoreAll, 'rmsd', 'RMSD [mm]', **dp_params)
 
-    vd_mn, tmp = sumplot(
-        scoreAll, 'vd', 'Total Volume Difference', **sp_params)
-    voe_mn, tmp = sumplot(
-        scoreAll, 'voe', 'Volume Difference Error', **sp_params)
-    avgd_mn, tmp = sumplot(scoreAll, 'avgd', 'Average Distance', **sp_params)
-    maxd_mn, tmp = sumplot(scoreAll, 'maxd', 'Maxiamal Distance', **sp_params)
+    vd_mn, tmp = sumplot(scoreAll, 'vd', 'Total Volume Difference',
+                            **sp_params)
+    voe_mn, tmp = sumplot(scoreAll, 'voe', 'Volume Difference Error',
+                            **sp_params)
+    avgd_mn, tmp = sumplot(scoreAll, 'avgd', 'Average Distance',
+                            **sp_params)
+    maxd_mn, tmp = sumplot(scoreAll, 'maxd', 'Maxiamal Distance',
+                            **sp_params)
     rmsd_mn, tmp = sumplot(scoreAll, 'rmsd', 'Square Distance', **sp_params)
 
-    print "Total score"
+    logger.info("Overall score")
 
     scoreTotal, scoreMetrics, scoreAll = sliverScoreAll(data)
-    print 'Score total: ', scoreTotal
+    logger.info('Overall score: ' + str(scoreTotal))
 
-    plot_total(scoreMetrics, labels=labels, err_scale=0.05, show=show,
-               filename=image_basename)
+    if use_plt:
+        plot_total(scoreMetrics, labels=labels, err_scale=0.05, show=show,
+                   filename=image_basename)
 
 
 def recalculate_suggestion(eval_files):
@@ -356,12 +360,6 @@ def sliver_eval_all_to_yamls(yaml_files, pklz_dirs, sliver_dir, eval_files,
 def plotone(data, expn, keyword, ind, marker, legend):
     if ind in expn:
         xdata = range(1, len(data[ind][keyword]) + 1)
-        print 'errrrrrrrrrrrrr'
-        print data[ind][keyword]
-        print marker
-        print legend
-        plt.plot([1, 2], [1, 2], 'k')
-        return
         plt.plot(
             xdata, data[ind][keyword], marker, label=legend, alpha=0.7, ms=10)
 
@@ -389,14 +387,6 @@ def dataplot(data, keyword, ylabel, expn=None, markers=None, labels=None,
             label = 'Unknown label'
             pass
         plotone(data, expn, keyword, expn[i], marker, label)
-        # plotone(data, expn, keyword, 0, 'ks', '1 gauss')
-
-    return
-    # return
-
-    # plotone(data, expn, keyword, 1, 'kv', '3 gauss')
-    # plotone(data, expn, keyword, 2, 'kp', 'smoothing')
-    # plotone(data, expn, keyword, 3, 'k*', 'blowup')
 
     x1, x2, y1, y2 = plt.axis()
     # necheme grafy od 40 do 50. chceme grafy od nuly
@@ -408,18 +398,15 @@ def dataplot(data, keyword, ylabel, expn=None, markers=None, labels=None,
     print loc
     plt.legend(numpoints=1, loc=loc,
                bbox_to_anchor=(1.05, 1), borderaxespad=0.)
-    # plt.savefig('pitomost.png')
     plt.savefig(filename + '-' + keyword + '.pdf', bbox_inches='tight')
-    # plt.savefig('-avgd.png')
     if show:
         plt.show()
     plt.close()
 
-# <codecell>
-
 
 def sumplot(data, keyword, ylabel, expn=None, expn_labels=None, loc=70,
-            filename='', labels_rotation=70, ymin=None, show=True):
+            filename='', labels_rotation=70, ymin=None, show=True,
+            use_plt=True):
     """
     Plot data. Function is prepared for our dataset (for example 5 measures).
     expn_labels: Labels for x-axis based aligned to expn
@@ -440,34 +427,33 @@ def sumplot(data, keyword, ylabel, expn=None, expn_labels=None, loc=70,
         dat = data[ind][keyword]
         mn.append(np.mean(dat))
         va.append(np.var(dat))
+    if use_plt:
+        plt.errorbar(expn, mn, fmt='ks', yerr=va)
+        x1, x2, y1, y2 = plt.axis()
+        # necheme grafy od 40 do 50. chceme grafy od nuly
 
-    plt.errorbar(expn, mn, fmt='ks', yerr=va)
-    x1, x2, y1, y2 = plt.axis()
-    # necheme grafy od 40 do 50. chceme grafy od nuly
+        if ymin is not None:
+            if y1 > 0:
+                y1 = ymin
+        plt.axis((x1, x2, y1, y2))
+        plt.ylabel(ylabel)
+        print expn
+        plt.xlim([np.min(expn) - 1, np.max(expn) + 1])
+        # plt.xticks([1,2,3],['hu','ha', 'te'])
 
-    if ymin is not None:
-        if y1 > 0:
-            y1 = ymin
-    plt.axis((x1, x2, y1, y2))
-    plt.ylabel(ylabel)
-    print expn
-    plt.xlim([np.min(expn) - 1, np.max(expn) + 1])
-    # plt.xticks([1,2,3],['hu','ha', 'te'])
+        if expn_labels is not None:
+            expn_labels = np.array(expn_labels)
+            expn_labels = expn_labels[np.array(expn)]
 
-    if expn_labels is not None:
-        # expn_labels = np.array(['1 gauss', '3 gauss', 'smoothing', 'blowup'])
-        expn_labels = np.array(expn_labels)
-        expn_labels = expn_labels[np.array(expn)]
-
-        plt.xticks(expn, expn_labels, rotation=labels_rotation)
-    print loc
-    # plt.legend(numpoints=1, loc=loc)
-    # plt.savefig('pitomost.png')
-    plt.savefig(filename + '-' + keyword + '.pdf', bbox_inches='tight')
-    # plt.savefig('-avgd.png')
-    if show:
-        plt.show()
-    plt.close()
+            plt.xticks(expn, expn_labels, rotation=labels_rotation)
+        print loc
+        # plt.legend(numpoints=1, loc=loc)
+        # plt.savefig('pitomost.png')
+        plt.savefig(filename + '-' + keyword + '.pdf', bbox_inches='tight')
+        # plt.savefig('-avgd.png')
+        if show:
+            plt.show()
+        plt.close()
 
     return mn, va
 
