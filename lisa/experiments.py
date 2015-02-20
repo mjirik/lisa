@@ -244,18 +244,16 @@ def report(pklz_dirs, labels, markers, show=True, image_basename=''):
         'show': show,
         'filename': image_basename
     }
-    print "#####################š"
     # return
     yaml_files = [os.path.normpath(path) + '.yaml' for path in pklz_dirs]
-    print yaml_files
+    logger.debug(str(yaml_files))
 
     eval_files = [os.path.normpath(path) + '_eval' for path in pklz_dirs]
-    print eval_files
+    logger.debug(str(eval_files))
     data = [misc.obj_from_file(fname + '.pkl', filetype='pkl')
             for fname in eval_files]
 
     print "first plot"
-    return
 
     dataplot(data, 'voe', 'Volume Difference Error [%]', **dp_params)
     dataplot(data, 'vd', 'Total Volume Difference [%]', **dp_params)
@@ -265,7 +263,7 @@ def report(pklz_dirs, labels, markers, show=True, image_basename=''):
     dataplot(data, 'rmsd', 'RMSD [mm]', **dp_params)
 
     print "Souhrn měření"
-    # return
+    return
 
     vd_mn, tmp = sumplot(data, 'vd', 'Total Volume Difference', **sp_params)
     voe_mn, tmp = sumplot(data, 'voe', 'Volume Difference Error',  **sp_params)
@@ -273,7 +271,6 @@ def report(pklz_dirs, labels, markers, show=True, image_basename=''):
     maxd_mn, tmp = sumplot(data, 'maxd', 'Maxiamal Distance',      **sp_params)
     rmsd_mn, tmp = sumplot(data, 'rmsd', 'Square Distance',        **sp_params)
 
-    # return
     print "\n"
     print 'vd   ', vd_mn
     print "voe ", voe_mn
@@ -377,6 +374,8 @@ def dataplot(data, keyword, ylabel, expn=None, markers=None, labels=None,
     if labels is None:
         labels = [''] * len(data)
 
+    print "^^^^^^^^^^^^^^^^ž"
+
     for i in range(0, len(expn)):
         try:
             marker = markers[i]
@@ -387,6 +386,8 @@ def dataplot(data, keyword, ylabel, expn=None, markers=None, labels=None,
             pass
         plotone(data, expn, keyword, expn[i], marker, label)
         # plotone(data, expn, keyword, 0, 'ks', '1 gauss')
+
+    return
 
     # plotone(data, expn, keyword, 1, 'kv', '3 gauss')
     # plotone(data, expn, keyword, 2, 'kp', 'smoothing')
