@@ -61,6 +61,7 @@ install:
     - python mysetup.py -d
     
 # command to run tests
-script: nosetests --with-coverage --verbose --cover-package=lisa
+# script: nosetests --with-coverage --verbose --cover-package=lisa
+script: nosetests --with-coverage --cover-package=lisa -s
 after_success:
     - coveralls
