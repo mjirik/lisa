@@ -163,6 +163,13 @@ class ExperimentsTest(unittest.TestCase):
         ramr.config()
         ramr.run_experiments()
         ramr.evaluation()
+        print "--------------------------------------"
+        data_path = os.path.abspath(
+            path_to_script + "./../sample_data/")
+        print os.listdir(data_path)
+        data_path = os.path.abspath(
+            path_to_script + "./../sample_data/exp_small/")
+        print os.listdir(data_path)
         self.assertTrue(False)
         # ramr.report()
 #         # import io3d.misc
