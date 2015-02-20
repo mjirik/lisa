@@ -262,6 +262,7 @@ def report(pklz_dirs, labels, markers, show=True, image_basename=''):
     dataplot(data, 'rmsd', 'RMSD [mm]', **dp_params)
 
     print "Souhrn měření"
+    return
 
     vd_mn, tmp = sumplot(data, 'vd', 'Total Volume Difference', **sp_params)
     voe_mn, tmp = sumplot(data, 'voe', 'Volume Difference Error',  **sp_params)
@@ -301,7 +302,7 @@ def report(pklz_dirs, labels, markers, show=True, image_basename=''):
     dataplot(scoreAll, 'avgd', 'AvgD [mm]', **dp_params)
     dataplot(scoreAll, 'rmsd', 'RMSD [mm]', **dp_params)
     print "before sumplot"
-    return
+    # return
 
     vd_mn, tmp = sumplot(
         scoreAll, 'vd', 'Total Volume Difference', **sp_params)
