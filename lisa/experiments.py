@@ -376,6 +376,7 @@ def dataplot(data, keyword, ylabel, expn=None, markers=None, labels=None,
 
     print "^^^^^^^^^^^^^^^^ž"
 
+    return
     for i in range(0, len(expn)):
         try:
             marker = markers[i]
@@ -387,7 +388,7 @@ def dataplot(data, keyword, ylabel, expn=None, markers=None, labels=None,
         plotone(data, expn, keyword, expn[i], marker, label)
         # plotone(data, expn, keyword, 0, 'ks', '1 gauss')
 
-    return
+    # return
 
     # plotone(data, expn, keyword, 1, 'kv', '3 gauss')
     # plotone(data, expn, keyword, 2, 'kp', 'smoothing')
