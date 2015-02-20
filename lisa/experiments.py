@@ -245,7 +245,7 @@ def report(pklz_dirs, labels, markers, show=True, image_basename=''):
         'filename': image_basename
     }
     print "#####################š"
-    return
+    # return
     yaml_files = [os.path.normpath(path) + '.yaml' for path in pklz_dirs]
     print yaml_files
 
@@ -269,6 +269,7 @@ def report(pklz_dirs, labels, markers, show=True, image_basename=''):
     maxd_mn, tmp = sumplot(data, 'maxd', 'Maxiamal Distance',      **sp_params)
     rmsd_mn, tmp = sumplot(data, 'rmsd', 'Square Distance',        **sp_params)
 
+    return
     print "\n"
     print 'vd   ', vd_mn
     print "voe ", voe_mn
