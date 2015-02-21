@@ -26,27 +26,27 @@ import io3d.misc
 
 
 class RunAndMakeReport:
+    """
+    Je potřeba mít připraven adresář s daty(pklz_dirs), v nichž jsou uloženy
+    seedy. Dále pak soubory s konfigurací a stejným jménem jako adresář +
+    přípona '.conf'.
+
+    :sliver_dir: dir with sliver reference data
+    :input_data_path_pattern: Directory containing data with seeds
+        "/home/mjirik/exp010-seeds/*-seeds.pklz"
+    :pklz_dirs: List of dirs or string with dir prefix. If the string is
+        given base on labels the list is generated
+        In each will be output for one experiment. There
+        is also required to have file with same name as directory with
+        extension.config. In this files is configuration of Lisa.
+    :image_basename: Basis for image names. It can be directory, or filename
+        begining
+    """
     def __init__(self, pklz_dirs, labels, markers, sliver_reference_dir,
                  input_data_path_pattern, conf_default=None,
                  conf_list=None, show=True, use_plt=True,
                  image_basename=None):
 
-        """
-        Je potřeba mít připraven adresář s daty(pklz_dirs), v nichž jsou uloženy
-        seedy. Dále pak soubory s konfigurací a stejným jménem jako adresář +
-        přípona '.conf'.
-
-        :sliver_dir: dir with sliver reference data
-        :input_data_path_pattern: Directory containing data with seeds
-            "/home/mjirik/exp010-seeds/*-seeds.pklz"
-        :pklz_dirs: List of dirs or string with dir prefix. If the string is
-            given base on labels the list is generated
-            In each will be output for one experiment. There
-            is also required to have file with same name as directory with
-            extension.config. In this files is configuration of Lisa.
-        :image_basename: Basis for image names. It can be directory, or filename
-            begining
-        """
         self.conf_list = conf_list
         self.conf_default = conf_default
         self.labels = labels
