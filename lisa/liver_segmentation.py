@@ -257,7 +257,7 @@ def zobrazit(original,rucni,strojova):
     ed.show()
     return
 
-def vyhodnoceniMetodyTri(metoda):
+def vyhodnoceniMetodyTri(metoda,path = None):
     '''metoda- int cislo metody (poradi pri vyvoji) 
     nacte cestu ze souboru path.yml, dale nacte soubory v adresari kde je situovana a sice 
     Tren1+2.yml, Tren1+3.yml a Tren2+3.yml. Pri nacteni souboru vznikne pole:
@@ -300,7 +300,13 @@ def vyhodnoceniMetodyTri(metoda):
         
         return vysledky
     
-    cesta = nactiYamlSoubor('path.yml')
+    cesta = ''
+    if(path == None):
+        cesta = nactiYamlSoubor('path.yml')
+    else:
+        cesta = path
+    
+    
     print 'ANALYZA PRVNI TRETINY'
     seznam1 =nacteniMnoziny('Tren1+2.yml',cesta,metoda)
     print 'ANALYZA DRUHE TRETINY'
@@ -324,90 +330,8 @@ def vyhodnoceniMetodyTri(metoda):
 
 
 
-def vyhodnoceniMetodyTriX(metoda):
-    '''metoda- int cislo metody (poradi pri vyvoji) 
-    nacte cestu ze souboru path.yml, dale nacte soubory v adresari kde je situovana a sice 
-    Tren1+2.yml, Tren1+3.yml a Tren2+3.yml. Pri nacteni souboru vznikne pole:
-    [seznamSouboruTrenovaciMnoziny(nepodstatny),seznamSouboruTESTOVACImnoziny,vysledkyMETODY]
-    na souborech ze seznamuTestovacimnoziny provede segmentaci metodou s cislem METODA
-    a zapise do souboru vysledky.yml pole 
-    [vsechnyVysledky,prumerScore]
-    se vsemi vysledky a take vypise prumer na konzoli
-    '''
-    
-    ctenar = io3d.DataReader()
-    cesta = nactiYamlSoubor('path.yml')
-    engine = nearpy.Engine(dim = 3) #vytvoreni enginu
-    
-    def segmentujSubor(nazevSouboru):
-        [seznamTM,seznamTestovaci,vysledky]= nactiYamlSoubor(nazevSouboru)#'Tren1+2.yml'
-        seznamVsechVysledku = []
-        for x in seznamTM: #male overeni spravnosti testovacich a trenovacich dat
-            if(seznamTestovaci.count(x)>0):
-                print('TM obsahuje testovaci data!!!')
-                
-        def iterace(cesta,seznamTestovaci,ctenar,counter):
-            #print polozka
-            'ZDE UPRAVIT'
-            nacti = nactiSoubor(cesta,seznamTestovaci,counter,ctenar)#
-            poleTest = nacti[0]
-            voxelSizeTest = nacti[1]
-            slovnik = {'cisloMetody':metoda,'vysledkyDostupne':vysledky}
-            #print slovnik['vysledkyDostupne']
-            vytvoreny = LiverSegmentation(poleTest,voxelSizeTest,slovnik)
-            #vysledky ==> nenacitaji se data z trenovani cele
-            vytvoreny.setCisloMetody(metoda)#prirazeniMetody
-            #print vytvoreny.segParams
-            vytvoreny.runVolby()
-            segmentovany = vytvoreny.segmentation
-            segmentovanyVoxelSize = vytvoreny.voxelSize
-            nactiNovy = nactiSoubor(cesta,seznamTestovaci,counter+maximum,ctenar)
-            poleRucni = nactiNovy[0]
-            voxelSizeRucni = nactiNovy[1]
-            poleRucni = np.array(poleRucni)
-            #print segmentovany 
-            #print poleRucni
-            return[segmentovany,segmentovanyVoxelSize,poleRucni,voxelSizeRucni]
-        def pomocna(cesta,seznamTestovaci,ctenar,counter):
-            [segmentovany,segmentovanyVoxelSize,poleRucni,voxelSizeRucni] = iterace(cesta,seznamTestovaci,ctenar,counter)
-            skoreData = vyhodnoceniSnimku(segmentovany,segmentovanyVoxelSize,poleRucni,voxelSizeRucni,engine)
-            return skoreData
-        counter = 0
-        maximum = len(seznamTestovaci)/2
-        for polozka in seznamTestovaci:
-            skoreData = pomocna(cesta,seznamTestovaci,ctenar,counter)
-            'PLACEHOLDER, NAHRADIT '
-            #skoreData = [polozka,0] #
-            seznamVsechVysledku.append(skoreData)
-            
-            counter = counter+1
-            if(counter >= maximum): #preruseni pro vycerpani originalu
-                break
-                #pass
-        return seznamVsechVysledku
-    
-    
-    
-    print 'ANALYZA PRVNI TRETINY'
-    seznam1 =segmentujSubor('Tren1+2.yml')
-    print 'ANALYZA DRUHE TRETINY'
-    seznam2 = segmentujSubor('Tren1+3.yml')
-    print 'ANALYZA TRETI TRETINY'
-    seznam3 = segmentujSubor('Tren2+3.yml')
-    seznamVsech = seznam1+seznam2+seznam3
-    prumerSeznam = np.zeros(len(seznamVsech))
-    pomocnik = 0
-    for polozka in seznamVsech:
-        prumerSeznam[pomocnik] = polozka[1]
-        pomocnik = pomocnik+1
-    celkovyPrumer = np.mean(prumerSeznam)
-    zapsat = [seznamVsech,celkovyPrumer]
 
-    print 'celkovy prumer je: ' + str(celkovyPrumer)
-    zapisYamlSoubor('vysledky.yml',zapsat)
-    print 'soubory zapsany do vysledky.yml'
-    
-    return
+  
 
 def vyhodnoceniSnimku(snimek1,voxelsize1,snimek2,voxelsize2,engine):
     '''Provede vyhodnoceni snimku pomoci metod z volumetry_evaluation,
@@ -594,12 +518,16 @@ def segmentace3(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     #print np.shape(segmentaceVysledek)
     return segmentaceVysledek
 
-def trenovaniCele(metoda):
+def trenovaniCele(metoda,path = None):
     '''Metoda je cislo INT, dane poradim metody pri implementaci prace
     nacte cestu ze souboru path.yml, vsechny soubory v adresari
      natrenuje podle zvolene metody a zapise vysledek do TrenC.yml. 
     '''
-    cesta = nactiYamlSoubor('path.yml')
+    cesta = ''
+    if(path == None):
+        cesta = nactiYamlSoubor('path.yml')
+    else:
+        cesta = path
     #print cesta
     seznamSouboru = vyhledejSoubory(cesta)
     
@@ -632,14 +560,18 @@ def nahrazka(cesta,seznamSouboru):
     nahrazka trenovaci metody pro rychly beh a testovani'''
     return [25,3]
 
-def trenovaniTri(metoda):
+def trenovaniTri(metoda,path = None):
     '''Metoda je cislo INT, dane poradim metody pri implementaci prace
     nacte cestu ze souboru path.yml, vsechny soubory v adresari rozdeli na tri casti
     pro casti 1+2,2+3 a 1+3 natrenuje podle zvolene metody. 
     ulozene soubory: 1) seznam trenovanych souboru 2)seznam na kterych ma probehnout segmentace
     3) vysledek trenovani (napr. prumer a odchylka u metody 1)
     '''
-    cesta = nactiYamlSoubor('path.yml')
+    cesta = ''
+    if(path == None):
+        cesta = nactiYamlSoubor('path.yml')
+    else:
+        cesta = path
     #print cesta
     
     def rozdelTrenovaciNaTri(cesta):
@@ -843,14 +775,14 @@ class LiverSegmentation:
     def __init__(
         self,
         data3d,
-        voxelsize=[1, 1, 1],segparams={'cisloMetody':2,'vysledkyDostupne':False,'some_parameter': 22}
+        voxelsize=[1, 1, 1],segparams={'cisloMetody':2,'vysledkyDostupne':False,'some_parameter': 22,'path':None}
     ):
-        """TODO: Docstring for __init__.
-
+        """
         :data3d: 3D array with data
         :segparams: parameters of segmentation
         cisloMetody = INT, cislo pouzite metody (0-testovaci)
         vysledkyDostupne = F/vysledek, F =>vysledek se nacte, jinak se vezme
+        path = path s trenovacimi/testovacimi daty
         :returns: TODO
 
         """
@@ -866,6 +798,16 @@ class LiverSegmentation:
     
     def setCisloMetody(self,cislo):
         self.segParams['cisloMetody'] = cislo
+    
+    def getCisloMetody(self):
+        return self.segParams['cisloMetody']
+        
+        
+    def setPath(self, string):
+        self.segParams['path'] = string
+    
+    def getPath(self):
+        return self.segParams['path']
 
     def run(self):
         numero = self.segParams['cisloMetody']
@@ -932,6 +874,29 @@ class LiverSegmentation:
         # self.voxels2 = pyed.getSeedsVal(2)
         self.run()
         pass
+    
+    def vyhodnoceniMetodyTri(self):
+        '''Funkce je ulozena zvlast aby bylo mozne menit pocet parametru
+        a jednoduse volat defaultni metodu '''
+        metoda = self.getCisloMetody()
+        path = self.getPath()
+        vyhodnoceniMetodyTri(metoda,path)
+
+    
+    def  trenovaniCele(self):
+        '''Funkce je ulozena zvlast aby bylo mozne menit pocet parametru
+        a jednoduse volat defaultni metodu '''
+        metoda = self.getCisloMetody()
+        path = self.getPath()
+        trenovaniCele(metoda,path)
+        
+    def  trenovaniTri(self):
+        '''Funkce je ulozena zvlast aby bylo mozne menit pocet parametru
+        a jednoduse volat defaultni metodu '''
+        metoda = self.getCisloMetody()
+        path = self.getPath()
+        trenovaniTri(metoda,path)
+ 
 
 def main():
     logger = logging.getLogger()
