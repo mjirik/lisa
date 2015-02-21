@@ -15,6 +15,7 @@ import subprocess
 import glob
 import numpy as np
 import copy
+import six
 
 # ----------------- my scripts --------
 import misc
@@ -30,12 +31,30 @@ class RunAndMakeReport:
                  conf_list=None, show=True, use_plt=True,
                  image_basename=None):
 
+        """
+        Je potřeba mít připraven adresář s daty(pklz_dirs), v nichž jsou uloženy
+        seedy. Dále pak soubory s konfigurací a stejným jménem jako adresář +
+        přípona '.conf'.
+
+        :sliver_dir: dir with sliver reference data
+        :input_data_path_pattern: Directory containing data with seeds
+            "/home/mjirik/exp010-seeds/*-seeds.pklz"
+        :pklz_dirs: List of dirs or string with dir prefix. If the string is
+            given base on labels the list is generated
+            In each will be output for one experiment. There
+            is also required to have file with same name as directory with
+            extension.config. In this files is configuration of Lisa.
+        :image_basename: Basis for image names. It can be directory, or filename
+            begining
+        """
         self.conf_list = conf_list
         self.conf_default = conf_default
         self.labels = labels
         self.markers = markers
-        self.pklz_dirs = pklz_dirs
         self.sliver_dir = sliver_reference_dir
+        if isinstance(pklz_dirs, six.string_types):
+            pklz_dirs = [pklz_dirs + lab.replace(' ', '') for lab in labels]
+        self.pklz_dirs = pklz_dirs
         self.yaml_files = \
             [os.path.normpath(path) + '.yaml' for path in pklz_dirs]
         self.eval_files = \
@@ -81,28 +100,8 @@ class RunAndMakeReport:
                use_plt=self.use_plt)
 
 
-def run_and_make_report(pklz_dirs, labels, markers, sliver_reference_dir,
-                        input_data_path_pattern, conf_default=None,
-                        conf_list=None, show=True,
-                        image_basename=None):
-    """
-    Je potřeba mít připraven adresář s daty(pklz_dirs), v nichž jsou uloženy
-    seedy. Dále pak soubory s konfigurací a stejným jménem jako adresář +
-    přípona '.conf'.
-
-    :sliver_dir: dir with sliver reference data
-    :input_data_path_pattern: Directory containing data with seeds
-         "/home/mjirik/exp010-seeds/*-seeds.pklz"
-    :pklz_dirs: List of dirs. In each will be output for one experiment. There
-         is also required to have file with same name as directory with
-         extension.config. In this files is configuration of Lisa.
-    :image_basename: Basis for image names. It can be directory, or filename
-         begining
-    """
-    rr = RunAndMakeReport(pklz_dirs, labels, markers, sliver_reference_dir,
-                          input_data_path_pattern, conf_default=None,
-                          conf_list=None, show=show,
-                          image_basename=None)
+def run_and_make_report(**params):
+    rr = RunAndMakeReport(**params)
     rr.make_all()
     # exp_conf_files = [os.path.join(os.path.normpath(path),
     # 'organ_segmentation.config') for path in pklz_dirs]

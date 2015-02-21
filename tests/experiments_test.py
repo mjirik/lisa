@@ -24,6 +24,64 @@ import lisa.experiments
 
 class ExperimentsTest(unittest.TestCase):
 
+    def test_experiment_set_(self):
+        """
+        pklz_dirs as prefix is tested.
+        """
+
+# if directory exists, remove it
+        exp_dir = os.path.abspath(
+            path_to_script + "./../sample_data/exp_small2/")
+
+        if os.path.exists(exp_dir):
+            shutil.rmtree(exp_dir)
+        os.mkdir(exp_dir)
+
+        pklz_dirs = os.path.abspath(
+            path_to_script + "./../sample_data/exp_small2/exp2-")
+
+        sliver_reference_dir = os.path.abspath(
+            path_to_script + "./../sample_data/exp_small2/seg")
+
+# this is setup for visualization
+        markers = ['ks',
+                   # 'r<'
+                   ]
+        labels = ['vs 6 mm',
+                  'vs 7 mm'
+                  ]
+        input_data_path_pattern = os.path.abspath(
+            path_to_script + "./../sample_data/exp_small/seeds/*.pklz")
+
+        conf_default = {
+            'config_version': [1, 0, 0], 'working_voxelsize_mm': 2.0,
+            'segmentation_smoothing': False,
+            'segparams': {'pairwise_alpha_per_mm2': 50,
+                          'return_only_object_with_seeds': True}
+        }
+        conf_list = [
+            {'working_voxelsize_mm': 6},
+            {'working_voxelsize_mm': 7}
+        ]
+
+#
+# # experiment_support.report(pklz_dirs, labels, markers)
+        ramr = lisa.experiments.RunAndMakeReport(
+            pklz_dirs, labels, markers, sliver_reference_dir,
+            input_data_path_pattern,
+            conf_default=conf_default,
+            conf_list=conf_list,
+            show=False, use_plt=False)
+        ramr.config()
+        dir_eval = os.listdir(exp_dir)
+        # self.assertIn('exp1_eval.pkl', dir_eval)
+        # self.assertIn('exp1_eval.csv', dir_eval)
+        self.assertIn('exp2-vs6mm.config', dir_eval)
+        self.assertIn('exp2-vs7mm.config', dir_eval)
+        # self.assertIn('exp1.yaml', dir_eval)
+#         # self.assertTrue(False)
+        # shutil.rmtree(dire)
+
     @attr("slow")
     def test_experiment_set(self):
         import lisa.experiments
@@ -112,8 +170,6 @@ class ExperimentsTest(unittest.TestCase):
         self.assertGreater(len(obj['data']), 0)
         # self.assertTrue(False)
 
-    @attr("actual")
-    # @attr("incomplete")
     def test_experiment_set_small_per_partes(self):
         plt.ioff()
         # import lisa.experiments
