@@ -118,6 +118,7 @@ class ExperimentsTest(unittest.TestCase):
         # self.assertTrue(False)
 
     @attr("incomplete")
+    @attr("actual")
     def test_experiment_set_small(self):
         import lisa.experiments
 
@@ -358,7 +359,6 @@ class ExperimentsTest(unittest.TestCase):
         self.assertLess(eval1[0], 1.1 * eval2[0])
         self.assertGreater(eval1[0], 0.9 * eval2[0])
 
-    @attr("actual")
     @attr("incomplete")
     def test_compare_eval_sliver_distance_bigger(self):
         """

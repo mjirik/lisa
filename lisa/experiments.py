@@ -16,6 +16,7 @@ import glob
 import numpy as np
 import copy
 import six
+import pandas
 
 # ----------------- my scripts --------
 import misc
@@ -69,6 +70,9 @@ class RunAndMakeReport:
         self.use_plt = use_plt
 
     def make_all(self):
+        """
+        Run config(), run_experiments(), evaluation() and report()
+        """
         self.config()
         self.run_experiments()
         self.evaluation()
@@ -96,12 +100,12 @@ class RunAndMakeReport:
 
     def report(self):
         report(self.pklz_dirs, self.labels, self.markers,
-               show=self.show, image_basename=self.image_basename,
+               show=self.show, output_prefix=self.image_basename,
                use_plt=self.use_plt)
 
 
-def run_and_make_report(**params):
-    rr = RunAndMakeReport(**params)
+def run_and_make_report(*pars, **params):
+    rr = RunAndMakeReport(*pars, **params)
     rr.make_all()
     # exp_conf_files = [os.path.join(os.path.normpath(path),
     # 'organ_segmentation.config') for path in pklz_dirs]
@@ -131,7 +135,9 @@ def run_all_liver_segmentation_experiments_with_conf(
     exp_conf_files,
     input_data_path_pattern,
     output_paths,
-        dry_run=False):
+    dry_run=False,
+    force_run=False
+):
     """
     Only if there is almost empty dir
     """
@@ -146,7 +152,9 @@ def run_all_liver_segmentation_experiments_with_conf(
 
         if os.path.isfile(config_file_path):
             logger.debug('file "%s" found' % (config_file_path))
-            if len(glob.glob(output_paths[i] + '/*.pkl*')) < 2:
+            n_in_files = len(glob.glob(input_data_path_pattern))
+            n_out_files = len(glob.glob(output_paths[i] + '/*.pkl*'))
+            if (n_out_files < n_in_files) or force_run:
                 logger.debug('performing segmentation experiment')
                 run_liver_segmentation_experiment_with_conf(
                     config_file_path,
@@ -224,7 +232,26 @@ def run_liver_segmentation_experiment_with_conf(
 # <codecell>
 
 
-def report(pklz_dirs, labels, markers, show=True, image_basename='',
+def __create_data_frames(tables, indexes, columns):
+    dfs = []
+    for i in range(0, len(tables)):
+        df = pandas.DataFrame(
+            tables[i],
+            index=indexes[i],
+            columns=columns[i])
+        dfs.append(df)
+    return dfs
+
+
+def __save_data_frames(dfs, labels, output_prefix):
+    for df, label in zip(dfs, labels):
+        fname = output_prefix + '-score-' + label.replace(' ', '') + '.tex'
+        fo = open(fname, "w")
+        fo.write(df.to_latex())
+        fo.close()
+
+
+def report(pklz_dirs, labels, markers, show=True, output_prefix='',
            use_plt=True):
     """
     based on
@@ -239,13 +266,13 @@ def report(pklz_dirs, labels, markers, show=True, image_basename='',
         'labels': labels,
         'loc': 0,
         'show': show,
-        'filename': image_basename
+        'filename': output_prefix
     }
     sp_params = {
         'expn': expn,
         'expn_labels': expn_labels,
         'show': show,
-        'filename': image_basename,
+        'filename': output_prefix,
         'use_plt': use_plt
     }
     # return
@@ -291,8 +318,11 @@ def report(pklz_dirs, labels, markers, show=True, image_basename='',
 
     tables, indexes, columns = scoreTableEvaluation(scoreMetrics)
 
-    df = pandas.DataFrame(tables[0], index=indexes[0], columns=columns[0])
-    print df.to_string()
+    dataframes = __create_data_frames(tables, indexes, columns)
+    __save_data_frames(dataframes, labels, output_prefix)
+
+    # df = pandas.DataFrame(tables[0], index=indexes[0], columns=columns[0])
+    # print df.to_string()
 
     if use_plt:
         dataplot(scoreAll, 'voe', 'Volume Difference Error [points]',
@@ -318,7 +348,7 @@ def report(pklz_dirs, labels, markers, show=True, image_basename='',
 
     if use_plt:
         plot_total(scoreMetrics, labels=labels, err_scale=0.05, show=show,
-                   filename=image_basename)
+                   filename=output_prefix)
 
 
 def recalculate_suggestion(eval_files):
@@ -340,9 +370,10 @@ def sliver_eval_all_to_yamls(yaml_files, pklz_dirs, sliver_dir, eval_files,
     """
     if recalculateThis is None:
         recalculateThis = recalculate_suggestion(eval_files)
+    print 'eval files ' , eval_files
 
     for i in recalculateThis:
-        print "Performing evaluation on: ", pklz_dirs[i]
+        logger.info("Performing evaluation on: " + str(pklz_dirs[i]))
         a = volumetry_evaluation.evaluateAndWriteToFile(yaml_files[i],
                                                         pklz_dirs[i],
                                                         sliver_dir,
@@ -350,7 +381,7 @@ def sliver_eval_all_to_yamls(yaml_files, pklz_dirs, sliver_dir, eval_files,
                                                         visualization=False,
                                                         return_dir_lists=True
                                                         )
-        print a
+        logger.debug(str(a))
 
 
 def plotone(data, expn, keyword, ind, marker, legend):
@@ -492,6 +523,8 @@ def plot_total(scoreMetrics, err_scale=1, expn=None, labels=None,
 
     if filename is not None:
         plt.savefig(filename + '-total.pdf', bbox_inches='tight')
+
+    return mn, va
 
 
 def sliverScore(measure, metric_type):
