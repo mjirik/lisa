@@ -469,54 +469,69 @@ def segmentace2(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     return segmentaceVysledek
 
 def segmentace3(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
-    '''Zacleneni Region growingu do primitivni metody + prevedeni na numpy
-    pro urychleni vypoctu - NEDOPADLO DOBRE, NEZKOUSET + 
-    vybrani pixelu POUZE Z LEVE POLOVINY'''
+    '''Morfologie z 2D na 3D '''
     print 'pouzita metoda 3'
     segmentaceVysledek = []
     #print tabulka
     zeli3 = 0
     mezDolni = 0
     mezHorni = 250
+    print 'probiha prahovani'
+  
+    rezNovy1 = ( tabulka>=mezDolni)
+    rezNovy2 = (tabulka<=mezHorni)
+    rezNovy =np.multiply( rezNovy1, rezNovy2)
+    rezNovy2 = rezNovy.astype(np.int8)
     
-    for rez in tabulka:
-        print str(zeli3+1) + '/' + str(len(tabulka))
-        rezNovy1 = ( tabulka[zeli3,:,:]>=mezDolni)
-        rezNovy2 = (tabulka[zeli3,:,:]<=mezHorni)
-        
-        velikost = rezNovy2.shape #vybrani pixelu jen z prave poloroviny
-        osa = velikost[1]
-        rezNovy2[:,osa/2:osa] = 0
-        
-        rezNovy =np.multiply( rezNovy1, rezNovy2)
-        rezNovy2 = rezNovy.astype(int)
-        
-        'BINARNI OPERACE 2D'
-        struktura1 = [[0,1,0],[1,1,1],[0,1,0]]
-        struktura4 = np.ones([7,1])
-        rezNovy = ndimage.binary_erosion(rezNovy2,struktura1, 5)
-        rezNovy2 = ndimage.binary_fill_holes(rezNovy)
-        rezNovy = ndimage.binary_erosion(rezNovy2,struktura1, 18)
-        rezNovy2 = ndimage.binary_erosion(rezNovy,struktura4, 8)
-        rezNovy = rezNovy2
-        
-        
-        
-        segmentaceVysledek.append(rezNovy)  
-        zeli3 = zeli3+1 #prochazeni rezu
     
+
+    'BINARNI OPERACE 3D'
+    print 'probihaji binarni operace'
+    struktura1 = np.array([[[0,1,0],[1,1,1],[0,1,0]],[[1,1,1],[1,1,1],[1,1,1]],[[0,1,0],[1,1,1],[0,1,0]]])
+
+    rezNovy = ndimage.binary_dilation(rezNovy2,struktura1, 1)
+    print '1/2'
+    rezNovy2 = ndimage.binary_opening(rezNovy,struktura1, 15) #CELKEM OK
+    print '2/2'
+    rezNovy = ndimage.binary_erosion(rezNovy2,struktura1, 10)
+    rezNovy2 = rezNovy
+    
+    print 'probiha vybrani nejvetsiho objektu'
+    [labelImage, labels] = ndimage.label(rezNovy2)
+    #print nb_labels
+    vytvoreny = np.zeros(labelImage.shape,dtype = np.int8)
+    nejvetsi = 0 #index nejvetsiho objektu
+    maximum = 0
+    for x in range(labels):
+        print str(x+1) + '/' + str(labels)
+        vytvoreny = (labelImage == x+1)
+        suma = np.sum(vytvoreny)
+        #print suma
+        if(suma > maximum):
+            nejvetsi = x+1
+            maximum = suma
+    
+    print x+1
+    print maximum
+    rezNovy2 = labelImage == nejvetsi
+    
+    
+    
+    
+    rezNovy = rezNovy2.astype(np.int8)
+    #print rezNovy
+    
+
+   
     'REGION GROWING'
     print 'Probiha region growing'
     
     
     
-    #ed = sed3.sed3(np.array(vysledek))
+    #ed = sed3.sed3(np.array(rezNovy))
     #ed.show()
-     
-    #print segmentaceVysledek  
-    #print np.shape(tabulka)
-    #print np.shape(segmentaceVysledek)
-    return segmentaceVysledek
+
+    return rezNovy
 
 def trenovaniCele(metoda,path = None):
     '''Metoda je cislo INT, dane poradim metody pri implementaci prace
