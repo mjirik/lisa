@@ -25,189 +25,7 @@ from scipy import ndimage
 import volumetry_evaluation as ve
 import sed3
 import qmisc
-import nearpy
 import SimpleITK as sitk
-
-def otestujVzdalenost(vol1, vol2, voxelsize_mm):
-    engine = nearpy.Engine()
-    [avgd, rmsd, maxd] = vzdalenosti(vol1, vol2, voxelsize_mm,engine)
-    return [avgd, rmsd, maxd] 
-
-def compare_volumesUPRAVA(vol1, vol2, voxelsize_mm,engine):
-    """
-    vol1: reference
-    vol2: segmentation
-    """
-    volume1 = np.sum(vol1 > 0)
-    volume2 = np.sum(vol2 > 0)
-    volume1_mm3 = volume1 * np.prod(voxelsize_mm)
-    volume2_mm3 = volume2 * np.prod(voxelsize_mm)
-    logger.debug('vol1 [mm3]: ' + str(volume1_mm3))
-    logger.debug('vol2 [mm3]: ' + str(volume2_mm3))
-
-    df = vol1 - vol2
-    df1 = np.sum(df == 1) * np.prod(voxelsize_mm)
-    df2 = np.sum(df == -1) * np.prod(voxelsize_mm)
-
-    logger.debug('err- [mm3]: ' + str(df1) + ' err- [%]: '
-                 + str(df1 / volume1_mm3 * 100))
-    logger.debug('err+ [mm3]: ' + str(df2) + ' err+ [%]: '
-                 + str(df2 / volume1_mm3 * 100))
-
-    # VOE[%]
-    intersection = np.sum(df != 0).astype(float)
-    union = (np.sum(vol1 > 0) + np.sum(vol2 > 0)).astype(float)
-    voe = 100 * ((intersection / union))
-    logger.debug('VOE [%]' + str(voe))
-
-    # VD[%]
-    vd = 100 * (volume2 - volume1).astype(float) / volume1.astype(float)
-    logger.debug('VD [%]' + str(vd))
-    # import pdb; pdb.set_trace()
-
-    # pyed = sed3.sed3(vol1, contour=vol2)
-    # pyed.show()
-
-    # get_border(vol1)
-    [avgd, rmsd, maxd] = vzdalenosti(vol1, vol2, voxelsize_mm,engine)
-    logger.debug('AvgD [mm]' + str(avgd))
-    logger.debug('RMSD [mm]' + str(rmsd))
-    logger.debug('MaxD [mm]' + str(maxd))
-    evaluation = {
-        'volume1_mm3': volume1_mm3,
-        'volume2_mm3': volume2_mm3,
-        'err1_mm3': df1,
-        'err2_mm3': df2,
-        'err1_percent': df1 / volume1_mm3 * 100,
-        'err2_percent': df2 / volume1_mm3 * 100,
-        'voe': voe,
-        'vd': vd,
-        'avgd': avgd,
-        'rmsd': rmsd,
-        'maxd': maxd
-    }
-    return evaluation
-
-def vzdalenosti(pole1,pole2,voxelSize_mm,engine):
-    '''sample_MAX = maximalni pocet vzorku se kterym se pocita
-    vstup: pole1/2 = 3d T/F pole objektu1/2, voxelsize = pole velikosti voxelu
-    vystup = [asd,rmsd,maxd] prumerne a maximalni vzdalenosti mezi objekty
-    vypocteni vzdalenosti mezi povrchy poli presne podle PDF
-    pouziva metodu approximate nearest neighbout (ANN) z knihovny nearpy'''
-    
-    sample_MAX = 8000.0 #maximalni pocet vzorku objektu OPTIMALMI SE ZDA 8000
-    
-    def vypoctiPrumer(poctyVzorku,prumery):
-        'vypocte prumer z prumeru a poctu vzorku vektoru ruzne delky'
-        sumaPrumeru = 0
-        sumaVzorku = 0
-        pomocny = 0
-        for pocet in poctyVzorku:
-            sumaVzorku = sumaVzorku+pocet
-            sumaPrumeru = sumaPrumeru+prumery[pomocny]*pocet
-            pomocny = pomocny+1
-        
-        prumerCelkem = float(sumaPrumeru)/float(sumaVzorku)
-        return prumerCelkem
-    
-    def pridejVektor(a,b,c,voxelSize,engine):
-        vektor = np.array([a*voxelSize_mm[0],b*voxelSize_mm[1],c*voxelSize_mm[1]])
-        #print vektor
-        engine.store_vector(vektor)
-    
-    def nejblizsi(a,b,c,voxelSize,engine):
-        vzdalenost = 0
-        vektor = np.array([a*voxelSize_mm[0],b*voxelSize_mm[1],c*voxelSize_mm[1]])
-        #print vektor
-        vysledek = engine.neighbours(vektor)
-        if(vysledek != []):
-            vzdalenost = vysledek[0][2]
-        return vzdalenost
-    
-    
-    
-    print 'zahajuje se vypocet vzdalenosti mezi dvema objekty'
-    print 'maximalni pocet vzorku: '+str(sample_MAX)
-    
-    border1 = ve.get_border(pole1)
-    border2 = ve.get_border(pole2)
-    
-    vektory1 = np.where(border1 == 1) #pole s informaci o vektorech (jejich pozice v souradnicich)
-    vektory2= np.where(border2 == 1)
-    
-    
-    downsampling = float(len(vektory1[0]))/sample_MAX #'Downsampling pro urychleni vypoctu na unosnou mez'
-    downsampling = np.round(downsampling,2)
-    #print np.round(downsampling) 
-    print 'ukladaji se data o objektu 1 '    
-    counter = 0
-    for x in range(len(vektory1[0])):
-        if((x %100000) == 0):
-            print str(x) + '/' + str(len(vektory1[0]))
-        if((x % downsampling) == 0):
-            a = vektory1[0][x]
-            b = vektory1[1][x]
-            c = vektory1[2][x]  
-            pridejVektor(a,b,c,voxelSize_mm,engine)
-            counter = counter+1
-    vzdalenosti2k1 = []  #pole kde budou ulozeny vzdalenosti od objektu 1 k objektu 2
-    'v engine jsou ulozeny vektory z border1'
-    print 'probiha vypocet vzdalenosti mezi 2 a 1'
-    for x in range(len(vektory2[0])):
-        if((x %100000) == 0):
-            print str(x) + '/' + str(len(vektory1[0]))
-        if((x % downsampling) == 0):
-            #print str(x) + '/' + str(len(vektory1[0]))
-            a = vektory2[0][x]
-            b = vektory2[1][x]
-            c = vektory2[2][x] 
-            vysledek =nejblizsi(a,b,c+5,voxelSize_mm,engine)
-            vzdalenosti2k1.append( vysledek)
-    vzdalenosti2k1 = np.array( vzdalenosti2k1)
-            
-    print 'vzdalenosti 2-1 vypocteny, vyprazdnovani enginu'
-    #print vzdalenosti2k1.shape  
-    engine.clean_all_buckets()      
-    
-    print 'ukladaji se data o objektu 2 '    
-    counter = 0
-    for x in range(len(vektory2[0])):
-        if((x %100000) == 0):
-            print str(x) + '/' + str(len(vektory2[0]))
-        if((x % downsampling) == 0):
-            a = vektory2[0][x]
-            b = vektory2[1][x]
-            c = vektory2[2][x]  
-            pridejVektor(a,b,c,voxelSize_mm,engine)
-            counter = counter+1
-    vzdalenosti1k2 = []
-    'v engine jsou ulozeny vektory z border2'
-    print 'probiha vypocet vzdalenosti mezi 1 a 2'
-    for x in range(len(vektory1[0])): 
-        if((x %100000) == 0):
-            print str(x) + '/' + str(len(vektory1[0]))       
-        if((x % downsampling) == 0):
-            #print str(x) + '/' + str(len(vektory1[0]))
-            a = vektory1[0][x]
-            b = vektory1[1][x]
-            c = vektory1[2][x] 
-            vysledek =nejblizsi(a,b,c+5,voxelSize_mm,engine)
-            vzdalenosti1k2.append(vysledek)
-    engine.clean_all_buckets() 
-    vzdalenosti1k2 = np.array( vzdalenosti1k2)        
-    print 'vzdalenosti 1-2 vypocteny'    
-    #print vzdalenosti2k1  
-    #print vzdalenosti1k2  
-    print 'vypocet asd,rmsd,msd'
-    'vypocet prumeru ze VSECH vzdalenosti'  
-    prumery = [np.mean(vzdalenosti2k1),np.mean(vzdalenosti1k2)]
-    poctyVzorku = [len(vzdalenosti2k1),len(vzdalenosti1k2)]
-    celkovyPrumer = vypoctiPrumer(poctyVzorku,prumery)
-    asd = celkovyPrumer
-    rmsd =np.sqrt(1/float(len(vzdalenosti2k1)*len(vzdalenosti1k2)))#* np.sqrt(np.sum(vzdalenosti2k1**2)+np.sum(vzdalenosti1k2**2))
-    maxd = max(np.max(vzdalenosti2k1), np.max(vzdalenosti1k2))
-    print [asd,rmsd,maxd]
-    return [asd,rmsd,maxd]
 
 def souborAsegmentace(cisloSouboru,cisloMetody,cesta):
     '''nacte soubor a vytvori jeho segmentaci, pomoci zvolene metody
@@ -294,8 +112,7 @@ def vyhodnoceniMetodyTri(metoda,path = None):
         vytvoreny.runVolby()
         segmentovany = vytvoreny.segmentation
         segmentovanyVelikost = vytvoreny.voxelSize
-        engine = nearpy.Engine(dim = 3)
-        vysledky = vyhodnoceniSnimku(rucniPole,rucniVelikost,segmentovany,segmentovanyVelikost,engine)   
+        vysledky = vyhodnoceniSnimku(rucniPole,rucniVelikost,segmentovany,segmentovanyVelikost)   
         #vysledky =[1,2]    
         
         return vysledky
@@ -333,7 +150,7 @@ def vyhodnoceniMetodyTri(metoda,path = None):
 
   
 
-def vyhodnoceniSnimku(snimek1,voxelsize1,snimek2,voxelsize2,engine):
+def vyhodnoceniSnimku(snimek1,voxelsize1,snimek2,voxelsize2):
     '''Provede vyhodnoceni snimku pomoci metod z volumetry_evaluation,
     slucuje dve metody a vraci pole [evalData (slovnik),score(%)],
     dale protoze velikosti voxelu se mirne lisi u rucni segmentace
@@ -341,9 +158,9 @@ def vyhodnoceniSnimku(snimek1,voxelsize1,snimek2,voxelsize2,engine):
     '''
     print 'probiha vyhodnoceni snimku pockejte prosim'
     voxelsize_mm = [((voxelsize1[0]+voxelsize2[0])/2.0),((voxelsize1[1]+voxelsize2[1])/2.0),((voxelsize1[2]+voxelsize2[2])/2.0)]#prumer z obou
-    snimek1 = np.array(snimek1)
-    snimek2 = np.array(snimek2)
-    evaluace = compare_volumesUPRAVA(snimek1, snimek2, voxelsize_mm,engine)
+    snimek1 = np.array(snimek1,dtype = np.int8)
+    snimek2 = np.array(snimek2,dtype = np.int8)
+    evaluace = ve.compare_volumes(snimek1, snimek2, voxelsize_mm)
     #score = ve.sliver_score_one_couple(evaluace)
     score = 0
     vysledky = [evaluace,score]
