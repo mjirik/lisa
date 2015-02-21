@@ -15,6 +15,8 @@ from nose.plugins.attrib import attr
 from lisa import liver_segmentation
 import os
 path_to_script = os.path.dirname(os.path.abspath(__file__))
+import logging
+logger = logging.getLogger(__name__)
 
 
 class LiverSegmentationTest(unittest.TestCase):
@@ -93,21 +95,25 @@ class LiverSegmentationTest(unittest.TestCase):
 
         import nearpy
         import io3d
+        
+        logger.setLevel(logging.DEBUG) #ZDE UPRAVIT POKUD NECHCETE VSECHNY VYPISY
+        
+        
 
         path_to_script = os.path.dirname(os.path.abspath(__file__))
         # print path_to_script
         b = path_to_script[0:-5]
         b = b + 'sample_data'
         cesta = b
-
-        print 'probiha nacitani souboru z adresare sample_data'
+        
+        logger.info('probiha nacitani souboru z adresare sample_data')
         seznamSouboru = liver_segmentation.vyhledejSoubory(cesta)
         reader = io3d.DataReader()
         vektorOriginal = liver_segmentation.nactiSoubor(
             cesta, seznamSouboru, 0, reader)
         originalPole = vektorOriginal[0]
         originalVelikost = vektorOriginal[1]
-        print '***zahajeni segmentace***'
+        logger.info( '***zahajeni segmentace***')
         vytvoreny = liver_segmentation.LiverSegmentation(
             originalPole, originalVelikost)
         vytvoreny.setCisloMetody(2)
@@ -115,25 +121,25 @@ class LiverSegmentationTest(unittest.TestCase):
         segmentovany = vytvoreny.segmentation
         segmentovanyVelikost = vytvoreny.voxelSize
         engine = nearpy.Engine(dim=3)
-        print 'segmentace dokoncena, nacitani rucni segmentace z adresare sample_data'
+        logger.info('segmentace dokoncena, nacitani rucni segmentace z adresare sample_data')
         vektorOriginal = liver_segmentation.nactiSoubor(
             cesta, seznamSouboru, 1, reader)
         rucniPole = vektorOriginal[0]
         rucniVelikost = vektorOriginal[1]
-        print 'zahajeni vyhodnoceni segmentace'
+        logger.info('zahajeni vyhodnoceni segmentace')
         vysledky = liver_segmentation.vyhodnoceniSnimku(
             rucniPole, rucniVelikost, segmentovany, segmentovanyVelikost, engine)
-        print vysledky
+        logger.info(str(vysledky))
         skore = vysledky[1]
         pravda = True
         if(skore > 75):
-            print'metoda funguje uspokojive'
+            logger.info('metoda funguje uspokojive')
             pravda = False
         if(pravda and (skore > 50)):
-            print'metoda funguje relativne dobre'
+            logger.info('metoda funguje relativne dobre')
             pravda = False
         if(pravda):
-            print'metoda funguje spatne'
+            logger.info('metoda funguje spatne')
             pravda = False
         self.assertGreater(skore, 5)
 
