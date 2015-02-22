@@ -260,20 +260,37 @@ Install Windows with Anaconda
 * Run command line and create conda-virtualenv
 
 
-    conda create --no-default-packages -n lisa pip
-    activate lisa
+        conda create --no-default-packages -n lisa pip
+        activate lisa
 
 * In activated lisa virtualenv run following lines
 
 
-    pip install wget
-    python wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_conda.txt
-    install --file requirements_conda.txt
-    mkdir projects
-    cd projects
-    git clone --recursive -b stable https://github.com/mjirik/lisa.git
+         pip install wget
+         python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_conda.txt
+         conda install -y --file requirements_conda.txt
+         mkdir projects
+         cd projects
+         
         
- 
+ * gco_python
+    
+    Fallowing lines downloads gco and gco_python. Then it makes build with mingw compiler and install. 
+
+
+        git clone https://github.com/amueller/gco_python.git
+        cd gco_python
+        mkdir gco_src && cd gco_src
+        curl -O http://vision.csd.uwo.ca/code/gco-v3.0.zip
+        unzip gco-v3.0.zip
+        cd ..
+        curl -O https://raw2.github.com/mjirik/pyseg_base/master/distr/gco_python.pyx.patch
+        patch gco_python.pyx < gco_python.pyx.patch
+        python setup.py build_ext -i --compiler=mingw32
+        python.exe setup.py build --compiler=mingw32
+        python.exe setup.py install --skip-build
+        
+        git clone --recursive -b stable https://github.com/mjirik/lisa.git
 
 Install Windows with PythonXY
 ======================
