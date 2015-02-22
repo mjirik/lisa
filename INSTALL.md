@@ -257,12 +257,21 @@ Install Windows with Anaconda
 
      Select "Run Git from the Windows Command Prompt" or "Run Git and included Unix tools from the Windows Command Prompt"
 * Download and install [CMake](http://www.cmake.org/download/#latest)
-* Run command line
+* Run command line and create conda-virtualenv
 
-	conda install --file requirements_conda.txt
-        mkdir projects
-        cd projects
-        git clone --recursive -b stable https://github.com/mjirik/lisa.git
+
+    conda create --no-default-packages -n lisa pip
+    activate lisa
+
+* In activated lisa virtualenv run following lines
+
+
+    pip install wget
+    python wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_conda.txt
+    install --file requirements_conda.txt
+    mkdir projects
+    cd projects
+    git clone --recursive -b stable https://github.com/mjirik/lisa.git
         
  
 
