@@ -287,8 +287,8 @@ Install Windows with Anaconda
         curl -O https://raw2.github.com/mjirik/pyseg_base/master/distr/gco_python.pyx.patch
         patch gco_python.pyx < gco_python.pyx.patch
         python setup.py build_ext -i --compiler=mingw32
-        python.exe setup.py build --compiler=mingw32
-        python.exe setup.py install --skip-build
+        python setup.py build --compiler=mingw32
+        python setup.py install --skip-build
         
         git clone --recursive -b stable https://github.com/mjirik/lisa.git
 
