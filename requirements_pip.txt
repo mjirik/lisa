@@ -2,4 +2,3 @@ pysegbase
 dicom2fem
 sed3
 io3d
-nearpy
