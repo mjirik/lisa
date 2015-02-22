@@ -249,8 +249,24 @@ In VirtualBox
 * Use existing hard disk and locate downloaded Lisa Image (lisa_ubuntu14.04.vdi)
 * Password to Lisa account is: L1v3r.
 
+Install Windows with Anaconda
+=========
 
-Install Windows
+* Download and install [miniconda](http://conda.pydata.org/miniconda.html)
+* Download and install [Git](http://www.git-scm.com/download/win)
+
+     Select "Run Git from the Windows Command Prompt" or "Run Git and included Unix tools from the Windows Command Prompt"
+* Download and install [CMake](http://www.cmake.org/download/#latest)
+* Run command line
+
+	conda install --file requirements_conda.txt
+        mkdir projects
+        cd projects
+        git clone --recursive -b stable https://github.com/mjirik/lisa.git
+        
+ 
+
+Install Windows with PythonXY
 ======================
 
 
