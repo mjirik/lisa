@@ -178,9 +178,9 @@ class ExperimentsTest(unittest.TestCase):
         # os.path.join(path_to_script, "..")
         pklz_dirs = [
             os.path.abspath(
-                path_to_script + "./../sample_data/exp_small/exp1"),
+                path_to_script + "./../sample_data/exp_small2/exp1"),
             # os.path.abspath(
-            #     path_to_script + "./../sample_data/exp_small/exp2"),
+            #     path_to_script + "./../sample_data/exp_small2/exp2"),
         ]
         sliver_reference_dir = os.path.abspath(
             path_to_script + "./../sample_data/exp_small/seg")
@@ -211,6 +211,11 @@ class ExperimentsTest(unittest.TestCase):
         for dire in pklz_dirs:
             if os.path.exists(dire):
                 shutil.rmtree(dire)
+
+        dire, rest = os.path.split(pklz_dirs[0])
+        if os.path.exists(dire):
+            shutil.rmtree(dire)
+        os.mkdir(dire)
 #
 # # experiment_support.report(pklz_dirs, labels, markers)
         ramr = lisa.experiments.RunAndMakeReport(
@@ -219,12 +224,20 @@ class ExperimentsTest(unittest.TestCase):
             conf_default=conf_default,
             conf_list=conf_list,
             show=False, use_plt=False)
+
+        self.assertTrue(ramr.is_evaluation_necessary())
+        self.assertTrue(ramr.is_run_experiments_necessary())
+
         ramr.config()
         ramr.run_experiments()
         ramr.evaluation()
         ramr.report()
+
+        self.assertFalse(ramr.is_evaluation_necessary())
+        self.assertFalse(ramr.is_run_experiments_necessary())
+
         data_path = os.path.abspath(
-            path_to_script + "./../sample_data/exp_small/")
+            path_to_script + "./../sample_data/exp_small2/")
         dir_eval = os.listdir(data_path)
         self.assertIn('exp1_eval.pkl', dir_eval)
         self.assertIn('exp1_eval.csv', dir_eval)

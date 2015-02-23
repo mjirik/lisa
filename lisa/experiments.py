@@ -54,6 +54,7 @@ class RunAndMakeReport:
         self.markers = markers
         self.sliver_dir = sliver_reference_dir
         if isinstance(pklz_dirs, six.string_types):
+            # pklz_dir is string
             pklz_dirs = [pklz_dirs + lab.replace(' ', '') for lab in labels]
         self.pklz_dirs = pklz_dirs
         self.yaml_files = \
@@ -99,9 +100,30 @@ class RunAndMakeReport:
             self.eval_files, recalculateThis=None)
 
     def report(self):
-        report(self.pklz_dirs, self.labels, self.markers,
+        report(self.eval_files, self.labels, self.markers,
                show=self.show, output_prefix=self.image_basename,
                use_plt=self.use_plt)
+
+    def is_evaluation_necessary(self):
+        """
+        Check if evaluation output file exists.
+        """
+        for filen in self.eval_files:
+            if not os.path.isfile(filen + '.pkl'):
+                return True
+        return False
+
+    def is_run_experiments_necessary(self):
+        """
+        Check if run_experiments output files exists. Number of files in
+        every experiment dir is the same as number of files with seeds.
+        """
+        n_seeds = len(glob.glob(self.input_data_path_pattern))
+        for pklz_dir in self.pklz_dirs:
+            n_out_files = len(glob.glob(os.path.join(pklz_dir, '*.pkl*')))
+            if n_out_files < n_seeds:
+                return True
+        return False
 
 
 def run_and_make_report(*pars, **params):
@@ -251,11 +273,16 @@ def __save_data_frames(dfs, labels, output_prefix):
         fo.close()
 
 
-def report(pklz_dirs, labels, markers, show=True, output_prefix='',
-           use_plt=True):
+def report(eval_files, labels, markers, show=True, output_prefix='',
+           use_plt=True, pklz_dirs=None):
     """
+
     based on
-    use_plt: can supress using of matplotlib
+    :eval_files: list of filenames with input data without extension. If it is
+    None, based on pklz_disr the default eval_list is generated.
+    :use_plt: can supress using of matplotlib
+    :pklz_dirs: is used for generating eval_files if eval_files is None.
+    Obsolete
     """
 
 # TODO image_basename  generovat obrazky
@@ -276,10 +303,17 @@ def report(pklz_dirs, labels, markers, show=True, output_prefix='',
         'use_plt': use_plt
     }
     # return
-    yaml_files = [os.path.normpath(path) + '.yaml' for path in pklz_dirs]
-    logger.debug(str(yaml_files))
+    # yaml_files = [os.path.normpath(path) + '.yaml' for path in pklz_dirs]
+    # logger.debug(str(yaml_files))
 
-    eval_files = [os.path.normpath(path) + '_eval' for path in pklz_dirs]
+    if eval_files is None:
+        if pklz_dirs is not None:
+            eval_files = [
+                os.path.normpath(path) + '_eval' for path in pklz_dirs]
+        else:
+            logger.error('pklz_dirs and eval_files is None')
+            raise Exception('pklz_dirs and eval_files is None')
+
     logger.debug(str(eval_files))
     data = [misc.obj_from_file(fname + '.pkl', filetype='pkl')
             for fname in eval_files]
@@ -311,7 +345,6 @@ def report(pklz_dirs, labels, markers, show=True, output_prefix='',
     logger.info('rmsd ' + str(rmsd_mn))
 
     logger.info("Přepočteno na skóre")
-    import pandas
     # print tables[0].shape
     # pandas.set_option('display.max_columns', None)
     scoreTotal, scoreMetrics, scoreAll = sliverScoreAll(data)
@@ -370,7 +403,7 @@ def sliver_eval_all_to_yamls(yaml_files, pklz_dirs, sliver_dir, eval_files,
     """
     if recalculateThis is None:
         recalculateThis = recalculate_suggestion(eval_files)
-    print 'eval files ' , eval_files
+    logger.debug('eval files ' + str(eval_files))
 
     for i in recalculateThis:
         logger.info("Performing evaluation on: " + str(pklz_dirs[i]))
