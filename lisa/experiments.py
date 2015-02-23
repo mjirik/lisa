@@ -42,11 +42,14 @@ class RunAndMakeReport:
         extension.config. In this files is configuration of Lisa.
     :image_basename: Basis for image names. It can be directory, or filename
         begining
+    :only_if_necessary: If it is True the make_all() function call
+    run_experiments() and evaluation() function only if there are no evaluation
+    outputs and experiment_outputs.
     """
     def __init__(self, pklz_dirs, labels, markers, sliver_reference_dir,
                  input_data_path_pattern, conf_default=None,
                  conf_list=None, show=True, use_plt=True,
-                 image_basename=None):
+                 image_basename=None, only_if_necessary=True):
 
         self.conf_list = conf_list
         self.conf_default = conf_default
@@ -69,14 +72,21 @@ class RunAndMakeReport:
         self.show = show
         self.input_data_path_pattern = input_data_path_pattern
         self.use_plt = use_plt
+        self.only_if_necessary = only_if_necessary
 
     def make_all(self):
         """
         Run config(), run_experiments(), evaluation() and report()
         """
         self.config()
-        self.run_experiments()
-        self.evaluation()
+        if self.only_if_necessary:
+            if self.is_evaluation_necessary():
+                if self.is_run_experiments_necessary():
+                    self.run_experiments()
+                self.evaluation()
+        else:
+            self.run_experiments()
+            self.evaluation()
         self.report()
 
     def config(self):
