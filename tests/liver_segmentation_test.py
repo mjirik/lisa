@@ -93,7 +93,6 @@ class LiverSegmentationTest(unittest.TestCase):
         rucni segmentaci, na vysledku a rucni provede srovnani a podle
         vysledku vypise verdikt na konzoli'''
 
-        import nearpy
         import io3d
         
         logger.setLevel(logging.DEBUG) #ZDE UPRAVIT POKUD NECHCETE VSECHNY VYPISY
@@ -116,11 +115,10 @@ class LiverSegmentationTest(unittest.TestCase):
         logger.info( '***zahajeni segmentace***')
         vytvoreny = liver_segmentation.LiverSegmentation(
             originalPole, originalVelikost)
-        vytvoreny.setCisloMetody(2)
+        #vytvoreny.setCisloMetody(2)
         vytvoreny.run()
         segmentovany = vytvoreny.segmentation
         segmentovanyVelikost = vytvoreny.voxelSize
-        engine = nearpy.Engine(dim=3)
         logger.info('segmentace dokoncena, nacitani rucni segmentace z adresare sample_data')
         vektorOriginal = liver_segmentation.nactiSoubor(
             cesta, seznamSouboru, 1, reader)
@@ -128,7 +126,7 @@ class LiverSegmentationTest(unittest.TestCase):
         rucniVelikost = vektorOriginal[1]
         logger.info('zahajeni vyhodnoceni segmentace')
         vysledky = liver_segmentation.vyhodnoceniSnimku(
-            rucniPole, rucniVelikost, segmentovany, segmentovanyVelikost, engine)
+            rucniPole, rucniVelikost, segmentovany, segmentovanyVelikost)
         logger.info(str(vysledky))
         skore = vysledky[1]
         pravda = True

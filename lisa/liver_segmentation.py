@@ -607,7 +607,7 @@ class LiverSegmentation:
     def __init__(
         self,
         data3d,
-        voxelsize=[1, 1, 1],segparams={'cisloMetody':2,'vysledkyDostupne':False,'some_parameter': 22,'path':None}
+        voxelsize=[1, 1, 1],segparams={'cisloMetody':3,'vysledkyDostupne':False,'some_parameter': 22,'path':None}
     ):
         """
         :data3d: 3D array with data
