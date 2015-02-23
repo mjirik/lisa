@@ -1,9 +1,9 @@
-[submodule "extern/pyseg_base"]
-	path = src/extern/pyseg_base
-	url = git://github.com/mjirik/pyseg_base.git
-[submodule "extern/dicom2fem"]
-	path = src/extern/dicom2fem
-	url = git://github.com/vlukes/dicom2fem.git
-[submodule "extern/sed3"]
-	path = src/extern/sed3
-	url = https://github.com/mjirik/sed3.git
+# [submodule "extern/pyseg_base"]
+# 	path = src/extern/pyseg_base
+# 	url = git://github.com/mjirik/pyseg_base.git
+# [submodule "extern/dicom2fem"]
+# 	path = src/extern/dicom2fem
+# 	url = git://github.com/vlukes/dicom2fem.git
+# [submodule "extern/sed3"]
+# 	path = src/extern/sed3
+# 	url = https://github.com/mjirik/sed3.git
