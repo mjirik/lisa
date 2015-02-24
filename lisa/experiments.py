@@ -283,6 +283,44 @@ def __save_data_frames(dfs, labels, output_prefix):
         fo.close()
 
 
+def create_data_frame(data, labels, pklz_dirs):
+    """
+    :data: Create pandas dataframe
+
+    data = [misc.obj_from_file(fn + '.pkl',filetype='pkl') for fn in eval_files]
+    """
+
+    scoreTotal, scoreMetrics, scoreAll = sliverScoreAll(data)
+
+    df_pieces = []
+    for (dat, label, pklz_dir, score_data) in \
+            zip(data, labels, pklz_dirs, scoreAll):
+        # add two columns
+        dat['label'] = [label] * len(dat['avgd'])
+        dat['pklz_dir'] = [pklz_dir] * len(dat['avgd'])
+
+        dat['avgd_pts'] = score_data['avgd']
+        dat['maxd_pts'] = score_data['maxd']
+        dat['voe_pts'] = score_data['voe']
+        dat['vd_pts'] = score_data['vd']
+        dat['rmsd_pts'] = score_data['rmsd']
+
+        df = pandas.DataFrame(dat, columns=dat.keys())
+        df_pieces.append(df)
+
+    df_all = pandas.concat(df_pieces)
+    a, inv = np.unique(df_all['file1'], return_inverse=True)
+    df_all.index = inv
+    return df_all
+
+
+def __df_to_csv_and_latex(df_all, output_prefix):
+    with open(output_prefix + "all_data.csv", 'w') as f:
+        df_all.to_csv(f)
+    with open(output_prefix + "all_data.tex", 'w') as f:
+        df_all.to_latex(f)
+
+
 def report(eval_files, labels, markers, show=True, output_prefix='',
            use_plt=True, pklz_dirs=None):
     """
@@ -327,6 +365,9 @@ def report(eval_files, labels, markers, show=True, output_prefix='',
     logger.debug(str(eval_files))
     data = [misc.obj_from_file(fname + '.pkl', filetype='pkl')
             for fname in eval_files]
+
+    df_all = create_data_frame(data, labels, eval_files)
+    __df_to_csv_and_latex(df_all, output_prefix)
 
     if use_plt:
         logger.debug("first plot")
@@ -465,7 +506,6 @@ def dataplot(data, keyword, ylabel, expn=None, markers=None, labels=None,
             y1 = ymin
     plt.axis((0, x2 + 1, y1, y2))
     plt.ylabel(ylabel)
-    print loc
     plt.legend(numpoints=1, loc=loc,
                bbox_to_anchor=(1.05, 1), borderaxespad=0.)
     plt.savefig(filename + '-' + keyword + '.pdf', bbox_inches='tight')
@@ -507,7 +547,6 @@ def sumplot(data, keyword, ylabel, expn=None, expn_labels=None, loc=70,
                 y1 = ymin
         plt.axis((x1, x2, y1, y2))
         plt.ylabel(ylabel)
-        print expn
         plt.xlim([np.min(expn) - 1, np.max(expn) + 1])
         # plt.xticks([1,2,3],['hu','ha', 'te'])
 
@@ -516,7 +555,6 @@ def sumplot(data, keyword, ylabel, expn=None, expn_labels=None, loc=70,
             expn_labels = expn_labels[np.array(expn)]
 
             plt.xticks(expn, expn_labels, rotation=labels_rotation)
-        print loc
         # plt.legend(numpoints=1, loc=loc)
         # plt.savefig('pitomost.png')
         plt.savefig(filename + '-' + keyword + '.pdf', bbox_inches='tight')
@@ -553,7 +591,6 @@ def plot_total(scoreMetrics, err_scale=1, expn=None, labels=None,
             y1 = ymin
     plt.axis((x1, x2, y1, y2))
     plt.ylabel(ylabel)
-    print expn
     plt.xlim([np.min(expn) - 1, np.max(expn) + 1])
     # plt.xticks([1,2,3],['hu','ha', 'te'])
 
