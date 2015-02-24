@@ -15,7 +15,7 @@ import subprocess
 import glob
 import numpy as np
 import copy
-import six
+# import six
 import pandas
 
 # ----------------- my scripts --------
@@ -35,6 +35,8 @@ class RunAndMakeReport:
     :sliver_dir: dir with sliver reference data
     :input_data_path_pattern: Directory containing data with seeds
         "/home/mjirik/exp010-seeds/*-seeds.pklz"
+    :experiment_dir: base directory of experiment outputs
+    :experiment_name: string is used as prefix for all output files
     :pklz_dirs: List of dirs or string with dir prefix. If the string is
         given base on labels the list is generated
         In each will be output for one experiment. There
@@ -46,19 +48,30 @@ class RunAndMakeReport:
     run_experiments() and evaluation() function only if there are no evaluation
     outputs and experiment_outputs.
     """
-    def __init__(self, pklz_dirs, labels, markers, sliver_reference_dir,
+    def __init__(self, experiment_dir, labels, markers, sliver_reference_dir,
                  input_data_path_pattern, conf_default=None,
                  conf_list=None, show=True, use_plt=True,
-                 image_basename=None, only_if_necessary=True):
+                 image_basename=None, only_if_necessary=True,
+                 pklz_dirs=None, experiment_name=None):
 
         self.conf_list = conf_list
         self.conf_default = conf_default
         self.labels = labels
         self.markers = markers
         self.sliver_dir = sliver_reference_dir
-        if isinstance(pklz_dirs, six.string_types):
+        self.experiment_dir = experiment_dir
+        if experiment_name is None:
+            aa, experiment_name = os.path.split(self.experiment_dir)
+        self.experiment_name = experiment_name
+
+        # if isinstance(pklz_dirs, six.string_types):
+        if pklz_dirs is None:
             # pklz_dir is string
-            pklz_dirs = [pklz_dirs + lab.replace(' ', '') for lab in labels]
+            pklz_dirs = [
+                os.path.join(
+                    experiment_dir, experiment_name + lab.replace(' ', ''))
+                for lab in labels
+            ]
         self.pklz_dirs = pklz_dirs
         self.yaml_files = \
             [os.path.normpath(path) + '.yaml' for path in pklz_dirs]
@@ -67,8 +80,10 @@ class RunAndMakeReport:
         self.exp_conf_files = \
             [os.path.normpath(path) + '.config' for path in pklz_dirs]
         if image_basename is None:
-            self.image_basename, head = os.path.split(self.pklz_dirs[0])
-            self.image_basename = os.path.join(self.image_basename, 'fig')
+            # self.image_basename, head = os.path.split(self.pklz_dirs[0])
+            self.image_basename = os.path.join(
+                self.experiment_dir, experiment_name + '-fig')
+
         self.show = show
         self.input_data_path_pattern = input_data_path_pattern
         self.use_plt = use_plt
@@ -112,7 +127,7 @@ class RunAndMakeReport:
     def report(self):
         report(self.eval_files, self.labels, self.markers,
                show=self.show, output_prefix=self.image_basename,
-               use_plt=self.use_plt)
+               use_plt=self.use_plt, experiment_name=self.experiment_name)
 
     def is_evaluation_necessary(self):
         """
@@ -139,15 +154,6 @@ class RunAndMakeReport:
 def run_and_make_report(*pars, **params):
     rr = RunAndMakeReport(*pars, **params)
     rr.make_all()
-    # exp_conf_files = [os.path.join(os.path.normpath(path),
-    # 'organ_segmentation.config') for path in pklz_dirs]
-    print "run experiments"
-    # run experiments
-    # # run evaluation
-    # print "run evaluation"
-    # print "make report"
-    # # make report
-    #
 
 
 def generate_configs(pklz_dirs, conf_default, conf_list):
@@ -283,7 +289,7 @@ def __save_data_frames(dfs, labels, output_prefix):
         fo.close()
 
 
-def create_data_frame(data, labels, pklz_dirs):
+def create_data_frame(data, labels, pklz_dirs, experiment_name=''):
     """
     :data: Create pandas dataframe
 
@@ -295,9 +301,10 @@ def create_data_frame(data, labels, pklz_dirs):
     df_pieces = []
     for (dat, label, pklz_dir, score_data) in \
             zip(data, labels, pklz_dirs, scoreAll):
-        # add two columns
+        # add some columns
         dat['label'] = [label] * len(dat['avgd'])
         dat['pklz_dir'] = [pklz_dir] * len(dat['avgd'])
+        dat['experiment_name'] = [experiment_name] * len(dat['avgd'])
 
         dat['avgd_pts'] = score_data['avgd']
         dat['maxd_pts'] = score_data['maxd']
@@ -314,15 +321,18 @@ def create_data_frame(data, labels, pklz_dirs):
     return df_all
 
 
-def __df_to_csv_and_latex(df_all, output_prefix):
+def __df_to_csv_and_latex(
+    df_all, output_prefix, latex_columns=['vd_pts', 'voe_pts', 'avgd_pts',
+                                          'maxd_pts', 'rmsd_pts']
+):
     with open(output_prefix + "all_data.csv", 'w') as f:
         df_all.to_csv(f)
     with open(output_prefix + "all_data.tex", 'w') as f:
-        df_all.to_latex(f)
+        df_all[latex_columns].to_latex(f)
 
 
 def report(eval_files, labels, markers, show=True, output_prefix='',
-           use_plt=True, pklz_dirs=None):
+           use_plt=True, pklz_dirs=None, experiment_name=''):
     """
 
     based on
@@ -366,7 +376,7 @@ def report(eval_files, labels, markers, show=True, output_prefix='',
     data = [misc.obj_from_file(fname + '.pkl', filetype='pkl')
             for fname in eval_files]
 
-    df_all = create_data_frame(data, labels, eval_files)
+    df_all = create_data_frame(data, labels, eval_files, experiment_name)
     __df_to_csv_and_latex(df_all, output_prefix)
 
     if use_plt:
