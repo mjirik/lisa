@@ -323,7 +323,8 @@ def create_data_frame(data, labels, pklz_dirs, experiment_name=''):
 
 def __df_to_csv_and_latex(
     df_all, output_prefix, latex_columns=['vd_pts', 'voe_pts', 'avgd_pts',
-                                          'maxd_pts', 'rmsd_pts']
+                                          'maxd_pts', 'rmsd_pts',
+                                          'experiment_name', 'label']
 ):
     with open(output_prefix + "all_data.csv", 'w') as f:
         df_all.to_csv(f)
