@@ -32,32 +32,34 @@ class RunAndMakeReport:
     seedy. Dále pak soubory s konfigurací a stejným jménem jako adresář +
     přípona '.conf'.
 
-    :sliver_dir: dir with sliver reference data
-    :input_data_path_pattern: Directory containing data with seeds
+    :param sliver_dir: dir with sliver reference data
+    :param input_data_path_pattern: Directory containing data with seeds
         "/home/mjirik/exp010-seeds/*-seeds.pklz"
-    :experiment_dir: base directory of experiment outputs
-    :experiment_name: string is used as prefix for all output files
-    :pklz_dirs: List of dirs or string with dir prefix. If the string is
+    :param experiment_dir: base directory of experiment outputs
+    :param experiment_name: string is used as prefix for all output files
+    :param pklz_dirs: List of dirs or string with dir prefix. If the string is
         given base on labels the list is generated
         In each will be output for one experiment. There
         is also required to have file with same name as directory with
         extension.config. In this files is configuration of Lisa.
-    :image_basename: Basis for image names. It can be directory, or filename
-        begining
-    :only_if_necessary: If it is True the make_all() function call
-    run_experiments() and evaluation() function only if there are no evaluation
-    outputs and experiment_outputs.
+    :param image_basename: Basis for image names. It can be directory, or
+        filename begining
+    :param only_if_necessary: If it is True the make_all() function call
+        run_experiments() and evaluation() function only if there are no
+        evaluation outputs and experiment_outputs.
+    :param markers: Allows to control markes for output graphs
     """
-    def __init__(self, experiment_dir, labels, markers, sliver_reference_dir,
+    def __init__(self, experiment_dir, labels, sliver_reference_dir,
                  input_data_path_pattern, conf_default=None,
                  conf_list=None, show=True, use_plt=True,
                  image_basename=None, only_if_necessary=True,
-                 pklz_dirs=None, experiment_name=None):
+                 pklz_dirs=None, experiment_name=None,
+                 filename_separator='-', markers=None
+                 ):
 
         self.conf_list = conf_list
         self.conf_default = conf_default
         self.labels = labels
-        self.markers = markers
         self.sliver_dir = sliver_reference_dir
         self.experiment_dir = experiment_dir
         if experiment_name is None:
@@ -69,7 +71,8 @@ class RunAndMakeReport:
             # pklz_dir is string
             pklz_dirs = [
                 os.path.join(
-                    experiment_dir, experiment_name + lab.replace(' ', ''))
+                    experiment_dir,
+                    experiment_name + filename_separator + lab.replace(' ', ''))
                 for lab in labels
             ]
         self.pklz_dirs = pklz_dirs
@@ -82,12 +85,22 @@ class RunAndMakeReport:
         if image_basename is None:
             # self.image_basename, head = os.path.split(self.pklz_dirs[0])
             self.image_basename = os.path.join(
-                self.experiment_dir, experiment_name + '-fig')
+                self.experiment_dir, experiment_name + filename_separator)
 
         self.show = show
         self.input_data_path_pattern = input_data_path_pattern
         self.use_plt = use_plt
         self.only_if_necessary = only_if_necessary
+        self.filename_separator = filename_separator
+        if markers is None:
+            markers = [
+                "ks", "k<", "k>", "k^", "kv", "kp", 'k*', 'ok', 'kh', 'ks'
+            ]
+        # repeat markers to have requested length
+        n = len(labels)
+        markers = np.asarray(([markers] * ((n / len(markers) + 1)))
+                             ).reshape(-1)[:n].tolist()
+        self.markers = markers
 
     def make_all(self):
         """
@@ -127,7 +140,9 @@ class RunAndMakeReport:
     def report(self):
         report(self.eval_files, self.labels, self.markers,
                show=self.show, output_prefix=self.image_basename,
-               use_plt=self.use_plt, experiment_name=self.experiment_name)
+               use_plt=self.use_plt, experiment_name=self.experiment_name,
+               filename_separator=self.filename_separator
+               )
 
     def is_evaluation_necessary(self):
         """
@@ -333,7 +348,8 @@ def __df_to_csv_and_latex(
 
 
 def report(eval_files, labels, markers, show=True, output_prefix='',
-           use_plt=True, pklz_dirs=None, experiment_name=''):
+           use_plt=True, pklz_dirs=None, experiment_name='',
+           filename_separator=''):
     """
 
     based on
@@ -352,14 +368,16 @@ def report(eval_files, labels, markers, show=True, output_prefix='',
         'labels': labels,
         'loc': 0,
         'show': show,
-        'filename': output_prefix
+        'filename': output_prefix,
+        'filename_separator': filename_separator
     }
     sp_params = {
         'expn': expn,
         'expn_labels': expn_labels,
         'show': show,
         'filename': output_prefix,
-        'use_plt': use_plt
+        'use_plt': use_plt,
+        'filename_separator': filename_separator
     }
     # return
     # yaml_files = [os.path.normpath(path) + '.yaml' for path in pklz_dirs]
@@ -483,11 +501,12 @@ def plotone(data, expn, keyword, ind, marker, legend):
     if ind in expn:
         xdata = range(1, len(data[ind][keyword]) + 1)
         plt.plot(
-            xdata, data[ind][keyword], marker, label=legend, alpha=0.7, ms=10)
+            xdata, data[ind][keyword], marker, label=legend)
+        # , alpha=0.7, ms=10)
 
 
 def dataplot(data, keyword, ylabel, expn=None, markers=None, labels=None,
-             ymin=None, loc=0, filename='', show=True):
+             ymin=None, loc=0, filename='', show=True, filename_separator='-'):
     """
     Plot data. Function is prepared for our dataset (for example 5 measures).
 
@@ -519,7 +538,8 @@ def dataplot(data, keyword, ylabel, expn=None, markers=None, labels=None,
     plt.ylabel(ylabel)
     plt.legend(numpoints=1, loc=loc,
                bbox_to_anchor=(1.05, 1), borderaxespad=0.)
-    plt.savefig(filename + '-' + keyword + '.pdf', bbox_inches='tight')
+    plt.savefig(filename + filename_separator + keyword + '.pdf',
+                bbox_inches='tight')
     if show:
         plt.show()
     plt.close()
@@ -527,7 +547,7 @@ def dataplot(data, keyword, ylabel, expn=None, markers=None, labels=None,
 
 def sumplot(data, keyword, ylabel, expn=None, expn_labels=None, loc=70,
             filename='', labels_rotation=70, ymin=None, show=True,
-            use_plt=True):
+            use_plt=True, filename_separator='-'):
     """
     Plot data. Function is prepared for our dataset (for example 5 measures).
     expn_labels: Labels for x-axis based aligned to expn
@@ -568,7 +588,8 @@ def sumplot(data, keyword, ylabel, expn=None, expn_labels=None, loc=70,
             plt.xticks(expn, expn_labels, rotation=labels_rotation)
         # plt.legend(numpoints=1, loc=loc)
         # plt.savefig('pitomost.png')
-        plt.savefig(filename + '-' + keyword + '.pdf', bbox_inches='tight')
+        plt.savefig(filename + filename_separator + keyword + '.pdf',
+                    bbox_inches='tight')
         # plt.savefig('-avgd.png')
         if show:
             plt.show()

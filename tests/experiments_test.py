@@ -32,7 +32,7 @@ class ExperimentsTest(unittest.TestCase):
 # if directory exists, remove it
         experiment_dir = os.path.abspath(
             path_to_script + "./../sample_data/exp_small2/")
-        experiment_name = 'exp2-'
+        experiment_name = 'exp2'
 
         if os.path.exists(experiment_dir):
             shutil.rmtree(experiment_dir)
@@ -68,12 +68,14 @@ class ExperimentsTest(unittest.TestCase):
 #
 # # experiment_support.report(pklz_dirs, labels, markers)
         ramr = lisa.experiments.RunAndMakeReport(
-            experiment_dir, labels, markers, sliver_reference_dir,
+            experiment_dir, labels, sliver_reference_dir,
             input_data_path_pattern,
             conf_default=conf_default,
             conf_list=conf_list,
             show=False, use_plt=False,
-            experiment_name=experiment_name)
+            experiment_name=experiment_name,
+            markers=markers
+        )
         ramr.config()
         dir_eval = os.listdir(experiment_dir)
         # self.assertIn('exp1_eval.pkl', dir_eval)
@@ -186,9 +188,6 @@ class ExperimentsTest(unittest.TestCase):
         # "/home/mjirik/data/medical/orig/sliver07/training/"
 
 # this is setup for visualization
-        markers = ['ks',
-                   # 'r<'
-                   ]
         labels = ['vs6mm',
                   # '02smoothing'
                   ]
@@ -212,7 +211,7 @@ class ExperimentsTest(unittest.TestCase):
 #
 # # experiment_support.report(pklz_dirs, labels, markers)
         ramr = lisa.experiments.RunAndMakeReport(
-            experiment_dir, labels, markers, sliver_reference_dir,
+            experiment_dir, labels, sliver_reference_dir,
             input_data_path_pattern,
             conf_default=conf_default,
             conf_list=conf_list,
@@ -232,13 +231,13 @@ class ExperimentsTest(unittest.TestCase):
         data_path = os.path.abspath(
             path_to_script + "./../sample_data/exp22/")
         dir_eval = os.listdir(data_path)
-        self.assertIn('exp22vs6mm_eval.pkl', dir_eval)
-        self.assertIn('exp22vs6mm_eval.csv', dir_eval)
-        self.assertIn('exp22vs6mm.config', dir_eval)
-        self.assertIn('exp22vs6mm.yaml', dir_eval)
+        self.assertIn('exp22-vs6mm_eval.pkl', dir_eval)
+        self.assertIn('exp22-vs6mm_eval.csv', dir_eval)
+        self.assertIn('exp22-vs6mm.config', dir_eval)
+        self.assertIn('exp22-vs6mm.yaml', dir_eval)
         import io3d.misc
         obj = io3d.misc.obj_from_file(
-            os.path.join(experiment_dir, 'exp22vs6mm.yaml'),
+            os.path.join(experiment_dir, 'exp22-vs6mm.yaml'),
             filetype='yaml')
         self.assertGreater(len(obj['data']), 0)
 #         # self.assertTrue(False)
