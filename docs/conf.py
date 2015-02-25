@@ -38,7 +38,7 @@ MOCK_MODULES = [
     'seg2fem', 'skimage.segmentation', 'matplotlib.patches', 'skimage.feature',
     'scipy.ndimage.morphology', 'mpl_toolkits', 'mpl_toolkits.mplot3d',
     'matplotlib.backends.backend_gtkagg', 'cv2', 'skimage.measure', 'dicom2fem',
-    'scipy.stats', 'io3d.misc', 'six', 'nearpy', 'SimpleITK', 'lar'
+    'scipy.stats', 'io3d.misc', 'six', 'nearpy', 'SimpleITK', 'lar', 'pandas'
 ]
 
 for mod_name in MOCK_MODULES:
