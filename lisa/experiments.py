@@ -36,7 +36,9 @@ class RunAndMakeReport:
     :params labels: Labels for describing graphs. They are also used for
         generating dir names if pklz_dirs is not used.
     :param sliver_reference_dir: dir with sliver reference data
-    :param input_data_path_pattern: Directory containing data with seeds
+    :param input_data_path_pattern: Directory containing data with seeds. For
+        example::
+
         "/home/mjirik/exp010-seeds/*-seeds.pklz"
     :param conf_default: default values for config generation. Example::
 
@@ -49,6 +51,7 @@ class RunAndMakeReport:
                 'method': 'GC'
             }
         }
+
     :param experiment_name: string is used as prefix for all output files
     :param pklz_dirs: List of dirs or string with dir prefix. If the string is
         given base on labels the list is generated
