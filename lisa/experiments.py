@@ -32,10 +32,23 @@ class RunAndMakeReport:
     seedy. Dále pak soubory s konfigurací a stejným jménem jako adresář +
     přípona '.conf'.
 
-    :param sliver_dir: dir with sliver reference data
+    :param experiment_dir: base directory of experiment outputs
+    :params labels: Labels for describing graphs. They are also used for
+        generating dir names if pklz_dirs is not used.
+    :param sliver_reference_dir: dir with sliver reference data
     :param input_data_path_pattern: Directory containing data with seeds
         "/home/mjirik/exp010-seeds/*-seeds.pklz"
-    :param experiment_dir: base directory of experiment outputs
+    :param conf_default: default values for config generation. Example::
+
+        conf_default = {
+            'config_version': [1,0,0],
+            'working_voxelsize_mm': 2.0,
+            'segparams': {
+                'pairwise_alpha_per_mm2': 50,
+                'return_only_object_with_seeds': True,
+                'method': 'GC'
+            }
+        }
     :param experiment_name: string is used as prefix for all output files
     :param pklz_dirs: List of dirs or string with dir prefix. If the string is
         given base on labels the list is generated
