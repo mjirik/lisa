@@ -40,7 +40,8 @@ class RunAndMakeReport:
         example::
 
         "/home/mjirik/exp010-seeds/*-seeds.pklz"
-    :param conf_default: default values for config generation. Example::
+    :param conf_default: default values for config generation.
+        Example::
 
         conf_default = {
             'config_version': [1,0,0],
@@ -51,7 +52,6 @@ class RunAndMakeReport:
                 'method': 'GC'
             }
         }
-
     :param experiment_name: string is used as prefix for all output files
     :param pklz_dirs: List of dirs or string with dir prefix. If the string is
         given base on labels the list is generated
