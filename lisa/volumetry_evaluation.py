@@ -312,7 +312,11 @@ def distance_matrics(vol1, vol2, voxelsize_mm):
     # avgd = (sum_d21 + sum_d12)/float(len_d21 + len_d12)
     # rmsd = ((np.sum(dst_12**2) + dst_21**2)/float(len_d21 + len_d12))**0.5
     avgd = np.average(dst_both)
-    rmsd = np.average(dst_both ** 2)**0.5
+
+# there is not clear what is correct
+    # rmsd = np.average(dst_both ** 2)**0.5
+    # rmsd = (np.average(dst_12) + np.average(dst_21))**0.5
+    rmsd = np.average(dst_both ** 2)
     # rmsd = np.average(dst_b1_to_b2[border2] ** 2)
     maxd = max(np.max(dst_b1_to_b2), np.max(dst_b2_to_b1))
 # old

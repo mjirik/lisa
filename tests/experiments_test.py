@@ -122,7 +122,6 @@ class ExperimentsTest(unittest.TestCase):
         # self.assertTrue(False)
 
     @attr("incomplete")
-    @attr("actual")
     def test_experiment_set_small(self):
         import lisa.experiments
 
@@ -165,11 +164,13 @@ class ExperimentsTest(unittest.TestCase):
 
 # experiment_support.report(pklz_dirs, labels, markers)
         lisa.experiments.run_and_make_report(
-            pklz_dirs, labels, markers, sliver_reference_dir,
+            pklz_dirs, labels, sliver_reference_dir,
             input_data_path_pattern,
             conf_default=conf_default,
             conf_list=conf_list,
-            show=False)
+            show=False,
+            markers=markers
+        )
         import io3d.misc
         obj = io3d.misc.obj_from_file(pklz_dirs[0] + '.yaml', filetype='yaml')
         self.assertGreater(len(obj['data']), 0)
@@ -330,6 +331,27 @@ class ExperimentsTest(unittest.TestCase):
         eval1 = ve.distance_matrics(vol1, vol2, [1, 1, 1])
         self.assertAlmostEquals(eval1[2], np.sqrt(2) * 2)
 
+    @attr("actual")
+    def test_eval_sliver_distance_two_points_non_comutative(self):
+        """
+        Two volumes - obj1 1px and obj2 2px
+        There is different maximal distance from first to second then
+        from second to first
+
+        """
+
+        vol1 = np.zeros([20, 21, 22], dtype=np.int8)
+        vol1[10, 10, 10] = 1
+
+        vol2 = np.zeros([20, 21, 22], dtype=np.int8)
+        vol2[10, 12, 10] = 1
+        vol2[10, 14, 10] = 1
+
+        eval1 = ve.distance_matrics(vol1, vol2, [1, 1, 1])
+
+        self.assertLess(eval1[0], 4)
+        self.assertGreater(eval1[0], 2)
+
     def test_eval_sliver_distance_two_points_with_half_voxelsize(self):
         """
         Two points 2 by 2 pixels diagonal and voxelsize is 0.5
@@ -348,6 +370,7 @@ class ExperimentsTest(unittest.TestCase):
     def test_compare_eval_sliver_distance(self):
         """
         comparison of two methods for surface distance computation
+        Second implementation is obsolete
         """
 
         vol1 = np.zeros([20, 21, 22], dtype=np.int8)
@@ -371,6 +394,7 @@ class ExperimentsTest(unittest.TestCase):
         """
         comparison of two methods for surface distance computation on bigger
         object
+        Second implementation is obsolete
         """
 
         vol1 = np.zeros([100, 210, 220], dtype=np.int8)
