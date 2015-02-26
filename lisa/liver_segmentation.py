@@ -57,6 +57,16 @@ def zobrazUtil(cmetody,cisloObrazu = 1):
     #segmentace = np.zeros(rucni.shape, dtype=np.int8)
     #segmentace[0:-1,100:400,100:400] = 1    
     zobrazit(original,rucni,strojova)
+    #zobrazit2(original,rucni,strojova) #pouziva contour
+    return
+
+def zobrazitOriginal(original):
+    '''Pomocna metoda pro zobrazeni
+    libovolneho snimku '''
+    ed = sed3.sed3(original)
+    #print kombinaceNesouhlas
+    ed.show()
+    return
 
 def zobrazit(original,rucni,strojova):
     '''Metoda pro srovnani rucni a 
@@ -71,6 +81,20 @@ def zobrazit(original,rucni,strojova):
     vysledek = -strojova-rucni  +3*prunik 
     #poleVysledek = kombinace   
     ed = sed3.sed3(vysledek)
+    #print kombinaceNesouhlas
+    ed.show()
+    return
+
+def zobrazit2(original,rucni,strojova):
+    '''Metoda pro srovnani rucni a 
+    automaticke segmentace z lidskeho pohledu
+    cerna oblast - NESHODA strojoveho a rucniho
+    bila oblast - SHODA strojoveho a rucniho
+    seda oblast - NULY u strojoveho i rucniho'''
+    
+    
+    #poleVysledek = kombinace   
+    ed = sed3.sed3(original,contour=strojova)
     #print kombinaceNesouhlas
     ed.show()
     return
@@ -285,14 +309,19 @@ def segmentace2(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     #print np.shape(segmentaceVysledek)
     return segmentaceVysledek
 
+
 def segmentace3(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     '''Morfologie z 2D na 3D '''
     print 'pouzita metoda 3'
     segmentaceVysledek = []
     #print tabulka
-    zeli3 = 0
-    mezDolni = 0
-    mezHorni = 250
+    #zeli3 = 0
+    pokus = nactiYamlSoubor('Metoda1.yml')
+    prumer = pokus[0]
+    odchylka = np.sqrt(pokus[1])
+    konstanta = 2
+    mezHorni=prumer + konstanta*odchylka
+    mezDolni=prumer - konstanta*odchylka
     print 'probiha prahovani'
   
     rezNovy1 = ( tabulka>=mezDolni)
