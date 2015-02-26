@@ -17,6 +17,7 @@ import numpy as np
 import copy
 # import six
 import pandas
+import traceback
 
 # ----------------- my scripts --------
 import misc
@@ -293,10 +294,13 @@ def run_liver_segmentation_experiment_with_conf(
             else:
                 import lisa.organ_segmentation
                 import sys
-                tmpargv = sys.argv
-                sys.argv = bsh.split()[1:]
-                lisa.organ_segmentation.main()
-                sys.argv = tmpargv
+                try:
+                    tmpargv = sys.argv
+                    sys.argv = bsh.split()[1:]
+                    lisa.organ_segmentation.main()
+                    sys.argv = tmpargv
+                except:
+                    traceback.print_exc()
 
 # <codecell>
 
