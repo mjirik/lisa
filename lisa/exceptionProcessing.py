@@ -24,7 +24,7 @@ def reportException(exception):
         print str(e)
         print "Original exception:"
         print str(exception)
-        traceback.print_rb(exception.__traceback___)
+        traceback.print_tb(exception.__traceback___)
 
 
 def sendMail(mailcontent, subject='None'):
