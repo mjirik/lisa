@@ -29,7 +29,7 @@ import exceptionProcessing
 import scipy
 import scipy.ndimage
 import numpy as np
-import time
+import datetime
 import argparse
 # tady uz je logger
 # import dcmreaddata as dcmreader
@@ -438,9 +438,9 @@ class OrganSegmentation():
         try:
             time_prev = datap['processing_information']['processing_time']
             self.processing_time = time_prev
-            self.time_start = time.time() - time_prev
+            self.time_start = datetime.datetime.now() - time_prev
         except:
-            self.time_start = time.time()
+            self.time_start = datetime.datetime.now()
 
     def __import_dataplus_seeds(self, datap):
         try:
@@ -607,7 +607,7 @@ class OrganSegmentation():
 
         # if False:
         if False:
-# TODO dodělat postprocessing PV
+            # TODO dodělat postprocessing PV
             import segmentation
             outputSegmentation = segmentation.vesselSegmentation(
                 self.data3d,
@@ -617,7 +617,7 @@ class OrganSegmentation():
                 dilationIterations=10,
                 nObj=1,
                 biggestObjects=False,
-                seeds = (self.segmentation>0).astype(np.int8),
+                seeds=(self.segmentation > 0).astype(np.int8),
                 useSeedsOfCompactObjects=True,
                 interactivity=True,
                 binaryClosingIterations=2,
@@ -665,7 +665,8 @@ class OrganSegmentation():
 #
         logger.debug('self.slab')
         logger.debug(str(self.slab))
-        self.processing_time = time.time() - self.time_start
+        self.processing_time = (
+            datetime.datetime.now() - self.time_start).total_seconds()
 
 #    def interactivity(self, min_val=800, max_val=1300):
 # @TODO generovat QApplication
@@ -738,6 +739,7 @@ class OrganSegmentation():
         processing_information = {
             'organ_segmentation': {
                 'processing_time': self.processing_time,
+                'time_start': str(self.time_start),
                 'oseg_input_params': self.oseg_input_params,
                 'organ_interactivity_counter':
                 self.organ_interactivity_counter,
