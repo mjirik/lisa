@@ -348,7 +348,8 @@ def create_data_frame(data, labels, pklz_dirs, experiment_name=''):
 
     df_all = pandas.concat(df_pieces)
     a, inv = np.unique(df_all['file1'], return_inverse=True)
-    df_all.index = inv
+    df_all['data_index'] = inv
+    df_all.index = range(0, len(inv))
     return df_all
 
 
@@ -358,7 +359,7 @@ def __df_to_csv_and_latex(
                                           'experiment_name', 'label']
 ):
     with open(output_prefix + "all_data.csv", 'w') as f:
-        df_all.to_csv(f)
+        df_all.to_csv(f, index=False)
     with open(output_prefix + "all_data.tex", 'w') as f:
         df_all[latex_columns].to_latex(f)
 
