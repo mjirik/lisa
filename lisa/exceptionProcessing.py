@@ -15,8 +15,8 @@ from email.mime.text import MIMEText
 
 
 def reportException(exception):
+    excstr = traceback.format_exc()
     try:
-        excstr = traceback.format_exc()
         sendMail(excstr, 'Lisa exception: ' + str(exception))
     except Exception as e:
         print "Problems with sending exception report"
@@ -24,7 +24,9 @@ def reportException(exception):
         print str(e)
         print "Original exception:"
         print str(exception)
-        traceback.print_tb(exception.__traceback___)
+        print excstr
+
+    raise(exception)
 
 
 def sendMail(mailcontent, subject='None'):

@@ -25,7 +25,6 @@ class LiverSegmentationTest(unittest.TestCase):
     # nosetests tests/liver_segmentation_test.py -a actual
 
     @attr('interactive')
-    @attr('actual')
     def test_automatic(self):
         pass
 
@@ -86,6 +85,7 @@ class LiverSegmentationTest(unittest.TestCase):
         # ed.show()
 
     @attr('incomplete')
+    @attr('actual')
     def test_automatickyTest(self):
         ''' nacte prvni dva soubory koncici .mhd z adresare sample_data
         prvni povazuje za originalni a provede na nem segmentaci defaultni
@@ -94,17 +94,17 @@ class LiverSegmentationTest(unittest.TestCase):
         vysledku vypise verdikt na konzoli'''
 
         import io3d
-        
+
         logger.setLevel(logging.DEBUG) #ZDE UPRAVIT POKUD NECHCETE VSECHNY VYPISY
-        
-        
+
+
 
         path_to_script = os.path.dirname(os.path.abspath(__file__))
         # print path_to_script
         b = path_to_script[0:-5]
         b = b + 'sample_data'
         cesta = b
-        
+
         logger.info('probiha nacitani souboru z adresare sample_data')
         seznamSouboru = liver_segmentation.vyhledejSoubory(cesta)
         reader = io3d.DataReader()
@@ -130,6 +130,11 @@ class LiverSegmentationTest(unittest.TestCase):
         logger.info(str(vysledky))
         skore = vysledky[1]
         pravda = True
+        import sed3
+        ed = sed3.sed3(vytvoreny.data3d, contour=vytvoreny.segmentation)
+        ed.show()
+
+
         if(skore > 75):
             logger.info('metoda funguje uspokojive')
             pravda = False
