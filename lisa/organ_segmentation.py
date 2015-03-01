@@ -515,7 +515,7 @@ class OrganSegmentation():
             import liver_segmentation
             igc = liver_segmentation.LiverSegmentation(
                 data3d_res,
-                voxelsize_mm=self.voxelsize_mm,
+                voxelsize_mm=self.working_voxelsize_mm,
                 segparams=self.segparams
             )
 

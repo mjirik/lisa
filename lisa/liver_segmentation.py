@@ -52,10 +52,10 @@ def souborAsegmentace(cisloSouboru,cisloMetody,cesta):
 def zobrazUtil(cmetody,cisloObrazu = 1):
     'utilita pro rychle zobrazeni metody s cislem cmetody'
     cesta = nactiYamlSoubor('path.yml')
-    
+
     [rucni,rucniVelikost,strojova,segmentovanyVelikost,original] = souborAsegmentace(cisloObrazu,cmetody,cesta)
     #segmentace = np.zeros(rucni.shape, dtype=np.int8)
-    #segmentace[0:-1,100:400,100:400] = 1    
+    #segmentace[0:-1,100:400,100:400] = 1
     zobrazit(original,rucni,strojova)
     #zobrazit2(original,rucni,strojova) #pouziva contour
     return
@@ -69,46 +69,46 @@ def zobrazitOriginal(original):
     return
 
 def zobrazit(original,rucni,strojova):
-    '''Metoda pro srovnani rucni a 
+    '''Metoda pro srovnani rucni a
     automaticke segmentace z lidskeho pohledu
     cerna oblast - NESHODA strojoveho a rucniho
     bila oblast - SHODA strojoveho a rucniho
     seda oblast - NULY u strojoveho i rucniho'''
-    
+
     prunik = np.multiply(rucni,strojova)
     opak = (strojova-1)*(-1)
     prunikOpak =  np.multiply(opak,rucni)
-    vysledek = -strojova-rucni  +3*prunik 
-    #poleVysledek = kombinace   
+    vysledek = -strojova-rucni  +3*prunik
+    #poleVysledek = kombinace
     ed = sed3.sed3(vysledek)
     #print kombinaceNesouhlas
     ed.show()
     return
 
 def zobrazit2(original,rucni,strojova):
-    '''Metoda pro srovnani rucni a 
+    '''Metoda pro srovnani rucni a
     automaticke segmentace z lidskeho pohledu
     cerna oblast - NESHODA strojoveho a rucniho
     bila oblast - SHODA strojoveho a rucniho
     seda oblast - NULY u strojoveho i rucniho'''
-    
-    
-    #poleVysledek = kombinace   
+
+
+    #poleVysledek = kombinace
     ed = sed3.sed3(original,contour=strojova)
     #print kombinaceNesouhlas
     ed.show()
     return
 
 def vyhodnoceniMetodyTri(metoda,path = None):
-    '''metoda- int cislo metody (poradi pri vyvoji) 
-    nacte cestu ze souboru path.yml, dale nacte soubory v adresari kde je situovana a sice 
+    '''metoda- int cislo metody (poradi pri vyvoji)
+    nacte cestu ze souboru path.yml, dale nacte soubory v adresari kde je situovana a sice
     Tren1+2.yml, Tren1+3.yml a Tren2+3.yml. Pri nacteni souboru vznikne pole:
     [seznamSouboruTrenovaciMnoziny(nepodstatny),seznamSouboruTESTOVACImnoziny,vysledkyMETODY]
     na souborech ze seznamuTestovacimnoziny provede segmentaci metodou s cislem METODA
-    a zapise do souboru vysledky.yml pole 
+    a zapise do souboru vysledky.yml pole
     [vsechnyVysledky,prumerScore]
     se vsemi vysledky a take vypise prumer na konzoli'''
-    
+
     def nacteniMnoziny(nazevSouboru,cesta,metoda):
         [seznamTM,seznamTestovaci,vysledky]= nactiYamlSoubor(nazevSouboru)#'Tren1+2.yml'
         #print seznamTM
@@ -120,10 +120,10 @@ def vyhodnoceniMetodyTri(metoda,path = None):
             vysledek = vyhodnotSoubor(cesta,x,seznamTestovaci,ctenar,vysledky,metoda)
             seznamVsechVysledku.append(vysledek)
         return seznamVsechVysledku
-                
+
     def vyhodnotSoubor(cesta,x,seznamTestovaci,ctenar,vysledky,metoda):
         originalNazev =  [seznamTestovaci[x]]
-        rucniNazev = [seznamTestovaci[x+len(seznamTestovaci)/2]]        
+        rucniNazev = [seznamTestovaci[x+len(seznamTestovaci)/2]]
         vektor = nactiSoubor(cesta,rucniNazev,0,ctenar)
         rucniPole = vektor[0]
         rucniVelikost = vektor[1]
@@ -136,18 +136,18 @@ def vyhodnoceniMetodyTri(metoda,path = None):
         vytvoreny.runVolby()
         segmentovany = vytvoreny.segmentation
         segmentovanyVelikost = vytvoreny.voxelSize
-        vysledky = vyhodnoceniSnimku(rucniPole,rucniVelikost,segmentovany,segmentovanyVelikost)   
-        #vysledky =[1,2]    
-        
+        vysledky = vyhodnoceniSnimku(rucniPole,rucniVelikost,segmentovany,segmentovanyVelikost)
+        #vysledky =[1,2]
+
         return vysledky
-    
+
     cesta = ''
     if(path == None):
         cesta = nactiYamlSoubor('path.yml')
     else:
         cesta = path
-    
-    
+
+
     print 'ANALYZA PRVNI TRETINY'
     seznam1 =nacteniMnoziny('Tren1+2.yml',cesta,metoda)
     print 'ANALYZA DRUHE TRETINY'
@@ -166,13 +166,13 @@ def vyhodnoceniMetodyTri(metoda,path = None):
     print 'celkovy prumer je: ' + str(celkovyPrumer)
     zapisYamlSoubor('vysledky.yml',zapsat)
     print 'soubory zapsany do vysledky.yml'
-    
+
     return
 
 
 
 
-  
+
 
 def vyhodnoceniSnimku(snimek1,voxelsize1,snimek2,voxelsize2):
     '''Provede vyhodnoceni snimku pomoci metod z volumetry_evaluation,
@@ -188,7 +188,7 @@ def vyhodnoceniSnimku(snimek1,voxelsize1,snimek2,voxelsize2):
     #score = ve.sliver_score_one_couple(evaluace)
     score = 0
     vysledky = [evaluace,score]
-    
+
     return vysledky
 
 def zapisYamlSoubor(nazevSouboru,Data):
@@ -236,42 +236,42 @@ def segmentace1(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
         prumer = vektor[0]
         variance = vektor[1]
         return [prumer,variance]
-    
+
     if(vysledky == False): #v pripade nezadani vysledku
         [prumer,var] = nactiPrumVar()
     else:
-        prumer = vysledky[0]  
+        prumer = vysledky[0]
         var = vysledky[1]
-    odchylka = np.sqrt(var) 
+    odchylka = np.sqrt(var)
     #print np.shape(tabulka)
     segmentaceVysledek = []
     zeli3=0
     mezHorni = prumer +konstanta*odchylka
     mezDolni = prumer -konstanta*odchylka
-    
+
     for rez in tabulka:
         print str(zeli3+1) + '/' + str(len(tabulka))
         rezNovy1 = ( (np.array(rez)>=prumer+mezDolni))
         rezNovy2 = (np.array(rez)<=prumer +mezHorni)
         rezNovy =np.multiply( rezNovy1, rezNovy2)
         rezNovy = rezNovy.astype(int)
-        
+
         seznam = rezNovy
-        segmentaceVysledek.append(seznam)       
+        segmentaceVysledek.append(seznam)
         zeli3 = zeli3+1 #prochazeni rezu
-    
-    
+
+
     #ed = sed3.sed3(np.array(segmentaceVysledek))
     #print kombinaceNesouhlas
     #ed.show()
-     
-    #print segmentaceVysledek  
+
+    #print segmentaceVysledek
     #print np.shape(tabulka)
     #print np.shape(segmentaceVysledek)
     return segmentaceVysledek
 
 def segmentace2(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
-    '''PRIMITIVNI METODA - PRAHOVANI Z PDF -50 az 250   
+    '''PRIMITIVNI METODA - PRAHOVANI Z PDF -50 az 250
     optimalni se zda 0 az 200
     pro metodu 0 az 180'''
     print 'pouzita metoda 2'
@@ -285,7 +285,7 @@ def segmentace2(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
         rezNovy2 = (np.array(rez)<=mezHorni)
         rezNovy =np.multiply( rezNovy1, rezNovy2)
         rezNovy2 = rezNovy.astype(int)
-        
+
         'BINARNI OPERACE'
         struktura1 = [[0,1,0],[1,1,1],[0,1,0]]
         struktura4 = np.ones([7,1])
@@ -294,17 +294,17 @@ def segmentace2(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
         rezNovy = ndimage.binary_erosion(rezNovy2,struktura1, 18)
         rezNovy2 = ndimage.binary_erosion(rezNovy,struktura4, 8)
         rezNOvy = rezNovy2
-        
-        
-        
-        segmentaceVysledek.append(rezNovy)       
+
+
+
+        segmentaceVysledek.append(rezNovy)
         zeli3 = zeli3+1 #prochazeni rezu
-    
-    
+
+
     #ed = sed3.sed3(np.array(segmentaceVysledek))
     #ed.show()
-     
-    #print segmentaceVysledek  
+
+    #print segmentaceVysledek
     #print np.shape(tabulka)
     #print np.shape(segmentaceVysledek)
     return segmentaceVysledek
@@ -323,13 +323,13 @@ def segmentace3(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     mezHorni=prumer + konstanta*odchylka
     mezDolni=prumer - konstanta*odchylka
     print 'probiha prahovani'
-  
+
     rezNovy1 = ( tabulka>=mezDolni)
     rezNovy2 = (tabulka<=mezHorni)
     rezNovy =np.multiply( rezNovy1, rezNovy2)
     rezNovy2 = rezNovy.astype(np.int8)
-    
-    
+
+
 
     'BINARNI OPERACE 3D'
     print 'probihaji binarni operace'
@@ -341,7 +341,7 @@ def segmentace3(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     print '2/2'
     rezNovy = ndimage.binary_erosion(rezNovy2,struktura1, 10)
     rezNovy2 = rezNovy
-    
+
     print 'probiha vybrani nejvetsiho objektu'
     [labelImage, labels] = ndimage.label(rezNovy2)
     #print nb_labels
@@ -356,24 +356,24 @@ def segmentace3(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
         if(suma > maximum):
             nejvetsi = x+1
             maximum = suma
-    
-    print x+1
+
+    # print x+1
     print maximum
     rezNovy2 = labelImage == nejvetsi
-    
-    
-    
-    
+
+
+
+
     rezNovy = rezNovy2.astype(np.int8)
     #print rezNovy
-    
 
-   
+
+
     'REGION GROWING'
     print 'Probiha region growing'
-    
-    
-    
+
+
+
     #ed = sed3.sed3(np.array(rezNovy))
     #ed.show()
 
@@ -382,7 +382,7 @@ def segmentace3(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
 def trenovaniCele(metoda,path = None):
     '''Metoda je cislo INT, dane poradim metody pri implementaci prace
     nacte cestu ze souboru path.yml, vsechny soubory v adresari
-     natrenuje podle zvolene metody a zapise vysledek do TrenC.yml. 
+     natrenuje podle zvolene metody a zapise vysledek do TrenC.yml.
     '''
     cesta = ''
     if(path == None):
@@ -391,25 +391,25 @@ def trenovaniCele(metoda,path = None):
         cesta = path
     #print cesta
     seznamSouboru = vyhledejSoubory(cesta)
-    
+
     vybrano = False
-    
+
     if(metoda ==0):
         def metoda(cesta,seznamSouboru):
             vysledek =nahrazka(cesta,seznamSouboru)
             return vysledek
         vybrano = True
-    
+
     if(metoda ==1):
         def metoda(cesta,seznamSouboru):
             vysledek =metoda1(cesta,seznamSouboru)
             return vysledek
         vybrano = True
-    
+
     if(not vybrano):
         print "spatne zvolena metoda trenovani"
         return
-        
+
     print "Probiha trenovani"
     vysledek1= metoda(cesta,seznamSouboru)
     soubor = open("TrenC.yml","wb")
@@ -424,7 +424,7 @@ def nahrazka(cesta,seznamSouboru):
 def trenovaniTri(metoda,path = None):
     '''Metoda je cislo INT, dane poradim metody pri implementaci prace
     nacte cestu ze souboru path.yml, vsechny soubory v adresari rozdeli na tri casti
-    pro casti 1+2,2+3 a 1+3 natrenuje podle zvolene metody. 
+    pro casti 1+2,2+3 a 1+3 natrenuje podle zvolene metody.
     ulozene soubory: 1) seznam trenovanych souboru 2)seznam na kterych ma probehnout segmentace
     3) vysledek trenovani (napr. prumer a odchylka u metody 1)
     '''
@@ -434,7 +434,7 @@ def trenovaniTri(metoda,path = None):
     else:
         cesta = path
     #print cesta
-    
+
     def rozdelTrenovaciNaTri(cesta):
         '''Rozdeli trenovaci mnozinu na tri dily'''
         vektorSouboru = vyhledejSoubory(cesta)
@@ -446,7 +446,7 @@ def trenovaniTri(metoda,path = None):
         Cast3 = vektorSouboru[int(dily[0])+int(dily[1]):int(dily[0])+int(dily[1])+int(dily[2])]
         Cast3 = Cast3 + vektorSouboru[delkaTrenovacich+int(dily[0])+int(dily[1]):delkaTrenovacich+int(dily[0])+int(dily[1])+int(dily[2])]
         return[Cast1,Cast2,Cast3]
-    
+
     [cast1,cast2,cast3] = rozdelTrenovaciNaTri(cesta)
     delka = len(cast1)/2
     delka3 = len(cast3)/2
@@ -455,15 +455,15 @@ def trenovaniTri(metoda,path = None):
     #print tren12
     tren23 = cast2[0:delka]+cast3[0:delka3]+cast2[delka:delka*2]+cast3[delka3:delka3*2]
     tren13 = cast1[0:delka]+cast3[0:delka3]+cast1[delka:delka*2]+cast3[delka3:delka3*2]
-    
+
     vybrano = False
-    
+
     if(metoda ==0):
         def metoda(cesta,seznamSouboru):
             vysledek =nahrazka(cesta,seznamSouboru)
             return vysledek
         vybrano = True
-    
+
     if(metoda ==1):
         def metoda(cesta,seznamSouboru):
             vysledek =metoda1(cesta,seznamSouboru)
@@ -472,35 +472,35 @@ def trenovaniTri(metoda,path = None):
     if(not vybrano):
         print "spatne zvolena metoda trenovani"
         return
-        
+
     print "Probiha trenovani Prvni Casti"
     vysledek1= metoda(cesta,tren12)
     poleMega = [tren12,cast3,vysledek1]
     zapisYamlSoubor("Tren1+2.yml",poleMega)
-    
+
     print "Probiha trenovani druhe casti"
     vysledek2= metoda(cesta,tren23)
     poleMega = [tren23,cast1,vysledek2]
     zapisYamlSoubor("Tren2+3.yml",poleMega)
-    
-    print "Probiha trenovani treti casti"  
-    vysledek3= metoda(cesta,tren13) 
+
+    print "Probiha trenovani treti casti"
+    vysledek3= metoda(cesta,tren13)
     poleMega = [tren13,cast2,vysledek3]
     zapisYamlSoubor("Tren1+3.yml",poleMega)
     print "trenovani  dokonceno"
-    
+
 def zapisCestu():
     cesta = 'C:/Users/asus/workspace/training'
     print cesta
     zapisYamlSoubor('path.yml',cesta)
     print "cesta uspesne zapsana"
-    
+
 def vyhledejSoubory(cesta):
     ''' vrátí pole názvů všech souborů končících  .mhd v daném adresáři
     předpoklad je že jsou seřazeny nejprve originály, pak trénovací
     kousky. Pokud s tímto máte problémy pojmenujte je následovně:
     liver-orig001.mhd atd... liver-seg001.mhd atd a seřaďte abecedně'''
-    
+
     konec = '.mhd'
     novy = []
     seznam = os.listdir(cesta)
@@ -508,32 +508,32 @@ def vyhledejSoubory(cesta):
         if (polozka.endswith(konec)):
             novy.append(polozka)
     return novy
-    
+
 def nactiSoubor(cesta,seznamSouboru,polozka,reader):
     ''' rozebere nacteny soubor na jednotlive promenne jako je
-    velikost voxelu apod. ze slovniku do jednoho pole ,tabulka 
+    velikost voxelu apod. ze slovniku do jednoho pole ,tabulka
     je použitelná v sed3 editoru, první dimenze = Z (hlava-nohy)'''
-    cesta =  cesta+"/" +seznamSouboru[polozka] 
+    cesta =  cesta+"/" +seznamSouboru[polozka]
     datap = reader.Get3DData(cesta, dataplus_format=False)
     tabulka = datap[0]
     slovnik = datap[1]
     velikostVoxelu = slovnik['voxelsize_mm']
     vektor = [tabulka,velikostVoxelu]
-    
+
     #ed = sed3.sed3(tabulka)
     #ed.show()
-    
+
     return vektor
 
 def metoda1(cesta,seznamSouboru):
     '''METODA 1 - PRIMITIVNI
-    predpoklady: sudy pocet trenovacich dat, 
-    originalni data jsou prvni polovina, pak 
+    predpoklady: sudy pocet trenovacich dat,
+    originalni data jsou prvni polovina, pak
     segmentovana. Kde je segmentace True je 0.
     vypocte prumer a varianci ze segmentovanych voxelu-
     vysledou hodnotu je pak mozno pouzit pro prahovani
     hodnota zapsana do souboru "Metoda1.yml" '''
-    
+
     def vypoctiPrumer(poctyVzorku,prumery):
         'vypocte prumer z prumeru a poctu vzorku vektoru ruzne delky'
         sumaPrumeru = 0
@@ -543,7 +543,7 @@ def metoda1(cesta,seznamSouboru):
             sumaVzorku = sumaVzorku+pocet
             sumaPrumeru = sumaPrumeru+prumery[pomocny]*pocet
             pomocny = pomocny+1
-        
+
         prumerCelkem = float(sumaPrumeru)/float(sumaVzorku)
         return prumerCelkem
 
@@ -561,14 +561,14 @@ def metoda1(cesta,seznamSouboru):
             scitanec = float( minivar*poctyVzorku[pomocny])/sumaVzorku
             nasobitel = poctyVzorku[pomocny]*((prumery[pomocny]-prumerCelkem)**2)/sumaVzorku
             sumaVar = sumaVar+nasobitel+scitanec
-            pomocny = pomocny+1        
+            pomocny = pomocny+1
         return sumaVar
-    
+
     def zapisPrumVar(prumer,variance):
         '''zapise pole [prumer,variance] pomoci pickle do souboru'''
         radek = [prumer,variance]
         zapisYamlSoubor('Metoda1.yml',radek)
-    
+
     def zpracuj(cesta,seznamSouboru,pomocny,ctenar,pocetOrig):
         originalni = nactiSoubor(cesta,seznamSouboru,pomocny,ctenar) #originalni pole
         segmentovany = nactiSoubor(cesta,seznamSouboru,pomocny+pocetOrig,ctenar) #segmentovane pole(0)
@@ -581,45 +581,45 @@ def metoda1(cesta,seznamSouboru):
 
         if (not(np.linalg.norm(pole1-pole2) <= 10**(-2))):
             raise NameError('Chyba ve vstupnich datech original c.' + str(pomocny+1) + ' se neshoduje se segmentaci')
-        
-        '''ZDE PRACOVAT S originalni A segmentovany'''       
-       
+
+        '''ZDE PRACOVAT S originalni A segmentovany'''
+
         poleSeg = segmentovany[0]#nuly jsou kde neni segmentace jednicky kde je
         poleOri = originalni[0]
-        
+
         kombinace = np.multiply(poleSeg,poleOri)#skalarni soucin
         X = np.ma.masked_equal(kombinace,0)
         bezNul = X.compressed()
         return bezNul
-    
+
     print "zahajeno trenovani metodou c.1"
     pocetSouboru = len(seznamSouboru)
-    pocetOrig = pocetSouboru/2    
+    pocetOrig = pocetSouboru/2
     ctenar =  io3d.DataReader()
-    
+
     prumery = []
-    variance = []    
-    poctyVzorku=[]  
-    
-    
+    variance = []
+    poctyVzorku=[]
+
+
     pomocny = 0
     for soubor in seznamSouboru:
         ukazatel = str(pomocny+1) + "/" + str(pocetOrig)
         print ukazatel
         bezNul = zpracuj(cesta,seznamSouboru,pomocny,ctenar,pocetOrig)
-        
+
         prumery.append(np.mean(bezNul))
         variance.append(np.var(bezNul))
         poctyVzorku.append(len(bezNul))
         originalni = 0
         segmentovany = 0
-        
+
         pomocny = pomocny +1
         '''NASLEDUJICI RADEK LZE OMEZIT CISLEM PRO NETRENOVANI CELE MNOZINY'''
         #print (pomocny+1 >= pocetOrig)
-        if(pomocny+1 >= pocetOrig): #if(pomocny >= pocetOrig): 
+        if(pomocny+1 >= pocetOrig): #if(pomocny >= pocetOrig):
             print "trenovani ukonceno"
-            break    
+            break
     prumer = vypoctiPrumer(poctyVzorku,prumery)
     var = vypoctiVar(poctyVzorku,prumery,variance,prumer)
 
@@ -628,7 +628,7 @@ def metoda1(cesta,seznamSouboru):
     print var
     print "vysledky ukladany do souboru 'Metoda1.yml'"
     zapisPrumVar(prumer,var)
-    return [prumer,var]  
+    return [prumer,var]
 
 class LiverSegmentation:
     """
@@ -636,7 +636,7 @@ class LiverSegmentation:
     def __init__(
         self,
         data3d,
-        voxelsize=[1, 1, 1],segparams={'cisloMetody':3,'vysledkyDostupne':False,'some_parameter': 22,'path':None}
+        voxelsize_mm=[1, 1, 1], segparams={}
     ):
         """
         :data3d: 3D array with data
@@ -652,21 +652,24 @@ class LiverSegmentation:
         self.interactivity_counter = 0
         # 3D array with object and background selections by user
         self.seeds = None
-        self.voxelSize = voxelsize
-        self.segParams = segparams
+        self.voxelSize = voxelsize_mm
+        self.segParams = {'cisloMetody': 3, 'vysledkyDostupne': False}
+        self.segParams.update(segparams)
         self.segmentation = np.zeros(data3d.shape, dtype=np.int8)
+
+    def set_seeds(self, seeds):
         pass
-    
-    def setCisloMetody(self,cislo):
+
+    def setCisloMetody(self, cislo):
         self.segParams['cisloMetody'] = cislo
-    
+
     def getCisloMetody(self):
         return self.segParams['cisloMetody']
-        
-        
+
+
     def setPath(self, string):
         self.segParams['path'] = string
-    
+
     def getPath(self):
         return self.segParams['path']
 
@@ -675,52 +678,52 @@ class LiverSegmentation:
         #print self.segParams
         vysledek = self.segParams['vysledkyDostupne']
         spatne = True
-        
+
         if(numero == 0):
-            print('testovaci metoda')            
+            print('testovaci metoda')
             self.segmentation = segmentace0(self.data3d,self.voxelSize,vysledek)
             spatne = False
-        if(numero == 1):            
+        if(numero == 1):
             self.segmentation = segmentace1(self.data3d,self.voxelSize,vysledek)
             spatne = False
-        if(numero == 2):            
+        if(numero == 2):
             self.segmentation = segmentace2(self.data3d,self.voxelSize,vysledek)
             spatne = False
-        if(numero == 3):            
+        if(numero == 3):
             self.segmentation = segmentace3(self.data3d,self.voxelSize,vysledek)
             spatne = False
-        
+
         if(spatne):
             print('Zvolena metoda nenalezena')
-    
+
     def runVolby(self):
         '''metoda s vice moznostmi vyberu metody-vybrana v segParams'''
         numero = self.segParams['cisloMetody']
         #print self.segParams
         vysledek = self.segParams['vysledkyDostupne']
         spatne = True
-        
+
         if(numero == 0):
-            print('testovaci metoda')            
+            print('testovaci metoda')
             self.segmentation = segmentace0(self.data3d,self.voxelSize,vysledek)
             spatne = False
-        if(numero == 1):            
+        if(numero == 1):
             self.segmentation = segmentace1(self.data3d,self.voxelSize,vysledek)
             spatne = False
-        
-        if(numero == 2):            
+
+        if(numero == 2):
             self.segmentation = segmentace2(self.data3d,self.voxelSize,vysledek)
             spatne = False
-        if(numero == 3):            
+        if(numero == 3):
             self.segmentation = segmentace3(self.data3d,self.voxelSize,vysledek)
             spatne = False
-        
-        
+
+
         if(spatne):
             print('Zvolena metoda nenalezena')
-        
-    
-    
+
+
+
     def nacistTrenovaciData(self,path):
         pass
 
@@ -735,7 +738,7 @@ class LiverSegmentation:
         # self.voxels2 = pyed.getSeedsVal(2)
         self.run()
         pass
-    
+
     def vyhodnoceniMetodyTri(self):
         '''Funkce je ulozena zvlast aby bylo mozne menit pocet parametru
         a jednoduse volat defaultni metodu '''
@@ -743,21 +746,21 @@ class LiverSegmentation:
         path = self.getPath()
         vyhodnoceniMetodyTri(metoda,path)
 
-    
+
     def  trenovaniCele(self):
         '''Funkce je ulozena zvlast aby bylo mozne menit pocet parametru
         a jednoduse volat defaultni metodu '''
         metoda = self.getCisloMetody()
         path = self.getPath()
         trenovaniCele(metoda,path)
-        
+
     def  trenovaniTri(self):
         '''Funkce je ulozena zvlast aby bylo mozne menit pocet parametru
         a jednoduse volat defaultni metodu '''
         metoda = self.getCisloMetody()
         path = self.getPath()
         trenovaniTri(metoda,path)
- 
+
 
 def main():
     logger = logging.getLogger()
@@ -784,7 +787,7 @@ def main():
 
     if args.debug:
         ch.setLevel(logging.DEBUG)
-    
+
     pass
 
 
