@@ -27,6 +27,210 @@ import sed3
 import qmisc
 import SimpleITK as sitk
 
+
+def segmentace4(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
+    '''binarni operace nasledovane region growingem'''
+    
+    print 'pouzita metoda 4 pouzivajici metodu 3'
+    vzorkovaciKonstanta = np.shape(tabulka)[0]*0.33+33 #*0.33+22
+    hranicniKonstanta = 30.0
+    #print vzorkovaciKonstanta
+    #vzorkovaciKonstanta = 80
+    #return
+    binarniOperace = segmentace3(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False)    
+    segmentaceVysledek = binarniOperace
+    'konstanta urcuje rozmezi region growingu'
+    segmentaceVysledek = regionGrowingCTIF(tabulka,binarniOperace,velikostVoxelu,konstanta = vzorkovaciKonstanta,
+                                           konstantaHranice = hranicniKonstanta)
+    
+    
+    return segmentaceVysledek
+
+def regionGrowingCTIF(ctImage,array,velikostVoxelu,konstanta = 100,konstantaHranice = 5.0):
+    ''' ctImage = ct snimek, array = numpy aray po binarnich operacich (lokalizace vnitrku jater
+    konstanta = rozmezi v kterem jsou pridavany pixely k seedu je urcovana z poctu rezu
+    konstantaHranice = delka kterou je RG ohranicen v mm
+    vysledek = pole array s vetsi segmentaci'''
+    
+    'Krok 1 vybrani seedu z array'
+
+    
+    segmentationFilter = sitk.ConnectedThresholdImageFilter()
+    segmentationFilter.SetConnectivity(segmentationFilter.FaceConnectivity) #FaceConnectivity , FullConectivity
+    segmentationFilter.SetReplaceValue( 1 )   
+    
+    original = sitk.GetImageFromArray(ctImage)
+    #segmentaceImg = sitk.GetImageFromArray(array) #nepotrebne, zustane ve formatu numpy
+    
+    border = ve.get_border(array)    
+
+    vektory = np.where(array == 1) #pole s informaci o vektorech (jejich pozice v souradnicich)
+    #print vektory
+    
+    #print 'ukladaji se data o objektu 1 '    
+    
+    def iterace(x,vektory,segmentationFilter,konstanta,array,koule):
+        '''Vyrazne setreni pameti '''
+        a = int(vektory[0][x])
+        b = int(vektory[1][x])
+        c = int(vektory[2][x])  
+        
+        seed = [c,b,a] #SITK ma souradnice obracene
+        #print seed
+        bod = [a,b,c]
+        segmentationFilter.AddSeed(seed)        
+        hodnota = original.GetPixel(*seed )
+        segmentationFilter.SetLower( hodnota-konstanta )
+        segmentationFilter.SetUpper( hodnota+konstanta )
+        vysledek = segmentationFilter.Execute( original )
+        vysledek[seed] = 1
+        
+        
+        
+        
+        ukazat = sitk.GetArrayFromImage(vysledek)
+        ukazat.astype(np.int8)
+        
+        'Omezeni rozsahu'
+        okoli = vytvor3DobjektPole(koule,ukazat,bod)
+        ukazat = np.multiply(okoli,ukazat)
+        'konec omezeni rozsahu'
+        array = np.add(array,ukazat)
+        array = array > 0 #array = array > 0
+        #print ukazat #kontrola
+        return array
+    
+    'Downsampling pro udrzitelnost vypoctu'
+    sample_MAX = 30.0 #pocet seedu
+    downsampling = float(len(vektory[0]))/sample_MAX #'Downsampling pro urychleni vypoctu na unosnou mez'
+    downsampling = np.round(downsampling,0)
+    #print 'downsampling'
+    #print downsampling
+    
+    koule = vytvorKouli3D(velikostVoxelu,konstantaHranice)
+    #koule = 0
+    
+    for x in range(len(vektory[0])):
+        if((x % downsampling) == 0):
+            print str(x) +'/' + str(len(vektory[0]))
+            array = iterace(x,vektory,segmentationFilter,konstanta,array,koule)
+        
+        
+    
+    
+    
+    return array
+
+def vytvorKouli3D(voxelSize_mm,polomer_mm):
+    ''' voxelSize_mm = [x,y,z],polomer_mm = r
+    koule = vytvorene 3d numpy array s 1 na mistech
+     kde je koule     a 0 kde neni.
+    definice koule: Vsechny body se vzdalenosti mensi 
+    rovnou polomeru od stredoveho voxelu Pokud vzdalenost zasahuje
+    do voxelu je vybran jako 1.'''
+    
+    print 'Vytvareni 3d objektu'
+    x = voxelSize_mm[0]
+    y = voxelSize_mm[1]
+    z = voxelSize_mm[2]
+    xVoxely = int(np.ceil(polomer_mm/x))
+    yVoxely = int(np.ceil(polomer_mm/y))
+    zVoxely = int( np.ceil(polomer_mm/z))
+    #print xVoxely
+    #print yVoxely
+    #print zVoxely
+    rozmery = [xVoxely*2+1,yVoxely*2+1,zVoxely*2+1]
+    stred = [xVoxely+0,yVoxely+0,zVoxely+0]#souradnice stredu ke kteremu budou pocitany vzdalenosti
+    #print stred
+    #print voxelSize_mm
+    souradniceStredu = np.multiply(stred,voxelSize_mm)
+    #print souradniceStredu
+    policko = np.zeros(rozmery,dtype = np.int8)
+    #print policko.shape
+    
+    for xR in range(rozmery[0]):
+        print str(xR) + '/' + str(rozmery[0])
+        for yR in range(rozmery[1]):
+            for zR in range(rozmery[2]):
+                #print policko[xR,yR,zR]
+                bod = [xR,yR,zR]
+                souradniceBodu = np.multiply(bod,voxelSize_mm)
+                vzdalenost = np.linalg.norm(souradniceBodu-souradniceStredu)
+                if(vzdalenost <= polomer_mm):
+                    policko[xR,yR,zR] = 1
+        
+    
+    koule = policko
+    #main.zobrazitOriginal(koule)
+    print 'vytvoreni 3d objektu dokonceno'
+    return koule
+
+def miniSouradnice(delkaPole,delkaKoule,bod):
+    '''Pomocna funkce pro nalezeni souradnic pro vlozeni objektu do pole
+    jedna se o dukladne osetreni okraju '''
+    delka = delkaPole
+    polomer = (delkaKoule-1)/2    
+    uprava =  (polomer -bod)
+    if(uprava <0):
+        uprava = 0
+    #print bod    
+    hraniceDolniKoule = uprava
+    #print hraniceDolniKoule
+    uprava2 = delka-bod
+    uprava2 = polomer-uprava2
+    uprava2 = 2*polomer-uprava2-1
+    if(uprava2 > delkaKoule-1):
+        uprava2 = delkaKoule-1
+    hraniceHorniKoule = uprava2+1
+    #print hraniceHorniKoule
+    #print koule[hraniceDolniKoule:hraniceHorniKoule]
+    
+    rozdil = hraniceHorniKoule-hraniceDolniKoule
+    start = bod -polomer
+    if(start <0):
+        start = 0
+    konec = start + rozdil
+    
+    startP = start
+    konecP = konec
+    startK = hraniceDolniKoule
+    konecK = hraniceHorniKoule
+    return[startP,konecP,startK,konecK]
+    
+def vytvor3DobjektPole(koule,pole,bod):
+    ''' pole: 3d pole T/F vstupnich dat
+    koule = 3d objekt mensi nez pole
+    bod = souradnice [x,y,z] bodu 
+    Vytvori objekt koule v nulovem poli velikosti pole v bod.'''
+    
+    #nalezeni pocatku a konce v kouli
+    kouleRozmer =  np.shape(koule)
+    poleRozmer = np.shape(pole)
+    #print np.shape(koule)
+    #print np.shape(pole)
+    #print bod
+    
+    
+    delkaKouleX = kouleRozmer[0]
+    delkaPoleX = poleRozmer[0]
+    [startPX,konecPX,startKX,konecKX] = miniSouradnice(delkaPoleX,delkaKouleX,bod[0])
+    
+    delkaKouleY = kouleRozmer[1]
+    delkaPoleY = poleRozmer[1]
+    [startPY,konecPY,startKY,konecKY] = miniSouradnice(delkaPoleY,delkaKouleY,bod[1])
+    
+    delkaKouleZ = kouleRozmer[2]
+    delkaPoleZ = poleRozmer[2]
+    [startPZ,konecPZ,startKZ,konecKZ] = miniSouradnice(delkaPoleZ,delkaKouleZ,bod[2])
+    
+    pomocny = np.zeros(pole.shape,dtype = np.int8)
+    
+    #print [startPX,konecPX,startKX,konecKX]
+    #print [startPY,konecPY,startKY,konecKY]
+    #print [startPZ,konecPZ,startKZ,konecKZ]
+    pomocny[startPX:konecPX,startPY:konecPY,startPZ:konecPZ] = koule[startKX:konecKX,startKY:konecKY,startKZ:konecKZ]
+    return pomocny
+
 def souborAsegmentace(cisloSouboru,cisloMetody,cesta):
     '''nacte soubor a vytvori jeho segmentaci, pomoci zvolene metody
     vrati parametry potrebne pro evaluaci'''
@@ -319,7 +523,7 @@ def segmentace3(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     pokus = nactiYamlSoubor('Metoda1.yml')
     prumer = pokus[0]
     odchylka = np.sqrt(pokus[1])
-    konstanta = 2
+    konstanta = 2.5 #STARA DOBRA = 2
     mezHorni=prumer + konstanta*odchylka
     mezDolni=prumer - konstanta*odchylka
     print 'probiha prahovani'
@@ -636,7 +840,7 @@ class LiverSegmentation:
     def __init__(
         self,
         data3d,
-        voxelsize=[1, 1, 1],segparams={'cisloMetody':3,'vysledkyDostupne':False,'some_parameter': 22,'path':None}
+        voxelsize=[1, 1, 1],segparams={'cisloMetody':4,'vysledkyDostupne':False,'some_parameter': 22,'path':None}
     ):
         """
         :data3d: 3D array with data
@@ -689,6 +893,9 @@ class LiverSegmentation:
         if(numero == 3):            
             self.segmentation = segmentace3(self.data3d,self.voxelSize,vysledek)
             spatne = False
+        if(numero == 4):            
+            self.segmentation = segmentace4(self.data3d,self.voxelSize,vysledek)
+            spatne = False
         
         if(spatne):
             print('Zvolena metoda nenalezena')
@@ -714,7 +921,9 @@ class LiverSegmentation:
         if(numero == 3):            
             self.segmentation = segmentace3(self.data3d,self.voxelSize,vysledek)
             spatne = False
-        
+        if(numero == 4):            
+            self.segmentation = segmentace4(self.data3d,self.voxelSize,vysledek)
+            spatne = False
         
         if(spatne):
             print('Zvolena metoda nenalezena')
