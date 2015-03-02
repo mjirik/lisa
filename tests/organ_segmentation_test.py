@@ -38,6 +38,37 @@ class OrganSegmentationTest(unittest.TestCase):
         metadata = {'voxelsize_mm': voxelsize_mm}
         return img3d, metadata, seeds, segmentation
 
+    def test_raises_exception(self):
+        dcmdir = os.path.join(
+            path_to_script,
+            './../sample_data/matlab/examples/sample_data/DICOM/digest_article/') # noqa
+        oseg = organ_segmentation.OrganSegmentation(
+            dcmdir, working_voxelsize_mm=4, manualroi=False)
+        oseg.data3d = None
+        # oseg.ninteractivity()
+        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+        self.assertRaises(oseg.ninteractivity)
+
+    @attr("actual")
+    def test_exception_catch_and_try_send(self):
+        """
+        this is only testing if there is exception
+        """
+        import copy
+        argv_tmp = copy.copy(sys.argv)
+        sys.argv = ['lisa.py', '-dd', 'fake_path']
+
+        # try:
+        #     organ_segmentation.main()
+        # except UnboundLocalError as e:
+        #     print "--------asdasdfsadfasaaaaaaaaaaaaaaaa"
+        #     import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+
+        self.assertRaises(UnboundLocalError, organ_segmentation.main)
+        sys.argv = argv_tmp
+
+
+
     # @unittest.skipIf(not interactiveTest, "interactive test")
     @attr("interactive")
     def test_viewer_seeds(self):

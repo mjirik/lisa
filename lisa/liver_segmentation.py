@@ -21,11 +21,10 @@ import numpy as np
 import io3d
 import os
 import yaml
+import os.path as op
 from scipy import ndimage
 import volumetry_evaluation as ve
 import sed3
-import qmisc
-import SimpleITK as sitk
 
 def souborAsegmentace(cisloSouboru,cisloMetody,cesta):
     '''nacte soubor a vytvori jeho segmentaci, pomoci zvolene metody
@@ -229,16 +228,18 @@ def segmentace1(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     '''
     print 'pouzita metoda 1'
     konstanta = 0.7 #EXPERIMENTALNE NALEZENA KONSTANTA
-    def nactiPrumVar():
+    def nactiPrumVar(source):
         '''vrati pole [prumer,variance] nactene pomoci yaml ze souboru'''
-        source = 'Metoda1.yml'
+
+        # Nelze ignorovat vstupy
+        # source = 'Metoda1.yml'
         vektor=nactiYamlSoubor(source)
         prumer = vektor[0]
         variance = vektor[1]
         return [prumer,variance]
 
     if(vysledky == False): #v pripade nezadani vysledku
-        [prumer,var] = nactiPrumVar()
+        [prumer,var] = nactiPrumVar(source)
     else:
         prumer = vysledky[0]
         var = vysledky[1]
@@ -310,13 +311,13 @@ def segmentace2(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     return segmentaceVysledek
 
 
-def segmentace3(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
+def segmentace3(tabulka,velikostVoxelu,source='Metoda1.yml', vysledky = False):
     '''Morfologie z 2D na 3D '''
     print 'pouzita metoda 3'
     segmentaceVysledek = []
     #print tabulka
     #zeli3 = 0
-    pokus = nactiYamlSoubor('Metoda1.yml')
+    pokus = nactiYamlSoubor(source)
     prumer = pokus[0]
     odchylka = np.sqrt(pokus[1])
     konstanta = 2
@@ -653,9 +654,17 @@ class LiverSegmentation:
         # 3D array with object and background selections by user
         self.seeds = None
         self.voxelSize = voxelsize_mm
-        self.segParams = {'cisloMetody': 3, 'vysledkyDostupne': False}
+        self.segParams = {
+            'cisloMetody': 3,
+            'vysledkyDostupne': False,
+            'paramfile': self.__default_paramfile_path()
+        }
         self.segParams.update(segparams)
         self.segmentation = np.zeros(data3d.shape, dtype=np.int8)
+
+    def __default_paramfile_path(self):
+        path_to_script = op.dirname(os.path.abspath(__file__))
+        return op.join(path_to_script, 'data/segparams1.yml')
 
     def set_seeds(self, seeds):
         pass
@@ -666,7 +675,6 @@ class LiverSegmentation:
     def getCisloMetody(self):
         return self.segParams['cisloMetody']
 
-
     def setPath(self, string):
         self.segParams['path'] = string
 
@@ -675,22 +683,30 @@ class LiverSegmentation:
 
     def run(self):
         numero = self.segParams['cisloMetody']
-        #print self.segParams
+        # print self.segParams
         vysledek = self.segParams['vysledkyDostupne']
         spatne = True
 
         if(numero == 0):
             print('testovaci metoda')
-            self.segmentation = segmentace0(self.data3d,self.voxelSize,vysledek)
+            self.segmentation = segmentace0(
+                self.data3d, self.voxelSize, vysledek)
             spatne = False
         if(numero == 1):
-            self.segmentation = segmentace1(self.data3d,self.voxelSize,vysledek)
+            self.segmentation = segmentace1(
+                self.data3d, self.voxelSize, vysledky=vysledek,
+                source=self.segParams['paramfile'])
             spatne = False
         if(numero == 2):
-            self.segmentation = segmentace2(self.data3d,self.voxelSize,vysledek)
+            self.segmentation = segmentace2(
+                self.data3d, self.voxelSize, vysledky=vysledek,
+                source=self.segParams['paramfile'])
             spatne = False
         if(numero == 3):
-            self.segmentation = segmentace3(self.data3d,self.voxelSize,vysledek)
+
+            self.segmentation = segmentace3(
+                self.data3d, self.voxelSize, vysledky=vysledek,
+                source=self.segParams['paramfile'])
             spatne = False
 
         if(spatne):

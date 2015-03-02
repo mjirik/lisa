@@ -35,34 +35,47 @@ class LiverSegmentationTest(unittest.TestCase):
     def test_liver_segmentation_real_data(self):
         # path_to_script = os.path.dirname(os.path.abspath(__file__))
         dpath = os.path.join(path_to_script, '../sample_data/jatra_5mm/')
-        data3d, metadata = io3d.read(dpath)
+        dpath = os.path.join(path_to_script, '../sample_data/liver-orig001.mhd')
+        data3d, metadata = io3d.datareader.read(dpath)
         # import sed3
-        img3d = np.random.rand(32, 64, 64) * 4
-        img3d[4:24, 12:32, 5:25] = img3d[4:24, 12:32, 5:25] + 25
-
-# seeds
-        seeds = np.zeros([32, 64, 64], np.int8)
-        seeds[9:12, 13:29, 18:24] = 1
-        seeds[9:12, 4:9, 3:32] = 2
+#         img3d = np.random.rand(32, 64, 64) * 4
+#         img3d[4:24, 12:32, 5:25] = img3d[4:24, 12:32, 5:25] + 25
+#
+# # seeds
+#         seeds = np.zeros([32, 64, 64], np.int8)
+#         seeds[9:12, 13:29, 18:24] = 1
+#         seeds[9:12, 4:9, 3:32] = 2
 # [mm]  10 x 10 x 10        # voxelsize_mm = [1, 4, 3]
-        voxelsize_mm = [5, 5, 5]
+        voxelsize_mm = metadata['voxelsize_mm']
 
         ls = liver_segmentation.LiverSegmentation(
             data3d=data3d,
-            voxelsize=voxelsize_mm,
+            voxelsize_mm=voxelsize_mm,
+            segparams={'cisloMetody': 2}
             # seeds=seeds
         )
         ls.run()
-        volume = np.sum(ls.segmentation == 1) * np.prod(voxelsize_mm)
+        # volume = np.sum(ls.segmentation == 1) * np.prod(voxelsize_mm)
 
-        # ed = sed3.sed3(img3d, contour=ls.segmentation, seeds=seeds)
+        dpath_seg = os.path.join(path_to_script,
+                                 '../sample_data/liver-seg001.mhd')
+        data3d_seg, metadata_seg = io3d.datareader.read(dpath_seg)
+
+        dif = (np.asarray(ls.segmentation) > 0) != (data3d_seg > 0)
+
+        # import sed3
+        # # ed = sed3.sed3(data3d, contour=ls.segmentation) #, seeds=seeds)
+        # ed = sed3.sed3(data3d, contour = dif) #, seeds=seeds)
         # ed.show()
 
         # import pdb; pdb.set_trace()
+        total_dif = np.sum(dif)*np.prod(voxelsize_mm)
 
         # mel by to být litr. tedy milion mm3
-        self.assertGreater(volume, 900000)
-        self.assertLess(volume, 1100000)
+        # self.assertGreater(volume, 900000)
+        # self.assertLess(volume, 1100000)
+# difference should be less then 2 liters
+        self.assertLess(total_dif, 2000000)
 
     @attr('interactive')
     def test_liver_segmentation(self):
@@ -112,7 +125,7 @@ class LiverSegmentationTest(unittest.TestCase):
 
         ls = liver_segmentation.LiverSegmentation(
             data3d=img3d,
-            voxelsize=voxelsize_mm,
+            voxelsize_mm=voxelsize_mm,
             # seeds=seeds
         )
         ls.run()
@@ -129,10 +142,8 @@ class LiverSegmentationTest(unittest.TestCase):
         vysledku vypise verdikt na konzoli'''
 
         import io3d
-
-        logger.setLevel(logging.DEBUG) #ZDE UPRAVIT POKUD NECHCETE VSECHNY VYPISY
-
-
+        # ZDE UPRAVIT POKUD NECHCETE VSECHNY VYPISY
+        logger.setLevel(logging.DEBUG)
 
         path_to_script = os.path.dirname(os.path.abspath(__file__))
         # print path_to_script
@@ -147,14 +158,15 @@ class LiverSegmentationTest(unittest.TestCase):
             cesta, seznamSouboru, 0, reader)
         originalPole = vektorOriginal[0]
         originalVelikost = vektorOriginal[1]
-        logger.info( '***zahajeni segmentace***')
+        logger.info('***zahajeni segmentace***')
         vytvoreny = liver_segmentation.LiverSegmentation(
             originalPole, originalVelikost)
-        #vytvoreny.setCisloMetody(2)
+        # vytvoreny.setCisloMetody(2)
         vytvoreny.run()
         segmentovany = vytvoreny.segmentation
         segmentovanyVelikost = vytvoreny.voxelSize
-        logger.info('segmentace dokoncena, nacitani rucni segmentace z adresare sample_data')
+        logger.info('segmentace dokoncena, \
+nacitani rucni segmentace z adresare sample_data')
         vektorOriginal = liver_segmentation.nactiSoubor(
             cesta, seznamSouboru, 1, reader)
         rucniPole = vektorOriginal[0]
