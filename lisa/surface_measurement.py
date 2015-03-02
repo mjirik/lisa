@@ -30,24 +30,30 @@ def surface_density(segmentation, voxelsize_mm, aoi=None, sond_raster_mm=None):
     :sond_raster_mm: unimplemented. It is parametr of sonds design
     """
 
-    axis = 0
     if sond_raster_mm is None:
         sond_raster_mm = voxelsize_mm
     if aoi is None:
         aoi = np.ones(segmentation.shape)
 
+    # est S = 2 \frac{1}{n} \sum_{i=1}^{n} \frac{v}{l_i} \cdot l_i
+    Sv = np.average([
+        _sv_one_axis(segmentation, aoi, voxelsize_mm, 0, sond_raster_mm),
+        _sv_one_axis(segmentation, aoi, voxelsize_mm, 1, sond_raster_mm),
+        _sv_one_axis(segmentation, aoi, voxelsize_mm, 2, sond_raster_mm)
+    ])
+    return Sv
+
+
+def _sv_one_axis(segmentation, aoi, voxelsize_mm, axis, sond_raster_mm):
     im_edg = find_edge(segmentation, axis=axis)
     im_edg = im_edg * aoi
     im_sond, aoi_sond = bufford_needle_sond(
         im_edg, voxelsize_mm, sond_raster_mm, axis=axis, aoi=aoi)
-
-    # est S = 2 \frac{1}{n} \sum_{i=1}^{n} \frac{v}{l_i} \cdot l_i
-
 # celkova delka sond
     # n_needle = (im_sond.shape[1] * im_sond.shape[2])
     # one_needle_l = im_sond.shape[0] * voxelsize_mm[0]
     # length = n_needle * one_needle_l
-    length = np.sum(aoi_sond > 0) * voxelsize_mm[0]
+    length = np.sum(aoi_sond > 0) * voxelsize_mm[axis]
 
 # inverse of the probe per unit volume v/l_i
     # ippuv = (
