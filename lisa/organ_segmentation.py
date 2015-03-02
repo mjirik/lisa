@@ -34,11 +34,14 @@ import argparse
 # tady uz je logger
 # import dcmreaddata as dcmreader
 try:
+    import pysegbase
     from pysegbase import pycut
 except:
     path_to_script = os.path.dirname(os.path.abspath(__file__))
     sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
     logger.warning("Deprecated of pyseg_base as submodule")
+    import traceback
+    traceback.print_exc()
     import pycut
 
 import volumetry_evaluation
@@ -515,7 +518,7 @@ class OrganSegmentation():
             import liver_segmentation
             igc = liver_segmentation.LiverSegmentation(
                 data3d_res,
-                voxelsize_mm=self.voxelsize_mm,
+                voxelsize_mm=self.working_voxelsize_mm,
                 segparams=self.segparams
             )
 
