@@ -29,11 +29,15 @@ import SimpleITK as sitk
 
 
 def segmentace4(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
-    '''binarni operace nasledovane region growingem'''
+    '''binarni operace nasledovane region growingem
+    vzorkovaciKonstanta === pocitac urci sam
+    hrannicni konstanta = ohraniceni region growingu kolem seedu v mm
+    maxSeedKonstanta = pocet vybranych seedu (rovnomerne)'''
     
     print 'pouzita metoda 4 pouzivajici metodu 3'
-    vzorkovaciKonstanta = np.shape(tabulka)[0]*0.33+33 #*0.33+22
-    hranicniKonstanta = 30.0
+    vzorkovaciKonstanta = np.shape(tabulka)[0]*0.33+33 #*0.33+22 #KONSTANTA VYPOCITANA Z DELKY 3D SNIMKU (ROZLISENI)
+    hranicniKonstanta = 45.0 #50 a 10 vypada dobre 35 a 50seed =malo/ moc ///45 20 nej 
+    maxSeedKonstanta = 30
     #print vzorkovaciKonstanta
     #vzorkovaciKonstanta = 80
     #return
@@ -41,12 +45,12 @@ def segmentace4(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     segmentaceVysledek = binarniOperace
     'konstanta urcuje rozmezi region growingu'
     segmentaceVysledek = regionGrowingCTIF(tabulka,binarniOperace,velikostVoxelu,konstanta = vzorkovaciKonstanta,
-                                           konstantaHranice = hranicniKonstanta)
+                                           konstantaHranice = hranicniKonstanta,maxSeeds = maxSeedKonstanta)
     
     
     return segmentaceVysledek
 
-def regionGrowingCTIF(ctImage,array,velikostVoxelu,konstanta = 100,konstantaHranice = 5.0):
+def regionGrowingCTIF(ctImage,array,velikostVoxelu,konstanta = 100,konstantaHranice = 5.0,maxSeeds = None):
     ''' ctImage = ct snimek, array = numpy aray po binarnich operacich (lokalizace vnitrku jater
     konstanta = rozmezi v kterem jsou pridavany pixely k seedu je urcovana z poctu rezu
     konstantaHranice = delka kterou je RG ohranicen v mm
@@ -101,7 +105,10 @@ def regionGrowingCTIF(ctImage,array,velikostVoxelu,konstanta = 100,konstantaHran
         return array
     
     'Downsampling pro udrzitelnost vypoctu'
-    sample_MAX = 30.0 #pocet seedu
+    if(maxSeeds == None):
+        sample_MAX = 30.0 #pocet seedu
+    else:
+        sample_MAX = maxSeeds
     downsampling = float(len(vektory[0]))/sample_MAX #'Downsampling pro urychleni vypoctu na unosnou mez'
     downsampling = np.round(downsampling,0)
     #print 'downsampling'
@@ -111,8 +118,9 @@ def regionGrowingCTIF(ctImage,array,velikostVoxelu,konstanta = 100,konstantaHran
     #koule = 0
     
     for x in range(len(vektory[0])):
-        if((x % downsampling) == 0):
+        if((x % (len(vektory[0])/5)) == 0):
             print str(x) +'/' + str(len(vektory[0]))
+        if((x % downsampling) == 0):            
             array = iterace(x,vektory,segmentationFilter,konstanta,array,koule)
         
         
@@ -121,48 +129,55 @@ def regionGrowingCTIF(ctImage,array,velikostVoxelu,konstanta = 100,konstantaHran
     
     return array
 
+def vytvoritTFKruznici(polomerPole,polomerKruznice):
+    '''vytvori 2d pole velikosti 2xpolomerPole+1
+     s kruznici o polomeru polomerKruznice uprostred '''
+    radius = polomerPole
+    r2 = np.arange(-radius, radius+1)**2
+    dist2 = r2[:, None] + r2
+    vratit =  (dist2 <= polomerKruznice**2).astype(np.int)
+    return vratit
+
 def vytvorKouli3D(voxelSize_mm,polomer_mm):
-    ''' voxelSize_mm = [x,y,z],polomer_mm = r
-    koule = vytvorene 3d numpy array s 1 na mistech
-     kde je koule     a 0 kde neni.
-    definice koule: Vsechny body se vzdalenosti mensi 
-    rovnou polomeru od stredoveho voxelu Pokud vzdalenost zasahuje
-    do voxelu je vybran jako 1.'''
+    '''voxelSize:mm = [x,y,z], polomer_mm = r
+    Vytvari kouli v 3d prostoru postupnym vytvarenim
+    kruznic podel X (prvni) osy. Predpokladem spravnosti
+    funkce je ze Y a Z osy maji stejne rozliseni  
+    funkce vyuziva pythagorovu vetu'''
     
-    print 'Vytvareni 3d objektu'
+    print 'zahajeno vytvareni 3D objektu'
+    
     x = voxelSize_mm[0]
     y = voxelSize_mm[1]
     z = voxelSize_mm[2]
     xVoxely = int(np.ceil(polomer_mm/x))
     yVoxely = int(np.ceil(polomer_mm/y))
     zVoxely = int( np.ceil(polomer_mm/z))
-    #print xVoxely
-    #print yVoxely
-    #print zVoxely
-    rozmery = [xVoxely*2+1,yVoxely*2+1,zVoxely*2+1]
-    stred = [xVoxely+0,yVoxely+0,zVoxely+0]#souradnice stredu ke kteremu budou pocitany vzdalenosti
-    #print stred
-    #print voxelSize_mm
-    souradniceStredu = np.multiply(stred,voxelSize_mm)
-    #print souradniceStredu
-    policko = np.zeros(rozmery,dtype = np.int8)
-    #print policko.shape
     
-    for xR in range(rozmery[0]):
-        print str(xR) + '/' + str(rozmery[0])
-        for yR in range(rozmery[1]):
-            for zR in range(rozmery[2]):
-                #print policko[xR,yR,zR]
-                bod = [xR,yR,zR]
-                souradniceBodu = np.multiply(bod,voxelSize_mm)
-                vzdalenost = np.linalg.norm(souradniceBodu-souradniceStredu)
-                if(vzdalenost <= polomer_mm):
-                    policko[xR,yR,zR] = 1
+    rozmery = [xVoxely*2+1,yVoxely*2+1,yVoxely*2+1]
+    xStred  = xVoxely
+    konec = yVoxely*2+1
+    koule = np.zeros(rozmery) #pole kam bude ulozen vysledek
+    
+    for xR in range(xVoxely*2+1):
         
+        if(xR == xStred):
+            print '3D objekt z 50% vytvoren'
+        
+        c = polomer_mm #nejdelsi strana
+        a = (xStred-xR )*x
+        vnitrek = (c**2-a**2)
+        b = 0.0
+        if(vnitrek > 0):
+            b = np.sqrt((c**2-a**2))#pythagorova veta   b je v mm     
+        rKruznice = float(b)/float(y)
+        if(rKruznice == np.NAN):
+            continue 
+        #print rKruznice #osetreni NAN
+        kruznice = vytvoritTFKruznici(yVoxely,rKruznice)
+        koule[xR,0:konec,0:konec] = kruznice[0:konec,0:konec]    
     
-    koule = policko
-    #main.zobrazitOriginal(koule)
-    print 'vytvoreni 3d objektu dokonceno'
+    print '3D objekt uspesne vytvoren'
     return koule
 
 def miniSouradnice(delkaPole,delkaKoule,bod):
