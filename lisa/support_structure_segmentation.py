@@ -101,7 +101,7 @@ class SupportStructureSegmentation():
         self.voxelsize_mm = np.array(self.metadata['voxelsize_mm'])
 
 
-    def convolve_structure_heart( self , size=5 ):
+    def convolve_structure_heart( self , size=9 ):
 	a = np.zeros(( size , size , size ))
 	c = np.floor( size / 2 )
 	a[c,c,c]=1
@@ -117,7 +117,7 @@ class SupportStructureSegmentation():
 
     def heart_segmentation(self):
 	x=self.convolve_structure_heart()
-	seg_prub=filters.convolve( (self.segmentation == self.slab['lungs']) , x )
+	seg_prub=filters.convolve( ((self.segmentation == self.slab['lungs'])-0.5) , x )
 	#ipdb.set_trace()
 	self.segmentation = seg_prub
 	#self.segmentation = np.array(seg_prub==1)
