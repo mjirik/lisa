@@ -42,6 +42,8 @@ import collections
 import segmentation
 import qmisc
 import io3d
+import ipdb
+import scipy.ndimage.filters as filters
 
 
 from io3d import datareader
@@ -59,8 +61,10 @@ class SupportStructureSegmentation():
             autocrop = True,
             autocrop_margin_mm = [10,10,10],
             modality = 'CT',
-            slab = {'none':0, 'bone':8,'lungs':9,'heart':10}
-            ):
+            slab = {'none':0, 'bone':8,'lungs':9,'heart':10},
+            maximal_lung_diff = 0.2
+	    ):
+	    
         """
         Segmentaton of support structures for liver segmentatio based on
         location prior.
@@ -76,6 +80,7 @@ class SupportStructureSegmentation():
         self.crinfo = [[0,-1],[0,-1],[0,-1]]
         self.segmentation = None
         self.slab = slab
+	self.maximal_lung_diff = maximal_lung_diff
 
 
 
@@ -96,27 +101,75 @@ class SupportStructureSegmentation():
         self.voxelsize_mm = np.array(self.metadata['voxelsize_mm'])
 
 
+    def convolve_structure_heart( self , size=5 ):
+	a = np.zeros(( size , size , size ))
+	c = np.floor( size / 2 )
+	a[c,c,c]=1
+	structure = filters.gaussian_filter( a , self.voxelsize_mm )
+	structure[:,:c,:] *= -1
+	structure[:,c,:] = 0
+	return structure
+
+
     def bone_segmentation(self):
         self.segmentation = np.array(self.data3d > 1300).astype(np.int8)*self.slab['bone']
         pass
 
     def heart_segmentation(self):
+	x=self.convolve_structure_heart()
+	seg_prub=filters.convolve( (self.segmentation == self.slab['lungs']) , x )
+	#ipdb.set_trace()
+	self.segmentation = seg_prub
+	#self.segmentation = np.array(seg_prub==1)
         pass
+    
+    def iteration(self):
+	sirka=5
+	prumer= np.mean(self.voxelsize_mm)
+	a= int (sirka/prumer)		
+	return a
 
     def lungs_segmentation(self):
 	LUNG_UP=-360 #horní hranice
 	self.segmentation = np.array(self.data3d <= LUNG_UP)
-	labeled_seg , num_seg = label(self.segmentation)
-	counts= [0]*(num_seg+1)	
-	self.segmentation=morphology.binary_closing(self.segmentation,iterations=3).astype(self.segmentation.dtype)
+	self.segmentation=morphology.binary_closing(self.segmentation , iterations=self.iteration()).astype(self.segmentation.dtype)
+	seg_prub=self.segmentation
+	labeled_seg , num_seg = label(seg_prub)
+	counts= [0]*(num_seg+1)
 	for x in np.nditer(labeled_seg, op_flags=['readwrite']):
-	    counts[x[...]]=counts[x[...]]+1
-	poradi = np.sort(counts)
-	#a=labeled_seg.shape
-	#if labeled_seg[0,0,0]==labeled_seg[0,0,a[2]-1]:
-	#	print("ok")
-	print(poradi)    
-        #self.segmentation = np.zeros(self.data3d.shape)
+	    if x[...]!=0:
+	    	counts[x[...]]=counts[x[...]]+1
+	index=np.argmax(counts) #pozadí
+	counts[index]=0
+	index=np.argmax(counts) #jedna nebo obě plíce
+	velikost1=counts[index]
+	counts[index]=0
+	index2=np.argmax(counts)# druhá plíce nebo nečo jiného
+	velikost2=counts[index2]
+	if ((velikost2 / velikost1) > (1-self.maximal_lung_diff)) | ((velikost2/velikost1) < (1 + self.maximal_lung_diff)):
+	    print("plice separované")
+	else:
+	    pocet=0
+	    while ((velikost2 / velikost1) < (1-self.maximal_lung_diff)) | ((velikost2/velikost1)> (1 + self.maximal_lung_diff)):
+		morphology.binary_erosion(self.segmentation,iterations=1).astype(self.segmentation.dtype)
+		labeled_seg , num_seg = label(seg_prub)
+		counts= [0]*(num_seg+1)
+		for x in np.nditer(labeled_seg, op_flags=['readwrite']):
+	    	    if x[...]!=0:
+	    	       	counts[x[...]]=counts[x[...]]+1
+	    	index=np.argmax(counts) #pozadí
+	    	counts[index]=0
+	    	index=np.argmax(counts) #jedna nebo obě plíce
+	    	velikost1=counts[index]
+	    	counts[index]=0
+	    	index2=np.argmax(counts)# druhá plíce nebo nečo jiného
+	    	velikost2=counts[index2]
+		pocet=pocet+1
+		
+	    morphology.binary_dilation(self.segmentation,iterations=pocet).astype(self.segmentation.dtype)
+	self.segmentation= np.array(labeled_seg==index).astype(np.int8)*self.slab['lungs']
+	self.segmentation= self.segmentation + np.array(labeled_seg==index2).astype(np.int8)*self.slab['lungs']
+			
         pass
 
 
@@ -175,7 +228,7 @@ class SupportStructureSegmentation():
         slab['none'] = 0
         slab['liver'] = 1
         slab['lesions'] = 6
-
+	slab['lungs'] = 9
         data = {}
         data['version'] = (1,0,0)
         data['data3d'] = self.data3d
@@ -270,6 +323,7 @@ def main():
 
     #sseg.bone_segmentation()
     sseg.lungs_segmentation()
+    sseg.heart_segmentation()
 
     #print ("Data size: " + str(data3d.nbytes) + ', shape: ' + str(data3d.shape) )
 
