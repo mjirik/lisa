@@ -27,19 +27,19 @@ before_install:
     - sh -e /etc/init.d/xvfb start
 # command to install dependencies
 install:
-    - conda update --yes conda 
+    - conda update --yes conda
     # Install dependencies
-    - conda install --yes pip python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib scikit-learn scikit-image cython pyqt pyyaml setuptools pip vtk pandas
+    - conda install --yes --file reonda.txt
     - pip install -r ci/requirements_ci.txt
+    - "easy_install SimpleITK mahotas"
+    - pip install -r requirements_pip.txt
     # - if [ ${pack} == "old_mpl" ]; then conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy nose dateutil pandas statsmodels pil six; fi
     # - if [ ${pack} == "newest" ]; then conda install --yes pip python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib nose dateutil pandas statsmodels six; fi
     # scikit-image
-    - pip install nearpy
+    # - pip install nearpy
     # - "pip install pyyaml"
-    - "easy_install SimpleITK mahotas"
     # my packages
     # install skelet3d
-    - "pip install pysegbase dicom2fem sed3 io3d"
     - git clone https://github.com/mjirik/skelet3d.git
     - mkdir skelet3d/build
     - cd skelet3d/build
