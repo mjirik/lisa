@@ -575,7 +575,7 @@ def segmentace3(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
             nejvetsi = x+1
             maximum = suma
 
-    print x+1
+    # print x+1
     print maximum
     rezNovy2 = labelImage == nejvetsi
 
