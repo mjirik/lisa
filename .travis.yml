@@ -29,7 +29,7 @@ before_install:
 install:
     - conda update --yes conda
     # Install dependencies
-    - conda install --yes --file reonda.txt
+    - conda install --yes --file requirements_conda.txt
     - pip install -r ci/requirements_ci.txt
     - "easy_install SimpleITK mahotas"
     - pip install -r requirements_pip.txt
