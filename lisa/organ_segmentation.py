@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 import sys
 import os
 import os.path as op
-
+# from collections import namedtuple
 import exceptionProcessing
 
 # from scipy.io import loadmat, savemat
@@ -34,7 +34,7 @@ import argparse
 # tady uz je logger
 # import dcmreaddata as dcmreader
 try:
-    import pysegbase
+    import pysegbase  # noqa
     from pysegbase import pycut
 except:
     path_to_script = os.path.dirname(os.path.abspath(__file__))
@@ -134,28 +134,30 @@ class OrganSegmentation():
         volume_unit='ml',
         save_filetype='pklz',
         debug_mode=False,
+        seg_postproc_pars={},
 
         #           iparams=None,
     ):
         """ Segmentation of objects from CT data.
 
         :param datapath: path to directory with dicom files
-        manualroi: manual set of ROI before data processing, there is a
+        :param manualroi: manual set of ROI before data processing, there is a
              problem with correct coordinates
-        data3d, metadata: it can be used for data loading not from directory.
+        :param data3d, metadata: it can be used for data loading not from directory.
             If both are setted, datapath is ignored
-        output_label: label for output segmented volume
-        slab: aditional label system for description segmented data
+        :param output_label: label for output segmented volume
+        :param slab: aditional label system for description segmented data
         {'none':0, 'liver':1, 'lesions':6}
-        roi: region of interest. [[startx, stopx], [sty, spy], [stz, spz]]
-        seeds: ndimage array with size same as data3d
-        experiment_caption = this caption is used for naming of outputs
-        lisa_operator_identifier: used for logging
-        input_datapath_start: Path where user directory selection dialog
+        :param roi: region of interest. [[startx, stopx], [sty, spy], [stz, spz]]
+        :param seeds: ndimage array with size same as data3d
+        :param experiment_caption = this caption is used for naming of outputs
+        :param lisa_operator_identifier: used for logging
+        :param input_datapath_start: Path where user directory selection dialog
             starts.
-        volume_blowup: Blow up volume is computed in smoothing so it is working
+        :param volume_blowup: Blow up volume is computed in smoothing so it is working
             only if smoothing is turned on.
-
+        :param seg_postproc_pars: Can be used for setting postprocessing
+        parameters. For example
         """
 
         self.iparams = {}
@@ -200,6 +202,29 @@ class OrganSegmentation():
         self.save_filetype = save_filetype
         self.vessel_tree = {}
         self.debug_mode = debug_mode
+        # SegPostprocPars = namedtuple(
+        #     'SegPostprocPars', [
+        #         'smoothing_mm',
+        #         'segmentation_smoothing',
+        #         'volume_blowup',
+        #         'snakes',
+        #         'snakes_method',
+        #         'snakes_params']
+        # )
+
+        self.seg_postproc_pars = {
+            'smoothing_mm': smoothing_mm,
+            'segmentation_smoothing': segmentation_smoothing,
+            'volume_blowup': volume_blowup,
+            'snakes': False,
+            'snakes_method': '',
+            'snakes_params': {},
+        }
+        self.seg_postproc_pars.update(seg_postproc_pars)
+        # seg_postproc_pars.update(seg_postproc_pars)
+        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+
+        # self.seg_postproc_pars = SegPostprocPars(**seg_postproc_pars_default)
 
 
 #
@@ -626,8 +651,8 @@ class OrganSegmentation():
                 binaryClosingIterations=2,
                 binaryOpeningIterations=0)
 
-        if self.segmentation_smoothing:
-            self.segm_smoothing(self.smoothing_mm)
+        self._segmentation_postprocessing()
+
 
         # rint 'autocrop', self.autocrop
         if self.autocrop is True:
@@ -670,6 +695,18 @@ class OrganSegmentation():
         logger.debug(str(self.slab))
         self.processing_time = (
             datetime.datetime.now() - self.time_start).total_seconds()
+
+    def _segmentation_postprocessing(self):
+        """
+        :segmentation_smoothing:
+        """
+
+        if self.seg_postproc_pars['segmentation_smoothing']:
+            self.segm_smoothing(self.seg_postproc_pars['smoothing_mm'])
+
+        if self.seg_postproc_pars['snakes']:
+            pass
+
 
 #    def interactivity(self, min_val=800, max_val=1300):
 # @TODO generovat QApplication
