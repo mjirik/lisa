@@ -35,7 +35,7 @@ def segmentace4(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
 
     print 'pouzita metoda 4 pouzivajici metodu 3'
     vzorkovaciKonstanta = np.shape(tabulka)[0]*0.33+33 #*0.33+22 #KONSTANTA VYPOCITANA Z DELKY 3D SNIMKU (ROZLISENI)
-    hranicniKonstanta = 45.0 #50 a 10 vypada dobre 35 a 50seed =malo/ moc ///45 20 nej
+    hranicniKonstanta = 50.0 #50 a 10 vypada dobre 35 a 50seed =malo/ moc ///45 20 nej
     maxSeedKonstanta = 30
     #print vzorkovaciKonstanta
     #vzorkovaciKonstanta = 80
@@ -537,7 +537,7 @@ def segmentace3(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     pokus = nactiYamlSoubor(source)
     prumer = pokus[0]
     odchylka = np.sqrt(pokus[1])
-    konstanta = 2.5 #STARA DOBRA = 2
+    konstanta = 2 #STARA DOBRA = 2 S USPECHEM I 2.5
     mezHorni=prumer + konstanta*odchylka
     mezDolni=prumer - konstanta*odchylka
     print 'probiha prahovani'
