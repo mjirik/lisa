@@ -40,7 +40,7 @@ def segmentace4(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     #print vzorkovaciKonstanta
     #vzorkovaciKonstanta = 80
     #return
-    binarniOperace = segmentace3(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False)
+    binarniOperace = segmentace3(tabulka,velikostVoxelu,source=source,vysledky = False)
     segmentaceVysledek = binarniOperace
     'konstanta urcuje rozmezi region growingu'
     segmentaceVysledek = regionGrowingCTIF(tabulka,binarniOperace,velikostVoxelu,konstanta = vzorkovaciKonstanta,
@@ -871,10 +871,20 @@ class LiverSegmentation:
         # 3D array with object and background selections by user
         self.seeds = None
         self.voxelSize = voxelsize
-        self.segParams = {'cisloMetody':4,'vysledkyDostupne':False,'some_parameter': 22,'path':None}
+        self.segParams = {
+            'cisloMetody':4,
+            'vysledkyDostupne':False,
+            'paramfile': self._get_default_paramfile_path(),
+            'path':None
+        }
         self.segParams.update(segparams)
         self.segmentation = np.zeros(data3d.shape, dtype=np.int8)
-        pass
+
+    def _get_default_paramfile_path(self):
+        path_to_script = op.dirname(os.path.abspath(__file__))
+        paramfile = op.join(path_to_script, 'data/segparams1.yml')
+        return paramfile
+
 
     def setCisloMetody(self,cislo):
         self.segParams['cisloMetody'] = cislo
@@ -900,19 +910,19 @@ class LiverSegmentation:
             self.segmentation = segmentace0(self.data3d,self.voxelSize,vysledek)
             spatne = False
         if(numero == 1):
-            self.segmentation = segmentace1(self.data3d,self.voxelSize,
+            self.segmentation = segmentace1(self.data3d,self.voxelSize, source=self.segParams['paramfile'],
                                             vysledky=vysledek)
             spatne = False
         if(numero == 2):
-            self.segmentation = segmentace2(self.data3d,self.voxelSize,
+            self.segmentation = segmentace2(self.data3d,self.voxelSize, source=self.segParams['paramfile'],
                                             vysledky=vysledek)
             spatne = False
         if(numero == 3):
-            self.segmentation = segmentace3(self.data3d,self.voxelSize,
+            self.segmentation = segmentace3(self.data3d,self.voxelSize, source=self.segParams['paramfile'],
                                             vysledky=vysledek)
             spatne = False
         if(numero == 4):
-            self.segmentation = segmentace4(self.data3d,self.voxelSize,
+            self.segmentation = segmentace4(self.data3d,self.voxelSize, source=self.segParams['paramfile'],
                                             vysledky=vysledek)
             spatne = False
 
@@ -928,20 +938,20 @@ class LiverSegmentation:
 
         if(numero == 0):
             print('testovaci metoda')
-            self.segmentation = segmentace0(self.data3d,self.voxelSize,vysledek)
+            self.segmentation = segmentace0(self.data3d,self.voxelSize,source=self.segParams['paramfile'],vysledky=vysledek)
             spatne = False
         if(numero == 1):
-            self.segmentation = segmentace1(self.data3d,self.voxelSize,vysledek)
+            self.segmentation = segmentace1(self.data3d,self.voxelSize,source=self.segParams['paramfile'],vysledky=vysledek)
             spatne = False
 
         if(numero == 2):
-            self.segmentation = segmentace2(self.data3d,self.voxelSize,vysledek)
+            self.segmentation = segmentace2(self.data3d,self.voxelSize,source=self.segParams['paramfile'],vysledky=vysledek)
             spatne = False
         if(numero == 3):
-            self.segmentation = segmentace3(self.data3d,self.voxelSize,vysledek)
+            self.segmentation = segmentace3(self.data3d,self.voxelSize,source=self.segParams['paramfile'],vysledky=vysledek)
             spatne = False
         if(numero == 4):
-            self.segmentation = segmentace4(self.data3d,self.voxelSize,vysledek)
+            self.segmentation = segmentace4(self.data3d,self.voxelSize,source=self.segParams['paramfile'],vysledky=vysledek)
             spatne = False
 
         if(spatne):
