@@ -31,6 +31,7 @@ import scipy.ndimage
 import numpy as np
 import datetime
 import argparse
+import lisa.extern.morphsnakes as ms
 # tady uz je logger
 # import dcmreaddata as dcmreader
 try:
@@ -143,19 +144,20 @@ class OrganSegmentation():
         :param datapath: path to directory with dicom files
         :param manualroi: manual set of ROI before data processing, there is a
              problem with correct coordinates
-        :param data3d, metadata: it can be used for data loading not from directory.
-            If both are setted, datapath is ignored
+        :param data3d, metadata: it can be used for data loading not from
+        directory. If both are setted, datapath is ignored
         :param output_label: label for output segmented volume
         :param slab: aditional label system for description segmented data
         {'none':0, 'liver':1, 'lesions':6}
-        :param roi: region of interest. [[startx, stopx], [sty, spy], [stz, spz]]
+        :param roi: region of interest.
+        [[startx, stopx], [sty, spy], [stz, spz]]
         :param seeds: ndimage array with size same as data3d
         :param experiment_caption = this caption is used for naming of outputs
         :param lisa_operator_identifier: used for logging
         :param input_datapath_start: Path where user directory selection dialog
             starts.
-        :param volume_blowup: Blow up volume is computed in smoothing so it is working
-            only if smoothing is turned on.
+        :param volume_blowup: Blow up volume is computed in smoothing so it is
+        working only if smoothing is turned on.
         :param seg_postproc_pars: Can be used for setting postprocessing
         parameters. For example
         """
@@ -217,8 +219,8 @@ class OrganSegmentation():
             'segmentation_smoothing': segmentation_smoothing,
             'volume_blowup': volume_blowup,
             'snakes': False,
-            'snakes_method': '',
-            'snakes_params': {},
+            'snakes_method': 'ACWE',
+            'snakes_params': {'smoothing': 1, 'lambda1': 100, 'lambda2': 1},
         }
         self.seg_postproc_pars.update(seg_postproc_pars)
         # seg_postproc_pars.update(seg_postproc_pars)
@@ -653,7 +655,6 @@ class OrganSegmentation():
 
         self._segmentation_postprocessing()
 
-
         # rint 'autocrop', self.autocrop
         if self.autocrop is True:
             # rint
@@ -705,7 +706,18 @@ class OrganSegmentation():
             self.segm_smoothing(self.seg_postproc_pars['smoothing_mm'])
 
         if self.seg_postproc_pars['snakes']:
-            pass
+            if self.seg_postproc_pars['snakes_method'] is 'ACWE':
+                macwe = ms.MorphACWE(
+                    self.data3d,
+                    **self.seg_postproc_pars['snakes_params']
+                )
+                macwe.levelset = (
+                    self.segmentation == self.slab['liver']
+                ).astype(np.uint8)
+                macwe.run(10)
+                self.segmentation = macwe.levelset
+            else:
+                logger.warning('Unknown snake method')
 
 
 #    def interactivity(self, min_val=800, max_val=1300):
