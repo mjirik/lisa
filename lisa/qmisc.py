@@ -98,7 +98,10 @@ def combinecrinfo(crinfo1, crinfo2):
 
 def crinfo_from_specific_data(data, margin):
     # hledáme automatický ořez, nonzero dá indexy
+    logger.debug('crinfo')
+    logger.debug(str(margin))
     nzi = np.nonzero(data)
+    logger.debug(str(nzi))
 
     x1 = np.min(nzi[0]) - margin[0]
     x2 = np.max(nzi[0]) + margin[0] + 1
@@ -165,7 +168,8 @@ def getVersionString():
 
     if version_string == None:  # noqa
         try:
-            path_to_version = os.path.join(path_to_script, '../.git/refs/heads/master')
+            path_to_version = os.path.join(path_to_script,
+                                           '../.git/refs/heads/master')
             with file(path_to_version) as f:
                 version_string = f.read()
         except:
@@ -176,7 +180,8 @@ def getVersionString():
             path_to_version = os.path.join(path_to_script, '../__VERSION__')
             with file(path_to_version) as f:
                 version_string = f.read()
-            path_to_version = path_to_version + '  version number is created manually'
+            path_to_version = path_to_version + \
+                '  version number is created manually'
 
         except:
             logger.warning('Problem with reading file "__VERSION__"')
