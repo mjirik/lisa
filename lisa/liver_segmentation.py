@@ -27,27 +27,30 @@ import os.path as op
 import volumetry_evaluation as ve
 import sed3
 
-def segmentace4(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
-    '''binarni operace nasledovane region growingem
-    vzorkovaciKonstanta === pocitac urci sam
-    hrannicni konstanta = ohraniceni region growingu kolem seedu v mm
-    maxSeedKonstanta = pocet vybranych seedu (rovnomerne)'''
-
-    print 'pouzita metoda 4 pouzivajici metodu 3'
-    vzorkovaciKonstanta = np.shape(tabulka)[0]*0.33+33 #*0.33+22 #KONSTANTA VYPOCITANA Z DELKY 3D SNIMKU (ROZLISENI)
-    hranicniKonstanta = 50.0 #50 a 10 vypada dobre 35 a 50seed =malo/ moc ///45 20 nej
-    maxSeedKonstanta = 30
-    #print vzorkovaciKonstanta
-    #vzorkovaciKonstanta = 80
-    #return
-    binarniOperace = segmentace3(tabulka,velikostVoxelu,source=source,vysledky = False)
-    segmentaceVysledek = binarniOperace
-    'konstanta urcuje rozmezi region growingu'
-    segmentaceVysledek = regionGrowingCTIF(tabulka,binarniOperace,velikostVoxelu,konstanta = vzorkovaciKonstanta,
-                                           konstantaHranice = hranicniKonstanta,maxSeeds = maxSeedKonstanta)
-
-
-    return segmentaceVysledek
+def updatujSegparams(seznamNazvuPolozek):
+    '''nacte stary slovnik z segparams1.yml, a prida, pripadne prepise
+    stare nazvy a polzky novymi ze seznamu seznamNazvuPolozek:
+    seznamNazvuPolozek = [['hranicniKonstanta',50.0],
+    ['maxSeedKonstanta',30],
+    ['prumer', 130.79240506015375],
+    ['variance',  2114.51201903427]]
+    '''
+    path_to_script = op.dirname(os.path.abspath(__file__))
+    paramfile = op.join(path_to_script, 'data/segparams1.yml')
+    #print paramfile
+    puvodni = main.nactiYamlSoubor(paramfile)
+    if(isinstance(puvodni,dict)):
+        updatovany = puvodni
+    else:
+        updatovany = {} #osetreni pripadu spatnych dat v souboru
+    print updatovany
+    
+    for dvojice in seznamNazvuPolozek:
+        nazev = dvojice[0]
+        polozka = dvojice[1]
+        updatovany[nazev] = polozka
+    
+    main.zapisYamlSoubor(paramfile, updatovany)
 
 def regionGrowingCTIF(ctImage,array,velikostVoxelu,konstanta = 100,konstantaHranice = 5.0,maxSeeds = None):
     ''' ctImage = ct snimek, array = numpy aray po binarnich operacich (lokalizace vnitrku jater
@@ -436,7 +439,7 @@ def segmentace0(tabulka,velikostVoxelu,vysledky = False):
 
     return segmentaceVysledek
 
-def segmentace1(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
+def segmentace1(data3d,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     '''PRIMITIVNI METODA - PRAHOVANI
     Nacte parametry prumer a odchylka ze souboru Metoda1.yml
     (lze zmenit pomoci volitelneho argumentu source)
@@ -461,14 +464,14 @@ def segmentace1(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
         prumer = vysledky[0]
         var = vysledky[1]
     odchylka = np.sqrt(var)
-    #print np.shape(tabulka)
+    #print np.shape(data3d)
     segmentaceVysledek = []
     zeli3=0
     mezHorni = prumer +konstanta*odchylka
     mezDolni = prumer -konstanta*odchylka
 
-    for rez in tabulka:
-        print str(zeli3+1) + '/' + str(len(tabulka))
+    for rez in data3d:
+        print str(zeli3+1) + '/' + str(len(data3d))
         rezNovy1 = ( (np.array(rez)>=prumer+mezDolni))
         rezNovy2 = (np.array(rez)<=prumer +mezHorni)
         rezNovy =np.multiply( rezNovy1, rezNovy2)
@@ -484,11 +487,11 @@ def segmentace1(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     #ed.show()
 
     #print segmentaceVysledek
-    #print np.shape(tabulka)
+    #print np.shape(data3d)
     #print np.shape(segmentaceVysledek)
     return segmentaceVysledek
 
-def segmentace2(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
+def segmentace2(data3d,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     '''PRIMITIVNI METODA - PRAHOVANI Z PDF -50 az 250
     optimalni se zda 0 az 200
     pro metodu 0 az 180'''
@@ -497,8 +500,8 @@ def segmentace2(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     zeli3 = 0
     mezDolni = 0
     mezHorni = 250
-    for rez in tabulka:
-        print str(zeli3+1) + '/' + str(len(tabulka))
+    for rez in data3d:
+        print str(zeli3+1) + '/' + str(len(data3d))
         rezNovy1 = ( (np.array(rez)>=mezDolni))
         rezNovy2 = (np.array(rez)<=mezHorni)
         rezNovy =np.multiply( rezNovy1, rezNovy2)
@@ -523,43 +526,50 @@ def segmentace2(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     #ed.show()
 
     #print segmentaceVysledek
-    #print np.shape(tabulka)
+    #print np.shape(data3d)
     #print np.shape(segmentaceVysledek)
     return segmentaceVysledek
 
 
-def segmentace3(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
-    '''Morfologie z 2D na 3D '''
-    print 'pouzita metoda 3'
-    segmentaceVysledek = []
-    #print tabulka
+def segmentace3(data3d,velikostVoxelu,source='Metoda1.yml',vysledky = False):
+    '''ata3d - vstupni data (CT snimek)
+    velikostVoxelu - vektor urcujici velikostVoxelu
+    source - cesta k souboru opsahujici segmentacni parametry
+    vysledky - existence trenovacich dat, jejich predani
+    binarni operace nasledovane region growingem
+    vzorkovaciKonstanta === pocitac urci sam
+    hrannicni konstanta = ohraniceni region growingu kolem seedu v mm
+    maxSeedKonstanta = pocet vybranych seedu (rovnomerne)'''
+    #print data3d
     #zeli3 = 0
-    pokus = nactiYamlSoubor(source)
-    prumer = pokus[0]
-    odchylka = np.sqrt(pokus[1])
+    
+    slovnik = nactiYamlSoubor(source)
+    prumer = slovnik['prumer']
+    variance = slovnik['variance']
+    odchylka = np.sqrt(variance)
     konstanta = 2 #STARA DOBRA = 2 S USPECHEM I 2.5
     mezHorni=prumer + konstanta*odchylka
     mezDolni=prumer - konstanta*odchylka
     print 'probiha prahovani'
-
-    rezNovy1 = ( tabulka>=mezDolni)
-    rezNovy2 = (tabulka<=mezHorni)
+    
+    rezNovy1 = ( data3d>=mezDolni)
+    rezNovy2 = (data3d<=mezHorni)
     rezNovy =np.multiply( rezNovy1, rezNovy2)
     rezNovy2 = rezNovy.astype(np.int8)
-
-
-
+    
+    
+    
     'BINARNI OPERACE 3D'
     print 'probihaji binarni operace'
     struktura1 = np.array([[[0,1,0],[1,1,1],[0,1,0]],[[1,1,1],[1,1,1],[1,1,1]],[[0,1,0],[1,1,1],[0,1,0]]])
-
+    
     rezNovy = ndimage.binary_dilation(rezNovy2,struktura1, 1)
     print '1/2'
     rezNovy2 = ndimage.binary_opening(rezNovy,struktura1, 15) #CELKEM OK
     print '2/2'
     rezNovy = ndimage.binary_erosion(rezNovy2,struktura1, 10)
     rezNovy2 = rezNovy
-
+    
     print 'probiha vybrani nejvetsiho objektu'
     [labelImage, labels] = ndimage.label(rezNovy2)
     #print nb_labels
@@ -574,28 +584,61 @@ def segmentace3(tabulka,velikostVoxelu,source='Metoda1.yml',vysledky = False):
         if(suma > maximum):
             nejvetsi = x+1
             maximum = suma
-
+    
     # print x+1
     print maximum
     rezNovy2 = labelImage == nejvetsi
-
-
-
-
+    
+    
+    
+    
     rezNovy = rezNovy2.astype(np.int8)
     #print rezNovy
-
-
-
+    
+    
+    
     'REGION GROWING'
     print 'Probiha region growing'
-
-
-
+    
+    
+    
     #ed = sed3.sed3(np.array(rezNovy))
     #ed.show()
-
+    
     return rezNovy
+    
+
+def segmentace4(data3d,velikostVoxelu,source,vysledky = False):
+    '''
+    data3d - vstupni data (CT snimek)
+    velikostVoxelu - vektor urcujici velikostVoxelu
+    source - cesta k souboru opsahujici segmentacni parametry
+    vysledky - existence trenovacich dat, jejich predani
+    binarni operace nasledovane region growingem
+    vzorkovaciKonstanta === pocitac urci sam
+    hrannicni konstanta = ohraniceni region growingu kolem seedu v mm
+    maxSeedKonstanta = pocet vybranych seedu (rovnomerne)'''
+
+    print 'pouzita metoda 4 pouzivajici metodu 3'
+    vzorkovaciKonstanta = np.shape(data3d)[0]*0.33+33 #*0.33+22 #KONSTANTA VYPOCITANA Z DELKY 3D SNIMKU (ROZLISENI)
+    
+    slovnik = nactiYamlSoubor(source)
+    hranicniKonstanta = slovnik['hranicniKonstanta']
+    maxSeedKonstanta  = slovnik['maxSeedKonstanta']
+    
+    #hranicniKonstanta = 50.0 #50 a 10 vypada dobre 35 a 50seed =malo/ moc ///45 20 nej
+    #maxSeedKonstanta = 30
+    #print vzorkovaciKonstanta
+    #vzorkovaciKonstanta = 80
+    #return
+    binarniOperace = segmentace3(data3d,velikostVoxelu,source=source,vysledky = False)
+    segmentaceVysledek = binarniOperace
+    'konstanta urcuje rozmezi region growingu'
+    segmentaceVysledek = regionGrowingCTIF(data3d,binarniOperace,velikostVoxelu,konstanta = vzorkovaciKonstanta,
+                                           konstantaHranice = hranicniKonstanta,maxSeeds = maxSeedKonstanta)
+
+
+    return segmentaceVysledek
 
 def trenovaniCele(metoda,path = None):
     '''Metoda je cislo INT, dane poradim metody pri implementaci prace
