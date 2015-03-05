@@ -548,6 +548,17 @@ def processData(inputfile=None, threshold=None, skeleton=False,
     hr.generateStats()
     hr.writeReportToCSV()
     hr.writeReportToYAML()
+    
+    # Add results Record
+    if crop is not None:
+        label = str(crop[0])+"-"+str(crop[1])
+    else:
+        label = "0-end"
+    if inputfile is not None:
+        path = inputfile
+    else:
+        path = "_GENERATED_DATA_"
+    hr.addResultsRecord(label=label, datapath=path)
 
     # ## End
     logger.info('Finished')

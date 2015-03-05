@@ -8,12 +8,15 @@ Generator of histology report
 import logging
 logger = logging.getLogger(__name__)
 
+import os
 import argparse
 import numpy as np
 
 import misc
 import csv
 
+import pandas as pd
+import datetime
 
 class HistologyReport:
 
@@ -69,6 +72,33 @@ class HistologyReport:
             writer.writerow(data['Other']['Radius histogram'][1])
             writer.writerow(data['Other']['Length histogram'][0])
             writer.writerow(data['Other']['Length histogram'][1])
+            
+    def addResultsRecord(self, label='_LABEL_', datapath='_PATH_', recordfilename='stats'):
+        logger.debug("Adding Results record to file: "+recordfilename+".*")
+        cols = ['label', 'Vv', 'Sv', 'Lv', 'Tort', 'Nv', 'datetime', 'shape', 'voxelsize', 'path']
+        
+        data_r_m = self.stats['Report']['Main']
+        data_g = self.data['General']
+        newrow = [[label, 
+                    data_r_m['Vessel volume fraction (Vv)'], 
+                    data_r_m['Surface density (Sv)'], 
+                    data_r_m['Length density (Lv)'], 
+                    data_r_m['Tortuosity'], 
+                    data_r_m['Nv'], 
+                    str(datetime.datetime.now()), 
+                    "-".join(map(str, data_g['shape_px'])), 
+                    "-".join(map(str, data_g['voxel_size_mm'])), 
+                    datapath]]
+        
+        df = pd.DataFrame(newrow, columns=cols)
+        
+        filename = recordfilename+'.csv'
+        append = os.path.isfile(filename)
+        with open(filename, 'a') as f:
+            if append:
+                df.to_csv(f, header=False)
+            else:
+                df.to_csv(f)
 
     def generateStats(self, binNum=40):
         # TODO - upravit dokumentaci

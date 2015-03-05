@@ -83,10 +83,11 @@ class HistologyAnalyserWindow(QMainWindow):
         """
         sys.exit(0)
 
-    def processDataGUI(self, data3d=None, metadata=None, crgui=True):
+    def processDataGUI(self, inputfile=None, data3d=None, metadata=None, crgui=True):
         """
         GUI version of histology analysation algorithm
         """
+        self.inputfile = inputfile
         self.data3d = data3d
         self.masked = None
         self.metadata = metadata
@@ -510,6 +511,7 @@ class StatsResultDialog(QDialog):
     def __init__(self, mainWindow=None, histologyAnalyser=None, stats=None):
         self.mainWindow = mainWindow
         self.ha = histologyAnalyser
+        self.recordAdded = False
 
         self.hr = HistologyReport()
         if stats is None:
@@ -615,6 +617,9 @@ class StatsResultDialog(QDialog):
         self.mainWindow.setStatusBarText('Statistics - writing YAML file')
         self.ha.writeStatsToYAML()
         self.mainWindow.setStatusBarText('Ready')
+        
+        if not self.recordAdded:
+            self.addResultsRecord()
 
     def writeCSV(self):
         # TODO - choose save path
@@ -622,6 +627,9 @@ class StatsResultDialog(QDialog):
         self.mainWindow.setStatusBarText('Statistics - writing CSV file')
         self.ha.writeStatsToCSV()
         self.mainWindow.setStatusBarText('Ready')
+        
+        if not self.recordAdded:
+            self.addResultsRecord()
 
     def writeReportYAML(self):
         # TODO - choose save path
@@ -629,6 +637,9 @@ class StatsResultDialog(QDialog):
         self.mainWindow.setStatusBarText('Report - writing YAML file')
         self.hr.writeReportToYAML()
         self.mainWindow.setStatusBarText('Ready')
+        
+        if not self.recordAdded:
+            self.addResultsRecord()
 
     def writeReportCSV(self):
         # TODO - choose save path
@@ -636,6 +647,19 @@ class StatsResultDialog(QDialog):
         self.mainWindow.setStatusBarText('Report - writing CSV file')
         self.hr.writeReportToCSV()
         self.mainWindow.setStatusBarText('Ready')
+        
+        if not self.recordAdded:
+            self.addResultsRecord()
+        
+    def addResultsRecord(self):
+        # Add results Record
+        label = "GUI-mode"
+        if self.mainWindow.inputfile is not None and self.mainWindow.inputfile != "":
+            path = self.mainWindow.inputfile
+        else:
+            path = "_GENERATED_DATA_"
+        self.hr.addResultsRecord(label=label, datapath=path)
+        self.recordAdded = True
 
 class HistogramMplCanvas(FigureCanvas):
     def __init__(self, histogramNumbers, histogramBins, title='', xlabel='', ylabel=''):
@@ -705,7 +729,7 @@ class HistogramMplCanvas(FigureCanvas):
             self.axes.set_ylabel(self.text_ylabel)
 
 class LoadDialog(QDialog):
-    signal_finished = pyqtSignal(np.ndarray,dict,bool)
+    signal_finished = pyqtSignal(str,np.ndarray,dict,bool)
 
     def __init__(self, mainWindow=None, inputfile=None, voxelsize=None, crop=None):
         self.mainWindow = mainWindow
@@ -932,8 +956,10 @@ class LoadDialog(QDialog):
                     logger.warning('Error when manually croping data - bad parameters')
                     QMessageBox.warning(self, 'Error', 'Bad manual crop parameters!!!')
                     return
-
-            self.signal_finished.emit(self.data3d, self.metadata, self.box_crgui)
+            
+            if self.inputfile is None:
+                self.inputfile = ""
+            self.signal_finished.emit(self.inputfile, self.data3d, self.metadata, self.box_crgui)
 
         else:
             # if no data3d or metadata loaded
