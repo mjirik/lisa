@@ -706,18 +706,24 @@ class OrganSegmentation():
             self.segm_smoothing(self.seg_postproc_pars['smoothing_mm'])
 
         if self.seg_postproc_pars['snakes']:
+            logger.debug('Making snakes')
             if self.seg_postproc_pars['snakes_method'] is 'ACWE':
-                macwe = ms.MorphACWE(
-                    self.data3d,
-                    **self.seg_postproc_pars['snakes_params']
-                )
-                macwe.levelset = (
-                    self.segmentation == self.slab['liver']
-                ).astype(np.uint8)
-                macwe.run(10)
-                self.segmentation = macwe.levelset
+                method =  ms.MorphACWE
+            elif self.seg_postproc_pars['snakes_method'] is 'GAC':
+                method =  ms.MorphGAC
             else:
-                logger.warning('Unknown snake method')
+                logger.error('Unknown snake method')
+                return
+
+            macwe = method(
+                self.data3d,
+                **self.seg_postproc_pars['snakes_params']
+            )
+            macwe.levelset = (
+                self.segmentation == self.slab['liver']
+            ).astype(np.uint8)
+            macwe.run(self.seg_postproc_pars['snakes_niter'])
+            self.segmentation = macwe.levelset
 
 
 #    def interactivity(self, min_val=800, max_val=1300):
