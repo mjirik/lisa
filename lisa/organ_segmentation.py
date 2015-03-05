@@ -769,7 +769,11 @@ class OrganSegmentation():
         # gc.interactivity()
         # igc.make_gc()
         igc.run()
-        self.segmentation = (igc.segmentation == 0).astype(np.int8)
+        if 'method' not in self.segparams.keys() or\
+                self.segparams['method'] == 'GC':
+            self.segmentation = (igc.segmentation == 0).astype(np.int8)
+        else:
+            self.segmentation = np.asarray(igc.segmentation, dtype=np.int8)
         self._interactivity_end(igc)
 
     def export(self):

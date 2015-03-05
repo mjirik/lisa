@@ -892,6 +892,7 @@ class LiverSegmentation:
         return self.segParams['cisloMetody']
 
     def set_seeds(self, seeds):
+        self.seeds = seeds
         pass
 
     def setPath(self, string):
