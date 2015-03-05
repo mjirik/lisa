@@ -708,9 +708,9 @@ class OrganSegmentation():
         if self.seg_postproc_pars['snakes']:
             logger.debug('Making snakes')
             if self.seg_postproc_pars['snakes_method'] is 'ACWE':
-                method =  ms.MorphACWE
+                method = ms.MorphACWE
             elif self.seg_postproc_pars['snakes_method'] is 'GAC':
-                method =  ms.MorphGAC
+                method = ms.MorphGAC
             else:
                 logger.error('Unknown snake method')
                 return
@@ -777,8 +777,10 @@ class OrganSegmentation():
         igc.run()
         if 'method' not in self.segparams.keys() or\
                 self.segparams['method'] == 'GC':
+            logger.debug('ninteractivity seg method GC')
             self.segmentation = (igc.segmentation == 0).astype(np.int8)
         else:
+            logger.debug('ninteractivity seg method other')
             self.segmentation = np.asarray(igc.segmentation, dtype=np.int8)
         self._interactivity_end(igc)
 
