@@ -33,36 +33,27 @@ class LiverSegmentationTest(unittest.TestCase):
     @attr('actual')
     def test_liver_segmentation_real_data(self):
         # path_to_script = os.path.dirname(os.path.abspath(__file__))
-        dpath = os.path.join(path_to_script, '../sample_data/jatra_5mm/')
+        # dpath = os.path.join(path_to_script, '../sample_data/jatra_5mm/')
+        dpath = os.path.join(path_to_script, '../sample_data/liver-orig001.mhd')
         data3d, metadata = io3d.datareader.read(dpath)
-        # import sed3
-        img3d = np.random.rand(32, 64, 64) * 4
-        img3d[4:24, 12:32, 5:25] = img3d[4:24, 12:32, 5:25] + 25
-
-# seeds
-        seeds = np.zeros([32, 64, 64], np.int8)
-        seeds[9:12, 13:29, 18:24] = 1
-        seeds[9:12, 4:9, 3:32] = 2
-# [mm]  10 x 10 x 10        # voxelsize_mm = [1, 4, 3]
-        voxelsize_mm = [5, 5, 5]
+        voxelsize_mm = metadata['voxelsize_mm']
 
         ls = liver_segmentation.LiverSegmentation(
             data3d=data3d,
-            voxelsize=voxelsize_mm,
+            voxelsize_mm=voxelsize_mm,
             segparams={'cisloMetody': 3}
             # seeds=seeds
         )
         ls.run()
         volume = np.sum(ls.segmentation == 1) * np.prod(voxelsize_mm)
 
-        # ed = sed3.sed3(img3d, contour=ls.segmentation, seeds=seeds)
+        # import sed3
+        # ed = sed3.sed3(data3d, contour=ls.segmentation)  # , seeds=seeds)
         # ed.show()
 
-        # import pdb; pdb.set_trace()
-
         # mel by to být litr. tedy milion mm3
-        # self.assertGreater(volume, 900000)
-        # self.assertLess(volume, 1100000)
+        self.assertGreater(volume, 100000)
+        self.assertLess(volume, 2100000)
 
     @attr('interactive')
     def test_liver_segmentation(self):
@@ -80,7 +71,7 @@ class LiverSegmentationTest(unittest.TestCase):
 
         ls = liver_segmentation.LiverSegmentation(
             data3d=img3d,
-            voxelsize=voxelsize_mm,
+            voxelsize_mm=voxelsize_mm,
             # seeds=seeds
         )
         ls.run()
@@ -112,7 +103,7 @@ class LiverSegmentationTest(unittest.TestCase):
 
         ls = liver_segmentation.LiverSegmentation(
             data3d=img3d,
-            voxelsize=voxelsize_mm,
+            voxelsize_mm=voxelsize_mm,
             # seeds=seeds
         )
         ls.run()
@@ -121,7 +112,6 @@ class LiverSegmentationTest(unittest.TestCase):
         # ed.show()
 
     @attr('incomplete')
-    @attr('actual')
     def test_automatickyTest(self):
         ''' nacte prvni dva soubory koncici .mhd z adresare sample_data
         prvni povazuje za originalni a provede na nem segmentaci defaultni

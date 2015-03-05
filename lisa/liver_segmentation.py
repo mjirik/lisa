@@ -854,7 +854,7 @@ class LiverSegmentation:
     def __init__(
         self,
         data3d,
-        voxelsize=[1, 1, 1],segparams={}
+        voxelsize_mm=[1, 1, 1],segparams={}
     ):
         """
         :data3d: 3D array with data
@@ -870,12 +870,12 @@ class LiverSegmentation:
         self.interactivity_counter = 0
         # 3D array with object and background selections by user
         self.seeds = None
-        self.voxelSize = voxelsize
+        self.voxelSize = voxelsize_mm
         self.segParams = {
-            'cisloMetody':4,
-            'vysledkyDostupne':False,
+            'cisloMetody': 4,
+            'vysledkyDostupne': False,
             'paramfile': self._get_default_paramfile_path(),
-            'path':None
+            'path': None
         }
         self.segParams.update(segparams)
         self.segmentation = np.zeros(data3d.shape, dtype=np.int8)
@@ -885,13 +885,15 @@ class LiverSegmentation:
         paramfile = op.join(path_to_script, 'data/segparams1.yml')
         return paramfile
 
-
-    def setCisloMetody(self,cislo):
+    def setCisloMetody(self, cislo):
         self.segParams['cisloMetody'] = cislo
 
     def getCisloMetody(self):
         return self.segParams['cisloMetody']
 
+    def set_seeds(self, seeds):
+        self.seeds = seeds
+        pass
 
     def setPath(self, string):
         self.segParams['path'] = string
