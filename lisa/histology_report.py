@@ -73,7 +73,7 @@ class HistologyReport:
             writer.writerow(data['Other']['Length histogram'][0])
             writer.writerow(data['Other']['Length histogram'][1])
             
-    def addResultsRecord(self, label='_LABEL_', datapath='_PATH_', recordfilename='stats'):
+    def addResultsRecord(self, label='_LABEL_', datapath="_GENERATED_DATA_", recordfilename='statsRecords'):
         logger.debug("Adding Results record to file: "+recordfilename+".*")
         cols = ['label', 'Vv', 'Sv', 'Lv', 'Tort', 'Nv', 'datetime', 'shape', 'voxelsize', 'path']
         

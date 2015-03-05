@@ -554,11 +554,10 @@ def processData(inputfile=None, threshold=None, skeleton=False,
         label = str(crop[0])+"-"+str(crop[1])
     else:
         label = "0-end"
-    if inputfile is not None:
-        path = inputfile
+    if inputfile is None:
+        hr.addResultsRecord(label=label)
     else:
-        path = "_GENERATED_DATA_"
-    hr.addResultsRecord(label=label, datapath=path)
+        hr.addResultsRecord(label=label, datapath=inputfile)
 
     # ## End
     logger.info('Finished')
