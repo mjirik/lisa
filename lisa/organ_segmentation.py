@@ -401,6 +401,7 @@ class OrganSegmentation():
         # pyed = sed3.sed3(self.orig_scale_segmentation)
         # pyed.show()
         logger.debug('wanted volume ' + str(wvol))
+        logger.debug('sigma ' + str(sigma))
 
         critf = lambda x: self.__volume_blowup_criterial_function(x, wvol, # noqa
                                                                  segsmooth)
