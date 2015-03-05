@@ -17,7 +17,7 @@ from PyQt4 import QtCore
 from PyQt4.QtCore import pyqtSignal, QObject, QRunnable, QThreadPool, Qt
 from PyQt4.QtGui import QMainWindow, QWidget, QDialog, QLabel, QFont,\
     QGridLayout, QFrame, QPushButton, QSizePolicy, QProgressBar, QSpacerItem,\
-    QCheckBox, QLineEdit, QApplication, QHBoxLayout
+    QCheckBox, QLineEdit, QApplication, QHBoxLayout, QFileDialog
 
 import numpy as np
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -610,42 +610,68 @@ class StatsResultDialog(QDialog):
         ### Setup layout
         self.setLayout(self.ui_gridLayout)
         self.show()
+        
+    def getSavePath(self, ofilename="stats", extension="yaml"):
+        logger.debug("GetSavePathDialog")
+        
+        filename = str(QFileDialog.getSaveFileName( self,
+        "Save file",
+        "./"+ofilename+"."+extension,
+        filter="*."+extension))
+        
+        return filename
 
     def writeYAML(self):
-        # TODO - choose save path
         logger.info("Writing statistics YAML file")
+        filename = self.getSavePath("hist_stats", "yaml")
+        if filename is None or filename == "":
+            logger.debug("File save cenceled")
+            return
+        
         self.mainWindow.setStatusBarText('Statistics - writing YAML file')
-        self.ha.writeStatsToYAML()
+        self.ha.writeStatsToYAML(filename)
         self.mainWindow.setStatusBarText('Ready')
         
         if not self.recordAdded:
             self.addResultsRecord()
 
     def writeCSV(self):
-        # TODO - choose save path
         logger.info("Writing statistics CSV file")
+        filename = self.getSavePath("hist_stats", "csv")
+        if filename is None or filename == "":
+            logger.debug("File save cenceled")
+            return
+        
         self.mainWindow.setStatusBarText('Statistics - writing CSV file')
-        self.ha.writeStatsToCSV()
+        self.ha.writeStatsToCSV(filename)
         self.mainWindow.setStatusBarText('Ready')
         
         if not self.recordAdded:
             self.addResultsRecord()
 
     def writeReportYAML(self):
-        # TODO - choose save path
         logger.info("Writing report YAML file")
+        filename = self.getSavePath("hist_report", "yaml")
+        if filename is None or filename == "":
+            logger.debug("File save cenceled")
+            return
+        
         self.mainWindow.setStatusBarText('Report - writing YAML file')
-        self.hr.writeReportToYAML()
+        self.hr.writeReportToYAML(filename)
         self.mainWindow.setStatusBarText('Ready')
         
         if not self.recordAdded:
             self.addResultsRecord()
 
     def writeReportCSV(self):
-        # TODO - choose save path
         logger.info("Writing report CSV file")
+        filename = self.getSavePath("hist_report", "csv")
+        if filename is None or filename == "":
+            logger.debug("File save cenceled")
+            return
+        
         self.mainWindow.setStatusBarText('Report - writing CSV file')
-        self.hr.writeReportToCSV()
+        self.hr.writeReportToCSV(filename)
         self.mainWindow.setStatusBarText('Ready')
         
         if not self.recordAdded:

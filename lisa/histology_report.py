@@ -41,14 +41,12 @@ class HistologyReport:
             data['General']['surface_density'] = None
         return data
 
-    def writeReportToYAML(self, filename='hist_report'):
+    def writeReportToYAML(self, filename='hist_report.yaml'):
         logger.debug('write report to yaml')
-        filename = filename + '.yaml'
         misc.obj_to_file(self.stats, filename=filename, filetype='yaml')
 
-    def writeReportToCSV(self, filename='hist_report'):
+    def writeReportToCSV(self, filename='hist_report.csv'):
         logger.debug('write report to csv')
-        filename = filename + '.csv'
         data = self.stats['Report']
 
         with open(filename, 'wb') as csvfile:
