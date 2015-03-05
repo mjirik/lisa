@@ -40,7 +40,7 @@ class LiverSegmentationTest(unittest.TestCase):
 
         ls = liver_segmentation.LiverSegmentation(
             data3d=data3d,
-            voxelsize=voxelsize_mm,
+            voxelsize_mm=voxelsize_mm,
             segparams={'cisloMetody': 3}
             # seeds=seeds
         )
@@ -71,7 +71,7 @@ class LiverSegmentationTest(unittest.TestCase):
 
         ls = liver_segmentation.LiverSegmentation(
             data3d=img3d,
-            voxelsize=voxelsize_mm,
+            voxelsize_mm=voxelsize_mm,
             # seeds=seeds
         )
         ls.run()
@@ -103,7 +103,7 @@ class LiverSegmentationTest(unittest.TestCase):
 
         ls = liver_segmentation.LiverSegmentation(
             data3d=img3d,
-            voxelsize=voxelsize_mm,
+            voxelsize_mm=voxelsize_mm,
             # seeds=seeds
         )
         ls.run()
