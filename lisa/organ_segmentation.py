@@ -697,7 +697,7 @@ class OrganSegmentation():
         """
         :segmentation_smoothing:
         """
-
+        logger.debug(str(self.seg_postproc_pars))
         if self.seg_postproc_pars['segmentation_smoothing']:
             self.segm_smoothing(self.seg_postproc_pars['smoothing_mm'])
 
