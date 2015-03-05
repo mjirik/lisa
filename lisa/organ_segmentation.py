@@ -407,6 +407,7 @@ class OrganSegmentation():
 
         thr = scipy.optimize.fmin(critf, x0=0.5, disp=False)[0]
         logger.debug('optimal threshold ' + str(thr))
+        logger.debug('segsmooth ' + str(np.nonzero(segsmooth)))
 
         self.segmentation = (1.0 *
                              (segsmooth > thr)  # self.volume_blowup)
