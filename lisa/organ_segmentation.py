@@ -670,14 +670,6 @@ class OrganSegmentation():
             self.crop(tmpcrinfo)
 
         logger.debug('nonzero segm ' + str(np.nonzero(self.segmentation)))
-        # seg = self
-        # rint 'ms d3d ', oseg.data3d.shape
-        # rint 'ms seg ', oseg.segmentation.shape
-        # rint 'crinfo ', oseg.crinfo
-            # elf.segmentation = qmisc.crop(self.segmentation, tmpcrinfo)
-            # elf.data3d = qmisc.crop(self.data3d, tmpcrinfo)
-
-            # elf.crinfo = qmisc.combinecrinfo(self.crinfo, tmpcrinfo)
 
         if self.texture_analysis not in (None, False):
             import texture_analysis
