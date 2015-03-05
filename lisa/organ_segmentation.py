@@ -574,6 +574,7 @@ class OrganSegmentation():
         resolution.
         """
         logger.debug('_interactivity_end()')
+        logger.debug('nonzero segm ' + str(np.nonzero(self.segmentation)))
         # @TODO remove old code in except part
         try:
             # rint 'pred vyjimkou'
@@ -635,6 +636,7 @@ class OrganSegmentation():
                 0:shp[1],
                 0:shp[2]] = seeds[0:shp[0], 0:shp[1], 0:shp[2]]
 
+        logger.debug('nonzero segm ' + str(np.nonzero(self.segmentation)))
         # if False:
         if False:
             # TODO dodělat postprocessing PV
@@ -655,6 +657,7 @@ class OrganSegmentation():
 
         self._segmentation_postprocessing()
 
+        logger.debug('nonzero segm 3' + str(np.nonzero(self.segmentation)))
         # rint 'autocrop', self.autocrop
         if self.autocrop is True:
             # rint
@@ -666,6 +669,7 @@ class OrganSegmentation():
 
             self.crop(tmpcrinfo)
 
+        logger.debug('nonzero segm ' + str(np.nonzero(self.segmentation)))
         # seg = self
         # rint 'ms d3d ', oseg.data3d.shape
         # rint 'ms seg ', oseg.segmentation.shape
