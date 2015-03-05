@@ -221,6 +221,7 @@ class OrganSegmentation():
             'snakes': False,
             'snakes_method': 'ACWE',
             'snakes_params': {'smoothing': 1, 'lambda1': 100, 'lambda2': 1},
+            'snakes_niter': 20,
         }
         self.seg_postproc_pars.update(seg_postproc_pars)
         # seg_postproc_pars.update(seg_postproc_pars)
