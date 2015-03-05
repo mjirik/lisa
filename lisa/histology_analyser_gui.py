@@ -653,12 +653,11 @@ class StatsResultDialog(QDialog):
         
     def addResultsRecord(self):
         # Add results Record
-        label = "GUI-mode"
-        if self.mainWindow.inputfile is not None and self.mainWindow.inputfile != "":
-            path = self.mainWindow.inputfile
+        label = "GUI mode"
+        if self.mainWindow.inputfile is None or self.mainWindow.inputfile == "":
+            self.hr.addResultsRecord(label=label)
         else:
-            path = "_GENERATED_DATA_"
-        self.hr.addResultsRecord(label=label, datapath=path)
+            self.hr.addResultsRecord(label=label, datapath=path)
         self.recordAdded = True
 
 class HistogramMplCanvas(FigureCanvas):
