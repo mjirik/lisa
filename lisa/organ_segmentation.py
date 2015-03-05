@@ -321,7 +321,7 @@ class OrganSegmentation():
         self.working_voxelsize_mm = vx_size
         # return vx_size
 
-    def __volume_blowup_criterial_funcion(self, threshold, wanted_volume,
+    def __volume_blowup_criterial_function(self, threshold, wanted_volume,
                                           segmentation_smooth
                                           ):
 
@@ -399,11 +399,13 @@ class OrganSegmentation():
         # import pdb; pdb.set_trace()
         # pyed = sed3.sed3(self.orig_scale_segmentation)
         # pyed.show()
+        logger.debug('wanted volume ' + str(wvol))
 
-        critf = lambda x: self.__volume_blowup_criterial_funcion(x, wvol, # noqa
+        critf = lambda x: self.__volume_blowup_criterial_function(x, wvol, # noqa
                                                                  segsmooth)
 
         thr = scipy.optimize.fmin(critf, x0=0.5, disp=False)[0]
+        logger.debug('optimal threshold ' + str(thr))
 
         self.segmentation = (1.0 *
                              (segsmooth > thr)  # self.volume_blowup)
@@ -699,6 +701,7 @@ class OrganSegmentation():
         """
         logger.debug(str(self.seg_postproc_pars))
         if self.seg_postproc_pars['segmentation_smoothing']:
+        if self.segmentation_smoothing:
             self.segm_smoothing(self.seg_postproc_pars['smoothing_mm'])
 
         if self.seg_postproc_pars['snakes']:
