@@ -322,8 +322,8 @@ class OrganSegmentation():
         # return vx_size
 
     def __volume_blowup_criterial_function(self, threshold, wanted_volume,
-                                          segmentation_smooth
-                                          ):
+                                           segmentation_smooth
+                                           ):
 
         segm = (1.0 * segmentation_smooth > threshold).astype(np.int8)
         vol2 = np.sum(segm)
@@ -701,7 +701,7 @@ class OrganSegmentation():
         """
         logger.debug(str(self.seg_postproc_pars))
         if self.seg_postproc_pars['segmentation_smoothing']:
-        if self.segmentation_smoothing:
+            # if self.segmentation_smoothing:
             self.segm_smoothing(self.seg_postproc_pars['smoothing_mm'])
 
         if self.seg_postproc_pars['snakes']:
