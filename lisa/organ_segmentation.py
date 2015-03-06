@@ -587,10 +587,14 @@ class OrganSegmentation():
 # Now we need reshape  seeds and segmentation to original size
 
             segm_orig_scale = skimage.transform.resize(
-                self.segmentation, self.data3d.shape, order=0)
+                self.segmentation, self.data3d.shape, order=0,
+                preserve_range=True
+            )
 
             seeds = skimage.transform.resize(
-                igc_seeds, self.data3d.shape, order=0)
+                igc_seeds, self.data3d.shape, order=0,
+                preserve_range=True
+            )
 
             self.segmentation = segm_orig_scale
             self.seeds = seeds
