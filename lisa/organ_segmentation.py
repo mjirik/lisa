@@ -394,8 +394,10 @@ class OrganSegmentation():
         # pyqtRemoveInputHook()
         vol1 = np.sum(self.segmentation)
         wvol = vol1 * self.volume_blowup
+        logger.debug('unique segm ' + str(np.unique(self.segmentation)))
         segsmooth = scipy.ndimage.filters.gaussian_filter(
             self.segmentation.astype(np.float32), sigma)
+        logger.debug('unique segsmooth ' + str(np.unique(segsmooth)))
         # import ipdb; ipdb.set_trace()
         # import pdb; pdb.set_trace()
         # pyed = sed3.sed3(self.orig_scale_segmentation)
@@ -661,6 +663,9 @@ class OrganSegmentation():
                 binaryClosingIterations=2,
                 binaryOpeningIterations=0)
 
+        logger.debug('unique segm ' + str(np.unique(self.segmentation)))
+        logger.debug('segm hist ' + str(np.histogram(self.segmentation,
+                                                     bins=[-1, 0, 1, 2, 3])))
         self._segmentation_postprocessing()
 
         logger.debug('nonzero segm 3' + str(np.nonzero(self.segmentation)))
