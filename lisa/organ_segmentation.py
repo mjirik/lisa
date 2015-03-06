@@ -575,19 +575,9 @@ class OrganSegmentation():
 
         return igc
 
-    def _interactivity_end(self, igc):
-        """
-        This is called after processing step. All data are rescaled to original
-        resolution.
-        """
-        logger.debug('_interactivity_end()')
-        logger.debug('nonzero segm ' + str(np.nonzero(self.segmentation)))
-        logger.debug('unique segm ' + str(np.unique(self.segmentation)))
-        logger.debug('before zoom self segm mx %s  min %s ' % (
-            str(np.max(self.segmentation)),
-            str(np.min(self.segmentation)),
-        ))
+    def __resize_to_orig(self, igc_seeds):
         # @TODO remove old code in except part
+
         try:
             # rint 'pred vyjimkou'
             # aise Exception ('test without skimage')
@@ -600,10 +590,11 @@ class OrganSegmentation():
                 self.segmentation, self.data3d.shape, order=0)
 
             seeds = skimage.transform.resize(
-                igc.seeds, self.data3d.shape, order=0)
+                igc_seeds, self.data3d.shape, order=0)
 
             self.segmentation = segm_orig_scale
             self.seeds = seeds
+            logger.debug('resize to orig with skimage')
         except:
 
             segm_orig_scale = scipy.ndimage.zoom(
@@ -613,14 +604,12 @@ class OrganSegmentation():
                 order=0
             ).astype(np.int8)
             seeds = scipy.ndimage.zoom(
-                igc.seeds,
+                igc_seeds,
                 1.0 / self.zoom,
                 mode='nearest',
                 order=0
             )
-            self.organ_interactivity_counter = igc.interactivity_counter
-            logger.debug("org inter counter " +
-                         str(self.organ_interactivity_counter))
+            logger.debug('resize to orig with scipy.ndimage')
 
 # @TODO odstranit hack pro oříznutí na stejnou velikost
 # v podstatě je to vyřešeno, ale nechalo by se to dělat elegantněji v zoom
@@ -648,6 +637,23 @@ class OrganSegmentation():
                 0:shp[1],
                 0:shp[2]] = seeds[0:shp[0], 0:shp[1], 0:shp[2]]
 
+    def _interactivity_end(self, igc):
+        """
+        This is called after processing step. All data are rescaled to original
+        resolution.
+        """
+        logger.debug('_interactivity_end()')
+        logger.debug('nonzero segm ' + str(np.nonzero(self.segmentation)))
+        logger.debug('unique segm ' + str(np.unique(self.segmentation)))
+        logger.debug('before zoom self segm mx %s  min %s ' % (
+            str(np.max(self.segmentation)),
+            str(np.min(self.segmentation)),
+        ))
+
+        self.__resize_to_orig(igc.seeds)
+        self.organ_interactivity_counter = igc.interactivity_counter
+        logger.debug("org inter counter " +
+                     str(self.organ_interactivity_counter))
         logger.debug('nonzero segm ' + str(np.nonzero(self.segmentation)))
         # if False:
         if False:
