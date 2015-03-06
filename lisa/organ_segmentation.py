@@ -583,6 +583,10 @@ class OrganSegmentation():
         logger.debug('_interactivity_end()')
         logger.debug('nonzero segm ' + str(np.nonzero(self.segmentation)))
         logger.debug('unique segm ' + str(np.unique(self.segmentation)))
+        logger.debug('before zoom self segm mx %s  min %s ' % (
+            str(np.max(self.segmentation)),
+            str(np.min(self.segmentation)),
+        ))
         # @TODO remove old code in except part
         try:
             # rint 'pred vyjimkou'
