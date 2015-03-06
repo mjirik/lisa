@@ -580,6 +580,7 @@ class OrganSegmentation():
         """
         logger.debug('_interactivity_end()')
         logger.debug('nonzero segm ' + str(np.nonzero(self.segmentation)))
+        logger.debug('unique segm ' + str(np.unique(self.segmentation)))
         # @TODO remove old code in except part
         try:
             # rint 'pred vyjimkou'
@@ -675,6 +676,9 @@ class OrganSegmentation():
             self.crop(tmpcrinfo)
 
         logger.debug('nonzero segm ' + str(np.nonzero(self.segmentation)))
+        logger.debug('unique segm ' + str(np.unique(self.segmentation)))
+        logger.debug('segm hist ' + str(np.histogram(self.segmentation,
+                                                     bins=[-1, 0, 1, 2, 3])))
 
         if self.texture_analysis not in (None, False):
             import texture_analysis
