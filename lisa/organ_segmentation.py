@@ -647,9 +647,9 @@ class OrganSegmentation():
         resolution.
         """
         logger.debug('_interactivity_end()')
-        logger.debug('nonzero segm ' + str(np.nonzero(self.segmentation)))
-        logger.debug('unique segm ' + str(np.unique(self.segmentation)))
-        logger.debug('before zoom self segm mx %s  min %s ' % (
+        # logger.debug('nonzero segm ' + str(np.nonzero(self.segmentation)))
+        # logger.debug('unique segm ' + str(np.unique(self.segmentation)))
+        # logger.debug('before zoom self segm mx %s  min %s ' % (
             str(np.max(self.segmentation)),
             str(np.min(self.segmentation)),
         ))
@@ -677,16 +677,8 @@ class OrganSegmentation():
                 binaryClosingIterations=2,
                 binaryOpeningIterations=0)
 
-        logger.debug('self segm mx %s  min %s ' % (
-            str(np.max(self.segmentation)),
-            str(np.min(self.segmentation)),
-        ))
-        logger.debug('unique segm ' + str(np.unique(self.segmentation)))
-        logger.debug('segm hist ' + str(np.histogram(self.segmentation,
-                                                     bins=[-1, 0, 1, 2, 3])))
         self._segmentation_postprocessing()
 
-        logger.debug('nonzero segm 3' + str(np.nonzero(self.segmentation)))
         # rint 'autocrop', self.autocrop
         if self.autocrop is True:
             # rint
@@ -698,10 +690,6 @@ class OrganSegmentation():
 
             self.crop(tmpcrinfo)
 
-        logger.debug('nonzero segm ' + str(np.nonzero(self.segmentation)))
-        logger.debug('unique segm ' + str(np.unique(self.segmentation)))
-        logger.debug('segm hist ' + str(np.histogram(self.segmentation,
-                                                     bins=[-1, 0, 1, 2, 3])))
 
         if self.texture_analysis not in (None, False):
             import texture_analysis
