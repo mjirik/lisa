@@ -663,6 +663,10 @@ class OrganSegmentation():
                 binaryClosingIterations=2,
                 binaryOpeningIterations=0)
 
+        logger.debug('self segm mx %s  min %s ' % (
+            str(np.max(self.segmentation)),
+            str(np.min(self.segmentation)),
+        ))
         logger.debug('unique segm ' + str(np.unique(self.segmentation)))
         logger.debug('segm hist ' + str(np.histogram(self.segmentation,
                                                      bins=[-1, 0, 1, 2, 3])))
