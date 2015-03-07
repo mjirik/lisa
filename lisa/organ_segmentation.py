@@ -650,9 +650,9 @@ class OrganSegmentation():
         # logger.debug('nonzero segm ' + str(np.nonzero(self.segmentation)))
         # logger.debug('unique segm ' + str(np.unique(self.segmentation)))
         # logger.debug('before zoom self segm mx %s  min %s ' % (
-            str(np.max(self.segmentation)),
-            str(np.min(self.segmentation)),
-        ))
+        #    str(np.max(self.segmentation)),
+        #    str(np.min(self.segmentation)),
+        #))
 
         self.__resize_to_orig(igc.seeds)
         self.organ_interactivity_counter = igc.interactivity_counter
