@@ -27,6 +27,55 @@ import os.path as op
 import volumetry_evaluation as ve
 import sed3
 
+def binarniOperace2d(pole3d):
+    '''2d binarni operace pro odstraneny malych casti a sumu po region growingu
+    vyuzivaji utvar diamond 3x3 
+    nejprve 1x otevreni, pak 20x konvoluce, kde je >= 5 je prirazeno 1
+    (mozna se jedna o erozi, nicmene pri pouziti nefunguje stejne) 
+    nasleduje 7x dilatace
+    nakonec je pro pripad vzniku vice 3d objektu vybran 1 nejvetsi'''
+    
+    print 'probihaji 2d binarni operace'
+    
+    pomocny = 0 
+    utvar1 = np.array([[0,1,0],[1,1,1],[0,1,0]]) 
+    utvar2 = np.ones([3,3])
+    for rez in pole3d:
+        rez2 = ndimage.binary_opening(rez, utvar1, 1)
+        konvoluce = ndimage.binary_fill_holes(rez2)
+        for x in range(20):
+            konvoluce = np.array(konvoluce,dtype = np.int8)
+            konvoluce = ndimage.convolve(konvoluce, utvar1)
+            konvoluce = (konvoluce >=5)
+                 
+        #bonus = ndimage.binary_erosion(konvoluce, utvar, 5)
+        bonus = ndimage.binary_dilation(konvoluce, utvar1, 7)
+        vysledek = bonus
+        #urciteANavic = ndimage.binary_closing(rez, utvar, 20)
+        pole3d[pomocny,:,:] = vysledek
+        pomocny = pomocny+1
+        
+    #print 'probiha vybrani nejvetsiho objektu'
+    [labelImage, labels] = ndimage.label(pole3d)
+    #print nb_labels
+    vytvoreny = np.zeros(labelImage.shape,dtype = np.int8)
+    nejvetsi = 0 #index nejvetsiho objektu
+    maximum = 0
+    for x in range(labels):
+        print str(x+1) + '/' + str(labels)
+        vytvoreny = (labelImage == x+1)
+        suma = np.sum(vytvoreny)
+        #print suma
+        if(suma > maximum):
+            nejvetsi = x+1
+            maximum = suma
+    
+    # print x+1
+    #print maximum
+    data3d = labelImage == nejvetsi
+        
+    return data3d
+
 def updatujSegparams(seznamNazvuPolozek):
     '''nacte stary slovnik z segparams1.yml, a prida, pripadne prepise
     stare nazvy a polzky novymi ze seznamu seznamNazvuPolozek:
@@ -277,7 +326,7 @@ def zobrazUtil(cmetody,cisloObrazu = 1):
     [rucni,rucniVelikost,strojova,segmentovanyVelikost,original] = souborAsegmentace(cisloObrazu,cmetody,cesta)
     #segmentace = np.zeros(rucni.shape, dtype=np.int8)
     #segmentace[0:-1,100:400,100:400] = 1
-    zobrazit(original,rucni,strojova)
+    zobrazit(rucni,strojova)
     #zobrazit2(original,rucni,strojova) #pouziva contour
     return
 
@@ -289,7 +338,7 @@ def zobrazitOriginal(original):
     ed.show()
     return
 
-def zobrazit(original,rucni,strojova):
+def zobrazit(rucni,strojova):
     '''Metoda pro srovnani rucni a
     automaticke segmentace z lidskeho pohledu
     cerna oblast - NESHODA strojoveho a rucniho
@@ -620,7 +669,7 @@ def segmentace4(data3d,velikostVoxelu,source,vysledky = False):
     maxSeedKonstanta = pocet vybranych seedu (rovnomerne)'''
 
     print 'pouzita metoda 4 pouzivajici metodu 3'
-    vzorkovaciKonstanta = np.shape(data3d)[0]*0.33+33 #*0.33+22 #KONSTANTA VYPOCITANA Z DELKY 3D SNIMKU (ROZLISENI)
+    vzorkovaciKonstanta = np.shape(data3d)[0]*0.33+40 #*0.33+33 #KONSTANTA VYPOCITANA Z DELKY 3D SNIMKU (ROZLISENI)
     
     slovnik = nactiYamlSoubor(source)
     hranicniKonstanta = slovnik['hranicniKonstanta']
@@ -636,6 +685,9 @@ def segmentace4(data3d,velikostVoxelu,source,vysledky = False):
     'konstanta urcuje rozmezi region growingu'
     segmentaceVysledek = regionGrowingCTIF(data3d,binarniOperace,velikostVoxelu,konstanta = vzorkovaciKonstanta,
                                            konstantaHranice = hranicniKonstanta,maxSeeds = maxSeedKonstanta)
+    segmentaceVysledek = binarniOperace2d(segmentaceVysledek)
+    
+
 
 
     return segmentaceVysledek
