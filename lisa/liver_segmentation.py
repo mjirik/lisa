@@ -26,6 +26,157 @@ import SimpleITK as sitk
 import os.path as op
 import volumetry_evaluation as ve
 import sed3
+import sys
+import matplotlib.pyplot as plt
+from sklearn import mixture
+import matplotlib
+
+def binarniOperace3D(data3d):
+    '''Provede binarni 3D operace na danem poli
+    prvni je 1x dilatace, nasleduje otevreni (15 iteraci), nakonec 10x eroze 
+    jedinym objektem  '''    
+    print 'probihaji binarni operace 3D'
+    struktura2 = np.array([[[0,1,0],[1,1,1],[0,1,0]],[[1,1,1],[1,1,1],[1,1,1]],[[0,1,0],[1,1,1],[0,1,0]]])
+    struktura1 = vytvorKouli3D([1,1,1], 1.5)
+    rezNovy = ndimage.binary_dilation(data3d,struktura1, 1)
+    #zobrazitOriginal(rezNovy)
+    #sys.exit()
+    print '1/2'
+    rezNovy2 = ndimage.binary_opening(rezNovy,struktura1, 5) #CELKEM OK
+    #zobrazitOriginal(rezNovy2)
+    #sys.exit()
+    print '2/2'
+    rezNovy = ndimage.binary_dilation(rezNovy2,struktura1, 3)
+    rezNovy2 = ndimage.binary_opening(rezNovy,struktura1, 15) #2 20
+    rezNovy = ndimage.binary_erosion(rezNovy2,struktura1, 7)
+    rezNovy2 = rezNovy
+    zobrazitOriginal(rezNovy2)
+    sys.exit()
+    
+    print 'probiha vybrani nejvetsiho objektu'
+    [labelImage, labels] = ndimage.label(rezNovy2)
+    #print nb_labels
+    vytvoreny = np.zeros(labelImage.shape,dtype = np.int8)
+    nejvetsi = 0 #index nejvetsiho objektu
+    maximum = 0
+    for x in range(labels):
+        print str(x+1) + '/' + str(labels)
+        vytvoreny = (labelImage == x+1)
+        suma = np.sum(vytvoreny)
+        #print suma
+        if(suma > maximum):
+            nejvetsi = x+1
+            maximum = suma
+    
+    # print x+1
+    print maximum
+    rezNovy2 = labelImage == nejvetsi   
+    
+    rezNovy = rezNovy2.astype(np.int8)
+    return rezNovy
+
+def prahovaniProcenta(data3d,procentaHranice = 0.35,procentaJatra = 0.15):
+    '''Procentualni metoda prahovani
+    data3d - prahovany obraz CT,
+    procentaHranice - procenta ohraniceni dat pro model gaussovek
+    procentaJatra - procenta podilu finalniho vysledku
+    vraci prahovany obraz
+    vysledek obsahuje jatra, pricemz obsahuji cerne casti - sum
+    (jatra nejsou vzdy vyplnena)
+    POPIS METODY
+    Nejprve se vypocita histogram. Ten se pak zprava ohranici mnozstvim
+    procentaHranice (35%)
+    nasledne se data z ohraniceneho histogramu (po pretvoreni) vlozi do
+    modelu gaussovskych funkci (dvou). Vybrana je funkce s vyssi vahou (obvykle 
+    z dvojice 0.9 a 0.5). Stredni hodnota teto funkce je vybrana jako dolni hranice.
+    Horni hranice je pak urcena tak aby vysledne prahovani pokrylo procenta obrazku:
+    procentaJatra (15%)
+    Zduvodnen - jatra jsou "hrbolek" na pravem "ramenu" nejpravejsi gaussovky.
+    
+    '''
+    procenta = procentaHranice
+    procentaJater = procentaJatra
+    
+    'vypocet histogramu'
+    maxx = np.max(data3d)
+    minx = np.min(data3d)
+    bins=np.arange(minx, maxx+1)
+    histogram = np.histogram(data3d, bins)
+    cetnosti = histogram[0]
+    celkem = np.sum(cetnosti)
+    
+    'ohraniceni histogramu'
+    delka = len(cetnosti)
+    suma = 0
+    for x in range(delka):
+        y = delka-x-1
+        suma = suma+cetnosti[y]
+        podil = float(suma)/float(celkem)
+        #print podil
+        if(podil >= procenta):
+            break
+    
+    #OHRANICENY HISTOGRAM
+    ukazat1 = bins[y:len(bins)-2] #hodnoty bins[0:len(bins)-1]
+    ukazat2 = cetnosti[y:len(cetnosti)-1] #cetnosti    
+    
+    #vytvoreni dat pro gaussovsky model (cetnosti-> vic cisel)
+    data = np.zeros(np.sum(ukazat2))
+    prochazet = 0
+    for x in range(len(ukazat2)-1):
+        mnozstvi = ukazat2[x]
+        konec = prochazet + mnozstvi
+        tamto = ukazat1[x]
+        data[prochazet:konec] = tamto
+        prochazet = konec
+        #print x
+    sample_MAX = 8000 #omezeni na 8000 vzorku pro gaussovky
+    n =  (float(len(data))/float(sample_MAX))
+    data = data[0::n] 
+    
+    'gaussovsky model'
+    clf = mixture.GMM(n_components=2, covariance_type='full')
+    print 'probiha modelovani normalnimi funkcemi'
+    clf.fit(data)
+    print 'modelovani dokonceno'
+    stredniHodnoty = clf.means_ #[m1,m2]
+    vahy = clf.weights_ #[w1,w2]
+    #c1, c2 = clf.covars_ #kovariance, netreba
+    
+    vybrat = np.argmax(vahy)
+    hraniceDolni = stredniHodnoty[vybrat][0]
+    
+    #plt.plot(ukazat1,ukazat2)
+    #plt.show()   
+    
+    'ohraniceni po nalezeni dolni hranice'   
+    kopie = np.zeros(len(ukazat1)) 
+    kopie[:] = hraniceDolni
+    vzdalenost = np.abs(kopie - ukazat1) #nalezeni pozice nejblizsi hodnoty
+    poziceDolni = np.argmin(vzdalenost) 
+    #print ukazat2[poziceDolni] #cetnosti
+    suma = 0
+    delka = len(ukazat1)
+    
+    prochazet = np.arange(poziceDolni,delka)
+
+    for x in prochazet:
+        suma = suma+ukazat2[x]
+        podil = float(suma)/float(celkem)
+        if(podil >= procentaJater):
+            break
+    hraniceHorni = ukazat1[x]
+    
+    'vysledne prahovani'
+    #print hraniceDolni
+    #print hraniceHorni    
+    prumer = np.mean(data3d)
+    vetsi = data3d> hraniceDolni
+    mensi = data3d < hraniceHorni
+    segmentaceVysledek = np.multiply(vetsi,mensi)
+    #zobrazitOriginal(segmentovany)    
+    
+    return segmentaceVysledek
 
 def binarniOperace2d(pole3d):
     '''2d binarni operace pro odstraneny malych casti a sumu po region growingu
@@ -35,7 +186,7 @@ def binarniOperace2d(pole3d):
     nasleduje 7x dilatace
     nakonec je pro pripad vzniku vice 3d objektu vybran 1 nejvetsi'''
     
-    print 'probihaji 2d binarni operace'
+    print 'probihaji 2D binarni operace'
     
     pomocny = 0 
     utvar1 = np.array([[0,1,0],[1,1,1],[0,1,0]]) 
@@ -541,42 +692,12 @@ def segmentace1(data3d,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     return segmentaceVysledek
 
 def segmentace2(data3d,velikostVoxelu,source='Metoda1.yml',vysledky = False):
-    '''PRIMITIVNI METODA - PRAHOVANI Z PDF -50 az 250
-    optimalni se zda 0 az 200
-    pro metodu 0 az 180'''
-    print 'pouzita metoda 2'
-    segmentaceVysledek = []
-    zeli3 = 0
-    mezDolni = 0
-    mezHorni = 250
-    for rez in data3d:
-        print str(zeli3+1) + '/' + str(len(data3d))
-        rezNovy1 = ( (np.array(rez)>=mezDolni))
-        rezNovy2 = (np.array(rez)<=mezHorni)
-        rezNovy =np.multiply( rezNovy1, rezNovy2)
-        rezNovy2 = rezNovy.astype(int)
-
-        'BINARNI OPERACE'
-        struktura1 = [[0,1,0],[1,1,1],[0,1,0]]
-        struktura4 = np.ones([7,1])
-        rezNovy = ndimage.binary_erosion(rezNovy2,struktura1, 5)
-        rezNovy2 = ndimage.binary_fill_holes(rezNovy)
-        rezNovy = ndimage.binary_erosion(rezNovy2,struktura1, 18)
-        rezNovy2 = ndimage.binary_erosion(rezNovy,struktura4, 8)
-        rezNOvy = rezNovy2
-
-
-
-        segmentaceVysledek.append(rezNovy)
-        zeli3 = zeli3+1 #prochazeni rezu
-
-
-    #ed = sed3.sed3(np.array(segmentaceVysledek))
-    #ed.show()
-
-    #print segmentaceVysledek
-    #print np.shape(data3d)
-    #print np.shape(segmentaceVysledek)
+    prahovany = prahovaniProcenta(data3d,procentaHranice = 0.35,procentaJatra = 0.18)
+    operovany = binarniOperace3D(prahovany)
+    zobrazitOriginal(operovany)
+    sys.exit()   
+    
+    segmentaceVysledek = 0
     return segmentaceVysledek
 
 
@@ -609,7 +730,7 @@ def segmentace3(data3d,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     
     
     'BINARNI OPERACE 3D'
-    print 'probihaji binarni operace'
+    print 'probihaji binarni operace 3D'
     struktura1 = np.array([[[0,1,0],[1,1,1],[0,1,0]],[[1,1,1],[1,1,1],[1,1,1]],[[0,1,0],[1,1,1],[0,1,0]]])
     
     rezNovy = ndimage.binary_dilation(rezNovy2,struktura1, 1)
@@ -643,14 +764,7 @@ def segmentace3(data3d,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     
     rezNovy = rezNovy2.astype(np.int8)
     #print rezNovy
-    
-    
-    
-    'REGION GROWING'
-    print 'Probiha region growing'
-    
-    
-    
+       
     #ed = sed3.sed3(np.array(rezNovy))
     #ed.show()
     
