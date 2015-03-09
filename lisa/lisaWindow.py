@@ -11,7 +11,7 @@ import sys
 import os
 import numpy as np
 
-import time
+import datetime
 
 from io3d import datareader
 # import segmentation
@@ -164,8 +164,10 @@ class OrganSegmentationWindow(QMainWindow):
 
         btn_mask = QPushButton("Mask region", self)
         btn_mask.clicked.connect(self.maskRegion)
-        btn_segauto = QPushButton("Automatic seg.", self)
-        btn_segauto.clicked.connect(self.autoSeg)
+        btn_segliver = QPushButton("Liver seg.", self)
+        btn_segliver.clicked.connect(self.liverSeg)
+        self.btn_segauto = QPushButton("Auto seg.", self)
+        self.btn_segauto.clicked.connect(self.autoSeg)
         btn_segman = QPushButton("Manual seg.", self)
         btn_segman.clicked.connect(self.manualSeg)
         self.text_seg_data = QLabel('segmented data:')
@@ -174,7 +176,8 @@ class OrganSegmentationWindow(QMainWindow):
         grid.addWidget(btn_segfile, rstart + 1, 1)
         grid.addWidget(btn_segcompare, rstart + 1, 3)
         grid.addWidget(btn_mask, rstart + 2, 1)
-        grid.addWidget(btn_segauto, rstart + 2, 2)
+        grid.addWidget(btn_segliver, rstart + 2, 2)
+        grid.addWidget(self.btn_segauto, rstart + 1, 2)
         grid.addWidget(btn_segman, rstart + 2, 3)
         grid.addWidget(self.text_seg_data, rstart + 3, 1, 1, 3)
         rstart += 4
@@ -542,7 +545,7 @@ class OrganSegmentationWindow(QMainWindow):
         self.setLabelText(self.text_seg_data, text)
         self.statusBar().showMessage('Ready')
 
-    def autoSeg(self):
+    def liverSeg(self):
         if self.oseg.data3d is None:
             self.statusBar().showMessage('No DICOM data!')
             return
@@ -551,6 +554,16 @@ class OrganSegmentationWindow(QMainWindow):
             min_val=self.oseg.viewermin,
             max_val=self.oseg.viewermax)
         self.checkSegData('auto. seg., ')
+
+    def autoSeg(self):
+        self.statusBar().showMessage('Performing automatic segmentation...')
+        QApplication.processEvents()
+        if self.oseg.data3d is None:
+            self.statusBar().showMessage('No DICOM data!')
+            return
+
+        self.oseg.run_sss()
+        self.statusBar().showMessage('Automatic segmentation finished')
 
     def manualSeg(self):
         oseg = self.oseg
@@ -569,7 +582,7 @@ class OrganSegmentationWindow(QMainWindow):
         pyed.exec_()
 
         oseg.segmentation = pyed.getSeeds()
-        self.oseg.processing_time = time.time() - self.oseg.time_start
+        self.oseg.processing_time = datetime.datetime.now() - self.oseg.time_start
         self.checkSegData('manual seg., ')
 
     def checkSegData(self, msg):

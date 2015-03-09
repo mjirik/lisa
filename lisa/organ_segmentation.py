@@ -55,6 +55,7 @@ import config
 from io3d import datareader
 from io3d import datawriter
 import data_plus
+import lisa.support_structure_segmentation as sss
 
 # import audiosupport
 # import skimage
@@ -277,6 +278,18 @@ class OrganSegmentation():
     #    self.orig_shape = datap['orig_shape']
     #    self.seeds = datap[
     #        'processing_information']['organ_segmentation']['seeds']
+
+    def run_sss(self):
+        sseg = sss.SupportStructureSegmentation(
+            data3d=self.data3d,
+            voxelsize_mm=self.voxelsize_mm,
+        )
+        # sseg.run()
+
+        # sseg.bone_segmentation()
+        sseg.lungs_segmentation()
+        sseg.heart_segmentation()
+        self.segmentation = sseg.segmentation
 
     def __clean_oseg_input_params(self, oseg_params):
         """
