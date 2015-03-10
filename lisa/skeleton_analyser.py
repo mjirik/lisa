@@ -27,7 +27,7 @@ class SkeletonAnalyser:
     """
 
     def __init__(self, data3d_skel, volume_data=None, voxelsize_mm=[1, 1, 1],
-                 use_filter_small=False, filter_small_threshold=3, cut_wrong_skeleton=True):
+                 use_filter_small=False, filter_small_threshold=3, cut_wrong_skeleton=False):
         # for not
         self.volume_data = volume_data
         self.voxelsize_mm = voxelsize_mm
