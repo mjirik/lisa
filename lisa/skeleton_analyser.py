@@ -27,7 +27,7 @@ class SkeletonAnalyser:
     """
 
     def __init__(self, data3d_skel, volume_data=None, voxelsize_mm=[1, 1, 1],
-                 use_filter_small=False, filter_small_threshold=3):
+                 use_filter_small=False, filter_small_threshold=3, cut_wrong_skeleton=True):
         # for not
         self.volume_data = volume_data
         self.voxelsize_mm = voxelsize_mm
@@ -39,7 +39,7 @@ class SkeletonAnalyser:
                                             filter_small_threshold)
         skelet_nodes = self.__skeleton_nodes(data3d_skel)
         self.sklabel = self.__generate_sklabel(skelet_nodes)
-        self.cut_wrong_skeleton = False
+        self.cut_wrong_skeleton = cut_wrong_skeleton
 
         logger.debug('Inited SkeletonAnalyser - voxelsize:' + str(
             voxelsize_mm) + ' volumedata:' + str(volume_data is not None))
@@ -160,63 +160,63 @@ class SkeletonAnalyser:
                 stats = self.__remove_edge_from_stats(stats, s)
         logger.debug('skeleton_analysis: Cut - Unconnected edges removed')
 
-        logger.debug(
-            'skeleton_analysis: Cut - Getting lists of nodes,' +
-            ' edges and end nodes')
-        # dict of connected nodes to edge
-        edg_neigh = {}
-        for s in dict(stats):
-            if s not in edg_neigh:
-                edg_neigh[s] = []
+        #logger.debug(
+            #'skeleton_analysis: Cut - Getting lists of nodes,' +
+            #' edges and end nodes')
+        ## dict of connected nodes to edge
+        #edg_neigh = {}
+        #for s in dict(stats):
+            #if s not in edg_neigh:
+                #edg_neigh[s] = []
 
-            try:
-                if not stats[s]['nodeIdA'] in edg_neigh[s]:
-                    edg_neigh[s].append(stats[s]['nodeIdA'])
-            except KeyError:
-                logger.debug('Edge id:' + str(s) + ' is missing nodeIdA')
+            #try:
+                #if not stats[s]['nodeIdA'] in edg_neigh[s]:
+                    #edg_neigh[s].append(stats[s]['nodeIdA'])
+            #except KeyError:
+                #logger.debug('Edge id:' + str(s) + ' is missing nodeIdA')
 
-            try:
-                if not stats[s]['nodeIdB'] in edg_neigh[s]:
-                    edg_neigh[s].append(stats[s]['nodeIdB'])
-            except KeyError:
-                logger.debug('Edge id:' + str(s) + ' is missing nodeIdB')
+            #try:
+                #if not stats[s]['nodeIdB'] in edg_neigh[s]:
+                    #edg_neigh[s].append(stats[s]['nodeIdB'])
+            #except KeyError:
+                #logger.debug('Edge id:' + str(s) + ' is missing nodeIdB')
 
-        # dict of connected edges to node
-        node_neigh = {}
-        for e in edg_neigh:
-            for node in edg_neigh[e]:
-                if not node in node_neigh:
-                    node_neigh[node] = []
+        ## dict of connected edges to node
+        #node_neigh = {}
+        #for e in edg_neigh:
+            #for node in edg_neigh[e]:
+                #if not node in node_neigh:
+                    #node_neigh[node] = []
 
-                if not e in node_neigh[node]:
-                    node_neigh[node].append(e)
+                #if not e in node_neigh[node]:
+                    #node_neigh[node].append(e)
 
-        # get end nodes
-        end_nodes = {}
-        for i in node_neigh:
-            neigh = node_neigh[i]
-            if len(neigh) == 1:
-                logger.debug('end node/edge: ' + str(i) + '/' + str(neigh[0]))
-                end_nodes[i] = neigh[0]
-        logger.debug('skeleton_analysis: Cut - Got all lists')
+        ## get end nodes
+        #end_nodes = {}
+        #for i in node_neigh:
+            #neigh = node_neigh[i]
+            #if len(neigh) == 1:
+                #logger.debug('end node/edge: ' + str(i) + '/' + str(neigh[0]))
+                #end_nodes[i] = neigh[0]
+        #logger.debug('skeleton_analysis: Cut - Got all lists')
 
-        # removes end edges based on radius/length ratio
-        logger.debug(
-            'skeleton_analysis: Cut - Removing bad segments based on' +
-            ' radius/length ratio')
-        for end_node in end_nodes:
-            edge_end_id = end_nodes[end_node]
-            edge_end_stat = stats[edge_end_id]
+        ## removes end edges based on radius/length ratio
+        #logger.debug(
+            #'skeleton_analysis: Cut - Removing bad segments based on' +
+            #' radius/length ratio')
+        #for end_node in end_nodes:
+            #edge_end_id = end_nodes[end_node]
+            #edge_end_stat = stats[edge_end_id]
 
-            if edge_end_stat['radius_mm'] /\
-                    float(edge_end_stat['lengthEstimation']) > cut_ratio:
-                logger.debug(
-                    'bad rad/len: ' +
-                    str(edge_end_stat['radius_mm']) + ' ' +
-                    str(edge_end_stat['lengthEstimation']))
-                stats = self.__remove_edge_from_stats(stats, edge_end_id)
+            #if edge_end_stat['radius_mm'] /\
+                    #float(edge_end_stat['lengthEstimation']) > cut_ratio:
+                #logger.debug(
+                    #'bad rad/len: ' +
+                    #str(edge_end_stat['radius_mm']) + ' ' +
+                    #str(edge_end_stat['lengthEstimation']))
+                #stats = self.__remove_edge_from_stats(stats, edge_end_id)
 
-        logger.debug('skeleton_analysis: Cut - Bad segments removed')
+        #logger.debug('skeleton_analysis: Cut - Bad segments removed')
 
         return stats
 

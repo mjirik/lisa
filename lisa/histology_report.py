@@ -172,26 +172,30 @@ class HistologyReport:
 
     def getNv(self):
         logger.debug('Computing Nv...')
-        nodes = []
+        nodes = {}
         for key in self.data['Graph']:
             edge = self.data['Graph'][key]
             try:
                 nodeIdA = edge['nodeIdA']
-                nodeIdB = edge['nodeIdB']
-
-                if nodeIdA not in nodes:
-                    if len(edge['connectedEdgesA']) > 0:
-                        nodes.append(nodeIdA)
-
-                if nodeIdB not in nodes:
-                    if len(edge['connectedEdgesB']) > 0:
-                        nodes.append(nodeIdB)
-
+                if nodeIdA in nodes: nodes[nodeIdA] += [key] 
+                else: nodes[nodeIdA] = [key]
             except Exception, e:
-                logger.warning('getNv(): bad key ' + str(e))
+                logger.warning('getNv(): no nodeIdA')
+            try:
+                nodeIdB = edge['nodeIdB']
+                if nodeIdB in nodes: nodes[nodeIdB] += [key] 
+                else: nodes[nodeIdB] = [key]
+            except Exception, e:
+                logger.warning('getNv(): no nodeIdB')
 
         logger.debug('Got ' + str(len(nodes)) + ' connected nodes')
-        Nv = len(nodes) / float(self.data['General']['used_volume_mm3'])
+        
+        fork_num = 0 # Number of nodes with 3+ connected edges 
+        for n_key in nodes:
+            if len(nodes[n_key]) >= 3:
+                fork_num += 1
+        
+        Nv = fork_num / float(self.data['General']['used_volume_mm3'])
 
         logger.debug('Nv is ' + str(Nv))
         return Nv
