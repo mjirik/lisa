@@ -501,7 +501,7 @@ def vytvor3DobjektPole(koule,pole,bod):
     pomocny[startPX:konecPX,startPY:konecPY,startPZ:konecPZ] = koule[startKX:konecKX,startKY:konecKY,startKZ:konecKZ]
     return pomocny
 
-def souborAsegmentace(cisloSouboru,cisloMetody,cesta):
+def souborAsegmentace(cisloSouboru,metoda,cesta):
     '''nacte soubor a vytvori jeho segmentaci, pomoci zvolene metody
     vrati parametry potrebne pro evaluaci'''
     ctenar = io3d.DataReader()
@@ -514,7 +514,7 @@ def souborAsegmentace(cisloSouboru,cisloMetody,cesta):
     originalPole = vektor2[0]
     originalVelikost = vektor2[1]
     vytvoreny = LiverSegmentation(originalPole,originalVelikost)
-    vytvoreny.setCisloMetody(cisloMetody) #ZVOLENI METODY
+    vytvoreny.setMethodNumber(metoda)#ZVOLENI METODY
     vytvoreny.runVolby()
     segmentovany = vytvoreny.segmentation
     segmentovanyVelikost = vytvoreny.voxelSize
@@ -526,13 +526,12 @@ def souborAsegmentace(cisloSouboru,cisloMetody,cesta):
 def zobrazUtil(cmetody,cisloObrazu = 1):
     'utilita pro rychle zobrazeni metody s cislem cmetody'
     cesta = nactiYamlSoubor('path.yml')
-
     [rucni,rucniVelikost,strojova,segmentovanyVelikost,original] = souborAsegmentace(cisloObrazu,cmetody,cesta)
-    #segmentace = np.zeros(rucni.shape, dtype=np.int8)
-    #segmentace[0:-1,100:400,100:400] = 1
     zobrazit(rucni,strojova)
-    skore = vyhodnoceniSnimku(rucni, rucniVelikost, strojova, segmentovanyVelikost)
-    print skore
+    
+    #skore = vyhodnoceniSnimku(rucni, rucniVelikost, strojova, segmentovanyVelikost)
+    #print skore
+    
     #zobrazit2(original,rucni,strojova) #pouziva contour
     return
 
@@ -593,25 +592,31 @@ def vyhodnoceniMetodyTri(metoda,path = None):
         for x in range(len(seznamTestovaci)): #male overeni spravnosti testovacich a trenovacich dat
             if(x >= len(seznamTestovaci)/2):
                 break
+            #print seznamTestovaci
             vysledek = vyhodnotSoubor(cesta,x,seznamTestovaci,ctenar,vysledky,metoda)
+            vysledek = 0
             seznamVsechVysledku.append(vysledek)
         return seznamVsechVysledku
 
-    def vyhodnotSoubor(cesta,x,seznamTestovaci,ctenar,vysledky,metoda):
+    def vyhodnotSoubor(cesta,x,seznamTestovaci,ctenar,vysledkySeg,metoda):
         originalNazev =  [seznamTestovaci[x]]
         rucniNazev = [seznamTestovaci[x+len(seznamTestovaci)/2]]
+        print 'probiha nacitani souboru'
         vektor = nactiSoubor(cesta,rucniNazev,0,ctenar)
         rucniPole = vektor[0]
         rucniVelikost = vektor[1]
         vektor2 = nactiSoubor(cesta,originalNazev,0,ctenar)
         originalPole = vektor2[0]
         originalVelikost = vektor2[1]
-        slovnik = {'cisloMetody':metoda,'vysledkyDostupne':vysledky}
-        vytvoreny = LiverSegmentation(originalPole,originalVelikost,slovnik)
-        vytvoreny.setCisloMetody(metoda) #ZVOLENI METODY
+        print'probiha nastavovani parametru'
+        vytvoreny = LiverSegmentation(originalPole,originalVelikost)
+        vytvoreny.setVysledky(vysledkySeg)
+        vytvoreny.setMethodNumber(metoda) #ZVOLENI METODY
+        print 'probiha segmentace'
         vytvoreny.runVolby()
         segmentovany = vytvoreny.segmentation
         segmentovanyVelikost = vytvoreny.voxelSize
+        print 'zahajeno vyhodnoceni'
         vysledky = vyhodnoceniSnimku(rucniPole,rucniVelikost,segmentovany,segmentovanyVelikost)
         #vysledky =[1,2]
 
@@ -680,73 +685,25 @@ def nactiYamlSoubor(nazevSouboru):
     dataNova = yaml.load(soubor)
     return dataNova
 
-def segmentace0(tabulka,velikostVoxelu,vysledky = False):
+def segPlaceholder(data3d,velikostVoxelu,source,vysledky = False):
     '''RYCHLA TESTOVACI METODA - PRO TESTOVANI
-    Vybere pouze prvky blizke nule a to je cele
-    vraci segmentaci ve formatu numpy Matrix'''
-    #print np.shape(tabulka)
-    velikost = np.shape(tabulka)
+    Pouzivejte v pripade testovani programu'''
+    velikost = np.shape(data3d)
     a = velikost[0]
     b = velikost[1]
     c = velikost[2]
-    segmentaceVysledek = np.zeros(tabulka.shape)
+    segmentaceVysledek = np.zeros(data3d.shape,dtype = np.int8)
     segmentaceVysledek[a/4:3*a/4,b/4:3*b/4,c/4:3*c/4] = 1
 
     return segmentaceVysledek
 
-def segmentace1(data3d,velikostVoxelu,source='Metoda1.yml',vysledky = False):
-    '''PRIMITIVNI METODA - PRAHOVANI
-    Nacte parametry prumer a odchylka ze souboru Metoda1.yml
-    (lze zmenit pomoci volitelneho argumentu source)
-    pak pomoci prahovani vybere z kazdeho rezu cast z intervalu
-    prumer +-2 sigma, nasledne provede binarni operace
-    otevreni (1x) a uzavreni (3x)  tak aby byly odstraneny drobne pixely
-    metode lze take zadat vysledky
-    '''
-    print 'pouzita metoda 1'
-    konstanta = 0.7 #EXPERIMENTALNE NALEZENA KONSTANTA
-    def nactiPrumVar(source):
-        '''vrati pole [prumer,variance] nactene pomoci yaml ze souboru'''
-        # source = 'Metoda1.yml'
-        vektor=nactiYamlSoubor(source)
-        prumer = vektor[0]
-        variance = vektor[1]
-        return [prumer,variance]
-
-    if(vysledky == False): #v pripade nezadani vysledku
-        [prumer,var] = nactiPrumVar(source)
-    else:
-        prumer = vysledky[0]
-        var = vysledky[1]
-    odchylka = np.sqrt(var)
-    #print np.shape(data3d)
-    segmentaceVysledek = []
-    zeli3=0
-    mezHorni = prumer +konstanta*odchylka
-    mezDolni = prumer -konstanta*odchylka
-
-    for rez in data3d:
-        print str(zeli3+1) + '/' + str(len(data3d))
-        rezNovy1 = ( (np.array(rez)>=prumer+mezDolni))
-        rezNovy2 = (np.array(rez)<=prumer +mezHorni)
-        rezNovy =np.multiply( rezNovy1, rezNovy2)
-        rezNovy = rezNovy.astype(int)
-
-        seznam = rezNovy
-        segmentaceVysledek.append(seznam)
-        zeli3 = zeli3+1 #prochazeni rezu
-
-
-    #ed = sed3.sed3(np.array(segmentaceVysledek))
-    #print kombinaceNesouhlas
-    #ed.show()
-
-    #print segmentaceVysledek
-    #print np.shape(data3d)
-    #print np.shape(segmentaceVysledek)
-    return segmentaceVysledek
-
-def segmentace2(data3d,velikostVoxelu,source='Metoda1.yml',vysledky = False):
+def segFind(data3d,velikostVoxelu,source,vysledky = False):
+    '''Metoda ktera nalzene vnitrek jater - odhadne zakladni obrysy tvaru
+    testovano uspesne na 20ti snimcich sliver07
+    data3d - vstupni pole CT snimku
+    velikostVoxelu - [x,y,z] rozměry voxelu
+    source - soubor obsahujici data segmentaci (segparams1.yml)
+     '''
     prahovany = prahovaniProcenta(data3d,procentaHranice = 0.32,procentaJatra = 0.18) #0.35 0.18
     operovany = binarniOperace3D2D(prahovany)
     #zobrazitOriginal(operovany)
@@ -755,79 +712,9 @@ def segmentace2(data3d,velikostVoxelu,source='Metoda1.yml',vysledky = False):
     segmentaceVysledek = operovany
     return segmentaceVysledek
 
-
-def segmentace3(data3d,velikostVoxelu,source='Metoda1.yml',vysledky = False):
-    '''ata3d - vstupni data (CT snimek)
-    velikostVoxelu - vektor urcujici velikostVoxelu
-    source - cesta k souboru opsahujici segmentacni parametry
-    vysledky - existence trenovacich dat, jejich predani
-    binarni operace nasledovane region growingem
-    vzorkovaciKonstanta === pocitac urci sam
-    hrannicni konstanta = ohraniceni region growingu kolem seedu v mm
-    maxSeedKonstanta = pocet vybranych seedu (rovnomerne)'''
-    #print data3d
-    #zeli3 = 0
-    
-    slovnik = nactiYamlSoubor(source)
-    prumer = slovnik['prumer']
-    variance = slovnik['variance']
-    odchylka = np.sqrt(variance)
-    konstanta = 2 #STARA DOBRA = 2 S USPECHEM I 2.5
-    mezHorni=prumer + konstanta*odchylka
-    mezDolni=prumer - konstanta*odchylka
-    print 'probiha prahovani'
-    
-    rezNovy1 = ( data3d>=mezDolni)
-    rezNovy2 = (data3d<=mezHorni)
-    rezNovy =np.multiply( rezNovy1, rezNovy2)
-    rezNovy2 = rezNovy.astype(np.int8)
-    
-    
-    
-    'BINARNI OPERACE 3D'
-    print 'probihaji binarni operace 3D'
-    struktura1 = np.array([[[0,1,0],[1,1,1],[0,1,0]],[[1,1,1],[1,1,1],[1,1,1]],[[0,1,0],[1,1,1],[0,1,0]]])
-    
-    rezNovy = ndimage.binary_dilation(rezNovy2,struktura1, 1)
-    print '1/2'
-    rezNovy2 = ndimage.binary_opening(rezNovy,struktura1, 15) #CELKEM OK
-    print '2/2'
-    rezNovy = ndimage.binary_erosion(rezNovy2,struktura1, 10)
-    rezNovy2 = rezNovy
-    
-    print 'probiha vybrani nejvetsiho objektu'
-    [labelImage, labels] = ndimage.label(rezNovy2)
-    #print nb_labels
-    vytvoreny = np.zeros(labelImage.shape,dtype = np.int8)
-    nejvetsi = 0 #index nejvetsiho objektu
-    maximum = 0
-    for x in range(labels):
-        print str(x+1) + '/' + str(labels)
-        vytvoreny = (labelImage == x+1)
-        suma = np.sum(vytvoreny)
-        #print suma
-        if(suma > maximum):
-            nejvetsi = x+1
-            maximum = suma
-    
-    # print x+1
-    print maximum
-    rezNovy2 = labelImage == nejvetsi
-    
-    
-    
-    
-    rezNovy = rezNovy2.astype(np.int8)
-    #print rezNovy
-       
-    #ed = sed3.sed3(np.array(rezNovy))
-    #ed.show()
-    
-    return rezNovy
-    
-
-def segmentace4(data3d,velikostVoxelu,source,vysledky = False):
+def segRGrow(data3d,velikostVoxelu,source,vysledky = False):
     '''
+    Metoda pouzivajici segFind nasledovany region growingem.
     data3d - vstupni data (CT snimek)
     velikostVoxelu - vektor urcujici velikostVoxelu
     source - cesta k souboru opsahujici segmentacni parametry
@@ -837,7 +724,7 @@ def segmentace4(data3d,velikostVoxelu,source,vysledky = False):
     hrannicni konstanta = ohraniceni region growingu kolem seedu v mm
     maxSeedKonstanta = pocet vybranych seedu (rovnomerne)'''
 
-    print 'pouzita metoda 4 pouzivajici metodu 2'
+    #print 'pouzita metoda 4'
     vzorkovaciKonstanta = np.shape(data3d)[0]*0.33+40 #*0.33+33 #KONSTANTA VYPOCITANA Z DELKY 3D SNIMKU (ROZLISENI)
     
     slovnik = nactiYamlSoubor(source)
@@ -851,7 +738,7 @@ def segmentace4(data3d,velikostVoxelu,source,vysledky = False):
     #print vzorkovaciKonstanta
     #vzorkovaciKonstanta = 80
     #return
-    binarniOperace = segmentace2(data3d,velikostVoxelu,source=source,vysledky = False)
+    binarniOperace = segFind(data3d,velikostVoxelu,source=source,vysledky = False)
     #segmentaceVysledek = binarniOperace
     'konstanta urcuje rozmezi region growingu'
     segmentaceVysledek = regionGrowingCTIF(data3d,binarniOperace,velikostVoxelu,konstanta = vzorkovaciKonstanta,
@@ -881,12 +768,6 @@ def trenovaniCele(metoda,path = None):
 
     vybrano = False
 
-    if(metoda ==0):
-        def metoda(cesta,seznamSouboru):
-            vysledek =nahrazka(cesta,seznamSouboru)
-            return vysledek
-        vybrano = True
-
     if(metoda ==1):
         def metoda(cesta,seznamSouboru):
             vysledek =metoda1(cesta,seznamSouboru)
@@ -899,14 +780,9 @@ def trenovaniCele(metoda,path = None):
 
     print "Probiha trenovani"
     vysledek1= metoda(cesta,seznamSouboru)
-    soubor = open("TrenC.yml","wb")
+    #soubor = open("TrenC.yml","wb")
     zapisYamlSoubor("TrenC.yml",vysledek1)
     print "trenovani  dokonceno"
-
-def nahrazka(cesta,seznamSouboru):
-    '''METODA 0 - nahrada
-    nahrazka trenovaci metody pro rychly beh a testovani'''
-    return [25,3]
 
 def trenovaniTri(metoda,path = None):
     '''Metoda je cislo INT, dane poradim metody pri implementaci prace
@@ -945,11 +821,6 @@ def trenovaniTri(metoda,path = None):
 
     vybrano = False
 
-    if(metoda ==0):
-        def metoda(cesta,seznamSouboru):
-            vysledek =nahrazka(cesta,seznamSouboru)
-            return vysledek
-        vybrano = True
 
     if(metoda ==1):
         def metoda(cesta,seznamSouboru):
@@ -1128,7 +999,7 @@ class LiverSegmentation:
         """
         :data3d: 3D array with data
         :segparams: parameters of segmentation
-        cisloMetody = INT, cislo pouzite metody (0-testovaci)
+        method = nazev pouzite metody, seznam = getMethodList
         vysledkyDostupne = F/vysledek, F =>vysledek se nacte, jinak se vezme
         path = path s trenovacimi/testovacimi daty
         :returns: TODO
@@ -1141,7 +1012,7 @@ class LiverSegmentation:
         self.seeds = None
         self.voxelSize = voxelsize_mm
         self.segParams = {
-            'cisloMetody': 2,
+            'method': 'find',
             'vysledkyDostupne': False,
             'paramfile': self._get_default_paramfile_path(),
             'path': None
@@ -1154,11 +1025,23 @@ class LiverSegmentation:
         paramfile = op.join(path_to_script, 'data/segparams1.yml')
         return paramfile
 
-    def setCisloMetody(self, cislo):
-        self.segParams['cisloMetody'] = cislo
+    def setMethod(self, nazev):
+        self.segParams['method'] = nazev
+        
+    def setMethodNumber(self, n):
+        '''Vybere n-tou polozku ze seznamu getMethodList a nastavi metodu na ni.'''
+        seznam = self.getMethodList()
+        self.segParams['method'] = seznam[n]
 
-    def getCisloMetody(self):
-        return self.segParams['cisloMetody']
+    def getMethod(self):
+        return self.segParams['method']
+    
+    def getMethodList(self):
+        '''Vraci seznam vsech platnych nazvu metod ktere lze pouzit'''
+        return ['placeholder','find','regionGrowing']
+    
+    def setVysledky(self,vysledky):
+        self.segParams['vysledky'] = vysledky
 
     def set_seeds(self, seeds):
         self.seeds = seeds
@@ -1171,62 +1054,48 @@ class LiverSegmentation:
         return self.segParams['path']
 
     def run(self):
-        numero = self.segParams['cisloMetody']
+        '''metoda s vice moznostmi vyberu metody-vybrana v segParams'''
+        nazev = self.segParams['method']
         #print self.segParams
         vysledek = self.segParams['vysledkyDostupne']
         spatne = True
 
-        if(numero == 0):
-            print('testovaci metoda')
-            self.segmentation = segmentace0(self.data3d,self.voxelSize,vysledek)
+        if(nazev  == 'placeholder'):
+            metoda = segPlaceholder
             spatne = False
-        if(numero == 1):
-            self.segmentation = segmentace1(self.data3d,self.voxelSize, source=self.segParams['paramfile'],
-                                            vysledky=vysledek)
+        if(nazev  == 'find'):
+            metoda = segFind
             spatne = False
-        if(numero == 2):
-            self.segmentation = segmentace2(self.data3d,self.voxelSize, source=self.segParams['paramfile'],
-                                            vysledky=vysledek)
-            spatne = False
-        if(numero == 3):
-            self.segmentation = segmentace3(self.data3d,self.voxelSize, source=self.segParams['paramfile'],
-                                            vysledky=vysledek)
-            spatne = False
-        if(numero == 4):
-            self.segmentation = segmentace4(self.data3d,self.voxelSize, source=self.segParams['paramfile'],
-                                            vysledky=vysledek)
-            spatne = False
+        if(nazev  == 'regionGrowing'):
+            metoda = segRGrow
+            spatne = False         
 
         if(spatne):
             print('Zvolena metoda nenalezena')
+        else:
+            self.segmentation = metoda(self.data3d,self.voxelSize,source=self.segParams['paramfile'],vysledky=vysledek)
 
     def runVolby(self):
         '''metoda s vice moznostmi vyberu metody-vybrana v segParams'''
-        numero = self.segParams['cisloMetody']
+        nazev = self.segParams['method']
         #print self.segParams
         vysledek = self.segParams['vysledkyDostupne']
         spatne = True
 
-        if(numero == 0):
-            print('testovaci metoda')
-            self.segmentation = segmentace0(self.data3d,self.voxelSize,source=self.segParams['paramfile'],vysledky=vysledek)
+        if(nazev  == 'placeholder'):
+            metoda = segPlaceholder
             spatne = False
-        if(numero == 1):
-            self.segmentation = segmentace1(self.data3d,self.voxelSize,source=self.segParams['paramfile'],vysledky=vysledek)
+        if(nazev  == 'find'):
+            metoda = segFind
             spatne = False
-
-        if(numero == 2):
-            self.segmentation = segmentace2(self.data3d,self.voxelSize,source=self.segParams['paramfile'],vysledky=vysledek)
-            spatne = False
-        if(numero == 3):
-            self.segmentation = segmentace3(self.data3d,self.voxelSize,source=self.segParams['paramfile'],vysledky=vysledek)
-            spatne = False
-        if(numero == 4):
-            self.segmentation = segmentace4(self.data3d,self.voxelSize,source=self.segParams['paramfile'],vysledky=vysledek)
-            spatne = False
+        if(nazev  == 'regionGrowing'):
+            metoda = segRGrow
+            spatne = False         
 
         if(spatne):
             print('Zvolena metoda nenalezena')
+        else:
+            self.segmentation = metoda(self.data3d,self.voxelSize,source=self.segParams['paramfile'],vysledky=vysledek)
 
 
 
@@ -1248,7 +1117,7 @@ class LiverSegmentation:
     def vyhodnoceniMetodyTri(self):
         '''Funkce je ulozena zvlast aby bylo mozne menit pocet parametru
         a jednoduse volat defaultni metodu '''
-        metoda = self.getCisloMetody()
+        metoda = self.getMethod()
         path = self.getPath()
         vyhodnoceniMetodyTri(metoda,path)
 
@@ -1256,14 +1125,14 @@ class LiverSegmentation:
     def  trenovaniCele(self):
         '''Funkce je ulozena zvlast aby bylo mozne menit pocet parametru
         a jednoduse volat defaultni metodu '''
-        metoda = self.getCisloMetody()
+        metoda = self.getMethod()
         path = self.getPath()
         trenovaniCele(metoda,path)
 
     def  trenovaniTri(self):
         '''Funkce je ulozena zvlast aby bylo mozne menit pocet parametru
         a jednoduse volat defaultni metodu '''
-        metoda = self.getCisloMetody()
+        metoda = self.getMethod()
         path = self.getPath()
         trenovaniTri(metoda,path)
 
