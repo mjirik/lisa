@@ -5,3 +5,4 @@ io3d
 ipdb
 nearpy
 joblib
+git+https://github.com/mjirik/morphsnakes.git

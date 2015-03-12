@@ -31,7 +31,7 @@ import scipy.ndimage
 import numpy as np
 import datetime
 import argparse
-import lisa.extern.morphsnakes as ms
+import morphsnakes as ms
 # tady uz je logger
 # import dcmreaddata as dcmreader
 try:
@@ -660,12 +660,6 @@ class OrganSegmentation():
         resolution.
         """
         logger.debug('_interactivity_end()')
-        # logger.debug('nonzero segm ' + str(np.nonzero(self.segmentation)))
-        # logger.debug('unique segm ' + str(np.unique(self.segmentation)))
-        # logger.debug('before zoom self segm mx %s  min %s ' % (
-        #    str(np.max(self.segmentation)),
-        #    str(np.min(self.segmentation)),
-        #))
 
         self.__resize_to_orig(igc.seeds)
         self.organ_interactivity_counter = igc.interactivity_counter
@@ -702,7 +696,6 @@ class OrganSegmentation():
                 self.autocrop_margin)
 
             self.crop(tmpcrinfo)
-
 
         if self.texture_analysis not in (None, False):
             import texture_analysis
