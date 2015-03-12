@@ -17,7 +17,7 @@ from PyQt4 import QtCore
 from PyQt4.QtCore import pyqtSignal, QObject, QRunnable, QThreadPool, Qt
 from PyQt4.QtGui import QMainWindow, QWidget, QDialog, QLabel, QFont,\
     QGridLayout, QFrame, QPushButton, QSizePolicy, QProgressBar, QSpacerItem,\
-    QCheckBox, QLineEdit, QApplication, QHBoxLayout, QFileDialog
+    QCheckBox, QLineEdit, QApplication, QHBoxLayout, QFileDialog, QMessageBox
 
 import numpy as np
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -683,7 +683,7 @@ class StatsResultDialog(QDialog):
         if self.mainWindow.inputfile is None or self.mainWindow.inputfile == "":
             self.hr.addResultsRecord(label=label)
         else:
-            self.hr.addResultsRecord(label=label, datapath=path)
+            self.hr.addResultsRecord(label=label, datapath=self.mainWindow.inputfile)
         self.recordAdded = True
 
 class HistogramMplCanvas(FigureCanvas):
