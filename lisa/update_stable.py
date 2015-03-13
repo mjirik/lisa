@@ -9,12 +9,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-
-
-
-
-
 def update():
+    import os.path as op
+    path_to_script = op.dirname(op.abspath(__file__))
+    path_to_base = op.abspath(op.join(path_to_script, '../'))
     release_type = 'devel'
     # release_type = 'stable'
 
@@ -36,20 +34,35 @@ def update():
     ppio3d = ['io3d', 'io3d==1.0.5']
     ppsed3 = ['sed3', 'sed3==1.0.4']
     try:
-        #import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         subprocess.call('git pull', shell=True)
         subprocess.call('git submodule update --init --recursive', shell=True)
-        # subprocess.call('pip install -U --no-deps pysegbase --user', shell=True)
         # subprocess.call('pip install -U --no-deps io3d --user', shell=True)
         # subprocess.call('pip install -U --no-deps sed3 --user', shell=True)
-        subprocess.call(pipshell + pppysegbase[use_specifed_version], shell=True)
+        subprocess.call(
+            pipshell + pppysegbase[use_specifed_version], shell=True)
         subprocess.call(pipshell + ppio3d[use_specifed_version], shell=True)
         subprocess.call(pipshell + ppsed3[use_specifed_version], shell=True)
-# skelet3d is not in pipy
-        # subprocess.call('pip install -U --no-deps skelet3d --user', shell=True)
+        # skelet3d is not in pipy
+        # subprocess.call(
+        #      'pip install -U --no-deps skelet3d --user', shell=True)
     except:
         print ('Probem with git submodules')
         print (traceback.format_exc())
+
+    try:
+        subprocess.call(["pip", "install", '--user', "-r",
+                        op.join(path_to_base, "requirements_pip.txt")])
+    except:
+        logger.warning('Problem with pip update')
+        traceback.print_exc()
+
+    try:
+        subprocess.call(["conda", "install", "--yes", "--file",
+                        op.join(path_to_base, "requirements_conda.txt")])
+    except:
+        logger.warning('Problem with conda update')
+        traceback.print_exc()
 
 
 def main():
