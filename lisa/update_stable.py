@@ -16,7 +16,21 @@ def update():
     release_type = 'devel'
     # release_type = 'stable'
 
+    try:
+        subprocess.call(["conda", "install", "--yes", "--file",
+                        op.join(path_to_base, "requirements_conda.txt")])
+    except:
+        logger.warning('Problem with conda update')
+        traceback.print_exc()
     print ('Updating submodules')
+
+    try:
+        subprocess.call(["pip", "install", '--user', "-r",
+                        op.join(path_to_base, "requirements_pip.txt")])
+    except:
+        logger.warning('Problem with pip update')
+        traceback.print_exc()
+
     branch_name = subprocess.check_output(['git', 'branch'])
     # if we found stabel (find is not -1), we should use specific version
     if branch_name.find('* stable') != -1 or release_type == 'stable':
@@ -49,20 +63,6 @@ def update():
     except:
         print ('Probem with git submodules')
         print (traceback.format_exc())
-
-    try:
-        subprocess.call(["pip", "install", '--user', "-r",
-                        op.join(path_to_base, "requirements_pip.txt")])
-    except:
-        logger.warning('Problem with pip update')
-        traceback.print_exc()
-
-    try:
-        subprocess.call(["conda", "install", "--yes", "--file",
-                        op.join(path_to_base, "requirements_conda.txt")])
-    except:
-        logger.warning('Problem with conda update')
-        traceback.print_exc()
 
 
 def main():
