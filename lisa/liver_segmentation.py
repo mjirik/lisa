@@ -30,7 +30,99 @@ import matplotlib.pyplot as plt
 from sklearn import mixture
 import matplotlib
 
-def binarniOperaceNove(pole3d):
+def binarniOperace3D2D(pole3d,voxelSize):
+    '''Kombinace 3D a 2D binarnich operaci, vraci 3d pole true/false rozmeru pole3d
+    pouzite po variabilnim prahovani
+    struktury 2D: diamond 3x3, 3D: 18ti okoli
+    operace:
+    1) 3D dilatace 1x (zaplneni struktury jater
+    2) 2D otevreni 10x, zaplneni der
+    3) 2D konvoluce vybrana >=5 20x po sobe
+    4) 3D otevreni velikost*0.040625+8 krat kde velikost je pocet rezu snimku
+    Vysledkem v kombinaci s variabilnim prahovanim (prahovaniProcenta) je relativne 
+    dobre urcena oblast jater, ale je vzdy MENSI, testovano na 20ti snimcich sliver07    
+    '''
+    
+    
+    #print 'probihaji 3D binarni operace'
+    #struktura1 = np.array([[[0,1,0],[1,1,1],[0,1,0]],[[1,1,1],[1,1,1],[1,1,1]],[[0,1,0],[1,1,1],[0,1,0]]])
+    
+    #print struktura1
+    poleNew = [voxelSize[0]/1.0,voxelSize[1],voxelSize[2]]
+    struktura1 = vytvorKouli3D(poleNew, 2.5)
+    #print '****'
+    #print struktura1
+    #return
+    
+    rezNovy = ndimage.binary_dilation(pole3d,struktura1, 1)
+    
+    #zobrazitOriginal(rezNovy)
+    #sys.exit()
+    
+    #utvar1 = np.array([[0,1,0],[1,1,1],[0,1,0]]) 
+    rKruznice = 2#vmmm
+    voxelyKruznice = rKruznice/voxelSize[1]
+    voxelyPole = np.ceil(voxelyKruznice)
+    utvar1 = vytvoritTFKruznici(voxelyPole ,voxelyKruznice)
+    #print utvar1
+
+    #return
+    sumaObjektu = np.sum(utvar1)
+    pomocny = 0    
+    
+    for rez in rezNovy:
+        rez2 = ndimage.binary_opening(rez, utvar1, 10)#8
+        konvoluce = ndimage.binary_fill_holes(rez2)
+        for x in range(20):
+            konvoluce = np.array(konvoluce,dtype = np.int8)
+            konvoluce = ndimage.convolve(konvoluce, utvar1)
+            konvoluce = (konvoluce >=sumaObjektu)
+                 
+        bonus = ndimage.binary_dilation(konvoluce, utvar1, 10) #7
+        vysledek = konvoluce
+        #urciteANavic = ndimage.binary_closing(rez, utvar, 20)
+        rezNovy[pomocny,:,:] = vysledek
+        pomocny = pomocny+1
+    #zobrazitOriginal(rezNovy)    
+    velikost = np.shape(pole3d)
+    #print velikost
+    velikost = velikost[0]
+    hodnota = int(np.round(velikost*0.06+5)) # uprava operaci podle rozliseni
+    hodnota = 5
+    #print velikost 
+    print hodnota
+    print voxelSize
+    
+    rezNovy2 = ndimage.binary_opening(rezNovy,struktura1,hodnota)
+    #rezNovy2 = rezNovy2 > 5
+    #zobrazitOriginal(rezNovy2)
+    #sys.exit()    
+    
+    #data3d = rezNovy2
+    
+    #'''
+    print 'probiha vybrani nejvetsiho objektu'
+    [labelImage, labels] = ndimage.label(rezNovy2)
+    #print nb_labels
+    vytvoreny = np.zeros(labelImage.shape,dtype = np.int8)
+    nejvetsi = 0 #index nejvetsiho objektu
+    maximum = 0
+    for x in range(labels):
+        print str(x+1) + '/' + str(labels)
+        vytvoreny = (labelImage == x+1)
+        suma = np.sum(vytvoreny)
+        #print suma
+        if(suma > maximum):
+            nejvetsi = x+1
+            maximum = suma
+    
+    # print x+1
+    #print maximum
+    data3d = labelImage == nejvetsi
+    #'''
+    return data3d
+
+def binarniOperaceNove(pole3d,voxelsize):
     '''Kombinace 3D a 2D binarnich operaci, vraci 3d pole true/false rozmeru pole3d
     pouzite po variabilnim prahovani
     struktury 2D: diamond 3x3, 3D: 18ti okoli
@@ -102,80 +194,6 @@ def binarniOperaceNove(pole3d):
     
     return okraj
 
-def binarniOperace3D2D(pole3d):
-    '''Kombinace 3D a 2D binarnich operaci, vraci 3d pole true/false rozmeru pole3d
-    pouzite po variabilnim prahovani
-    struktury 2D: diamond 3x3, 3D: 18ti okoli
-    operace:
-    1) 3D dilatace 1x (zaplneni struktury jater
-    2) 2D otevreni 10x, zaplneni der
-    3) 2D konvoluce vybrana >=5 20x po sobe
-    4) 3D otevreni velikost*0.040625+8 krat kde velikost je pocet rezu snimku
-    Vysledkem v kombinaci s variabilnim prahovanim (prahovaniProcenta) je relativne 
-    dobre urcena oblast jater, ale je vzdy MENSI, testovano na 20ti snimcich sliver07    
-    '''
-    
-    
-    print 'probihaji 3D binarni operace'
-    struktura1 = np.array([[[0,1,0],[1,1,1],[0,1,0]],[[1,1,1],[1,1,1],[1,1,1]],[[0,1,0],[1,1,1],[0,1,0]]])
-    rezNovy = ndimage.binary_dilation(pole3d,struktura1, 1)
-    #zobrazitOriginal(rezNovy)
-    #sys.exit()
-
-    
-    pomocny = 0 
-    utvar1 = np.array([[0,1,0],[1,1,1],[0,1,0]]) 
-    utvar2 = np.ones([3,3])
-    for rez in rezNovy:
-        rez2 = ndimage.binary_opening(rez, utvar1, 10)
-        konvoluce = ndimage.binary_fill_holes(rez2)
-        for x in range(20):
-            konvoluce = np.array(konvoluce,dtype = np.int8)
-            konvoluce = ndimage.convolve(konvoluce, utvar1)
-            konvoluce = (konvoluce >=5)
-                 
-        #bonus = ndimage.binary_erosion(konvoluce, utvar, 5)
-        bonus = ndimage.binary_dilation(konvoluce, utvar1, 16) #7
-        vysledek = konvoluce
-        #urciteANavic = ndimage.binary_closing(rez, utvar, 20)
-        rezNovy[pomocny,:,:] = vysledek
-        pomocny = pomocny+1
-        
-    velikost = np.shape(pole3d)
-    #print velikost
-    velikost = velikost[0]
-    hodnota = int(np.round(velikost*0.040625+6)) # uprava operaci podle rozliseni
-    #print velikost 
-    print hodnota
-    
-    rezNovy2 = ndimage.binary_opening(rezNovy,struktura1,hodnota)
-    #rezNovy2 = rezNovy2 > 5
-    #zobrazitOriginal(rezNovy2)
-    #sys.exit()    
-    
-    #data3d = rezNovy2
-    
-    #'''
-    print 'probiha vybrani nejvetsiho objektu'
-    [labelImage, labels] = ndimage.label(rezNovy2)
-    #print nb_labels
-    vytvoreny = np.zeros(labelImage.shape,dtype = np.int8)
-    nejvetsi = 0 #index nejvetsiho objektu
-    maximum = 0
-    for x in range(labels):
-        print str(x+1) + '/' + str(labels)
-        vytvoreny = (labelImage == x+1)
-        suma = np.sum(vytvoreny)
-        #print suma
-        if(suma > maximum):
-            nejvetsi = x+1
-            maximum = suma
-    
-    # print x+1
-    #print maximum
-    data3d = labelImage == nejvetsi
-    #'''
-    return data3d
 
 def prahovaniProcenta(data3d,procentaHranice = 0.32,procentaJatra = 0.18):
     '''Procentualni metoda prahovani
@@ -527,6 +545,8 @@ def zobrazUtil(cmetody,cisloObrazu = 1):
     'utilita pro rychle zobrazeni metody s cislem cmetody'
     cesta = nactiYamlSoubor('path.yml')
     [rucni,rucniVelikost,strojova,segmentovanyVelikost,original] = souborAsegmentace(cisloObrazu,cmetody,cesta)
+    
+    #zobrazitOriginal(rucni)#kontrola
     zobrazit(rucni,strojova)
     
     #skore = vyhodnoceniSnimku(rucni, rucniVelikost, strojova, segmentovanyVelikost)
@@ -617,6 +637,8 @@ def vyhodnoceniMetodyTri(metoda,path = None):
         segmentovany = vytvoreny.segmentation
         segmentovanyVelikost = vytvoreny.voxelSize
         print 'zahajeno vyhodnoceni'
+        rucniPole.astype(np.int8)
+        segmentovany.astype(np.int8)
         vysledky = vyhodnoceniSnimku(rucniPole,rucniVelikost,segmentovany,segmentovanyVelikost)
         #vysledky =[1,2]
 
@@ -705,7 +727,7 @@ def segFind(data3d,velikostVoxelu,source,vysledky = False):
     source - soubor obsahujici data segmentaci (segparams1.yml)
      '''
     prahovany = prahovaniProcenta(data3d,procentaHranice = 0.32,procentaJatra = 0.18) #0.35 0.18
-    operovany = binarniOperace3D2D(prahovany)
+    operovany = binarniOperace3D2D(prahovany,velikostVoxelu)
     #zobrazitOriginal(operovany)
     #sys.exit()   
     
@@ -746,7 +768,7 @@ def segRGrow(data3d,velikostVoxelu,source,vysledky = False):
     np.save('jatraPred.npy',segmentaceVysledek)
     ##zobrazitOriginal(segmentaceVysledek)
     #sys.exit()
-    segmentaceVysledek = binarniOperaceNove(segmentaceVysledek)
+    segmentaceVysledek = binarniOperaceNove(segmentaceVysledek,velikostVoxelu)
     
 
 
