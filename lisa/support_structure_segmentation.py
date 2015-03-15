@@ -44,7 +44,7 @@ import qmisc
 import io3d
 import ipdb
 import scipy.ndimage.filters as filters
-
+import multipolyfit as mpf
 
 from io3d import datareader
 from scipy.ndimage.measurements import label
@@ -61,13 +61,14 @@ class SupportStructureSegmentation():
             autocrop = True,
             autocrop_margin_mm = [10,10,10],
             modality = 'CT',
-            slab = {'none':0, 'bone':8,'lungs':9,'heart':10},
-            maximal_lung_diff = 0.2
+            slab = {'none':0, 'bone':8,'lungs':9,'heart':10,'branice':5},
+            maximal_lung_diff = 0.2,
+	    rad_branice=5
 	    ):
 	    
         """
         Segmentaton of support structures for liver segmentatio based on
-        location prior.
+        locati0on prior.
         """
 
 
@@ -81,6 +82,7 @@ class SupportStructureSegmentation():
         self.segmentation = None
         self.slab = slab
 	self.maximal_lung_diff = maximal_lung_diff
+	self.rad_branice=rad_branice
 
 
 
@@ -103,24 +105,46 @@ class SupportStructureSegmentation():
 
     def convolve_structure_heart( self , size=9 ):
 	a = np.zeros(( size , size , size ))
-	c = np.floor( size / 2 )
+	c = int (np.floor( size / 2 ))
 	a[c,c,c]=1
 	structure = filters.gaussian_filter( a , self.voxelsize_mm )
-	structure[:,:c,:] *= -1
-	structure[:,c,:] = 0
+	structure[:c,:,:] *= -1
+	structure[c,:,:] = 0
 	return structure
 
+    def convolve_structure_spine(self):
+
+
+
+	return structure
+    
 
     def bone_segmentation(self):
-        self.segmentation = np.array(self.data3d > 1300).astype(np.int8)*self.slab['bone']
+	Bones_down=330
+        self.segmentation = np.array(self.data3d > Bones_down).astype(np.int8)*self.slab['bone']
         pass
 
     def heart_segmentation(self):
-	x=self.convolve_structure_heart()
-	seg_prub=filters.convolve( ((self.segmentation == self.slab['lungs'])-0.5) , x )
-	#ipdb.set_trace()
-	self.segmentation = seg_prub
-	#self.segmentation = np.array(seg_prub==1)
+	a=self.convolve_structure_heart()
+	seg_prub = filters.convolve( ((self.segmentation == self.slab['lungs'])-0.5) , a )
+	self.segmentation = np.array(seg_prub<=-0.3)
+	z, x, y= np.nonzero(self.segmentation)
+	s = np.array([x , y]).T
+	h = np.array(z)
+	model = mpf.multipolyfit(s, h, self.rad_branice, model_out = True)
+	ran = self.segmentation.shape
+	x = np.arange( ran[1] )
+	y = np.arange( ran[2] )
+	x, y = np.meshgrid( x, y)
+	z = np.floor(np.asarray(map(model, x.reshape(-1),y.reshape(-1)))).astype(int)
+	x = x.reshape(z.shape)
+	y = y.reshape(z.shape)
+	print(z)
+	for a in range(z.shape[0]):
+	    if (z[a] < ran[0]) and (z[a] >= 0):
+	    	self.segmentation[z[a], x[a], y[a]] = self.slab['branice'] 
+
+	#ipdb.set_trace()  
         pass
     
     def iteration(self):
