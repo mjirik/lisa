@@ -19,6 +19,9 @@ class ShapeModelTest(unittest.TestCase):
 
     # @attr('interactive')
     def test_shape_model(self):
+        """
+        Run shape model
+        """
         sm = shm.ShapeModel()
         sm.model_margin = [0, 0, 0]
 
@@ -36,20 +39,19 @@ class ShapeModelTest(unittest.TestCase):
         sh1[23:27, 11:13] = 0
         sm.train_one(sh1)
 
-        mdl = sm.get_model([[15, 25], [10, 25], [0, 1]], [30, 30, 1])
+        sm.get_model([[15, 25], [10, 25], [0, 1]], [30, 30, 1])
         # print mdl.shape
 
-        import matplotlib.pyplot as plt
+        # import matplotlib.pyplot as plt
         # import ipdb; ipdb.set_trace()
         # plt.imshow(np.squeeze(sh1))
         # plt.imshow(np.squeeze(sm.model[:, :, 0]))
-        plt.imshow(np.squeeze(mdl))
-        plt.show()
+        # plt.imshow(np.squeeze(mdl))
+        # plt.show()
         # import sed3
         # ed = sed3.sed3(sh1)
         # ed.show()
 
-        pass
 
 if __name__ == "__main__":
     unittest.main()
