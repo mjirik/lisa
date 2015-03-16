@@ -1,4 +1,6 @@
-python -m wget 
+python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_pip.txt
+python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_conda.txt
+python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_apt.txt
 
 
 conda install --yes --file requirements_conda.txt
