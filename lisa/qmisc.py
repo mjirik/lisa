@@ -68,6 +68,9 @@ def crop(data, crinfo):
     Crop the data.
 
     crop(data, crinfo)
+
+    :param crinfo: min and max for each axis
+
     """
     return data[
         __int_or_none(crinfo[0][0]):__int_or_none(crinfo[0][1]),
