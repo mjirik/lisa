@@ -29,6 +29,9 @@ echo "$USER"
 # apt-get upgrade -y
 
 # 0. deb package requirements
+pip install wget
+python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_apt.txt
+
 apt-get install -y -qq $(grep -vE "^\s*#" requirements_apt.txt | tr "\n" " ")
 # apt-get install -y python git python-dev g++ python-numpy python-scipy python-matplotlib python-sklearn python-skimage python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools curl python-pip cmake
 
@@ -37,17 +40,8 @@ sudo -u $USER wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86
 sudo -u $USER bash Miniconda-latest-Linux-x86_64.sh -b
 sudo -u $USER export PATH=$HOMEDIR/miniconda/bin:$PATH
 
-pip install wget
-python wget https://raw.githubusercontent.com/mjirik/lisa/master/install.sh
+python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/install.sh
 bash install.sh
-
-
-
-
-
-
-
-
 
 sudo make install
 # sudo -u $USER sh -c "cd ~/projects/skelet3d/build && cmake .. && make"
