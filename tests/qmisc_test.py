@@ -159,6 +159,16 @@ class QmiscTest(unittest.TestCase):
         # print data_out
         self.assertItemsEqual(new_shape, data_out.shape)
 
+    def test_fix_crinfo(self):
+        crinfo = [[10, 15], [30, 40], [1, 50]]
+        cri_fixed = misc.fix_crinfo(crinfo)
+
+        print crinfo
+        print cri_fixed
+
+        self.assertTrue(cri_fixed[1, 1] == 40)
+        self.assertTrue(cri_fixed[2, 1] == 50)
+
     def test_resize_to_mm(self):
 
         data = np.random.rand(3, 4, 5)

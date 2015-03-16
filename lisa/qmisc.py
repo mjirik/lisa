@@ -72,6 +72,7 @@ def crop(data, crinfo):
     :param crinfo: min and max for each axis
 
     """
+    crinfo = fix_crinfo(crinfo)
     return data[
         __int_or_none(crinfo[0][0]):__int_or_none(crinfo[0][1]),
         __int_or_none(crinfo[1][0]):__int_or_none(crinfo[1][1]),
@@ -89,6 +90,8 @@ def combinecrinfo(crinfo1, crinfo2):
     """
     Combine two crinfos. First used is crinfo1, second used is crinfo2.
     """
+    crinfo1 = fix_crinfo(crinfo1)
+    crinfo2 = fix_crinfo(crinfo2)
 
     crinfo = [
         [crinfo1[0][0] + crinfo2[0][0], crinfo1[0][0] + crinfo2[0][1]],
@@ -135,6 +138,7 @@ def crinfo_from_specific_data(data, margin):
 
 def uncrop(data, crinfo, orig_shape):
 
+    crinfo = fix_crinfo(crinfo)
     data_out = np.zeros(orig_shape, dtype=data.dtype)
 
     # print 'uncrop ', crinfo
@@ -155,6 +159,18 @@ def uncrop(data, crinfo, orig_shape):
         ] = data
 
     return data_out
+
+
+def fix_crinfo(crinfo, to='axis'):
+    """
+    Function recognize order of crinfo and convert it to proper format.
+    """
+
+    crinfo = np.asarray(crinfo)
+    if crinfo.shape[0] == 2:
+        crinfo = crinfo.T
+
+    return crinfo
 
 
 def getVersionString():
@@ -233,13 +249,16 @@ def resize_to_mm(data3d, voxelsize_mm, new_voxelsize_mm):
 
 
 def resize_to_shape(segmentation, shape):
-    nzoom = shape / np.array(segmentation.shape).astype(np.double)
+    import qmisc
+    return qmisc(segmentation, shape)
 
-    segm_orig_scale = scipy.ndimage.zoom(
-        segmentation,
-        nzoom,
-        mode='nearest',
-        order=0
-    ).astype(segmentation.dtype)
-
-    return segm_orig_scale
+    # nzoom = shape / np.array(segmentation.shape).astype(np.double)
+    #
+    # segm_orig_scale = scipy.ndimage.zoom(
+    #     segmentation,
+    #     nzoom,
+    #     mode='nearest',
+    #     order=0
+    # ).astype(segmentation.dtype)
+    #
+    # return segm_orig_scale
