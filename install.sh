@@ -1,3 +1,6 @@
+python -m wget 
+
+
 conda install --yes --file requirements_conda.txt
 
 # 2. easy_install requirements simpleITK  

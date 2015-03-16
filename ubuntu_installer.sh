@@ -28,38 +28,27 @@ echo "$USER"
 # apt-get update
 # apt-get upgrade -y
 
-# 1. deb package requirements
-apt-get install -y python git python-dev g++ python-numpy python-scipy python-matplotlib python-sklearn python-skimage python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools curl python-pip cmake
+# 0. deb package requirements
+apt-get install -y -qq $(grep -vE "^\s*#" requirements_apt.txt | tr "\n" " ")
+# apt-get install -y python git python-dev g++ python-numpy python-scipy python-matplotlib python-sklearn python-skimage python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools curl python-pip cmake
 
-# 2. easy_install requirements simpleITK  
-easy_install -U SimpleITK mahotas
+# 1. conda python packages
+sudo -u $USER wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
+sudo -u $USER bash Miniconda-latest-Linux-x86_64.sh -b
+sudo -u $USER export PATH=$HOMEDIR/miniconda/bin:$PATH
 
-# 3. pip install our packages pyseg_base and dicom2fem
-sudo -u $USER pip install pysegbase dicom2fem sed3 io3d ipdb --user
-
-sudo -u $USER mkdir ~/projects
-
-# 4. install gco_python
-
-sudo -u $USER mkdir ~/projects/gco_python
-sudo -u $USER git clone https://github.com/mjirik/gco_python.git ~/projects/gco_python
-cd $HOMEDIR
-cd projects/gco_python
-echo `pwd`
-sudo -u $USER make
-sudo -u $USER python setup.py install --user
+pip install wget
+python wget https://raw.githubusercontent.com/mjirik/lisa/master/install.sh
+bash install.sh
 
 
-# 5. skelet3d - optional for Histology Analyser
-sudo apt-get install -y cmake python-numpy libinsighttoolkit3-dev libpng12-dev
-# sudo -u $USER cd ~/projects
-sudo -u $USER mkdir ~/projects/skelet3d
-sudo -u $USER git clone https://github.com/mjirik/skelet3d.git ~/projects/skelet3d
-sudo -u $USER mkdir ~/projects/skelet3d/build
-cd $HOMEDIR
-cd projects/skelet3d/build
-sudo -u $USER cmake ..
-sudo -u $USER make
+
+
+
+
+
+
+
 sudo make install
 # sudo -u $USER sh -c "cd ~/projects/skelet3d/build && cmake .. && make"
 # sudo -u $USER mkdir build
