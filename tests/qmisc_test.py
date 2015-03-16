@@ -161,10 +161,10 @@ class QmiscTest(unittest.TestCase):
 
     def test_fix_crinfo(self):
         crinfo = [[10, 15], [30, 40], [1, 50]]
-        cri_fixed = misc.fix_crinfo(crinfo)
+        cri_fixed = qmisc.fix_crinfo(crinfo)
 
-        print crinfo
-        print cri_fixed
+        # print crinfo
+        # print cri_fixed
 
         self.assertTrue(cri_fixed[1, 1] == 40)
         self.assertTrue(cri_fixed[2, 1] == 50)
