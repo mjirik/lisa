@@ -20,11 +20,18 @@ import qmisc
 
 class ShapeModel():
     """
+    Cílem je dát dohromady vstupní data s různou velikostí a různou polohou
+    objektu. Výstup je pak zapotřebí opět přizpůsobit libovolné velikosti a
+    poloze objektu v obraze.
+
     Model je tvořen polem s velikostí definovanou v konstruktoru (self.shape).
     U modelu je potřeba brát v potaz polohu objektu. Ta je udávána pomocí
     crinfo. To je skupina polí s minimální a maximální hodnotou pro každou osu.
 
     Trénování je prováděno opakovaným voláním funkce train_one().
+
+    :param model_margin: stanovuje velikost okraje v modelu. Objekt bude ve
+    výchozím nastavení vzdálen 0 px od každého okraje.
 
     """
 
@@ -32,21 +39,32 @@ class ShapeModel():
         """TODO: to be defined1. """
         self.model = np.ones(shape)
         self.data_number = 0
-        self.model_margin = 1
+        self.model_margin = [0, 0, 0]
         pass
 
-    def get_model(self, image_shape, crinfo):
+    def get_model(self, crinfo, image_shape):
         """
         :param image_shape: Size of output image
         :param crinfo: Array with min and max index of object for each axis.
         [[minx, maxx], [miny, maxy], [minz, maxz]]
 
         """
+        # Průměrování
+        mdl = self.model / self.data_number
+        print mdl.shape
+        print crinfo
+        # mdl_res = qmisc.resize_to_shape(mdl, crinfo[0][]
+        uncr = qmisc.uncrop(mdl, crinfo, image_shape, resize=True)
+        return uncr
 
     def train_one(self, data):
         """
         """
         crinfo = qmisc.crinfo_from_specific_data(data, margin=self.model_margin)
+        datacr = qmisc.crop(data, crinfo=crinfo)
+        datacrres = qmisc.resize_to_shape(datacr, self.model.shape)
+
+        self.model += datacrres
 
         self.data_number += 1
 
@@ -55,8 +73,6 @@ class ShapeModel():
     def train(self, data_arr):
         for data in data_arr:
             self.train_one(data)
-
-
 
 
 def main():

@@ -136,7 +136,7 @@ def crinfo_from_specific_data(data, margin):
     return crinfo
 
 
-def uncrop(data, crinfo, orig_shape):
+def uncrop(data, crinfo, orig_shape, resize=False):
 
     crinfo = fix_crinfo(crinfo)
     data_out = np.zeros(orig_shape, dtype=data.dtype)
@@ -144,6 +144,8 @@ def uncrop(data, crinfo, orig_shape):
     # print 'uncrop ', crinfo
     # print orig_shape
     # print data.shape
+    if resize:
+        data = resize_to_shape(data, crinfo[:, 1] - crinfo[:, 0])
 
     startx = np.round(crinfo[0][0]).astype(int)
     starty = np.round(crinfo[1][0]).astype(int)
@@ -249,8 +251,8 @@ def resize_to_mm(data3d, voxelsize_mm, new_voxelsize_mm):
 
 
 def resize_to_shape(segmentation, shape):
-    import qmisc
-    return qmisc(segmentation, shape)
+    import misc
+    return misc.resize_to_shape(segmentation, shape)
 
     # nzoom = shape / np.array(segmentation.shape).astype(np.double)
     #

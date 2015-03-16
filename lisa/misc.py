@@ -177,7 +177,7 @@ def resize_to_shape(data, shape, zoom=None):
     except:
         dtype = data.dtype
         if zoom is None:
-            zoom = shape / (data.shape).astype(np.float)
+            zoom = shape / np.asarray(data.shape).astype(np.double)
 
         segm_orig_scale = scipy.ndimage.zoom(
             data,
