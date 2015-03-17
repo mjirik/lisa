@@ -589,7 +589,8 @@ class OrganSegmentationWindow(QMainWindow):
         pyed.exec_()
 
         oseg.segmentation = pyed.getSeeds()
-        self.oseg.processing_time = datetime.datetime.now() - self.oseg.time_start
+        self.oseg.processing_time = \
+            datetime.datetime.now() - self.oseg.time_start
         self.checkSegData('manual seg., ')
 
     def checkSegData(self, msg):
@@ -605,7 +606,7 @@ class OrganSegmentationWindow(QMainWindow):
             tim = self.oseg.processing_time
 
             if self.oseg.volume_unit == 'ml':
-                import datetime
+                # import datetime
                 # timstr = str(datetime.timedelta(seconds=round(tim)))
                 timstr = str(tim)
                 logger.debug('tim = ' + str(tim))
