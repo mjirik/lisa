@@ -590,69 +590,79 @@ class OrganSegmentation():
 
     def __resize_to_orig(self, igc_seeds):
         # @TODO remove old code in except part
+        self.segmentation = misc.resize_to_shape(
+            self.segmentation,
+            self.data3d.shape,
+            self.zoom
+        )
+        self.seeds = misc.resize_to_shape(
+            igc_seeds,
+            self.data3d.shape,
+            self.zoom
+        )
 
-        try:
-            # rint 'pred vyjimkou'
-            # aise Exception ('test without skimage')
-            # rint 'za vyjimkou'
-            import skimage
-            import skimage.transform
-# Now we need reshape  seeds and segmentation to original size
-
-            segm_orig_scale = skimage.transform.resize(
-                self.segmentation, self.data3d.shape, order=0,
-                preserve_range=True
-            )
-
-            seeds = skimage.transform.resize(
-                igc_seeds, self.data3d.shape, order=0,
-                preserve_range=True
-            )
-
-            self.segmentation = segm_orig_scale
-            self.seeds = seeds
-            logger.debug('resize to orig with skimage')
-        except:
-
-            segm_orig_scale = scipy.ndimage.zoom(
-                self.segmentation,
-                1.0 / self.zoom,
-                mode='nearest',
-                order=0
-            ).astype(np.int8)
-            seeds = scipy.ndimage.zoom(
-                igc_seeds,
-                1.0 / self.zoom,
-                mode='nearest',
-                order=0
-            )
-            logger.debug('resize to orig with scipy.ndimage')
-
-# @TODO odstranit hack pro oříznutí na stejnou velikost
-# v podstatě je to vyřešeno, ale nechalo by se to dělat elegantněji v zoom
-# tam je bohužel patrně bug
-            # rint 'd3d ', self.data3d.shape
-            # rint 's orig scale shape ', segm_orig_scale.shape
-            shp = [
-                np.min([segm_orig_scale.shape[0], self.data3d.shape[0]]),
-                np.min([segm_orig_scale.shape[1], self.data3d.shape[1]]),
-                np.min([segm_orig_scale.shape[2], self.data3d.shape[2]]),
-            ]
-            # elf.data3d = self.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
-            # mport ipdb; ipdb.set_trace() # BREAKPOINT
-
-            self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
-            self.segmentation[
-                0:shp[0],
-                0:shp[1],
-                0:shp[2]] = segm_orig_scale[0:shp[0], 0:shp[1], 0:shp[2]]
-
-            del segm_orig_scale
-
-            self.seeds[
-                0:shp[0],
-                0:shp[1],
-                0:shp[2]] = seeds[0:shp[0], 0:shp[1], 0:shp[2]]
+#         try:
+#             # rint 'pred vyjimkou'
+#             # aise Exception ('test without skimage')
+#             # rint 'za vyjimkou'
+#             import skimage
+#             import skimage.transform
+# # Now we need reshape  seeds and segmentation to original size
+#
+#             segm_orig_scale = skimage.transform.resize(
+#                 self.segmentation, self.data3d.shape, order=0,
+#                 preserve_range=True
+#             )
+#
+#             seeds = skimage.transform.resize(
+#                 igc_seeds, self.data3d.shape, order=0,
+#                 preserve_range=True
+#             )
+#
+#             # self.segmentation = segm_orig_scale
+#             self.seeds = seeds
+#             logger.debug('resize to orig with skimage')
+#         except:
+#
+#             segm_orig_scale = scipy.ndimage.zoom(
+#                 self.segmentation,
+#                 1.0 / self.zoom,
+#                 mode='nearest',
+#                 order=0
+#             ).astype(np.int8)
+#             seeds = scipy.ndimage.zoom(
+#                 igc_seeds,
+#                 1.0 / self.zoom,
+#                 mode='nearest',
+#                 order=0
+#             )
+#             logger.debug('resize to orig with scipy.ndimage')
+#
+# # @TODO odstranit hack pro oříznutí na stejnou velikost
+# # v podstatě je to vyřešeno, ale nechalo by se to dělat elegantněji v zoom
+# # tam je bohužel patrně bug
+#             # rint 'd3d ', self.data3d.shape
+#             # rint 's orig scale shape ', segm_orig_scale.shape
+#             shp = [
+#                 np.min([segm_orig_scale.shape[0], self.data3d.shape[0]]),
+#                 np.min([segm_orig_scale.shape[1], self.data3d.shape[1]]),
+#                 np.min([segm_orig_scale.shape[2], self.data3d.shape[2]]),
+#             ]
+#             # elf.data3d = self.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
+#             # mport ipdb; ipdb.set_trace() # BREAKPOINT
+#
+#             self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
+#             self.segmentation[
+#                 0:shp[0],
+#                 0:shp[1],
+#                 0:shp[2]] = segm_orig_scale[0:shp[0], 0:shp[1], 0:shp[2]]
+#
+#             del segm_orig_scale
+#
+#             self.seeds[
+#                 0:shp[0],
+#                 0:shp[1],
+#                 0:shp[2]] = seeds[0:shp[0], 0:shp[1], 0:shp[2]]
 
     def _interactivity_end(self, igc):
         """
@@ -670,7 +680,7 @@ class OrganSegmentation():
         if False:
             # TODO dodělat postprocessing PV
             import segmentation
-            outputSegmentation = segmentation.vesselSegmentation(
+            outputSegmentation = segmentation.vesselSegmentation(  # noqa
                 self.data3d,
                 self.segmentation,
                 threshold=-1,

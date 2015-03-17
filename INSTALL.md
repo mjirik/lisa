@@ -39,7 +39,13 @@ Tested with Ubuntu 14.04 and Linux Mint 16 Petra
 
     # 1. deb package requirements
     sudo apt-get install python git python-dev g++ python-numpy python-scipy python-matplotlib python-sklearn python-skimage python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools curl
-    
+
+    # 2. install miniconda
+    wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
+    bash Miniconda-latest-Linux-x86_64.sh -b
+    cd ~
+    export PATH=`pwd`/miniconda/bin:$PATH
+
     # 2. easy_install requirements simpleITK  
     sudo easy_install -U SimpleITK mahotas
 

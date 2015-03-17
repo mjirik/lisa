@@ -12,6 +12,9 @@ import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "./extern/sPickle"))
+import numpy as np
+import scipy
+import scipy.ndimage
 
 
 def suggest_filename(file_path, exists=None):
@@ -144,3 +147,64 @@ def obj_to_file(obj, filename='annotation.yaml', filetype='yaml'):
         sio.savemat(filename, obj)
     else:
         logger.error('Unknown filetype ' + filetype)
+
+
+def resize_to_shape(data, shape, zoom=None):
+    """
+    Function resize input data to specific shape.
+
+    :param data: input 3d array-like data
+    :param shape: shape of output data
+    :param zoom: zoom is used for back compatibility
+    """
+    # @TODO remove old code in except part
+
+    try:
+        # rint 'pred vyjimkou'
+        # aise Exception ('test without skimage')
+        # rint 'za vyjimkou'
+        import skimage
+        import skimage.transform
+# Now we need reshape  seeds and segmentation to original size
+
+        segm_orig_scale = skimage.transform.resize(
+            data, shape, order=0,
+            preserve_range=True
+        )
+
+        segmentation = segm_orig_scale
+        logger.debug('resize to orig with skimage')
+    except:
+        dtype = data.dtype
+        if zoom is None:
+            zoom = shape / np.asarray(data.shape).astype(np.double)
+
+        segm_orig_scale = scipy.ndimage.zoom(
+            data,
+            1.0 / zoom,
+            mode='nearest',
+            order=0
+        ).astype(dtype)
+        logger.debug('resize to orig with scipy.ndimage')
+
+# @TODO odstranit hack pro oříznutí na stejnou velikost
+# v podstatě je to vyřešeno, ale nechalo by se to dělat elegantněji v zoom
+# tam je bohužel patrně bug
+        # rint 'd3d ', self.data3d.shape
+        # rint 's orig scale shape ', segm_orig_scale.shape
+        shp = [
+            np.min([segm_orig_scale.shape[0], shape[0]]),
+            np.min([segm_orig_scale.shape[1], shape[1]]),
+            np.min([segm_orig_scale.shape[2], shape[2]]),
+        ]
+        # elf.data3d = self.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
+        # mport ipdb; ipdb.set_trace() # BREAKPOINT
+
+        segmentation = np.zeros(shape, dtype=dtype)
+        segmentation[
+            0:shp[0],
+            0:shp[1],
+            0:shp[2]] = segm_orig_scale[0:shp[0], 0:shp[1], 0:shp[2]]
+
+        del segm_orig_scale
+    return segmentation

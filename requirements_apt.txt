@@ -1,0 +1,1 @@
+python git python-dev g++ sox make  curl cmake cmake libinsighttoolkit3-dev libpng12-dev libgdcm2-dev
