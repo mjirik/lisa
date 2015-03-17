@@ -56,6 +56,7 @@ from io3d import datareader
 from io3d import datawriter
 import data_plus
 import lisa.support_structure_segmentation as sss
+import lisa.cachefile as cachef
 
 # import audiosupport
 # import skimage
@@ -137,6 +138,7 @@ class OrganSegmentation():
         save_filetype='pklz',
         debug_mode=False,
         seg_postproc_pars={},
+        cache_filename='cache.yml'
 
         #           iparams=None,
     ):
@@ -214,6 +216,7 @@ class OrganSegmentation():
         #         'snakes_method',
         #         'snakes_params']
         # )
+        self.cache = cachef.CacheFile(cache_filename)
 
         self.seg_postproc_pars = {
             'smoothing_mm': smoothing_mm,
@@ -747,6 +750,10 @@ class OrganSegmentation():
             else:
                 logger.error('Unknown snake method')
                 return
+
+            sp = self.seg_postproc_pars['snakes_params']
+            if 'seeds' in sp.keys() and sp['seeds'] is True:
+                sp['seeds'] = self.seeds
 
             macwe = method(
                 self.data3d,

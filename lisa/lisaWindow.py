@@ -368,15 +368,22 @@ class OrganSegmentationWindow(QMainWindow):
         #     seg.datapath = dcmreader.get_dcmdir_qt(
         #        app=True,
         #        directory=self.oseg.input_datapath_start
+        if 'loaddir' in self.oseg.cache.data.keys():
+            directory = self.oseg.cache.get('loaddir')
+        else:
+            directory = self.oseg.input_datapath_start
         #
         oseg.datapath = self.__get_datafile(
             app=True,
-            directory=self.oseg.input_datapath_start
+            directory=directory
         )
 
         if oseg.datapath is None:
             self.statusBar().showMessage('No data path specified!')
             return
+        head, teil = os.path.split(oseg.datapath)
+        self.oseg.cache.update('loaddir', head)
+
         self.importDataWithGui()
 
     def loadDataDir(self):
