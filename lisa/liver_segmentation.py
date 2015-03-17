@@ -25,82 +25,67 @@ import SimpleITK as sitk
 import os.path as op
 import volumetry_evaluation as ve
 import sed3
-import sys
-import matplotlib.pyplot as plt
 from sklearn import mixture
-import matplotlib
+import morphsnakes
+import sys
 
-def binarniOperace3D2D(pole3d,voxelSize):
+def simpleSnake(data3d,segmentace,iterace,vyhlazovani=1,l1=1,l2=2):
+    '''Metoda pouzivajici knihovnu morphSnakes (morphological Chan-Vese evolution)
+    data3d - 3d CT snimek
+    segmentace - vnitrek jater pro zahajeni algoritmu
+    iterace - zvoleny pocet iteraci
+    vyhlazovani - pocet operaci vyhlazovani po dokonceni algoritmu
+    l1,l2 =  relativni dulezitost vnitrnich a vnejsich pixelu
+    (treba experimentalne nastavit)'''
+    print 'vytvareni instance morphsnakes'
+    macwe = morphsnakes.MorphACWE(data3d, smoothing=vyhlazovani, lambda1=l1, lambda2=l2)
+    macwe.set_levelset(segmentace)
+    'probiha beh morphsnakes'
+    macwe.run(iterace)
+    vysledek = macwe.levelset
+    vysledek.astype(np.int8)
+    return vysledek
+
+def binarniOperace3D2D(pole3d,voxelSize,rKoule = 2.5,rKruznice = 2):
     '''Kombinace 3D a 2D binarnich operaci, vraci 3d pole true/false rozmeru pole3d
     pouzite po variabilnim prahovani
-    struktury 2D: diamond 3x3, 3D: 18ti okoli
+    struktury 2D: kruznice o polomeru rKruznice (2), 3D: koule o polomeru rKoule (2.5)
     operace:
-    1) 3D dilatace 1x (zaplneni struktury jater
+    1) 3D dilatace 1x (zaplneni struktury jater)
     2) 2D otevreni 10x, zaplneni der
     3) 2D konvoluce vybrana >=5 20x po sobe
-    4) 3D otevreni velikost*0.040625+8 krat kde velikost je pocet rezu snimku
+    4) 3D otevreni 5x 
     Vysledkem v kombinaci s variabilnim prahovanim (prahovaniProcenta) je relativne 
     dobre urcena oblast jater, ale je vzdy MENSI, testovano na 20ti snimcich sliver07    
     '''
-    
-    
-    #print 'probihaji 3D binarni operace'
-    #struktura1 = np.array([[[0,1,0],[1,1,1],[0,1,0]],[[1,1,1],[1,1,1],[1,1,1]],[[0,1,0],[1,1,1],[0,1,0]]])
-    
-    #print struktura1
+
     poleNew = [voxelSize[0]/1.0,voxelSize[1],voxelSize[2]]
-    struktura1 = vytvorKouli3D(poleNew, 2.5)
-    #print '****'
-    #print struktura1
-    #return
-    
+    struktura1 = vytvorKouli3D(poleNew, rKoule)    
     rezNovy = ndimage.binary_dilation(pole3d,struktura1, 1)
-    
-    #zobrazitOriginal(rezNovy)
-    #sys.exit()
-    
-    #utvar1 = np.array([[0,1,0],[1,1,1],[0,1,0]]) 
-    rKruznice = 2#vmmm
     voxelyKruznice = rKruznice/voxelSize[1]
     voxelyPole = np.ceil(voxelyKruznice)
     utvar1 = vytvoritTFKruznici(voxelyPole ,voxelyKruznice)
-    #print utvar1
-
-    #return
     sumaObjektu = np.sum(utvar1)
     pomocny = 0    
     
     for rez in rezNovy:
-        rez2 = ndimage.binary_opening(rez, utvar1, 10)#8
+        rez2 = ndimage.binary_opening(rez, utvar1, 10)
         konvoluce = ndimage.binary_fill_holes(rez2)
         for x in range(20):
             konvoluce = np.array(konvoluce,dtype = np.int8)
             konvoluce = ndimage.convolve(konvoluce, utvar1)
             konvoluce = (konvoluce >=sumaObjektu)
                  
-        bonus = ndimage.binary_dilation(konvoluce, utvar1, 10) #7
+        #bonus = ndimage.binary_dilation(konvoluce, utvar1, 10)
         vysledek = konvoluce
-        #urciteANavic = ndimage.binary_closing(rez, utvar, 20)
         rezNovy[pomocny,:,:] = vysledek
-        pomocny = pomocny+1
-    #zobrazitOriginal(rezNovy)    
+        pomocny = pomocny+1   
     velikost = np.shape(pole3d)
-    #print velikost
     velikost = velikost[0]
-    hodnota = int(np.round(velikost*0.06+5)) # uprava operaci podle rozliseni
     hodnota = 5
-    #print velikost 
-    print hodnota
-    print voxelSize
     
     rezNovy2 = ndimage.binary_opening(rezNovy,struktura1,hodnota)
-    #rezNovy2 = rezNovy2 > 5
-    #zobrazitOriginal(rezNovy2)
-    #sys.exit()    
     
-    #data3d = rezNovy2
-    
-    #'''
     print 'probiha vybrani nejvetsiho objektu'
     [labelImage, labels] = ndimage.label(rezNovy2)
     #print nb_labels
@@ -115,38 +100,31 @@ def binarniOperace3D2D(pole3d,voxelSize):
         if(suma > maximum):
             nejvetsi = x+1
             maximum = suma
-    
-    # print x+1
-    #print maximum
+
     data3d = labelImage == nejvetsi
-    #'''
     return data3d
 
 def binarniOperaceNove(pole3d,voxelsize):
     '''Kombinace 3D a 2D binarnich operaci, vraci 3d pole true/false rozmeru pole3d
     pouzite po variabilnim prahovani
-    struktury 2D: diamond 3x3, 3D: 18ti okoli
+    struktury 2D: diamond 3x3, 3D: koule o polomeru 3 'krychlove' voxely
     operace:
-    1) 3D dilatace 1x (zaplneni struktury jater
-    2) 2D otevreni 10x, zaplneni der
-    3) 2D konvoluce vybrana >=5 20x po sobe
-    4) 3D otevreni velikost*0.040625+8 krat kde velikost je pocet rezu snimku
-    Vysledkem v kombinaci s variabilnim prahovanim (prahovaniProcenta) je relativne 
-    dobre urcena oblast jater, ale je vzdy MENSI, testovano na 20ti snimcich sliver07    
+    1) odstraneni okraje (sobel, jeho odecteni od puvodniho)
+    2) konvoluce s 3d kouli, vybrana kde > 100 (koule = 123)
+    3) 2D otevreni diamondem 5x
+    4) vybrani nejvetsiho objektu
+    Cilem techto operaci je odstranit sum a prevytekle casti po Region Growingu
     '''
     def odstranOkraj(objekt):
         dataNew = objekt
         dataNew.astype(np.int8)
         okraj = ndimage.sobel(dataNew)
-        #silny = ndimage.binary_dilation(okraj, struktura1,1)
         silny = okraj.astype(np.bool)
         silny = silny*(-1) +1
         novy = np.multiply(silny,pole3d)
-        return novy
-   
+        return novy   
     
     print 'probihaji 3D binarni operace'
-    struktura1 = np.array([[[0,1,0],[1,1,1],[0,1,0]],[[1,1,1],[1,1,1],[1,1,1]],[[0,1,0],[1,1,1],[0,1,0]]])
     koule = vytvorKouli3D( [1,1,1] ,3)
     #print np.sum(koule)
     
@@ -164,9 +142,7 @@ def binarniOperaceNove(pole3d,voxelsize):
     for rez in rezNovy:
         konvoluce = ndimage.binary_fill_holes(rez)                 
         bonus = ndimage.binary_opening(konvoluce, utvar1, 5)
-        #bonus = ndimage.binary_dilation(konvoluce, utvar1, 16) #7
         vysledek = bonus
-        #urciteANavic = ndimage.binary_closing(rez, utvar1, 20)
         rezNovy[pomocny,:,:] = vysledek
         pomocny = pomocny+1
     okraj = rezNovy
@@ -181,13 +157,9 @@ def binarniOperaceNove(pole3d,voxelsize):
         print str(x+1) + '/' + str(labels)
         vytvoreny = (labelImage == x+1)
         suma = np.sum(vytvoreny)
-        #print suma
         if(suma > maximum):
             nejvetsi = x+1
             maximum = suma
-    
-    # print x+1
-    #print maximum
     okraj = labelImage == nejvetsi
     
     
@@ -309,19 +281,19 @@ def updatujSegparams(seznamNazvuPolozek):
     path_to_script = op.dirname(os.path.abspath(__file__))
     paramfile = op.join(path_to_script, 'data/segparams1.yml')
     #print paramfile
-    puvodni = main.nactiYamlSoubor(paramfile)
+    puvodni = nactiYamlSoubor(paramfile)
     if(isinstance(puvodni,dict)):
         updatovany = puvodni
     else:
         updatovany = {} #osetreni pripadu spatnych dat v souboru
-    print updatovany
+    #print updatovany
     
     for dvojice in seznamNazvuPolozek:
         nazev = dvojice[0]
         polozka = dvojice[1]
         updatovany[nazev] = polozka
     
-    main.zapisYamlSoubor(paramfile, updatovany)
+    zapisYamlSoubor(paramfile, updatovany)
 
 def regionGrowingCTIF(ctImage,array,velikostVoxelu,konstanta = 100,konstantaHranice = 5.0,maxSeeds = None):
     ''' ctImage = ct snimek, array = numpy aray po binarnich operacich (lokalizace vnitrku jater
@@ -752,8 +724,8 @@ def segRGrow(data3d,velikostVoxelu,source,vysledky = False):
     slovnik = nactiYamlSoubor(source)
     hranicniKonstanta = slovnik['hranicniKonstanta']
     maxSeedKonstanta  = slovnik['maxSeedKonstanta']
-    hranicniKonstanta = 50
-    maxSeedKonstanta  = 30
+    #hranicniKonstanta = 50
+    #maxSeedKonstanta  = 30
     
     #hranicniKonstanta = 50.0 #50 a 10 vypada dobre 35 a 50seed =malo/ moc ///45 20 nej
     #maxSeedKonstanta = 30
@@ -773,6 +745,23 @@ def segRGrow(data3d,velikostVoxelu,source,vysledky = False):
 
 
 
+    return segmentaceVysledek
+
+
+
+def segSimpleSnake(data3d,velikostVoxelu,source,vysledky = False):
+    '''Metoda pouzivajici morphSNakes bez mapy 
+    pouziva take segfind
+     '''
+    slovnik = nactiYamlSoubor(source)
+    lambda1 = slovnik['snakeLambda1']
+    lambda2  = slovnik['snakeLambda2']
+    iterace = slovnik['snakeIterace']
+    segmentace = segFind(data3d,velikostVoxelu,source)
+    #zobrazitOriginal(segmentace)
+    #print [iterace,lambda1,lambda2]
+    #sys.exit()
+    segmentaceVysledek = simpleSnake(data3d, segmentace, iterace,l1 = lambda1,l2=lambda2)
     return segmentaceVysledek
 
 def trenovaniCele(metoda,path = None):
@@ -1060,7 +1049,7 @@ class LiverSegmentation:
     
     def getMethodList(self):
         '''Vraci seznam vsech platnych nazvu metod ktere lze pouzit'''
-        return ['placeholder','find','regionGrowing']
+        return ['placeholder','find','regionGrowing','snakeSimple']
     
     def setVysledky(self,vysledky):
         self.segParams['vysledky'] = vysledky
@@ -1090,7 +1079,10 @@ class LiverSegmentation:
             spatne = False
         if(nazev  == 'regionGrowing'):
             metoda = segRGrow
-            spatne = False         
+            spatne = False     
+        if(nazev  == 'snakeSimple'):
+            metoda = segSimpleSnake
+            spatne = False       
 
         if(spatne):
             print('Zvolena metoda nenalezena')
@@ -1112,7 +1104,10 @@ class LiverSegmentation:
             spatne = False
         if(nazev  == 'regionGrowing'):
             metoda = segRGrow
-            spatne = False         
+            spatne = False
+        if(nazev  == 'snakeSimple'):
+            metoda = segSimpleSnake
+            spatne = False           
 
         if(spatne):
             print('Zvolena metoda nenalezena')
