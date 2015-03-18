@@ -29,6 +29,90 @@ from sklearn import mixture
 import morphsnakes
 import sys
 
+def vytvor3DMrizku(vzorkovani_mm,rozmer_mm):
+    '''
+    vytvori 3d mrizku se zvolenym vzorkovanim a rozmerem
+     a vrati objekt:    [mrizka,vzorkovani_mm,stred]
+    stred = int souradnice stredu ve vsech smerech
+    '''
+    pocet = np.round(rozmer_mm/vzorkovani_mm)
+    if(pocet% 2 == 0):
+        pocet = pocet+1
+    mrizka = np.zeros([pocet,pocet,pocet])
+    stred = pocet/2+1
+    objekt = [mrizka,vzorkovani_mm,stred]
+    return objekt
+
+def vypoctiMrizku(data3d,voxelSize,mrizkavzk_mm = 20,mrizka_mm=250):
+    ''' vypocte mrizku umistenou ve stredu objektu v data3d
+    a umisti do ni data podle tvaru objektu 
+    ZATIM SUMA VOXELU
+    data3d - vstupni data (T/F)
+    voxelSize - velikost voxelu [x,y,z]
+    mrizkavzk_mm - velikost vzorkovani mrizky v milimetrech
+    mrizka_mm - velikost mrizky v milimetrech (x,y i z)'''
+    [mrizka,vzorkovaniMrizka,stredMrizka] = vytvor3DMrizku(50,250)
+    krychlePocet = mrizka.shape
+    
+    krychlePocet2 = list(range(0,int(krychlePocet[0])))
+    krychlePocet3 = list(range(0,krychlePocet[0]))
+    krychlePocet = list(range(0,int(krychlePocet[0])))
+    #print krychlePocet
+    stredKrychle_mm =vzorkovaniMrizka*stredMrizka
+
+    data = data3d
+    stredPresne = ndimage.center_of_mass(data3d)
+    stredData = (np.round(stredPresne))
+    stredData_mm =  np.multiply(stredData,voxelSize)
+    dataVelikost = data.shape
+    #print stredData
+    #print mrizka.shape    
+    xPridat = np.round(vzorkovaniMrizka/voxelSize[0])#voxely krychlicky v rozmeru x
+    yPridat = np.round(vzorkovaniMrizka/voxelSize[1])
+    zPridat = np.round(vzorkovaniMrizka/voxelSize[2])
+    
+    for xMrizka in krychlePocet:        
+        for yMrizka in krychlePocet2:
+            for zMrizka in krychlePocet3:
+                #print [xMrizka,yMrizka,zMrizka]
+                souradniceAbsolut = np.array([xMrizka,yMrizka,zMrizka])*vzorkovaniMrizka #stred = [000]
+                souradniceRelativ = souradniceAbsolut - stredKrychle_mm #vzdalenosti od stredu v mm
+                voxelyX = np.round(souradniceRelativ[0]/voxelSize[0])
+                voxelyY = np.round(souradniceRelativ[1]/voxelSize[1])
+                voxelyZ = np.round(souradniceRelativ[2]/voxelSize[2])
+                poziceOdStredu = [voxelyX,voxelyY,voxelyZ] # ve voxelech
+                poziceVPoli = stredData + poziceOdStredu #zacatek
+                
+                #print poziceVPoli
+                
+                xStart = poziceVPoli[0]#osetreni okraje - nizke cislo
+                if(xStart <0):
+                    continue
+                xKonec = xStart + xPridat
+                if(xKonec > dataVelikost[0]):#osetreni okraje - vysoke cislo
+                    continue
+                
+                yStart = poziceVPoli[1]#osetreni okraje - nizke cislo
+                if(yStart <0):
+                    continue
+                yKonec = yStart + yPridat
+                if(yKonec > dataVelikost[1]):#osetreni okraje - vysoke cislo
+                    continue
+                
+                zStart = poziceVPoli[2]#osetreni okraje - nizke cislo
+                if(zStart <0):
+                    continue
+                zKonec = zStart + zPridat
+                if(zKonec > dataVelikost[2]):#osetreni okraje - vysoke cislo
+                    continue
+                
+                objekt = data[xStart:xKonec,yStart:yKonec,zStart:zKonec]   
+                
+                'algoritmus naplneni mrizky'
+                #print np.sum(objekt)
+                mrizka[xMrizka,yMrizka,zMrizka] = np.sum(objekt)
+    return mrizka
+
 def simpleSnake(data3d,segmentace,iterace,vyhlazovani=1,l1=1,l2=2):
     '''Metoda pouzivajici knihovnu morphSnakes (morphological Chan-Vese evolution)
     data3d - 3d CT snimek
@@ -40,7 +124,7 @@ def simpleSnake(data3d,segmentace,iterace,vyhlazovani=1,l1=1,l2=2):
     print 'vytvareni instance morphsnakes'
     macwe = morphsnakes.MorphACWE(data3d, smoothing=vyhlazovani, lambda1=l1, lambda2=l2)
     macwe.set_levelset(segmentace)
-    'probiha beh morphsnakes'
+    print 'probiha beh morphsnakes'
     macwe.run(iterace)
     vysledek = macwe.levelset
     vysledek.astype(np.int8)
@@ -754,8 +838,8 @@ def segSimpleSnake(data3d,velikostVoxelu,source,vysledky = False):
     pouziva take segfind
      '''
     slovnik = nactiYamlSoubor(source)
-    lambda1 = slovnik['snakeLambda1']
-    lambda2  = slovnik['snakeLambda2']
+    lambda2 = slovnik['snakeLambda1']
+    lambda1  = slovnik['snakeLambda2']
     iterace = slovnik['snakeIterace']
     segmentace = segFind(data3d,velikostVoxelu,source)
     #zobrazitOriginal(segmentace)
