@@ -368,15 +368,22 @@ class OrganSegmentationWindow(QMainWindow):
         #     seg.datapath = dcmreader.get_dcmdir_qt(
         #        app=True,
         #        directory=self.oseg.input_datapath_start
+        if 'loaddir' in self.oseg.cache.data.keys():
+            directory = self.oseg.cache.get('loaddir')
+        else:
+            directory = self.oseg.input_datapath_start
         #
         oseg.datapath = self.__get_datafile(
             app=True,
-            directory=self.oseg.input_datapath_start
+            directory=directory
         )
 
         if oseg.datapath is None:
             self.statusBar().showMessage('No data path specified!')
             return
+        head, teil = os.path.split(oseg.datapath)
+        self.oseg.cache.update('loaddir', head)
+
         self.importDataWithGui()
 
     def loadDataDir(self):
@@ -582,7 +589,8 @@ class OrganSegmentationWindow(QMainWindow):
         pyed.exec_()
 
         oseg.segmentation = pyed.getSeeds()
-        self.oseg.processing_time = datetime.datetime.now() - self.oseg.time_start
+        self.oseg.processing_time = \
+            datetime.datetime.now() - self.oseg.time_start
         self.checkSegData('manual seg., ')
 
     def checkSegData(self, msg):
@@ -598,7 +606,7 @@ class OrganSegmentationWindow(QMainWindow):
             tim = self.oseg.processing_time
 
             if self.oseg.volume_unit == 'ml':
-                import datetime
+                # import datetime
                 # timstr = str(datetime.timedelta(seconds=round(tim)))
                 timstr = str(tim)
                 logger.debug('tim = ' + str(tim))

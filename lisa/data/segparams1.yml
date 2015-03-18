@@ -1,1 +1,2 @@
-{hranicniKonstanta: 50.0, maxSeedKonstanta: 30, prumer: 130.79240506015375, variance: 2114.51201903427}
+{hranicniKonstanta: 50.0, maxSeedKonstanta: 30, prumer: 130.79240506015375, snakeIterace: 1,
+  snakeLambda1: 1, snakeLambda2: 2, variance: 2114.51201903427}
