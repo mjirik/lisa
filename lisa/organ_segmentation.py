@@ -732,6 +732,8 @@ class OrganSegmentation():
         self.processing_time = (
             datetime.datetime.now() - self.time_start).total_seconds()
 
+        logger.debug('processing_time = ' + str(self.processing_time))
+
     def _segmentation_postprocessing(self):
         """
         :segmentation_smoothing:

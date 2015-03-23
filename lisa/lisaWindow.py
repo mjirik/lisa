@@ -609,7 +609,7 @@ class OrganSegmentationWindow(QMainWindow):
                 # import datetime
                 # timstr = str(datetime.timedelta(seconds=round(tim)))
                 timstr = str(tim)
-                logger.debug('tim = ' + str(tim))
+                # logger.debug('tim = ' + str(tim))
                 aux = 'volume = %.2f [ml] , time = %s' %\
                       (nn * voxelvolume_mm3 / 1000, timstr)
             else:
