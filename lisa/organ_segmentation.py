@@ -85,7 +85,7 @@ default_segmodelparams = {
 }
 
 default_segparams = {
-    'method': 'GC',
+    'method': pycut.methods[0],
     'pairwise_alpha_per_mm2': 40,
     'use_boundary_penalties': False,
     'boundary_penalties_sigma': 50}
@@ -553,7 +553,7 @@ class OrganSegmentation():
                      '\nmodelparams ' + str(self.segmodelparams)
                      )
         if 'method' not in self.segparams.keys() or\
-                self.segparams['method'] == 'GC':
+                self.segparams['method'] in pycut.methods:
             igc = pycut.ImageGraphCut(
                 # self.data3d,
                 data3d_res,
@@ -818,7 +818,8 @@ class OrganSegmentation():
         # igc.make_gc()
         igc.run()
         if 'method' not in self.segparams.keys() or\
-                self.segparams['method'] == 'GC':
+\
+                self.segparams['method'] in pycut.methods:
             logger.debug('ninteractivity seg method GC')
             self.segmentation = (igc.segmentation == 0).astype(np.int8)
         else:
