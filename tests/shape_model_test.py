@@ -10,7 +10,7 @@
 
 """
 import unittest
-from nose.plugins.attrib import attr
+# from nose.plugins.attrib import attr
 import lisa.shape_model as shm
 import numpy as np
 
@@ -30,14 +30,16 @@ class ShapeModelTest(unittest.TestCase):
         sh0[13:19, 7:16] = 1
         sh0[17:19, 12:16] = 0
         sh0[13:15, 13:16] = 0
-        sm.train_one(sh0)
+        sh0_vs = [2, 1, 1]
+        sm.train_one(sh0, sh0_vs)
 
 
 # train with second model
         sh1 = np.zeros([40, 20, 1])
         sh1[16:27, 7:13] = 1
         sh1[23:27, 11:13] = 0
-        sm.train_one(sh1)
+        sh1_vs = [1, 1, 1]
+        sm.train_one(sh1, sh1_vs)
 
         sm.get_model([[15, 25], [10, 25], [0, 1]], [30, 30, 1])
         # print mdl.shape

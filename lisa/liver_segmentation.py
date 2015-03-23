@@ -790,6 +790,23 @@ def segFind(data3d,velikostVoxelu,source,vysledky = False):
     segmentaceVysledek = operovany
     return segmentaceVysledek
 
+def segFindImproved(data3d,velikostVoxelu,source,vysledky = False):
+    prahovany = prahovaniProcenta(data3d,procentaHranice = 0.3,procentaJatra = 0.1) #0.32 0.18
+    utvar = vytvorKouli3D(velikostVoxelu, 2)
+    utvar2 = vytvorKouli3D(velikostVoxelu, 3)
+    utvar = utvar.astype(np.int8)
+    prahovany = prahovany.astype(np.int8)
+    soucet = np.sum(utvar)
+    konvoluce = ndimage.convolve(prahovany, utvar)
+    zobrazeny = konvoluce >= soucet*0.4
+    vyriznuty = ndimage.binary_opening(zobrazeny, utvar, 1)
+    zesileny = ndimage.binary_dilation(vyriznuty, utvar, 3)
+    otevreny = ndimage.binary_opening(zesileny, utvar2, 10)
+    
+    vysledek = otevreny
+    #main.zobrazitOriginal(vysledek)
+    return vysledek
+
 def segRGrow(data3d,velikostVoxelu,source,vysledky = False):
     '''
     Metoda pouzivajici segFind nasledovany region growingem.
@@ -1159,7 +1176,7 @@ class LiverSegmentation:
             metoda = segPlaceholder
             spatne = False
         if(nazev  == 'find'):
-            metoda = segFind
+            metoda = segFindImproved
             spatne = False
         if(nazev  == 'regionGrowing'):
             metoda = segRGrow
@@ -1184,7 +1201,7 @@ class LiverSegmentation:
             metoda = segPlaceholder
             spatne = False
         if(nazev  == 'find'):
-            metoda = segFind
+            metoda = segFindImproved
             spatne = False
         if(nazev  == 'regionGrowing'):
             metoda = segRGrow
