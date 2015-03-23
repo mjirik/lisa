@@ -1180,8 +1180,11 @@ def logger_init():  # pragma: no cover
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
+    fformatter = logging.Formatter(
+        '%(name)s - %(funcName)s -%(lineno)d - %(levelname)s - %(message)s'
+    )
     fh = logging.FileHandler('lisa.log')
-    fh.setFormatter(formatter)
+    fh.setFormatter(fformatter)
     fh.setLevel(logging.DEBUG)
     logger.addHandler(fh)
 
