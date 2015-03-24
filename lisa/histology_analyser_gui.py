@@ -421,7 +421,7 @@ class SegmResultDialog(QDialog):
 
 # Worker signals for computing statistics
 class StatsWorkerSignals(QObject):
-    update = pyqtSignal(int,int,int)
+    update = pyqtSignal(int,int,str)
     finished = pyqtSignal()
 
 # Worker for computing statistics
@@ -499,7 +499,7 @@ class StatsRunDialog(QDialog):
 
         self.pool.start(worker)
 
-    def updateInfo(self, part=0, whole=1, processPart=1):
+    def updateInfo(self, part=0, whole=1, processPart="-"):
         # update progress bar
         step = int((part/float(whole))*100)
         self.pbar.setValue(step)
