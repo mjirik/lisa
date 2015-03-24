@@ -206,6 +206,7 @@ class HistologyAnalyser:
 
         # # add general info
         logger.debug('Computing general statistics...')
+        if guiUpdateFunction is not None: guiUpdateFunction(0, 3, "Volumetric methods (Vv, Sv)")
         vs = self.metadata['voxelsize_mm']
         voxel_volume_mm3 = vs[0]*vs[1]*vs[2]
         volume_px = self.data3d.shape[0] \
@@ -218,11 +219,15 @@ class HistologyAnalyser:
         self.data3d_masked[self.data3d_masked > 1] = 1
         used_volume_px = np.sum(np.sum(np.sum(self.data3d_masked)))
         used_volume_mm3 = used_volume_px*voxel_volume_mm3
+        if guiUpdateFunction is not None: guiUpdateFunction(1, 3, "Volumetric methods (Vv, Sv)")
 
         vessel_volume_fraction = float(np.sum(np.sum(np.sum(
             self.data3d_thr)))) / float(used_volume_px)
+        if guiUpdateFunction is not None: guiUpdateFunction(2, 3, "Volumetric methods (Vv, Sv)")
+        
         sv = surface_measurement.surface_density(
             self.data3d_thr, self.metadata['voxelsize_mm'], self.data3d_masked)
+        if guiUpdateFunction is not None: guiUpdateFunction(3, 3, "Volumetric methods (Vv, Sv)")
 
         info = {
             'voxel_size_mm': list(vs),
