@@ -224,7 +224,7 @@ and background")
             data3d=data3d,
             metadata=metadata,
             seeds=seeds,
-            working_voxelsize_mm=10,
+            working_voxelsize_mm=5,
             manualroi=False,
             autocrop=False,
 
@@ -237,15 +237,25 @@ and background")
         oseg.portalVeinSegmentation(interactivity=False, threshold=180)
         oseg.saveVesselTree('porta')
 
+        # print '> 0 '
+        # print np.sum(oseg.segmentation > 0)
+        # print np.sum(segm > 0)
+        # print np.sum(oseg.segmentation > 0) * np.prod(voxelsize_mm)
+        # print np.sum(segm > 0) * np.prod(voxelsize_mm)
+        # print 'computed ', volume
+        # print voxelsize_mm
+        # print oseg.voxelsize_mm
+
         # import pdb; pdb.set_trace()
         # import sed3
         # ed = sed3.sed3(data3d, seeds=seeds,
-        #                contour=(oseg.segmentation == 2))
+        #                contour=(oseg.segmentation))
         # ed.show()
+        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
         # mel by to být litr. tedy milion mm3
-        self.assertGreater(volume, 579000)
-        self.assertLess(volume, 585000)
+        self.assertGreater(volume, 630000)
+        self.assertLess(volume, 640000)
 
     def test_roi(self):
         """
