@@ -782,6 +782,9 @@ class OrganSegmentation():
         #     self.data3d = self.data_editor(self.data3d)
 
         igc = self._interactivity_begin()
+        # from PyQt4.QtCore import pyqtRemoveInputHook
+        # pyqtRemoveInputHook()
+        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
         pyed = QTSeedEditor(igc.img,
                             seeds=igc.seeds,
