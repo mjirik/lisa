@@ -29,6 +29,42 @@ from sklearn import mixture
 import morphsnakes
 import sys
 
+def objectRemovalDistanceBased(data3d,threshold=1):
+    '''
+    Rozdeli data3d na objekty a vypocte hmotny stred celeho obrazu.
+    Nasledne vypocte hmotne obrazy vsech objektu a odstrani ty,
+    ktere maji vzdalenost od stredu > prumer*threshold
+    vraci data3d bez
+    '''
+    stred = ndimage.center_of_mass(data3d)#sted vseho
+    labels = ndimage.label(data3d)
+    znacky = labels[0]
+    indexy = np.array(range(labels[1]))+1
+    stredy = ndimage.center_of_mass(data3d, znacky,indexy)#stredy objektu
+    
+    if(labels[1]==1): #jediny objekt
+        return data3d
+    print 'probiha odstranovani postrannich objektu'
+    odchylky = np.zeros(labels[1])#zde budou odchylky objektu od celkoveho stredu
+    for misto in range(labels[1]):
+        odchylka = np.array(stred)-np.array(stredy[misto])
+        odchylka = np.linalg.norm(odchylka)
+        odchylky[misto] = odchylka
+    print odchylky
+    
+    prumer = np.mean(odchylky)
+    TF = odchylky < prumer*threshold
+    
+    vysledek = data3d
+    pomocny = 1
+    for x in TF:
+        if(x == False):
+            odstranit = znacky == pomocny
+            odstranit = odstranit*(-1)+1
+            vysledek = np.multiply(vysledek,odstranit)
+        pomocny = pomocny+1
+    return vysledek
+
 def vytvor3DMrizku(vzorkovani_mm,rozmer_mm):
     '''
     vytvori 3d mrizku se zvolenym vzorkovanim a rozmerem
@@ -791,6 +827,14 @@ def segFind(data3d,velikostVoxelu,source,vysledky = False):
     return segmentaceVysledek
 
 def segFindImproved(data3d,velikostVoxelu,source,vysledky = False):
+    '''Metoda ktera nalzene vnitrek jater - odhadne relativne dobre obrysy tvaru
+    vyuziva faktu ze jatra jsou po naprahovani obvykle strukturovana-
+    netvori uplne vyplneny utvar => konvoluce >= soucet*0.4
+    testovano uspesne na 20ti snimcich sliver07
+    data3d - vstupni pole CT snimku
+    velikostVoxelu - [x,y,z] rozměry voxelu
+    source - soubor obsahujici data segmentaci (segparams1.yml)
+     '''
     prahovany = prahovaniProcenta(data3d,procentaHranice = 0.3,procentaJatra = 0.1) #0.32 0.18
     utvar = vytvorKouli3D(velikostVoxelu, 2)
     utvar2 = vytvorKouli3D(velikostVoxelu, 3)
@@ -801,9 +845,10 @@ def segFindImproved(data3d,velikostVoxelu,source,vysledky = False):
     zobrazeny = konvoluce >= soucet*0.4
     vyriznuty = ndimage.binary_opening(zobrazeny, utvar, 1)
     zesileny = ndimage.binary_dilation(vyriznuty, utvar, 3)
-    otevreny = ndimage.binary_opening(zesileny, utvar2, 10)
+    otevreny = ndimage.binary_opening(zesileny, utvar2, 10)    
+    odstraneny = objectRemovalDistanceBased(otevreny,threshold=1.5)
     
-    vysledek = otevreny
+    vysledek = odstraneny
     #main.zobrazitOriginal(vysledek)
     return vysledek
 

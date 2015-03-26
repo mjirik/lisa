@@ -3,6 +3,7 @@ python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements
 python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_conda.txt
 
 
+conda install --yes --file requirements_conda_root.txt
 conda install --yes --file requirements_conda.txt
 
 # 2. easy_install requirements simpleITK  
