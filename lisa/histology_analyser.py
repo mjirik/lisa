@@ -343,15 +343,6 @@ class HistologyAnalyser:
         misc.obj_to_file(self.sklabel, filename=filename, filetype='pickle')
 
 
-# TODO - include this in generate_sample_data()
-# def muxImage(self, data3d, metadata):
-    # import SimpleITK as sitk
-    # data3di = sitk.GetImageFromArray(data3d)
-    # data3di.SetSpacing(metadata['voxelsize_mm'])
-
-    # return data3di
-
-
 def generate_sample_data(m=1, noise_level=0.005, gauss_sigma=0.1):
     """
     Generate sample vessel system.
@@ -458,8 +449,14 @@ def parser_init():  # pragma: no cover
         help='Segmentation threshold. Default -1 (GUI/Automatic selection)')
 
     parser.add_argument(
-        '-is', '--input_is_skeleton', action='store_true',
-        help='Input file is .pkl file with skeleton')
+        '-m', '--maskfile',
+        default=None,
+        help='Input file with mask data. Must have same dimensions as data after crop.')
+    
+    parser.add_argument(
+        '--savemask',
+        action='store_true',
+        help='Saves used mask to mask.pkl file. Only in GUI mode')
 
     parser.add_argument(
         '-cr', '--crop',
@@ -487,64 +484,64 @@ None. Format: "z1 z2 y1 y2 x1 x2". -1 = None (start or end of axis).')
     return args
 
 
-def processData(inputfile=None, threshold=None, skeleton=False,
-                crop=None, voxelsize=None, binaryClosing=-1, binaryOpening=-1):
-    # Processing data without gui
-    if skeleton:  # when input is just skeleton
-        # TODO - test if works or just delete
-        logger.info("input is skeleton")
-        struct = misc.obj_from_file(filename='tmp0.pkl', filetype='pickle')
-        data3d = struct['data3d']
-        metadata = struct['metadata']
-        ha = HistologyAnalyser(data3d, metadata, threshold, 
-                 binaryClosing=binaryClosing, binaryOpening=binaryOpening, 
-                 nogui=True)
-        ha.data3d_skel = struct['skel']
-        ha.data3d_thr = struct['thr']
-        logger.info("end of is skeleton")
-    else:
-        # ## Reading/Generating data
-        if inputfile is None:  # # Using generated sample data
-            logger.info('Generating sample data...')
-            metadata = {'voxelsize_mm': [1, 1, 1]}
-            data3d = generate_sample_data(1, 0, 0)
-        else:  # # Normal runtime
-            dr = datareader.DataReader()
-            data3d, metadata = dr.Get3DData(inputfile)
+def processData(args):
+    """
+    Processing data without gui
+    """
+    inputfile=args.inputfile
+    threshold=args.threshold
+    mask_file=args.maskfile
+    crop=args.crop
+    voxelsize=args.voxelsize
+    binaryClosing=args.binaryopening
+    binaryOpening=args.binaryclosing
+    
+    # Reading/Generating data
+    if inputfile is None:  # # Using generated sample data
+        logger.info('Generating sample data...')
+        metadata = {'voxelsize_mm': [1, 1, 1]}
+        data3d = generate_sample_data(1, 0, 0)
+    else:  # Normal runtime
+        dr = datareader.DataReader()
+        data3d, metadata = dr.Get3DData(inputfile)
 
-        # ## Custom voxel size
-        if voxelsize is not None:
-            metadata['voxelsize_mm'] = voxelsize
+    # Custom voxel size
+    if voxelsize is not None:
+        metadata['voxelsize_mm'] = voxelsize
 
-        # ## Crop data
-        if crop is not None:
-            logger.debug('Croping data: %s', str(crop))
-            data3d = data3d[crop[0]:crop[1], crop[2]:crop[3], crop[4]:crop[5]].copy()
+    # Crop data
+    if crop is not None:
+        logger.debug('Croping data: %s', str(crop))
+        data3d = data3d[crop[0]:crop[1], crop[2]:crop[3], crop[4]:crop[5]].copy()
 
-        # ## Init HistologyAnalyser object
-        logger.debug('Init HistologyAnalyser object')
-        ha = HistologyAnalyser(data3d, metadata, threshold, 
-                 binaryClosing=binaryClosing, binaryOpening=binaryOpening, 
-                 nogui=True)
+    # Init HistologyAnalyser object
+    logger.debug('Init HistologyAnalyser object')
+    ha = HistologyAnalyser(data3d, metadata, threshold, 
+             binaryClosing=binaryClosing, binaryOpening=binaryOpening, 
+             nogui=True)
 
-        # ## No GUI == No Remove Area
+    # Remove Area = Load mask from file
+    if mask_file is not None:
+        logger.debug('Loading mask from file...')
+        mask = misc.obj_from_file(filename=mask_file, filetype='pickle')
+        if ha.data3d.shape == mask.shape:
+            ha.data3d_masked = mask
+            ha.data3d[mask == 0] = np.min(ha.data3d)
+        else:
+            raise ValueError('Mask file has wrong dimensions '+str(mask.shape))
+    
+    # Segmentation
+    logger.debug('Segmentation')
+    ha.data_to_skeleton()
 
-        # ## Segmentation
-        logger.debug('Segmentation')
-        ha.data_to_skeleton()
-
-    # ## Computing statistics
+    # Computing statistics
     logger.info("# ## ## ## ## statistics")
     ha.data_to_statistics()
 
-    # ## Saving files
+    # Saving files
     logger.info("# ## ## write stats to file")
     ha.writeStatsToCSV()
     ha.writeStatsToYAML()
-    ha.writeSkeletonToPickle('skel.pkl')
-    # struct = {'skel': data3d_skel, 'thr': data3d_thr, 'data3d': data3d,
-    # 'metadata':metadata}
-    # misc.obj_to_file(struct, filename='tmp0.pkl', filetype='pickle')
     
     # ## Histology report
     logger.info("# ## ## Histology report")
@@ -574,9 +571,6 @@ def main():  # pragma: no cover
     logging.basicConfig()
     logger = logging.getLogger()
     logger.setLevel(logging.WARNING)
-    # ch = logging.StreamHandler()
-    # https://docs.python.org/2/howto/logging.html# configuring-logging
-    # logger.addHandler(ch)
 
     if args.debug:
         logger.setLevel(logging.DEBUG)
@@ -587,21 +581,14 @@ def main():  # pragma: no cover
 
     if args.nogui:
         logger.info('Running without GUI')
-        processData(inputfile=args.inputfile,
-                    threshold=args.threshold,
-                    skeleton=args.input_is_skeleton,
-                    crop=args.crop,
-                    voxelsize=args.voxelsize,
-                    binaryClosing=args.binaryopening,
-                    binaryOpening=args.binaryclosing
-                    )
+        processData(args)
     else:
         app = QApplication(sys.argv)
-        # gui =
         HA_GUI.HistologyAnalyserWindow(
             inputfile=args.inputfile,
             voxelsize=args.voxelsize,
-            crop=args.crop
+            crop=args.crop,
+            args=args
         )
         sys.exit(app.exec_())
 

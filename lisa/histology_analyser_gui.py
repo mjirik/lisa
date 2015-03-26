@@ -32,6 +32,7 @@ except:
         logger.warning("Deprecated of pyseg_base as submodule")
         from seed_editor_qt import QTSeedEditor
 
+import misc
 import histology_analyser as HA
 from histology_report import HistologyReport
 from histology_report import HistologyReportDialog
@@ -41,10 +42,11 @@ class HistologyAnalyserWindow(QMainWindow):
     HEIGHT = 350 #600
     WIDTH = 800
 
-    def __init__(self, inputfile = None, voxelsize = None, crop = None):
+    def __init__(self, inputfile = None, voxelsize = None, crop = None, args=None):
         QMainWindow.__init__(self)
         self.initUI()
-
+        
+        self.args = args
         self.showLoadDialog(inputfile = inputfile, voxelsize = voxelsize, crop = crop)
 
     def initUI(self):
@@ -91,21 +93,8 @@ class HistologyAnalyserWindow(QMainWindow):
         self.metadata = metadata
         self.crgui = crgui
 
-        ### when input is just skeleton
-        # TODO - edit input_is_skeleton mode to run in gui + test if it works
-        #if self.args_skeleton:
-            #logger.info("input is skeleton")
-            #struct = misc.obj_from_file(filename='tmp0.pkl', filetype='pickle')
-            #self.data3d = struct['data3d']
-            #self.metadata = struct['metadata']
-            #self.ha = HA.HistologyAnalyser(self.data3d, self.metadata, nogui=False)
-            #self.ha.data3d_skel = struct['skel']
-            #self.ha.data3d_thr = struct['thr']
-            #logger.info("end of is skeleton")
-            #self.fixWindow() # just to be sure
-
         ### Gui Crop data
-        if self.crgui is True: # --crgui gui crop
+        if self.crgui is True: 
             logger.debug('Gui data crop')
             self.data3d = self.showCropDialog(self.data3d)
 
@@ -113,11 +102,31 @@ class HistologyAnalyserWindow(QMainWindow):
         logger.debug('Init HistologyAnalyser object')
         self.ha = HA.HistologyAnalyser(self.data3d, self.metadata, nogui=False)
 
-        ### Remove Area
+        ### Remove Area (mask)
         logger.debug('Remove area')
-        self.setStatusBarText('Remove area')
-        self.showRemoveDialog(self.ha.data3d)
-        self.ha.data3d_masked = self.masked
+        bad_mask = True
+        if self.args.maskfile is not None: # try to load mask from file
+            logger.debug('Loading mask from file...')
+            try:
+                mask = misc.obj_from_file(filename=self.args.maskfile, filetype='pickle')
+                if self.ha.data3d.shape == mask.shape:
+                    self.ha.data3d_masked = mask
+                    self.ha.data3d[mask == 0] = np.min(self.ha.data3d)
+                    bad_mask = False
+                else:
+                    logger.error('Mask file has wrong dimensions '+str(mask.shape))
+            except Exception, e:
+                logger.error('Error when processing mask file: '+str(e))
+            if bad_mask == True: logger.debug('Falling back to GUI mask mode')
+            
+        if bad_mask == True: # gui remove area (mask)
+            self.setStatusBarText('Remove area')
+            self.showRemoveDialog(self.ha.data3d)
+            self.ha.data3d_masked = self.masked
+            
+        if self.args.savemask and bad_mask == True: # save mask to file
+            logger.debug('Saving mask to file...')
+            misc.obj_to_file(self.masked, filename='mask.pkl', filetype='pickle')
 
         ### Segmentation
         self.showSegmQueryDialog()
