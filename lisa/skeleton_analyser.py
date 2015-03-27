@@ -52,11 +52,11 @@ class SkeletonAnalyser:
         | terminal: terminal node
         """
         def updateFunction(num, length, part):
-            if (num % 5 == 0) or num == length:
+            if int(length/100.0) == 0 or (num % int(length/100.0) == 0) or num == length:
+                if guiUpdateFunction is not None:
+                    guiUpdateFunction(num, length, part)
                 logger.info('skeleton_analysis: processed ' + str(
-                    num) + '/' + str(length) + ', part ' + str(part))
-            if guiUpdateFunction is not None:
-                guiUpdateFunction(num, length, part)
+                        num) + '/' + str(length) + ', part ' + str(part))
 
         logger.debug('__radius_analysis_init')
         if self.volume_data is not None:
@@ -76,11 +76,11 @@ class SkeletonAnalyser:
             self.elm_neigh[edg_number], self.elm_box[
                 edg_number] = self.__element_neighbors(edg_number)
             updateFunction(edg_number + abs(len_node) + 1, abs(
-                len_node) + len_edg + 1, 0)  # update gui progress
+                len_node) + len_edg + 1, "generating node->connected_edges lookup table")  # update gui progress
         logger.debug(
             'skeleton_analysis: finished element_neighbors processing')
 
-        logger.debug('skeleton_analysis: starting first processing part')
+        logger.debug('skeleton_analysis: starting processing part: length, radius, curve and connections of edge')
         for edg_number in range(1, len_edg + 1):
             edgst = {}
             edgst.update(self.__connection_analysis(edg_number))
@@ -93,20 +93,20 @@ class SkeletonAnalyser:
                     edg_number, skdst))  # slow (this takes most of time)
             stats[edgst['id']] = edgst
 
-            updateFunction(edg_number, len_edg, 1)  # update gui progress
-        logger.debug('skeleton_analysis: finished first processing part')
+            updateFunction(edg_number, len_edg, "length, radius, curve, connections of edge")  # update gui progress
+        logger.debug('skeleton_analysis: finished processing part: length, radius, curve, connections of edge')
 
         if self.cut_wrong_skeleton:
             stats = self.__cut_wrong_skeleton(stats)
 
         # @TODO dokončit
-        # logger.debug('skeleton_analysis: starting second processing part')
+        # logger.debug('skeleton_analysis: starting processing part: angles of connected edges')
         # for edg_number in range (1,len_edg+1):
             # edgst = stats[edg_number]
             # edgst.update(self.__connected_edge_angle(edg_number, stats))
 
-            # updateFunction(edg_number,len_edg,2) # update gui progress
-        # logger.debug('skeleton_analysis: finished second processing part')
+            # updateFunction(edg_number,len_edg, "angles of connected edges") # update gui progress
+        # logger.debug('skeleton_analysis: finished processing part: angles of connected edges')
 
         return stats
 
