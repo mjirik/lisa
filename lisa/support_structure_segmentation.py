@@ -63,7 +63,7 @@ class SupportStructureSegmentation():
             modality = 'CT',
             slab = {'none':0, 'bone':8,'lungs':9,'heart':10,'branice':5},
             maximal_lung_diff = 0.2,
-	    rad_branice=5
+	    rad_branice=4
 	    ):
 	    
         """
@@ -112,19 +112,46 @@ class SupportStructureSegmentation():
 	structure[c,:,:] = 0
 	return structure
 
-    def convolve_structure_spine(self):
-
-
-
+    def convolve_structure_spine(self, velikost = [150 , 3 , 3]):
+	structure=np.ones((int(velikost[2]/self.voxelsize_mm[0]),int(velikost[1]/self.voxelsize_mm[1]),int(velikost[2]/self.voxelsize_mm[2])))
 	return structure
     
+    def rozm_structure(self, size = 11):
+	a = np.zeros(( size , size , size ))
+	c = int (np.floor( size / 2 ))
+	a[c, c, c]=1
+	#a = filters.gaussian_filter(a, self.voxelsize_mm)
+	a[:, :, :]=1
+	return a	
 
     def bone_segmentation(self):
+	#ipdb.set_trace()
 	Bones_down=330
-        self.segmentation = np.array(self.data3d > Bones_down).astype(np.int8)*self.slab['bone']
+        self.segmentation = self.segmentation + np.array(self.data3d > Bones_down).astype(np.int8)*self.slab['bone']
+
+
+
+    def spine_segmentation:
+	seg_prub = morphology.binary_closing(seg_prub, iterations=self.iteration())
+	seg_prub = 1*np.array(seg_prub>0)	
+	#seg_prub = filters.convolve(seg_prub , self.rozm_structure())
+	#print(np.unique(seg_prub))
+	seg_prub = filters.gaussian_filter(self.data3d, 5.0/np.asarray(self.voxelsize_mm))
+	#seg_prub=morphology.binary_closing(seg_prub, iterations=self.iteration())
+	#seg_prub = filters.convolve(seg_prub , self.convolve_structure_spine())
+	#b=np.unique(seg_prub)
+	import sed3
+	ed =sed3.sed3(seg_prub)
+	ed.show()
+	#print(b)
+	#b=max(b)
+	#b=int(0.5*b)#int(0.8*b) 
+	self.segmentation = seg_prub#np.array(seg_prub>=b)
         pass
+	
 
     def heart_segmentation(self):
+	heart_down=0
 	a=self.convolve_structure_heart()
 	seg_prub = filters.convolve( ((self.segmentation == self.slab['lungs'])-0.5) , a )
 	self.segmentation = np.array(seg_prub<=-0.3)
@@ -136,15 +163,19 @@ class SupportStructureSegmentation():
 	x = np.arange( ran[1] )
 	y = np.arange( ran[2] )
 	x, y = np.meshgrid( x, y)
-	z = np.floor(np.asarray(map(model, x.reshape(-1),y.reshape(-1)))).astype(int)
+	z = np.floor(np.asarray(map(model, x.reshape(-1), y.reshape(-1)))).astype(int)
 	x = x.reshape(z.shape)
 	y = y.reshape(z.shape)
-	print(z)
+	cc = np.zeros(ran)
 	for a in range(z.shape[0]):
 	    if (z[a] < ran[0]) and (z[a] >= 0):
 	    	self.segmentation[z[a], x[a], y[a]] = self.slab['branice'] 
-
-	#ipdb.set_trace()  
+		for b in range(z[a], ran[0]):
+		    cc[b, x[a], y[a]] = 1
+	#ipdb.set_trace()
+	aaa = np.array(self.data3d >= heart_down).astype(np.int8)*self.slab['heart']
+	aaa=morphology.binary_opening(aaa , iterations=self.iteration()).astype(self.segmentation.dtype)
+	self.segmentation = self.segmentation + cc * aaa
         pass
     
     def iteration(self):
@@ -152,6 +183,13 @@ class SupportStructureSegmentation():
 	prumer= np.mean(self.voxelsize_mm)
 	a= int (sirka/prumer)		
 	return a
+
+    def orientation(self):
+	#split1, split2 = np.split(self.segmentation, 2, 1)
+	#print(np.nonzero(split1))	
+	#print(np.nonzero(split2))
+
+	pass
 
     def lungs_segmentation(self):
 	LUNG_UP=-360 #horní hranice
@@ -174,10 +212,10 @@ class SupportStructureSegmentation():
 	    print("plice separované")
 	else:
 	    pocet=0
-	    while ((velikost2 / velikost1) < (1-self.maximal_lung_diff)) | ((velikost2/velikost1)> (1 + self.maximal_lung_diff)):
+	    while ((velikost2 / velikost1) < (1 - self.maximal_lung_diff)) | ((velikost2/velikost1)> (1 + self.maximal_lung_diff)):
 		morphology.binary_erosion(self.segmentation,iterations=1).astype(self.segmentation.dtype)
 		labeled_seg , num_seg = label(seg_prub)
-		counts= [0]*(num_seg+1)
+		counts= [0] * (num_seg+1)
 		for x in np.nditer(labeled_seg, op_flags=['readwrite']):
 	    	    if x[...]!=0:
 	    	       	counts[x[...]]=counts[x[...]]+1
@@ -345,9 +383,10 @@ def main():
             voxelsize_mm = metadata['voxelsize_mm'],
             )
 
-    #sseg.bone_segmentation()
+    sseg.bone_segmentation()
+    #sseg.orientation()
     sseg.lungs_segmentation()
-    sseg.heart_segmentation()
+    #sseg.heart_segmentation()
 
     #print ("Data size: " + str(data3d.nbytes) + ', shape: ' + str(data3d.shape) )
 
