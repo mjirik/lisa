@@ -127,11 +127,11 @@ class SupportStructureSegmentation():
     def bone_segmentation(self):
 	#ipdb.set_trace()
 	Bones_down=330
-        self.segmentation = self.segmentation + np.array(self.data3d > Bones_down).astype(np.int8)*self.slab['bone']
+        self.segmentation = np.array(self.data3d > Bones_down).astype(np.int8)*self.slab['bone']
+	
 
 
-
-    def spine_segmentation:
+    def spine_segmentation(self):
 	seg_prub = morphology.binary_closing(seg_prub, iterations=self.iteration())
 	seg_prub = 1*np.array(seg_prub>0)	
 	#seg_prub = filters.convolve(seg_prub , self.rozm_structure())
@@ -193,9 +193,8 @@ class SupportStructureSegmentation():
 
     def lungs_segmentation(self):
 	LUNG_UP=-360 #horní hranice
-	self.segmentation = np.array(self.data3d <= LUNG_UP)
-	self.segmentation=morphology.binary_closing(self.segmentation , iterations=self.iteration()).astype(self.segmentation.dtype)
-	seg_prub=self.segmentation
+	seg_prub = np.array(self.data3d <= LUNG_UP)
+	seg_prub = morphology.binary_closing(seg_prub , iterations=self.iteration()).astype(self.segmentation.dtype)
 	labeled_seg , num_seg = label(seg_prub)
 	counts= [0]*(num_seg+1)
 	for x in np.nditer(labeled_seg, op_flags=['readwrite']):
@@ -229,8 +228,8 @@ class SupportStructureSegmentation():
 		pocet=pocet+1
 		
 	    morphology.binary_dilation(self.segmentation,iterations=pocet).astype(self.segmentation.dtype)
-	self.segmentation= np.array(labeled_seg==index).astype(np.int8)*self.slab['lungs']
-	self.segmentation= self.segmentation + np.array(labeled_seg==index2).astype(np.int8)*self.slab['lungs']
+	self.segmentation = self.segmentation + np.array(labeled_seg==index).astype(np.int8)*self.slab['lungs']
+	self.segmentation = self.segmentation + np.array(labeled_seg==index2).astype(np.int8)*self.slab['lungs']
 			
         pass
 
