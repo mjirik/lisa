@@ -102,12 +102,14 @@ class OrganSegmentationWindow(QMainWindow):
         lisa_logo.setPixmap(logo)  # scaledToWidth(128))
         grid.addWidget(lisa_title, 0, 1)
         grid.addWidget(info, 1, 1)
-        grid.addWidget(lisa_logo, 0, 2, 2, 2)
 
         btn_config = QPushButton("Configuration", self)
         btn_config.clicked.connect(self.btnConfig)
         self.uiw['dcmdir'] = btn_config
         grid.addWidget(btn_config, 2, 1)
+
+        grid.addWidget(lisa_logo, 0, 2, 3, 2)
+
         # rid.setColumnMinimumWidth(1, logo.width()/2)
         # rid.setColumnMinimumWidth(2, logo.width()/2)
         # rid.setColumnMinimumWidth(3, logo.width()/2)
