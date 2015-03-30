@@ -44,6 +44,7 @@ import qmisc
 import io3d
 import ipdb
 import scipy.ndimage.filters as filters
+import scipy.signal
 import multipolyfit as mpf
 
 from io3d import datareader
@@ -61,9 +62,9 @@ class SupportStructureSegmentation():
             autocrop = True,
             autocrop_margin_mm = [10,10,10],
             modality = 'CT',
-            slab = {'none':0, 'bone':8,'lungs':9,'heart':10,'branice':5},
+            slab = {'none':0, 'bone':8,'lungs':9,'heart':10,'diaphragm':5},
             maximal_lung_diff = 0.2,
-	    rad_branice=4
+	    rad_diaphragm=4
 	    ):
 	    
         """
@@ -82,14 +83,20 @@ class SupportStructureSegmentation():
         self.segmentation = None
         self.slab = slab
 	self.maximal_lung_diff = maximal_lung_diff
-	self.rad_branice=rad_branice
+	self.rad_diaphragm=rad_diaphragm
 
 
 
         #import pdb; pdb.set_trace()
 
 
-#    def
+    def run(self):
+	self.bone_segmentation()
+	self.spine_segmentation()
+	self.lungs_segmentation()
+	self.heart_segmentation()
+
+
     def import_data(self, data):
         self.data = data
         self.data3d = data['data3d']
@@ -112,17 +119,10 @@ class SupportStructureSegmentation():
 	structure[c,:,:] = 0
 	return structure
 
-    def convolve_structure_spine(self, velikost = [150 , 3 , 3]):
-	structure=np.ones((int(velikost[2]/self.voxelsize_mm[0]),int(velikost[1]/self.voxelsize_mm[1]),int(velikost[2]/self.voxelsize_mm[2])))
+    def convolve_structure_spine(self, velikost = [150 , 3, 3]):
+	structure = np.ones((int(velikost[2]/self.voxelsize_mm[0]),int(velikost[1]/self.voxelsize_mm[1]),int(velikost[2]/self.voxelsize_mm[2])))
 	return structure
-    
-    def rozm_structure(self, size = 11):
-	a = np.zeros(( size , size , size ))
-	c = int (np.floor( size / 2 ))
-	a[c, c, c]=1
-	#a = filters.gaussian_filter(a, self.voxelsize_mm)
-	a[:, :, :]=1
-	return a	
+    	
 
     def bone_segmentation(self):
 	#ipdb.set_trace()
@@ -132,21 +132,14 @@ class SupportStructureSegmentation():
 
 
     def spine_segmentation(self):
-	seg_prub = morphology.binary_closing(seg_prub, iterations=self.iteration())
-	seg_prub = 1*np.array(seg_prub>0)	
-	#seg_prub = filters.convolve(seg_prub , self.rozm_structure())
-	#print(np.unique(seg_prub))
 	seg_prub = filters.gaussian_filter(self.data3d, 5.0/np.asarray(self.voxelsize_mm))
-	#seg_prub=morphology.binary_closing(seg_prub, iterations=self.iteration())
-	#seg_prub = filters.convolve(seg_prub , self.convolve_structure_spine())
-	#b=np.unique(seg_prub)
-	import sed3
-	ed =sed3.sed3(seg_prub)
-	ed.show()
-	#print(b)
-	#b=max(b)
-	#b=int(0.5*b)#int(0.8*b) 
-	self.segmentation = seg_prub#np.array(seg_prub>=b)
+	seg_prub = filters.convolve(seg_prub, self.convolve_structure_spine())
+	#seg_prub = scipy.signal.fftconvolve(seg_prub, self.convolve_structure_spine())
+	seg_prub = np.array(seg_prub > 5900)
+	#import sed3
+	#ed = sed3.sed3(seg_prub)
+	#ed.show()
+	self.segmentation = seg_prub
         pass
 	
 
@@ -158,7 +151,7 @@ class SupportStructureSegmentation():
 	z, x, y= np.nonzero(self.segmentation)
 	s = np.array([x , y]).T
 	h = np.array(z)
-	model = mpf.multipolyfit(s, h, self.rad_branice, model_out = True)
+	model = mpf.multipolyfit(s, h, self.rad_diaphragm, model_out = True)
 	ran = self.segmentation.shape
 	x = np.arange( ran[1] )
 	y = np.arange( ran[2] )
@@ -169,7 +162,7 @@ class SupportStructureSegmentation():
 	cc = np.zeros(ran)
 	for a in range(z.shape[0]):
 	    if (z[a] < ran[0]) and (z[a] >= 0):
-	    	self.segmentation[z[a], x[a], y[a]] = self.slab['branice'] 
+	    	self.segmentation[z[a], x[a], y[a]] = self.slab['diaphragm'] 
 		for b in range(z[a], ran[0]):
 		    cc[b, x[a], y[a]] = 1
 	#ipdb.set_trace()
@@ -354,6 +347,14 @@ def main():
             help='path to data dir')
     parser.add_argument('-d', '--debug', action='store_true',
             help='run in debug mode')
+    parser.add_argument('-ss', '--segspine', action='store_true',
+            help='run spine segmentaiton')
+    parser.add_argument('-sl', '--seglungs', action='store_true',
+            help='run lungs segmentation')
+    parser.add_argument('-sh', '--segheart', action='store_true',
+            help='run heart segmentation')
+    parser.add_argument('-sb', '--segbones', action='store_true',
+            help='run bones segmentation')    
     parser.add_argument('-exd', '--exampledata', action='store_true',
             help='run unittest')
     parser.add_argument('-so', '--show_output', action='store_true',
@@ -382,10 +383,16 @@ def main():
             voxelsize_mm = metadata['voxelsize_mm'],
             )
 
-    sseg.bone_segmentation()
+
     #sseg.orientation()
-    sseg.lungs_segmentation()
-    #sseg.heart_segmentation()
+    if args.segbones:
+	sseg.bone_segmentation()
+    if args.segspine:
+        sseg.spine_segmentation()
+    if args.seglungs or args.segheart:
+    	sseg.lungs_segmentation()
+    if args.segheart:
+    	sseg.heart_segmentation()
 
     #print ("Data size: " + str(data3d.nbytes) + ', shape: ' + str(data3d.shape) )
 
