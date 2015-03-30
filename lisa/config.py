@@ -14,9 +14,9 @@ import sys
 import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
-sys.path.append(os.path.join(path_to_script,
-                             "../extern/sed3/"))
+# sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
+# sys.path.append(os.path.join(path_to_script,
+#                              "../extern/sed3/"))
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
 
@@ -26,7 +26,8 @@ logger = logging.getLogger(__name__)
 import inspect
 
 
-import misc
+from io3d import misc
+# import misc
 
 
 def get_config(filename, default_cfg):
@@ -123,5 +124,5 @@ def subdict(bigdict, wanted_keys):
     return ret
 
 
-def save_config(cfg, pointer):
-    pass
+def save_config(cfg, filename):
+    misc.obj_to_file(cfg, filename, filetype='yaml')

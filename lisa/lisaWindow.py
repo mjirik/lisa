@@ -12,6 +12,7 @@ import os
 import numpy as np
 
 import datetime
+import Tkinter as tk
 
 from io3d import datareader
 # import segmentation
@@ -102,12 +103,17 @@ class OrganSegmentationWindow(QMainWindow):
         grid.addWidget(lisa_title, 0, 1)
         grid.addWidget(info, 1, 1)
         grid.addWidget(lisa_logo, 0, 2, 2, 2)
+
+        btn_config = QPushButton("Configuration", self)
+        btn_config.clicked.connect(self.btnConfig)
+        self.uiw['dcmdir'] = btn_config
+        grid.addWidget(btn_config, 2, 1)
         # rid.setColumnMinimumWidth(1, logo.width()/2)
         # rid.setColumnMinimumWidth(2, logo.width()/2)
         # rid.setColumnMinimumWidth(3, logo.width()/2)
 
         # # dicom reader
-        rstart = 2
+        rstart = 3
         hr = QFrame()
         hr.setFrameShape(QFrame.HLine)
         text_dcm = QLabel('DICOM reader')
@@ -642,6 +648,33 @@ class OrganSegmentationWindow(QMainWindow):
 
         else:
             self.statusBar().showMessage('No segmentation data!')
+
+    def btnConfig(self, event=None):
+        import lisa.configEditor as ce
+        import lisa.config
+        import lisa.organ_segmentation as los
+        d = los.lisa_config_init()
+        root = tk.Tk()
+        conf = ce.apply(root, d, (0, 2, 0, 0), use_list=False)
+        root.mainloop()
+        newconf = {}
+        for (k, v) in conf.iteritems():
+            key = str(k)
+            value = str(v.get())
+            try:
+                value = eval(value)
+            except:
+                pass
+            newconf[key] = value
+
+        lisa.config.save_config(
+            newconf,
+            os.path.join(newconf['output_datapath'], 'organ_segmentation.config')
+        )
+        self.quit(event)
+        # from PyQt4.QtCore import pyqtRemoveInputHook
+        # pyqtRemoveInputHook()
+        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
     def btnSaveOutDcmOverlay(self, event=None, filename=None):
         if self.oseg.segmentation is not None:
