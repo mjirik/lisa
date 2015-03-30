@@ -29,6 +29,150 @@ from sklearn import mixture
 import morphsnakes
 import sys
 
+def findPeak (CTstupnice,CTcetnosti,konstanta = 1.2):
+    '''Najde a vybere nejpravejsi spicku v grafu CTcetnosti
+    CT stupnice jsou pak hodnoty odpovidajici CT cislum,
+    pro pripad pouziti funkce pro prahovani 
+    konstanta:
+    spicky jsou urceny jako oblasti s 
+    hodnotou > prumer + konstanta*odchylka
+    vraci:
+    [jedinaSpicka,y1,y2,hraniceHorni,hraniceDolni]
+    jedinaSpicka - pole s 0mi vsude krome vybrane spicky
+    y1 start spicky v poli
+    y2 konec spicky v poli
+    hraniceHorni,hraniceDolni - hodnoty z CTstupnice na y1,y2
+     '''
+    
+    
+    ukazat1= CTstupnice
+    ukazat2= CTcetnosti
+    
+    upraveny = ukazat2
+    #upraveny[0:100] = 0
+    prumer = np.mean(upraveny)
+    var = np.var(upraveny)
+    TF = upraveny > prumer+konstanta*np.sqrt(var)
+    cetnostiSpicek = np.multiply(TF,upraveny)
+    
+    #plt.plot(cetnostiSpicek)    
+    #plt.show()
+    
+    
+    hodnotySpicek = np.multiply(TF,ukazat1)
+    
+    'vybrani nejpravejsi nalezene spicky'
+    
+    hraniceHorni = 0
+    hraniceDolni = 0
+    y1 = 0
+    y2 = 0
+    horniNalezena = False
+    delka = len(hodnotySpicek)
+    
+    for x in range(delka):
+        y = delka-x-1
+        cislo = hodnotySpicek[y]
+
+        if((cislo!=0) and (horniNalezena == False)):#nalezena horni hranice
+            hraniceHorni = cislo
+            y2 = y
+            horniNalezena = True
+        if((cislo==0) and (horniNalezena == True)):#nalezena dolni hranice
+            hraniceDolni= ukazat1[y]
+            y1 = y
+            break
+    
+    jedinaSpicka = cetnostiSpicek
+    jedinaSpicka[0:y1] = 0
+    jedinaSpicka[y2:-1] = 0
+    
+    #plt.plot(jedinaSpicka)    
+    #plt.show()
+    return [jedinaSpicka,y1,y2,hraniceHorni,hraniceDolni]
+
+
+def prahovaniKonvoluce(data3d,voxelSize,konstSpicky=1,konstUtlum = 0.9):
+    '''
+    prahovani slozitym zpusobem
+    data3d - vstupni data pro prahovani
+    voxelSize - veliksot voxelu (nepouzivana)
+    konstSpicky- konstanta pro urceni spicek (vyssi => mene spicek)
+    konstUtlum - na jake mnozstvi musi poklesnout hodnota cetnosti
+    Popis:
+    1) vypocte se histogram
+    2) vybere se jeho nejpravejsi "spicka"
+    3) tato "spicka" muze obsahovat male spicky - vybere se opet nejpravejsi
+    4) vybere se maximum teto spicky a oznaci se jako dolni hranice prahovani
+    5) od hodnoty cetnosti (maxima) je sledovan vyvoj grafu smerem vpravo az
+    do poklesu hodnoty cetnosti na 0.9 puvodni urovne. Odpovidajici hodnota 
+    jasu je vybrana jako horni hranice prahovani
+    vysledny obraz je s jatry (a podobne jasnymi organy) nejhusteji zastoupenymi
+    vraci: T/F prahovany obrazek
+    '''
+
+    'vypocet histogramu'
+    maxx = np.max(data3d)
+    minx = np.min(data3d)
+    bins=np.arange(minx, maxx+1)
+    histogram = np.histogram(data3d, bins)
+    cetnosti = histogram[0]
+    celkem = np.sum(cetnosti)
+    
+    #OHRANICENY HISTOGRAM
+    ukazat1 = bins[0:len(bins)-2] #hodnoty bins[0:len(bins)-1]
+    ukazat2 = cetnosti[0:len(cetnosti)-1] #cetnosti    
+    
+    #plt.plot(ukazat1,ukazat2)    
+    #plt.show()
+    
+    'vybrani nejpravejsi nalezene "spicky" (utvar muze byt nahore zaspicately)'
+    upraveny = ukazat2
+    upraveny[0:200] = 0 #odstraneni rusiveho vrcholu - zastini ostatni
+    [jedinaSpicka,y1,y2,hraniceHorni,hraniceDolni] = findPeak (ukazat1,upraveny,konstanta = 1)#1.2#1
+    
+    #plt.plot(jedinaSpicka)    
+    #plt.show()    
+    
+    'vybrani nejpravejsiho maxima spicky (utvaru) a urceni jako hranice'
+    miniSpicka = jedinaSpicka[y1:y2]
+    hodnoty = ukazat1[y1:y2]
+    
+    #plt.plot(miniSpicka)    
+    #plt.show()
+    
+    [jedinaMSpicka,m1,m2,hHorni,hDolni] = findPeak(miniSpicka,miniSpicka,konstanta = 1)   #1.2
+    
+    #plt.plot(jedinaMSpicka)    
+    #plt.show()
+    
+    poziceMala = np.argmax(jedinaMSpicka)
+    pozice = y1+poziceMala
+    
+    #cosi = ukazat2[pozice:-1]
+    
+    #plt.plot(cosi)    
+    #plt.show()
+
+    hranice = ukazat1[pozice]
+    
+    'vybrani voxelu od hranice az po pokles cetnosti na uroven utlumu'
+    hraniceDolni = hranice
+    hodnotaNarustu = ukazat2[pozice]
+    utlum = konstUtlum
+    
+    for pomocny in range(pozice,len(ukazat2)):
+        hodnota = ukazat2[pomocny]
+        if(hodnota<= hodnotaNarustu*(1-utlum) ):
+            hraniceHorni = ukazat1[pomocny]
+            break
+
+    vetsi = data3d> hraniceDolni
+    mensi = data3d < hraniceHorni
+    segmentaceVysledek = np.multiply(vetsi,mensi)
+    return segmentaceVysledek
+
+
 def objectRemovalDistanceBased(data3d,threshold=1):
     '''
     Rozdeli data3d na objekty a vypocte hmotny stred celeho obrazu.
@@ -826,6 +970,24 @@ def segFind(data3d,velikostVoxelu,source,vysledky = False):
     segmentaceVysledek = operovany
     return segmentaceVysledek
 
+
+
+
+def prumerovaciFIltr(konvoluce,velikostVoxelu,soucet):
+    zobrazeny = konvoluce >= soucet*0.3
+    
+    zobrazeny = zobrazeny*1000
+    mm = 25
+    a = np.round(mm/velikostVoxelu[0])
+    b = np.round(mm/velikostVoxelu[1])
+    c = np.round(mm/velikostVoxelu[2])
+    print [a,b,c]
+    mean = ndimage.uniform_filter(zobrazeny, size=[a,b,c])
+    #odstraneny = objectRemovalDistanceBased(vyriznuty,threshold=1.5)
+    
+    vysledek = mean > 750
+    return vysledek
+
 def segFindImproved(data3d,velikostVoxelu,source,vysledky = False):
     '''Metoda ktera nalzene vnitrek jater - odhadne relativne dobre obrysy tvaru
     vyuziva faktu ze jatra jsou po naprahovani obvykle strukturovana-
@@ -842,11 +1004,13 @@ def segFindImproved(data3d,velikostVoxelu,source,vysledky = False):
     prahovany = prahovany.astype(np.int8)
     soucet = np.sum(utvar)
     konvoluce = ndimage.convolve(prahovany, utvar)
+    druhy = prumerovaciFIltr(konvoluce,velikostVoxelu,soucet)
     zobrazeny = konvoluce >= soucet*0.4
     vyriznuty = ndimage.binary_opening(zobrazeny, utvar, 1)
     zesileny = ndimage.binary_dilation(vyriznuty, utvar, 3)
-    otevreny = ndimage.binary_opening(zesileny, utvar2, 10)    
-    odstraneny = objectRemovalDistanceBased(otevreny,threshold=1.5)
+    otevreny = ndimage.binary_opening(zesileny, utvar2, 10)
+    nasobeny = np.multiply(otevreny,druhy)    
+    odstraneny = objectRemovalDistanceBased(nasobeny,threshold=1.5)
     
     vysledek = odstraneny
     #main.zobrazitOriginal(vysledek)
@@ -899,15 +1063,20 @@ def segSimpleSnake(data3d,velikostVoxelu,source,vysledky = False):
     '''Metoda pouzivajici morphSNakes bez mapy 
     pouziva take segfind
      '''
+    #print '*******'
+    #print np.prod(velikostVoxelu)
+    #print '*******'
     slovnik = nactiYamlSoubor(source)
     lambda2 = slovnik['snakeLambda1']
     lambda1  = slovnik['snakeLambda2']
-    iterace = slovnik['snakeIterace']
-    segmentace = segFind(data3d,velikostVoxelu,source)
+    #iterace = slovnik['snakeIterace']
+    iterace = 7
+    segmentace = segFindImproved(data3d,velikostVoxelu,source)
     #zobrazitOriginal(segmentace)
     #print [iterace,lambda1,lambda2]
     #sys.exit()
-    segmentaceVysledek = simpleSnake(data3d, segmentace, iterace,l1 = lambda1,l2=lambda2)
+    
+    segmentaceVysledek = simpleSnake(data3d, segmentace, iterace,l1 = lambda1,l2=lambda2,vyhlazovani=3)
     return segmentaceVysledek
 
 def trenovaniCele(metoda,path = None):
