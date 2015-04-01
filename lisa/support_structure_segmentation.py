@@ -80,11 +80,11 @@ class SupportStructureSegmentation():
         self.autocrop_margin_mm = np.array(autocrop_margin_mm)
         self.autocrop_margin = self.autocrop_margin_mm/self.voxelsize_mm
         self.crinfo = [[0,-1],[0,-1],[0,-1]]
-        self.segmentation = None
+        self.segmentation = np.ones(data3d.shape)
         self.slab = slab
 	self.maximal_lung_diff = maximal_lung_diff
 	self.rad_diaphragm=rad_diaphragm
-
+	
 
 
         #import pdb; pdb.set_trace()
@@ -124,10 +124,9 @@ class SupportStructureSegmentation():
 	return structure
     	
 
-    def bone_segmentation(self):
+    def bone_segmentation(self, bone_threshold = 330):
 	#ipdb.set_trace()
-	Bones_down=330
-        self.segmentation = np.array(self.data3d > Bones_down).astype(np.int8)*self.slab['bone']
+        self.segmentation = np.array(self.data3d > bone_threshold).astype(np.int8)*self.slab['bone']
 	
 
 
@@ -143,8 +142,7 @@ class SupportStructureSegmentation():
         pass
 	
 
-    def heart_segmentation(self):
-	heart_down=0
+    def heart_segmentation(self, heart_treshold = 0):
 	a=self.convolve_structure_heart()
 	seg_prub = filters.convolve( ((self.segmentation == self.slab['lungs'])-0.5) , a )
 	self.segmentation = np.array(seg_prub<=-0.3)
@@ -166,13 +164,12 @@ class SupportStructureSegmentation():
 		for b in range(z[a], ran[0]):
 		    cc[b, x[a], y[a]] = 1
 	#ipdb.set_trace()
-	aaa = np.array(self.data3d >= heart_down).astype(np.int8)*self.slab['heart']
+	aaa = np.array(self.data3d >= heart_threshold).astype(np.int8)*self.slab['heart']
 	aaa=morphology.binary_opening(aaa , iterations=self.iteration()).astype(self.segmentation.dtype)
 	self.segmentation = self.segmentation + cc * aaa
         pass
     
-    def iteration(self):
-	sirka=5
+    def iteration(self, sirka = 5):
 	prumer= np.mean(self.voxelsize_mm)
 	a= int (sirka/prumer)		
 	return a
@@ -184,17 +181,23 @@ class SupportStructureSegmentation():
 
 	pass
 
-    def lungs_segmentation(self):
-	LUNG_UP=-360 #horní hranice
-	seg_prub = np.array(self.data3d <= LUNG_UP)
-	seg_prub = morphology.binary_closing(seg_prub , iterations=self.iteration()).astype(self.segmentation.dtype)
+    def lungs_segmentation(self, lungs_threshold = -360):
+	seg_prub = np.array(self.data3d <= lungs_threshold)
+	seg_prub = morphology.binary_closing(seg_prub , iterations=self.iteration()).astype(self.segmentation.dtype)	
+	seg_prub = morphology.binary_opening(seg_prub , iterations = 5)	
 	labeled_seg , num_seg = label(seg_prub)
 	counts= [0]*(num_seg+1)
-	for x in np.nditer(labeled_seg, op_flags=['readwrite']):
-	    if x[...]!=0:
-	    	counts[x[...]]=counts[x[...]]+1
+	for x in range(1, num_seg+1):
+	    a = np.sum(np.array(labeled_seg == x))
+	    counts[x] = a
+
+	
+	#for x in np.nditer(labeled_seg, op_flags=['readwrite']):
+	#    if x[...]!=0:
+	#    	counts[x[...]]=counts[x[...]]+1
 	index=np.argmax(counts) #pozadí
 	counts[index]=0
+	print(num_seg)
 	index=np.argmax(counts) #jedna nebo obě plíce
 	velikost1=counts[index]
 	counts[index]=0
@@ -345,6 +348,10 @@ def main():
     parser.add_argument('-i','--datadir',
             default=None,
             help='path to data dir')
+    parser.add_argument('-o','--output',
+            default=None,
+            help='output file')
+    
     parser.add_argument('-d', '--debug', action='store_true',
             help='run in debug mode')
     parser.add_argument('-ss', '--segspine', action='store_true',
@@ -413,14 +420,14 @@ def main():
     if args.show_output:
         sseg.visualization()
 
-    savestring = raw_input ('Save output data? (y/n): ')
+    # savestring = raw_input ('Save output data? (y/n): ')
     #sn = int(snstring)
-    if savestring in ['Y','y']:
+    if args.output is not None: # savestring in ['Y','y']:
         import misc
 
         data = sseg.export()
 
-        misc.obj_to_file(data, "organ.pickle", filetype = 'pickle')
+        misc.obj_to_file(data, args.output, filetype = 'pickle')
     #output = segmentation.vesselSegmentation(oseg.data3d, oseg.orig_segmentation)
 
 
