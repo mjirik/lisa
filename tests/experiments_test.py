@@ -176,6 +176,7 @@ class ExperimentsTest(unittest.TestCase):
         self.assertGreater(len(obj['data']), 0)
         # self.assertTrue(False)
 
+    @attr("actual")
     def test_experiment_set_small_per_partes(self):
         plt.ioff()
         # import lisa.experiments
