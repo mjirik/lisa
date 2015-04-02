@@ -223,6 +223,7 @@ def compare_volumes(vol1, vol2, voxelsize_mm):
     volume2 = np.sum(vol2 > 0)
     volume1_mm3 = volume1 * np.prod(voxelsize_mm)
     volume2_mm3 = volume2 * np.prod(voxelsize_mm)
+    volume_avg_mm3 = (volume1_mm3 + volume2_mm3) * 0.5
     logger.debug('vol1 [mm3]: ' + str(volume1_mm3))
     logger.debug('vol2 [mm3]: ' + str(volume2_mm3))
 
@@ -259,8 +260,8 @@ def compare_volumes(vol1, vol2, voxelsize_mm):
         'volume2_mm3': volume2_mm3,
         'err1_mm3': df1,
         'err2_mm3': df2,
-        'err1_percent': df1 / volume1_mm3 * 100,
-        'err2_percent': df2 / volume1_mm3 * 100,
+        'err1_percent': df1 / volume_avg_mm3 * 100,
+        'err2_percent': df2 / volume_avg_mm3 * 100,
         'voe': voe,
         'vd': vd,
         'avgd': avgd,
