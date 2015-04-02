@@ -232,7 +232,9 @@ class ExperimentsTest(unittest.TestCase):
 
         ramr.config()
         ramr.run_experiments()
-        ramr.evaluation(special_evaluation_function=speceval)
+        # ramr.evaluation(special_evaluation_function=speceval)
+        ramr.evaluation(
+            special_evaluation_function=lisa.volumetry_evaluation.compare_volumes_boundingbox)
         ramr.report()
 
         self.assertFalse(ramr.is_evaluation_necessary())

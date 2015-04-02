@@ -227,6 +227,33 @@ def eval_all_from_dataset_metadata(inputdata, visualization=False,
 
     return evaluation_all
 
+def compare_volumes_boundingbox(vol1, vol2, voxelsize_mm):
+    import qmisc
+    crinfo = qmisc.crinfo_from_specific_data(vol1, [20, 20, 20])
+    vol1[
+        crinfo[0][0]:crinfo[0][1],
+        crinfo[1][0]:crinfo[1][1],
+        crinfo[2][0]:crinfo[2][1]
+    ]=1
+
+    volume1 = np.sum(vol1 > 0)
+    volume2 = np.sum(vol2 > 0)
+    volume1_mm3 = volume1 * np.prod(voxelsize_mm)
+    volume2_mm3 = volume2 * np.prod(voxelsize_mm)
+    volume_avg_mm3 = (volume1_mm3 + volume2_mm3) * 0.5
+
+    df = vol1 - vol2
+    df1 = np.sum(df == 1) * np.prod(voxelsize_mm)
+    df2 = np.sum(df == -1) * np.prod(voxelsize_mm)
+
+    evaluation = {
+        'box_err1_mm3': df1,
+        'box_err2_mm3': df2,
+        'box_err1_percent': df1 / volume_avg_mm3 * 100,
+        'box_err2_percent': df2 / volume_avg_mm3 * 100,
+    }
+    return evaluation
+
 
 def compare_volumes(vol1, vol2, voxelsize_mm, use_logger=False):
     """
@@ -248,9 +275,9 @@ def compare_volumes(vol1, vol2, voxelsize_mm, use_logger=False):
 
     if use_logger:
         logger.debug('err- [mm3]: ' + str(df1) + ' err- [%]: '
-                    + str(df1 / volume1_mm3 * 100))
+                    + str(df1 / volume_avg_mm3 * 100))
         logger.debug('err+ [mm3]: ' + str(df2) + ' err+ [%]: '
-                    + str(df2 / volume1_mm3 * 100))
+                    + str(df2 / volume_avg_mm3 * 100))
 
     # VOE[%]
     intersection = np.sum(df != 0).astype(float)
