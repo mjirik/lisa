@@ -147,12 +147,20 @@ class RunAndMakeReport:
             output_paths=self.pklz_dirs,
             dry_run=False)
 
-    def evaluation(self):
+    def evaluation(self, special_evaluation_function=None):
+        """
+        :param special_evaluation_function: is pointer to function with
+        fallowing signature:
+            eval_dict = special_evaluation_function(volume1, volume2)
+        """
         sliver_eval_all_to_yamls(
             self.yaml_files,
             self.pklz_dirs,
             self.sliver_dir,
-            self.eval_files, recalculateThis=None)
+            self.eval_files,
+            recalculateThis=None,
+            special_evaluation_function=special_evaluation_function
+        )
 
     def report(self):
         report(self.eval_files, self.labels, self.markers,
@@ -497,10 +505,13 @@ def recalculate_suggestion(eval_files):
 
 
 def sliver_eval_all_to_yamls(yaml_files, pklz_dirs, sliver_dir, eval_files,
-                             recalculateThis=None):
+                             recalculateThis=None,
+                             special_evaluation_function=None):
     """
     This is time consuming.
     It can be specified which should be evaluated with recalculateThis=[2,5]
+    :param special_evaluation_function: evaluation function like fallowing:
+        eval_dict = special_evaluation_function(volume1, volume2, voxelsize_mm)
     """
     if recalculateThis is None:
         recalculateThis = recalculate_suggestion(eval_files)
@@ -508,13 +519,15 @@ def sliver_eval_all_to_yamls(yaml_files, pklz_dirs, sliver_dir, eval_files,
 
     for i in recalculateThis:
         logger.info("Performing evaluation on: " + str(pklz_dirs[i]))
-        a = volumetry_evaluation.evaluateAndWriteToFile(yaml_files[i],
-                                                        pklz_dirs[i],
-                                                        sliver_dir,
-                                                        eval_files[i],
-                                                        visualization=False,
-                                                        return_dir_lists=True
-                                                        )
+        a = volumetry_evaluation.evaluateAndWriteToFile(
+            yaml_files[i],
+            pklz_dirs[i],
+            sliver_dir,
+            eval_files[i],
+            visualization=False,
+            return_dir_lists=True,
+            special_evaluation_function=special_evaluation_function
+        )
         logger.debug(str(a))
 
 

@@ -22,6 +22,13 @@ import lisa
 import lisa.experiments
 
 
+# just test if everything is going ok
+def speceval(vol1, vol2, vs):
+    """
+    special_evaluation_function
+    """
+    return {'one': 1}
+
 class ExperimentsTest(unittest.TestCase):
 
     def test_experiment_set_(self):
@@ -222,9 +229,10 @@ class ExperimentsTest(unittest.TestCase):
         self.assertTrue(ramr.is_evaluation_necessary())
         self.assertTrue(ramr.is_run_experiments_necessary())
 
+
         ramr.config()
         ramr.run_experiments()
-        ramr.evaluation()
+        ramr.evaluation(special_evaluation_function=speceval)
         ramr.report()
 
         self.assertFalse(ramr.is_evaluation_necessary())
@@ -332,7 +340,6 @@ class ExperimentsTest(unittest.TestCase):
         eval1 = ve.distance_matrics(vol1, vol2, [1, 1, 1])
         self.assertAlmostEquals(eval1[2], np.sqrt(2) * 2)
 
-    @attr("actual")
     def test_eval_sliver_distance_two_points_non_comutative(self):
         """
         Two volumes - obj1 1px and obj2 2px

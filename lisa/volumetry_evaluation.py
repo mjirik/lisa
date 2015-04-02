@@ -65,7 +65,8 @@ def evaluateAndWriteToFile(
     directorySliver,
     outputfile,
     visualization,
-    return_dir_lists=False
+    return_dir_lists=False,
+    special_evaluation_function=None
 ):
     """
     Function computes yaml file (if there are given input sliver and pklz
@@ -84,7 +85,10 @@ def evaluateAndWriteToFile(
     data_file = inputYamlFile
     inputdata = misc.obj_from_file(data_file, filetype='yaml')
 
-    evaluation_all = eval_all_from_dataset_metadata(inputdata, visualization)
+    evaluation_all = eval_all_from_dataset_metadata(
+        inputdata, visualization,
+        special_evaluation_function=special_evaluation_function
+    )
 
     logger.debug(str(evaluation_all))
     logger.debug('eval all')
@@ -119,7 +123,8 @@ def evaluateAndWriteToFile(
     # oseg.orig_segmentation)
 
 
-def eval_all_from_dataset_metadata(inputdata, visualization=False):
+def eval_all_from_dataset_metadata(inputdata, visualization=False,
+                                   special_evaluation_function=None):
     """
     set metadata
     """
@@ -183,19 +188,28 @@ def eval_all_from_dataset_metadata(inputdata, visualization=False):
 
         evaluation_one = compare_volumes(data3d_a, data3d_b,
                                          metadata_a['voxelsize_mm'])
+        evaluation_one.update(
+            special_evaluation_function(
+                data3d_a, data3d_b, metadata_a['voxelsize_mm']
+            ))
         evaluation_all['file1'].append(data3d_a_path)
         evaluation_all['file2'].append(data3d_b_path)
-        evaluation_all['volume1_mm3'].append(evaluation_one['volume1_mm3'])
-        evaluation_all['volume2_mm3'].append(evaluation_one['volume2_mm3'])
-        evaluation_all['err1_mm3'].append(evaluation_one['err1_mm3'])
-        evaluation_all['err2_mm3'].append(evaluation_one['err2_mm3'])
-        evaluation_all['err1_percent'].append(evaluation_one['err1_percent'])
-        evaluation_all['err2_percent'].append(evaluation_one['err2_percent'])
-        evaluation_all['voe'].append(evaluation_one['voe'])
-        evaluation_all['vd'].append(evaluation_one['vd'])
-        evaluation_all['avgd'].append(evaluation_one['avgd'])
-        evaluation_all['rmsd'].append(evaluation_one['rmsd'])
-        evaluation_all['maxd'].append(evaluation_one['maxd'])
+        for key in evaluation_one.keys():
+            if key not in evaluation_all.keys():
+                evaluation_all[key] = []
+
+            evaluation_all[key].append(evaluation_one[key])
+        # evaluation_all['volume1_mm3'].append(evaluation_one['volume1_mm3'])
+        # evaluation_all['volume2_mm3'].append(evaluation_one['volume2_mm3'])
+        # evaluation_all['err1_mm3'].append(evaluation_one['err1_mm3'])
+        # evaluation_all['err2_mm3'].append(evaluation_one['err2_mm3'])
+        # evaluation_all['err1_percent'].append(evaluation_one['err1_percent'])
+        # evaluation_all['err2_percent'].append(evaluation_one['err2_percent'])
+        # evaluation_all['voe'].append(evaluation_one['voe'])
+        # evaluation_all['vd'].append(evaluation_one['vd'])
+        # evaluation_all['avgd'].append(evaluation_one['avgd'])
+        # evaluation_all['rmsd'].append(evaluation_one['rmsd'])
+        # evaluation_all['maxd'].append(evaluation_one['maxd'])
         if 'processing_time' in obj_b.keys():
             # this is only for compatibility with march2014 data
             processing_time = obj_b['processing_time']
