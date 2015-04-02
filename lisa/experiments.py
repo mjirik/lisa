@@ -346,10 +346,6 @@ def create_data_frame(data, labels, pklz_dirs, experiment_name=''):
         dat['voe_pts'] = score_data['voe']
         dat['vd_pts'] = score_data['vd']
         dat['rmsd_pts'] = score_data['rmsd']
-        # dat['err1_mm3'] = score_data['err1_mm3']
-        # dat['err2_mm3'] = score_data['err2_mm3']
-        # dat['err1_percent'] = score_data['err1_percent']
-        # dat['err2_percent'] = score_data['err2_percent']
 
         df = pandas.DataFrame(dat, columns=dat.keys())
         df_pieces.append(df)
@@ -419,8 +415,6 @@ def report(eval_files, labels, markers, show=True, output_prefix='',
     logger.debug(str(eval_files))
     data = [misc.obj_from_file(fname + '.pkl', filetype='pkl')
             for fname in eval_files]
-
-    import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
     df_all = create_data_frame(data, labels, eval_files, experiment_name)
     __df_to_csv_and_latex(df_all, output_prefix)
