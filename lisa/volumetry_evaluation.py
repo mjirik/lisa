@@ -214,7 +214,7 @@ def eval_all_from_dataset_metadata(inputdata, visualization=False):
     return evaluation_all
 
 
-def compare_volumes(vol1, vol2, voxelsize_mm):
+def compare_volumes(vol1, vol2, voxelsize_mm, use_logger=False):
     """
     vol1: reference
     vol2: segmentation
@@ -224,27 +224,31 @@ def compare_volumes(vol1, vol2, voxelsize_mm):
     volume1_mm3 = volume1 * np.prod(voxelsize_mm)
     volume2_mm3 = volume2 * np.prod(voxelsize_mm)
     volume_avg_mm3 = (volume1_mm3 + volume2_mm3) * 0.5
-    logger.debug('vol1 [mm3]: ' + str(volume1_mm3))
-    logger.debug('vol2 [mm3]: ' + str(volume2_mm3))
+    if use_logger:
+        logger.debug('vol1 [mm3]: ' + str(volume1_mm3))
+        logger.debug('vol2 [mm3]: ' + str(volume2_mm3))
 
     df = vol1 - vol2
     df1 = np.sum(df == 1) * np.prod(voxelsize_mm)
     df2 = np.sum(df == -1) * np.prod(voxelsize_mm)
 
-    logger.debug('err- [mm3]: ' + str(df1) + ' err- [%]: '
-                 + str(df1 / volume1_mm3 * 100))
-    logger.debug('err+ [mm3]: ' + str(df2) + ' err+ [%]: '
-                 + str(df2 / volume1_mm3 * 100))
+    if use_logger:
+        logger.debug('err- [mm3]: ' + str(df1) + ' err- [%]: '
+                    + str(df1 / volume1_mm3 * 100))
+        logger.debug('err+ [mm3]: ' + str(df2) + ' err+ [%]: '
+                    + str(df2 / volume1_mm3 * 100))
 
     # VOE[%]
     intersection = np.sum(df != 0).astype(float)
     union = (np.sum(vol1 > 0) + np.sum(vol2 > 0)).astype(float)
     voe = 100 * ((intersection / union))
-    logger.debug('VOE [%]' + str(voe))
+    if use_logger:
+        logger.debug('VOE [%]' + str(voe))
 
     # VD[%]
     vd = 100 * (volume2 - volume1).astype(float) / volume1.astype(float)
-    logger.debug('VD [%]' + str(vd))
+    if use_logger:
+        logger.debug('VD [%]' + str(vd))
     # import pdb; pdb.set_trace()
 
     # pyed = sed3.sed3(vol1, contour=vol2)
@@ -252,9 +256,10 @@ def compare_volumes(vol1, vol2, voxelsize_mm):
 
     # get_border(vol1)
     avgd, rmsd, maxd = distance_matrics(vol1, vol2, voxelsize_mm)
-    logger.debug('AvgD [mm]' + str(avgd))
-    logger.debug('RMSD [mm]' + str(rmsd))
-    logger.debug('MaxD [mm]' + str(maxd))
+    if use_logger:
+        logger.debug('AvgD [mm]' + str(avgd))
+        logger.debug('RMSD [mm]' + str(rmsd))
+        logger.debug('MaxD [mm]' + str(maxd))
     evaluation = {
         'volume1_mm3': volume1_mm3,
         'volume2_mm3': volume2_mm3,
