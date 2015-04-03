@@ -52,8 +52,9 @@ else
     sudo -u $USER export PATH=$HOMEDIR/miniconda/bin:$PATH
 fi
 
-python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/install.sh
-bash install.sh
+sudo -u $USER wget https://raw.githubusercontent.com/mjirik/lisa/master/install.sh
+sudo -u bash install.sh
+
 
 sudo make install
 # sudo -u $USER sh -c "cd ~/projects/skelet3d/build && cmake .. && make"
