@@ -31,9 +31,9 @@ echo "$USER"
 # 0. deb package requirements
 # sudo -u $USER pip install wget --user
 # sudo -u $USER python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_apt.txt
-sudo -u $USER wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_apt.txt
+wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_apt.txt
 
-apt-get install -y -qq $(grep -vE "^\s*#" requirements_apt.txt | tr "\n" " ")
+sudo apt-get install -y -qq $(grep -vE "^\s*#" requirements_apt.txt | tr "\n" " ")
 # apt-get install -y python git python-dev g++ python-numpy python-scipy python-matplotlib python-sklearn python-skimage python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools curl python-pip cmake
 
 # 1. conda python packages
@@ -43,18 +43,18 @@ else
     MACHINE_TYPE=`uname -m`
     if [ ${MACHINE_TYPE} == 'x86_64' ]; then
     # 64-bit stuff here
-        sudo -u $USER wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
-        sudo -u $USER bash Miniconda-latest-Linux-x86_64.sh -b
+        wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
+        bash Miniconda-latest-Linux-x86_64.sh -b
     else
     # 32-bit stuff here
-        sudo -u $USER wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86.sh
-        sudo -u $USER bash Miniconda-latest-Linux-x86.sh -b
+        wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86.sh
+        bash Miniconda-latest-Linux-x86.sh -b
     fi
-    sudo -u $USER export PATH=$HOMEDIR/miniconda/bin:$PATH
+    source export PATH=$HOMEDIR/miniconda/bin:$PATH
 fi
 
-sudo -u $USER wget https://raw.githubusercontent.com/mjirik/lisa/master/install.sh
-sudo -u $USER bash install.sh
+wget https://raw.githubusercontent.com/mjirik/lisa/master/install.sh
+bash install.sh
 
 
 sudo make install
@@ -67,22 +67,29 @@ cd ~/projects
 if [ "$ARG1" = "" ] ; then
     echo "Cloning stable version"
     # stable version
-    sudo -u $USER git clone --recursive -b stable https://github.com/mjirik/lisa.git
+    git clone --recursive -b stable https://github.com/mjirik/lisa.git
 elif [ $ARG1 -eq "devel" ] ; then
     echo "Cloning unstable branch using ssh"
     # if there is an any argument, install as developer
     # apt-get install -y sshpass virtualbox
-    sudo -u $USER git clone --recursive git@github.com:mjirik/lisa.git
+    git clone --recursive git@github.com:mjirik/lisa.git
+elif [ $ARG1 -eq "requirements" ] ; then
+    echo "Just requirements, no git clone"
+
 else
     echo "Cloning unstable branch using http"
-    sudo -u $USER git clone --recursive https://github.com/mjirik/lisa.git
+    git clone --recursive https://github.com/mjirik/lisa.git
 
 fi
-cd lisa
-sudo -u $USER python mysetup.py -d
-sudo -u $USER python mysetup.py -icn
+if [ $ARG1 -eq "requirements" ] ; then
+    echo "Just requirements"
+else
+    cd lisa
+    sudo -u $USER python mysetup.py -d
+    sudo -u $USER python mysetup.py -icn
 
-cd $HOMEDIR
+    cd $HOMEDIR
+fi
 # python src/update_stable.py
 # python lisa.py $@
 
