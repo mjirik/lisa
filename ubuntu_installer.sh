@@ -39,8 +39,16 @@ apt-get install -y -qq $(grep -vE "^\s*#" requirements_apt.txt | tr "\n" " ")
 if hash conda 2>/dec/null; then
     echo "Conda is installed"
 else
-    sudo -u $USER wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
-    sudo -u $USER bash Miniconda-latest-Linux-x86_64.sh -b
+    MACHINE_TYPE=`uname -m`
+    if [ ${MACHINE_TYPE} == 'x86_64' ]; then
+    # 64-bit stuff here
+        sudo -u $USER wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
+        sudo -u $USER bash Miniconda-latest-Linux-x86_64.sh -b
+    else
+    # 32-bit stuff here
+        sudo -u $USER wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86.sh
+        sudo -u $USER bash Miniconda-latest-Linux-x86.sh -b
+    fi
     sudo -u $USER export PATH=$HOMEDIR/miniconda/bin:$PATH
 fi
 
