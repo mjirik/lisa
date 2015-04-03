@@ -72,8 +72,10 @@ def update(dry_run=False):
     #             'git submodule update --init --recursive', shell=True)
     #         subprocess.call(
     #             pipshell + pppysegbase[use_specifed_version], shell=True)
-    #         subprocess.call(pipshell + ppio3d[use_specifed_version], shell=True)
-    #         subprocess.call(pipshell + ppsed3[use_specifed_version], shell=True)
+    #         subprocess.call(pipshell + ppio3d[use_specifed_version],
+    #             shell=True)
+    #         subprocess.call(pipshell + ppsed3[use_specifed_version],
+    #             shell=True)
     #         # skelet3d is not in pipy
     #         # subprocess.call(
     #         #      'pip install -U --no-deps skelet3d --user', shell=True)
