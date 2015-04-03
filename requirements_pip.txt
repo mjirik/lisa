@@ -1,3 +1,4 @@
+pydicom
 pysegbase
 dicom2fem
 sed3
