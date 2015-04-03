@@ -13,9 +13,14 @@ def update(dry_run=False):
     import os.path as op
     path_to_script = op.dirname(op.abspath(__file__))
     path_to_base = op.abspath(op.join(path_to_script, '../'))
-    release_type = 'devel'
+    # release_type = 'devel'
     # release_type = 'stable'
 
+    if not dry_run:
+        try:
+            subprocess.call('git pull', shell=True)
+        except:
+            logger.warning('Problem with git pull')
     conda_ok = True
     print ('Updating submodules')
     try:
