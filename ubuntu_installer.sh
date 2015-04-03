@@ -19,6 +19,7 @@ ARG1=$1
 #     echo "Cloning unstable branch using http"
 # fi
 # exit
+cd ~
 HOMEDIR="`pwd`"
 USER="$(echo `pwd` | sed 's|.*home/\([^/]*\).*|\1|')"
 
@@ -42,15 +43,18 @@ if hash conda 2>/dec/null; then
 else
     MACHINE_TYPE=`uname -m`
     if [ ${MACHINE_TYPE} == 'x86_64' ]; then
+        echo "Installing 64-bit conda"
     # 64-bit stuff here
         wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
         bash Miniconda-latest-Linux-x86_64.sh -b
     else
     # 32-bit stuff here
+        echo "Installing 32-bit conda"
         wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86.sh
         bash Miniconda-latest-Linux-x86.sh -b
     fi
-    source export PATH=$HOMEDIR/miniconda/bin:$PATH
+    export PATH=$HOMEDIR/miniconda/bin:$PATH
+    conda
 fi
 
 wget https://raw.githubusercontent.com/mjirik/lisa/master/install.sh
@@ -73,7 +77,7 @@ elif [ $ARG1 -eq "devel" ] ; then
     # if there is an any argument, install as developer
     # apt-get install -y sshpass virtualbox
     git clone --recursive git@github.com:mjirik/lisa.git
-elif [ $ARG1 -eq "requirements" ] ; then
+elif [ $ARG1 -eq "noclone" ] ; then
     echo "Just requirements, no git clone"
 
 else
@@ -81,12 +85,12 @@ else
     git clone --recursive https://github.com/mjirik/lisa.git
 
 fi
-if [ $ARG1 -eq "requirements" ] ; then
+if [ $ARG1 -eq "noclone" ] ; then
     echo "Just requirements"
 else
     cd lisa
-    sudo -u $USER python mysetup.py -d
-    sudo -u $USER python mysetup.py -icn
+    python mysetup.py -d
+    python mysetup.py -icn
 
     cd $HOMEDIR
 fi
