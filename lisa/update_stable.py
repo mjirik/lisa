@@ -16,6 +16,8 @@ def update(dry_run=False):
     release_type = 'devel'
     # release_type = 'stable'
 
+    conda_ok = True
+    print ('Updating submodules')
     try:
         cmd = ["conda", "install", "--yes", "--file",
                op.join(path_to_base, "requirements_conda.txt")]
@@ -24,11 +26,16 @@ def update(dry_run=False):
     except:
         logger.warning('Problem with conda update')
         traceback.print_exc()
-    print ('Updating submodules')
+        conda_ok = False
+        # try:
+        #     install_and_import('wget', '--user')
 
     try:
-        cmd = ["pip", "install", '--user', "-r",
-               op.join(path_to_base, "requirements_pip.txt")]
+
+        cmd = ["pip", "install", '-U', '--no-deps']
+        if not conda_ok:
+            cmd.append('--user')
+        cmd = cmd + ["-r", op.join(path_to_base, "requirements_pip.txt")]
         if dry_run:
             cmd.insert(1, '-V')
         subprocess.call(cmd)
@@ -67,6 +74,18 @@ def update(dry_run=False):
         except:
             print ('Probem with git submodules')
             print (traceback.format_exc())
+
+
+def install_and_import(package, pip_params=[]):
+    import importlib
+    try:
+        importlib.import_module(package)
+    except ImportError:
+        import pip
+        main_args = ['install'] + pip_params
+        pip.main(main_args)
+    finally:
+        globals()[package] = importlib.import_module(package)
 
 
 def main():
