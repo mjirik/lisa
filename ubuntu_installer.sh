@@ -53,7 +53,7 @@ else
 fi
 
 sudo -u $USER wget https://raw.githubusercontent.com/mjirik/lisa/master/install.sh
-sudo -u bash install.sh
+sudo -u $USER bash install.sh
 
 
 sudo make install
