@@ -51,7 +51,7 @@ def update(dry_run=False):
     print ('Updating pip modules')
     try:
 
-        cmd = ["pip", "install", '-U']  # , '--no-deps']
+        cmd = ["pip", "install", '-U', '--no-deps']
         if not conda_ok:
             cmd.append('--user')
         cmd = cmd + ["-r", op.join(path_to_base, "requirements_pip.txt")]
