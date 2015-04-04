@@ -22,6 +22,18 @@ def update(dry_run=False):
         except:
             logger.warning('Problem with git pull')
     conda_ok = True
+    print ('Updating conda root modules')
+    try:
+        cmd = ["conda", "install", "--yes", "--file",
+               op.join(path_to_base, "requirements_conda_root.txt")]
+        if dry_run:
+            cmd.append('--dry-run')
+        subprocess.call(cmd)
+    except:
+        logger.warning('Problem with conda root update')
+        traceback.print_exc()
+        conda_ok = False
+
     print ('Updating conda modules')
     try:
         cmd = ["conda", "install", "--yes", "--file",
@@ -36,17 +48,6 @@ def update(dry_run=False):
         # try:
         #     install_and_import('wget', '--user')
 
-    print ('Updating conda root modules')
-    try:
-        cmd = ["conda", "install", "--yes", "--file",
-               op.join(path_to_base, "requirements_conda_root.txt")]
-        if dry_run:
-            cmd.append('--dry-run')
-        subprocess.call(cmd)
-    except:
-        logger.warning('Problem with conda root update')
-        traceback.print_exc()
-        conda_ok = False
 
     print ('Updating pip modules')
     try:
