@@ -15,7 +15,8 @@ pyqt=4.10.4=py27_0
 yaml=0.1.4=0
 pyyaml
 vtk=5.10.1=py27_1
+# pandas is installed with pip
 # pandas=0.15.2=np19py27_0
-pandas=0.16.0=np19py27_1
+# pandas=0.16.0=np19py27_1
 ipython=3.1.0=py27_0
 

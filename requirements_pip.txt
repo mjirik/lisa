@@ -8,3 +8,4 @@ nearpy
 joblib
 git+https://github.com/mjirik/morphsnakes.git
 multipolyfit
+pandas
