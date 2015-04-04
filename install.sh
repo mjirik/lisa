@@ -12,7 +12,7 @@ conda install --yes --file requirements_conda.txt
 easy_install -U --user SimpleITK mahotas
 
 # 3. pip install our packages pyseg_base and dicom2fem
-pip install -U -r requirements_pip.txt --user 
+pip install -U --no-deps -r requirements_pip.txt --user 
 
 mkdir projects
 

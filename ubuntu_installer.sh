@@ -46,12 +46,12 @@ else
     if [ ${MACHINE_TYPE} == 'x86_64' ]; then
         echo "Installing 64-bit conda"
     # 64-bit stuff here
-        wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
+        wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O Miniconda-latest-Linux-x86_64.sh
         bash Miniconda-latest-Linux-x86_64.sh -b
     else
     # 32-bit stuff here
         echo "Installing 32-bit conda"
-        wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86.sh
+        wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86.sh -O Miniconda-latest-Linux-x86.sh
         bash Miniconda-latest-Linux-x86.sh -b
     fi
     export PATH=$HOMEDIR/miniconda/bin:$PATH
