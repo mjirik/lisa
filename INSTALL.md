@@ -24,8 +24,8 @@ Install (L)Ubuntu 14.04
 
 ### Script way
 
-    wget https://raw.githubusercontent.com/mjirik/lisa/master/ubuntu_installer.sh
-    sudo bash ubuntu_installer.sh
+    wget https://raw.githubusercontent.com/mjirik/lisa/master/ubuntu_installer.sh -o ubuntu_installer.sh
+    source ubuntu_installer.sh
     
 
 Installer uses sudo for installing standard Ubuntu packages. Other procedures 

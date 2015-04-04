@@ -32,7 +32,7 @@ echo "$USER"
 # 0. deb package requirements
 # sudo -u $USER pip install wget --user
 # sudo -u $USER python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_apt.txt
-wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_apt.txt -o requirements_apt.txt
+wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_apt.txt -O requirements_apt.txt
 
 sudo apt-get install -y -qq $(grep -vE "^\s*#" requirements_apt.txt | tr "\n" " ")
 # apt-get install -y python git python-dev g++ python-numpy python-scipy python-matplotlib python-sklearn python-skimage python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools curl python-pip cmake
@@ -58,7 +58,7 @@ else
     conda
 fi
 
-wget https://raw.githubusercontent.com/mjirik/lisa/master/install.sh =o install.sh
+wget https://raw.githubusercontent.com/mjirik/lisa/master/install.sh -O install.sh
 bash install.sh
 
 
