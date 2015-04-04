@@ -47,6 +47,7 @@ def update(dry_run=False):
         logger.warning('Problem with conda root update')
         traceback.print_exc()
         conda_ok = False
+
     print ('Updating pip modules')
     try:
 
