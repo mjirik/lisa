@@ -41,6 +41,7 @@ sudo apt-get install -y -qq $(grep -vE "^\s*#" requirements_apt.txt | tr "\n" " 
 if hash conda 2>/dec/null; then
     echo "Conda is installed"
 else
+    touch ~/.bashrc
     MACHINE_TYPE=`uname -m`
     if [ ${MACHINE_TYPE} == 'x86_64' ]; then
         echo "Installing 64-bit conda"
