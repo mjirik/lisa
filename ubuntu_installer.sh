@@ -19,17 +19,17 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
 
     sudo apt-get install -y -qq $(grep -vE "^\s*#" requirements_apt.txt | tr "\n" " ")
     
-elif [[ "$OSTYPE" == "darwin"* ]]; then
+# elif [[ "$OSTYPE" == "darwin"* ]]; then
         # Mac OSX
-elif [[ "$OSTYPE" == "cygwin" ]]; then
+# elif [[ "$OSTYPE" == "cygwin" ]]; then
         # POSIX compatibility layer and Linux environment emulation for Windows
-elif [[ "$OSTYPE" == "msys" ]]; then
+# elif [[ "$OSTYPE" == "msys" ]]; then
         # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
-elif [[ "$OSTYPE" == "win32" ]]; then
+# elif [[ "$OSTYPE" == "win32" ]]; then
         # I'm not sure this can happen.
-elif [[ "$OSTYPE" == "freebsd"* ]]; then
+# elif [[ "$OSTYPE" == "freebsd"* ]]; then
         # ...
-else
+# else
         # Unknown.
 fi
 # echo "$ARG1"
