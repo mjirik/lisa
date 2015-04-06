@@ -75,9 +75,9 @@ else
         fi
         wget https://raw.githubusercontent.com/mjirik/lisa/master/install.sh -O install.sh
     elif [[ "$OSTYPE" == "darwin"* ]]; then
-        curl "http://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh" -o "Miniconda-latest.sh"
-        bash Miniconda-latest.sh -b
-        echo "export PATH=$HOMEDIR/miniconda/bin:\$PATH" >> ~/.profile
+        # curl "http://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh" -o "Miniconda-latest.sh"
+        # bash Miniconda-latest.sh -b
+        # echo "export PATH=$HOMEDIR/miniconda/bin:\$PATH" >> ~/.profile
         
         curl https://raw.githubusercontent.com/mjirik/lisa/master/install.sh -o install.sh
     fi
