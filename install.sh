@@ -37,5 +37,6 @@ cd ..
 git clone https://github.com/mjirik/skelet3d.git 
 cd skelet3d
 mkdir build
+cd build
 cmake ..
 make
