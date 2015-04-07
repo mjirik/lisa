@@ -293,6 +293,7 @@ class OrganSegmentation():
         sseg.lungs_segmentation()
         sseg.heart_segmentation()
         self.segmentation = sseg.segmentation
+        self.slab = sseg.slab
 
     def __clean_oseg_input_params(self, oseg_params):
         """
@@ -539,6 +540,9 @@ class OrganSegmentation():
 
     def _interactivity_begin(self):
         logger.debug('_interactivity_begin()')
+        # TODO make copy and work with it
+        self.data3d[self.segmentation > 2] = -1000
+
         # print 'zoom ', self.zoom
         # print 'svs_mm ', self.working_voxelsize_mm
         data3d_res = scipy.ndimage.zoom(
