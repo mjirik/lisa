@@ -228,6 +228,7 @@ class OrganSegmentationWindow(QMainWindow):
         btn_svpv = QPushButton("Save PV tree", self)
         btn_svpv.clicked.connect(self.btnSavePortalVeinTree)
         btn_svpv.setToolTip("Save Portal Vein 1D model into vessel_tree.yaml")
+        btn_svpv.setEnabled(False)
 
         btn_hvseg = QPushButton("Hepatic veins seg.", self)
         btn_hvseg.clicked.connect(self.btnHepaticVeinsSegmentation)
