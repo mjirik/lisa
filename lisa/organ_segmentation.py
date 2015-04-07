@@ -138,7 +138,9 @@ class OrganSegmentation():
         save_filetype='pklz',
         debug_mode=False,
         seg_postproc_pars={},
-        cache_filename='cache.yml'
+        cache_filename='cache.yml',
+        seg_preproc_pars={},
+
 
         #           iparams=None,
     ):
@@ -228,6 +230,10 @@ class OrganSegmentation():
             'snakes_niter': 20,
         }
         self.seg_postproc_pars.update(seg_postproc_pars)
+        self.seg_preproc_pars = {
+            'use_automatic_segmentation': True,
+        }
+        self.seg_preproc_pars.update(seg_preproc_pars)
         # seg_postproc_pars.update(seg_postproc_pars)
         # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
@@ -541,7 +547,9 @@ class OrganSegmentation():
     def _interactivity_begin(self):
         logger.debug('_interactivity_begin()')
         # TODO make copy and work with it
-        self.data3d[self.segmentation > 2] = -1000
+
+        if self.seg_preproc_pars['use_automatic_segmentation']:
+            self.data3d[self.segmentation > 2] = -1000
 
         # print 'zoom ', self.zoom
         # print 'svs_mm ', self.working_voxelsize_mm
