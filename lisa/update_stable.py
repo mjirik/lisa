@@ -36,7 +36,8 @@ def update(dry_run=False):
 
     print ('Updating conda modules')
     try:
-        cmd = ["conda", "install", "--yes", "-c", 'luispedro ',
+        cmd = ["conda", "install", "--yes",
+               # "-c", 'luispedro ',
                '-c', 'SimpleITK', "--file",
                op.join(path_to_base, "requirements_conda.txt")]
         if dry_run:
