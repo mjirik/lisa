@@ -66,7 +66,7 @@ class SupportStructureSegmentation():
             maximal_lung_diff = 0.2,
 	    rad_diaphragm=4
 	    ):
-	    
+
         """
         Segmentaton of support structures for liver segmentatio based on
         locati0on prior.
@@ -84,7 +84,7 @@ class SupportStructureSegmentation():
         self.slab = slab
 	self.maximal_lung_diff = maximal_lung_diff
 	self.rad_diaphragm=rad_diaphragm
-	
+
 
 
         #import pdb; pdb.set_trace()
@@ -122,12 +122,12 @@ class SupportStructureSegmentation():
     def convolve_structure_spine(self, velikost = [150 , 3, 3]):
 	structure = np.ones((int(velikost[2]/self.voxelsize_mm[0]),int(velikost[1]/self.voxelsize_mm[1]),int(velikost[2]/self.voxelsize_mm[2])))
 	return structure
-    	
+
 
     def bone_segmentation(self, bone_threshold = 330):
 	#ipdb.set_trace()
         self.segmentation = np.array(self.data3d > bone_threshold).astype(np.int8)*self.slab['bone']
-	
+
 
 
     def spine_segmentation(self):
@@ -140,15 +140,15 @@ class SupportStructureSegmentation():
 	#ed.show()
 	self.segmentation = seg_prub
         pass
-	
+
 
     def heart_segmentation(self, heart_threshold = 0):
 	a=self.convolve_structure_heart()
-	
+
 	seg_prub = filters.convolve( ((self.segmentation == 10)-0.5) , a )#self.slab['lungs']
-	import sed3
-	ed = sed3.sed3(seg_prub)
-	ed.show()
+	# import sed3
+	# ed = sed3.sed3(seg_prub)
+	# ed.show()
 	seg_prub = np.array(seg_prub<=-0.3)
 	z, x, y= np.nonzero(seg_prub)
 	s = np.array([x , y]).T
@@ -164,7 +164,7 @@ class SupportStructureSegmentation():
 	cc = np.zeros(ran)
 	for a in range(z.shape[0]):
 	    if (z[a] < ran[0]) and (z[a] >= 0):
-	    	self.segmentation[z[a], x[a], y[a]] = self.slab['diaphragm'] 
+	    	self.segmentation[z[a], x[a], y[a]] = self.slab['diaphragm']
 		for b in range(z[a], ran[0]):
 		    cc[b, x[a], y[a]] = 1
 	#ipdb.set_trace()
@@ -172,23 +172,23 @@ class SupportStructureSegmentation():
 	aaa=morphology.binary_opening(aaa , iterations=self.iteration()).astype(self.segmentation.dtype)
 	self.segmentation = self.segmentation + cc * aaa.astype(np.int8)*self.slab['heart']
         pass
-    
+
     def iteration(self, sirka = 5):
 	prumer= np.mean(self.voxelsize_mm)
-	a= int (sirka/prumer)		
+	a= int (sirka/prumer)
 	return a
 
     def orientation(self):
 	#split1, split2 = np.split(self.segmentation, 2, 1)
-	#print(np.nonzero(split1))	
+	#print(np.nonzero(split1))
 	#print(np.nonzero(split2))
 
 	pass
 
     def lungs_segmentation(self, lungs_threshold = -360):
 	seg_prub = np.array(self.data3d <= lungs_threshold)
-	seg_prub = morphology.binary_closing(seg_prub , iterations=self.iteration()).astype(self.segmentation.dtype)	
-	seg_prub = morphology.binary_opening(seg_prub , iterations = 5)	
+	seg_prub = morphology.binary_closing(seg_prub , iterations=self.iteration()).astype(self.segmentation.dtype)
+	seg_prub = morphology.binary_opening(seg_prub , iterations = 5)
 	labeled_seg , num_seg = label(seg_prub)
 	counts= [0]*(num_seg+1)
 	for x in range(1, num_seg+1):
@@ -227,11 +227,11 @@ class SupportStructureSegmentation():
 	    	index2=np.argmax(counts)# druhá plíce nebo nečo jiného
 	    	velikost2=counts[index2]
 		pocet=pocet+1
-		
+
 	    morphology.binary_dilation(self.segmentation,iterations=pocet).astype(self.segmentation.dtype)
 	self.segmentation = self.segmentation + np.array(labeled_seg==index).astype(np.int8)*self.slab['lungs']
 	self.segmentation = self.segmentation + np.array(labeled_seg==index2).astype(np.int8)*self.slab['lungs']
-			
+
         pass
 
 
@@ -356,7 +356,7 @@ def main():
     parser.add_argument('-o','--output',
             default=None,
             help='output file')
-    
+
     parser.add_argument('-d', '--debug', action='store_true',
             help='run in debug mode')
     parser.add_argument('-ss', '--segspine', action='store_true',
@@ -366,7 +366,7 @@ def main():
     parser.add_argument('-sh', '--segheart', action='store_true',
             help='run heart segmentation')
     parser.add_argument('-sb', '--segbones', action='store_true',
-            help='run bones segmentation')    
+            help='run bones segmentation')
     parser.add_argument('-exd', '--exampledata', action='store_true',
             help='run unittest')
     parser.add_argument('-so', '--show_output', action='store_true',
