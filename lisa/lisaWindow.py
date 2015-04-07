@@ -235,6 +235,7 @@ class OrganSegmentationWindow(QMainWindow):
         btn_svhv.clicked.connect(self.btnSaveHepaticVeinsTree)
         btn_svhv.setToolTip(
             "Save Hepatic Veins 1D model into vessel_tree.yaml")
+        btn_svhv.setEnabled(False)
 
         btn_lesions = QPushButton("Lesions localization", self)
         btn_lesions.clicked.connect(self.btnLesionLocalization)
@@ -652,9 +653,9 @@ class OrganSegmentationWindow(QMainWindow):
             self.statusBar().showMessage('No segmentation data!')
 
     def btnConfig(self, event=None):
-        import lisa.configEditor as ce
-        import lisa.config
-        import lisa.organ_segmentation as los
+        import configEditor as ce
+        import config
+        import organ_segmentation as los
         d = los.lisa_config_init()
         root = tk.Tk()
         conf = ce.apply(root, d, (0, 2, 0, 0), use_list=False)
@@ -669,9 +670,11 @@ class OrganSegmentationWindow(QMainWindow):
                 pass
             newconf[key] = value
 
-        lisa.config.save_config(
+        config.save_config(
             newconf,
-            os.path.join(newconf['output_datapath'], 'organ_segmentation.config')
+            os.path.join(
+                newconf['output_datapath'],
+                'organ_segmentation.config')
         )
         self.quit(event)
         # from PyQt4.QtCore import pyqtRemoveInputHook
