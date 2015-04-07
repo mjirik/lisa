@@ -19,4 +19,6 @@ vtk=5.10.1=py27_1
 # pandas=0.15.2=np19py27_0
 # pandas=0.16.0=np19py27_1
 ipython=3.1.0=py27_0
+SimpleITK
+mahotas
 

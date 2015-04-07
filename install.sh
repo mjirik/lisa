@@ -6,7 +6,7 @@ python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements
 
 
 conda install --yes --file requirements_conda_root.txt
-conda install --yes --file requirements_conda.txt
+conda install --yes -c SimpleITK -c luispedro --file requirements_conda.txt
 
 # 2. easy_install requirements simpleITK  
 easy_install -U --user SimpleITK mahotas
