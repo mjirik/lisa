@@ -142,11 +142,15 @@ class SupportStructureSegmentation():
         pass
 	
 
-    def heart_segmentation(self, heart_treshold = 0):
+    def heart_segmentation(self, heart_threshold = 0):
 	a=self.convolve_structure_heart()
-	seg_prub = filters.convolve( ((self.segmentation == self.slab['lungs'])-0.5) , a )
-	self.segmentation = np.array(seg_prub<=-0.3)
-	z, x, y= np.nonzero(self.segmentation)
+	
+	seg_prub = filters.convolve( ((self.segmentation == 10)-0.5) , a )#self.slab['lungs']
+	import sed3
+	ed = sed3.sed3(seg_prub)
+	ed.show()
+	seg_prub = np.array(seg_prub<=-0.3)
+	z, x, y= np.nonzero(seg_prub)
 	s = np.array([x , y]).T
 	h = np.array(z)
 	model = mpf.multipolyfit(s, h, self.rad_diaphragm, model_out = True)
@@ -166,7 +170,7 @@ class SupportStructureSegmentation():
 	#ipdb.set_trace()
 	aaa = np.array(self.data3d >= heart_threshold).astype(np.int8)*self.slab['heart']
 	aaa=morphology.binary_opening(aaa , iterations=self.iteration()).astype(self.segmentation.dtype)
-	self.segmentation = self.segmentation + cc * aaa
+	self.segmentation = self.segmentation + cc * aaa.astype(np.int8)*self.slab['heart']
         pass
     
     def iteration(self, sirka = 5):
@@ -191,7 +195,7 @@ class SupportStructureSegmentation():
 	    a = np.sum(np.array(labeled_seg == x))
 	    counts[x] = a
 
-	
+	#self.segmentation = seg_prub
 	#for x in np.nditer(labeled_seg, op_flags=['readwrite']):
 	#    if x[...]!=0:
 	#    	counts[x[...]]=counts[x[...]]+1
@@ -211,9 +215,10 @@ class SupportStructureSegmentation():
 		morphology.binary_erosion(self.segmentation,iterations=1).astype(self.segmentation.dtype)
 		labeled_seg , num_seg = label(seg_prub)
 		counts= [0] * (num_seg+1)
-		for x in np.nditer(labeled_seg, op_flags=['readwrite']):
-	    	    if x[...]!=0:
-	    	       	counts[x[...]]=counts[x[...]]+1
+		for x in range(1, num_seg+1):
+	    	    a = np.sum(np.array(labeled_seg == x))
+	    	    counts[x] = a
+
 	    	index=np.argmax(counts) #pozadí
 	    	counts[index]=0
 	    	index=np.argmax(counts) #jedna nebo obě plíce
