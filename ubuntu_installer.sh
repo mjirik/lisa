@@ -99,6 +99,7 @@ sudo make install
 
 # Clone Lisa, make icons
 cd
+cd projects
 if [ "$ARG1" = "" ] ; then
     echo "Cloning stable version"
     # stable version
