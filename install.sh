@@ -27,7 +27,7 @@ cd gco_python
 make
 python setup.py install --user
 cd ..
-cd ..
+# cd ..
 
 
 # 5. skelet3d - optional for Histology Analyser

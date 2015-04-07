@@ -36,7 +36,8 @@ def update(dry_run=False):
 
     print ('Updating conda modules')
     try:
-        cmd = ["conda", "install", "--yes", "--file",
+        cmd = ["conda", "install", "--yes", "-c", 'luispedro ',
+               '-c', 'SimpleITK', "--file",
                op.join(path_to_base, "requirements_conda.txt")]
         if dry_run:
             cmd.append('--dry-run')
@@ -47,7 +48,6 @@ def update(dry_run=False):
         conda_ok = False
         # try:
         #     install_and_import('wget', '--user')
-
 
     print ('Updating pip modules')
     try:
