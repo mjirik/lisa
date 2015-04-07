@@ -162,31 +162,30 @@ Install Mac OS
     and [OSX 10.9 Mavericks installer](https://distfiles.macports.org/MacPorts/MacPorts-2.2.1-10.9-Mavericks.pkg)
 
 
- * GIT
+ * Install GIT + CMake using macports
 
-    Use mac ports
 
-        sudo port install git-core +svn +doc +bash_completion +gitweb
+        sudo port install git-core +svn +doc +bash_completion +gitweb cmake
 
-    Use mac installer  (http://git-scm.com/download/mac)
+    or 
+    
+    Use [Git installer](http://git-scm.com/download/mac)
+    and [CMake installer](http://www.cmake.org/download/#latest).
     There is a need to allow install applications from unknown developers
     (Settings - Security & Privacy - General - Allow applications downloaded from)
- 
- * Anaconda
+   
+    
+    
+ * [Install Anaconda](http://continuum.io/downloads)
 
-    Install other stuff with anaconda
+ * All other dependencies install with script
+
 
         curl https://raw.githubusercontent.com/mjirik/lisa/master/ubuntu_installer.sh -o ubuntu_installer.sh
         source ubuntu_installer.sh
 
+     You can run `ubuntu_installer.py` with parameter `devel` or `noclone` to control source files cloning
  
-
- * source files
-
-
-        git clone git@github.com:mjirik/pyseg_base.git
-        git submodule update --init --recursive
-
 
 
    
@@ -363,7 +362,7 @@ Install Mac OS (Lisa until version 1.4)
 
  * Numpy, Scipy, ...
 
-
+c
         sudo port selfupdate
         sudo port upgrade outdated
         sudo port install py27-pyqt4 py27-numpy py27-scipy py27-matplotlib py27-ipython +notebook py27-pandas py27-sympy py27-nose  py-scikit-learn py-pydicom py27-yaml py27-cython vtk5 +qt4_mac +python27 py27-distutils-extra
