@@ -24,12 +24,11 @@ Install (L)Ubuntu 14.04
 
 ### Script way
 
-    wget https://raw.githubusercontent.com/mjirik/lisa/master/ubuntu_installer.sh -o ubuntu_installer.sh
-    source ubuntu_installer.sh
+    curl https://raw.githubusercontent.com/mjirik/lisa/master/installer.sh -o installer.sh
+    source installer.sh
     
 
-Installer uses sudo for installing standard Ubuntu packages. Other procedures 
-uses only normal user permission.
+You can run `installer.py` with parameter `devel` or `noclone` to control source files cloning
     
 ### Manual way
 
@@ -154,28 +153,6 @@ Install Mac OS
     * Click "Install" on the command line tools line.
 
 
- * MacPorts
-
-    Use standard pkg package. (http://www.macports.org/install.php)
-    
-    Tested on [OS X 10.8 Mountain Lion installer](https://distfiles.macports.org/MacPorts/MacPorts-2.2.1-10.8-MountainLion.pkg)
-    and [OSX 10.9 Mavericks installer](https://distfiles.macports.org/MacPorts/MacPorts-2.2.1-10.9-Mavericks.pkg)
-
-
- * Install GIT + CMake using macports
-
-
-        sudo port install git-core +svn +doc +bash_completion +gitweb cmake
-
-    or 
-    
-    Use [Git installer](http://git-scm.com/download/mac)
-    and [CMake installer](http://www.cmake.org/download/#latest).
-    There is a need to allow install applications from unknown developers
-    (Settings - Security & Privacy - General - Allow applications downloaded from)
-   
-    
-    
  * [Install Anaconda](http://continuum.io/downloads)
 
  * All other dependencies install with script
