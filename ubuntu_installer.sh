@@ -73,20 +73,31 @@ else
             wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86.sh -O Miniconda-latest-Linux-x86.sh
             bash Miniconda-latest-Linux-x86.sh -b
         fi
-        wget https://raw.githubusercontent.com/mjirik/lisa/master/install.sh -O install.sh
+        wget https://raw.githubusercontent.com/mjirik/lisa/master/install_nosudo.sh -O install_nosudo.sh
     elif [[ "$OSTYPE" == "darwin"* ]]; then
         # curl "http://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh" -o "Miniconda-latest.sh"
         # bash Miniconda-latest.sh -b
         # echo "export PATH=$HOMEDIR/miniconda/bin:\$PATH" >> ~/.profile
         
-        curl https://raw.githubusercontent.com/mjirik/lisa/master/install.sh -o install.sh
+        curl https://raw.githubusercontent.com/mjirik/lisa/master/install_nosudo.sh -o install_nosudo.sh
     fi
     export PATH=$HOMEDIR/miniconda/bin:$PATH
     conda
 fi
 
+if [[ "$OSTYPE" == "darwin"* ]]; then
 
-bash install.sh
+    curl https://raw.githubusercontent.com/mjirik/lisa/master/install_nosudo.sh -o install_nosudo.sh
+    if hash brew 2>/dec/null; then
+        echo "Homebrew is installed"
+    else
+        ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    fi
+    brew install git cmake
+fi
+
+
+bash install_nosudo.sh
 
 cd 
 cd projects
