@@ -181,10 +181,10 @@ Install Mac OS
  * All other dependencies install with script
 
 
-        curl https://raw.githubusercontent.com/mjirik/lisa/master/ubuntu_installer.sh -o ubuntu_installer.sh
+        curl https://raw.githubusercontent.com/mjirik/lisa/master/installer.sh -o installer.sh
         source ubuntu_installer.sh
 
-     You can run `ubuntu_installer.py` with parameter `devel` or `noclone` to control source files cloning
+     You can run `installer.py` with parameter `devel` or `noclone` to control source files cloning
  
 
 
