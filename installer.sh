@@ -31,7 +31,19 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
         # ...
 # else
         # Unknown.
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+
+    
+    if hash brew 2>/dec/null; then
+        echo "brew is installed"
+    else
+        echo "installing brew"
+        ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    fi
+    brew install git cmake
+    curl https://raw.githubusercontent.com/mjirik/lisa/master/install_nosudo.sh -o install_nosudo.sh
 fi
+
 # echo "$ARG1"
 # if [ "$ARG1" = "" ] ; then
 #     echo "asdfa"
@@ -59,6 +71,7 @@ fi
 if hash conda 2>/dec/null; then
     echo "Conda is installed"
 else
+    
     touch ~/.bashrc
     MACHINE_TYPE=`uname -m`
     if [[ "$OSTYPE" == "linux-gnu" ]]; then
@@ -75,6 +88,7 @@ else
         fi
         wget https://raw.githubusercontent.com/mjirik/lisa/master/install_nosudo.sh -O install_nosudo.sh
     elif [[ "$OSTYPE" == "darwin"* ]]; then
+        echo "Installing conda"
         # curl "http://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh" -o "Miniconda-latest.sh"
         # bash Miniconda-latest.sh -b
         # echo "export PATH=$HOMEDIR/miniconda/bin:\$PATH" >> ~/.profile
@@ -85,16 +99,7 @@ else
     conda
 fi
 
-if [[ "$OSTYPE" == "darwin"* ]]; then
 
-    curl https://raw.githubusercontent.com/mjirik/lisa/master/install_nosudo.sh -o install_nosudo.sh
-    if hash brew 2>/dec/null; then
-        echo "Homebrew is installed"
-    else
-        ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-    fi
-    brew install git cmake
-fi
 
 
 bash install_nosudo.sh
