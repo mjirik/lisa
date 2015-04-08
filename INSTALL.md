@@ -24,7 +24,7 @@ Install (L)Ubuntu 14.04
 
 ### Script way
 
-    wget https://raw.githubusercontent.com/mjirik/lisa/master/installer.sh -o installer.sh
+    wget https://raw.githubusercontent.com/mjirik/lisa/master/installer.sh -O installer.sh
     source installer.sh
     
 
