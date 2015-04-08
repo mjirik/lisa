@@ -24,7 +24,7 @@ Install stable branche
 
 or for current developement
 
-    curl https://raw.githubusercontent.com/mjirik/lisa/master/installer.sh
+    curl -O https://raw.githubusercontent.com/mjirik/lisa/master/installer.sh
     source installer.sh devel
 
 or use [Lisa in Ubuntu for VirtualBox](http://147.228.240.61/queetech/install/lisa_ubuntu14.04.vdi)
