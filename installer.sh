@@ -40,7 +40,7 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
         echo "installing brew"
         ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
     fi
-    brew install git cmake
+    brew install git cmake homebrew/science/insighttoolkit
     curl https://raw.githubusercontent.com/mjirik/lisa/master/install_nosudo.sh -o install_nosudo.sh
 fi
 
