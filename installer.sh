@@ -18,7 +18,7 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_apt.txt -O requirements_apt.txt
 
     sudo apt-get install -y -qq $(grep -vE "^\s*#" requirements_apt.txt | tr "\n" " ")
-    
+    wget https://raw.githubusercontent.com/mjirik/lisa/master/install_nosudo.sh -O install_nosudo.sh
 # elif [[ "$OSTYPE" == "darwin"* ]]; then
         # Mac OSX
 # elif [[ "$OSTYPE" == "cygwin" ]]; then
@@ -86,7 +86,8 @@ else
             wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86.sh -O Miniconda-latest-Linux-x86.sh
             bash Miniconda-latest-Linux-x86.sh -b
         fi
-        wget https://raw.githubusercontent.com/mjirik/lisa/master/install_nosudo.sh -O install_nosudo.sh
+        echo "export PATH=$HOMEDIR/miniconda/bin:\$PATH" >> ~/.bashrc
+        
     elif [[ "$OSTYPE" == "darwin"* ]]; then
         echo "Installing conda"
         # curl "http://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh" -o "Miniconda-latest.sh"
