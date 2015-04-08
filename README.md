@@ -21,7 +21,7 @@ See our [install notes](https://github.com/mjirik/lisa/blob/master/INSTALL.md) f
 Get stable branche
 
     curl https://raw.githubusercontent.com/mjirik/lisa/master/installer.sh
-    sourceu installer.sh
+    source installer.sh
 
 or for current developement
 
