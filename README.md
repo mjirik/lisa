@@ -18,10 +18,9 @@ Install
 See our [install notes](https://github.com/mjirik/lisa/blob/master/INSTALL.md) for Linux, Mac OS and Windows 
 
 
-Get stable branche
+Install stable branche
 
-    curl https://raw.githubusercontent.com/mjirik/lisa/master/installer.sh
-    source installer.sh
+    source <(curl -s https://raw.githubusercontent.com/mjirik/lisa/master/installer.sh)
 
 or for current developement
 
