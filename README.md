@@ -20,15 +20,13 @@ See our [install notes](https://github.com/mjirik/lisa/blob/master/INSTALL.md) f
 
 Get stable branche
 
-    wget https://raw.githubusercontent.com/mjirik/lisa/master/ubuntu_installer.sh
-    chmod a+x ubuntu_installer.sh
-    sudo ./ubuntu_installer.sh
+    curl https://raw.githubusercontent.com/mjirik/lisa/master/installer.sh
+    sourceu installer.sh
 
 or for current developement
 
-    wget https://raw.githubusercontent.com/mjirik/lisa/master/ubuntu_installer.sh
-    chmod a+x ubuntu_installer.sh
-    sudo ./ubuntu_installer.sh devel
+    curl https://raw.githubusercontent.com/mjirik/lisa/master/installer.sh
+    source installer.sh devel
 
 or use [Lisa in Ubuntu for VirtualBox](http://147.228.240.61/queetech/install/lisa_ubuntu14.04.vdi)
 
