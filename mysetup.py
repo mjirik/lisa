@@ -341,13 +341,38 @@ def download_and_run(url, local_file_name):
     subprocess.call(local_file_name)
 
 
-def make_icon():
-    import fileinput
+def get_conda_path():
+    import os.path as op
+    conda_pth = op.expanduser('~/anaconda/bin')
+    if not op.exists(conda_pth):
+        conda_pth = op.expanduser('~/miniconda/bin')
+    return conda_pth
+
+
+def file_copy_and_replace_lines(in_path, out_path):
     import shutil
+    import fileinput
 
     print "path to script:"
     print path_to_script
     lisa_path = os.path.abspath(path_to_script)
+
+    shutil.copy2(in_path, out_path)
+    conda_path = get_conda_path()
+
+    print 'ip ', in_path
+    print 'op ', out_path
+    print 'cp ', conda_path
+    for line in fileinput.input(out_path, inplace=True):
+        # coma on end makes no linebreak
+        line = line.replace("@{LISA_PATH}", lisa_path)
+        line = line.replace("@{CONDA_PATH}", conda_path)
+        print line
+
+def make_icon():
+    import fileinput
+    import shutil
+
 
     in_path = os.path.join(path_to_script, "applications/lisa.desktop.in")
     in_path_ha = os.path.join(path_to_script, "applications/ha.desktop.in")
@@ -367,43 +392,29 @@ def make_icon():
     # copy desktop files to desktop
     if desktop_path is not None:
         out_path = os.path.join(desktop_path, "lisa.desktop")
-        shutil.copy2(in_path, out_path)
-
         out_path_ha = os.path.join(desktop_path, "ha.desktop")
-        shutil.copy2(in_path_ha, out_path_ha)
 
         #fi = fileinput.input(out_path, inplace=True)
         print "icon output path:"
         print out_path, out_path_ha
+        file_copy_and_replace_lines(in_path, out_path)
+        file_copy_and_replace_lines(in_path_ha, out_path_ha)
 
-        for line in fileinput.input(out_path, inplace=True):
-            #coma on end makes no linebreak
-            print line.replace("@{LISA_PATH}", lisa_path),
 
-        for line in fileinput.input(out_path_ha, inplace=True):
-            #coma on end makes no linebreak
-            print line.replace("@{LISA_PATH}", lisa_path),
 
     # copy desktop files to $HOME/.local/share/applications/
     # to be accesable in application menu (Linux)
     local_app_path = os.path.join(home_path, '.local/share/applications')
     if os.path.exists(local_app_path) and os.path.isdir(local_app_path):
         out_path = os.path.join(local_app_path, "lisa.desktop")
-        shutil.copy2(in_path, out_path)
 
         out_path_ha = os.path.join(local_app_path, "ha.desktop")
-        shutil.copy2(in_path_ha, out_path_ha)
 
         print "icon output path:"
         print out_path, out_path_ha
+        file_copy_and_replace_lines(in_path, out_path)
+        file_copy_and_replace_lines(in_path_ha, out_path_ha)
 
-        for line in fileinput.input(out_path, inplace=True):
-            #coma on end makes no linebreak
-            print line.replace("@{LISA_PATH}", lisa_path),
-
-        for line in fileinput.input(out_path_ha, inplace=True):
-            #coma on end makes no linebreak
-            print line.replace("@{LISA_PATH}", lisa_path),
     else:
         print "Couldnt find $HOME/.local/share/applications/."
 

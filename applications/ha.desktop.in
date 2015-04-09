@@ -4,7 +4,7 @@
 Name=Histology Analyser
 GenericName=Histology Analyser
 Comment=LISA - Histology Analyser
-Exec=@{LISA_PATH}/applications/ha.sh
+Exec=bash -c 'export PATH=@{CONDA_PATH}:$PATH ; @{LISA_PATH}/applications/ha.sh'
 Terminal=false
 Type=Application
 Icon=@{LISA_PATH}/applications/LISA256.png
