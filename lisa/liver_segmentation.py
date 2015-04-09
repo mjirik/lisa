@@ -11,8 +11,8 @@ Modul slouží k segmentaci jater.
 Třída musí obsahovat funkce run(), interactivity_loop() a proměnné seeds,
 voxelsize, segmentation a interactivity_counter.
 Spoluautor: Martin Červený
-
 """
+
 import logging
 logger = logging.getLogger(__name__)
 import argparse
@@ -28,86 +28,86 @@ import sed3
 from sklearn import mixture
 import morphsnakes
 import sys
+import matplotlib.pyplot as plt
 
-def findPeak (CTstupnice,CTcetnosti,konstanta = 1.2):
-    '''Najde a vybere nejpravejsi spicku v grafu CTcetnosti
-    CT stupnice jsou pak hodnoty odpovidajici CT cislum,
-    pro pripad pouziti funkce pro prahovani 
-    konstanta:
-    spicky jsou urceny jako oblasti s 
-    hodnotou > prumer + konstanta*odchylka
-    vraci:
-    [jedinaSpicka,y1,y2,hraniceHorni,hraniceDolni]
-    jedinaSpicka - pole s 0mi vsude krome vybrane spicky
-    y1 start spicky v poli
-    y2 konec spicky v poli
-    hraniceHorni,hraniceDolni - hodnoty z CTstupnice na y1,y2
-     '''
+def vyberMaxObjekt(data3dObjekty):
+    '''
+    data3dObjekty = T/F pole s 3d objekty
+    velikostVoxelu = [x,y,z]
+    vraci T/F pole s nejvetsim objektem
+    Vrati pole data3do. s odstranenymi vsemi objekty
+    krome nejvetsiho
+    '''
+    [labelImage, labels] = ndimage.label(data3dObjekty)
+    histogram = ndimage.histogram(labelImage, 1, labels, labels)
+    pozice = np.argmax(histogram)
+    hodnota = pozice+1
+    vysledek = (labelImage == hodnota).astype(np.int8)
+    return vysledek
+
+def odstranMaleSpicky(spicky2d,konstanta = 0.15):
+    '''
+    spicky2d - pole s ciselnymi hodnotami kde objekty (spicky) jsou a 0 kde ne
+    konstanta - nasobek velikosti nejvetsiho objektu (spicky) pro zachovani 
+    Rozdeli spicky2d na objekty, nalezne nejvetsi a odstrani vsechny objekty mensi
+    nez nasobek velikosti daneho objektu
+    vraci: uklizenePole - pole spicky2d bez malych objektu       
+    '''    
+    nejvetsi = vyberMaxObjekt(spicky2d)
+    delkaNej = np.sum(nejvetsi)
+    [labelImage, labels] = ndimage.label(spicky2d)
     
+    uklizenePole = np.zeros(len(spicky2d),dtype = np.bool)
     
-    ukazat1= CTstupnice
-    ukazat2= CTcetnosti
+    for x in range(labels):
+        oznaceni = x+1
+        vybranyObjekt = labelImage == oznaceni
+        velikost = np.sum(vybranyObjekt)
+        if(velikost > konstanta*delkaNej):
+            uklizenePole = np.add(uklizenePole,vybranyObjekt)
+            
+    uklizenePole = np.multiply(uklizenePole,spicky2d)        
     
-    upraveny = ukazat2
-    #upraveny[0:100] = 0
-    prumer = np.mean(upraveny)
-    var = np.var(upraveny)
-    TF = upraveny > prumer+konstanta*np.sqrt(var)
-    cetnostiSpicek = np.multiply(TF,upraveny)
-    
-    #plt.plot(cetnostiSpicek)    
-    #plt.show()
-    
-    
-    hodnotySpicek = np.multiply(TF,ukazat1)
-    
-    'vybrani nejpravejsi nalezene spicky'
-    
-    hraniceHorni = 0
-    hraniceDolni = 0
-    y1 = 0
-    y2 = 0
     horniNalezena = False
-    delka = len(hodnotySpicek)
+    delka = len(uklizenePole)
     
     for x in range(delka):
         y = delka-x-1
-        cislo = hodnotySpicek[y]
+        cislo = uklizenePole[y]
 
         if((cislo!=0) and (horniNalezena == False)):#nalezena horni hranice
-            hraniceHorni = cislo
             y2 = y
             horniNalezena = True
         if((cislo==0) and (horniNalezena == True)):#nalezena dolni hranice
-            hraniceDolni= ukazat1[y]
             y1 = y
             break
     
-    jedinaSpicka = cetnostiSpicek
-    jedinaSpicka[0:y1] = 0
-    jedinaSpicka[y2:-1] = 0
-    
-    #plt.plot(jedinaSpicka)    
-    #plt.show()
-    return [jedinaSpicka,y1,y2,hraniceHorni,hraniceDolni]
+    return [uklizenePole,y1,y2]
 
-
-def prahovaniKonvoluce(data3d,voxelSize,konstSpicky=1,konstUtlum = 0.9):
+def prahovaniKonvoluce(data3d,voxelSize,konstSpicky=0.95):
     '''
-    prahovani slozitym zpusobem
+    prahovani za pomoci krivkove analyzy histogramu
+    vyuziva teorie ze jatra jsou nejpravejsi vyznamna spicka v histogramu
     data3d - vstupni data pro prahovani
     voxelSize - veliksot voxelu (nepouzivana)
-    konstSpicky- konstanta pro urceni spicek (vyssi => mene spicek)
-    konstUtlum - na jake mnozstvi musi poklesnout hodnota cetnosti
+    konstSpicky- konstanta pro urceni spicek (vyssi => mene uzsich spicek)
     Popis:
     1) vypocte se histogram
-    2) vybere se jeho nejpravejsi "spicka"
-    3) tato "spicka" muze obsahovat male spicky - vybere se opet nejpravejsi
-    4) vybere se maximum teto spicky a oznaci se jako dolni hranice prahovani
-    5) od hodnoty cetnosti (maxima) je sledovan vyvoj grafu smerem vpravo az
-    do poklesu hodnoty cetnosti na 0.9 puvodni urovne. Odpovidajici hodnota 
-    jasu je vybrana jako horni hranice prahovani
-    vysledny obraz je s jatry (a podobne jasnymi organy) nejhusteji zastoupenymi
+    2) ohranicic se vpravo nulami (vymaze se "vzduch")
+    2) vybere se jeho spicky (a odstrani male "sumove" spicky)
+    3) na zaklade poctu nalezenych spicek se zvoli submetoda
+     a) tri spicky - jatra jsou treti prava spicka
+     b) dve spicky - jatra jsou nejpravejsi spicka v diferenci 'skluzu'
+     c) jedna spicka -  jatra jsou nejpravejsi spicka v diferenci 'skluzu'
+     (avsak je treba je hledat za prvni spickou)  
+    Overeni teorie jsou dve:
+    I) metody teorii odpovidaji, funguji a neprotireci si
+    II) pri zmeneni metody (odstraneni spicek) take fungovaly
+    (konkretne metoda 10 po vycisteni spicek presla ze stadia 3 
+    spicky kde fungovala do stadia 2 spicky)
+    logicky pri zachovani spicek funguji "lepe"
+    testovano na sliver.org trenovaci mnozine podava konzistentni vysledky
+    
     vraci: T/F prahovany obrazek
     '''
 
@@ -123,55 +123,222 @@ def prahovaniKonvoluce(data3d,voxelSize,konstSpicky=1,konstUtlum = 0.9):
     ukazat1 = bins[0:len(bins)-2] #hodnoty bins[0:len(bins)-1]
     ukazat2 = cetnosti[0:len(cetnosti)-1] #cetnosti    
     
-    #plt.plot(ukazat1,ukazat2)    
-    #plt.show()
-    
     'vybrani nejpravejsi nalezene "spicky" (utvar muze byt nahore zaspicately)'
     upraveny = ukazat2
     upraveny[0:200] = 0 #odstraneni rusiveho vrcholu - zastini ostatni
-    [jedinaSpicka,y1,y2,hraniceHorni,hraniceDolni] = findPeak (ukazat1,upraveny,konstanta = 1)#1.2#1
     
-    #plt.plot(jedinaSpicka)    
-    #plt.show()    
+    [spicky,y1,y2] = findPeak (ukazat2,procenta = konstSpicky) #nalezeni prave spicky
     
-    'vybrani nejpravejsiho maxima spicky (utvaru) a urceni jako hranice'
-    miniSpicka = jedinaSpicka[y1:y2]
-    hodnoty = ukazat1[y1:y2]
+    'odstraneni "sumovych" spicek'
+    [odstraneneMale,y1,y2] = odstranMaleSpicky(spicky)    
+    TF = odstraneneMale >0
+    [labeled,labels] = ndimage.label(TF)    
+    spicky = odstraneneMale    
+    'Zvoleni metody na zaklade poctu spicek'
+    if(labels >=3):
+        [poziceStart,poziceKonec] = prahovaniTri(spicky,y1,y2,ukazat2)
+        hraniceDolni = ukazat1[poziceStart]
+        hraniceHorni = ukazat1[poziceKonec]
+        vetsi = data3d> hraniceDolni
+        mensi = data3d < hraniceHorni
+        segmentaceVysledek = np.multiply(vetsi,mensi)
+        return segmentaceVysledek
     
-    #plt.plot(miniSpicka)    
-    #plt.show()
+    if(labels ==1):        
+        [poziceStart,poziceKonec] = prahovaniJedna(spicky,y1,y2,ukazat2)
+        hraniceDolni = ukazat1[poziceStart]
+        hraniceHorni = ukazat1[poziceKonec]
+        vetsi = data3d> hraniceDolni
+        mensi = data3d < hraniceHorni
+        segmentaceVysledek = np.multiply(vetsi,mensi) 
+        return segmentaceVysledek
     
-    [jedinaMSpicka,m1,m2,hHorni,hDolni] = findPeak(miniSpicka,miniSpicka,konstanta = 1)   #1.2
-    
-    #plt.plot(jedinaMSpicka)    
-    #plt.show()
-    
-    poziceMala = np.argmax(jedinaMSpicka)
-    pozice = y1+poziceMala
-    
-    #cosi = ukazat2[pozice:-1]
-    
-    #plt.plot(cosi)    
-    #plt.show()
+    if(labels ==2):  
+        [poziceStart,poziceKonec] = prahovaniDve(spicky,y1,y2,ukazat2)
+        hraniceDolni = ukazat1[poziceStart]
+        hraniceHorni = ukazat1[poziceKonec]  
+        vetsi = data3d> hraniceDolni
+        mensi = data3d < hraniceHorni
+        segmentaceVysledek = np.multiply(vetsi,mensi) 
+        return segmentaceVysledek       
+    else:
+        print 'SELHANI NALEZENI SPICEK V HISTOGRAMU'
+    return  
 
-    hranice = ukazat1[pozice]
+
+def findPeak (data2d,procenta = 0.5):
+    '''
+    Najde a vybere nejpravejsi spicku v grafu 
+    data2d
+    spicky jsou urceny jako oblasti ktere zustanou
+    po odstraneni procentax1 nejmensich hodnot z celku
+    (prahovani)
+    vraci:
+    [spicky,y1,y2]
+    jedinaSpicka - pole s 0mi vsude krome vybrane spicek
+    y1 start spicky v poli
+    y2 konec spicky v poli
+    '''
+    kopie = np.copy(data2d)
+    serazene = np.sort(kopie)
+    delka = len(serazene)
+    pozice = int(delka*procenta)
+    hranice = serazene[pozice]
+    TF = data2d > hranice
+    jednaSpicka = np.multiply(data2d,TF)
+    'vybrani nejpravejsi nalezene spicky'
+
+    y1 = 0
+    y2 = 0
+    horniNalezena = False
+    delka = len(jednaSpicka)
     
-    'vybrani voxelu od hranice az po pokles cetnosti na uroven utlumu'
-    hraniceDolni = hranice
-    hodnotaNarustu = ukazat2[pozice]
-    utlum = konstUtlum
-    
-    for pomocny in range(pozice,len(ukazat2)):
-        hodnota = ukazat2[pomocny]
-        if(hodnota<= hodnotaNarustu*(1-utlum) ):
-            hraniceHorni = ukazat1[pomocny]
+    for x in range(delka):
+        y = delka-x-1
+        cislo = jednaSpicka[y]
+
+        if((cislo!=0) and (horniNalezena == False)):#nalezena horni hranice
+            y2 = y
+            horniNalezena = True
+        if((cislo==0) and (horniNalezena == True)):#nalezena dolni hranice
+            y1 = y
             break
+    jediny = np.copy(jednaSpicka)
+    jediny[0:y1] = 0
+    jediny[y2:-1] = 0
+    
+    #plt.plot(jednaSpicka)
+    #plt.show()
 
-    vetsi = data3d> hraniceDolni
-    mensi = data3d < hraniceHorni
-    segmentaceVysledek = np.multiply(vetsi,mensi)
-    return segmentaceVysledek
 
+    spicky = jednaSpicka #(i ostatni...)
+    return [spicky,y1,y2]
+
+def prahovaniTri(spicky,y1,y2,ukazat2,konstanta1 = 0.45,konstanta2 = 0.8):#0.5 0.7 
+    '''
+    Prahovani pro pripad nalezeni tri spicek v histogramu
+    spicky - 2d pole oznacujici nalezene dve spicky v histogramu
+    y1,y2 - pocatek a konec nejpravejsi spicky v poli 'spicky'
+    konstanta1 - konstanta urcujici konec sestupu vpravo od max spicky (konst*max)
+    onstanta2- konstanta urcujici konec sestupu vlevo od max spicky (konst*max)
+    POPIS
+    1) urci se nejpravejsi spicka ze 'spicky' a jeji maximum
+    2)prava hranice je misto kde poklesne na konstanta1*maxima
+    3)leva hranice je misto kde poklesne na konstanta2*maxima
+    vraci [poziceStart,poziceKonec] 
+    hranice prahovani   
+    '''    
+    jedinaSpicka = spicky[y1:y2]
+    maximalni = np.argmax(jedinaSpicka)
+    maximum = jedinaSpicka[maximalni]
+    
+    vetsi = ukazat2> konstanta1*maximum
+    nonzeroid = np.nonzero(vetsi)[0]
+    posledni = nonzeroid[-1]
+    
+    usek = ukazat2[0:y1+maximalni]
+    vetsiMini = usek> konstanta2*maximum
+    nonzeroid = np.nonzero(vetsiMini)[0]
+    posledniVuseku = nonzeroid[-1]
+    
+    prvni = posledniVuseku 
+    return [prvni,posledni]
+
+def prahovaniJedna(spicky,y1,y2,ukazat2,konstanta1 = 0.1,konstanta2 = 0.7,konstantaSpicky = 0.45):#0.07
+    '''
+    Prahovani pro pripad nalezeni jedine spicky v histogramu
+    spicky - 2d pole oznacujici nalezene dve spicky v histogramu
+    y1,y2 - pocatek a konec nejpravejsi spicky v poli 'spicky'
+    konstanta1 - konstanta urcujici konec sestupu vpravo od max spicky (konst*max)
+    onstanta2- k
+    POPIS
+    1) urci se 'sjezd' od maxima az do maximum*konstanta1
+    2)spocte se jeho diference a 1x se vyfiltruje obdelnikem delky 15
+    3)obrati se jeji hodnota (* -1)
+    4) vybere se jeji nejpravejsi spicka ('druha ze dvou')
+    TATO VARIANTA JE POUZE 1X V TRENOVACI MNOZINE A PROTO NENI DOSTATECNE PROVERENA 
+    (nicmene teorii odpovida a na danem vzorku fungovala)    
+    vraci [poziceStart,poziceKonec] 
+    hranice prahovani   
+    '''
+    spicka = spicky[y1:y2]
+    maximalni = np.argmax(spicka)
+    maximum = spicka[maximalni]
+    doKonce = ukazat2[y1+maximalni:-1]
+    
+    vetsi = doKonce> konstanta1*maximum
+    nonzeroid = np.nonzero(vetsi)[0]
+    posledni = nonzeroid[-1]
+    
+    ohraniceny = doKonce[0:posledni]
+    filtr = np.ones([15])/15
+    diference = np.diff(ohraniceny)
+    filtrovana = np.convolve(diference, filtr, mode = 'same')
+    obracena = filtrovana*(-1)
+    
+    [spickyObracena,z1,z2 ] = findPeak (obracena,procenta = konstantaSpicky)
+    [spickyObracena,z1,z2 ] = odstranMaleSpicky(spickyObracena,konstanta = konstantaSpicky)
+    poziceStart = y1+maximalni+z1
+    poziceKonec = y1+maximalni+z2
+    
+    return [poziceStart,poziceKonec] 
+
+def prahovaniDve(spicky,y1,y2,ukazat2,konstanta1 = 0.1,konstantaSpicky = 0.4,procentaShift = 0.15):    
+    '''
+    Prahovani pro pripad nalezeni dvou spicek v histogramu
+    spicky - 2d pole oznacujici nalezene dve spicky v histogramu
+    y1,y2 - pocatek a konec nejpravejsi spicky v poli 'spicky'
+    konstanta1 - konstanta urcujici konec sestupu vpravo od max spicky (konst*max)
+    konstantaSpicky - konstanta pouzivana pro hledani spicek v diferenci (findPeak)
+    procentaShift - zaverecne posunuti nalezene spicky vpravo o procenta*delkaSpicky
+    zduvodneni: vpravo je mene rusivych elementu (kosti apod)  a velke spicky tak jsou 
+    'vycisteny' zatimco male zustavaji relativne nezmeneny, vysledek lepsi nez bez.
+    POPIS
+    1) urci se 'sjezd' od maxima az do maximum*konstanta1
+    2)spocte se jeho diference a 2x se vyfiltruje obdelnikem delky 15
+    3)spocte se jeji absolutni hodnota
+    4) vybere se jeji nejpravejsi spicka 
+    5) tato spicka se posune o procentaShift jeji delky
+    6) hranice prahovani jsou urceny jako okraje  posunute spicky
+    vraci [poziceStart,poziceKonec] 
+    hranice prahovani   
+    '''
+    
+    spicka = spicky[y1:y2]
+    maximalniStart = np.argmax(spicka)
+    maximum = spicka[maximalniStart]
+    doKonce = ukazat2[y1:-1]
+    
+    vetsi = doKonce> konstanta1*maximum
+    nonzeroid = np.nonzero(vetsi)[0]
+    posledni = nonzeroid[-1]    
+    ohraniceny = doKonce[0:posledni]
+    
+    filtr = np.ones([15])/15
+    diference = np.diff(ohraniceny)
+    filtrovana = np.convolve(diference, filtr, mode = 'same')
+    dvakratFiltrovana = np.convolve(filtrovana, filtr, mode = 'same')
+    absolutni = np.abs(dvakratFiltrovana)
+    
+    [spickyAbs,z1,z2 ] = findPeak (absolutni,procenta = konstantaSpicky)
+    [spickyAbs,z1,z2 ] = odstranMaleSpicky(spickyAbs,konstanta = konstantaSpicky)
+    
+    jedinaSpicka = np.copy(spickyAbs)
+    jedinaSpicka[0:z1] = 0
+    
+    maximalniSpicka = np.argmax(jedinaSpicka)
+    maximum = jedinaSpicka[maximalniSpicka]
+    
+    z1 = z1 
+    z2 =  maximalniSpicka    
+    delka = z2-z1
+    shift = int(procentaShift*delka)
+    z1 = z1+shift #shift nekdy TROCHU spatny, nekdy VELMI nutny
+    z2 = z2+shift
+    
+    poziceStart = y1+z1
+    poziceKonec = y1+z2
+    return [poziceStart,poziceKonec] 
 
 def objectRemovalDistanceBased(data3d,threshold=1):
     '''
@@ -973,11 +1140,11 @@ def segFind(data3d,velikostVoxelu,source,vysledky = False):
 
 
 
-def prumerovaciFIltr(konvoluce,velikostVoxelu,soucet):
-    zobrazeny = konvoluce >= soucet*0.3
+def prumerovaciFIltr(konvoluce,velikostVoxelu,soucet,k1=0.3,k2=750,velikostFiltru = 25):
+    zobrazeny = konvoluce >= soucet*k1
     
     zobrazeny = zobrazeny*1000
-    mm = 25
+    mm = velikostFiltru
     a = np.round(mm/velikostVoxelu[0])
     b = np.round(mm/velikostVoxelu[1])
     c = np.round(mm/velikostVoxelu[2])
@@ -985,7 +1152,7 @@ def prumerovaciFIltr(konvoluce,velikostVoxelu,soucet):
     mean = ndimage.uniform_filter(zobrazeny, size=[a,b,c])
     #odstraneny = objectRemovalDistanceBased(vyriznuty,threshold=1.5)
     
-    vysledek = mean > 750
+    vysledek = mean > k2
     return vysledek
 
 def segFindImproved(data3d,velikostVoxelu,source,vysledky = False):
