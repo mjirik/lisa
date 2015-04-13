@@ -353,26 +353,43 @@ def file_copy_and_replace_lines(in_path, out_path):
     import shutil
     import fileinput
 
-    print "path to script:"
-    print path_to_script
+    # print "path to script:"
+    # print path_to_script
     lisa_path = os.path.abspath(path_to_script)
 
     shutil.copy2(in_path, out_path)
     conda_path = get_conda_path()
 
-    print 'ip ', in_path
-    print 'op ', out_path
-    print 'cp ', conda_path
+    # print 'ip ', in_path
+    # print 'op ', out_path
+    # print 'cp ', conda_path
     for line in fileinput.input(out_path, inplace=True):
         # coma on end makes no linebreak
         line = line.replace("@{LISA_PATH}", lisa_path)
         line = line.replace("@{CONDA_PATH}", conda_path)
         print line
 
-def make_icon():
-    import fileinput
-    import shutil
 
+def make_icon():
+    import platform
+
+    system = platform.system()
+    if system == 'Darwin':
+        # MacOS
+        __make_icon_osx()
+        pass
+    elif system == "Linux":
+        __make_icon_linux()
+
+
+def __make_icon_osx():
+    home_path = os.path.expanduser('~')
+    in_path = os.path.join(path_to_script, "applications/lisa_gui")
+    dt_path = os.path.join(home_path, "Desktop")
+    subprocess.call(['ln', '-s', in_path, dt_path])
+
+
+def __make_icon_linux():
 
     in_path = os.path.join(path_to_script, "applications/lisa.desktop.in")
     in_path_ha = os.path.join(path_to_script, "applications/ha.desktop.in")
@@ -394,13 +411,11 @@ def make_icon():
         out_path = os.path.join(desktop_path, "lisa.desktop")
         out_path_ha = os.path.join(desktop_path, "ha.desktop")
 
-        #fi = fileinput.input(out_path, inplace=True)
+        # fi = fileinput.input(out_path, inplace=True)
         print "icon output path:"
         print out_path, out_path_ha
         file_copy_and_replace_lines(in_path, out_path)
         file_copy_and_replace_lines(in_path_ha, out_path_ha)
-
-
 
     # copy desktop files to $HOME/.local/share/applications/
     # to be accesable in application menu (Linux)
