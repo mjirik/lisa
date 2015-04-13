@@ -298,6 +298,9 @@ class OrganSegmentation():
         # sseg.bone_segmentation()
         sseg.lungs_segmentation()
         sseg.heart_segmentation()
+        # TODO remove hack - force remove number 1 from segmentation
+        # this sould be fixed in sss
+        sseg.segmentation[sseg.segmentation == 1] = 0
         self.segmentation = sseg.segmentation
         self.slab = sseg.slab
 
