@@ -20,7 +20,6 @@ class TemplateTest(unittest.TestCase):
 
     @attr('actual')
     def test_length(self):
-        import skelet3d
 
         data = np.zeros([20, 20, 20], dtype=np.int8)
         data[2:13, 4, 4] = 1
@@ -32,19 +31,7 @@ class TemplateTest(unittest.TestCase):
         data[12, 12, 12] = 1
         data[13, 13, 13] = 1
 
-        # data[5, 10:12, 5:12] = 1
-
-        # bar
-        # data[5, 3:11, 15:17] = 1
-
-        # import sed3 as ped
-        # pe = ped.sed3(data)
-        # pe.show()
-        # skel = skelet3d.skelet3d(data)
         skel = data
-
-        # pe = ped.sed3(skel)
-        # pe.show()
 
         skan = sk.SkeletonAnalyser(copy.copy(skel), volume_data=data,
                                    voxelsize_mm=[1, 20, 300])
