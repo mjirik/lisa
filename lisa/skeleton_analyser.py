@@ -40,6 +40,7 @@ class SkeletonAnalyser:
         skelet_nodes = self.__skeleton_nodes(data3d_skel)
         self.sklabel = self.__generate_sklabel(skelet_nodes)
         self.cut_wrong_skeleton = cut_wrong_skeleton
+        self.curve_order = 2
 
         logger.debug('Inited SkeletonAnalyser - voxelsize:' + str(
             voxelsize_mm) + ' volumedata:' + str(volume_data is not None))
@@ -586,9 +587,53 @@ class SkeletonAnalyser:
 
         return neighbors, box
 
+    def __ordered_points_mm(self, points_mm, nodeA_pos, nodeB_pos,
+                            one_node_mode=False):
+
+        length = 0
+        startpoint = nodeA_pos
+        pt_mm = [[nodeA_pos[0]], [nodeA_pos[1]], [nodeA_pos[2]]]
+        while len(points_mm[0]) != 0:
+            # get closest point to startpoint
+            p_length = float('Inf')  # get max length
+            closest_num = -1
+            for p in range(0, len(points_mm[0])):
+                test_point = np.array(
+                    [points_mm[0][p], points_mm[1][p], points_mm[2][p]])
+                p_length_new = np.linalg.norm(startpoint - test_point)
+                if p_length_new < p_length:
+                    p_length = p_length_new
+                    closest_num = p
+            closest = np.array(
+                [points_mm[0][closest_num],
+                 points_mm[1][closest_num],
+                 points_mm[2][closest_num]])
+            # add length
+            pt_mm[0].append(points_mm[0][closest_num])
+            pt_mm[1].append(points_mm[1][closest_num])
+            pt_mm[2].append(points_mm[2][closest_num])
+            length += np.linalg.norm(closest - startpoint)
+            # replace startpoint with used point
+            startpoint = closest
+            # remove used point from points
+            points_mm = [
+                np.delete(points_mm[0], closest_num),
+                np.delete(points_mm[1], closest_num),
+                np.delete(points_mm[2], closest_num)
+            ]
+        # add length to nodeB
+        if not one_node_mode:
+            length += np.linalg.norm(nodeB_pos - startpoint)
+            pt_mm[0].append(nodeB_pos[0])
+            pt_mm[1].append(nodeB_pos[1])
+            pt_mm[2].append(nodeB_pos[2])
+
+        return pt_mm, length
+
     def __edge_length(self, edg_number, edg_stats):
         """
-        Computes estimated length of edge, distance from end nodes and tortosity.
+        Computes estimated length of edge, distance from end nodes and
+        tortosity.
 
         | needs:
         |   edg_stats['nodeIdA']
@@ -681,38 +726,16 @@ class SkeletonAnalyser:
             np.array(points[2] * self.voxelsize_mm[2])
         ]
 
-        length = 0
-        startpoint = nodeA_pos
-        while len(points_mm[0]) != 0:
-            # get closest point to startpoint
-            p_length = float('Inf')  # get max length
-            closest_num = -1
-            for p in range(0, len(points_mm[0])):
-                test_point = np.array(
-                    [points_mm[0][p], points_mm[1][p], points_mm[2][p]])
-                p_length_new = np.linalg.norm(startpoint - test_point)
-                if p_length_new < p_length:
-                    p_length = p_length_new
-                    closest_num = p
-            closest = np.array(
-                [points_mm[0][closest_num],
-                 points_mm[1][closest_num],
-                 points_mm[2][closest_num]])
-            # add length
-            length += np.linalg.norm(closest - startpoint)
-            # replace startpoint with used point
-            startpoint = closest
-            # remove used point from points
-            points_mm = [np.delete(points_mm[0], closest_num), np.delete(
-                points_mm[1], closest_num), np.delete(
-                    points_mm[2], closest_num)]
-
-        # add length to nodeB
-        if not one_node_mode:
-            length += np.linalg.norm(nodeB_pos - startpoint)
+        _, length = self.__ordered_points_mm(points_mm, nodeA_pos, nodeB_pos,
+                                             one_node_mode)
 
         # get distance between nodes
         if one_node_mode:
+            startpoint = np.array([
+                points_mm[0][0],
+                points_mm[1][0],
+                points_mm[2][0]
+            ])
             nodes_distance = np.linalg.norm(nodeA_pos - startpoint)
         else:
             nodes_distance = np.linalg.norm(nodeA_pos - nodeB_pos)
@@ -736,13 +759,39 @@ class SkeletonAnalyser:
         retval = {}
         try:
 
+            # crop used area
+            box = self.elm_box[edg_number]
+
+            sklabelcr = self.sklabel[box]
+            # get positions of edge points
+            points = (sklabelcr == edg_number).nonzero()
+            points_mm = [
+                np.array((box[0].start + points[0]) * self.voxelsize_mm[0]),
+                np.array((box[1].start + points[1]) * self.voxelsize_mm[1]),
+                np.array((box[2].start + points[2]) * self.voxelsize_mm[2])
+            ]
             point0_mm = np.array(edg_stats['nodeA_ZYX_mm'])
             point1_mm = np.array(edg_stats['nodeB_ZYX_mm'])
+            pts_mm_ord, _ = self.__ordered_points_mm(
+                points_mm, point0_mm, point1_mm)
+
+            t = np.linspace(0.0, 1.0, len(pts_mm_ord[0]))
+            fitParamsX = np.polyfit(t, pts_mm_ord[0], self.curve_order)
+            fitParamsY = np.polyfit(t, pts_mm_ord[1], self.curve_order)
+            fitParamsZ = np.polyfit(t, pts_mm_ord[2], self.curve_order)
+
             retval = {'curve_params':
                       {
                           'start': point0_mm.tolist(),
-                          'vector': (point1_mm - point0_mm).tolist()
+                          'vector': (point1_mm - point0_mm).tolist(),
+                          'fitParamsX': fitParamsX,
+                          'fitParamsY': fitParamsY,
+                          'fitParamsZ': fitParamsZ,
+                          'fitCurveStrX': str(np.poly1d(fitParamsX)),
+                          'fitCurveStrY': str(np.poly1d(fitParamsY)),
+                          'fitCurveStrZ': str(np.poly1d(fitParamsZ))
                       }}
+
         except Exception as ex:
             logger.warning("Problem in __edge_curve()")
             logger.warning(traceback.format_exc())

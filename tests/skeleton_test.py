@@ -41,8 +41,8 @@ class TemplateTest(unittest.TestCase):
         self.assertAlmostEqual(vessel_tree[1]['lengthEstimation'], 10)
         self.assertAlmostEqual(vessel_tree[2]['lengthEstimation'], 200)
         self.assertAlmostEqual(vessel_tree[3]['lengthEstimation'], 3000)
-        self.assertAlmostEqual(vessel_tree[4]['lengthEstimation'],
-                               2 * (1**2 + 20**2 + 300*2)**0.5)
+        diag_length = 2 * ((1**2 + 20**2 + 300**2)**0.5)
+        self.assertAlmostEqual(vessel_tree[4]['lengthEstimation'], diag_length)
 
     def test_tortuosity(self):
         import skelet3d
