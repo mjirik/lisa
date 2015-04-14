@@ -38,11 +38,11 @@ class TemplateTest(unittest.TestCase):
         vessel_tree = skan.skeleton_analysis()
 
         self.assertAlmostEqual
-        self.assertAlmostEqual(vessel_tree[1]['lengthEstimationPx'], 10)
-        self.assertAlmostEqual(vessel_tree[2]['lengthEstimationPx'], 200)
-        self.assertAlmostEqual(vessel_tree[3]['lengthEstimationPx'], 3000)
+        self.assertAlmostEqual(vessel_tree[1]['lengthEstimationPixel'], 10)
+        self.assertAlmostEqual(vessel_tree[2]['lengthEstimationPixel'], 200)
+        self.assertAlmostEqual(vessel_tree[3]['lengthEstimationPixel'], 3000)
         diag_length = 2 * ((1**2 + 20**2 + 300**2)**0.5)
-        self.assertAlmostEqual(vessel_tree[4]['lengthEstimationPx'],
+        self.assertAlmostEqual(vessel_tree[4]['lengthEstimationPixel'],
                                diag_length)
 
     def test_tortuosity(self):

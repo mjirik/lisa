@@ -41,6 +41,7 @@ class SkeletonAnalyser:
         self.sklabel = self.__generate_sklabel(skelet_nodes)
         self.cut_wrong_skeleton = cut_wrong_skeleton
         self.curve_order = 2
+        self.spline_smoothing = None
 
         logger.debug('Inited SkeletonAnalyser - voxelsize:' + str(
             voxelsize_mm) + ' volumedata:' + str(volume_data is not None))
@@ -587,7 +588,19 @@ class SkeletonAnalyser:
 
         return neighbors, box
 
-    def __length_from_curve(self, edg_stats, N=10):
+    def __length_from_curve_spline(self, edg_stats, N=10):
+        t = np.linspace(0.0, 1.0, N)
+        x, y, z = scipy.interpolate.splev(
+            t,
+            edg_stats['curve_params']['fitParamsSpline']
+        )
+        # x = points[0, :]
+        # y = points[1, :]
+        # z = points[2, :]
+        return self.__count_length(x, y, z, N)
+
+    def __length_from_curve_poly(self, edg_stats, N=10):
+
         px = np.poly1d(edg_stats['curve_params']['fitParamsX'])
         py = np.poly1d(edg_stats['curve_params']['fitParamsY'])
         pz = np.poly1d(edg_stats['curve_params']['fitParamsZ'])
@@ -598,10 +611,12 @@ class SkeletonAnalyser:
         y = py(t)
         z = pz(t)
 
-        length = 0
+        return self.__count_length(x, y, z, N)
 
+    def __count_length(self, x, y, z, N):
+        length = 0
         for i in range(N - 1):
-            print i, ' ', t[i]
+            # print i, ' ', t[i]
             p1 = np.asarray([
                 x[i],
                 y[i],
@@ -613,7 +628,7 @@ class SkeletonAnalyser:
                 z[i + 1]
             ])
             length += np.linalg.norm(p2 - p1)
-            print p1
+            # print p1
 
         return length
 
@@ -756,10 +771,16 @@ class SkeletonAnalyser:
             np.array(points[2] * self.voxelsize_mm[2])
         ]
 
-        _, length_px = self.__ordered_points_mm(points_mm, nodeA_pos, nodeB_pos,
-                                                one_node_mode)
-        length = self.__length_from_curve(edg_stats)
+        _, length_pixel = self.__ordered_points_mm(
+            points_mm, nodeA_pos, nodeB_pos, one_node_mode)
+        if one_node_mode:
+            length_poly = self.__length_from_curve_poly(edg_stats)
+            length_spline = self.__length_from_curve_spline(edg_stats)
+        else:
+            length_poly = length_pixel
+            length_spline = length_pixel
 
+        length = length_spline
         # get distance between nodes
         if one_node_mode:
             startpoint = np.array([
@@ -772,8 +793,10 @@ class SkeletonAnalyser:
             nodes_distance = np.linalg.norm(nodeA_pos - nodeB_pos)
 
         stats = {
+            'lengthEstimationPoly': float(length_poly),
+            'lengthEstimationSpline': float(length_spline),
             'lengthEstimation': float(length),
-            'lengthEstimationPx': float(length_px),
+            'lengthEstimationPixel': float(length_pixel),
             'nodesDistance': float(nodes_distance),
             'tortuosity': float(length / nodes_distance)
         }
@@ -811,6 +834,9 @@ class SkeletonAnalyser:
             fitParamsX = np.polyfit(t, pts_mm_ord[0], self.curve_order)
             fitParamsY = np.polyfit(t, pts_mm_ord[1], self.curve_order)
             fitParamsZ = np.polyfit(t, pts_mm_ord[2], self.curve_order)
+            tck, u = scipy.interpolate.splprep(
+                pts_mm_ord, s=self.spline_smoothing)
+            # tckl = np.asarray(tck).tolist()
 
             retval = {'curve_params':
                       {
@@ -821,7 +847,8 @@ class SkeletonAnalyser:
                           'fitParamsZ': fitParamsZ,
                           'fitCurveStrX': str(np.poly1d(fitParamsX)),
                           'fitCurveStrY': str(np.poly1d(fitParamsY)),
-                          'fitCurveStrZ': str(np.poly1d(fitParamsZ))
+                          'fitCurveStrZ': str(np.poly1d(fitParamsZ)),
+                          'fitParamsSpline': tck
                       }}
 
         except Exception as ex:
