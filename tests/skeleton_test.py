@@ -19,6 +19,44 @@ import copy
 class TemplateTest(unittest.TestCase):
 
     @attr('actual')
+    def test_length(self):
+        import skelet3d
+
+        data = np.zeros([20, 20, 20], dtype=np.int8)
+        data[2:13, 4, 4] = 1
+        data[6, 2:13, 6] = 1
+        data[8, 8, 2:13] = 1
+
+        # diagonala
+        data[11, 11, 11] = 1
+        data[12, 12, 12] = 1
+        data[13, 13, 13] = 1
+
+        # data[5, 10:12, 5:12] = 1
+
+        # bar
+        # data[5, 3:11, 15:17] = 1
+
+        # import sed3 as ped
+        # pe = ped.sed3(data)
+        # pe.show()
+        # skel = skelet3d.skelet3d(data)
+        skel = data
+
+        # pe = ped.sed3(skel)
+        # pe.show()
+
+        skan = sk.SkeletonAnalyser(copy.copy(skel), volume_data=data,
+                                   voxelsize_mm=[1, 20, 300])
+        vessel_tree = skan.skeleton_analysis()
+
+        self.assertAlmostEqual
+        self.assertAlmostEqual(vessel_tree[1]['lengthEstimation'], 10)
+        self.assertAlmostEqual(vessel_tree[2]['lengthEstimation'], 200)
+        self.assertAlmostEqual(vessel_tree[3]['lengthEstimation'], 3000)
+        self.assertAlmostEqual(vessel_tree[4]['lengthEstimation'],
+                               2 * (1**2 + 20**2 + 300*2)**0.5)
+
     def test_tortuosity(self):
         import skelet3d
 
