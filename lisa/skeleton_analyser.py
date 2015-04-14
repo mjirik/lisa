@@ -85,8 +85,8 @@ class SkeletonAnalyser:
         for edg_number in range(1, len_edg + 1):
             edgst = {}
             edgst.update(self.__connection_analysis(edg_number))
-            edgst.update(self.__edge_length(edg_number, edgst))
             edgst.update(self.__edge_curve(edg_number, edgst))
+            edgst.update(self.__edge_length(edg_number, edgst))
             edgst.update(self.__edge_vectors(edg_number, edgst))
             # edgst = edge_analysis(sklabel, i)
             if self.volume_data is not None:
@@ -587,6 +587,36 @@ class SkeletonAnalyser:
 
         return neighbors, box
 
+    def __length_from_curve(self, edg_stats, N=10):
+        px = np.poly1d(edg_stats['curve_params']['fitParamsX'])
+        py = np.poly1d(edg_stats['curve_params']['fitParamsY'])
+        pz = np.poly1d(edg_stats['curve_params']['fitParamsZ'])
+
+        t = np.linspace(0.0, 1.0, N)
+
+        x = px(t)
+        y = py(t)
+        z = pz(t)
+
+        length = 0
+
+        for i in range(N - 1):
+            print i, ' ', t[i]
+            p1 = np.asarray([
+                x[i],
+                y[i],
+                z[i]
+            ])
+            p2 = np.asarray([
+                x[i + 1],
+                y[i + 1],
+                z[i + 1]
+            ])
+            length += np.linalg.norm(p2 - p1)
+            print p1
+
+        return length
+
     def __ordered_points_mm(self, points_mm, nodeA_pos, nodeB_pos,
                             one_node_mode=False):
 
@@ -726,8 +756,9 @@ class SkeletonAnalyser:
             np.array(points[2] * self.voxelsize_mm[2])
         ]
 
-        _, length = self.__ordered_points_mm(points_mm, nodeA_pos, nodeB_pos,
-                                             one_node_mode)
+        _, length_px = self.__ordered_points_mm(points_mm, nodeA_pos, nodeB_pos,
+                                                one_node_mode)
+        length = self.__length_from_curve(edg_stats)
 
         # get distance between nodes
         if one_node_mode:
@@ -742,6 +773,7 @@ class SkeletonAnalyser:
 
         stats = {
             'lengthEstimation': float(length),
+            'lengthEstimationPx': float(length_px),
             'nodesDistance': float(nodes_distance),
             'tortuosity': float(length / nodes_distance)
         }
