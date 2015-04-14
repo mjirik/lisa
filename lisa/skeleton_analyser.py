@@ -762,6 +762,8 @@ class SkeletonAnalyser:
         nodeA_pos = nodeA_pos * self.voxelsize_mm
         if not one_node_mode:
             nodeB_pos = nodeB_pos * self.voxelsize_mm
+        else:
+            nodeB_pos = None
 
         # get positions of edge points
         points = (sklabelcr == edg_number).nonzero()
@@ -773,12 +775,14 @@ class SkeletonAnalyser:
 
         _, length_pixel = self.__ordered_points_mm(
             points_mm, nodeA_pos, nodeB_pos, one_node_mode)
+        length_poly = length_pixel
+        length_spline = length_pixel
         if one_node_mode:
-            length_poly = self.__length_from_curve_poly(edg_stats)
-            length_spline = self.__length_from_curve_spline(edg_stats)
-        else:
-            length_poly = length_pixel
-            length_spline = length_pixel
+            try:
+                length_poly = self.__length_from_curve_poly(edg_stats)
+                length_spline = self.__length_from_curve_spline(edg_stats)
+            except:
+                logger.info('problem with length_poly or length_spline')
 
         length = length_spline
         # get distance between nodes
@@ -826,6 +830,12 @@ class SkeletonAnalyser:
                 np.array((box[2].start + points[2]) * self.voxelsize_mm[2])
             ]
             point0_mm = np.array(edg_stats['nodeA_ZYX_mm'])
+            # if 'nodeB_ZYX_mm' in edg_stats.keys():
+            #     point1_mm = np.array(edg_stats['nodeB_ZYX_mm'])
+            #     one_node_mode = False
+            # else:
+            #     point1_mm = None
+            #     one_node_mode = True
             point1_mm = np.array(edg_stats['nodeB_ZYX_mm'])
             pts_mm_ord, _ = self.__ordered_points_mm(
                 points_mm, point0_mm, point1_mm)

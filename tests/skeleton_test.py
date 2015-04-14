@@ -31,6 +31,13 @@ class TemplateTest(unittest.TestCase):
         data[12, 12, 12] = 1
         data[13, 13, 13] = 1
 
+        # snake
+        # data[15:17, 13, 13] = 1
+        data[18, 14:17, 13] = 1
+        data[18, 17, 14:17] = 1
+        data[14:18, 17, 17] = 1
+        # data[18, 18, 15:17] = 1
+
         skel = data
 
         skan = sk.SkeletonAnalyser(copy.copy(skel), volume_data=data,
@@ -44,6 +51,7 @@ class TemplateTest(unittest.TestCase):
         diag_length = 2 * ((1**2 + 20**2 + 300**2)**0.5)
         self.assertAlmostEqual(vessel_tree[4]['lengthEstimationPixel'],
                                diag_length)
+        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
     def test_tortuosity(self):
         import skelet3d
