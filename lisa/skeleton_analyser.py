@@ -864,6 +864,13 @@ class SkeletonAnalyser:
             fitParamsX = np.polyfit(t, pts_mm_ord[0], self.curve_order)
             fitParamsY = np.polyfit(t, pts_mm_ord[1], self.curve_order)
             fitParamsZ = np.polyfit(t, pts_mm_ord[2], self.curve_order)
+            # Spline
+            # s - smoothing
+            # w - weight
+            w = np.ones(len(pts_mm_ord[0]))
+            # first and last have big weight
+            w[1] = len(pts_mm_ord[0])
+            w[-1] = len(pts_mm_ord[0])
             tck, u = scipy.interpolate.splprep(
                 pts_mm_ord, s=self.spline_smoothing)
             # tckl = np.asarray(tck).tolist()
