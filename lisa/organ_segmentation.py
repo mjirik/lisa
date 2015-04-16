@@ -239,7 +239,6 @@ class OrganSegmentation():
 
         # self.seg_postproc_pars = SegPostprocPars(**seg_postproc_pars_default)
 
-
 #
         oseg_input_params = locals()
         oseg_input_params = self.__clean_oseg_input_params(oseg_input_params)
@@ -431,8 +430,8 @@ class OrganSegmentation():
         logger.debug('wanted volume ' + str(wvol))
         logger.debug('sigma ' + str(sigma))
 
-        critf = lambda x: self.__volume_blowup_criterial_function(x, wvol, # noqa
-                                                                 segsmooth)
+        critf = lambda x: self.__volume_blowup_criterial_function(
+            x, wvol, segsmooth)
 
         thr = scipy.optimize.fmin(critf, x0=0.5, disp=False)[0]
         logger.debug('optimal threshold ' + str(thr))
@@ -781,7 +780,6 @@ class OrganSegmentation():
             ).astype(np.uint8)
             macwe.run(self.seg_postproc_pars['snakes_niter'])
             self.segmentation = macwe.levelset
-
 
 #    def interactivity(self, min_val=800, max_val=1300):
 # @TODO generovat QApplication
@@ -1413,12 +1411,11 @@ def main():  # pragma: no cover
             from lisaWindow import OrganSegmentationWindow
             from PyQt4.QtGui import QApplication
             app = QApplication(sys.argv)
-            oseg_w = OrganSegmentationWindow(oseg) # noqa
+            oseg_w = OrganSegmentationWindow(oseg)  # noqa
 #    import pdb; pdb.set_trace()
             sys.exit(app.exec_())
 
     except Exception as e:
-        import traceback
         # mport exceptionProcessing
         exceptionProcessing.reportException(e)
         print traceback.format_exc()
