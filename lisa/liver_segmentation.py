@@ -31,6 +31,12 @@ import sys
 import matplotlib.pyplot as plt
 import skimage.filter
 
+def filtrVariabilni(data3d,velikostVoxelu,mm = 5):    #mm = 25 konstanta = 1
+    ''' variabilni prumerovaci filtr'''
+    x = np.ceil(mm/velikostVoxelu[2])
+    mean = ndimage.uniform_filter(data3d.astype(np.int16), size=[x,x,x])
+    return mean
+
 def iterativniOdstraneni1(data3dBin,voxelSize):
     ''' iterativni odstraneni, vybere oblast mensi nez jsou jatra
     vhodne pouzit pred morphSnakes
@@ -100,9 +106,8 @@ def konvolucniOperace(prahovany,voxelSize):
     4) dilatace tohoto objektu a nasobeni s otsu prahovanym - jatra + kousky kolem
     vraci: binarni objekt kde by mely byt jatra + nepresnosti kolem nich
     '''
-    utvar = np.ones([5,5,5],dtype = np.int32)
-    prepsany2 = prahovany.astype(np.int32)
-    konvoluce = ndimage.convolve(prepsany2,utvar)
+    nasobeny = prahovany * 100
+    konvoluce = filtrVariabilni(nasobeny,voxelSize,mm = 3.5)
     
     val = skimage.filter.threshold_otsu(konvoluce)
     otsuPrahovany = konvoluce > val
@@ -136,6 +141,8 @@ def vyberMaxObjekt(data3dObjekty):
     krome nejvetsiho
     '''
     [labelImage, labels] = ndimage.label(data3dObjekty)
+    if(labels ==0): #zadne objekty v poli nejsou
+        return data3dObjekty
     histogram = ndimage.histogram(labelImage, 1, labels, labels)
     pozice = np.argmax(histogram)
     hodnota = pozice+1
