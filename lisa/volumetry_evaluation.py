@@ -188,9 +188,10 @@ def eval_all_from_dataset_metadata(inputdata, visualization=False,
 
         evaluation_one = compare_volumes(data3d_a, data3d_b,
                                          metadata_a['voxelsize_mm'])
-        evaluation_one.update(
-            special_evaluation_function(
-                data3d_a, data3d_b, metadata_a['voxelsize_mm']
+        if special_evaluation_function is not None:
+            evaluation_one.update(
+                special_evaluation_function(
+                    data3d_a, data3d_b, metadata_a['voxelsize_mm']
             ))
         evaluation_all['file1'].append(data3d_a_path)
         evaluation_all['file2'].append(data3d_b_path)
