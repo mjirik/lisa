@@ -30,6 +30,140 @@ import morphsnakes
 import sys
 import matplotlib.pyplot as plt
 import skimage.filter
+from scipy.cluster.vq import kmeans,vq
+import random
+
+def filtr3D(data3d,velikostVoxelu,mm = 5):    #mm = 25 konstanta = 1
+    
+    a = np.round(mm/velikostVoxelu[0])
+    b = np.round(mm/velikostVoxelu[1])
+    c = np.round(mm/velikostVoxelu[2])
+    #print [a,b,c]
+    mean = ndimage.uniform_filter(data3d.astype(np.int16), size=[a,b,c])
+
+    return mean
+
+def minFiltr3D(data3d,velikostVoxelu,mm = 5):    #mm = 25 konstanta = 1
+    
+    a = np.round(mm/velikostVoxelu[0])
+    b = np.round(mm/velikostVoxelu[1])
+    c = np.round(mm/velikostVoxelu[2])
+    #print [a,b,c]
+    mean = ndimage.minimum_filter(data3d.astype(np.int16), size=[a,b,c])
+
+    return mean
+
+def maxFiltr3D(data3d,velikostVoxelu,mm = 5):    #mm = 25 konstanta = 1
+    
+    a = np.round(mm/velikostVoxelu[0])
+    b = np.round(mm/velikostVoxelu[1])
+    c = np.round(mm/velikostVoxelu[2])
+    #print [a,b,c]
+    mean = ndimage.maximum_filter(data3d.astype(np.int16), size=[a,b,c])
+
+    return mean
+
+def freeOperace1(prahovany,voxelSize):
+    ''' 
+    Operace pro ziskani informace z prahovaneho obrazu
+    plneho sumu. 
+    DOPLNIT DOKUMENTACI PO SKONCENI UPRAV
+    '''
+    nasobeny = prahovany*100
+    konvoluce = filtrVariabilni(nasobeny,voxelSize,mm = 5)#4ok'TOHLE SMAZAT'
+
+    maximum = 2*maxFiltr3D(konvoluce,voxelSize,mm = 4)
+    filtrovany = 4*minFiltr3D(konvoluce,voxelSize,mm = 7)#1x4 supr
+    soucet = np.add(maximum,filtrovany)    
+    shadow = 3*filtr3D(konvoluce,voxelSize,mm = 50)    
+    vysledek = np.add(shadow,soucet)
+    return vysledek
+    
+
+def freeOperace2(soucet,voxelSize):    
+    prvaVrstva,druhaVrstva,tretiVrstva = freeKmeans(soucet,voxelSize)
+    
+    maxe = main.vyberMaxObjekt(prvaVrstva)
+    
+    nasobeny = maxe*100
+    shadow = filtrVariabilni(nasobeny,voxelSize,mm = 40)
+    oblastZajmu = shadow > 0
+    
+    #return maxe
+    [labelImage, labels] = ndimage.label(druhaVrstva)
+    
+    prunik = np.multiply(oblastZajmu,druhaVrstva)
+    
+    nejvetsi = main.vyberMaxObjekt(prunik)
+    poleSCislem = np.multiply(nejvetsi, labelImage)
+    cislo = np.max(poleSCislem)
+    
+    pridat = labelImage == cislo
+    
+    ostatniObjekty = prvaVrstva-maxe
+    
+    nasobeny = ostatniObjekty*100
+    shadow = filtr3D(nasobeny,voxelSize,mm = 50)
+    nezadouci = shadow > 5
+    
+    
+    opak = np.negative(nezadouci)
+    
+    
+    secist = np.add(maxe,pridat)
+    pomocny = np.multiply(secist,opak)
+    vysledek = main.vyberMaxObjekt(pomocny)
+    
+    return vysledek
+    
+def segFree(data3d,voxelSize,etc1,etc2):
+    'segmentace bez morphsnakes'
+    prahovany= main.prahovaniKonvoluce(data3d, voxelSize)
+    soucet = freeOperace1(prahovany,voxelSize)
+    vysledek = freeOperace2(soucet,voxelSize)
+    return vysledek
+
+def freeKmeans(vylepseny,velikostVoxelu):
+    
+    #cosi = vylepseny > np.mean(vylepseny) + 2.5*ndimage.standard_deviation(vylepseny)#UJDE - V PRIPADE ZE VSE OSTATNI SELZE
+    img = vylepseny
+    #print img.shape
+    pixel = np.reshape(img,(img.shape[0]*img.shape[1]*img.shape[2],1))
+    vybrane = np.array(random.sample(pixel,75000)) #150000 beha TROCHU POMALU
+    #print pixel.shape
+    print 'probiha kmeans algoritmus'
+    centroids,_ = kmeans(vybrane,7) #6 jakztakz funguje 7+2 VYPADA SLIBNE 17+3 TAKE
+    #print centroids
+    #print np.max(vylepseny)
+    #print np.min(vylepseny)
+    
+    
+    delka = img.shape[0]
+    delka1 = int(img.shape[1])
+    delka2 = int(img.shape[2])
+    pomocny = delka/2#+36#+16  #0...
+    
+    npcentroids = np.array(centroids)
+    npcentroids2 =  np.squeeze(npcentroids)
+    neserazeny = np.copy(npcentroids2)
+    serazeny = np.sort(npcentroids2)
+    
+    hranice1 = (serazeny[-2]+serazeny[-1])/2.0
+    hranice2 = (serazeny[-3]+serazeny[-2])/2.0
+    hranice3 = (serazeny[-4]+serazeny[-3])/2.0
+    
+    prvaVrstva = vylepseny >= hranice1    
+    prahovany = vylepseny >= hranice2
+    druhaVrstva = prahovany-prvaVrstva
+    prahovany = vylepseny >= hranice3
+    tretiVrstva = prahovany-druhaVrstva-prvaVrstva
+    
+    #main.zobrazitOriginal(prvaVrstva)
+    #main.zobrazitOriginal(druhaVrstva)
+    #main.zobrazitOriginal(tretiVrstva)
+    #sys.exit()
+    
+    return prvaVrstva,druhaVrstva,tretiVrstva
 
 def filtrVariabilni(data3d,velikostVoxelu,mm = 5):    #mm = 25 konstanta = 1
     ''' variabilni prumerovaci filtr'''
@@ -1646,7 +1780,7 @@ class LiverSegmentation:
         self.seeds = None
         self.voxelSize = voxelsize_mm
         self.segParams = {
-            'method': 'segKonvoluce',
+            'method': 'segFree',
             'vysledkyDostupne': False,
             'paramfile': self._get_default_paramfile_path(),
             'path': None
@@ -1672,7 +1806,7 @@ class LiverSegmentation:
     
     def getMethodList(self):
         '''Vraci seznam vsech platnych nazvu metod ktere lze pouzit'''
-        return ['placeholder','find','regionGrowing','snakeSimple','segKonvoluce']
+        return ['placeholder','find','regionGrowing','snakeSimple','segKonvoluce','segFree']
     
     def setVysledky(self,vysledky):
         self.segParams['vysledky'] = vysledky
@@ -1708,7 +1842,10 @@ class LiverSegmentation:
             spatne = False
         if(nazev  == 'segKonvoluce'):
             metoda = segKonvoluce
-            spatne = False           
+            spatne = False         
+        if(nazev  == 'segFree'):
+            metoda = segFree
+            spatne = False          
 
         if(spatne):
             print('Zvolena metoda nenalezena')
@@ -1736,7 +1873,10 @@ class LiverSegmentation:
             spatne = False
         if(nazev  == 'segKonvoluce'):
             metoda = segKonvoluce
-            spatne = False               
+            spatne = False
+        if(nazev  == 'segFree'):
+            metoda = segFree
+            spatne = False                   
 
         if(spatne):
             print('Zvolena metoda nenalezena')
