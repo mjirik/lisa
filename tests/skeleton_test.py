@@ -18,6 +18,34 @@ import copy
 
 class TemplateTest(unittest.TestCase):
 
+    def test_length_types(self):
+        data = np.zeros([20, 20, 20], dtype=np.int8)
+        # snake
+        data[18, 8:10, 13] = 1
+        data[18, 10:12, 13] = 1
+        data[18, 12:14, 13] = 1
+        data[18, 14:17, 13] = 1
+        data[18, 17, 14:17] = 1
+        data[14:18, 17, 17] = 1
+
+        skel = data
+
+        skan = sk.SkeletonAnalyser(copy.copy(skel), volume_data=data,
+                                   voxelsize_mm=[1, 20, 300])
+        skan.spline_smoothing = 5
+        vessel_tree = skan.skeleton_analysis()
+        pixel = vessel_tree[1]['lengthEstimationPixel']
+        poly = vessel_tree[1]['lengthEstimationPoly']
+        spline = vessel_tree[1]['lengthEstimationSpline']
+
+        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+        # self.assertAlmostEqual
+        # self.assertAlmostEqual(vessel_tree[1]['lengthEstimationPixel'], 10)
+        # self.assertAlmostEqual(vessel_tree[2]['lengthEstimationPixel'], 200)
+        # self.assertAlmostEqual(vessel_tree[3]['lengthEstimationPixel'], 3000)
+        # self.assertAlmostEqual(vessel_tree[1]['lengthEstimationPixel'],
+        #                        diag_length)
+
     @attr('actual')
     def test_length(self):
 
@@ -51,7 +79,18 @@ class TemplateTest(unittest.TestCase):
         diag_length = 2 * ((1**2 + 20**2 + 300**2)**0.5)
         self.assertAlmostEqual(vessel_tree[4]['lengthEstimationPixel'],
                                diag_length)
-        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+        # test spline
+        self.assertLess(
+            vessel_tree[1]['lengthEstimationPixel']
+            - vessel_tree[1]['lengthEstimationSpline'],
+            0.001
+        )
+        # test poly
+        self.assertLess(
+            vessel_tree[1]['lengthEstimationPixel']
+            - vessel_tree[1]['lengthEstimationPoly'],
+            0.001
+        )
 
     def test_tortuosity(self):
         import skelet3d
@@ -79,7 +118,10 @@ class TemplateTest(unittest.TestCase):
         # banana
         self.assertGreater(vessel_tree[1]['tortuosity'], 1.2)
         # bar
-        self.assertEqual(vessel_tree[2]['tortuosity'], 1)
+        self.assertLess(
+            vessel_tree[2]['tortuosity'] - 1,
+            0.00001
+        )
 
     def test_fileter_small(self):
         import skelet3d

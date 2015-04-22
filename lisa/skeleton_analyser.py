@@ -87,7 +87,8 @@ class SkeletonAnalyser:
             'skeleton_analysis: finished element_neighbors processing')
 
         logger.debug(
-            'skeleton_analysis: starting processing part: length, radius, curve and connections of edge')
+            'skeleton_analysis: starting processing part: length, radius, ' +
+            'curve and connections of edge')
         for edg_number in range(1, len_edg + 1):
             edgst = {}
             edgst.update(self.__connection_analysis(edg_number))
@@ -105,7 +106,8 @@ class SkeletonAnalyser:
                 edg_number, len_edg,
                 "length, radius, curve, connections of edge")
         logger.debug(
-            'skeleton_analysis: finished processing part: length, radius, curve, connections of edge')
+            'skeleton_analysis: finished processing part: length, radius, ' +
+            'curve, connections of edge')
 
         if self.cut_wrong_skeleton:
             stats = self.__cut_wrong_skeleton(stats)
@@ -159,12 +161,12 @@ class SkeletonAnalyser:
             connected_edgs = []
             try:
                 connected_edgs += stats[s]['connectedEdgesA']
-            except Exception, e:
+            except:  # Exception, e:
                 stats[s]['connectedEdgesA'] = []
 
             try:
                 connected_edgs += stats[s]['connectedEdgesB']
-            except Exception, e:
+            except:  # Exception, e:
                 stats[s]['connectedEdgesB'] = []
 
             if len(connected_edgs) == 0:
@@ -175,60 +177,60 @@ class SkeletonAnalyser:
         logger.debug('skeleton_analysis: Cut - Unconnected edges removed')
 
         # logger.debug(
-            #'skeleton_analysis: Cut - Getting lists of nodes,' +
-            #' edges and end nodes')
+        #    'skeleton_analysis: Cut - Getting lists of nodes,' +
+        #    ' edges and end nodes')
         # dict of connected nodes to edge
         # edg_neigh = {}
         # for s in dict(stats):
-            # if s not in edg_neigh:
-                # edg_neigh[s] = []
+        #     if s not in edg_neigh:
+        #         edg_neigh[s] = []
 
-            # try:
-                # if not stats[s]['nodeIdA'] in edg_neigh[s]:
-                    # edg_neigh[s].append(stats[s]['nodeIdA'])
-            # except KeyError:
-                # logger.debug('Edge id:' + str(s) + ' is missing nodeIdA')
+        #     try:
+        #         if not stats[s]['nodeIdA'] in edg_neigh[s]:
+        #             edg_neigh[s].append(stats[s]['nodeIdA'])
+        #     except KeyError:
+        #         logger.debug('Edge id:' + str(s) + ' is missing nodeIdA')
 
-            # try:
-                # if not stats[s]['nodeIdB'] in edg_neigh[s]:
-                    # edg_neigh[s].append(stats[s]['nodeIdB'])
-            # except KeyError:
-                # logger.debug('Edge id:' + str(s) + ' is missing nodeIdB')
+        #     try:
+        #         if not stats[s]['nodeIdB'] in edg_neigh[s]:
+        #             edg_neigh[s].append(stats[s]['nodeIdB'])
+        #     except KeyError:
+        #         logger.debug('Edge id:' + str(s) + ' is missing nodeIdB')
 
         # dict of connected edges to node
         # node_neigh = {}
         # for e in edg_neigh:
-            # for node in edg_neigh[e]:
-                # if not node in node_neigh:
-                    # node_neigh[node] = []
+        #    # for node in edg_neigh[e]:
+        #        # if not node in node_neigh:
+        #            # node_neigh[node] = []
 
-                # if not e in node_neigh[node]:
-                    # node_neigh[node].append(e)
+        #        # if not e in node_neigh[node]:
+        #            # node_neigh[node].append(e)
 
         # get end nodes
         # end_nodes = {}
         # for i in node_neigh:
-            # neigh = node_neigh[i]
-            # if len(neigh) == 1:
-                # logger.debug('end node/edge: ' + str(i) + '/' + str(neigh[0]))
-                # end_nodes[i] = neigh[0]
+        #    # neigh = node_neigh[i]
+        #     if len(neigh) == 1:
+        #         logger.debug('end node/edge: ' + str(i) + '/' + str(neigh[0]))
+        #         end_nodes[i] = neigh[0]
         # logger.debug('skeleton_analysis: Cut - Got all lists')
 
         # removes end edges based on radius/length ratio
         # logger.debug(
-            #'skeleton_analysis: Cut - Removing bad segments based on' +
-            #' radius/length ratio')
+        #    #'skeleton_analysis: Cut - Removing bad segments based on' +
+        #    #' radius/length ratio')
         # for end_node in end_nodes:
-            # edge_end_id = end_nodes[end_node]
-            # edge_end_stat = stats[edge_end_id]
+        #    # edge_end_id = end_nodes[end_node]
+        #    # edge_end_stat = stats[edge_end_id]
 
-            # if edge_end_stat['radius_mm'] /\
-                    # float(edge_end_stat['lengthEstimation']) > cut_ratio:
-                # logger.debug(
-                    #'bad rad/len: ' +
-                    # str(edge_end_stat['radius_mm']) + ' ' +
-                    # str(edge_end_stat['lengthEstimation']))
-                # stats = self.__remove_edge_from_stats(stats, edge_end_id)
+        #    # if edge_end_stat['radius_mm'] /\
+        #            # float(edge_end_stat['lengthEstimation']) > cut_ratio:
+        #        # logger.debug(
+        #            #'bad rad/len: ' +
+        #            # str(edge_end_stat['radius_mm']) + ' ' +
+        #            # str(edge_end_stat['lengthEstimation']))
+        #        # stats = self.__remove_edge_from_stats(stats, edge_end_id)
 
         # logger.debug('skeleton_analysis: Cut - Bad segments removed')
 
@@ -320,7 +322,7 @@ class SkeletonAnalyser:
             curve_params = edg_stats['curve_params']
             vectorA = self.__get_vector_from_curve(0.25, 0, curve_params)
             vectorB = self.__get_vector_from_curve(0.75, 1, curve_params)
-        except Exception as ex:
+        except:  # Exception as ex:
             logger.warning(traceback.format_exc())
             # print(ex)
             return {}
@@ -405,14 +407,15 @@ class SkeletonAnalyser:
         | edg_end: letter 'A' or 'B'
         |    creates phiXa, phiXb and phiXc.
 
-        See Schwen2012 : Analysis and algorithmic generation of hepatic vascular system.
+        See Schwen2012 : Analysis and algorithmic generation of hepatic vascular
+        system.
         """
         out = {}
 
         vector_key = 'vector' + edg_end
         try:
             vector = stats[edg_number][vector_key]
-        except Exception as e:
+        except:  # Exception as e:
             logger.warning(traceback.print_exc())
 
         try:
@@ -421,12 +424,12 @@ class SkeletonAnalyser:
             phiXa = self.__vectors_to_angle_deg(vectorX0, vector)
 
             out.update({'phiA0' + edg_end + 'a': phiXa.tolist()})
-        except Exception as e:
+        except:  # Exception as e:
             logger.warning(traceback.print_exc())
         try:
             vectorX1 = self.__vector_of_connected_edge(
                 edg_number, stats, edg_end, 1)
-        except Exception as e:
+        except:  # Exception as e:
             logger.warning(traceback.print_exc())
 
         try:
@@ -446,7 +449,7 @@ class SkeletonAnalyser:
                 'phi' + edg_end + 'c': phiXc.tolist()
             })
 
-        except Exception as e:
+        except:  # Exception as e:
             logger.warning(traceback.print_exc())
 
         return out
@@ -460,7 +463,8 @@ class SkeletonAnalyser:
         out = {}
         try:
             vectorA = stats[edg_number]['vectorA']
-            vectorB = stats[edg_number]['vectorB']
+            # vectorB = stats[edg_number]['vectorB']
+            stats[edg_number]['vectorB']
         except Exception:
             traceback.print_exc()
         try:
@@ -477,7 +481,8 @@ class SkeletonAnalyser:
                 ") vectorA not found 0 ")
 
         try:
-            vectorA1 = self.__vector_of_connected_edge(
+            # vectorA1 = self.__vector_of_connected_edge(
+            self.__vector_of_connected_edge(
                 edg_number, stats, 'A', 1)
         except:
             print (
@@ -600,7 +605,7 @@ class SkeletonAnalyser:
 
         return neighbors, box
 
-    def __length_from_curve_spline(self, edg_stats, N=10):
+    def __length_from_curve_spline(self, edg_stats, N=20):
         t = np.linspace(0.0, 1.0, N)
         x, y, z = scipy.interpolate.splev(
             t,
@@ -787,16 +792,19 @@ class SkeletonAnalyser:
 
         _, length_pixel = self.__ordered_points_mm(
             points_mm, nodeA_pos, nodeB_pos, one_node_mode)
-        length_poly = length_pixel
-        length_spline = length_pixel
-        if one_node_mode:
+        length_pixel = float(length_pixel)
+        length = length_pixel
+        length_poly = None
+        length_spline = None
+        if not one_node_mode:
+
             try:
                 length_poly = self.__length_from_curve_poly(edg_stats)
                 length_spline = self.__length_from_curve_spline(edg_stats)
+                length = length_spline
             except:
                 logger.info('problem with length_poly or length_spline')
 
-        length = length_spline
         # get distance between nodes
         if one_node_mode:
             startpoint = np.array([
@@ -809,10 +817,10 @@ class SkeletonAnalyser:
             nodes_distance = np.linalg.norm(nodeA_pos - nodeB_pos)
 
         stats = {
-            'lengthEstimationPoly': float(length_poly),
-            'lengthEstimationSpline': float(length_spline),
-            'lengthEstimation': float(length),
-            'lengthEstimationPixel': float(length_pixel),
+            'lengthEstimationPoly': length_poly,
+            'lengthEstimationSpline': length_spline,
+            'lengthEstimation': length,
+            'lengthEstimationPixel': length_pixel,
             'nodesDistance': float(nodes_distance),
             'tortuosity': float(length / nodes_distance)
         }
@@ -856,6 +864,13 @@ class SkeletonAnalyser:
             fitParamsX = np.polyfit(t, pts_mm_ord[0], self.curve_order)
             fitParamsY = np.polyfit(t, pts_mm_ord[1], self.curve_order)
             fitParamsZ = np.polyfit(t, pts_mm_ord[2], self.curve_order)
+            # Spline
+            # s - smoothing
+            # w - weight
+            w = np.ones(len(pts_mm_ord[0]))
+            # first and last have big weight
+            w[1] = len(pts_mm_ord[0])
+            w[-1] = len(pts_mm_ord[0])
             tck, u = scipy.interpolate.splprep(
                 pts_mm_ord, s=self.spline_smoothing)
             # tckl = np.asarray(tck).tolist()

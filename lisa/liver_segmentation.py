@@ -29,6 +29,108 @@ from sklearn import mixture
 import morphsnakes
 import sys
 import matplotlib.pyplot as plt
+import skimage.filter
+
+def filtrVariabilni(data3d,velikostVoxelu,mm = 5):    #mm = 25 konstanta = 1
+    ''' variabilni prumerovaci filtr'''
+    x = np.ceil(mm/velikostVoxelu[2])
+    mean = ndimage.uniform_filter(data3d.astype(np.int16), size=[x,x,x])
+    return mean
+
+def iterativniOdstraneni1(data3dBin,voxelSize):
+    ''' iterativni odstraneni, vybere oblast mensi nez jsou jatra
+    vhodne pouzit pred morphSnakes
+    vybira a pridava hranice, na zaver vybere nejvetsi objekt'''
+    vysledek = odstranIterace(data3dBin,voxelSize,mm=2)
+    vysledek1 = pridejIterace(vysledek,voxelSize,mm=2)
+    vysledek = odstranIterace(vysledek1,voxelSize,mm=2)
+    vysledek1 = pridejIterace(vysledek,voxelSize,mm=2)
+    vysledek = odstranIterace(vysledek1,voxelSize,mm=3,konst = 110)
+    vysledek1 = pridejIterace(vysledek,voxelSize,mm=3,konst = 110)
+    vysledek = odstranIterace(vysledek1,voxelSize,mm=3,konst = 110)
+    vysledek1 = pridejIterace(vysledek,voxelSize,mm=3,konst = 110)
+    maxObjekt = vyberMaxObjekt(vysledek1)
+    vysledek = maxObjekt
+    return vysledek
+
+def najdiHranici(data3d,voxelSize,konst = 75):
+    '''nalezne hranici pomoci konvoluce s 5x5x5 ctvercem
+    konstantu volte od 125-0 125 = siroka hranice, 75 optimalni'''
+    utvar = np.ones([5,5,5],dtype = np.int8)
+    prepsany = data3d.astype(np.int8)
+    konvoluce = ndimage.convolve(prepsany,utvar)
+    
+    vnitrek = konvoluce >= konst
+    opak = vnitrek *(-1)+1
+    hranice = np.multiply(opak,data3d)
+    
+    return hranice
+
+def odstranIterace(data3dBin,voxelSize,mm=2,konst = 75):
+    ''' nalezne hranici, uzavre ji, a provede odstraneni tohot utvaru'''
+    hranice = najdiHranici(data3dBin,voxelSize,konst)
+    
+    utvar = vytvorKouli3D(voxelSize,mm)
+    uzavrenaHranice = ndimage.binary_closing(hranice, utvar,1)
+    
+    opak = uzavrenaHranice*(-1)+1
+    ocisteny = np.multiply(opak,data3dBin)
+    return ocisteny
+
+def pridejIterace(data3dBin,voxelSize,mm=2,konst = 75):
+    ''' prida hranici do obrazu (i tam kde obraz nebyl)'''
+    prepsany = data3dBin.astype(np.bool)
+    hranice = najdiHranici(data3dBin,voxelSize,konst)
+    utvar = vytvorKouli3D(voxelSize,mm)
+    uzavrenaHranice = ndimage.binary_closing(hranice, utvar,1)
+    pridany = np.add(uzavrenaHranice,prepsany)
+    return pridany
+
+def pouzijSnake(data3dCT,segmentace,iterace = 5):
+    macwe = morphsnakes.MorphACWE(data3dCT, smoothing=4, lambda1=30, lambda2=1)
+    macwe.set_levelset(segmentace)
+    print 'probiha beh morphsnakes'
+    macwe.run(iterace)
+    print 'beh ukoncen'
+    vysledek = macwe.levelset
+    prepsanyVysledek = vysledek.astype(np.bool)
+    return prepsanyVysledek
+
+def konvolucniOperace(prahovany,voxelSize):
+    ''' 
+    Operace pro ziskani informace z prahovaneho obrazu
+    plneho sumu. Posloupnost operaci:
+    1) konvoluce s 5x5x5 objektem POZN: UPRAVIT PRO PROMENNE ROZLISENI (dramaticke zmeny)
+    2) otsu prahovani teto konvoluce
+    3) minimalni filtr velikosti 9x9x9 - vybere max objekt - jatra "uvnitr"
+    4) dilatace tohoto objektu a nasobeni s otsu prahovanym - jatra + kousky kolem
+    vraci: binarni objekt kde by mely byt jatra + nepresnosti kolem nich
+    '''
+    nasobeny = prahovany * 100
+    konvoluce = filtrVariabilni(nasobeny,voxelSize,mm = 3.5)
+    
+    val = skimage.filter.threshold_otsu(konvoluce)
+    otsuPrahovany = konvoluce > val
+    filtrovany = ndimage.minimum_filter(otsuPrahovany, size = [9,9,9])
+    
+    utvar = vytvorKouli3D(voxelSize, 5)
+    objekt = vyberMaxObjekt(filtrovany)
+    
+    uzavreny = ndimage.binary_dilation(objekt, utvar,5)
+    
+    kombinace = np.multiply(otsuPrahovany,uzavreny)
+    
+    return kombinace
+
+def segKonvoluce(data3d,voxelSize,source,vysledky = False):
+    '''Slozita metoda segmentace, pro podrobnejsi popis viz jednotlive metody
+    ktere pouziva'''
+    prahovany = prahovaniKonvoluce(data3d, voxelSize)
+    kombinace = konvolucniOperace(prahovany,voxelSize)
+    segmentace = iterativniOdstraneni1(kombinace,voxelSize)
+    #return segmentace
+    finalni = pouzijSnake(data3d,segmentace,iterace = 10)
+    return finalni
 
 def vyberMaxObjekt(data3dObjekty):
     '''
@@ -39,6 +141,8 @@ def vyberMaxObjekt(data3dObjekty):
     krome nejvetsiho
     '''
     [labelImage, labels] = ndimage.label(data3dObjekty)
+    if(labels ==0): #zadne objekty v poli nejsou
+        return data3dObjekty
     histogram = ndimage.histogram(labelImage, 1, labels, labels)
     pozice = np.argmax(histogram)
     hodnota = pozice+1
@@ -1180,7 +1284,6 @@ def segFindImproved(data3d,velikostVoxelu,source,vysledky = False):
     odstraneny = objectRemovalDistanceBased(nasobeny,threshold=1.5)
     
     vysledek = odstraneny
-    #main.zobrazitOriginal(vysledek)
     return vysledek
 
 def segRGrow(data3d,velikostVoxelu,source,vysledky = False):
@@ -1505,7 +1608,7 @@ class LiverSegmentation:
         self.seeds = None
         self.voxelSize = voxelsize_mm
         self.segParams = {
-            'method': 'find',
+            'method': 'segKonvoluce',
             'vysledkyDostupne': False,
             'paramfile': self._get_default_paramfile_path(),
             'path': None
@@ -1531,7 +1634,7 @@ class LiverSegmentation:
     
     def getMethodList(self):
         '''Vraci seznam vsech platnych nazvu metod ktere lze pouzit'''
-        return ['placeholder','find','regionGrowing','snakeSimple']
+        return ['placeholder','find','regionGrowing','snakeSimple','segKonvoluce']
     
     def setVysledky(self,vysledky):
         self.segParams['vysledky'] = vysledky
@@ -1564,7 +1667,10 @@ class LiverSegmentation:
             spatne = False     
         if(nazev  == 'snakeSimple'):
             metoda = segSimpleSnake
-            spatne = False       
+            spatne = False
+        if(nazev  == 'segKonvoluce'):
+            metoda = segKonvoluce
+            spatne = False           
 
         if(spatne):
             print('Zvolena metoda nenalezena')
@@ -1589,7 +1695,10 @@ class LiverSegmentation:
             spatne = False
         if(nazev  == 'snakeSimple'):
             metoda = segSimpleSnake
-            spatne = False           
+            spatne = False
+        if(nazev  == 'segKonvoluce'):
+            metoda = segKonvoluce
+            spatne = False               
 
         if(spatne):
             print('Zvolena metoda nenalezena')
