@@ -86,15 +86,6 @@ def pridejIterace(data3dBin,voxelSize,mm=2,konst = 75):
     pridany = np.add(uzavrenaHranice,prepsany)
     return pridany
 
-def pouzijSnake(data3dCT,segmentace,iterace = 5):
-    macwe = morphsnakes.MorphACWE(data3dCT, smoothing=4, lambda1=30, lambda2=1)
-    macwe.set_levelset(segmentace)
-    print 'probiha beh morphsnakes'
-    macwe.run(iterace)
-    print 'beh ukoncen'
-    vysledek = macwe.levelset
-    prepsanyVysledek = vysledek.astype(np.bool)
-    return prepsanyVysledek
 
 def konvolucniOperace(prahovany,voxelSize):
     ''' 
@@ -122,14 +113,61 @@ def konvolucniOperace(prahovany,voxelSize):
     
     return kombinace
 
+def pouzijSnake(featureImage,segmentace,iterace = 5):
+    '''  Malladi et al paper'''
+    print 'zahajen beh morphsnakes'
+    #prepsany = segmentace.astype(np.float32)
+    prepsany = segmentace.astype(np.int8)
+   
+    vzdalenost = ndimage.distance_transform_edt(prepsany, sampling = None, return_distances = True)
+    prepsany = vzdalenost.astype(np.float32)
+    segImage = sitk.GetImageFromArray(prepsany)    
+    instance = sitk.ShapeDetectionLevelSetImageFilter()
+    #instance.SetPropagationScaling(60)#1.0
+    #instance.SetCurvatureScaling(2)#0.5
+    #instance.SetMaximumRMSError( 0.0001 )#0.01
+    instance.SetNumberOfIterations( iterace )
+    levelset = instance.Execute( segImage, featureImage )    
+    obrazec = sitk.GetArrayFromImage(levelset)
+    main.zobrazitOriginal(obrazec)
+    vysledek = obrazec >= 0
+    print 'morphsnakes uspesne ukonceny'
+    return vysledek
+
+def vytvorFeatureImage(data3d):
+    ''' Vytvori feature image z prewittova operatoru (ve vsech smerech)
+    a nasledne jej normalizuje tak aby byla 0 v oblastech hran (1 bez hran)'''
+    feature = ndimage.prewitt(data3d,axis = 0)
+    feature2 = ndimage.prewitt(data3d,axis = 1)
+    soucet = np.add(feature,feature2)
+    feature2 = ndimage.prewitt(data3d,axis = 2)
+    feature = np.add(soucet,feature2)
+    #main.zobrazitOriginal(feature)
+    featureABS = np.abs(feature)*(-1)
+    
+    #print featureABS.dtype
+    
+    
+    prepsany = featureABS.astype(np.float32)
+    
+    normalizovany = prepsany/np.abs(np.min(featureABS))    
+    
+    featureImage = sitk.GetImageFromArray(normalizovany)
+    
+    #print featureImage
+    
+    return featureImage
+    
 def segKonvoluce(data3d,voxelSize,source,vysledky = False):
     '''Slozita metoda segmentace, pro podrobnejsi popis viz jednotlive metody
     ktere pouziva'''
     prahovany = prahovaniKonvoluce(data3d, voxelSize)
     kombinace = konvolucniOperace(prahovany,voxelSize)
     segmentace = iterativniOdstraneni1(kombinace,voxelSize)
-    #return segmentace
-    finalni = pouzijSnake(data3d,segmentace,iterace = 10)
+    np.save('kombinace.npy', segmentace)
+    sys.exit()
+    feature = vytvorFeatureImage(data3d)
+    finalni = pouzijSnake(feature,segmentace,iterace = 5)
     return finalni
 
 def vyberMaxObjekt(data3dObjekty):
