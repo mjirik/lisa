@@ -703,7 +703,7 @@ def prahovaniTri(spicky,y1,y2,ukazat2,konstanta1 = 0.45,konstanta2 = 0.8):#0.5 0
     POPIS
     1) urci se nejpravejsi spicka ze 'spicky' a jeji maximum
     2)prava hranice je misto kde poklesne na konstanta1*maxima
-    3)leva hranice je misto kde poklesne na konstanta2*maxima
+    3)leva hranice je maximum
     vraci [poziceStart,poziceKonec] 
     hranice prahovani   
     '''    
