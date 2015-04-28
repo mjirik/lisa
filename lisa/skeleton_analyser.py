@@ -21,14 +21,15 @@ class SkeletonAnalyser:
     | Example:
     | skan = SkeletonAnalyser(data3d_skel, volume_data, voxelsize_mm)
     | stats = skan.skeleton_analysis()
-
+    
+    | data3d_skel: 3d array with skeleton as 1s and background as 0s
     | use_filter_small: removing small objects
     | filter_small_threshold: threshold for small filtering
     """
 
     def __init__(self, data3d_skel, volume_data=None, voxelsize_mm=[1, 1, 1],
                  use_filter_small=False, filter_small_threshold=3,
-                 cut_wrong_skeleton=False):
+                 cut_wrong_skeleton=True):
         # for not
         self.volume_data = volume_data
         self.voxelsize_mm = voxelsize_mm
@@ -38,8 +39,12 @@ class SkeletonAnalyser:
         if use_filter_small:
             data3d_skel = self.filter_small(data3d_skel,
                                             filter_small_threshold)
+        
+        # generate nodes and enges (sklabel)
+        logger.debug('__skeleton_nodes, __generate_sklabel')
         skelet_nodes = self.__skeleton_nodes(data3d_skel)
         self.sklabel = self.__generate_sklabel(skelet_nodes)
+
         self.cut_wrong_skeleton = cut_wrong_skeleton
         self.curve_order = 2
         self.spline_smoothing = None
@@ -50,8 +55,8 @@ class SkeletonAnalyser:
     def skeleton_analysis(self, guiUpdateFunction=None):
         """
         | Glossary:
-        | element: line structure of skeleton connected to node on both ends
-        | node: connection point of elements. It is one or few voxelsize_mm
+        | element: line structure of skeleton connected to node on both ends. (index>0)
+        | node: connection point of elements. It is one or few voxelsize_mm. (index<0)
         | terminal: terminal node
         """
         def updateFunction(num, length, part):
@@ -61,17 +66,24 @@ class SkeletonAnalyser:
                     guiUpdateFunction(num, length, part)
                 logger.info('skeleton_analysis: processed ' + str(
                     num) + '/' + str(length) + ', part ' + str(part))
-
-        logger.debug('__radius_analysis_init')
-        if self.volume_data is not None:
-            skdst = self.__radius_analysis_init()
-
+        
+        if self.cut_wrong_skeleton:
+            # update gui progress
+            updateFunction(0, 1, "cuting wrong skeleton")
+            self.__cut_wrong_skeleton()
+        
         stats = {}
         len_edg = np.max(self.sklabel)
         len_node = np.min(self.sklabel)
         logger.debug(
             'len_edg: ' + str(len_edg) + ' len_node: ' + str(len_node))
-
+        
+        # analyze size of radiuses
+        logger.debug('__radius_analysis_init')
+        if self.volume_data is not None:
+            skdst = self.__radius_analysis_init()
+        
+        # get edges and nodes that are near the edge. (+bounding box)
         logger.debug(
             'skeleton_analysis: starting element_neighbors processing')
         self.elm_neigh = {}
@@ -85,7 +97,8 @@ class SkeletonAnalyser:
                 "generating node->connected_edges lookup table")
         logger.debug(
             'skeleton_analysis: finished element_neighbors processing')
-
+        
+        # get main stats
         logger.debug(
             'skeleton_analysis: starting processing part: length, radius, ' +
             'curve and connections of edge')
@@ -108,9 +121,6 @@ class SkeletonAnalyser:
         logger.debug(
             'skeleton_analysis: finished processing part: length, radius, ' +
             'curve, connections of edge')
-
-        if self.cut_wrong_skeleton:
-            stats = self.__cut_wrong_skeleton(stats)
 
         # @TODO dokončit
         # logger.debug(
@@ -148,33 +158,68 @@ class SkeletonAnalyser:
 
         return stats
 
-    def __cut_wrong_skeleton(self, stats, cut_ratio=2.0):
+    def __cut_wrong_skeleton(self, cut_ratio=2.0):
         """
         cut_ratio = 2.0 -> if radius of vessel is 2x its lenght or more,
         remove it
         """
-        # remove edges that are not connected to rest of the skeleton
+        
+        len_edg = np.max(self.sklabel)
+        len_node = np.min(self.sklabel)
         logger.debug(
-            'skeleton_analysis: Cut - Removing edges that are not connected' +
-            ' to rest of skeleton')
-        for s in dict(stats):
-            connected_edgs = []
-            try:
-                connected_edgs += stats[s]['connectedEdgesA']
-            except:  # Exception, e:
-                stats[s]['connectedEdgesA'] = []
+            'len_edg: ' + str(len_edg) + ' len_node: ' + str(len_node))
+        
+        # analyze size of radiuses
+        logger.debug('__radius_analysis_init')
+        if self.volume_data is not None:
+            skdst = self.__radius_analysis_init()
+        
+        # get edges and nodes that are near the edge. (+bounding box)
+        logger.debug(
+            'skeleton_analysis: starting element_neighbors processing')
+        self.elm_neigh = {}
+        self.elm_box = {}
+        for edg_number in (range(len_node, 0) + range(1, len_edg + 1)):
+            self.elm_neigh[edg_number], self.elm_box[
+                edg_number] = self.__element_neighbors(edg_number)
+        logger.debug(
+            'skeleton_analysis: finished element_neighbors processing')
+        
+        
+        # remove edges+nodes that are not connected to rest of the skeleton                
+        logger.debug(
+            'skeleton_analysis: Cut - Removing edges that are not' +
+            ' connected to rest of the skeleton (not counting its nodes)')
+        for elm in self.elm_neigh:
+            elm = int(elm)
+            if elm>0: # if edge
+                conn_nodes = [i for i in self.elm_neigh[elm] if i < 0] 
+                conn_edges = []
+                for n in conn_nodes:
+                    try:
+                        nn = self.elm_neigh[n] # get neighbours elements of node
+                    except:
+                        logger.debug('Node '+str(n)+' not found! May be already deleted.')
+                        continue
+                    
+                    for e in nn: # if there are other edges connected to node add them to conn_edges
+                        if e>0 and e not in conn_edges and e !=elm:
+                            conn_edges.append(e)
+                
+                if len(conn_edges)==0: # if no other edges are connected to nodes, remove from skeleton
+                    logger.debug("removing edge "+str(elm)+" with its nodes "+str(self.elm_neigh[elm]))
+                    for night in self.elm_neigh[elm]:
+                        self.sklabel[self.sklabel == night] = 0 # makes length NaN
+                    
+        logger.debug(
+            'skeleton_analysis: Cut - Removing elements that are not connected' +
+            ' to rest of the skeleton')
+        for elm in self.elm_neigh:
+            if len(self.elm_neigh[elm]) == 0:
+                logger.debug("removing element "+str(elm))
+                self.sklabel[self.sklabel == int(elm)] = 0 # makes length NaN
+        
 
-            try:
-                connected_edgs += stats[s]['connectedEdgesB']
-            except:  # Exception, e:
-                stats[s]['connectedEdgesB'] = []
-
-            if len(connected_edgs) == 0:
-                logger.debug(
-                    'Edge id:' + str(s) + ' is not connected to rest of' +
-                    ' skeleton')
-                stats = self.__remove_edge_from_stats(stats, s)
-        logger.debug('skeleton_analysis: Cut - Unconnected edges removed')
 
         # logger.debug(
         #    'skeleton_analysis: Cut - Getting lists of nodes,' +
@@ -233,8 +278,17 @@ class SkeletonAnalyser:
         #        # stats = self.__remove_edge_from_stats(stats, edge_end_id)
 
         # logger.debug('skeleton_analysis: Cut - Bad segments removed')
+        
 
-        return stats
+        # clear unneeded data. IMPORTANT!!
+        del(self.shifted_zero) # needed by __element_neighbors
+        del(self.shifted_sklabel) # needed by __element_neighbors
+        
+        # generate nodes and edges from skeleton (sklabel)
+        logger.debug('regenerate new nodes and edges from cut skeleton')
+        self.sklabel[self.sklabel!=0] = 1
+        skelet_nodes = self.__skeleton_nodes(self.sklabel)
+        self.sklabel = self.__generate_sklabel(skelet_nodes)
 
     def __skeleton_nodes(self, data3d_skel):
         """
@@ -822,7 +876,7 @@ class SkeletonAnalyser:
             'lengthEstimation': length,
             'lengthEstimationPixel': length_pixel,
             'nodesDistance': float(nodes_distance),
-            'tortuosity': float(length / nodes_distance)
+            'tortuosity': float(length / float(nodes_distance))
         }
 
         return stats
@@ -877,11 +931,11 @@ class SkeletonAnalyser:
 
             retval = {'curve_params':
                       {
-                          'start': point0_mm.tolist(),
-                          'vector': (point1_mm - point0_mm).tolist(),
-                          'fitParamsX': fitParamsX,
-                          'fitParamsY': fitParamsY,
-                          'fitParamsZ': fitParamsZ,
+                          'start': list(point0_mm.tolist()),
+                          'vector': list((point1_mm - point0_mm).tolist()),
+                          'fitParamsX': list(fitParamsX.tolist()),
+                          'fitParamsY': list(fitParamsY.tolist()),
+                          'fitParamsZ': list(fitParamsZ.tolist()),
                           'fitCurveStrX': str(np.poly1d(fitParamsX)),
                           'fitCurveStrY': str(np.poly1d(fitParamsY)),
                           'fitCurveStrZ': str(np.poly1d(fitParamsZ)),
