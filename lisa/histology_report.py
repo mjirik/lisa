@@ -179,41 +179,11 @@ class HistologyReport:
             'General']['vessel_volume_fraction']
         stats['Main']['Surface density (Sv)'] = self.data[
             'General']['surface_density']
-        stats['Main']['Nv'] = float(self.getNv())
+        stats['Main']['Nv'] = self.data['General']['Nv'] 
 
         # save stats
         self.stats = {'Report': stats}
         logger.debug('Main stats: ' + str(stats['Main']))
-
-    def getNv(self):
-        logger.debug('Computing Nv...')
-        nodes = {}
-        for key in self.data['Graph']:
-            edge = self.data['Graph'][key]
-            try:
-                nodeIdA = edge['nodeIdA']
-                if nodeIdA in nodes: nodes[nodeIdA] += [key] 
-                else: nodes[nodeIdA] = [key]
-            except Exception, e:
-                logger.warning('getNv(): no nodeIdA')
-            try:
-                nodeIdB = edge['nodeIdB']
-                if nodeIdB in nodes: nodes[nodeIdB] += [key] 
-                else: nodes[nodeIdB] = [key]
-            except Exception, e:
-                logger.warning('getNv(): no nodeIdB')
-
-        logger.debug('Got ' + str(len(nodes)) + ' connected nodes')
-        
-        fork_num = 0 # Number of nodes with 3+ connected edges 
-        for n_key in nodes:
-            if len(nodes[n_key]) >= 3:
-                fork_num += 1
-        
-        Nv = fork_num / float(self.data['General']['used_volume_mm3'])
-
-        logger.debug('Nv is ' + str(Nv))
-        return Nv
 
 
 class HistologyReportDialog(QDialog):

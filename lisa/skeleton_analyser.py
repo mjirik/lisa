@@ -269,6 +269,15 @@ class SkeletonAnalyser:
         self.elm_neigh = cut_elm_neigh
         self.elm_box = cut_elm_box
         
+        # check if some nodes are not forks but just curves
+        logger.debug('skeleton_analysis: Cut - check if some nodes are not forks but just curves')
+        for elm in self.elm_neigh:
+            if elm<0:
+                conn_edges = [i for i in self.elm_neigh[elm] if i > 0] 
+                if len(conn_edges) == 2:
+                    logger.warning('Node '+str(elm)+' is just a curve!!! FIX THIS!!!')
+                    # TODO
+        
         # regenerate new nodes and edges from cut skeleton (sklabel)
         logger.debug('regenerate new nodes and edges from cut skeleton')
         self.sklabel[self.sklabel!=0] = 1

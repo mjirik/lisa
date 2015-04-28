@@ -255,6 +255,54 @@ class HistologyAnalyser:
         # needed only by self.writeSkeletonToPickle()
         self.sklabel = skan.sklabel
         self.stats.update({'Graph': stats})
+        
+        # compute Nv statistic
+        self.stats['General']['Nv'] = float(self.get_Nv())
+        
+    def get_Nv(self):
+        logger.debug('Computing Nv...')
+        
+        # get lists of edges that are connected to nodes
+        nodes = {}
+        for key in self.stats['Graph']:
+            edge = self.stats['Graph'][key]
+            try:
+                nodeIdA = edge['nodeIdA']
+                if nodeIdA in nodes: nodes[nodeIdA] += [key] 
+                else: nodes[nodeIdA] = [key]
+            except Exception, e:
+                logger.warning('get_Nv(): no nodeIdA')
+            try:
+                nodeIdB = edge['nodeIdB']
+                if nodeIdB in nodes: nodes[nodeIdB] += [key] 
+                else: nodes[nodeIdB] = [key]
+            except Exception, e:
+                logger.warning('get_Nv(): no nodeIdB')
+        logger.debug('Read ' + str(len(nodes)) + ' nodes')
+        
+        # Get Pn (number of nodes with valence n)
+        max_l = 0
+        for n_key in nodes:
+            max_l = max(max_l, len(nodes[n_key]))
+        Pn = np.zeros(max_l+1)
+        for n_key in nodes:
+            Pn[len(nodes[n_key])] += 1
+        logger.debug(str(Pn))
+        
+        # Get N(cap)
+        Ncap = 0
+        for n in range(len(Pn)):
+            if n > 1: # dont count terminal nodes 
+                Ncap += ( (n-2)/2.0 ) * Pn[n]
+        
+        # Get V(ref)
+        Vref = self.stats['General']['used_volume_mm3']
+        
+        # Compute Nv
+        Nv = ( Ncap / float(Vref) ) + 1
+        logger.debug('Nv is ' + str(Nv))
+        
+        return Nv
 
     def showSegmentedData(self):
         skan = SkeletonAnalyser(
