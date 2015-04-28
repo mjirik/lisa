@@ -11,6 +11,8 @@ import os.path
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
 
+import traceback
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -277,6 +279,35 @@ class HistologyAnalyser:
 
     def writeStatsToYAML(self, filename='hist_stats.yaml'):
         logger.debug('writeStatsToYAML')
+        
+        gr = self.stats['Graph']
+        for i in gr:
+            logger.info('Processing edge num '+str(i))
+            try:
+                gr[i]['lengthEstimationPoly'] = float(gr[i]['lengthEstimationPoly'])
+            except:
+                logger.warning('lengthEstimationPoly not a number')
+                gr[i]['lengthEstimationPoly'] = None
+                
+            try:
+                gr[i]['lengthEstimationSpline'] = float(gr[i]['lengthEstimationSpline'])
+            except:
+                logger.warning('lengthEstimationSpline not a number')
+                gr[i]['lengthEstimationSpline'] = None
+            
+            try:
+                self.stats['lengthEstimation'] = float(gr[i]['lengthEstimation'])
+            except:
+                logger.warning('lengthEstimation not a number')
+                gr[i]['lengthEstimation'] = None
+            
+            try:
+                gr[i]['lengthEstimationPixel'] = float(gr[i]['lengthEstimationPixel'])
+            except:
+                logger.warning('lengthEstimationPixel not a number')
+                gr[i]['lengthEstimationPixel'] = None
+        self.stats['Graph'] = gr
+        
         misc.obj_to_file(self.stats, filename=filename, filetype='yaml')
 
     def writeStatsToCSV(self, filename='hist_stats.csv'):
@@ -291,8 +322,8 @@ class HistologyAnalyser:
                 quoting=csv.QUOTE_MINIMAL
             )
             # save csv info
-            info_labels = ['shape_px', 'vessel_volume_fraction', 'volume_mm3', 'volume_px', 'voxel_size_mm', 'voxel_volume_mm3']
-            entry_labels = ['connectedEdgesA', 'connectedEdgesB', 'curve_params_start', 'curve_params_vector', 'id', 'lengthEstimation', 'nodeA_ZYX', 'nodeA_ZYX_mm', 'nodeB_ZYX', 'nodeB_ZYX_mm', 'nodeIdA', 'nodeIdB', 'nodesDistance', 'radius_mm', 'tortuosity', 'vectorA', 'vectorB']
+            info_labels = ['shape_px', 'surface_density', 'used_volume_mm3', 'used_volume_px', 'vessel_volume_fraction', 'volume_mm3', 'volume_px', 'voxel_size_mm', 'voxel_volume_mm3']
+            entry_labels = ['connectedEdgesA', 'connectedEdgesB', 'id', 'lengthEstimation', 'lengthEstimationPixel', 'lengthEstimationPoly', 'lengthEstimationSpline', 'nodeA_ZYX', 'nodeA_ZYX_mm', 'nodeB_ZYX', 'nodeB_ZYX_mm', 'nodeIdA', 'nodeIdB', 'nodesDistance', 'radius_mm', 'tortuosity', 'vectorA', 'vectorB']
 
             try:
                 writer.writerow(info_labels)
@@ -304,6 +335,9 @@ class HistologyAnalyser:
             try:
                 writer.writerow(['__info__'])
                 writer.writerow(info['shape_px'])
+                writer.writerow([info['surface_density']])
+                writer.writerow([info['used_volume_mm3']])
+                writer.writerow([info['used_volume_px']])
                 writer.writerow([info['vessel_volume_fraction']])
                 writer.writerow([info['volume_mm3']])
                 writer.writerow([info['volume_px']])
@@ -311,6 +345,7 @@ class HistologyAnalyser:
                 writer.writerow([info['voxel_volume_mm3']])
             except Exception, e:
                 logger.error('Error when saving line (info) to csv: '+str(e))
+                logger.error(traceback.format_exc())
 
             # save data
             for lineid in data:
@@ -319,10 +354,13 @@ class HistologyAnalyser:
                     writer.writerow(['__entry__'])
                     writer.writerow(dataline['connectedEdgesA'])
                     writer.writerow(dataline['connectedEdgesB'])
-                    writer.writerow(dataline['curve_params']['start'])
-                    writer.writerow(dataline['curve_params']['vector'])
+                    #writer.writerow(dataline['curve_params']['start'])
+                    #writer.writerow(dataline['curve_params']['vector'])
                     writer.writerow([dataline['id']])
                     writer.writerow([dataline['lengthEstimation']])
+                    writer.writerow([dataline['lengthEstimationPixel']])
+                    writer.writerow([dataline['lengthEstimationPoly']])
+                    writer.writerow([dataline['lengthEstimationSpline']])
                     writer.writerow(dataline['nodeA_ZYX'])
                     writer.writerow(dataline['nodeA_ZYX_mm'])
                     writer.writerow(dataline['nodeB_ZYX'])
@@ -336,7 +374,8 @@ class HistologyAnalyser:
                     writer.writerow(dataline['vectorB'])
 
                 except Exception, e:
-                    logger.error('Error when saving line (data) to csv: '+str(e))
+                    logger.error('Error when saving line '+str(lineid)+' (data) to csv: '+str(e))
+                    logger.error(traceback.format_exc())
 
 
     def writeSkeletonToPickle(self, filename='skel.pkl'):
@@ -568,10 +607,16 @@ def processData(args):
 def main():  # pragma: no cover
     args = parser_init()
 
-    logging.basicConfig()
+    logging.basicConfig(stream=sys.stdout)
     logger = logging.getLogger()
+    
+    try:
+        os.remove("ha.log")
+    except OSError:
+        pass
+    logger.addHandler(logging.FileHandler("ha.log"))
+    
     logger.setLevel(logging.WARNING)
-
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
