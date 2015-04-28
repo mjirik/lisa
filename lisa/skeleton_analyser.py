@@ -68,7 +68,6 @@ class SkeletonAnalyser:
                     num) + '/' + str(length) + ', part ' + str(part))
         
         if self.cut_wrong_skeleton:
-            # update gui progress
             updateFunction(0, 1, "cuting wrong skeleton")
             self.__cut_wrong_skeleton()
         
@@ -78,7 +77,7 @@ class SkeletonAnalyser:
         logger.debug(
             'len_edg: ' + str(len_edg) + ' len_node: ' + str(len_node))
         
-        # analyze size of radiuses
+        # init radius analysis 
         logger.debug('__radius_analysis_init')
         if self.volume_data is not None:
             skdst = self.__radius_analysis_init()
@@ -97,6 +96,9 @@ class SkeletonAnalyser:
                 "generating node->connected_edges lookup table")
         logger.debug(
             'skeleton_analysis: finished element_neighbors processing')
+        # clear unneeded data. IMPORTANT!!
+        del(self.shifted_zero) # needed by __element_neighbors
+        del(self.shifted_sklabel) # needed by __element_neighbors
         
         # get main stats
         logger.debug(
@@ -160,19 +162,22 @@ class SkeletonAnalyser:
 
     def __cut_wrong_skeleton(self, cut_ratio=2.0):
         """
-        cut_ratio = 2.0 -> if radius of vessel is 2x its lenght or more,
+        cut_ratio = 2.0 -> if radius of terminal edge is 2x its lenght or more,
         remove it
         """
+        
+        def remove_elm(elm_id, elm_neigh, elm_box, sklabel):
+            sklabel[sklabel == elm_id] = 0 
+            del(elm_neigh[elm_id])
+            del(elm_box[elm_id])
+            for elm in elm_neigh:
+                elm_neigh[elm] = [x for x in elm_neigh[elm] if x != elm]
+            return elm_neigh, elm_box, sklabel
         
         len_edg = np.max(self.sklabel)
         len_node = np.min(self.sklabel)
         logger.debug(
             'len_edg: ' + str(len_edg) + ' len_node: ' + str(len_node))
-        
-        # analyze size of radiuses
-        logger.debug('__radius_analysis_init')
-        if self.volume_data is not None:
-            skdst = self.__radius_analysis_init()
         
         # get edges and nodes that are near the edge. (+bounding box)
         logger.debug(
@@ -184,12 +189,16 @@ class SkeletonAnalyser:
                 edg_number] = self.__element_neighbors(edg_number)
         logger.debug(
             'skeleton_analysis: finished element_neighbors processing')
-        
+        # clear unneeded data. IMPORTANT!!
+        del(self.shifted_zero) # needed by __element_neighbors
+        del(self.shifted_sklabel) # needed by __element_neighbors
         
         # remove edges+nodes that are not connected to rest of the skeleton                
         logger.debug(
             'skeleton_analysis: Cut - Removing edges that are not' +
             ' connected to rest of the skeleton (not counting its nodes)')
+        cut_elm_neigh = dict(self.elm_neigh)
+        cut_elm_box = dict(self.elm_box)
         for elm in self.elm_neigh:
             elm = int(elm)
             if elm>0: # if edge
@@ -209,82 +218,58 @@ class SkeletonAnalyser:
                 if len(conn_edges)==0: # if no other edges are connected to nodes, remove from skeleton
                     logger.debug("removing edge "+str(elm)+" with its nodes "+str(self.elm_neigh[elm]))
                     for night in self.elm_neigh[elm]:
-                        self.sklabel[self.sklabel == night] = 0 # makes length NaN
-                    
+                        remove_elm(night, cut_elm_neigh, cut_elm_box, self.sklabel)
+        self.elm_neigh = cut_elm_neigh
+        self.elm_box = cut_elm_box
+        
+        # remove elements that are not connected to the rest of skeleton
         logger.debug(
             'skeleton_analysis: Cut - Removing elements that are not connected' +
             ' to rest of the skeleton')
+        cut_elm_neigh = dict(self.elm_neigh)
+        cut_elm_box = dict(self.elm_box)
         for elm in self.elm_neigh:
+            elm = int(elm)
             if len(self.elm_neigh[elm]) == 0:
                 logger.debug("removing element "+str(elm))
-                self.sklabel[self.sklabel == int(elm)] = 0 # makes length NaN
+                remove_elm(elm, cut_elm_neigh, cut_elm_box, self.sklabel)
+        self.elm_neigh = cut_elm_neigh
+        self.elm_box = cut_elm_box
         
+        # get list of terminal nodes
+        logger.debug('skeleton_analysis: Cut - get list of terminal nodes')
+        terminal_nodes = []
+        for elm in self.elm_neigh:
+            if elm<0: # if node
+                conn_edges = [i for i in self.elm_neigh[elm] if i > 0] 
+                if len(conn_edges) == 1: # if only one edge is connected
+                    terminal_nodes.append(elm)
 
+        # init radius analysis 
+        logger.debug('__radius_analysis_init')
+        if self.volume_data is not None:
+            skdst = self.__radius_analysis_init()
 
-        # logger.debug(
-        #    'skeleton_analysis: Cut - Getting lists of nodes,' +
-        #    ' edges and end nodes')
-        # dict of connected nodes to edge
-        # edg_neigh = {}
-        # for s in dict(stats):
-        #     if s not in edg_neigh:
-        #         edg_neigh[s] = []
-
-        #     try:
-        #         if not stats[s]['nodeIdA'] in edg_neigh[s]:
-        #             edg_neigh[s].append(stats[s]['nodeIdA'])
-        #     except KeyError:
-        #         logger.debug('Edge id:' + str(s) + ' is missing nodeIdA')
-
-        #     try:
-        #         if not stats[s]['nodeIdB'] in edg_neigh[s]:
-        #             edg_neigh[s].append(stats[s]['nodeIdB'])
-        #     except KeyError:
-        #         logger.debug('Edge id:' + str(s) + ' is missing nodeIdB')
-
-        # dict of connected edges to node
-        # node_neigh = {}
-        # for e in edg_neigh:
-        #    # for node in edg_neigh[e]:
-        #        # if not node in node_neigh:
-        #            # node_neigh[node] = []
-
-        #        # if not e in node_neigh[node]:
-        #            # node_neigh[node].append(e)
-
-        # get end nodes
-        # end_nodes = {}
-        # for i in node_neigh:
-        #    # neigh = node_neigh[i]
-        #     if len(neigh) == 1:
-        #         logger.debug('end node/edge: ' + str(i) + '/' + str(neigh[0]))
-        #         end_nodes[i] = neigh[0]
-        # logger.debug('skeleton_analysis: Cut - Got all lists')
-
-        # removes end edges based on radius/length ratio
-        # logger.debug(
-        #    #'skeleton_analysis: Cut - Removing bad segments based on' +
-        #    #' radius/length ratio')
-        # for end_node in end_nodes:
-        #    # edge_end_id = end_nodes[end_node]
-        #    # edge_end_stat = stats[edge_end_id]
-
-        #    # if edge_end_stat['radius_mm'] /\
-        #            # float(edge_end_stat['lengthEstimation']) > cut_ratio:
-        #        # logger.debug(
-        #            #'bad rad/len: ' +
-        #            # str(edge_end_stat['radius_mm']) + ' ' +
-        #            # str(edge_end_stat['lengthEstimation']))
-        #        # stats = self.__remove_edge_from_stats(stats, edge_end_id)
-
-        # logger.debug('skeleton_analysis: Cut - Bad segments removed')
+        # removes end terminal edges based on radius/length ratio
+        logger.debug('skeleton_analysis: Cut - Removing bad terminal edges based on'+
+            ' radius/length ratio')
+        cut_elm_neigh = dict(self.elm_neigh)
+        cut_elm_box = dict(self.elm_box)
+        for tn in terminal_nodes:
+            te = [i for i in self.elm_neigh[tn] if i > 0][0] # terminal edge
+            radius = float(self.__radius_analysis(te, skdst))
+            edgst = self.__connection_analysis(int(te))
+            edgst.update(self.__edge_length(edg_number, edgst))
+            length = edgst['lengthEstimation']
+            
+            #logger.debug(str(radius / float(length))+" "+str(radius)+" "+str(length))
+            if (radius / float(length)) > cut_ratio:
+                logger.debug("removing edge "+str(te)+" with its terminal node.")
+                remove_elm(elm, cut_elm_neigh, cut_elm_box, self.sklabel)
+        self.elm_neigh = cut_elm_neigh
+        self.elm_box = cut_elm_box
         
-
-        # clear unneeded data. IMPORTANT!!
-        del(self.shifted_zero) # needed by __element_neighbors
-        del(self.shifted_sklabel) # needed by __element_neighbors
-        
-        # generate nodes and edges from skeleton (sklabel)
+        # regenerate new nodes and edges from cut skeleton (sklabel)
         logger.debug('regenerate new nodes and edges from cut skeleton')
         self.sklabel[self.sklabel!=0] = 1
         skelet_nodes = self.__skeleton_nodes(self.sklabel)
@@ -980,7 +965,7 @@ class SkeletonAnalyser:
         """
         Return smaller radius of tube
         """
-        # import ipdb; ipdb.set_trace() # BREAKPOINT
+        # returns mean distance from skeleton to vessel border = vessel radius
         edg_skdst = skdst * (self.sklabel == edg_number)
         return np.mean(edg_skdst[edg_skdst != 0])
 
@@ -996,7 +981,7 @@ class SkeletonAnalyser:
                            ' for edge number ' + str(edg_number))
 
             # get edges connected to end nodes
-            connectedEdgesA = self.elm_neigh[edg_neigh[0]]
+            connectedEdgesA = np.array(self.elm_neigh[edg_neigh[0]])
             # remove edg_number from connectedEdges list
             connectedEdgesA = connectedEdgesA[connectedEdgesA != edg_number]
 
@@ -1029,8 +1014,8 @@ class SkeletonAnalyser:
             }
         else:
             # get edges connected to end nodes
-            connectedEdgesA = self.elm_neigh[edg_neigh[0]]
-            connectedEdgesB = self.elm_neigh[edg_neigh[1]]
+            connectedEdgesA = np.array(self.elm_neigh[edg_neigh[0]])
+            connectedEdgesB = np.array(self.elm_neigh[edg_neigh[1]])
             # remove edg_number from connectedEdges list
             connectedEdgesA = connectedEdgesA[connectedEdgesA != edg_number]
             connectedEdgesB = connectedEdgesB[connectedEdgesB != edg_number]
