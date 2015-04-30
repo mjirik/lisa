@@ -30,12 +30,350 @@ import morphsnakes
 import sys
 import matplotlib.pyplot as plt
 import skimage.filter
+from scipy.cluster.vq import kmeans,vq
+import random
 
-def filtrVariabilni(data3d,velikostVoxelu,mm = 5):    #mm = 25 konstanta = 1
-    ''' variabilni prumerovaci filtr'''
-    x = np.ceil(mm/velikostVoxelu[2])
-    mean = ndimage.uniform_filter(data3d.astype(np.int16), size=[x,x,x])
+def freeOperace3saver(pomocny,tretiVrstva,voxelSize,nezadouci,mmKoule = 2, iteraceUz = 25,iteraceDil = 5):
+    '''pomocna funkce na setreni pameti, uzavreni pole a jeho dilatace
+    kouli veliksoti 2 mm
+    vraci prunik - prunik 3. vrstvy a dilatace
+    uzavreny - vzdy zadouci oblast'''
+    vyplneny = vyplnDiry2D(pomocny)
+    utvar = vytvorKouli3D(voxelSize, mmKoule)
+    uzavreny = closing3D(vyplneny,utvar,iteraceUz)
+    dilatovany = ndimage.binary_dilation(uzavreny, utvar, 5)
+    prunik = np.multiply(dilatovany,tretiVrstva)
+    
+    return prunik,uzavreny
+
+def freeOperace3(pomocny,tretiVrstva,voxelSize,nezadouci):
+    '''
+    pomocny = 3d binarni pole s 1. a 2. vrstvou 
+    treti vrstva  = 3d binarni pole 3. vrstvy
+    voxelSize - [x,y,z] velikost voxelu odpovidajici data3d
+    nezadouci - 3d binarni pole 3. vrstvy 1= zadouci 0 = nezadouci
+    vyplneni der a uzavreni utvarem koule a dilatace,
+    nasledny prunik s treti vrstvou a pridani nejvetsiho objektu ze
+    souctu pruniku a vstupu 
+    pri odstraneni nezadoucich je uzavreny objekt bran jako zadouci
+    vraci: raw, segmentovany binarni obraz'''
+    print 'probiha vymezeni okraju 3. vrstvy'
+    
+    prunik,uzavreny = freeOperace3saver(pomocny,tretiVrstva,voxelSize,nezadouci)
+    
+    opakUzavreneho = np.negative(uzavreny)
+    vyplneny = np.multiply(nezadouci,opakUzavreneho)
+    opakUzavreneho = np.multiply(prunik,vyplneny)
+    
+    rawAll = np.add(opakUzavreneho,pomocny)
+    raw = vyberMaxObjekt(rawAll)
+    
+    return raw
+
+def freeKmeans(vylepseny,velikostVoxelu,pocetVrstev = 14, pocetVzorku = 400000):
+    '''
+    vylepseny - 3d snimek ktery bude kvantizovan
+    velikost voxelu - [x,y,z] velikost voxelu v 3d poli
+    pocetVrstev - na kolik odstinu ma byt snimek kvantizovan
+    pocetVzorku - pocet nahodne vybranych vzorku z 3d pole vylepseny
+    Kmeans odstinova kvantizace - jako ve skole
+    vraci
+     prvaVrstva, 3d bin pole vrstvy cislo 1
+     druhaVrstva, 3d bin pole vrstvy cislo 2
+     tretiVrstva 3d bin pole vrstvy cislo 3
+    '''
+    img = vylepseny
+    pixel = np.reshape(img,(img.shape[0]*img.shape[1]*img.shape[2],1))
+    vybrane = np.array(random.sample(pixel,pocetVzorku))
+    print 'probiha kmeans algoritmus'
+    centroids,_ = kmeans(vybrane,pocetVrstev) #jakztakz funguje 7+2 VYPADA SLIBNE 17+3 14 NEJLEPSI
+    
+    npcentroids = np.array(centroids)
+    npcentroids2 =  np.squeeze(npcentroids)
+    serazeny = np.sort(npcentroids2)
+    
+    hranice1 = (serazeny[-2]+serazeny[-1])/2.0
+    hranice2 = (serazeny[-3]+serazeny[-2])/2.0
+    hranice3 = (serazeny[-4]+serazeny[-3])/2.0
+    
+    prvaVrstva = vylepseny >= hranice1    
+    prahovany = vylepseny >= hranice2
+    druhaVrstva = prahovany-prvaVrstva
+    prahovany = vylepseny >= hranice3
+    tretiVrstva = prahovany-druhaVrstva-prvaVrstva
+    
+    #zobrazitOriginal(prvaVrstva)
+    #zobrazitOriginal(druhaVrstva)
+    #zobrazitOriginal(tretiVrstva)
+    #sys.exit()
+    
+    return prvaVrstva,druhaVrstva,tretiVrstva
+
+def freeOperace2druhaVrstva(oblastZajmu,druhaVrstva):
+    ''' oblastZajmu, - 3d bin pole
+    druhaVrstva - 3d bin pole
+    Vybere objekt z druhe vrstvy ktery je nejvetsi v oblasti zajmu
+    vraci pridat - vybrany objekt z druhaVrstva'''
+    [labelImage, labels] = ndimage.label(druhaVrstva)
+    
+    prunik = np.multiply(oblastZajmu,druhaVrstva) 
+    
+    nejvetsi = vyberMaxObjekt(prunik)
+    
+    poleSCislem = np.multiply(nejvetsi, labelImage)
+    cislo = np.max(poleSCislem)
+    
+    pridat = labelImage == cislo
+    return pridat
+
+def freeOperace2nezadouci(maxe,prvaVrstva,pridano,voxelSize):
+    ''' 
+    maxe - nejvetsi objekt prvni vrstvy (3d bin pole)
+    prva vrstva - cela 1 vrstva
+    pridano - vybrana 1. a 2. vrstva vcetne nezadoucich oblasti
+    Pomocna funkce freeOperace2main
+    Jako nezadouci oblasti jsou vybrany oblasti 50mm od objektu 
+    nevybranych jako vnitrek jater
+    vraci opak - negace nezadoucich oblasti
+    '''
+    ostatniObjekty = prvaVrstva-maxe    #odstraneni 2. vrstvy pobliz ostatnich objektu
+    
+    nasobeny = ostatniObjekty*100
+    shadow = filtr3D(nasobeny,voxelSize,mm = 60)#zde byl filtr3D 50 mm
+    nezadouci = shadow > 0
+    
+    opak = np.negative(nezadouci)
+    return opak
+
+def freeOperace2main(soucet,voxelSize):
+    '''
+    soucet - filtrovany 3d obraz
+    voxelSize - [x,y,z] rozmery pole v milimetrech
+    Funkce pracujici s filtrovanym prahovanym obrazem (soucet)
+    Posloupnost operacei:
+    1) vybrani nejvetsiho objektu z 1. vrstvy = vnitrek jater
+    2) vybrani oblasti zajmu ve vzdalenosti 40 mm okolo tohoto objektu
+    3) z 2. vrstvy vybran objekt s nejvetsim podilem uvnitr oblasti zajmu
+    4) nalezeni nezadoucich oblasti - oblasti 60mm od objektu 1 vrstvy
+    neurcenych jako jatra
+    5) odecteni nezadoucich oblasti od souctu objektu 1. a 2. vrstvy
+    6) opakovane pricteni objektu 1. vrstvy (aby nedoslo k jeho smazani)
+    vraci - 
+    vysledek, - vybrana segmentace 1 a 2 vrstvy
+    tretiVrstva, - cela 3 vrstva
+    opak - opak nezadouci oblasti (1 = zadouci, 0 = nezadouci)
+    '''
+    prvaVrstva,druhaVrstva,tretiVrstva = freeKmeans(soucet,voxelSize)
+    
+    maxe = vyberMaxObjekt(prvaVrstva)#jatra uvnitr    
+    nasobeny = maxe*100
+    shadow = filtrVariabilni(nasobeny,voxelSize,mm = 40)
+    oblastZajmu = shadow > 0 #oblast zajmu kde bude pridana druha vrstva
+    
+    pridat = freeOperace2druhaVrstva(oblastZajmu,druhaVrstva)
+    pridano = np.add(pridat,maxe) #zde je vybrana prvni i vybrana druha vrstva (+cancoury)
+    opak = freeOperace2nezadouci(maxe,prvaVrstva,pridano,voxelSize)#nezadouci objekty
+    
+    odstraneny = np.multiply(pridano,opak)
+    vysledek = np.add(maxe,odstraneny) #na zaver je opet pridana 1. vrstva (pokud by byla odstranena)
+    prepsany = vysledek > 0
+    vysledek = vyberMaxObjekt(prepsany)
+    return vysledek,tretiVrstva,opak
+
+def closing3D(data3d,utvar,iterace):
+    '''
+    data3d - binarni 3d pole
+    utvar - 3d bianrni objekt se kterym se uzavreni provadi
+    iterace - pocet iteraci uzavreni
+    Binarni uzavreni, vytvori pole podle poctu iteraci a velikosti
+    utvaru aby nedoslo k chybe u okraju pole.
+    vraci: vratit, uzavrene pole puvodni velikosti
+    '''
+    
+    original = np.array(data3d.shape)
+    rozrust = np.array(utvar.shape)*iterace
+    velikostNoveho = original + rozrust*2
+    
+    nove = np.zeros(velikostNoveho,dtype = np.bool)
+    
+    nove[rozrust[0]:rozrust[0]+original[0],rozrust[1]:rozrust[1]+original[1],rozrust[2]:rozrust[2]+original[2]] = data3d
+    
+    uzavreneNove = ndimage.binary_closing(nove, utvar, iterace)
+    
+    vratit = uzavreneNove[rozrust[0]:rozrust[0]+original[0],rozrust[1]:rozrust[1]+original[1],rozrust[2]:rozrust[2]+original[2]]
+    
+    return vratit
+
+def vyplnDiry2D(data3d):    
+    '''
+    data3d - binarni pole
+    Vyplneni der v 3d poli 
+    x (prvni) osa je z hlediska kriteria 
+    der ignorovana
+    vraci: vyplneny - vyplnene 3d pole    '''
+    
+    vyplneny = np.zeros(data3d.shape,dtype = np.bool)
+    
+    pomocny = 0
+    for rez in data3d:
+        plastev = ndimage.binary_fill_holes(rez)
+        vyplneny[pomocny] = plastev
+        pomocny = pomocny+1
+    return vyplneny
+
+def freePostProcesHranice(data3d,utvar):
+    ''' data3d - vstupni binarni poel s objektem
+    utvar - 3d binarni objekt pro uzavreni
+    Nalezeni hranice objektu a jeji uzavreni. Ucelem
+    je odstraneni zily vystupujici z jater ktera
+    je nekdy segmentovana. '''
+    prepsany = data3d.astype(np.int8)
+    hranice = ve.get_border(prepsany)
+    uzavrenaHranice = ndimage.binary_closing(hranice, utvar, 4)
+    opak = np.negative(uzavrenaHranice)
+    rozdeleny = np.multiply(opak,data3d)
+    return rozdeleny
+
+def freePostProcesDiry(data3d,utvar):
+    '''data3d- vstup 3d numpy pole s binarnim objektem
+    utvar - 3d binarni objekt pro uzavreni
+    Zaplneni der (2D), nasledne binarni uzavreni (4x) 
+    a nasledne zZaplneni der (2D). Za ucelem odstraneni 2D der
+    ktere v jatrech logicky nejsou
+    vraci: vyplneny - objekt s vyplnenymi dirami
+    '''
+    vyplneny = vyplnDiry2D(data3d)
+    uzavren = closing3D(vyplneny,utvar,4)
+    vyplneny = vyplnDiry2D(uzavren)
+    return vyplneny
+
+def freePostProces(data3d,voxelSize):
+    '''data3d- vstup 3d numpy pole s binarnim objektem
+    voxelSIze - [x,y,z] rozmery pole v milimetrech
+    Posegmentacni zpracovani obrazu
+    sklada se hlavne z binarnich operaci
+     zaplneni der (a to 2D) - rychlejsi nez uzavreni
+    dale z odstraneni uzavrene hranice 
+    vraci: vysledek - upravene binarni pole'''
+    utvar = vytvorKouli3D(voxelSize, 2)    
+    vyplneny = freePostProcesDiry(data3d,utvar)
+    rozdeleny = freePostProcesHranice(vyplneny,utvar)    
+    'odstraneni vycnelku - brisni zila apod'
+    maxObjekt = vyberMaxObjekt(rozdeleny)
+    dilatovany = ndimage.binary_dilation(maxObjekt, utvar,5)
+    spravny = np.multiply(dilatovany,vyplneny)
+    vysledek = spravny 
+    return vysledek
+
+def freeOperace1(prahovany,voxelSize):
+    ''' 
+    prahovany - 3D binarni snimek
+    voxelSize - [x,y,z] velikost voxelu odpovidajici prahovany
+    Filtrace pro ziskani informace z prahovaneho obrazu
+    plneho sumu. 
+    postup operaci:
+    1) nasobeni prahovaneho 100 a jeho filtrace prumerovacim 
+    filtrem 5mm (omezen v Z ose) = A
+    pracuje se dale s timto obrazem
+    2) maximalni filtr 4mm z (A)  = B
+    3) minimalni filtr 7mm z (A)  = C
+    4) rovnomerny filtr 50mm = D
+    5) soucet = 2*B+4*C+3*D
+    vraci soucet 3d filtrovany obraz    
+    '''
+    nasobeny = prahovany*100
+
+    konvoluce = filtrVariabilni(nasobeny,voxelSize,mm = 5)
+
+    maximum = 2*maxFiltr3D(konvoluce,voxelSize,mm = 4)#zde 2?
+    filtrovany = 4*minFiltr3D(konvoluce,voxelSize,mm = 7)#4x7 supr 'TADY TADY'
+    soucet = np.add(maximum,filtrovany)    
+    shadow = 3*filtr3D(konvoluce,voxelSize,mm = 50)    
+    soucet = np.add(shadow,soucet)    
+    return soucet
+
+
+def segFreeSaver2(soucet,voxelSize):
+    '''
+    soucet - filtrace prahovaneho obrazu 3d pole
+    voxelSize - [x,y,z] velikost voxelu odpovidajici data3d
+    pomocna funkce pro setreni pameti 
+    vraci: raw - urcena segmentace ve filtrovanem obrazu
+    '''
+    
+    pomocny,tretiVrstva,nezadouci = freeOperace2main(soucet,voxelSize)
+    raw = freeOperace3(pomocny,tretiVrstva,voxelSize,nezadouci)
+    return raw
+
+def segFreeSaver1(data3d,voxelSize):
+    '''
+    data3d - 3D CT snimek
+    voxelSize - [x,y,z] velikost voxelu odpovidajici data3d
+    pomocna funkce pro setreni pameti 
+    vraci: soucet - filtrace prahovaneho obrazu
+    '''
+    prahovany= prahovaniKonvoluce(data3d, voxelSize)
+    soucet = freeOperace1(prahovany,voxelSize)
+    return soucet
+
+def segFree(data3d,voxelSize,source,vysledky = False):
+    '''
+    data3d - 3D CT snimek
+    voxelSize - [x,y,z] velikost voxelu odpovidajici data3d
+    source - nepouzivane
+    vysledky - nepouzivane
+    segmentace bez morphsnakes
+    postup operaci:
+    1) intelignetni prahovani
+    2) filtrace prahovaneho obrazu 
+    3) k-means rozdeleni na vrstvy
+    4) postupne urceni segmentace(variace na MSER?)  
+    vraci vysledek segmentovane binarni 3d pole 
+    '''
+    soucet = segFreeSaver1(data3d,voxelSize)
+    raw = segFreeSaver2(soucet,voxelSize)
+    post = freePostProces(raw,voxelSize) 
+    vysledek = post
+    return vysledek
+
+def filtr3D(data3d,velikostVoxelu,mm = 5):    #mm = 25 konstanta = 1
+    
+    a = np.round(mm/velikostVoxelu[0])
+    b = np.round(mm/velikostVoxelu[1])
+    c = np.round(mm/velikostVoxelu[2])
+    #print [a,b,c]
+    mean = ndimage.uniform_filter(data3d.astype(np.int16), size=[a,b,c])
+
     return mean
+
+def minFiltr3D(data3d,velikostVoxelu,mm = 5):    #mm = 25 konstanta = 1
+    
+    a = np.round(mm/velikostVoxelu[0])
+    b = np.round(mm/velikostVoxelu[1])
+    c = np.round(mm/velikostVoxelu[2])
+    #print [a,b,c]
+    mean = ndimage.minimum_filter(data3d.astype(np.int16), size=[a,b,c])
+
+    return mean
+
+def maxFiltr3D(data3d,velikostVoxelu,mm = 5):    #mm = 25 konstanta = 1
+    
+    a = np.round(mm/velikostVoxelu[0])
+    b = np.round(mm/velikostVoxelu[1])
+    c = np.round(mm/velikostVoxelu[2])
+    #print [a,b,c]
+    mean = ndimage.maximum_filter(data3d.astype(np.int16), size=[a,b,c])
+
+    return mean
+
+
+def filtrVariabilni(data3d,velikostVoxelu,mm = 5): 
+    
+    x = np.ceil(mm/velikostVoxelu[2])
+    mean = ndimage.uniform_filter(data3d.astype(np.int16), size=[x,x,x]) 
+
+    return mean
+
 
 def iterativniOdstraneni1(data3dBin,voxelSize):
     ''' iterativni odstraneni, vybere oblast mensi nez jsou jatra
@@ -86,15 +424,6 @@ def pridejIterace(data3dBin,voxelSize,mm=2,konst = 75):
     pridany = np.add(uzavrenaHranice,prepsany)
     return pridany
 
-def pouzijSnake(data3dCT,segmentace,iterace = 5):
-    macwe = morphsnakes.MorphACWE(data3dCT, smoothing=4, lambda1=30, lambda2=1)
-    macwe.set_levelset(segmentace)
-    print 'probiha beh morphsnakes'
-    macwe.run(iterace)
-    print 'beh ukoncen'
-    vysledek = macwe.levelset
-    prepsanyVysledek = vysledek.astype(np.bool)
-    return prepsanyVysledek
 
 def konvolucniOperace(prahovany,voxelSize):
     ''' 
@@ -122,14 +451,60 @@ def konvolucniOperace(prahovany,voxelSize):
     
     return kombinace
 
+def pouzijSnake(featureImage,segmentace,iterace = 5):
+    '''  Malladi et al paper'''
+    print 'zahajen beh morphsnakes'
+    #prepsany = segmentace.astype(np.float32)
+    prepsany = segmentace.astype(np.int8)
+   
+    vzdalenost = ndimage.distance_transform_edt(prepsany, sampling = None, return_distances = True)
+    prepsany = vzdalenost.astype(np.float32)
+    segImage = sitk.GetImageFromArray(prepsany)    
+    instance = sitk.ShapeDetectionLevelSetImageFilter()
+    #instance.SetPropagationScaling(60)#1.0
+    #instance.SetCurvatureScaling(2)#0.5
+    #instance.SetMaximumRMSError( 0.0001 )#0.01
+    instance.SetNumberOfIterations( iterace )
+    levelset = instance.Execute( segImage, featureImage )    
+    obrazec = sitk.GetArrayFromImage(levelset)
+    zobrazitOriginal(obrazec)
+    vysledek = obrazec >= 0
+    print 'morphsnakes uspesne ukonceny'
+    return vysledek
+
+def vytvorFeatureImage(data3d):
+    ''' Vytvori feature image z prewittova operatoru (ve vsech smerech)
+    a nasledne jej normalizuje tak aby byla 0 v oblastech hran (1 bez hran)'''
+    feature = ndimage.prewitt(data3d,axis = 0)
+    feature2 = ndimage.prewitt(data3d,axis = 1)
+    soucet = np.add(feature,feature2)
+    feature2 = ndimage.prewitt(data3d,axis = 2)
+    feature = np.add(soucet,feature2)
+    featureABS = np.abs(feature)*(-1)
+    
+    #print featureABS.dtype
+    
+    
+    prepsany = featureABS.astype(np.float32)
+    
+    normalizovany = prepsany/np.abs(np.min(featureABS))    
+    
+    featureImage = sitk.GetImageFromArray(normalizovany)
+    
+    #print featureImage
+    
+    return featureImage
+    
 def segKonvoluce(data3d,voxelSize,source,vysledky = False):
     '''Slozita metoda segmentace, pro podrobnejsi popis viz jednotlive metody
     ktere pouziva'''
     prahovany = prahovaniKonvoluce(data3d, voxelSize)
     kombinace = konvolucniOperace(prahovany,voxelSize)
     segmentace = iterativniOdstraneni1(kombinace,voxelSize)
-    #return segmentace
-    finalni = pouzijSnake(data3d,segmentace,iterace = 10)
+    np.save('kombinace.npy', segmentace)
+    sys.exit()
+    feature = vytvorFeatureImage(data3d)
+    finalni = pouzijSnake(feature,segmentace,iterace = 5)
     return finalni
 
 def vyberMaxObjekt(data3dObjekty):
@@ -328,7 +703,7 @@ def prahovaniTri(spicky,y1,y2,ukazat2,konstanta1 = 0.45,konstanta2 = 0.8):#0.5 0
     POPIS
     1) urci se nejpravejsi spicka ze 'spicky' a jeji maximum
     2)prava hranice je misto kde poklesne na konstanta1*maxima
-    3)leva hranice je misto kde poklesne na konstanta2*maxima
+    3)leva hranice je maximum
     vraci [poziceStart,poziceKonec] 
     hranice prahovani   
     '''    
@@ -1608,7 +1983,7 @@ class LiverSegmentation:
         self.seeds = None
         self.voxelSize = voxelsize_mm
         self.segParams = {
-            'method': 'segKonvoluce',
+            'method': 'segFree',
             'vysledkyDostupne': False,
             'paramfile': self._get_default_paramfile_path(),
             'path': None
@@ -1634,7 +2009,7 @@ class LiverSegmentation:
     
     def getMethodList(self):
         '''Vraci seznam vsech platnych nazvu metod ktere lze pouzit'''
-        return ['placeholder','find','regionGrowing','snakeSimple','segKonvoluce']
+        return ['placeholder','find','regionGrowing','snakeSimple','segKonvoluce','segFree']
     
     def setVysledky(self,vysledky):
         self.segParams['vysledky'] = vysledky
@@ -1670,7 +2045,10 @@ class LiverSegmentation:
             spatne = False
         if(nazev  == 'segKonvoluce'):
             metoda = segKonvoluce
-            spatne = False           
+            spatne = False         
+        if(nazev  == 'segFree'):
+            metoda = segFree
+            spatne = False          
 
         if(spatne):
             print('Zvolena metoda nenalezena')
@@ -1698,7 +2076,10 @@ class LiverSegmentation:
             spatne = False
         if(nazev  == 'segKonvoluce'):
             metoda = segKonvoluce
-            spatne = False               
+            spatne = False
+        if(nazev  == 'segFree'):
+            metoda = segFree
+            spatne = False                   
 
         if(spatne):
             print('Zvolena metoda nenalezena')

@@ -31,7 +31,7 @@ class LiverSegmentationTest(unittest.TestCase):
         pass
 
     @attr('actual')
-    def test_liver_segmentation_real_data(self):
+    def test_liver_segmentation_method_3_real_data(self):
         # path_to_script = os.path.dirname(os.path.abspath(__file__))
         # dpath = os.path.join(path_to_script, '../sample_data/jatra_5mm/')
         dpath = os.path.join(path_to_script, '../sample_data/liver-orig001.mhd')
@@ -50,6 +50,32 @@ class LiverSegmentationTest(unittest.TestCase):
         # import sed3
         # ed = sed3.sed3(data3d, contour=ls.segmentation)  # , seeds=seeds)
         # ed.show()
+
+
+        # mel by to být litr. tedy milion mm3
+        self.assertGreater(volume, 100000)
+        self.assertLess(volume, 2100000)
+
+    def test_liver_segmentation_method_4_real_data(self):
+        # path_to_script = os.path.dirname(os.path.abspath(__file__))
+        # dpath = os.path.join(path_to_script, '../sample_data/jatra_5mm/')
+        dpath = os.path.join(path_to_script, '../sample_data/liver-orig001.mhd')
+        data3d, metadata = io3d.datareader.read(dpath)
+        voxelsize_mm = metadata['voxelsize_mm']
+
+        ls = liver_segmentation.LiverSegmentation(
+            data3d=data3d,
+            voxelsize_mm=voxelsize_mm,
+            segparams={'cisloMetody': 4}
+            # seeds=seeds
+        )
+        ls.run()
+        volume = np.sum(ls.segmentation == 1) * np.prod(voxelsize_mm)
+
+        # import sed3
+        # ed = sed3.sed3(data3d, contour=ls.segmentation)  # , seeds=seeds)
+        # ed.show()
+
 
         # mel by to být litr. tedy milion mm3
         self.assertGreater(volume, 100000)
@@ -86,6 +112,7 @@ class LiverSegmentationTest(unittest.TestCase):
         self.assertGreater(volume, 900000)
         self.assertLess(volume, 1100000)
 
+    @attr('interactive')
     def test_liver_segmenation_just_run(self):
         """
         Tests only if it run. No strong assert.
