@@ -46,7 +46,9 @@ import ipdb
 import scipy.ndimage.filters as filters
 import scipy.signal
 import multipolyfit as mpf
-
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import interpolate
 from io3d import datareader
 from scipy.ndimage.measurements import label
 from scipy.ndimage import morphology
@@ -62,9 +64,10 @@ class SupportStructureSegmentation():
             autocrop = True,
             autocrop_margin_mm = [10,10,10],
             modality = 'CT',
-            slab = {'none':0, 'bone':8,'lungs':9,'heart':10,'diaphragm':5},
+            slab = {'none':0,'llung':4, 'bone':8,'rlung':9,'heart':10,'diaphragm':5},
             maximal_lung_diff = 0.2,
-	    rad_diaphragm=4
+	    rad_diaphragm=4,
+	    smer=None,
 	    ):
 
         """
@@ -80,10 +83,11 @@ class SupportStructureSegmentation():
         self.autocrop_margin_mm = np.array(autocrop_margin_mm)
         self.autocrop_margin = self.autocrop_margin_mm/self.voxelsize_mm
         self.crinfo = [[0,-1],[0,-1],[0,-1]]
-        self.segmentation = np.ones(data3d.shape)
+        self.segmentation = np.zeros(data3d.shape)
         self.slab = slab
 	self.maximal_lung_diff = maximal_lung_diff
 	self.rad_diaphragm=rad_diaphragm
+	self.smer=smer
 
 
 
@@ -119,22 +123,24 @@ class SupportStructureSegmentation():
 	structure[c,:,:] = 0
 	return structure
 
-    def convolve_structure_spine(self, velikost = [150 , 3, 3]):
-	structure = np.ones((int(velikost[2]/self.voxelsize_mm[0]),int(velikost[1]/self.voxelsize_mm[1]),int(velikost[2]/self.voxelsize_mm[2])))
-	return structure
-
+    
 
     def bone_segmentation(self, bone_threshold = 330):
 	#ipdb.set_trace()
-        self.segmentation = np.array(self.data3d > bone_threshold).astype(np.int8)*self.slab['bone']
+        return np.array(self.data3d > bone_threshold)#.astype(np.int8)*self.slab['bone']
 
+    def convolve_structure_spine(self, velikost = [300 , 2, 2]):
+	structure = np.ones((int(velikost[2]/self.voxelsize_mm[0]),int(velikost[1]/self.voxelsize_mm[1]),int(velikost[2]/self.voxelsize_mm[2])))
+	return structure
 
+    
 
     def spine_segmentation(self):
 	seg_prub = filters.gaussian_filter(self.data3d, 5.0/np.asarray(self.voxelsize_mm))
 	seg_prub = filters.convolve(seg_prub, self.convolve_structure_spine())
 	#seg_prub = scipy.signal.fftconvolve(seg_prub, self.convolve_structure_spine())
-	seg_prub = np.array(seg_prub > 5900)
+	maximum = np.amax(seg_prub)
+	seg_prub = np.array(seg_prub > 0.4*maximum)
 	#import sed3
 	#ed = sed3.sed3(seg_prub)
 	#ed.show()
@@ -142,10 +148,13 @@ class SupportStructureSegmentation():
         pass
 
 
+    def spl(x,y):
+	return interpolate.bisplev(x,y, tck)
+
     def heart_segmentation(self, heart_threshold = 0):
 	a=self.convolve_structure_heart()
-
-	seg_prub = filters.convolve( ((self.segmentation == 10)-0.5) , a )#self.slab['lungs']
+	seg_prub = np.array(self.segmentation == self.slab['rlung'])+np.array(self.segmentation == self.slab['llung'])
+	seg_prub = filters.convolve( (seg_prub-0.5) , a )
 	# import sed3
 	# ed = sed3.sed3(seg_prub)
 	# ed.show()
@@ -154,10 +163,14 @@ class SupportStructureSegmentation():
 	s = np.array([x , y]).T
 	h = np.array(z)
 	model = mpf.multipolyfit(s, h, self.rad_diaphragm, model_out = True)
+	##tck = interpolate.bisplrep(x,y,z, s=10)
 	ran = self.segmentation.shape
 	x = np.arange( ran[1] )
 	y = np.arange( ran[2] )
 	x, y = np.meshgrid( x, y)
+	##sh = [len(x), len(y)]
+	##x, y = np.meshgrid(x, y)
+	##z = np.asarray(map(spl(x,y), x.reshape(-1), y.reshape(-1))).reshape(sh)
 	z = np.floor(np.asarray(map(model, x.reshape(-1), y.reshape(-1)))).astype(int)
 	x = x.reshape(z.shape)
 	y = y.reshape(z.shape)
@@ -165,12 +178,43 @@ class SupportStructureSegmentation():
 	for a in range(z.shape[0]):
 	    if (z[a] < ran[0]) and (z[a] >= 0):
 	    	self.segmentation[z[a], x[a], y[a]] = self.slab['diaphragm']
-		for b in range(z[a], ran[0]):
+		for b in range(z[a]+1, ran[0]):
 		    cc[b, x[a], y[a]] = 1
 	#ipdb.set_trace()
-	aaa = np.array(self.data3d >= heart_threshold).astype(np.int8)*self.slab['heart']
-	aaa=morphology.binary_opening(aaa , iterations=self.iteration()).astype(self.segmentation.dtype)
-	self.segmentation = self.segmentation + cc * aaa.astype(np.int8)*self.slab['heart']
+	plice1=np.array(self.segmentation==self.slab['llung'])
+	z, x, y = np.nonzero(plice1)
+	xmin1=np.min(x)
+	xmax1=np.max(x)
+	ymin1=np.min(y)
+	ymax1=np.max(y)
+	z1=np.max(z)
+	z2=np.min(z)
+	plice2=np.array(self.segmentation==self.slab['rlung'])
+	z, x, y = np.nonzero(plice2)
+	xmin2=np.min(x)	
+	xmax2=np.max(x)
+	ymin2=np.min(y)
+	ymax2=np.max(y)	
+	mp=np.zeros(ran)
+
+	zd=(int) (z2+(np.floor((z1-z2)/3)))
+	mp[zd:, ymin2:ymax1, xmin2:xmax1]=1
+	bones = np.array(self.data3d>=200)
+	aaa = np.array(self.data3d >= heart_threshold)
+	aaa = aaa - bones
+	aaa=morphology.binary_opening(aaa , iterations=self.iteration()+2).astype(self.segmentation.dtype)
+	aaa = morphology.binary_erosion(aaa, iterations=self.iteration())	
+	aaa=cc * aaa * mp
+	lab , num = label(aaa)
+	counts= [0]*(num+1)
+	for x in range(1, num+1):
+	    a = np.sum(np.array(lab == x))
+	    counts[x] = a
+	index= np.argmax(counts)
+	aaa = np.array(lab==index)
+	aaa = morphology.binary_dilation(aaa, iterations=self.iteration())
+	self.segmentation= aaa
+	#self.segmentation = self.segmentation + aaa
         pass
 
     def iteration(self, sirka = 5):
@@ -179,9 +223,24 @@ class SupportStructureSegmentation():
 	return a
 
     def orientation(self):
-	#split1, split2 = np.split(self.segmentation, 2, 1)
-	#print(np.nonzero(split1))
-	#print(np.nonzero(split2))
+	if(self.segmentation.shape[0]%2==0):
+	    split1, split2 = np.split(self.segmentation, 2, 0)
+	    if(np.sum(split1)>np.sum(split2)):
+		self.smer=1
+
+	    else:
+		self.smer=0
+
+	
+	else:
+	    split1, split2 = np.split(self.segmentation[1:,:,:], 2, 0)
+	    if(np.sum(split1)>np.sum(split2)):
+		self.smer=1
+
+	    else:
+		self.smer=0
+
+
 
 	pass
 
@@ -199,9 +258,17 @@ class SupportStructureSegmentation():
 	#for x in np.nditer(labeled_seg, op_flags=['readwrite']):
 	#    if x[...]!=0:
 	#    	counts[x[...]]=counts[x[...]]+1
-	index=np.argmax(counts) #pozadí
+	z, x, y = labeled_seg.shape
+	index=labeled_seg[self.iteration()+5,self.iteration()+5,self.iteration()+5]
 	counts[index]=0
-	print(num_seg)
+	index=labeled_seg[self.iteration()+5,self.iteration()+5,y-self.iteration()-5]
+	counts[index]=0
+	index=labeled_seg[self.iteration()+5,x-self.iteration()-5,self.iteration()+5]
+	counts[index]=0
+	index=labeled_seg[self.iteration()+5,x-self.iteration()-5,y-self.iteration()-5]
+	counts[index]=0
+	#index=np.argmax(counts) #pozadí
+	#counts[index]=0
 	index=np.argmax(counts) #jedna nebo obě plíce
 	velikost1=counts[index]
 	counts[index]=0
@@ -229,11 +296,25 @@ class SupportStructureSegmentation():
 		pocet=pocet+1
 
 	    morphology.binary_dilation(self.segmentation,iterations=pocet).astype(self.segmentation.dtype)
-	self.segmentation = self.segmentation + np.array(labeled_seg==index).astype(np.int8)*self.slab['lungs']
-	self.segmentation = self.segmentation + np.array(labeled_seg==index2).astype(np.int8)*self.slab['lungs']
+	#self.segmentation = self.segmentation + np.array(labeled_seg==index).astype(np.int8)*self.slab['lungs']
+	#self.segmentation = self.segmentation + np.array(labeled_seg==index2).astype(np.int8)*self.slab['lungs']
+	plice1 = np.array(labeled_seg==index)
+	z,x,y = np.nonzero(plice1)
+	m1 = np.max(y)
+	if m1<(self.segmentation.shape[1]/2):
+	    self.segmentation = self.segmentation + np.array(labeled_seg==index).astype(np.int8)*self.slab['llung']
+	    self.segmentation = self.segmentation + np.array(labeled_seg==index2).astype(np.int8)*self.slab['rlung']
+	else:
+	    self.segmentation = self.segmentation + np.array(labeled_seg==index).astype(np.int8)*self.slab['rlung']
+	    self.segmentation = self.segmentation + np.array(labeled_seg==index2).astype(np.int8)*self.slab['llung']
+	self.orientation()
+	if self.smer==1:#netestovano
+	    self.segmentation[self.segmentation==self.slab['llung']]=3
+	    self.segmentation[self.segmentation==self.slab['rlung']]=self.slab['llung']
+	    self.segmentation[self.segmentation==3]=self.slab['rlung']
 
         pass
-
+	
 
 
     def _crop(self, data, crinfo):

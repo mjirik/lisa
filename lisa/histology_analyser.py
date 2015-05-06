@@ -658,15 +658,17 @@ def main():  # pragma: no cover
     logging.basicConfig(stream=sys.stdout)
     logger = logging.getLogger()
     
+    logger.setLevel(logging.WARNING)
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
+        
     try:
         os.remove("ha.log")
     except OSError:
         pass
-    logger.addHandler(logging.FileHandler("ha.log"))
-    
-    logger.setLevel(logging.WARNING)
-    if args.debug:
-        logger.setLevel(logging.DEBUG)
+    fh = logging.FileHandler("ha.log")
+    fh.setFormatter(logging.Formatter(fmt='%(levelname)s:%(name)s:%(message)s'))
+    logger.addHandler(fh)
 
     logger.info('Input file -> %s', args.inputfile)
     logger.info('Data crop -> %s', str(args.crop))
