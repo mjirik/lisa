@@ -148,72 +148,77 @@ class SupportStructureSegmentation():
         pass
 
 
-    def spl(x,y):
-	return interpolate.bisplev(x,y, tck)
+    def __spl(self, x,y):
+        return interpolate.bisplev(x,y, tck)
+
+    def __above_diaphragm_calculation(self, seg_prub):
+        z, x, y= np.nonzero(seg_prub)
+        s = np.array([x , y]).T
+        h = np.array(z)
+        model = mpf.multipolyfit(s, h, self.rad_diaphragm, model_out = True)
+        # tck = interpolate.bisplrep(x,y,z, s=10)
+        ran = self.segmentation.shape
+        x = np.arange( ran[1] )
+        y = np.arange( ran[2] )
+        x, y = np.meshgrid( x, y)
+        # sh = [len(x), len(y)]
+##x, y = np.meshgrid(x, y)
+        # z = np.asarray(map(self.__spl(x,y), x.reshape(-1), y.reshape(-1))).reshape(sh)
+
+
+        z = np.floor(np.asarray(map(model, x.reshape(-1), y.reshape(-1)))).astype(int)
+        x = x.reshape(z.shape)
+        y = y.reshape(z.shape)
+        cc = np.zeros(ran)
+        for a in range(z.shape[0]):
+            if (z[a] < ran[0]) and (z[a] >= 0):
+                self.segmentation[z[a], x[a], y[a]] = self.slab['diaphragm']
+                for b in range(z[a]+1, ran[0]):
+                    cc[b, x[a], y[a]] = 1
 
     def heart_segmentation(self, heart_threshold = 0):
-	a=self.convolve_structure_heart()
-	seg_prub = np.array(self.segmentation == self.slab['rlung'])+np.array(self.segmentation == self.slab['llung'])
-	seg_prub = filters.convolve( (seg_prub-0.5) , a )
-	# import sed3
-	# ed = sed3.sed3(seg_prub)
-	# ed.show()
-	seg_prub = np.array(seg_prub<=-0.3)
-	z, x, y= np.nonzero(seg_prub)
-	s = np.array([x , y]).T
-	h = np.array(z)
-	model = mpf.multipolyfit(s, h, self.rad_diaphragm, model_out = True)
-	##tck = interpolate.bisplrep(x,y,z, s=10)
-	ran = self.segmentation.shape
-	x = np.arange( ran[1] )
-	y = np.arange( ran[2] )
-	x, y = np.meshgrid( x, y)
-	##sh = [len(x), len(y)]
-	##x, y = np.meshgrid(x, y)
-	##z = np.asarray(map(spl(x,y), x.reshape(-1), y.reshape(-1))).reshape(sh)
-	z = np.floor(np.asarray(map(model, x.reshape(-1), y.reshape(-1)))).astype(int)
-	x = x.reshape(z.shape)
-	y = y.reshape(z.shape)
-	cc = np.zeros(ran)
-	for a in range(z.shape[0]):
-	    if (z[a] < ran[0]) and (z[a] >= 0):
-	    	self.segmentation[z[a], x[a], y[a]] = self.slab['diaphragm']
-		for b in range(z[a]+1, ran[0]):
-		    cc[b, x[a], y[a]] = 1
-	#ipdb.set_trace()
-	plice1=np.array(self.segmentation==self.slab['llung'])
-	z, x, y = np.nonzero(plice1)
-	xmin1=np.min(x)
-	xmax1=np.max(x)
-	ymin1=np.min(y)
-	ymax1=np.max(y)
-	z1=np.max(z)
-	z2=np.min(z)
-	plice2=np.array(self.segmentation==self.slab['rlung'])
-	z, x, y = np.nonzero(plice2)
-	xmin2=np.min(x)	
-	xmax2=np.max(x)
-	ymin2=np.min(y)
-	ymax2=np.max(y)	
-	mp=np.zeros(ran)
+        a=self.convolve_structure_heart()
+        seg_prub = np.array(self.segmentation == self.slab['rlung'])+np.array(self.segmentation == self.slab['llung'])
+        seg_prub = filters.convolve( (seg_prub-0.5) , a )
+# import sed3
+# ed = sed3.sed3(seg_prub)
+# ed.show()
+        seg_prub = np.array(seg_prub<=-0.3)
+        cc = self.__above_diaphragm_calculation(seg_prub)
+#ipdb.set_trace()
+        plice1=np.array(self.segmentation==self.slab['llung'])
+        z, x, y = np.nonzero(plice1)
+        xmin1=np.min(x)
+        xmax1=np.max(x)
+        ymin1=np.min(y)
+        ymax1=np.max(y)
+        z1=np.max(z)
+        z2=np.min(z)
+        plice2=np.array(self.segmentation==self.slab['rlung'])
+        z, x, y = np.nonzero(plice2)
+        xmin2=np.min(x)	
+        xmax2=np.max(x)
+        ymin2=np.min(y)
+        ymax2=np.max(y)	
+        mp=np.zeros(ran)
 
-	zd=(int) (z2+(np.floor((z1-z2)/3)))
-	mp[zd:, ymin2:ymax1, xmin2:xmax1]=1
-	bones = np.array(self.data3d>=200)
-	aaa = np.array(self.data3d >= heart_threshold)
-	aaa = aaa - bones
-	aaa=morphology.binary_opening(aaa , iterations=self.iteration()+2).astype(self.segmentation.dtype)
-	aaa = morphology.binary_erosion(aaa, iterations=self.iteration())	
-	aaa=cc * aaa * mp
-	lab , num = label(aaa)
-	counts= [0]*(num+1)
-	for x in range(1, num+1):
-	    a = np.sum(np.array(lab == x))
-	    counts[x] = a
-	index= np.argmax(counts)
-	aaa = np.array(lab==index)
-	aaa = morphology.binary_dilation(aaa, iterations=self.iteration())
-	self.segmentation= aaa
+        zd=(int) (z2+(np.floor((z1-z2)/3)))
+        mp[zd:, ymin2:ymax1, xmin2:xmax1]=1
+        bones = np.array(self.data3d>=200)
+        aaa = np.array(self.data3d >= heart_threshold)
+        aaa = aaa - bones
+        aaa=morphology.binary_opening(aaa , iterations=self.iteration()+2).astype(self.segmentation.dtype)
+        aaa = morphology.binary_erosion(aaa, iterations=self.iteration())	
+        aaa=cc * aaa * mp
+        lab , num = label(aaa)
+        counts= [0]*(num+1)
+        for x in range(1, num+1):
+            a = np.sum(np.array(lab == x))
+            counts[x] = a
+        index= np.argmax(counts)
+        aaa = np.array(lab==index)
+        aaa = morphology.binary_dilation(aaa, iterations=self.iteration())
+        self.segmentation= aaa
 	#self.segmentation = self.segmentation + aaa
         pass
 
