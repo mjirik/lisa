@@ -151,8 +151,10 @@ class SupportStructureSegmentation():
     def __spl(self, x,y):
         return interpolate.bisplev(x,y, tck)
 
-    def __above_diaphragm_calculation(self, seg_prub):
-        z, x, y= np.nonzero(seg_prub)
+    def __above_diaphragm_calculation(self, seg_prub, internal_resize_shape=[50, 50, 50]):
+        # seg_prub_tmp = misc.resize_to_shape(seg_prub, internal_resize_shape)
+        seg_prub_tmp = seg_prub
+        z, x, y= np.nonzero(seg_prub_tmp)
         s = np.array([x , y]).T
         h = np.array(z)
         model = mpf.multipolyfit(s, h, self.rad_diaphragm, model_out = True)
@@ -175,6 +177,9 @@ class SupportStructureSegmentation():
                 self.segmentation[z[a], x[a], y[a]] = self.slab['diaphragm']
                 for b in range(z[a]+1, ran[0]):
                     cc[b, x[a], y[a]] = 1
+
+        # cc = misc.resize_to_shape(cc, seg_prub.shape)
+        return cc
 
     def heart_segmentation(self, heart_threshold = 0):
         a=self.convolve_structure_heart()
@@ -200,7 +205,7 @@ class SupportStructureSegmentation():
         xmax2=np.max(x)
         ymin2=np.min(y)
         ymax2=np.max(y)	
-        mp=np.zeros(ran)
+        mp=np.zeros(self.segmentation.shape)
 
         zd=(int) (z2+(np.floor((z1-z2)/3)))
         mp[zd:, ymin2:ymax1, xmin2:xmax1]=1
