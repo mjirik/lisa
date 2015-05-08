@@ -53,6 +53,8 @@ from io3d import datareader
 from scipy.ndimage.measurements import label
 from scipy.ndimage import morphology
 
+import misc
+
 
 
 
@@ -151,15 +153,17 @@ class SupportStructureSegmentation():
     def __spl(self, x,y):
         return interpolate.bisplev(x,y, tck)
 
-    def __above_diaphragm_calculation(self, seg_prub, internal_resize_shape=[50, 50, 50]):
+    def __above_diaphragm_calculation(self, seg_prub, internal_resize_shape=[20, 20, 20]):
+        # print seg_prub.dtype
         # seg_prub_tmp = misc.resize_to_shape(seg_prub, internal_resize_shape)
+        # print seg_prub_tmp.dtype
         seg_prub_tmp = seg_prub
         z, x, y= np.nonzero(seg_prub_tmp)
         s = np.array([x , y]).T
         h = np.array(z)
         model = mpf.multipolyfit(s, h, self.rad_diaphragm, model_out = True)
         # tck = interpolate.bisplrep(x,y,z, s=10)
-        ran = self.segmentation.shape
+        ran = seg_prub.shape
         x = np.arange( ran[1] )
         y = np.arange( ran[2] )
         x, y = np.meshgrid( x, y)
@@ -174,7 +178,7 @@ class SupportStructureSegmentation():
         cc = np.zeros(ran)
         for a in range(z.shape[0]):
             if (z[a] < ran[0]) and (z[a] >= 0):
-                self.segmentation[z[a], x[a], y[a]] = self.slab['diaphragm']
+                # self.segmentation[z[a], x[a], y[a]] = self.slab['diaphragm']
                 for b in range(z[a]+1, ran[0]):
                     cc[b, x[a], y[a]] = 1
 
