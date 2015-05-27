@@ -42,7 +42,8 @@ class HistologyAnalyserWindow(QMainWindow):
     HEIGHT = 350 #600
     WIDTH = 800
 
-    def __init__(self, inputfile = None, voxelsize = None, crop = None, args=None):
+    def __init__(self, inputfile = None, voxelsize = None, crop = None, args=None, qapp=None):
+        self.qapp = qapp
         QMainWindow.__init__(self)
         self.initUI()
         
@@ -100,7 +101,9 @@ class HistologyAnalyserWindow(QMainWindow):
 
         ### Init HistologyAnalyser object
         logger.debug('Init HistologyAnalyser object')
-        self.ha = HA.HistologyAnalyser(self.data3d, self.metadata, nogui=False)
+        self.ha = HA.HistologyAnalyser(
+                self.data3d, self.metadata,
+                nogui=False, qapp=self.qapp)
 
         ### Remove Area (mask)
         logger.debug('Remove area')

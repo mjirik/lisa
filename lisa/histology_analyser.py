@@ -39,7 +39,8 @@ import surface_measurement
 class HistologyAnalyser:
 
     def __init__(self, data3d, metadata, threshold=-1, binaryClosing=-1,
-                 binaryOpening=-1, nogui=True):
+                 binaryOpening=-1, nogui=True, qapp=None):
+        self.qapp=qapp
         self.data3d = data3d
         if 'voxelsize_mm' not in metadata.keys():
             metadata['voxelsize_mm'] = [1, 1, 1]
@@ -169,7 +170,8 @@ class HistologyAnalyser:
             useSeedsOfCompactObjects=False,
             interactivity=not self.nogui,
             binaryClosingIterations=self.binaryClosing, # noqa 5,
-            binaryOpeningIterations=self.binaryOpening # 1 # noqa
+            binaryOpeningIterations=self.binaryOpening, # 1 # noqa
+            qapp=self.qapp
             )
         del(filteredData)
 
@@ -259,34 +261,58 @@ class HistologyAnalyser:
         # compute Nv statistic
         self.stats['General']['Nv'] = float(self.get_Nv())
         
+    def __insert_node(self, nodes, nodeIdLabel, key):
+        """
+        used in getNv()
+        nodeIdALabel: "A" or "B"
+        """
+        edge = self.stats['Graph'][key]
+        try:
+            nodeIdLab = edge["nodeId" + nodeIdLabel]
+            if nodeIdLab in nodes: 
+                nodes[nodeIdLab]['connected_edges'] += [key] 
+            else:
+                nodes[nodeIdLab] = {
+                        'connected_edges':[key],
+                        'centroid': self.stats['Graph'][key]['node' + nodeIdLabel + '_ZYX_mm']
+                        }
+        except Exception, e:
+            logger.warning('get_Nv(): no nodeIdA')
+        return nodes
+
     def get_Nv(self):
+
         logger.debug('Computing Nv...')
         
         # get lists of edges that are connected to nodes
         nodes = {}
         for key in self.stats['Graph']:
-            edge = self.stats['Graph'][key]
-            try:
-                nodeIdA = edge['nodeIdA']
-                if nodeIdA in nodes: nodes[nodeIdA] += [key] 
-                else: nodes[nodeIdA] = [key]
-            except Exception, e:
-                logger.warning('get_Nv(): no nodeIdA')
-            try:
-                nodeIdB = edge['nodeIdB']
-                if nodeIdB in nodes: nodes[nodeIdB] += [key] 
-                else: nodes[nodeIdB] = [key]
-            except Exception, e:
-                logger.warning('get_Nv(): no nodeIdB')
+            nodes = self.__insert_node(nodes, 'A', key)
+            nodes = self.__insert_node(nodes, 'B', key)
+            # edge = self.stats['Graph'][key]
+            # # TODO use insert_node function
+            # try:
+            #     nodeIdA = edge['nodeIdA']
+            #     if nodeIdA in nodes: 
+            #         nodes[nodeIdA] += [key] 
+            #     else: nodes[nodeIdA] = [key]
+            # except Exception, e:
+            #     logger.warning('get_Nv(): no nodeIdA')
+            # try:
+            #     nodeIdB = edge['nodeIdB']
+            #     if nodeIdB in nodes: nodes[nodeIdB] += [key] 
+            #     else: nodes[nodeIdB] = [key]
+            # except Exception, e:
+            #     logger.warning('get_Nv(): no nodeIdB')
         logger.debug('Read ' + str(len(nodes)) + ' nodes')
         
         # Get Pn (number of nodes with valence n)
         max_l = 0
         for n_key in nodes:
-            max_l = max(max_l, len(nodes[n_key]))
+            max_l = max(max_l, len(nodes[n_key]['connected_edges']))
         Pn = np.zeros(max_l+1)
         for n_key in nodes:
-            Pn[len(nodes[n_key])] += 1
+            Pn[len(nodes[n_key]['connected_edges'])] += 1
         logger.debug(str(Pn))
         
         # Get N(cap)
@@ -326,6 +352,7 @@ class HistologyAnalyser:
                 contour=self.data3d_thr.astype(np.int8)
             )
             pyed.show()
+
 
     def writeStatsToYAML(self, filename='hist_stats.yaml'):
         logger.debug('writeStatsToYAML')
@@ -685,7 +712,8 @@ def main():  # pragma: no cover
             inputfile=args.inputfile,
             voxelsize=args.voxelsize,
             crop=args.crop,
-            args=args
+            args=args, 
+            qapp=app
         )
         sys.exit(app.exec_())
 

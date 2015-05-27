@@ -32,7 +32,8 @@ def vesselSegmentation(data, segmentation=-1, threshold=-1,
                        interactivity=True, binaryClosingIterations=2,
                        binaryOpeningIterations=0,
                        smartInitBinaryOperations=True, returnThreshold=False,
-                       binaryOutput=True, returnUsedData=False):
+                       binaryOutput=True, returnUsedData=False,
+                       qapp=None):
     """
 
     Vessel segmentation z jater.
@@ -72,6 +73,7 @@ def vesselSegmentation(data, segmentation=-1, threshold=-1,
         filtrovana data
 
     """
+    # self.qapp = qapp
 
     dim = numpy.ndim(data)
     logger.debug('Dimenze vstupnich dat: ' + str(dim))
@@ -153,9 +155,16 @@ ok)')
         logger.debug(
             ('Nyni si levym nebo pravym tlacitkem mysi (klepnutim nebo tazenim)\
  oznacte specificke oblasti k vraceni.'))
+
+        # from PyQt4.QtCore import pyqtRemoveInputHook
+        # pyqtRemoveInputHook()
+        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+
         import sed3
         pyed = sed3.sed3(preparedData)
         pyed.show()
+
+
         seeds = pyed.seeds
 
         # Zkontrolovat, jestli uzivatel neco vybral - nejaky item musi byt
