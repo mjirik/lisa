@@ -1,4 +1,5 @@
 General:
+    Nv: 1.000001
     shape_px: [100, 100, 100]
     volume_mm3: 1000000
     volume_px: 1000000

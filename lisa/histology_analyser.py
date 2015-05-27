@@ -326,7 +326,7 @@ class HistologyAnalyser:
         
         # Compute Nv
         Nv = ( Ncap / float(Vref) ) + 1
-        import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
         logger.debug('Nv is ' + str(Nv))
         
