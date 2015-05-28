@@ -76,7 +76,7 @@ class TemplateTest(unittest.TestCase):
         skel = data
 
         skan = sk.SkeletonAnalyser(copy.copy(skel), volume_data=data,
-                                   voxelsize_mm=[1, 20, 300])
+                                   voxelsize_mm=[1, 20, 300], cut_wrong_skeleton=False)
         vessel_tree = skan.skeleton_analysis()
 
         self.assertAlmostEqual
