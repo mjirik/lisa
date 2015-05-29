@@ -12,9 +12,7 @@ import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "./extern/sPickle"))
-import numpy as np
-import scipy
-import scipy.ndimage
+# import numpy as np
 
 
 def suggest_filename(file_path, exists=None):
@@ -175,6 +173,8 @@ def resize_to_shape(data, shape, zoom=None):
         segmentation = segm_orig_scale
         logger.debug('resize to orig with skimage')
     except:
+        import scipy
+        import scipy.ndimage
         dtype = data.dtype
         if zoom is None:
             zoom = shape / np.asarray(data.shape).astype(np.double)

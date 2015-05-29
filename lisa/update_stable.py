@@ -7,9 +7,46 @@ import traceback
 
 import logging
 logger = logging.getLogger(__name__)
+import datetime
 
+
+# def write_update_info_in_file():
+#     import misc
+#     now = datetime.datetime.now() 
+def update_by_plan(filename=".update_plan.yaml", update_periode_days=10):
+    """
+    :return: True or False
+    """
+    retval = False
+    now = datetime.datetime.now() 
+    try:
+        # this import is necessary here. This module requires scipy and it is 
+        # not installed yet
+        import misc
+        data = misc.obj_from_file(filename)
+
+        string_date = data['update_datetime']
+        dt = datetime.datetime.strptime(string_date, "%Y-%m-%d %H:%M:%S.%f")
+        dt_delta = datetime.timedelta(days=update_periode_days)
+        if now > (dt + dt_delta):
+            retval = True
+            data['update_datetime'] = str(now)
+            misc.obj_to_file(data, filename)
+
+        # data['update_datetime'] = 
+    except:
+        retval = True
+        data = {}
+        data['update_datetime'] = str(now)
+        misc.obj_to_file(data, filename)
+
+    return retval
 
 def update(dry_run=False):
+    if update_by_plan():
+        make_update(dry_run)
+
+def make_update(dry_run=False):
     import os.path as op
     path_to_script = op.dirname(op.abspath(__file__))
     path_to_base = op.abspath(op.join(path_to_script, '../'))
