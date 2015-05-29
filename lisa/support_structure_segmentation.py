@@ -67,7 +67,7 @@ class SupportStructureSegmentation():
             autocrop_margin_mm = [10,10,10],
             modality = 'CT',
             slab = {'none':0,'llung':4, 'bone':8,'rlung':9,'heart':10,'diaphragm':5},
-            maximal_lung_diff = 0.2,
+            maximal_lung_diff = 0.3,
 	    rad_diaphragm=4,
 	    smer=None,
 	    ):
@@ -142,7 +142,7 @@ class SupportStructureSegmentation():
 	seg_prub = filters.convolve(seg_prub, self.convolve_structure_spine())
 	#seg_prub = scipy.signal.fftconvolve(seg_prub, self.convolve_structure_spine())
 	maximum = np.amax(seg_prub)
-	seg_prub = np.array(seg_prub > 0.4*maximum)
+	seg_prub = np.array(seg_prub > 0.35*maximum)
 	#import sed3
 	#ed = sed3.sed3(seg_prub)
 	#ed.show()
@@ -178,42 +178,66 @@ class SupportStructureSegmentation():
         cc = np.zeros(ran)
         for a in range(z.shape[0]):
             if (z[a] < ran[0]) and (z[a] >= 0):
+<<<<<<< HEAD
+                self.segmentation[z[a], x[a], y[a]] = self.slab['diaphragm']
+		if self.smer==0:
+              	    cc[z[a]+1:, x[a], y[a]] = 1
+		else:
+		    cc[:z[a]-1, x[a], y[a]] = 1
+=======
                 # self.segmentation[z[a], x[a], y[a]] = self.slab['diaphragm']
                 for b in range(z[a]+1, ran[0]):
                     cc[b, x[a], y[a]] = 1
+>>>>>>> d58f124d2df62b6b53e552d3e4e1f6135ede6508
 
         # cc = misc.resize_to_shape(cc, seg_prub.shape)
         return cc
 
-    def heart_segmentation(self, heart_threshold = 0):
+    def heart_segmentation(self, heart_threshold = 0, top_threshold = 200):
         a=self.convolve_structure_heart()
         seg_prub = np.array(self.segmentation == self.slab['rlung'])+np.array(self.segmentation == self.slab['llung'])
         seg_prub = filters.convolve( (seg_prub-0.5) , a )
 # import sed3
 # ed = sed3.sed3(seg_prub)
 # ed.show()
-        seg_prub = np.array(seg_prub<=-0.3)
+	if self.smer==0:
+            seg_prub = np.array(seg_prub<=-0.3)
+	else:
+	    seg_prub = np.array(seg_prub<=0.3)
         cc = self.__above_diaphragm_calculation(seg_prub)
 #ipdb.set_trace()
         plice1=np.array(self.segmentation==self.slab['llung'])
         z, x, y = np.nonzero(plice1)
-        xmin1=np.min(x)
-        xmax1=np.max(x)
-        ymin1=np.min(y)
-        ymax1=np.max(y)
-        z1=np.max(z)
-        z2=np.min(z)
+	print("konec")
+	x1 = [0,0,0,0]
+	y1 = [0,0,0,0]
+	z1 = [0,0,0,0]
+        x1[0]=np.min(x)
+        x1[1]=np.max(x)
+        y1[0]=np.min(y)
+        y1[1]=np.max(y)
+        z1[0]=np.max(z)
+        z1[1]=np.min(z)
         plice2=np.array(self.segmentation==self.slab['rlung'])
         z, x, y = np.nonzero(plice2)
-        xmin2=np.min(x)	
-        xmax2=np.max(x)
-        ymin2=np.min(y)
-        ymax2=np.max(y)	
+        x1[2]=np.min(x)	
+        x1[3]=np.max(x)
+        y1[2]=np.min(y)
+        y1[3]=np.max(y)
+	z1[2]=np.max(z)
+        z1[3]=np.min(z)	
         mp=np.zeros(self.segmentation.shape)
-
-        zd=(int) (z2+(np.floor((z1-z2)/3)))
-        mp[zd:, ymin2:ymax1, xmin2:xmax1]=1
-        bones = np.array(self.data3d>=200)
+	xmin=np.min(x1)
+	xmax=np.max(x1)
+	ymin=np.min(y1)
+	ymax=np.max(y1)
+	zmin=np.min(z1)
+	zmax=np.max(z1)
+	if self.smer==0:
+            mp[zmin:,  xmin:xmax ,ymin:ymax]=1
+	else:
+	    mp[:zmax,  xmin:xmax ,ymin:ymax]=1
+        bones = np.array(self.data3d >= top_threshold)
         aaa = np.array(self.data3d >= heart_threshold)
         aaa = aaa - bones
         aaa=morphology.binary_opening(aaa , iterations=self.iteration()+2).astype(self.segmentation.dtype)
@@ -257,21 +281,12 @@ class SupportStructureSegmentation():
 
 
 	pass
-
-    def lungs_segmentation(self, lungs_threshold = -360):
-	seg_prub = np.array(self.data3d <= lungs_threshold)
-	seg_prub = morphology.binary_closing(seg_prub , iterations=self.iteration()).astype(self.segmentation.dtype)
-	seg_prub = morphology.binary_opening(seg_prub , iterations = 5)
+    def volume_count(self, seg_prub):
 	labeled_seg , num_seg = label(seg_prub)
 	counts= [0]*(num_seg+1)
 	for x in range(1, num_seg+1):
 	    a = np.sum(np.array(labeled_seg == x))
 	    counts[x] = a
-
-	#self.segmentation = seg_prub
-	#for x in np.nditer(labeled_seg, op_flags=['readwrite']):
-	#    if x[...]!=0:
-	#    	counts[x[...]]=counts[x[...]]+1
 	z, x, y = labeled_seg.shape
 	index=labeled_seg[self.iteration()+5,self.iteration()+5,self.iteration()+5]
 	counts[index]=0
@@ -281,6 +296,22 @@ class SupportStructureSegmentation():
 	counts[index]=0
 	index=labeled_seg[self.iteration()+5,x-self.iteration()-5,y-self.iteration()-5]
 	counts[index]=0
+	print(counts)
+	return counts, labeled_seg
+
+
+
+
+
+    def lungs_segmentation(self, lungs_threshold = -360):
+	seg_prub = np.array(self.data3d <= lungs_threshold)
+	seg_prub = morphology.binary_closing(seg_prub , iterations=self.iteration()).astype(self.segmentation.dtype)
+	seg_prub = morphology.binary_opening(seg_prub , iterations = 5)
+	counts , labeled_seg=self.volume_count(seg_prub)
+	#self.segmentation = seg_prub
+	#for x in np.nditer(labeled_seg, op_flags=['readwrite']):
+	#    if x[...]!=0:890/
+	#    	counts[x[...]]=counts[x[...]]+1
 	#index=np.argmax(counts) #pozadí
 	#counts[index]=0
 	index=np.argmax(counts) #jedna nebo obě plíce
@@ -288,28 +319,26 @@ class SupportStructureSegmentation():
 	counts[index]=0
 	index2=np.argmax(counts)# druhá plíce nebo nečo jiného
 	velikost2=counts[index2]
-	if ((velikost2 / velikost1) > (1-self.maximal_lung_diff)) | ((velikost2/velikost1) < (1 + self.maximal_lung_diff)):
+	if (1.0-self.maximal_lung_diff)<= float(velikost2)/velikost1:
 	    print("plice separované")
 	else:
 	    pocet=0
-	    while ((velikost2 / velikost1) < (1 - self.maximal_lung_diff)) | ((velikost2/velikost1)> (1 + self.maximal_lung_diff)):
-		morphology.binary_erosion(self.segmentation,iterations=1).astype(self.segmentation.dtype)
-		labeled_seg , num_seg = label(seg_prub)
-		counts= [0] * (num_seg+1)
-		for x in range(1, num_seg+1):
-	    	    a = np.sum(np.array(labeled_seg == x))
-	    	    counts[x] = a
-
-	    	index=np.argmax(counts) #pozadí
-	    	counts[index]=0
+	    seg_prub = np.array(self.data3d <= lungs_threshold)
+	    seg_prub = morphology.binary_closing(seg_prub , iterations=self.iteration()).astype(self.segmentation.dtype)
+	    seg_prub = morphology.binary_opening(seg_prub , iterations = 5)
+		
+	    while not (1.0 - self.maximal_lung_diff) <= float(velikost2)/velikost1:
+		seg_prub = morphology.binary_erosion(seg_prub,iterations=1)
+		counts, labeled_seg =self.volume_count(seg_prub)
 	    	index=np.argmax(counts) #jedna nebo obě plíce
 	    	velikost1=counts[index]
 	    	counts[index]=0
 	    	index2=np.argmax(counts)# druhá plíce nebo nečo jiného
 	    	velikost2=counts[index2]
 		pocet=pocet+1
-
-	    morphology.binary_dilation(self.segmentation,iterations=pocet).astype(self.segmentation.dtype)
+		print(pocet)
+		print(velikost1 , velikost2)
+	    seg_prub = morphology.binary_dilation(self.segmentation,iterations=pocet).astype(self.segmentation.dtype)
 	#self.segmentation = self.segmentation + np.array(labeled_seg==index).astype(np.int8)*self.slab['lungs']
 	#self.segmentation = self.segmentation + np.array(labeled_seg==index2).astype(np.int8)*self.slab['lungs']
 	plice1 = np.array(labeled_seg==index)
@@ -326,7 +355,6 @@ class SupportStructureSegmentation():
 	    self.segmentation[self.segmentation==self.slab['llung']]=3
 	    self.segmentation[self.segmentation==self.slab['rlung']]=self.slab['llung']
 	    self.segmentation[self.segmentation==3]=self.slab['rlung']
-
         pass
 	
 
