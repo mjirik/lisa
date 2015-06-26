@@ -178,17 +178,14 @@ class SupportStructureSegmentation():
         cc = np.zeros(ran)
         for a in range(z.shape[0]):
             if (z[a] < ran[0]) and (z[a] >= 0):
-<<<<<<< HEAD
-                self.segmentation[z[a], x[a], y[a]] = self.slab['diaphragm']
-		if self.smer==0:
-              	    cc[z[a]+1:, x[a], y[a]] = 1
-		else:
-		    cc[:z[a]-1, x[a], y[a]] = 1
-=======
+#                 self.segmentation[z[a], x[a], y[a]] = self.slab['diaphragm']
+# 		if self.smer==0:
+#               	    cc[z[a]+1:, x[a], y[a]] = 1
+# 		else:
+# 		    cc[:z[a]-1, x[a], y[a]] = 1
                 # self.segmentation[z[a], x[a], y[a]] = self.slab['diaphragm']
                 for b in range(z[a]+1, ran[0]):
                     cc[b, x[a], y[a]] = 1
->>>>>>> d58f124d2df62b6b53e552d3e4e1f6135ede6508
 
         # cc = misc.resize_to_shape(cc, seg_prub.shape)
         return cc
