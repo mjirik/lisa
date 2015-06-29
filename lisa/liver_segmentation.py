@@ -105,8 +105,8 @@ def freeKmeans(vylepseny, velikostVoxelu, pocetVrstev=14, pocetVzorku=400000):
     '''
     img = vylepseny
     pixel = np.reshape(img, (img.shape[0] * img.shape[1] * img.shape[2], 1))
-    vybrane = np.array(random.sample(pixel, pocetVzorku))
-    print 'probiha kmeans algoritmus'
+    vybrane = np.array(random.sample(pixel, pocetVzorku)).astype(np.float)
+    logger.debug('probiha kmeans algoritmus')
     centroids, _ = kmeans(vybrane, pocetVrstev)
 
     npcentroids = np.array(centroids)
