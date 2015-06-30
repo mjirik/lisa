@@ -25,4 +25,5 @@ h5py
 pydicom
 sed3
 io3d
+pywget
 
