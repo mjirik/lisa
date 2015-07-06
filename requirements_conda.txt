@@ -22,8 +22,8 @@ vtk=5.10.1=py27_1
 ipython=3.1.0=py27_0
 SimpleITK
 h5py
-pydicom
-sed3
-io3d
+# pydicom
+# sed3
+# io3d
 pywget
 
