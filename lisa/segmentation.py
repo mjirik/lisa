@@ -149,22 +149,47 @@ ok)')
         inputSigma = number
 
     # seeds = None
-    if biggestObjects == False and\
-            seeds == None and interactivity == True and threshold == -1:
-
-        logger.debug(
-            ('Nyni si levym nebo pravym tlacitkem mysi (klepnutim nebo tazenim)\
- oznacte specificke oblasti k vraceni.'))
-
-        # from PyQt4.QtCore import pyqtRemoveInputHook
-        # pyqtRemoveInputHook()
-        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
-
-        import sed3
-        pyed = sed3.sed3(preparedData)
-        pyed.show()
+    vscl = VesselSegmentation()
+    vscl.biggestObjects = biggestObjects
+    vscl.interactivity = interactivity
+    vscl.threshold = threshold
+    vscl.preparedData = preparedData
+    vscl.vscl.run()
+# tohle je parádní prasečina
 
 
+class VesselSegmentation():
+    def __init__(self):
+        pass
+    
+    def run(self):
+        self.step1_seeds()
+
+    def __step1_seeds(self):
+        if self.biggestObjects == False and\
+                self.seeds == None and self.interactivity == True and self.threshold == -1:
+
+            logger.debug(
+                ('Nyni si levym nebo pravym tlacitkem mysi (klepnutim nebo tazenim)\
+    oznacte specificke oblasti k vraceni.'))
+
+            # from PyQt4.QtCore import pyqtRemoveInputHook
+            # pyqtRemoveInputHook()
+            # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+
+            import sed3
+            print "pred sed3"
+            pyed = sed3.sed3(self.preparedData, sed3_on_close=self.__step2_after_sed3)
+            print "po sed3 pred show"
+            pyed.show()
+            print "po show()"
+
+
+        else:
+            self.__step3_thr(self.seeds, binaryClosingIterations, binaryOpeningIterations)
+            pass
+
+    def __step2_after_sed3(pyed):
         seeds = pyed.seeds
 
         # Zkontrolovat, jestli uzivatel neco vybral - nejaky item musi byt
@@ -182,57 +207,73 @@ ok)')
             seeds = seeds.nonzero()
             logger.debug('Seedu bez nul: ' + str(len(seeds[0])))
 
-    closing = binaryClosingIterations
-    opening = binaryOpeningIterations
+        self.__thr()
+    def __step3_thr(self
+    # ,
+    #     seeds, 
+    #     binaryClosingIterations, 
+    #     binaryOpeningIterations,
+    #     smartInitBinaryOperations, 
+    #     interactivity,
+    #     preparedData, 
+    #     voxel=voxel, 
+    #     threshold=threshold,
+    #     interactivity=interactivity, number=number, inputSigma=inputSigma,
+    #     nObj=nObj, biggestObjects=biggestObjects,
+    #     useSeedsOfCompactObjects=useSeedsOfCompactObjects,
+        ):
 
-    if (smartInitBinaryOperations and interactivity):
+        closing = binaryClosingIterations
+        opening = binaryOpeningIterations
 
-        if (seeds == None):  # noqa
+        if (smartInitBinaryOperations and interactivity):
 
-            closing = 5
-            opening = 1
+            if (seeds == None):  # noqa
+
+                closing = 5
+                opening = 1
+
+            else:
+
+                closing = 2
+                opening = 0
+
+        # Samotne filtrovani.
+        uiT = uiThreshold.uiThreshold(
+            preparedData, voxel=self.voxel, threshold=threshold,
+            interactivity=interactivity, number=number, inputSigma=inputSigma,
+            nObj=nObj, biggestObjects=biggestObjects,
+            useSeedsOfCompactObjects=useSeedsOfCompactObjects,
+            binaryClosingIterations=closing, binaryOpeningIterations=opening,
+            seeds=seeds)
+        output = uiT.run()
+
+        # Vypocet binarni matice.
+        if output == None:  # noqa
+
+            logger.debug('Zadna data k vraceni! (output == None)')
+
+        elif binaryOutput:
+
+            output[output != 0] = 1
+
+        # Vraceni matice.
+        if returnThreshold:
+
+            if returnUsedData:
+
+                return preparedData, output, uiT.returnLastThreshold()
+
+            else:
+
+                return output, uiT.returnLastThreshold()
 
         else:
 
-            closing = 2
-            opening = 0
+            if returnUsedData:
 
-    # Samotne filtrovani.
-    uiT = uiThreshold.uiThreshold(
-        preparedData, voxel=voxel, threshold=threshold,
-        interactivity=interactivity, number=number, inputSigma=inputSigma,
-        nObj=nObj, biggestObjects=biggestObjects,
-        useSeedsOfCompactObjects=useSeedsOfCompactObjects,
-        binaryClosingIterations=closing, binaryOpeningIterations=opening,
-        seeds=seeds)
-    output = uiT.run()
+                return preparedData, output
 
-    # Vypocet binarni matice.
-    if output == None:  # noqa
+            else:
 
-        logger.debug('Zadna data k vraceni! (output == None)')
-
-    elif binaryOutput:
-
-        output[output != 0] = 1
-
-    # Vraceni matice.
-    if returnThreshold:
-
-        if returnUsedData:
-
-            return preparedData, output, uiT.returnLastThreshold()
-
-        else:
-
-            return output, uiT.returnLastThreshold()
-
-    else:
-
-        if returnUsedData:
-
-            return preparedData, output
-
-        else:
-
-            return output
+                return output
