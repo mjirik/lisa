@@ -33,7 +33,7 @@ def vesselSegmentation(data, segmentation=-1, threshold=-1,
                        binaryOpeningIterations=0,
                        smartInitBinaryOperations=True, returnThreshold=False,
                        binaryOutput=True, returnUsedData=False,
-                       qapp=None):
+                       qapp=None, on_close_fcn=None):
     """
 
     Vessel segmentation z jater.
@@ -154,16 +154,34 @@ ok)')
     vscl.interactivity = interactivity
     vscl.threshold = threshold
     vscl.preparedData = preparedData
-    vscl.vscl.run()
+    vscl.biggestObjects = biggestObjects
+    vscl.seeds = seeds
+    vscl.binaryClosingIterations = binaryClosingIterations
+    vscl.binaryOpeningIterations = binaryOpeningIterations
+    vscl.smartInitBinaryOperations = smartInitBinaryOperations
+    vscl.voxel = voxel
+    vscl.number = number
+    vscl.inputSigma = inputSigma
+    vscl.nObj = nObj
+    vscl.useSeedsOfCompactObjects = useSeedsOfCompactObjects
+    vscl.binaryOutput = binaryOutput
+    vscl.returnThreshold = returnThreshold
+    vscl.returnUsedData = returnUsedData
+    vscl.on_close_fcn = on_close_fcn
+    vscl.run()
+
+
+    return vscl.retval
 # tohle je parádní prasečina
 
 
 class VesselSegmentation():
     def __init__(self):
+        self.retval = None
         pass
     
     def run(self):
-        self.step1_seeds()
+        self.__step1_seeds()
 
     def __step1_seeds(self):
         if self.biggestObjects == False and\
@@ -186,10 +204,9 @@ class VesselSegmentation():
 
 
         else:
-            self.__step3_thr(self.seeds, binaryClosingIterations, binaryOpeningIterations)
-            pass
+            self.__step3_thr()
 
-    def __step2_after_sed3(pyed):
+    def __step2_after_sed3(self, pyed):
         seeds = pyed.seeds
 
         # Zkontrolovat, jestli uzivatel neco vybral - nejaky item musi byt
@@ -206,9 +223,12 @@ class VesselSegmentation():
             # seeds[2][x] ]
             seeds = seeds.nonzero()
             logger.debug('Seedu bez nul: ' + str(len(seeds[0])))
+        self.seeds = seeds
 
-        self.__thr()
+        self.__step3_thr()
+
     def __step3_thr(self
+
     # ,
     #     seeds, 
     #     binaryClosingIterations, 
@@ -223,12 +243,12 @@ class VesselSegmentation():
     #     useSeedsOfCompactObjects=useSeedsOfCompactObjects,
         ):
 
-        closing = binaryClosingIterations
-        opening = binaryOpeningIterations
+        closing = self.binaryClosingIterations
+        opening = self.binaryOpeningIterations
 
-        if (smartInitBinaryOperations and interactivity):
+        if (self.smartInitBinaryOperations and self.interactivity):
 
-            if (seeds == None):  # noqa
+            if (self.seeds == None):  # noqa
 
                 closing = 5
                 opening = 1
@@ -238,42 +258,54 @@ class VesselSegmentation():
                 closing = 2
                 opening = 0
 
+        # from PyQt4.QtCore import pyqtRemoveInputHook
+        # pyqtRemoveInputHook()
+        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
         # Samotne filtrovani.
         uiT = uiThreshold.uiThreshold(
-            preparedData, voxel=self.voxel, threshold=threshold,
-            interactivity=interactivity, number=number, inputSigma=inputSigma,
-            nObj=nObj, biggestObjects=biggestObjects,
-            useSeedsOfCompactObjects=useSeedsOfCompactObjects,
+            self.preparedData, 
+            voxel=self.voxel, 
+            threshold=self.threshold,
+            interactivity=self.interactivity, number=self.number, inputSigma=self.inputSigma,
+            nObj=self.nObj, biggestObjects=self.biggestObjects,
+            useSeedsOfCompactObjects=self.useSeedsOfCompactObjects,
             binaryClosingIterations=closing, binaryOpeningIterations=opening,
-            seeds=seeds)
+            seeds=self.seeds, uit_on_close=self.__step4_finish)
+        print "pred uiT.run"
         output = uiT.run()
+        print "po uiT.run()"
+
+    def __step4_finish(self, uiT):
+        output = uiT.imgFiltering
 
         # Vypocet binarni matice.
         if output == None:  # noqa
 
             logger.debug('Zadna data k vraceni! (output == None)')
 
-        elif binaryOutput:
+        elif self.binaryOutput:
 
             output[output != 0] = 1
 
         # Vraceni matice.
-        if returnThreshold:
+        if self.returnThreshold:
 
-            if returnUsedData:
+            if self.returnUsedData:
 
-                return preparedData, output, uiT.returnLastThreshold()
+                self.retval = self.preparedData, output, uiT.returnLastThreshold()
 
             else:
 
-                return output, uiT.returnLastThreshold()
+                self.retval = self.output, uiT.returnLastThreshold()
 
         else:
 
-            if returnUsedData:
+            if self.returnUsedData:
 
-                return preparedData, output
+                self.retval = self.preparedData, output
 
             else:
 
-                return output
+                self.retval = output
+        if self.on_close_fcn is not None:
+            self.on_close_fcn(self)
