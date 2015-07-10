@@ -322,6 +322,7 @@ class uiThreshold:
         else:
 
             print "debug in run()"
+            print numpy.nonzero(self.data)
             self.updateImage(-1)
             garbage.collect()
             matpyplot.show()
@@ -353,11 +354,13 @@ class uiThreshold:
 
             self.imgFiltering = self.data.copy()
 
+        print self.data.shape
         # Filtrovani
 
+        # I looks that this line is necessary for showing uiThreshold Window
         from PyQt4.QtCore import pyqtRemoveInputHook
         pyqtRemoveInputHook()
-        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+
         # Zjisteni jakou sigmu pouzit
         if(self.firstRun == True and self.inputSigma >= 0):
             sigma = numpy.round(self.inputSigma, 2)
@@ -398,6 +401,7 @@ class uiThreshold:
 
         # Operace binarni otevreni a uzavreni.
 
+        print "img filt check ", self.imgFiltering.shape
         # Nastaveni hodnot slideru.
         if (self.interactivity == True):
 
@@ -420,8 +424,10 @@ class uiThreshold:
             self.imgFiltering = thresholding_functions.fillHoles(
                 self.imgFiltering)
 
+        print "img filt check ", self.imgFiltering.shape
         # Zjisteni nejvetsich objektu.
         self.getBiggestObjects()
+        print "img filt check ", self.imgFiltering.shape
 
         # Vykresleni dat
         if (self.interactivity == True):
@@ -466,6 +472,7 @@ class uiThreshold:
         if (self.biggestObjects == True or
                 (self.seeds != None and self.useSeedsOfCompactObjects)):
 
+        # TODO jsem na stopě pádům
             self.imgFiltering = thresholding_functions.getPriorityObjects(
                 self.imgFiltering, self.nObj, self.seeds)
 
@@ -483,6 +490,7 @@ class uiThreshold:
         Vykresleni dat.
 
         """
+        print "img filt check ", self.imgFiltering.shape
 
         # Predani dat k vykresleni
         if (self.imgFiltering == None):
@@ -515,6 +523,7 @@ class uiThreshold:
             # del(img1)
             # del(img2)
 
+        print "img filt check ", self.imgFiltering.shape
         self.__drawSegmentedSlice(self.ax4, self.imgFiltering, self.imgFiltering.shape[0]/2)
         # Prekresleni
         self.fig.canvas.draw()

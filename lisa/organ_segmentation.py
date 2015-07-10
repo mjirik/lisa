@@ -994,9 +994,14 @@ class OrganSegmentation():
             'binaryOpeningIterations': 0
         }
         params.update(inparams)
+        from PyQt4.QtCore import pyqtRemoveInputHook
+        pyqtRemoveInputHook()
+        import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+
         outputSegmentation = segmentation.vesselSegmentation(
             self.data3d,
             self.segmentation,
+            on_close_fcn=self.__savePVSegmentation,
             **params
             # threshold=-1,
             # inputSigma=0.15,
@@ -1009,17 +1014,17 @@ class OrganSegmentation():
             # binaryClosingIterations=2,
             # binaryOpeningIterations=0
         )
-        # rom PyQt4.QtCore import pyqtRemoveInputHook
-        # yqtRemoveInputHook()
         # mport ipdb; ipdb.set_trace() # BREAKPOINT
 
-        self.segmentation[outputSegmentation == 1] = slab['porta']
+        # self.segmentation[outputSegmentation == 1] = slab['porta']
 
         # self.__vesselTree(outputSegmentation, 'porta')
 
     def __savePVSegmentation(self, segm):
-        outputSegmentation = segm.outputSegmentation
-        self.segmentation[outputSegmentation == 1] = slab['porta']
+        # outputSegmentation = segm.outputSegmentation
+        outputSegmentation = segm.retval
+        self.segmentation[outputSegmentation == 1] = self.slab['porta']
+
 
     def saveVesselTree(self, textLabel):
         """
