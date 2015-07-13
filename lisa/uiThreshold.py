@@ -41,7 +41,9 @@ class uiThreshold:
                  number=100.0, inputSigma=-1, nObj=10,  biggestObjects=True,
                  useSeedsOfCompactObjects=True,
                  binaryClosingIterations=2, binaryOpeningIterations=0,
-                 seeds=None, cmap=matplotlib.cm.Greys_r, fillHoles=True):
+                 seeds=None, cmap=matplotlib.cm.Greys_r, fillHoles=True,
+                 uit_on_close=None
+                 ):
         """
 
         Inicialitacni metoda.
@@ -89,6 +91,8 @@ class uiThreshold:
         self.seeds = seeds
         self.useSeedsOfCompactObjects = useSeedsOfCompactObjects
         self.fillHoles = fillHoles
+        self.uit_on_close = uit_on_close
+        self.retval = None
 
         if (sys.version_info[0] < 3):
 
@@ -313,14 +317,16 @@ class uiThreshold:
 
             self.updateImage(-1)
             garbage.collect()
+            del(self.data)
 
         else:
 
+            print "debug in run()"
+            print numpy.nonzero(self.data)
             self.updateImage(-1)
             garbage.collect()
             matpyplot.show()
 
-        del(self.data)
 
         garbage.collect()
 
@@ -348,7 +354,12 @@ class uiThreshold:
 
             self.imgFiltering = self.data.copy()
 
+        print self.data.shape
         # Filtrovani
+
+        # I looks that this line is necessary for showing uiThreshold Window
+        from PyQt4.QtCore import pyqtRemoveInputHook
+        pyqtRemoveInputHook()
 
         # Zjisteni jakou sigmu pouzit
         if(self.firstRun == True and self.inputSigma >= 0):
@@ -390,6 +401,7 @@ class uiThreshold:
 
         # Operace binarni otevreni a uzavreni.
 
+        print "img filt check ", self.imgFiltering.shape
         # Nastaveni hodnot slideru.
         if (self.interactivity == True):
 
@@ -412,8 +424,10 @@ class uiThreshold:
             self.imgFiltering = thresholding_functions.fillHoles(
                 self.imgFiltering)
 
+        print "img filt check ", self.imgFiltering.shape
         # Zjisteni nejvetsich objektu.
         self.getBiggestObjects()
+        print "img filt check ", self.imgFiltering.shape
 
         # Vykresleni dat
         if (self.interactivity == True):
@@ -458,6 +472,7 @@ class uiThreshold:
         if (self.biggestObjects == True or
                 (self.seeds != None and self.useSeedsOfCompactObjects)):
 
+        # TODO jsem na stopě pádům
             self.imgFiltering = thresholding_functions.getPriorityObjects(
                 self.imgFiltering, self.nObj, self.seeds)
 
@@ -475,6 +490,7 @@ class uiThreshold:
         Vykresleni dat.
 
         """
+        print "img filt check ", self.imgFiltering.shape
 
         # Predani dat k vykresleni
         if (self.imgFiltering == None):
@@ -507,6 +523,7 @@ class uiThreshold:
             # del(img1)
             # del(img2)
 
+        print "img filt check ", self.imgFiltering.shape
         self.__drawSegmentedSlice(self.ax4, self.imgFiltering, self.imgFiltering.shape[0]/2)
         # Prekresleni
         self.fig.canvas.draw()
@@ -529,6 +546,8 @@ class uiThreshold:
 
         matpyplot.clf()
         matpyplot.close()
+        if self.uit_on_close is not None:
+            self.retval = self.uit_on_close(self)
 
     def buttonMinNext(self, event):
 

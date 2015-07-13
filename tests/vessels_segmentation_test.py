@@ -83,6 +83,9 @@ class VesselsSegmentationTest(unittest.TestCase):
             binaryOpeningIterations=1)
 
 # ověření výsledku
+        # import sed3
+        # print "vystup je : ", outputTmp
+
         # pyed = sed3.sed3(outputTmp, contour=segm==slab['porta'])
         # pyed.show()
 
