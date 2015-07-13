@@ -996,7 +996,7 @@ class OrganSegmentation():
         params.update(inparams)
         from PyQt4.QtCore import pyqtRemoveInputHook
         pyqtRemoveInputHook()
-        import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
         outputSegmentation = segmentation.vesselSegmentation(
             self.data3d,
