@@ -192,6 +192,15 @@ class SkeletonAnalyser:
         # clear unneeded data. IMPORTANT!!
         del(self.shifted_zero) # needed by __element_neighbors
         del(self.shifted_sklabel) # needed by __element_neighbors
+        # mozna fix kratkodobych potizi, ale skutecny problem byl jinde
+        # try:
+        #     del(self.shifted_zero) # needed by __element_neighbors
+        # except:
+        #     logger.warning('self.shifted_zero does not exsist')
+        # try:
+        #     del(self.shifted_sklabel) # needed by __element_neighbors
+        # except:
+        #     logger.warning('self.shifted_zero does not exsist')
         
         # remove edges+nodes that are not connected to rest of the skeleton                
         logger.debug(

@@ -82,6 +82,7 @@ class VesselsSegmentationTest(unittest.TestCase):
             binaryClosingIterations=5,
             binaryOpeningIterations=1)
 
+
 # ověření výsledku
         # import sed3
         # print "vystup je : ", outputTmp

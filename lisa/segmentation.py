@@ -196,11 +196,8 @@ class VesselSegmentation():
             # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
             import sed3
-            print "pred sed3"
             pyed = sed3.sed3(self.preparedData, sed3_on_close=self.__step2_after_sed3)
-            print "po sed3 pred show"
             pyed.show()
-            print "po show()"
 
 
         else:
@@ -271,9 +268,8 @@ class VesselSegmentation():
             useSeedsOfCompactObjects=self.useSeedsOfCompactObjects,
             binaryClosingIterations=closing, binaryOpeningIterations=opening,
             seeds=self.seeds, uit_on_close=self.__step4_finish)
-        print "pred uiT.run"
-        output = uiT.run()
-        print "po uiT.run()"
+        self.retval = uiT.run()
+
 
     def __step4_finish(self, uiT):
         output = uiT.imgFiltering
