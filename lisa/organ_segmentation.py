@@ -1016,7 +1016,8 @@ class OrganSegmentation():
         )
         # mport ipdb; ipdb.set_trace() # BREAKPOINT
 
-        # self.segmentation[outputSegmentation == 1] = slab['porta']
+        if outputSegmentation is not None:
+            self.segmentation[outputSegmentation == 1] = slab['porta']
 
         # self.__vesselTree(outputSegmentation, 'porta')
 
