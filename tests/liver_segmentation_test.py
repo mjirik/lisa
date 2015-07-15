@@ -31,6 +31,7 @@ class LiverSegmentationTest(unittest.TestCase):
         pass
 
     @attr('actual')
+    @attr('slow')
     def test_liver_segmentation_method_3_real_data(self):
         # path_to_script = os.path.dirname(os.path.abspath(__file__))
         # dpath = os.path.join(path_to_script, '../sample_data/jatra_5mm/')
@@ -56,6 +57,7 @@ class LiverSegmentationTest(unittest.TestCase):
         self.assertGreater(volume, 100000)
         self.assertLess(volume, 2100000)
 
+    @attr('slow')
     def test_liver_segmentation_method_4_real_data(self):
         # path_to_script = os.path.dirname(os.path.abspath(__file__))
         # dpath = os.path.join(path_to_script, '../sample_data/jatra_5mm/')
