@@ -208,10 +208,10 @@ ok)')
         seeds=seeds)
 
 
-    # output = uiT.run()
+    output = uiT.run()
 
-    uiT.exec_()
-    output = uiT.get_values()
+    # uiT.exec_()
+    # output = uiT.get_values()
 
     # output = uiT.run()
 

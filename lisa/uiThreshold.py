@@ -59,12 +59,13 @@ class uiThresholdQt(QtGui.QDialog):
         params["figure"] = self.figure 
         self.uit = uiThreshold(*pars, **params)
         self.uit.on_close_fcn = self.callback_close
-        # self.uit.on_show_fcn = self.exec_
+        self.uit.on_show_fcn = self.exec_
         # ed.show()
         self.output = None
 
     def run(self):
-        return self.run()
+        # pass
+        return self.uit.run()
 
     def callback_close(self, uit):
         # self.output = uit
@@ -124,7 +125,7 @@ class uiThreshold:
 
             self.errorsOccured = False
 
-        self.on_show_fcn = plt.show()
+        self.on_show_fcn = plt.show
         self.interactivity = interactivity
         self.cmap = cmap
         self.number = number
