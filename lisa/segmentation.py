@@ -68,6 +68,8 @@ def vesselSegmentation(data, segmentation=-1, threshold=-1,
         binaryOutput - zda ma byt vystup vracen binarne nebo ne (binarnim
             vystupem se rozumi: cokoliv jineho nez hodnota 0 je hodnota 1)
         returnUsedData - vrati pouzita data
+        :param on_close_fcn: output function is called self as first param. 
+            self.output can be used to catch vessel segmentation output.
 
     Output:
         filtrovana data
