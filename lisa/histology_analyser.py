@@ -156,12 +156,12 @@ class HistologyAnalyser:
 
     def data_to_binar(self):
         # ## Median filter
-        self.__filteredData = scipy.ndimage.filters.median_filter(self.data3d, size=2)
+        filteredData = scipy.ndimage.filters.median_filter(self.data3d, size=2)
 
         # ## Segmentation
         data3d_thr = segmentation.vesselSegmentation(
-            self.__filteredData,  # self.data3d,
-            segmentation=np.ones(self.__filteredData.shape, dtype='int8'),
+            filteredData,  # self.data3d,
+            segmentation=np.ones(filteredData.shape, dtype='int8'),
             threshold=self.threshold,
             inputSigma=0,  # 0.15,
             dilationIterations=2,
@@ -171,10 +171,15 @@ class HistologyAnalyser:
             interactivity=not self.nogui,
             binaryClosingIterations=self.binaryClosing, # noqa 5,
             binaryOpeningIterations=self.binaryOpening, # 1 # noqa
-            qapp=self.qapp,
-            on_close_fcn=self.__after_data_to_binar
+            qapp=self.qapp
             )
+        del(filteredData)
 
+        # ## Zalepeni der
+        scipy.ndimage.morphology.binary_fill_holes(data3d_thr,
+                                                   output=data3d_thr)
+
+        self.data3d_thr = data3d_thr
 
     def binar_to_skeleton(self):
         # create border with generated stuff for skeletonization
@@ -194,35 +199,15 @@ class HistologyAnalyser:
 
     def data_to_skeleton(self):
         self.data_to_binar()
-
-    def __after_data_to_binar(self, vs):
-        data3d_thr = vs.output
-        del(filteredData)
-        # ## Zalepeni der
-        scipy.ndimage.morphology.binary_fill_holes(data3d_thr,
-                                                   output=data3d_thr)
-
-        self.data3d_thr = data3d_thr
         self.binar_to_skeleton()
-        self.data_to_statistics_post_step()
 
     def data_to_statistics(self, guiUpdateFunction=None):
-        """
-        Funkce se bohužel musí komplikovaně dělit kvůli callbackům z 
-        uiThreshold. Zatím je neumím dělat lépe.
-        """
-        self.__guiUpdateFunction = guiUpdateFunction
         self.stats = {}
 
         if (self.data3d_skel is None) or (self.data3d_thr is None):
             logger.debug('Skeleton was not generated!!! Generating now...')
             self.data_to_skeleton()
 
-        else:
-            self.data_to_statistics_post_step()
-
-    def data_to_statistics_post_step(self):
-        guiUpdateFunction = self.__guiUpdateFunction
         # # add general info
         logger.debug('Computing general statistics...')
         if guiUpdateFunction is not None: guiUpdateFunction(0, 3, "Volumetric methods (Vv, Sv)")

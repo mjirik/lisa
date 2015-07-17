@@ -24,10 +24,55 @@ import thresholding_functions
 
 import matplotlib
 import matplotlib.pyplot as matpyplot
+import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button  # , RadioButtons
 
 import gc as garbage
 
+from PyQt4 import QtGui, QtCore
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+
+class uiThresholdQt(QtGui.QDialog):
+    def __init__(self, *pars, **params):
+    # def __init__(self,parent=None):
+        parent = None
+
+
+        QtGui.QDialog.__init__(self, parent)
+        # super(Window, self).__init__(parent)
+        # self.setupUi(self)
+        self.figure = plt.figure()
+        self.canvas = FigureCanvas(self.figure)
+        self.toolbar = NavigationToolbar(self.canvas, self)
+
+# set the layout
+        layout = QtGui.QVBoxLayout()
+        layout.addWidget(self.toolbar)
+        layout.addWidget(self.canvas)
+        # layout.addWidget(self.button)
+        self.setLayout(layout)
+
+    # def set_params(self, *pars, **params):
+        # import sed3.sed3
+
+        params["figure"] = self.figure 
+        self.uit = uiThreshold(*pars, **params)
+        self.uit.on_close_fcn = self.callback_close
+        # self.uit.on_show_fcn = self.exec_
+        # ed.show()
+        self.output = None
+
+    def run(self):
+        return self.run()
+
+    def callback_close(self, uit):
+        # self.output = uit
+
+        self.close()
+
+    def get_values(self):
+        pass
 
 class uiThreshold:
 
@@ -41,9 +86,8 @@ class uiThreshold:
                  number=100.0, inputSigma=-1, nObj=10,  biggestObjects=True,
                  useSeedsOfCompactObjects=True,
                  binaryClosingIterations=2, binaryOpeningIterations=0,
-                 seeds=None, cmap=matplotlib.cm.Greys_r, fillHoles=True,
-                 uit_on_close=None
-                 ):
+                 seeds=None, cmap=matplotlib.cm.Greys_r, fillHoles=True, 
+                 figure=None):
         """
 
         Inicialitacni metoda.
@@ -65,6 +109,7 @@ class uiThreshold:
         """
 
         logger.debug('Spoustim prahovani dat...')
+        self.on_close_fcn = None
 
         self.inputDimension = numpy.ndim(data)
         if(self.inputDimension != 3):
@@ -79,6 +124,7 @@ class uiThreshold:
 
             self.errorsOccured = False
 
+        self.on_show_fcn = plt.show()
         self.interactivity = interactivity
         self.cmap = cmap
         self.number = number
@@ -91,8 +137,6 @@ class uiThreshold:
         self.seeds = seeds
         self.useSeedsOfCompactObjects = useSeedsOfCompactObjects
         self.fillHoles = fillHoles
-        self.uit_on_close = uit_on_close
-        self.retval = None
 
         if (sys.version_info[0] < 3):
 
@@ -117,7 +161,11 @@ class uiThreshold:
 
         if self.interactivity == True:
 
-            self.fig = matpyplot.figure()
+            if figure is None:
+
+                self.fig = matpyplot.figure()
+            else:
+                self.fig = figure
 
             # Maximalni a minimalni pouzita hodnota prahovani v datech (bud v
             # celych datech nebo vybranych seedu)
@@ -317,16 +365,14 @@ class uiThreshold:
 
             self.updateImage(-1)
             garbage.collect()
-            del(self.data)
 
         else:
 
-            print "debug in run()"
-            print numpy.nonzero(self.data)
             self.updateImage(-1)
             garbage.collect()
-            matpyplot.show()
+            self.on_show_fcn()
 
+        del(self.data)
 
         garbage.collect()
 
@@ -354,12 +400,7 @@ class uiThreshold:
 
             self.imgFiltering = self.data.copy()
 
-        print self.data.shape
         # Filtrovani
-
-        # I looks that this line is necessary for showing uiThreshold Window
-        from PyQt4.QtCore import pyqtRemoveInputHook
-        pyqtRemoveInputHook()
 
         # Zjisteni jakou sigmu pouzit
         if(self.firstRun == True and self.inputSigma >= 0):
@@ -401,7 +442,6 @@ class uiThreshold:
 
         # Operace binarni otevreni a uzavreni.
 
-        print "img filt check ", self.imgFiltering.shape
         # Nastaveni hodnot slideru.
         if (self.interactivity == True):
 
@@ -424,10 +464,8 @@ class uiThreshold:
             self.imgFiltering = thresholding_functions.fillHoles(
                 self.imgFiltering)
 
-        print "img filt check ", self.imgFiltering.shape
         # Zjisteni nejvetsich objektu.
         self.getBiggestObjects()
-        print "img filt check ", self.imgFiltering.shape
 
         # Vykresleni dat
         if (self.interactivity == True):
@@ -472,7 +510,6 @@ class uiThreshold:
         if (self.biggestObjects == True or
                 (self.seeds != None and self.useSeedsOfCompactObjects)):
 
-        # TODO jsem na stopě pádům
             self.imgFiltering = thresholding_functions.getPriorityObjects(
                 self.imgFiltering, self.nObj, self.seeds)
 
@@ -490,7 +527,6 @@ class uiThreshold:
         Vykresleni dat.
 
         """
-        print "img filt check ", self.imgFiltering.shape
 
         # Predani dat k vykresleni
         if (self.imgFiltering == None):
@@ -523,7 +559,6 @@ class uiThreshold:
             # del(img1)
             # del(img2)
 
-        print "img filt check ", self.imgFiltering.shape
         self.__drawSegmentedSlice(self.ax4, self.imgFiltering, self.imgFiltering.shape[0]/2)
         # Prekresleni
         self.fig.canvas.draw()
@@ -545,9 +580,9 @@ class uiThreshold:
     def buttonContinue(self, event):
 
         matpyplot.clf()
+        if self.on_close_fcn is not None:
+            self.on_close_fcn()
         matpyplot.close()
-        if self.uit_on_close is not None:
-            self.retval = self.uit_on_close(self)
 
     def buttonMinNext(self, event):
 
