@@ -156,16 +156,17 @@ ok)')
             ('Nyni si levym nebo pravym tlacitkem mysi (klepnutim nebo tazenim)\
  oznacte specificke oblasti k vraceni.'))
 
-        # from PyQt4.QtCore import pyqtRemoveInputHook
-        # pyqtRemoveInputHook()
-        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
         import sed3
         pyed = sed3.sed3qt(preparedData)
         # pyed.show()
         pyed.exec_()
 
+        # from PyQt4.QtCore import pyqtRemoveInputHook
+        # pyqtRemoveInputHook()
+        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
+        
         seeds = pyed.seeds
 
         # Zkontrolovat, jestli uzivatel neco vybral - nejaky item musi byt

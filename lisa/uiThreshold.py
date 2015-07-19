@@ -582,7 +582,7 @@ class uiThreshold:
 
         matpyplot.clf()
         if self.on_close_fcn is not None:
-            self.on_close_fcn()
+            self.on_close_fcn(self)
         matpyplot.close()
 
     def buttonMinNext(self, event):
