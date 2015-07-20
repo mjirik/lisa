@@ -199,22 +199,26 @@ ok)')
             closing = 2
             opening = 0
 
-    # Samotne filtrovani.
-    uiT = uiThreshold.uiThresholdQt(
-        preparedData, voxel=voxel, threshold=threshold,
-        interactivity=interactivity, number=number, inputSigma=inputSigma,
-        nObj=nObj, biggestObjects=biggestObjects,
-        useSeedsOfCompactObjects=useSeedsOfCompactObjects,
-        binaryClosingIterations=closing, binaryOpeningIterations=opening,
-        seeds=seeds)
+    # Samotne filtrovani
+    if interactivity:
+        uiT = uiThreshold.uiThresholdQt(
+            preparedData, voxel=voxel, threshold=threshold,
+            interactivity=interactivity, number=number, inputSigma=inputSigma,
+            nObj=nObj, biggestObjects=biggestObjects,
+            useSeedsOfCompactObjects=useSeedsOfCompactObjects,
+            binaryClosingIterations=closing, binaryOpeningIterations=opening,
+            seeds=seeds)
 
-
-    output = uiT.run()
-
-    # uiT.exec_()
-    # output = uiT.get_values()
-
-    # output = uiT.run()
+        output = uiT.run()
+    else:
+        uiT = uiThreshold.uiThreshold(
+            preparedData, voxel=voxel, threshold=threshold,
+            interactivity=interactivity, number=number, inputSigma=inputSigma,
+            nObj=nObj, biggestObjects=biggestObjects,
+            useSeedsOfCompactObjects=useSeedsOfCompactObjects,
+            binaryClosingIterations=closing, binaryOpeningIterations=opening,
+            seeds=seeds)
+        output = uiT.run()
 
     # Vypocet binarni matice.
     if output == None:  # noqa

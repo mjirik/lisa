@@ -346,6 +346,7 @@ class HistologyAnalyser:
         data3d_nodes_vis[data3d_nodes_vis < 0] = 2
 
         if not self.nogui:
+            # @TODO change sed3 to sed3qt
             pyed = se.sed3(
                 self.data3d,
                 seeds=(data3d_nodes_vis).astype(np.int8),

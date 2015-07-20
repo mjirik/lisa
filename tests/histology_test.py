@@ -9,6 +9,9 @@ import unittest
 from nose.plugins.attrib import attr
 import numpy as np
 
+import logging
+logger = logging.getLogger(__name__)
+
 from lisa.gen_volume_tree import TreeGenerator
 from lisa.histology_analyser import HistologyAnalyser
 from lisa.histology_report import HistologyReport
@@ -36,6 +39,7 @@ class HistologyTest(unittest.TestCase):
 
 
         """
+        print "zacatek podezreleho testu"
         # import segmentation
         # import misc
 
@@ -53,21 +57,26 @@ class HistologyTest(unittest.TestCase):
         threshold = 2.5
         ha = HistologyAnalyser(data3d, metadata, threshold)
 
+        print "prostreded 0 "
         # segmented data
         ha.data_to_binar()
+        print "prostreded 1 "
         ha.data_to_skeleton()
+        print "prostreded 2 "
 
         # get statistics
         ha.data_to_statistics()
         yaml_new = os.path.join(path_to_script, "hist_stats_new.yaml")
         ha.writeStatsToYAML(filename=yaml_new)
 
+        print "prostreded 3 "
         # get histology reports
         hr = HistologyReport()
         hr.importFromYaml(yaml_path)
         hr.generateStats()
         stats_orig = hr.stats['Report']
 
+        print "prostreded 4 "
         hr = HistologyReport()
         hr.importFromYaml(yaml_new)
         hr.generateStats()
@@ -83,6 +92,8 @@ class HistologyTest(unittest.TestCase):
 
         self.assertGreater(stats_orig['Other']['Avg radius mm'],stats_new['Other']['Avg radius mm']*0.9)  # noqa
         self.assertLess(stats_orig['Other']['Avg radius mm'],stats_new['Other']['Avg radius mm']*1.1)  # noqa
+
+        print "konec podezreleho testu"
 
     def test_generate_sample_data(self):
         """
