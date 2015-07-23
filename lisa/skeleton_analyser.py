@@ -1,5 +1,8 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
+"""
+Modul is used for skeleton binary 3D data analysis
+"""
 
 import sys
 import os.path
@@ -23,21 +26,25 @@ class SkeletonAnalyser:
     | stats = skan.skeleton_analysis()
     
     | data3d_skel: 3d array with skeleton as 1s and background as 0s
-    | use_filter_small: removing small objects
+    | use_filter_small_objects: removing small objects
     | filter_small_threshold: threshold for small filtering
+
+    :arg cut_wrong_skeleton: remove short skeleton edges to terminal
+    :arg aggregate_near_nodes_distance: combine near nodes to one
     """
 
     def __init__(self, data3d_skel, volume_data=None, voxelsize_mm=[1, 1, 1],
                  use_filter_small=False, filter_small_threshold=3,
-                 cut_wrong_skeleton=True):
+                 cut_wrong_skeleton=True, aggregate_near_nodes_distance=None):
         # for not
         self.volume_data = volume_data
         self.voxelsize_mm = voxelsize_mm
+        self.aggregate_near_nodes_distance = aggregate_near_nodes_distance
 
         # get array with 1 for edge, 2 is node and 3 is terminal
         logger.debug('Generating sklabel...')
         if use_filter_small:
-            data3d_skel = self.filter_small(data3d_skel,
+            data3d_skel = self.filter_small_objects(data3d_skel,
                                             filter_small_threshold)
         
         # generate nodes and enges (sklabel)
@@ -69,7 +76,7 @@ class SkeletonAnalyser:
         
         if self.cut_wrong_skeleton:
             updateFunction(0, 1, "cuting wrong skeleton")
-            self.__cut_wrong_skeleton()
+            self.__cut_short_skeleton_terminal_edges()
         
         stats = {}
         len_edg = np.max(self.sklabel)
@@ -160,7 +167,7 @@ class SkeletonAnalyser:
 
         return stats
 
-    def __cut_wrong_skeleton(self, cut_ratio=2.0):
+    def __cut_short_skeleton_terminal_edges(self, cut_ratio=2.0):
         """
         cut_ratio = 2.0 -> if radius of terminal edge is 2x its lenght or more,
         remove it
@@ -293,6 +300,8 @@ class SkeletonAnalyser:
         skelet_nodes = self.__skeleton_nodes(self.sklabel)
         self.sklabel = self.__generate_sklabel(skelet_nodes)
 
+
+
     def __skeleton_nodes(self, data3d_skel):
         """
         Return 3d ndarray where 0 is background, 1 is skeleton, 2 is node
@@ -311,6 +320,19 @@ class SkeletonAnalyser:
 
         return data3d_skel
 
+    def __skeleton_nodes_aggregation(self, data3d_skel):
+        """
+
+        aggregate near nodes
+        """
+        if self.aggregate_near_nodes_distance > 0:
+#          TODO doplnit zzávislost na voxelsize 
+            structure = generate_binary_elipsoid(self.aggregate_near_nodes_distance / self.voxelsize_mm)
+            nd_dil = scipy.ndimage.binary_dilation(data3d_skel==2, structure)
+            data3d_skel[nd_dil] = 2
+        return data3d_skel
+
+
     def __label_edge_by_its_terminal(self, labeled_terminals):
         import functools
         import scipy
@@ -327,8 +349,9 @@ class SkeletonAnalyser:
             labeled_terminals[labeled_terminals == neigh] = label
         return labeled_terminals
 
-    def filter_small(self, skel, threshold=4):
+    def filter_small_objects(self, skel, threshold=4):
         """
+        Remove small objects from 
         terminals are connected to edges
         """
         skeleton_nodes = self.__skeleton_nodes(skel)
@@ -1070,6 +1093,25 @@ class SkeletonAnalyser:
             }
 
         return edg_stats
+
+def generate_binary_elipsoid(ndradius=[1, 1, 1]):
+    """
+    generate binary elipsoid shape
+    """
+    ndradius = np.asarray(ndradius).astype(np.double)
+    shape = (ndradius * 2) + 1
+    x, y, z = np.indices(shape)
+    center1 = ndradius
+    mask = (
+        ((x - ndradius[0])**2 ) / ndradius[0]**2 +
+        ((y - ndradius[1])**2 ) / ndradius[1]**2 +
+        ((z - ndradius[2])**2 ) / ndradius[2]**2
+        )
+    # (y - ndradius[1])**2 < radius1**2
+    # mask = mask radius1**1
+    return mask < 1
+
+
 
 
 def curve_model(t, params):

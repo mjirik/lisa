@@ -19,6 +19,27 @@ import copy
 class TemplateTest(unittest.TestCase):
 
     @attr('actual')
+    def test_generate_elipse(self):
+        mask = sk.generate_binary_elipsoid([6,4,3])
+        print mask.shape
+
+
+        # import sed3
+        # ed = sed3.sed3(mask)
+        # ed.show()
+
+        self.assertEqual(mask[0][0][0], 0)
+        self.assertEqual(mask[6][4][3], 1)
+# on axis border should be zero
+        self.assertEqual(mask[0][4][3], 0)
+        self.assertEqual(mask[6][0][3], 0)
+        self.assertEqual(mask[6][4][0], 0)
+
+# on axis border one pixel into center should be one
+        self.assertEqual(mask[1][4][3], 1)
+        self.assertEqual(mask[6][1][3], 1)
+        self.assertEqual(mask[6][4][1], 1)
+
     def test_length_types(self):
         """
         Test for comparation of various length estimation methods.
@@ -145,7 +166,7 @@ class TemplateTest(unittest.TestCase):
         # pe.show()
 
         skan = sk.SkeletonAnalyser(copy.copy(data))
-        output = skan.filter_small(data, 3)
+        output = skan.filter_small_objects(data, 3)
         # skan.skeleton_analysis()
 
         # pe = ped.sed3(output)
