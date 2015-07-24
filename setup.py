@@ -32,7 +32,8 @@ setup(
     license = "BSD",
     keywords = "liver surgery computer vision",
     url = "http://github.com/mjirik",
-    packages=['tests'],
+    # packages=['tests'],
+    packages=['lisa'],
     long_description=read('README.md'),
     classifiers=[
         "Development Status :: 3 - Alpha",
