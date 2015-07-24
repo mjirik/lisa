@@ -68,9 +68,9 @@ class SupportStructureSegmentation():
             modality = 'CT',
             slab = {'none':0,'llung':4, 'bone':8,'rlung':9,'heart':10,'diaphragm':5},
             maximal_lung_diff = 0.3,
-	    rad_diaphragm=4,
-	    smer=None,
-	    ):
+            rad_diaphragm=4,
+            smer=None,
+        ):
 
         """
         Segmentaton of support structures for liver segmentatio based on
@@ -87,9 +87,9 @@ class SupportStructureSegmentation():
         self.crinfo = [[0,-1],[0,-1],[0,-1]]
         self.segmentation = np.zeros(data3d.shape)
         self.slab = slab
-	self.maximal_lung_diff = maximal_lung_diff
-	self.rad_diaphragm=rad_diaphragm
-	self.smer=smer
+        self.maximal_lung_diff = maximal_lung_diff
+        self.rad_diaphragm=rad_diaphragm
+        self.smer=smer
 
 
 
@@ -97,10 +97,10 @@ class SupportStructureSegmentation():
 
 
     def run(self):
-	self.bone_segmentation()
-	self.spine_segmentation()
-	self.lungs_segmentation()
-	self.heart_segmentation()
+        self.bone_segmentation()
+        self.spine_segmentation()
+        self.lungs_segmentation()
+        self.heart_segmentation()
 
 
     def import_data(self, data):
@@ -117,23 +117,23 @@ class SupportStructureSegmentation():
 
 
     def convolve_structure_heart( self , size=9 ):
-	a = np.zeros(( size , size , size ))
-	c = int (np.floor( size / 2 ))
-	a[c,c,c]=1
-	structure = filters.gaussian_filter( a , self.voxelsize_mm )
-	structure[:c,:,:] *= -1
-	structure[c,:,:] = 0
-	return structure
+        a = np.zeros(( size , size , size ))
+        c = int (np.floor( size / 2 ))
+        a[c,c,c]=1
+        structure = filters.gaussian_filter( a , self.voxelsize_mm )
+        structure[:c,:,:] *= -1
+        structure[c,:,:] = 0
+        return structure
 
     
 
     def bone_segmentation(self, bone_threshold = 200):
-	#ipdb.set_trace()
+#ipdb.set_trace()
         return np.array(self.data3d > bone_threshold)#.astype(np.int8)*self.slab['bone']
 
     def convolve_structure_spine(self, velikost = [300 , 2, 2]):
-	structure = np.ones((int(velikost[2]/self.voxelsize_mm[0]),int(velikost[1]/self.voxelsize_mm[1]),int(velikost[2]/self.voxelsize_mm[2])))  
-	return structure
+        structure = np.ones((int(velikost[2]/self.voxelsize_mm[0]),int(velikost[1]/self.voxelsize_mm[1]),int(velikost[2]/self.voxelsize_mm[2])))  
+        return structure
 
     
 
@@ -182,10 +182,10 @@ class SupportStructureSegmentation():
             if (z[a] < ran[0]) and (z[a] >= 0):
 
                 self.segmentation[z[a], x[a], y[a]] = self.slab['diaphragm']
-		if self.smer==0:
-              	    cc[z[a]+1:, x[a], y[a]] = 1
-		else:
-		    cc[:z[a]-1, x[a], y[a]] = 1
+                if self.smer==0:
+                    cc[z[a]+1:, x[a], y[a]] = 1
+                else:
+                    cc[:z[a]-1, x[a], y[a]] = 1
 
                 # self.segmentation[z[a], x[a], y[a]] = self.slab['diaphragm']
                 for b in range(z[a]+1, ran[0]):
@@ -198,26 +198,25 @@ class SupportStructureSegmentation():
         a=self.convolve_structure_heart()
         seg_prub = np.array(self.segmentation == self.slab['rlung'])+np.array(self.segmentation == self.slab['llung'])
 
-	
+
         seg_prub = filters.convolve( (seg_prub-0.5) , a )
-	
+
 
 # import sed3
 # ed = sed3.sed3(seg_prub)
 # ed.show()
-	
-	if self.smer==0:
+        if self.smer==0:
             seg_prub = np.array(seg_prub<=-0.3)
-	else:
-	    seg_prub = np.array(seg_prub<=0.3)
+        else:
+            seg_prub = np.array(seg_prub<=0.3)
         cc = self.__above_diaphragm_calculation(seg_prub)
 #ipdb.set_trace()
         plice1=np.array(self.segmentation==self.slab['llung'])
         z, x, y = np.nonzero(plice1)
-	print("konec")
-	x1 = [0,0,0,0]
-	y1 = [0,0,0,0]
-	z1 = [0,0,0,0]
+        print("konec")
+        x1 = [0,0,0,0]
+        y1 = [0,0,0,0]
+        z1 = [0,0,0,0]
         x1[0]=np.min(x)
         x1[1]=np.max(x)
         y1[0]=np.min(y)
@@ -226,31 +225,31 @@ class SupportStructureSegmentation():
         z1[1]=np.min(z)
         plice2=np.array(self.segmentation==self.slab['rlung'])
         z, x, y = np.nonzero(plice2)
-        x1[2]=np.min(x)	
+        x1[2]=np.min(x)
         x1[3]=np.max(x)
         y1[2]=np.min(y)
         y1[3]=np.max(y)
-	z1[2]=np.max(z)
-        z1[3]=np.min(z)	
+        z1[2]=np.max(z)
+        z1[3]=np.min(z)
         mp=np.zeros(self.segmentation.shape)
-	xmin=np.min(x1)
-	xmax=np.max(x1)
-	ymin=np.min(y1)
-	ymax=np.max(y1)
-	zmin=np.min(z1)
-	zmax=np.max(z1)
-	if self.smer==0:
+        xmin=np.min(x1)
+        xmax=np.max(x1)
+        ymin=np.min(y1)
+        ymax=np.max(y1)
+        zmin=np.min(z1)
+        zmax=np.max(z1)
+        if self.smer==0:
             mp[zmin:,  xmin:xmax ,ymin:ymax]=1
-	else:
-	    mp[:zmax,  xmin:xmax ,ymin:ymax]=1
-	
+        else:
+            mp[:zmax,  xmin:xmax ,ymin:ymax]=1
+
         bones = np.array(self.data3d >= top_threshold)
         aaa = np.array(self.data3d >= heart_threshold)
         aaa = aaa - bones
         aaa=morphology.binary_opening(aaa , iterations=self.iteration()+2).astype(self.segmentation.dtype)
         aaa = morphology.binary_erosion(aaa, iterations=self.iteration())	
         aaa=cc * aaa * mp
-	
+
         lab , num = label(aaa)
         counts= [0]*(num+1)
         for x in range(1, num+1):
@@ -260,14 +259,14 @@ class SupportStructureSegmentation():
         aaa = np.array(lab==index)
         aaa = morphology.binary_dilation(aaa, iterations=self.iteration())
         self.segmentation= aaa
-	self.segmentation = self.segmentation + aaa
+        self.segmentation = self.segmentation + aaa
 
         pass
 
     def iteration(self, sirka = 5):
-	prumer= np.mean(self.voxelsize_mm)
-	a= int (sirka/prumer)
-	return a
+        prumer= np.mean(self.voxelsize_mm)
+        a= int (sirka/prumer)
+        return a
 
     def orientation(self):
 	if(self.segmentation.shape[0]%2==0):
