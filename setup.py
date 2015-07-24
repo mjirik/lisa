@@ -32,7 +32,7 @@ setup(
     license = "BSD",
     keywords = "liver surgery computer vision",
     url = "http://github.com/mjirik",
-    packages=['an_example_pypi_project', 'tests'],
+    packages=['tests'],
     long_description=read('README.md'),
     classifiers=[
         "Development Status :: 3 - Alpha",
