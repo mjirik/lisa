@@ -317,6 +317,7 @@ class SkeletonAnalyser:
 
         data3d_skel[nodes == 1] = 2
         data3d_skel[terminals == 1] = 3
+        data3d_skel = self.__skeleton_nodes_aggregation(data3d_skel)
 
         return data3d_skel
 
@@ -327,7 +328,8 @@ class SkeletonAnalyser:
         """
         if self.aggregate_near_nodes_distance > 0:
 #          TODO doplnit zzávislost na voxelsize 
-            structure = generate_binary_elipsoid(self.aggregate_near_nodes_distance / self.voxelsize_mm)
+            structure = generate_binary_elipsoid(
+                    self.aggregate_near_nodes_distance / np.asarray(self.voxelsize_mm))
             nd_dil = scipy.ndimage.binary_dilation(data3d_skel==2, structure)
             data3d_skel[nd_dil] = 2
         return data3d_skel
