@@ -30,12 +30,13 @@ class SkeletonAnalyser:
     | filter_small_threshold: threshold for small filtering
 
     :arg cut_wrong_skeleton: remove short skeleton edges to terminal
-    :arg aggregate_near_nodes_distance: combine near nodes to one
+    :arg aggregate_near_nodes_distance: combine near nodes to one. Parameter 
+    defines distance in mm.
     """
 
     def __init__(self, data3d_skel, volume_data=None, voxelsize_mm=[1, 1, 1],
                  use_filter_small=False, filter_small_threshold=3,
-                 cut_wrong_skeleton=True, aggregate_near_nodes_distance=None):
+                 cut_wrong_skeleton=True, aggregate_near_nodes_distance=0):
         # for not
         self.volume_data = volume_data
         self.voxelsize_mm = voxelsize_mm
@@ -326,7 +327,7 @@ class SkeletonAnalyser:
 
         aggregate near nodes
         """
-        if self.aggregate_near_nodes_distance > 0:
+        if self.aggregate_near_nodes_distance >= 0:
 #          TODO doplnit zzávislost na voxelsize 
             structure = generate_binary_elipsoid(
                     self.aggregate_near_nodes_distance / np.asarray(self.voxelsize_mm))
