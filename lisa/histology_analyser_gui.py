@@ -103,7 +103,8 @@ class HistologyAnalyserWindow(QMainWindow):
         logger.debug('Init HistologyAnalyser object')
         self.ha = HA.HistologyAnalyser(
                 self.data3d, self.metadata,
-                nogui=False, qapp=self.qapp)
+                nogui=False, qapp=self.qapp,
+                aggregate_near_nodes_distance=self.args.aggregatenearnodes)
 
         ### Remove Area (mask)
         logger.debug('Remove area')

@@ -39,7 +39,8 @@ import surface_measurement
 class HistologyAnalyser:
 
     def __init__(self, data3d, metadata, threshold=-1, binaryClosing=-1,
-                 binaryOpening=-1, nogui=True, qapp=None):
+                 binaryOpening=-1, nogui=True, qapp=None,
+                 aggregate_near_nodes_distance=0 ):
         self.qapp=qapp
         self.data3d = data3d
         if 'voxelsize_mm' not in metadata.keys():
@@ -63,6 +64,8 @@ class HistologyAnalyser:
         self.nogui = nogui
 
         self.data3d_masked = None
+        
+        self.aggregate_near_nodes_distance = aggregate_near_nodes_distance
 
     def get_voxelsize(self):
         return self.metadata['voxelsize_mm']
@@ -251,7 +254,8 @@ class HistologyAnalyser:
         skan = SkeletonAnalyser(
             self.data3d_skel,
             volume_data=self.data3d_thr,
-            voxelsize_mm=self.metadata['voxelsize_mm']
+            voxelsize_mm=self.metadata['voxelsize_mm'],
+            aggregate_near_nodes_distance = self.aggregate_near_nodes_distance
             )
         stats = skan.skeleton_analysis(guiUpdateFunction=guiUpdateFunction)
         # needed only by self.writeSkeletonToPickle()
@@ -336,7 +340,9 @@ class HistologyAnalyser:
         skan = SkeletonAnalyser(
             self.data3d_skel,
             volume_data=self.data3d_thr,
-            voxelsize_mm=self.metadata['voxelsize_mm'])
+            voxelsize_mm=self.metadata['voxelsize_mm'],
+            aggregate_near_nodes_distance = self.aggregate_near_nodes_distance
+            )
         data3d_nodes_vis = skan.sklabel.copy()
         del(skan)
 
@@ -576,6 +582,11 @@ def parser_init():  # pragma: no cover
         help='Saves used mask to mask.pkl file. Only in GUI mode')
 
     parser.add_argument(
+        '--aggregatenearnodes', type=int,
+        default=0, 
+        help='aggregate_near_nodes_distance value')
+     
+    parser.add_argument(
         '-cr', '--crop',
         default=None,
         type=int, metavar='N', nargs='+',
@@ -635,7 +646,7 @@ def processData(args):
     logger.debug('Init HistologyAnalyser object')
     ha = HistologyAnalyser(data3d, metadata, threshold, 
              binaryClosing=binaryClosing, binaryOpening=binaryOpening, 
-             nogui=True)
+             nogui=True, aggregate_near_nodes_distance=args.aggregatenearnodes)
 
     # Remove Area = Load mask from file
     if mask_file is not None:
