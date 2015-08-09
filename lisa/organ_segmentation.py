@@ -393,9 +393,20 @@ class OrganSegmentation():
             self.crinfo,
             self.orig_shape)
 
+        label1 = 1
+        label2 = 1
+# TODO make GUI in Qt
+        from PyQt4.QtCore import pyqtRemoveInputHook
+        pyqtRemoveInputHook()
+        print 'unique data1 ', np.unique(data3d_segmentation_actual)
+        print 'unique data2 ', np.unique(data3d_segmentation)
+        print "set label1 and label2"
+        print "then press 'c'"
+        import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+
         evaluation = volumetry_evaluation.compare_volumes(
-            data3d_segmentation_actual,
-            data3d_segmentation,
+            data3d_segmentation_actual == label1,
+            data3d_segmentation == label2,
             self.voxelsize_mm
             )
         score = volumetry_evaluation.sliver_score_one_couple(evaluation)
