@@ -66,8 +66,8 @@ class SupportStructureSegmentation():
             autocrop = True,
             autocrop_margin_mm = [10,10,10],
             modality = 'CT',
-            slab = {'none':0,'llung':4, 'bone':8,'rlung':9,'heart':10,'diaphragm':5},
-            maximal_lung_diff = 0.3,
+            slab = {'none':0,'llung':4, 'bone':8,'rlung':9,'heart':6,'diaphragm':5},
+            maximal_lung_diff = 0.4,
             rad_diaphragm=4,
             smer=None,
         ):
@@ -184,7 +184,7 @@ class SupportStructureSegmentation():
         for a in range(z.shape[0]):
             if (z[a] < ran[0]) and (z[a] >= 0):
 
-                self.segmentation[z[a], x[a], y[a]] = self.slab['diaphragm']
+                #self.segmentation[z[a], x[a], y[a]] = self.slab['diaphragm']
                 if self.smer==0:
                     cc[z[a]+1:, x[a], y[a]] = 1
                 else:
@@ -262,7 +262,7 @@ class SupportStructureSegmentation():
         aaa = np.array(lab==index)
         aaa = morphology.binary_dilation(aaa, iterations=self.iteration())
         #self.segmentation= aaa
-	self.segmentation = self.segmentation + aaa
+	self.segmentation = self.segmentation + aaa.astype(np.int8)*self.slab['heart']
 
         pass
 
@@ -420,9 +420,9 @@ class SupportStructureSegmentation():
     def export(self):
         slab={}
         slab['none'] = 0
-        slab['liver'] = 1
-        slab['lesions'] = 6
-	slab['lungs'] = 9
+	slab['heart']=10
+        slab['llung'] = 4
+	slab['rlungs'] = 9
         data = {}
         data['version'] = (1,0,0)
         data['data3d'] = self.data3d

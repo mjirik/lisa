@@ -551,13 +551,13 @@ class OrganSegmentationWindow(QMainWindow):
         segdiff[segdiff == -1] = 2
         logger.debug('segdif unique ' + str(np.unique(segdiff)))
 
-        QApplication.processEvents()
-        ed = sed3.sed3(
-            self.oseg.data3d,
-            seeds=segdiff,
-            contour=(self.oseg.segmentation == self.oseg.slab['liver'])
-        )
-        ed.show()
+        #QApplication.processEvents()
+        #ed = sed3.sed3(
+        #    self.oseg.data3d,
+        #    seeds=segdiff,
+        #    contour=(self.oseg.segmentation == self.oseg.slab['liver'])
+        #)
+        #ed.show()
 
         self.setLabelText(self.text_seg_data, text)
         self.statusBar().showMessage('Ready')
