@@ -19,20 +19,49 @@ import copy
 class TemplateTest(unittest.TestCase):
 
     @attr('actual')
+    @attr('slow')
+    def test_nodes_aggregation_big_data(self):
+
+        data = np.zeros([1000, 1000, 100], dtype=np.int8)
+        voxelsize_mm = [14, 10, 6]
+        
+        # snake
+        # data[15:17, 13, 13] = 1
+        data[18, 3:17, 12] = 1
+        data[18, 17, 13:17] = 1
+        data[18, 9, 4:12] = 1
+        data[18, 11, 12:19] = 1
+        # data[18, 18, 15:17] = 1
+
+        # T-junction on the left
+        data[18, 4:16, 3] = 1
+        import sed3
+        # ed = sed3.sed3(data)
+        # ed.show()
+
+        skel = data
+
+        skan = sk.SkeletonAnalyser(
+                copy.copy(skel), 
+                volume_data=data,
+                voxelsize_mm=voxelsize_mm, 
+                cut_wrong_skeleton=False, 
+                aggregate_near_nodes_distance=20)
+        vessel_tree = skan.skeleton_analysis()
+
+        # ed = sed3.sed3(skan.sklabel, contour=data)
+        # ed.show()
+        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+
+        # number of terminals + inner nodes
+        self.assertEqual(np.min(skan.sklabel), -7)
+        # number of edges
+        self.assertEqual(np.max(skan.sklabel), 6)
+
     def test_nodes_aggregation(self):
 
         data = np.zeros([20, 20, 20], dtype=np.int8)
-        
-        # data[2:13, 4, 4] = 1
-        # data[6, 2:13, 6] = 1
-        # data[8, 8, 2:13] = 1
-        #
-        # data[6, 8, 6:17] = 1
-        #
-        # # diagonala
-        # data[11, 11, 11] = 1
-        # data[12, 12, 12] = 1
-        # data[13, 13, 13] = 1
+        voxelsize_mm = [14, 10, 6]
 
         # snake
         # data[15:17, 13, 13] = 1
@@ -50,8 +79,12 @@ class TemplateTest(unittest.TestCase):
 
         skel = data
 
-        skan = sk.SkeletonAnalyser(copy.copy(skel), volume_data=data,
-                                   voxelsize_mm=[14, 10, 6], cut_wrong_skeleton=False, aggregate_near_nodes_distance=20)
+        skan = sk.SkeletonAnalyser(
+                copy.copy(skel), 
+                volume_data=data,
+                voxelsize_mm=voxelsize_mm, 
+                cut_wrong_skeleton=False, 
+                aggregate_near_nodes_distance=20)
         vessel_tree = skan.skeleton_analysis()
 
         # ed = sed3.sed3(skan.sklabel, contour=data)
