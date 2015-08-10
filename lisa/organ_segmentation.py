@@ -401,7 +401,7 @@ class OrganSegmentation():
         print 'unique data1 ', np.unique(data3d_segmentation_actual)
         print 'unique data2 ', np.unique(data3d_segmentation)
         print "set label1 and label2"
-        print "then press 'c'"
+        print "then press 'c' and 'Enter'"
         import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
         evaluation = volumetry_evaluation.compare_volumes(
