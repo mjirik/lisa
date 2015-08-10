@@ -552,12 +552,22 @@ class OrganSegmentationWindow(QMainWindow):
         logger.debug('segdif unique ' + str(np.unique(segdiff)))
 
         QApplication.processEvents()
-        ed = sed3.sed3(
-            self.oseg.data3d,
-            seeds=segdiff,
-            contour=(self.oseg.segmentation == self.oseg.slab['liver'])
-        )
-        ed.show()
+        try:
+
+            ed = sed3.sed3qt(
+                self.oseg.data3d,
+                seeds=segdiff,
+                # contour=(self.oseg.segmentation == self.oseg.slab['liver'])
+                contour=self.oseg.segmentation
+            )
+            ed.exec_()
+        except:
+            ed = sed3.sed3(
+                self.oseg.data3d,
+                seeds=segdiff,
+                contour=(self.oseg.segmentation == self.oseg.slab['liver'])
+            )
+            ed.show()
 
         self.setLabelText(self.text_seg_data, text)
         self.statusBar().showMessage('Ready')
