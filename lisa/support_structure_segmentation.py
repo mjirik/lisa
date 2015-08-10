@@ -85,7 +85,7 @@ class SupportStructureSegmentation():
         self.autocrop_margin_mm = np.array(autocrop_margin_mm)
         self.autocrop_margin = self.autocrop_margin_mm/self.voxelsize_mm
         self.crinfo = [[0,-1],[0,-1],[0,-1]]
-        self.segmentation = np.zeros(data3d.shape)
+        self.segmentation = np.zeros(data3d.shape , dtype=np.int8)
         self.slab = slab
         self.maximal_lung_diff = maximal_lung_diff
         self.rad_diaphragm=rad_diaphragm
