@@ -138,17 +138,20 @@ class SupportStructureSegmentation():
     
 
     def spine_segmentation(self, bone_threshold= 330):
+
 	seg_prub = filters.gaussian_filter(self.data3d, 5.0/np.asarray(self.voxelsize_mm))
+
 	seg_prub = filters.convolve(seg_prub, self.convolve_structure_spine())
+	
 	
 	#seg_prub = scipy.signal.fftconvolve(seg_prub, self.convolve_structure_spine())
 	maximum = np.amax(seg_prub)
-	seg_prub = np.array(seg_prub > 0.35*maximum)
+	seg_prub = np.array(seg_prub > 0.55*maximum)
 	#seg_prub = seg_prub * np.array(self.data3d>=bone_threshold)
 	#import sed3
 	#ed = sed3.sed3(seg_prub)
 	#ed.show()
-	self.segmentation = self.data3d
+	self.segmentation = seg_prub
         pass
 
 
@@ -200,7 +203,6 @@ class SupportStructureSegmentation():
 
 	
         seg_prub = filters.convolve( (seg_prub-0.5) , a )
-	
 
 # import sed3
 # ed = sed3.sed3(seg_prub)
@@ -214,7 +216,6 @@ class SupportStructureSegmentation():
 #ipdb.set_trace()
         plice1=np.array(self.segmentation==self.slab['llung'])
         z, x, y = np.nonzero(plice1)
-	print("konec")
 	x1 = [0,0,0,0]
 	y1 = [0,0,0,0]
 	z1 = [0,0,0,0]
@@ -259,7 +260,7 @@ class SupportStructureSegmentation():
         index= np.argmax(counts)
         aaa = np.array(lab==index)
         aaa = morphology.binary_dilation(aaa, iterations=self.iteration())
-        self.segmentation= aaa
+        #self.segmentation= aaa
 	self.segmentation = self.segmentation + aaa
 
         pass
@@ -305,7 +306,6 @@ class SupportStructureSegmentation():
 	counts[index]=0
 	index=labeled_seg[self.iteration()+5,x-self.iteration()-5,y-self.iteration()-5]
 	counts[index]=0
-	print(counts)
 	return counts, labeled_seg
 
 
@@ -331,6 +331,7 @@ class SupportStructureSegmentation():
 	if (1.0-self.maximal_lung_diff)<= float(velikost2)/velikost1:
 	    print("plice separované")
 	else:
+	    print("plice neseparované")
 	    pocet=0
 	    seg_prub = np.array(self.data3d <= lungs_threshold)
 	    seg_prub = morphology.binary_closing(seg_prub , iterations=self.iteration()).astype(self.segmentation.dtype)
@@ -345,8 +346,6 @@ class SupportStructureSegmentation():
 	    	index2=np.argmax(counts)# druhá plíce nebo nečo jiného
 	    	velikost2=counts[index2]
 		pocet=pocet+1
-		print(pocet)
-		print(velikost1 , velikost2)
 	    seg_prub = morphology.binary_dilation(self.segmentation,iterations=pocet).astype(self.segmentation.dtype)
 	#self.segmentation = self.segmentation + np.array(labeled_seg==index).astype(np.int8)*self.slab['lungs']
 	#self.segmentation = self.segmentation + np.array(labeled_seg==index2).astype(np.int8)*self.slab['lungs']
@@ -557,7 +556,7 @@ def main():
     if args.show_output:
         sseg.visualization()
 
-    # savestring = raw_input ('Save output data? (y/n): ')
+    #savestring = raw_input ('Save output data? (y/n): ')
     #sn = int(snstring)
     if args.output is not None: # savestring in ['Y','y']:
         import misc
