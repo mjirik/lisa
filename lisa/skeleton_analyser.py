@@ -348,7 +348,7 @@ class SkeletonAnalyser:
         return data3d_skel
 
     def __skeleton_nodes_aggregation_per_each_node(self, data3d_skel2, structure):
-        print data3d_skel2.dtype
+        # print data3d_skel2.dtype
         node_list = np.nonzero(data3d_skel2)
         nlz = zip(node_list[0], node_list[1], node_list[2])
 
