@@ -330,10 +330,10 @@ class SkeletonAnalyser:
 
         method = 'auto'
         if self.aggregate_near_nodes_distance >= 0:
-            print 'generate structure'
+            # print 'generate structure'
             structure = generate_binary_elipsoid(
                     self.aggregate_near_nodes_distance / np.asarray(self.voxelsize_mm))
-            print 'perform dilation ', data3d_skel.shape
+            # print 'perform dilation ', data3d_skel.shape
             # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
             # TODO select best method
@@ -342,16 +342,17 @@ class SkeletonAnalyser:
 
             # per partes method even slower
             nd_dil = self.__skeleton_nodes_aggregation_per_each_node(data3d_skel==2, structure)
-            print "dilatation completed"
+            # print "dilatation completed"
             data3d_skel[nd_dil] = 2
-            print 'set to 2'
+            # print 'set to 2'
         return data3d_skel
 
     def __skeleton_nodes_aggregation_per_each_node(self, data3d_skel2, structure):
+        print data3d_skel2.dtype
         node_list = np.nonzero(data3d_skel2)
         nlz = zip(node_list[0], node_list[1], node_list[2])
 
-        print 'zip finished'
+        # print 'zip finished'
 
         for node_xyz in nlz:
             self.__node_dilatation(data3d_skel2, node_xyz, structure)
@@ -365,8 +366,8 @@ class SkeletonAnalyser:
         """
         border = structure.shape
         
-        print 'border ', border
-        print structure.shape
+        # print 'border ', border
+        # print structure.shape
         xlim = [max(0, node_xyz[0] - border[0]), min(data3d_skel2.shape[0], node_xyz[0] + border[0])]
         ylim = [max(0, node_xyz[1] - border[1]), min(data3d_skel2.shape[1], node_xyz[1] + border[1])]
         zlim = [max(0, node_xyz[2] - border[2]), min(data3d_skel2.shape[2], node_xyz[2] + border[2])]
@@ -383,10 +384,6 @@ class SkeletonAnalyser:
         data3d_skel2[xlim[0]:xlim[1],
                         ylim[0]:ylim[1],
                         zlim[0]:zlim[1]]=nd_dil
-
-
-
-
 
 
     def __label_edge_by_its_terminal(self, labeled_terminals):
