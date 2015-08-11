@@ -48,7 +48,7 @@ class TemplateTest(unittest.TestCase):
                 cut_wrong_skeleton=False, 
                 aggregate_near_nodes_distance=20)
         vessel_tree = skan.skeleton_analysis()
-        print 'skan completeskan completed'
+        # print 'skan completeskan completed'
 
         # ed = sed3.sed3(skan.sklabel, contour=data)
         # ed.show()
