@@ -582,7 +582,7 @@ def parser_init():  # pragma: no cover
         help='Saves used mask to mask.pkl file. Only in GUI mode')
 
     parser.add_argument(
-        '--aggregatenearnodes', type=int,
+        '--aggregatenearnodes', type=np.double,
         default=0, 
         help='aggregate_near_nodes_distance value')
      

@@ -59,6 +59,9 @@ class SkeletonAnalyser:
 
         logger.debug('Inited SkeletonAnalyser - voxelsize:' + str(
             voxelsize_mm) + ' volumedata:' + str(volume_data is not None))
+        print 'aggreg ', self.aggregate_near_nodes_distance
+        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+
 
     def skeleton_analysis(self, guiUpdateFunction=None):
         """
@@ -1152,7 +1155,9 @@ def generate_binary_elipsoid(ndradius=[1, 1, 1]):
     generate binary elipsoid shape
     """
     ndradius = np.asarray(ndradius).astype(np.double)
-    shape = (ndradius * 2) + 1
+    shape = ((ndradius * 2) + 1).astype(np.uint)
+    print "elipsoid shape ", shape
+    # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
     x, y, z = np.indices(shape)
     center1 = ndradius
     mask = (
