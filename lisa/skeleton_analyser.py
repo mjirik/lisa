@@ -323,6 +323,7 @@ class SkeletonAnalyser:
         data3d_skel[terminals == 1] = 3
         data3d_skel = self.__skeleton_nodes_aggregation(data3d_skel)
 
+
         return data3d_skel
 
     def __skeleton_nodes_aggregation(self, data3d_skel):
@@ -332,7 +333,10 @@ class SkeletonAnalyser:
         """
 
         method = 'auto'
-        if self.aggregate_near_nodes_distance >= 0:
+        if self.aggregate_near_nodes_distance > 0:
+            # d1_dbg = data3d_skel.copy()
+            # sklabel_edg0, len_edg0 = scipy.ndimage.label(data3d_skel)
+            
             # print 'generate structure'
             structure = generate_binary_elipsoid(
                     self.aggregate_near_nodes_distance / np.asarray(self.voxelsize_mm))
@@ -341,13 +345,19 @@ class SkeletonAnalyser:
 
             # TODO select best method
             # old simple method
-            # nd_dil = scipy.ndimage.binary_dilation(data3d_skel==2, structure)
+            nd_dil = scipy.ndimage.binary_dilation(data3d_skel==2, structure)
 
             # per partes method even slower
-            nd_dil = self.__skeleton_nodes_aggregation_per_each_node(data3d_skel==2, structure)
+            # nd_dil = self.__skeleton_nodes_aggregation_per_each_node(data3d_skel==2, structure)
             # print "dilatation completed"
-            data3d_skel[nd_dil] = 2
+            data3d_skel[nd_dil & data3d_skel > 0] = 2
             # print 'set to 2'
+            sklabel_edg1, len_edg1 = scipy.ndimage.label(data3d_skel)
+            # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+            # import sed3
+            # ed = sed3.sed3(data3d_skel)
+            # ed.show()
+
         return data3d_skel
 
     def __skeleton_nodes_aggregation_per_each_node(self, data3d_skel2, structure):
@@ -358,7 +368,7 @@ class SkeletonAnalyser:
         # print 'zip finished'
 
         for node_xyz in nlz:
-            self.__node_dilatation(data3d_skel2, node_xyz, structure)
+            data3d_skel2 = self.__node_dilatation(data3d_skel2, node_xyz, structure)
 
         return data3d_skel2
 
@@ -387,6 +397,8 @@ class SkeletonAnalyser:
         data3d_skel2[xlim[0]:xlim[1],
                         ylim[0]:ylim[1],
                         zlim[0]:zlim[1]]=nd_dil
+
+        return data3d_skel2
 
 
     def __label_edge_by_its_terminal(self, labeled_terminals):

@@ -30,7 +30,7 @@ class TemplateTest(unittest.TestCase):
         data[18, 3:17, 12] = 1
         data[18, 17, 13:17] = 1
         data[18, 9, 4:12] = 1
-        data[18, 11, 12:19] = 1
+        data[18, 14, 12:19] = 1
         # data[18, 18, 15:17] = 1
 
         # T-junction on the left
@@ -66,14 +66,14 @@ class TemplateTest(unittest.TestCase):
 
         # snake
         # data[15:17, 13, 13] = 1
-        data[18, 3:17, 12] = 1
-        data[18, 17, 13:17] = 1
-        data[18, 9, 4:12] = 1
-        data[18, 11, 12:19] = 1
+        data[17, 3:17, 12] = 1
+        data[17, 17, 13:17] = 1
+        data[17, 9, 4:12] = 1
+        data[17, 14, 12:19] = 1
         # data[18, 18, 15:17] = 1
 
         # T-junction on the left
-        data[18, 4:16, 3] = 1
+        data[17, 4:16, 3] = 1
         import sed3
         # ed = sed3.sed3(data)
         # ed.show()
