@@ -70,6 +70,7 @@ class SupportStructureSegmentation():
             maximal_lung_diff = 0.4,
             rad_diaphragm=4,
             smer=None,
+            working_voxelsize_mm = [2.0, 2.0, 2.0]
         ):
 
         """
@@ -79,21 +80,37 @@ class SupportStructureSegmentation():
 
 
 
-        self.data3d = data3d
-        self.voxelsize_mm = voxelsize_mm
-        self.autocrop = autocrop
-        self.autocrop_margin_mm = np.array(autocrop_margin_mm)
-        self.autocrop_margin = self.autocrop_margin_mm/self.voxelsize_mm
+        self.orig_voxelsize_mm = voxelsize_mm
+        self.orig_shape = data3d.shape
+        self.working_voxelsize_mm = working_voxelsize_mm
         self.crinfo = [[0,-1],[0,-1],[0,-1]]
-        self.segmentation = np.zeros(data3d.shape , dtype=np.int8)
         self.slab = slab
         self.maximal_lung_diff = maximal_lung_diff
         self.rad_diaphragm=rad_diaphragm
         self.smer=smer
 
 
+        # data resize
+        self.data3d = qmisc.resize_to_mm(data3d, voxelsize_mm, working_voxelsize_mm)
+        self.segmentation = np.zeros(self.data3d.shape , dtype=np.int8)
+        self.resized = True
+        # self.data3d = qmisc.resize_to_mm(data3d, voxelsize_mm, working_voxelsize_mm)
+        self.voxelsize_mm = self.working_voxelsize_mm
+
+        self.autocrop = autocrop
+        self.autocrop_margin_mm = np.array(autocrop_margin_mm)
+        self.autocrop_margin = self.autocrop_margin_mm/self.voxelsize_mm
 
         #import pdb; pdb.set_trace()
+
+    def resize_back_to_orig(self):
+        """
+        Resize segmentation to original shape
+        """
+        if self.resized:
+            self.segmentation = qmisc.resize_to_shape(self.segmentation, 
+                                                      self.orig_shape)
+            self.resized = False
 
 
     def run(self):
@@ -105,6 +122,9 @@ class SupportStructureSegmentation():
         self.lungs_segmentation()
         print 'srdce'
         self.heart_segmentation()
+
+        self.resize_back_to_orig()
+
 
 
     def import_data(self, data):
@@ -162,12 +182,20 @@ class SupportStructureSegmentation():
     def __spl(self, x,y):
         return interpolate.bisplev(x,y, tck)
 
-    def __above_diaphragm_calculation(self, seg_prub, internal_resize_shape=[20, 20, 20]):
+    def __above_diaphragm_calculation(self, seg_prub, internal_resize_shape=[20, 20, 20], data_degradation=4):
         # print seg_prub.dtype
         # seg_prub_tmp = misc.resize_to_shape(seg_prub, internal_resize_shape)
         # print seg_prub_tmp.dtype
         seg_prub_tmp = seg_prub
-        z, x, y= np.nonzero(seg_prub_tmp)
+        z, x, y = np.nonzero(seg_prub_tmp)
+# data degradation
+        x = x[::data_degradation]
+        y = y[::data_degradation]
+        z = z[::data_degradation]
+        # import PyQt4.QtCore
+        # PyQt4.QtCore.pyqtRemoveInputHook()
+        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+
         s = np.array([x , y]).T
         h = np.array(z)
         model = mpf.multipolyfit(s, h, self.rad_diaphragm, model_out = True)
@@ -206,7 +234,9 @@ class SupportStructureSegmentation():
         seg_prub = np.array(self.segmentation == self.slab['rlung'])+np.array(self.segmentation == self.slab['llung'])
 
 
+        logger.debug('pred konvoluci')
         seg_prub = filters.convolve( (seg_prub-0.5) , a )
+        logger.debug('po konvoluci')
 
 
 # import sed3
@@ -221,9 +251,9 @@ class SupportStructureSegmentation():
         plice1=np.array(self.segmentation==self.slab['llung'])
         z, x, y = np.nonzero(plice1)
 
-	x1 = [0,0,0,0]
-	y1 = [0,0,0,0]
-	z1 = [0,0,0,0]
+        x1 = [0,0,0,0]
+        y1 = [0,0,0,0]
+        z1 = [0,0,0,0]
         x1[0]=np.min(x)
         x1[1]=np.max(x)
         y1[0]=np.min(y)
@@ -253,6 +283,7 @@ class SupportStructureSegmentation():
         bones = np.array(self.data3d >= top_threshold)
         aaa = np.array(self.data3d >= heart_threshold)
         aaa = aaa - bones
+        logger.debug('pred binary opening')
         aaa=morphology.binary_opening(aaa , iterations=self.iteration()+2).astype(self.segmentation.dtype)
         aaa = morphology.binary_erosion(aaa, iterations=self.iteration())	
         aaa=cc * aaa * mp
@@ -264,38 +295,38 @@ class SupportStructureSegmentation():
             counts[x] = a
         index= np.argmax(counts)
         aaa = np.array(lab==index)
+        logger.debug('pred dilataci')
         aaa = morphology.binary_dilation(aaa, iterations=self.iteration())
         #self.segmentation= aaa
-	self.segmentation = self.segmentation + aaa.astype(np.int8)*self.slab['heart']
+        self.segmentation = self.segmentation + aaa.astype(np.int8)*self.slab['heart']
 
-        pass
 
     def iteration(self, sirka = 5):
         prumer= np.mean(self.voxelsize_mm)
         a= int (sirka/prumer)
+        print 'pocet iteraci', a
         return a
 
     def orientation(self):
-	if(self.segmentation.shape[0]%2==0):
-	    split1, split2 = np.split(self.segmentation, 2, 0)
-	    if(np.sum(split1)>np.sum(split2)):
-		self.smer=1
+        if(self.segmentation.shape[0]%2==0):
+            split1, split2 = np.split(self.segmentation, 2, 0)
+            if(np.sum(split1)>np.sum(split2)):
+                self.smer=1
 
-	    else:
-		self.smer=0
-
-	
-	else:
-	    split1, split2 = np.split(self.segmentation[1:,:,:], 2, 0)
-	    if(np.sum(split1)>np.sum(split2)):
-		self.smer=1
-
-	    else:
-		self.smer=0
+            else:
+                self.smer=0
 
 
+        else:
+            split1, split2 = np.split(self.segmentation[1:,:,:], 2, 0)
+            if(np.sum(split1)>np.sum(split2)):
+                self.smer=1
 
-	pass
+            else:
+                self.smer=0
+
+
+
     def volume_count(self, seg_prub):
 	labeled_seg , num_seg = label(seg_prub)
 	counts= [0]*(num_seg+1)
@@ -542,6 +573,8 @@ def main():
     if args.segheart:
     	sseg.heart_segmentation()
 
+
+    sseg.resize_back_to_orig()
     #print ("Data size: " + str(data3d.nbytes) + ', shape: ' + str(data3d.shape) )
 
     #igc = pycut.ImageGraphCut(data3d, zoom = 0.5)

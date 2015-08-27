@@ -292,11 +292,12 @@ class OrganSegmentation():
             data3d=self.data3d,
             voxelsize_mm=self.voxelsize_mm,
         )
-        # sseg.run()
+        sseg.run()
 
         # sseg.bone_segmentation()
-        sseg.lungs_segmentation()
-        sseg.heart_segmentation()
+        # sseg.lungs_segmentation()
+        # sseg.heart_segmentation()
+
         # TODO remove hack - force remove number 1 from segmentation
         # this sould be fixed in sss
         sseg.segmentation[sseg.segmentation == 1] = 0
