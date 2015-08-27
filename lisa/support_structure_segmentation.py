@@ -97,9 +97,13 @@ class SupportStructureSegmentation():
 
 
     def run(self):
+        print 'kosti'
         self.bone_segmentation()
+        print 'pater'
         self.spine_segmentation()
+        print 'plice'
         self.lungs_segmentation()
+        print 'srdce'
         self.heart_segmentation()
 
 
@@ -132,26 +136,26 @@ class SupportStructureSegmentation():
         return np.array(self.data3d > bone_threshold)#.astype(np.int8)*self.slab['bone']
 
     def convolve_structure_spine(self, velikost = [300 , 2, 2]):
-        structure = np.ones((int(velikost[2]/self.voxelsize_mm[0]),int(velikost[1]/self.voxelsize_mm[1]),int(velikost[2]/self.voxelsize_mm[2])))  
+        structure = np.ones((int(velikost[0]/self.voxelsize_mm[0]),int(velikost[1]/self.voxelsize_mm[1]),int(velikost[2]/self.voxelsize_mm[2])))  
         return structure
 
     
 
     def spine_segmentation(self, bone_threshold= 330):
-
-	seg_prub = filters.gaussian_filter(self.data3d, 5.0/np.asarray(self.voxelsize_mm))
-
-	seg_prub = filters.convolve(seg_prub, self.convolve_structure_spine())
+        seg_prub = filters.gaussian_filter(self.data3d, 5.0/np.asarray(self.voxelsize_mm))
+        structure = self.convolve_structure_spine()
+        
+        seg_prub = filters.convolve(seg_prub, structure)
 	
 	
-	#seg_prub = scipy.signal.fftconvolve(seg_prub, self.convolve_structure_spine())
-	maximum = np.amax(seg_prub)
-	seg_prub = np.array(seg_prub > 0.55*maximum)
-	#seg_prub = seg_prub * np.array(self.data3d>=bone_threshold)
-	#import sed3
-	#ed = sed3.sed3(seg_prub)
-	#ed.show()
-	self.segmentation = seg_prub
+#seg_prub = scipy.signal.fftconvolve(seg_prub, self.convolve_structure_spine())
+        maximum = np.amax(seg_prub)
+        seg_prub = np.array(seg_prub > 0.55*maximum)
+#seg_prub = seg_prub * np.array(self.data3d>=bone_threshold)
+#import sed3
+#ed = sed3.sed3(seg_prub)
+#ed.show()
+        self.segmentation = seg_prub
         pass
 
 
@@ -530,7 +534,7 @@ def main():
 
     #sseg.orientation()
     if args.segbones:
-	sseg.bone_segmentation()
+        sseg.bone_segmentation()
     if args.segspine:
         sseg.spine_segmentation()
     if args.seglungs or args.segheart:
