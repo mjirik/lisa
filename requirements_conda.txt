@@ -14,16 +14,16 @@ scikit-learn=0.15.2=np19py27_0
 cython=0.22=py27_0
 pyqt=4.10.4=py27_0
 yaml=0.1.4=0
-pyyaml
+pyyaml=3.11
 vtk=5.10.1=py27_1
 # pandas is installed with pip
 # pandas=0.15.2=np19py27_0
 # pandas=0.16.0=np19py27_1
 ipython=3.1.0=py27_0
-SimpleITK
-h5py
+SimpleITK=0.9.0
+h5py=2.5.0
 # pydicom
 # sed3
 # io3d
-pywget
+pywget=2.2
 
