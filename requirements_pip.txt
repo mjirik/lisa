@@ -6,7 +6,7 @@ io3d>=1.0.16
 ipdb>=0.8.1
 nearpy>=0.2
 joblib>=0.8.4
-git+https://github.com/mjirik/morphsnakes.git>=0.0.6
+git+https://github.com/mjirik/morphsnakes.git
 multipolyfit>=0.0.1
 pandas>=16.2
 pygco>=0.0.5
