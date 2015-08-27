@@ -476,8 +476,16 @@ class OrganSegmentationWindow(QMainWindow):
         self.statusBar().showMessage('Mask region...')
         QApplication.processEvents()
 
-        pyed = QTSeedEditor(self.oseg.data3d, mode='mask',
-                            voxelSize=self.oseg.voxelsize_mm)
+        pyed = QTSeedEditor(
+                self.oseg.data3d, mode='mask',
+                voxelSize=self.oseg.voxelsize_mm,
+                contours=((self.oseg.segmentation == 0).astype(np.int8)*2)
+                )
+
+        pyed.contours_old = pyed.contours.copy()
+        # initial mask set
+        # pyed.masked = np.ones(self.oseg.data3d.shape, np.int8)
+        # pyed.masked = (self.oseg.segmentation == 0).astype(np.int8)
 
         mx = self.oseg.viewermax
         mn = self.oseg.viewermin

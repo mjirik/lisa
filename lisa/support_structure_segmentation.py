@@ -114,13 +114,13 @@ class SupportStructureSegmentation():
 
 
     def run(self):
-        print 'kosti'
+        logger.debug('bones')
         self.bone_segmentation()
-        print 'pater'
+        logger.debug('spine')
         self.spine_segmentation()
-        print 'plice'
+        logger.debug('lungs')
         self.lungs_segmentation()
-        print 'srdce'
+        logger.debug('heart')
         self.heart_segmentation()
 
         self.resize_back_to_orig()
@@ -303,14 +303,13 @@ class SupportStructureSegmentation():
 
     def iteration(self, sirka = 5):
         prumer= np.mean(self.voxelsize_mm)
-        a= int (sirka/prumer)
-        print 'pocet iteraci', a
+        a = int(sirka / prumer)
         return a
 
     def orientation(self):
         if(self.segmentation.shape[0]%2==0):
             split1, split2 = np.split(self.segmentation, 2, 0)
-            if(np.sum(split1)>np.sum(split2)):
+            if (np.sum(split1) > np.sum(split2)):
                 self.smer=1
 
             else:
