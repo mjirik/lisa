@@ -76,8 +76,8 @@ def Rez_podle_roviny(plane, data, voxel):
 # ----------------------------------------------------------
 def cut_editor_old(data):
 
-    pyed = sed3.sed3(data['segmentation'])
-    pyed.show()
+    pyed = sed3.sed3qt(data['segmentation'])
+    pyed.exec_()
 
     return pyed.seeds
 
@@ -249,11 +249,12 @@ def virtual_resection_visualization(data, segm, dist1, dist2, cut,
     linie_vis[cut == 1] = 1
     linie_vis = linie_vis.astype(np.int8)
     if interactivity:
-        pyed = sed3.sed3(
+        pyed = sed3.sed3qt(
             data['data3d'],
             seeds=linie_vis,
             contour=(data['segmentation'] != 0))
-        pyed.show()
+        # pyed.show()
+        pyed.exec_()
 
     # import pdb; pdb.set_trace()
 
