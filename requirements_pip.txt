@@ -8,5 +8,5 @@ nearpy>=0.2
 joblib>=0.8.4
 git+https://github.com/mjirik/morphsnakes.git
 multipolyfit>=0.0.1
-pandas>=16.2
+pandas>=0.16.2
 pygco>=0.0.5
