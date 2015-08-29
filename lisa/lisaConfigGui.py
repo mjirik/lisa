@@ -13,12 +13,14 @@
 import logging
 logger = logging.getLogger(__name__)
 import argparse
+import os
 
 import PyQt4
 import PyQt4.QtCore
 import PyQt4.QtGui
 from PyQt4.QtGui import QWidget, QGridLayout, QSpinBox, QLineEdit, QCheckBox,\
-        QComboBox, QTextEdit, QDialog, QMainWindow, QDoubleSpinBox, QLabel
+        QComboBox, QTextEdit, QDialog, QMainWindow, QDoubleSpinBox, QLabel, \
+        QPushButton
 
 from pyqtconfig import ConfigManager
 
@@ -31,6 +33,8 @@ class LisaConfigWindow(QDialog):
         self.setWindowTitle('Lisa Config')
         self.config = ConfigManager()
         self.ncols = ncols
+# used with other module. If it is set, lisa config is deleted
+        self.reset_config = False
 
         CHOICE_A = "{pairwise_alpha_per_mm2: 45, return_only_object_with_seeds: true}"
         # CHOICE_A = 23
@@ -70,9 +74,6 @@ class LisaConfigWindow(QDialog):
                 sb = QCheckBox()
             else:
                 logger.error("Unexpected type in config dictionary")
-                from PyQt4.QtCore import pyqtRemoveInputHook
-                pyqtRemoveInputHook()
-                import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
             row = gd_max_i / self.ncols
             col = (gd_max_i % self.ncols) * 2
@@ -109,7 +110,15 @@ class LisaConfigWindow(QDialog):
         # rid.setColumnMinimumWidth(3, logo.width()/2)
         text_col = (self.ncols * 2) + 3
         gd.setColumnMinimumWidth(text_col, 500)
-        gd.addWidget(self.current_config_output, 0, text_col, gd_max_i/2, 1)
+        gd.addWidget(self.current_config_output, 1, text_col, (gd_max_i/2)-1, 1)
+
+        btn_reset_config = QPushButton("Reset and quit", self)
+        btn_reset_config.clicked.connect(self.btnResetConfig)
+        gd.addWidget(btn_reset_config, 0, text_col)
+
+        btn_save_config = QPushButton("Save and quit", self)
+        btn_save_config.clicked.connect(self.btnSaveConfig)
+        gd.addWidget(btn_save_config, (gd_max_i / 2), text_col)
 
         self.config.updated.connect(self.show_config)
 
@@ -136,6 +145,14 @@ class LisaConfigWindow(QDialog):
 
         return dictionary
 
+    def btnResetConfig(self, event=None):
+        self.reset_config = True
+        self.close()
+
+    def btnSaveConfig(self, event=None):
+        self.reset_config = False
+        self.close()
+
 
     def show_config(self):
         text = str(self.get_config_as_dict())
@@ -143,7 +160,6 @@ class LisaConfigWindow(QDialog):
 
 def configGui(cfg):
     import yaml
-    import json 
     # convert values to json
     isconverted = {}
     for key, value in cfg.iteritems():
@@ -159,6 +175,8 @@ def configGui(cfg):
 
     w = LisaConfigWindow(cfg)
     w.exec_()
+    if w.reset_config:
+        return None
     
     newcfg = w.get_config_as_dict()
     for key, value in newcfg.iteritems():

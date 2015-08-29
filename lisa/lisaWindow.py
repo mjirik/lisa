@@ -678,31 +678,22 @@ class OrganSegmentationWindow(QMainWindow):
         d = los.lisa_config_init()
 
         newconf = lcg.configGui(d)
-        # from PyQt4.QtCore import pyqtRemoveInputHook
-        # pyqtRemoveInputHook()
-        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINTnumber
 
-
-
-        # root = tk.Tk()
-        # conf = ce.apply(root, d, (0, 2, 0, 0), use_list=False)
-        # root.mainloop()
-        # newconf = {}
-        # for (k, v) in conf.iteritems():
-        #     key = str(k)
-        #     value = str(v.get())
-        #     try:
-        #         value = eval(value)
-        #     except:
-        #         pass
-        #     newconf[key] = value
-
-        config.save_config(
-            newconf,
-            os.path.join(
-                newconf['output_datapath'],
-                'organ_segmentation.config')
-        )
+        if newconf is None:
+# reset config
+            os.remove(
+                os.path.join(
+                    d['output_datapath'],
+                    'organ_segmentation.config')
+            )
+        else:
+            config.save_config(
+                newconf,
+                os.path.join(
+                    newconf['output_datapath'],
+                    'organ_segmentation.config')
+            )
+        
         self.quit(event)
         # from PyQt4.QtCore import pyqtRemoveInputHook
         # pyqtRemoveInputHook()
