@@ -7,6 +7,7 @@ ipdb>=0.8.1
 nearpy>=0.2
 joblib>=0.8.4
 git+https://github.com/mjirik/morphsnakes.git
+git+https://github.com/mjirik/pyqtconfig.git
 multipolyfit>=0.0.1
 pandas>=0.16.2
 pygco>=0.0.5

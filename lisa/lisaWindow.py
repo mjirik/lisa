@@ -3,7 +3,6 @@
 """
 Modul is used for GUI of Lisa
 """
-
 import logging
 logger = logging.getLogger(__name__)
 
@@ -675,19 +674,28 @@ class OrganSegmentationWindow(QMainWindow):
         import configEditor as ce
         import config
         import organ_segmentation as los
+        import lisaConfigGui as lcg
         d = los.lisa_config_init()
-        root = tk.Tk()
-        conf = ce.apply(root, d, (0, 2, 0, 0), use_list=False)
-        root.mainloop()
-        newconf = {}
-        for (k, v) in conf.iteritems():
-            key = str(k)
-            value = str(v.get())
-            try:
-                value = eval(value)
-            except:
-                pass
-            newconf[key] = value
+
+        newconf = lcg.configGui(d)
+        # from PyQt4.QtCore import pyqtRemoveInputHook
+        # pyqtRemoveInputHook()
+        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINTnumber
+
+
+
+        # root = tk.Tk()
+        # conf = ce.apply(root, d, (0, 2, 0, 0), use_list=False)
+        # root.mainloop()
+        # newconf = {}
+        # for (k, v) in conf.iteritems():
+        #     key = str(k)
+        #     value = str(v.get())
+        #     try:
+        #         value = eval(value)
+        #     except:
+        #         pass
+        #     newconf[key] = value
 
         config.save_config(
             newconf,
