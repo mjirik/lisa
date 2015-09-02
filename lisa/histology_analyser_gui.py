@@ -446,6 +446,7 @@ class StatsWorker(QRunnable):
 
     def run(self):
         self.ha.data_to_statistics(guiUpdateFunction=self.signals.update.emit)
+        logger.debug('data to statistics finished')
         self.signals.finished.emit()
 
 class StatsRunDialog(QDialog):

@@ -1049,11 +1049,11 @@ class OrganSegmentation():
             voxelsize_mm=self.voxelsize_mm)
         stats = skan.skeleton_analysis(guiUpdateFunction=None)
 
-        if 'graph' not in self.vessel_tree.keys():
+        if 'Graph' not in self.vessel_tree.keys():
             self.vessel_tree['voxelsize_mm'] = self.voxelsize_mm
-            self.vessel_tree['graph'] = {}
+            self.vessel_tree['Graph'] = {}
 
-        self.vessel_tree['graph'][textLabel] = stats
+        self.vessel_tree['Graph'][textLabel] = stats
         # print sa.stats
 # save skeleton to special file
         misc.obj_to_file(self.vessel_tree, 'vessel_tree.yaml', filetype='yaml')

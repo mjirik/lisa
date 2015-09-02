@@ -28,6 +28,7 @@ from PyQt4.QtGui import QMainWindow, QWidget, QDialog, QLabel, QFont,\
     QCheckBox, QLineEdit, QApplication, QHBoxLayout, QFileDialog, QMessageBox
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+import io3d
 
 class HistologyReport:
 
@@ -41,15 +42,15 @@ class HistologyReport:
 
     def fixData(self, data):
         try:
-            data['General']['used_volume_mm3']
-            data['General']['used_volume_px']
+            data['general']['used_volume_mm3']
+            data['general']['used_volume_px']
         except:
-            data['General']['used_volume_mm3'] = data['General']['volume_mm3']
-            data['General']['used_volume_px'] = data['General']['volume_px']
+            data['general']['used_volume_mm3'] = data['general']['volume_mm3']
+            data['general']['used_volume_px'] = data['general']['volume_px']
         try:
-            data['General']['surface_density']
+            data['general']['surface_density']
         except:
-            data['General']['surface_density'] = None
+            data['general']['surface_density'] = None
         return data
 
     def writeReportToYAML(self, filename='hist_report.yaml'):
@@ -88,7 +89,7 @@ class HistologyReport:
         cols = ['label', 'Vv', 'Sv', 'Lv', 'Tort', 'Nv', 'Vref', 'shape', 'voxelsize', 'datetime', 'path']
         
         data_r_m = self.stats['Report']['Main']
-        data_g = self.data['General']
+        data_g = self.data['general']
         newrow = [[label, 
                     data_r_m['Vessel volume fraction (Vv)'], 
                     data_r_m['Surface density (Sv)'], 
@@ -146,9 +147,12 @@ class HistologyReport:
         # Get other stats
         radius_array = []
         length_array = []
-        for key in self.data['Graph']:
-            length_array.append(self.data['Graph'][key]['lengthEstimation'])
-            radius_array.append(self.data['Graph'][key]['radius_mm'])
+        for tree_part in self.data['graph']:
+            for key in self.data['graph'][tree_part]:
+                # from PyQt4.QtCore import pyqtRemoveInputHook; pyqtRemoveInputHook(); import ipdb; ipdb.set_trace()  # noqa BREAKPOINT 
+
+                length_array.append(self.data['graph'][tree_part][key]['lengthEstimation'])
+                radius_array.append(self.data['graph'][tree_part][key]['radius_mm'])
 
         num_of_entries = len(length_array)
         stats['Other']['Total length mm'] = sum(length_array)
@@ -165,21 +169,21 @@ class HistologyReport:
             lengthHistogram[0].tolist(), lengthHistogram[1].tolist()]
 
         # get main stats
-        stats['Main']['Vref'] = float(self.data['General']['used_volume_mm3'])
+        stats['Main']['Vref'] = float(self.data['general']['used_volume_mm3'])
         tortuosity_array = []
-        for key in self.data['Graph']:
-            tortuosity_array.append(self.data['Graph'][key]['tortuosity'])
+        for key in self.data['graph']['microstructure']:
+            tortuosity_array.append(self.data['graph']['microstructure'][key]['tortuosity'])
         num_of_entries = len(tortuosity_array)
         stats['Main']['Tortuosity'] = sum(
             tortuosity_array) / float(num_of_entries)
         stats['Main']['Length density (Lv)'] = float(
             stats['Other']['Total length mm']) / float(
-                self.data['General']['used_volume_mm3'])
+                self.data['general']['used_volume_mm3'])
         stats['Main']['Vessel volume fraction (Vv)'] = self.data[
-            'General']['vessel_volume_fraction']
+            'general']['vessel_volume_fraction']
         stats['Main']['Surface density (Sv)'] = self.data[
-            'General']['surface_density']
-        stats['Main']['Nv'] = self.data['General']['Nv'] 
+            'general']['surface_density']
+        stats['Main']['Nv'] = self.data['general']['Nv'] 
 
         # save stats
         self.stats = {'Report': stats}
@@ -274,6 +278,8 @@ class HistologyReportDialog(QDialog):
         btn_yaml.clicked.connect(self.writeYAML)
         btn_csv = QPushButton("Write statistics to CSV", self)
         btn_csv.clicked.connect(self.writeCSV)
+        btn_data3d = QPushButton("Save labeled image", self)
+        btn_data3d.clicked.connect(self.btnWriteData3d)
         btn_rep_yaml = QPushButton("Write report to YAML", self)
         btn_rep_yaml.clicked.connect(self.writeReportYAML)
         btn_rep_csv = QPushButton("Write report to CSV", self)
@@ -281,8 +287,9 @@ class HistologyReportDialog(QDialog):
 
         self.ui_gridLayout.addWidget(btn_yaml, rstart + 0, 0)
         self.ui_gridLayout.addWidget(btn_csv, rstart + 0, 1)
-        self.ui_gridLayout.addWidget(btn_rep_yaml, rstart + 0, 2)
-        self.ui_gridLayout.addWidget(btn_rep_csv, rstart + 0, 3)
+        self.ui_gridLayout.addWidget(btn_data3d, rstart + 0, 2)
+        self.ui_gridLayout.addWidget(btn_rep_yaml, rstart + 0, 3)
+        self.ui_gridLayout.addWidget(btn_rep_csv, rstart + 0, 4)
         rstart +=1
 
         ### Stretcher
@@ -304,6 +311,20 @@ class HistologyReportDialog(QDialog):
         
         return filename
 
+    def btnWriteData3d(self):
+        logger.info("Writing skeleton")
+        filename = self.getSavePath("sklabel", "dcm")
+        if filename is None or filename == "":
+            logger.debug("File save cenceled")
+            return
+        
+        self.mainWindow.setStatusBarText('Saving labeled skeleton image')
+        io3d.datawriter.write(self.ha.sklabel, filename)
+        # self.ha.writeStatsToYAML(filename)
+        self.mainWindow.setStatusBarText('Ready')
+        
+        if not self.recordAdded:
+            self.addResultsRecord()
     def writeYAML(self):
         logger.info("Writing statistics YAML file")
         filename = self.getSavePath("hist_stats", "yaml")

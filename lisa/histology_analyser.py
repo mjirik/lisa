@@ -66,6 +66,7 @@ class HistologyAnalyser:
         self.data3d_masked = None
         
         self.aggregate_near_nodes_distance = aggregate_near_nodes_distance
+        self.graph_label = 'microstructure'
 
     def get_voxelsize(self):
         return self.metadata['voxelsize_mm']
@@ -245,9 +246,10 @@ class HistologyAnalyser:
             'used_volume_px': float(used_volume_px),
             'used_volume_mm3': float(used_volume_mm3),
             'vessel_volume_fraction': float(vessel_volume_fraction),
-            'surface_density': float(sv)
+            'surface_density': float(sv),
+            'processed_by': 'Histology Analyser'
         }
-        self.stats.update({'General': info})
+        self.stats.update({'general': info})
 
         # # process skeleton to statistics
         logger.debug('Computing skeleton to statistics...')
@@ -260,17 +262,17 @@ class HistologyAnalyser:
         stats = skan.skeleton_analysis(guiUpdateFunction=guiUpdateFunction)
         # needed only by self.writeSkeletonToPickle()
         self.sklabel = skan.sklabel
-        self.stats.update({'Graph': stats})
+        self.stats.update({'graph': {self.graph_label: stats}})
         
         # compute Nv statistic
-        self.stats['General']['Nv'] = float(self.get_Nv())
+        self.stats['general']['Nv'] = float(self.get_Nv())
         
     def __insert_node(self, nodes, nodeIdLabel, key):
         """
         used in getNv()
         nodeIdALabel: "A" or "B"
         """
-        edge = self.stats['Graph'][key]
+        edge = self.stats['graph'][self.graph_label][key]
         try:
             nodeIdLab = edge["nodeId" + nodeIdLabel]
             if nodeIdLab in nodes: 
@@ -278,7 +280,7 @@ class HistologyAnalyser:
             else:
                 nodes[nodeIdLab] = {
                         'connected_edges':[key],
-                        'centroid': self.stats['Graph'][key]['node' + nodeIdLabel + '_ZYX_mm']
+                        'centroid': self.stats['graph'][self.graph_label][key]['node' + nodeIdLabel + '_ZYX_mm']
                         }
         except Exception, e:
             logger.warning('get_Nv(): no nodeIdA')
@@ -290,10 +292,10 @@ class HistologyAnalyser:
         
         # get lists of edges that are connected to nodes
         nodes = {}
-        for key in self.stats['Graph']:
+        for key in self.stats['graph'][self.graph_label]:
             nodes = self.__insert_node(nodes, 'A', key)
             nodes = self.__insert_node(nodes, 'B', key)
-            # edge = self.stats['Graph'][key]
+            # edge = self.stats['graph'][key]
             # # TODO use insert_node function
             # try:
             #     nodeIdA = edge['nodeIdA']
@@ -326,7 +328,7 @@ class HistologyAnalyser:
                 Ncap += ( (n-2)/2.0 ) * Pn[n]
         
         # Get V(ref)
-        Vref = self.stats['General']['used_volume_mm3']
+        Vref = self.stats['general']['used_volume_mm3']
         
         # Compute Nv
         Nv = ( Ncap / float(Vref) ) + 1
@@ -364,7 +366,7 @@ class HistologyAnalyser:
     def writeStatsToYAML(self, filename='hist_stats.yaml'):
         logger.debug('writeStatsToYAML')
         
-        gr = self.stats['Graph']
+        gr = self.stats['graph']
         for i in gr:
             logger.info('Processing edge num '+str(i))
             try:
@@ -390,13 +392,13 @@ class HistologyAnalyser:
             except:
                 logger.warning('lengthEstimationPixel not a number')
                 gr[i]['lengthEstimationPixel'] = None
-        self.stats['Graph'] = gr
+        self.stats['graph'] = gr
         
         misc.obj_to_file(self.stats, filename=filename, filetype='yaml')
 
     def writeStatsToCSV(self, filename='hist_stats.csv'):
-        info = self.stats['General']
-        data = self.stats['Graph']
+        info = self.stats['general']
+        data = self.stats['graph'][self.graph_label]
 
         with open(filename, 'wb') as csvfile:
             writer = csv.writer(
