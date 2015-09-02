@@ -136,6 +136,8 @@ def process_tree(indata):
 def main():
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
+    ch = logging.StreamHandler()
+    logger.addHandler(ch)
 
     infile = sys.argv[1]
     if len(sys.argv) >= 3:
@@ -147,11 +149,18 @@ def main():
     yaml_file = open(infile, 'r')
     tree_raw_data = yaml.load(yaml_file)
 
-    tree_data = process_tree(tree_raw_data['graph']['porta'])
-    try:
-        tree_data = process_tree(tree_raw_data['graph']['porta'])
-    except:
-        tree_data = process_tree(tree_raw_data['Graph']['porta'])
+    if 'graph' in tree_raw_data:
+        trees = tree_raw_data['graph']
+    else:
+        trees = tree_raw_data['Graph']
+
+    tkeys = trees.keys()
+
+    tree_data = process_tree(trees[tkeys[0]])
+    # try:
+    #     trees = process_tree(tree_raw_data['graph']['porta'])
+    # except:
+    #     = process_tree(tree_raw_data['Graph']['porta'])
     polyData = gen_tree(tree_data)
 
     writer = vtk.vtkPolyDataWriter()
