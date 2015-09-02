@@ -262,9 +262,9 @@ class HistologyAnalyserWindow(QMainWindow):
 
         helpW = QLabel('Remove unneeded data')
         self.changeHelpWidget(widget=helpW)
-
+        from PyQt4.QtCore import pyqtRemoveInputHook; pyqtRemoveInputHook(); import ipdb; ipdb.set_trace()  # noqa BREAKPOINT 
         newapp = QTSeedEditor(data3d, mode='mask', 
-                              voxelsize_mm=self.metadata['voxelsize_mm'])
+                              voxelSize=self.metadata['voxelsize_mm'])
         newapp.status_bar.hide()
         self.embedWidget(newapp)
 
@@ -283,7 +283,7 @@ class HistologyAnalyserWindow(QMainWindow):
         self.changeHelpWidget(widget=helpW)
 
         newapp = QTSeedEditor(data3d, mode='crop',
-                              voxelsize_mm=self.metadata['voxelsize_mm'])
+                              voxelSize=self.metadata['voxelsize_mm'])
         newapp.status_bar.hide()
         self.embedWidget(newapp)
 
