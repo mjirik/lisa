@@ -263,7 +263,8 @@ class HistologyAnalyserWindow(QMainWindow):
         helpW = QLabel('Remove unneeded data')
         self.changeHelpWidget(widget=helpW)
 
-        newapp = QTSeedEditor(data3d, mode='mask')
+        newapp = QTSeedEditor(data3d, mode='mask', 
+                              voxelsize_mm=self.metadata['voxelsize_mm'])
         newapp.status_bar.hide()
         self.embedWidget(newapp)
 
@@ -281,7 +282,8 @@ class HistologyAnalyserWindow(QMainWindow):
         helpW = QLabel('Crop data')
         self.changeHelpWidget(widget=helpW)
 
-        newapp = QTSeedEditor(data3d, mode='crop')
+        newapp = QTSeedEditor(data3d, mode='crop',
+                              voxelsize_mm=self.metadata['voxelsize_mm'])
         newapp.status_bar.hide()
         self.embedWidget(newapp)
 
