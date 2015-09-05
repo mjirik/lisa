@@ -41,6 +41,15 @@ class HistologyReport:
         self.data = self.fixData(data)
 
     def fixData(self, data):
+        """
+        fix older versions
+        """
+        if 'General' in data.keys():
+            data['general'] = data.pop('General')
+        if 'Graph' in data.keys():
+            gr =  data.pop('Graph')
+            data['graph'] = {'microstructure': gr}
+
         try:
             data['general']['used_volume_mm3']
             data['general']['used_volume_px']
@@ -150,7 +159,6 @@ class HistologyReport:
         for tree_part in self.data['graph']:
             for key in self.data['graph'][tree_part]:
                 # from PyQt4.QtCore import pyqtRemoveInputHook; pyqtRemoveInputHook(); import ipdb; ipdb.set_trace()  # noqa BREAKPOINT 
-
                 length_array.append(self.data['graph'][tree_part][key]['lengthEstimation'])
                 radius_array.append(self.data['graph'][tree_part][key]['radius_mm'])
 

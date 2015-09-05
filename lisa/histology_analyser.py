@@ -366,7 +366,7 @@ class HistologyAnalyser:
     def writeStatsToYAML(self, filename='hist_stats.yaml'):
         logger.debug('writeStatsToYAML')
         
-        gr = self.stats['graph']
+        gr = self.stats['graph'][self.graph_label]
         for i in gr:
             logger.info('Processing edge num '+str(i))
             try:
@@ -392,7 +392,7 @@ class HistologyAnalyser:
             except:
                 logger.warning('lengthEstimationPixel not a number')
                 gr[i]['lengthEstimationPixel'] = None
-        self.stats['graph'] = gr
+        self.stats['graph'][self.graph_label] = gr
         
         misc.obj_to_file(self.stats, filename=filename, filetype='yaml')
 
