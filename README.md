@@ -75,6 +75,11 @@ Documentation
 
 Generated documentation can be found [here](http://147.228.240.61/queetech/Lisa-docs/html/)
 
+Manual generation:
+
+    cd docs
+    make latexpdf
+
 
 Tests
 -----
