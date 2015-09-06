@@ -40,6 +40,7 @@ MOCK_MODULES = [
     'matplotlib.backends.backend_gtkagg', 'cv2', 'skimage.measure', 'dicom2fem',
     'morphsnakes', 'scipy.ndimage.filters', 'scipy.signal', 'pandas',
     'scipy.stats', 'io3d.misc', 'lisa.extern.lar', 'scipy.cluster.vq',
+    'ipdb',
     # 'six', 'nearpy', 'SimpleITK', 'lar', 'pandas'
 ]
 #
