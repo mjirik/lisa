@@ -38,15 +38,19 @@ MOCK_MODULES = [
     'seg2fem', 'skimage.segmentation', 'matplotlib.patches', 'skimage.feature',
     'scipy.ndimage.morphology', 'mpl_toolkits', 'mpl_toolkits.mplot3d',
     'matplotlib.backends.backend_gtkagg', 'cv2', 'skimage.measure', 'dicom2fem',
-    'scipy.stats', 'io3d.misc', 'six', 'nearpy', 'SimpleITK', 'lar', 'pandas'
+    'morphsnakes', 'scipy.ndimage.filters', 'scipy.signal', 'pandas',
+    'scipy.stats', 'io3d.misc', 'lisa.extern.lar', 'scipy.cluster.vq',
+    # 'six', 'nearpy', 'SimpleITK', 'lar', 'pandas'
 ]
-
+#
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()
 import sklearn
 sklearn.__version__ = '0.0'
 import scipy
 scipy.__version__ = '0.0'
+import pysegbase.pycut
+pysegbase.pycut.methods = ['graphcut']
 
 # from unittest.mock import MagicMock
 #

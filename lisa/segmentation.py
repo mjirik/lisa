@@ -1,24 +1,22 @@
 ﻿# -*- coding: utf-8 -*-
 """
-Purpose:     (CZE-ZCU-FAV-KKY) Liver medical project
+    Purpose:     (CZE-ZCU-FAV-KKY) Liver medical project
 
-Author:      Pavel Volkovinsky
-Email:       volkovinsky.pavel@gmail.com
+    Author:      Pavel Volkovinsky
+    Email:       volkovinsky.pavel@gmail.com
 
-Created:     2012/11/08
-Copyright:   (c) Pavel Volkovinsky
+    Created:     2012/11/08
+    Copyright:   (c) Pavel Volkovinsky
+
 """
 
 import sys
 sys.path.append("../src/")
 sys.path.append("../extern/")
-
 import uiThreshold
 # import thresholding_functions
-
 import logging
 logger = logging.getLogger(__name__)
-
 import numpy
 import scipy
 import scipy.ndimage
