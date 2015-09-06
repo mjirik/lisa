@@ -39,8 +39,9 @@ MOCK_MODULES = [
     'scipy.ndimage.morphology', 'mpl_toolkits', 'mpl_toolkits.mplot3d',
     'matplotlib.backends.backend_gtkagg', 'cv2', 'skimage.measure', 'dicom2fem',
     'morphsnakes', 'scipy.ndimage.filters', 'scipy.signal', 'pandas',
-    'scipy.stats', 'io3d.misc', 'lisa.extern.lar', 'scipy.cluster.vq',
-    'ipdb',
+    'scipy.stats', 'io3d.misc', 'lisa.extern.lar', 'scipy.cluster',
+    'scipy.cluster.vq', 'scipy.cluster.vq',
+    'ipdb', 'multipolyfit', 'PIL', 'yaml', 'SimpleITK',
     # 'six', 'nearpy', 'SimpleITK', 'lar', 'pandas'
 ]
 #
