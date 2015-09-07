@@ -41,6 +41,7 @@ def surface_density(segmentation, voxelsize_mm, aoi=None, sond_raster_mm=None):
     im_sond, aoi_sond = bufford_needle_sond(
         im_edg, voxelsize_mm, sond_raster_mm, axis=axis, aoi=aoi)
 
+# isotropic fakir  - kubinova janacek
     # est S = 2 \frac{1}{n} \sum_{i=1}^{n} \frac{v}{l_i} \cdot l_i
 
 # celkova delka sond
