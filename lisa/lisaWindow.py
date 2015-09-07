@@ -580,6 +580,7 @@ class OrganSegmentationWindow(QMainWindow):
         self.statusBar().showMessage('Ready')
 
     def liverSeg(self):
+        self.statusBar().showMessage('Performing liver segmentation ...')
         if self.oseg.data3d is None:
             self.statusBar().showMessage('No DICOM data!')
             return
@@ -588,6 +589,7 @@ class OrganSegmentationWindow(QMainWindow):
             min_val=self.oseg.viewermin,
             max_val=self.oseg.viewermax)
         self.checkSegData('auto. seg., ')
+        self.statusBar().showMessage('Ready')
 
     def autoSeg(self):
         self.statusBar().showMessage('Performing automatic segmentation...')
@@ -740,6 +742,7 @@ class OrganSegmentationWindow(QMainWindow):
     def btnVirtualResection(self):
         # mport vessel_cut
 
+        self.statusBar().showMessage('Performing virtual resection ...')
         data = {'data3d': self.oseg.data3d,
                 'segmentation': self.oseg.segmentation,
                 'slab': self.oseg.slab,
