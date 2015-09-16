@@ -156,7 +156,7 @@ ok)')
 
 
         import sed3
-        pyed = sed3.sed3qt(preparedData)
+        pyed = sed3.sed3qt(preparedData, windowW=400, windowC=50)
         # pyed.show()
         pyed.exec_()
 
