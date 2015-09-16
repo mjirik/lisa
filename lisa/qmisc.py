@@ -239,8 +239,11 @@ def max_area_index(labels, num):
 def resize_to_mm(data3d, voxelsize_mm, new_voxelsize_mm, mode='nearest'):
     """
     Function can resize data3d or segmentation to specifed voxelsize_mm
-    voxelsize_mm: list of 3 numbers, also can be a string 'orig', 'orgi*2'
-        and 'orgi*4'.
+    :new_voxelsize_mm: requested voxelsize. List of 3 numbers, also 
+        can be a string 'orig', 'orgi*2' and 'orgi*4'.
+        
+    :voxelsize_mm: size of voxel
+    :mode: default is 'nearest'
     """
 
     if new_voxelsize_mm == 'orig':
@@ -265,7 +268,7 @@ def resize_to_mm(data3d, voxelsize_mm, new_voxelsize_mm, mode='nearest'):
 def resize_to_shape(*pars, **params):
     import misc
     return misc.resize_to_shape(*pars, **params)
-
+vx_size 
     # nzoom = shape / np.array(segmentation.shape).astype(np.double)
     #
     # segm_orig_scale = scipy.ndimage.zoom(

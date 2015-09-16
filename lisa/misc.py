@@ -154,6 +154,7 @@ def resize_to_shape(data, shape, zoom=None, mode='nearest'):
     :param data: input 3d array-like data
     :param shape: shape of output data
     :param zoom: zoom is used for back compatibility
+    :mode: default is 'nearest'
     """
     # @TODO remove old code in except part
 
