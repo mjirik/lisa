@@ -228,6 +228,7 @@ class OrganSegmentation():
             'snakes_method': 'ACWE',
             'snakes_params': {'smoothing': 1, 'lambda1': 100, 'lambda2': 1},
             'snakes_niter': 20,
+            'postproc_working_voxelsize': [1.0, 1.0, 1.0],
         }
         self.seg_postproc_pars.update(seg_postproc_pars)
         self.seg_preproc_pars = {
@@ -783,15 +784,27 @@ class OrganSegmentation():
             if 'seeds' in sp.keys() and sp['seeds'] is True:
                 sp['seeds'] = self.seeds
 
+            d3d = qmisc.resize_to_mm(
+                    self.data3d, 
+                    self.voxelsize_mm, 
+                    self.seg_postproc_pars['postproc_working_voxelsize'])
+            segw = qmisc.resize_to_mm(
+                    self.segmentation, 
+                    self.voxelsize_mm, 
+                    self.seg_postproc_pars['postproc_working_voxelsize'])
             macwe = method(
-                self.data3d,
+                d3d,
+                # self.data3d,
                 **self.seg_postproc_pars['snakes_params']
             )
             macwe.levelset = (
-                self.segmentation == self.slab['liver']
+                # self.segmentation == self.slab['liver']
+                segw == self.slab['liver']
             ).astype(np.uint8)
             macwe.run(self.seg_postproc_pars['snakes_niter'])
-            self.segmentation = macwe.levelset
+            seg = qmisc.resize_to_shape(macwe.levelset, self.data3d.shape)
+            self.segmentation[seg == 1] += 1
+            logger.debug('postprocessing with snakes finished')
 
 #    def interactivity(self, min_val=800, max_val=1300):
 # @TODO generovat QApplication
