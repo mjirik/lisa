@@ -147,7 +147,7 @@ def obj_to_file(obj, filename='annotation.yaml', filetype='yaml'):
         logger.error('Unknown filetype ' + filetype)
 
 
-def resize_to_shape(data, shape, zoom=None):
+def resize_to_shape(data, shape, zoom=None, mode='nearest'):
     """
     Function resize input data to specific shape.
 
@@ -182,7 +182,7 @@ def resize_to_shape(data, shape, zoom=None):
         segm_orig_scale = scipy.ndimage.zoom(
             data,
             1.0 / zoom,
-            mode='nearest',
+            mode=mode,
             order=0
         ).astype(dtype)
         logger.debug('resize to orig with scipy.ndimage')
