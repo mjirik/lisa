@@ -268,7 +268,7 @@ def resize_to_mm(data3d, voxelsize_mm, new_voxelsize_mm, mode='nearest'):
 def resize_to_shape(*pars, **params):
     import misc
     return misc.resize_to_shape(*pars, **params)
-vx_size 
+
     # nzoom = shape / np.array(segmentation.shape).astype(np.double)
     #
     # segm_orig_scale = scipy.ndimage.zoom(

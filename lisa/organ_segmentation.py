@@ -228,7 +228,8 @@ class OrganSegmentation():
             'snakes_method': 'ACWE',
             'snakes_params': {'smoothing': 1, 'lambda1': 100, 'lambda2': 1},
             'snakes_niter': 20,
-            'postproc_working_voxelsize': [1.0, 1.0, 1.0],
+            # 'postproc_working_voxelsize': [1.0, 1.0, 1.0],
+            'postproc_working_voxelsize': 'orig',
         }
         self.seg_postproc_pars.update(seg_postproc_pars)
         self.seg_preproc_pars = {
