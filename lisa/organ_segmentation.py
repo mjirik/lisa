@@ -804,7 +804,9 @@ class OrganSegmentation():
             ).astype(np.uint8)
             macwe.run(self.seg_postproc_pars['snakes_niter'])
             seg = qmisc.resize_to_shape(macwe.levelset, self.data3d.shape)
-            self.segmentation[seg == 1] += 1
+# for debug visualization preprocessing use fallowing line
+            # self.segmentation[seg == 1] += 1
+            self.segmentation[seg == 1] = self.slab['liver']
             logger.debug('postprocessing with snakes finished')
 
 #    def interactivity(self, min_val=800, max_val=1300):
