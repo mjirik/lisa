@@ -406,14 +406,14 @@ class OrganSegmentationWindow(QMainWindow):
 
         oseg.datapath = self.__get_datadir(
             app=True,
-            directory=self.oseg.input_datapath_start
+            directory=directory
         )
 
         if oseg.datapath is None:
             self.statusBar().showMessage('No DICOM directory specified!')
             return
         # head, teil = os.path.split(oseg.datapath)
-        # self.oseg.cache.update('loaddir', oseg.datapath)
+        self.oseg.cache.update('loaddir', oseg.datapath)
 
         self.importDataWithGui()
 
