@@ -976,7 +976,8 @@ class OrganSegmentation():
         # tumory.overlay_test()
         data = self.export()
         tumory.import_data(data)
-        tumory.automatic_localization()
+        tumory.run_gui()
+        # tumory.automatic_localization()
 
         self.segmentation = tumory.segmentation
 

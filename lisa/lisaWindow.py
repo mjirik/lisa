@@ -239,8 +239,7 @@ class OrganSegmentationWindow(QMainWindow):
 
         btn_lesions = QPushButton("Lesions localization", self)
         btn_lesions.clicked.connect(self.btnLesionLocalization)
-# @TODO make button active by removing next line
-        btn_lesions.setEnabled(False)
+        # btn_lesions.setEnabled(False)
 
         btn_resection = QPushButton("Virtual resection", self)
         btn_resection.clicked.connect(self.btnVirtualResection)
