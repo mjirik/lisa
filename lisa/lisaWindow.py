@@ -239,8 +239,7 @@ class OrganSegmentationWindow(QMainWindow):
 
         btn_lesions = QPushButton("Lesions localization", self)
         btn_lesions.clicked.connect(self.btnLesionLocalization)
-# @TODO make button active by removing next line
-        btn_lesions.setEnabled(False)
+        # btn_lesions.setEnabled(False)
 
         btn_resection = QPushButton("Virtual resection", self)
         btn_resection.clicked.connect(self.btnVirtualResection)
@@ -377,8 +376,8 @@ class OrganSegmentationWindow(QMainWindow):
         #     seg.datapath = dcmreader.get_dcmdir_qt(
         #        app=True,
         #        directory=self.oseg.input_datapath_start
-        if 'loaddir' in self.oseg.cache.data.keys():
-            directory = self.oseg.cache.get('loaddir')
+        if 'loadfiledir' in self.oseg.cache.data.keys():
+            directory = self.oseg.cache.get('loadfiledir')
         else:
             directory = self.oseg.input_datapath_start
         #
@@ -391,7 +390,7 @@ class OrganSegmentationWindow(QMainWindow):
             self.statusBar().showMessage('No data path specified!')
             return
         head, teil = os.path.split(oseg.datapath)
-        self.oseg.cache.update('loaddir', head)
+        self.oseg.cache.update('loadfiledir', head)
 
         self.importDataWithGui()
 
@@ -400,19 +399,21 @@ class OrganSegmentationWindow(QMainWindow):
         QApplication.processEvents()
 
         oseg = self.oseg
-        # f oseg.datapath is None:
-        #     seg.datapath = dcmreader.get_dcmdir_qt(
-        #        app=True,
-        #        directory=self.oseg.input_datapath_start
-        #
+        if 'loaddir' in self.oseg.cache.data.keys():
+            directory = self.oseg.cache.get('loaddir')
+        else:
+            directory = self.oseg.input_datapath_start
+
         oseg.datapath = self.__get_datadir(
             app=True,
-            directory=self.oseg.input_datapath_start
+            directory=directory
         )
 
         if oseg.datapath is None:
             self.statusBar().showMessage('No DICOM directory specified!')
             return
+        # head, teil = os.path.split(oseg.datapath)
+        self.oseg.cache.update('loaddir', oseg.datapath)
 
         self.importDataWithGui()
 

@@ -59,7 +59,7 @@ else:
 class Lesions:
     """
 
-    lesions = Lesions(data3d, segmentation, slab)
+    lesions = Lesions(data3d, voxelsize_mm, segmentation, slab)
     lesions.automatic_localization()
 
     or
@@ -87,6 +87,16 @@ class Lesions:
         self.min_size_of_comp = 50
 
 # ---------------------------------------------------------------------------
+    def run_gui(self):
+        import lesioneditor
+        import lesioneditor.Lession_editor_slim
+        le = lesioneditor.Lession_editor_slim.LesionEditor(data3d=self.data3d, segmentation=self.segmentation, slab=self.slab, voxelsize_mm=self.voxelsize_mm)
+        le.show()
+        # get data
+        # self.segmentation = le.segmentation
+        # self.slab = le.slab
+
+       
 # ---------------------------------------------------------------------------
     def import_data(self, data):
         self.data = data

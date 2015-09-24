@@ -608,9 +608,10 @@ class OrganSegmentation():
 #        }
         # if self.iparams['seeds'] is not None:
         if self.seeds is not None:
-            seeds_res = scipy.ndimage.zoom(
+            seeds_res = misc.resize_to_shape(
+            # seeds_res = scipy.ndimage.zoom(
                 self.seeds,
-                self.zoom,
+                data3d_res.shape,
                 mode='nearest',
                 order=0
             )
@@ -977,7 +978,8 @@ class OrganSegmentation():
         # tumory.overlay_test()
         data = self.export()
         tumory.import_data(data)
-        tumory.automatic_localization()
+        tumory.run_gui()
+        # tumory.automatic_localization()
 
         self.segmentation = tumory.segmentation
 
