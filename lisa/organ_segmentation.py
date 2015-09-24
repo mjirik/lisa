@@ -785,6 +785,7 @@ class OrganSegmentation():
             if 'seeds' in sp.keys() and sp['seeds'] is True:
                 sp['seeds'] = self.seeds
 
+            logger.debug('snakes')
             d3d = qmisc.resize_to_mm(
                     self.data3d, 
                     self.voxelsize_mm, 
