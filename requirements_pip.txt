@@ -1,5 +1,5 @@
 pydicom>=0.9.9
-pysegbase>=1.0.30
+pysegbase>=1.0.33
 dicom2fem>=1.0.0
 sed3>=1.1.4
 io3d>=1.0.18
@@ -11,4 +11,4 @@ git+https://github.com/mjirik/pyqtconfig.git
 multipolyfit>=0.0.1
 pandas>=0.16.2
 pygco>=0.0.5
-lesioneditor==0.0.2
+lesioneditor==0.0.3
