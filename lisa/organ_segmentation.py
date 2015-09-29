@@ -519,11 +519,16 @@ class OrganSegmentation():
             self.time_start = datetime.datetime.now()
 
     def __import_dataplus_seeds(self, datap):
+        """
+
+        :type self: seeds are changed
+        """
         try:
             self.seeds = datap['processing_information'][
                 'organ_segmentation']['seeds']
         except:
             logger.info('seeds not found in dataplus')
+            # if dicomdir is readed after something with seeds, seeds needs to be reseted
             # self.seeds = None
 
         # for each mm on boundary there will be sum of penalty equal 10
