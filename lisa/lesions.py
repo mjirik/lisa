@@ -75,8 +75,12 @@ class Lesions:
 
 # ----------------------------------------------------------------------------
 # ---------------------------------------------------------------------------
+
+
     def __init__(self, data3d=None, voxelsize_mm=None, segmentation=None,
                  slab=None):
+
+
         self.data3d = data3d
         self.data = None
         self.segmentation = segmentation
@@ -90,7 +94,13 @@ class Lesions:
     def run_gui(self):
         import lesioneditor
         import lesioneditor.Lession_editor_slim
-        le = lesioneditor.Lession_editor_slim.LesionEditor(data3d=self.data3d, segmentation=self.segmentation, slab=self.slab, voxelsize_mm=self.voxelsize_mm)
+        datap1={
+            'data3d': self.data3d,
+            'segmentation': self.segmentation,
+            'slab': self.slab,
+            'voxelsize_mm': self.voxelsize_mm
+        }
+        le = lesioneditor.Lession_editor_slim.LesionEditor(datap1=datap1)
         le.show()
         # get data
         # self.segmentation = le.segmentation
