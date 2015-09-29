@@ -21,7 +21,7 @@ See our [install notes](https://github.com/mjirik/lisa/blob/master/INSTALL.md) f
 Install stable branche
 
     wget https://raw.githubusercontent.com/mjirik/lisa/master/installer.sh
-    source installer.sh devel
+    source installer.sh stable
 
 or for current developement
 
