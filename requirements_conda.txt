@@ -26,5 +26,5 @@ h5py=2.5.0
 # sed3
 # io3d
 pywget=2.2
-opencv=2.4.10
+opencv=2.4.*
 
