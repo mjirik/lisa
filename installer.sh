@@ -121,12 +121,12 @@ if [ "$ARG1" = "" ] ; then
     echo "Cloning stable version"
     # stable version
     git clone --recursive -b stable https://github.com/mjirik/lisa.git
-elif [ $ARG1 -eq "devel" ] ; then
+elif [ "$ARG1" = "devel" ] ; then
     echo "Cloning unstable branch using ssh"
     # if there is an any argument, install as developer
     # apt-get install -y sshpass virtualbox
     git clone --recursive git@github.com:mjirik/lisa.git
-elif [ $ARG1 -eq "noclone" ] ; then
+elif [ "$ARG1" = "noclone" ] ; then
     echo "Just requirements, no git clone"
 
 else
@@ -134,7 +134,7 @@ else
     git clone --recursive https://github.com/mjirik/lisa.git
 
 fi
-if [ $ARG1 -eq "noclone" ] ; then
+if [ "$ARG1" = "noclone" ] ; then
     echo "Just requirements"
 else
     cd lisa
