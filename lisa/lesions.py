@@ -100,7 +100,7 @@ class Lesions:
             'slab': self.slab,
             'voxelsize_mm': self.voxelsize_mm
         }
-        le = lesioneditor.Lession_editor_slim.LesionEditor(datap1=datap1)
+        le = lesioneditor.Lession_editor_slim.LessionEditor(datap1=datap1)
         le.show()
         # get data
         # self.segmentation = le.segmentation
