@@ -10,6 +10,6 @@ git+https://github.com/mjirik/morphsnakes.git
 git+https://github.com/mjirik/pyqtconfig.git
 multipolyfit>=0.0.1
 pandas>=0.16.2
-pygco>=0.0.5
-lesioneditor==0.0.5
 pygco==0.0.5
+lesioneditor==0.0.5
+
