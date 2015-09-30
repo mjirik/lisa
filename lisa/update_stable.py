@@ -75,7 +75,7 @@ def make_update(dry_run=False):
     try:
         cmd = ["conda", "install", "--yes",
                # "-c", 'luispedro ',
-               '-c', 'SimpleITK', "--file",
+               '-c', 'SimpleITK', "-c", "menpo", "--file",
                op.join(path_to_base, "requirements_conda.txt")]
         if dry_run:
             cmd.append('--dry-run')
