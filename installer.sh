@@ -34,7 +34,7 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
 elif [[ "$OSTYPE" == "darwin"* ]]; then
 
     
-    if hash brew 2>/dec/null; then
+    if hash brew 2>/dev/null; then
         echo "brew is installed"
     else
         echo "installing brew"
@@ -68,7 +68,7 @@ fi
 # apt-get install -y python git python-dev g++ python-numpy python-scipy python-matplotlib python-sklearn python-skimage python-dicom cython python-yaml sox make python-qt4 python-vtk python-setuptools curl python-pip cmake
 
 # 1. conda python packages
-if hash conda 2>/dec/null; then
+if hash conda 2>/dev/null; then
     echo "Conda is installed"
 else
     
@@ -90,9 +90,9 @@ else
         
     elif [[ "$OSTYPE" == "darwin"* ]]; then
         echo "Installing conda"
-        # curl "http://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh" -o "Miniconda-latest.sh"
-        # bash Miniconda-latest.sh -b
-        # echo "export PATH=$HOMEDIR/miniconda/bin:\$PATH" >> ~/.profile
+        curl "http://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh" -o "Miniconda-latest.sh"
+        bash Miniconda-latest.sh -b
+        echo "export PATH=$HOMEDIR/miniconda/bin:\$PATH" >> ~/.profile
         
         curl https://raw.githubusercontent.com/mjirik/lisa/master/install_nosudo.sh -o install_nosudo.sh
     fi
@@ -121,12 +121,12 @@ if [ "$ARG1" = "" ] ; then
     echo "Cloning stable version"
     # stable version
     git clone --recursive -b stable https://github.com/mjirik/lisa.git
-elif [ $ARG1 -eq "devel" ] ; then
+elif [ "$ARG1" = "devel" ] ; then
     echo "Cloning unstable branch using ssh"
     # if there is an any argument, install as developer
     # apt-get install -y sshpass virtualbox
     git clone --recursive git@github.com:mjirik/lisa.git
-elif [ $ARG1 -eq "noclone" ] ; then
+elif [ "$ARG1" = "noclone" ] ; then
     echo "Just requirements, no git clone"
 
 else
@@ -134,7 +134,7 @@ else
     git clone --recursive https://github.com/mjirik/lisa.git
 
 fi
-if [ $ARG1 -eq "noclone" ] ; then
+if [ "$ARG1" = "noclone" ] ; then
     echo "Just requirements"
 else
     cd lisa

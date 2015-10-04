@@ -6,7 +6,7 @@ python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements
 
 
 conda install --yes --file requirements_conda_root.txt
-conda install --yes -c SimpleITK --file requirements_conda.txt
+conda install --yes -c SimpleITK -c menpo --file requirements_conda.txt
 # mahotas on luispedro is only for linux
 # conda install --yes -c SimpleITK -c luispedro --file requirements_conda.txt
 
@@ -18,18 +18,18 @@ pip install -U --no-deps -r requirements_pip.txt --user
 
 mkdir projects
 
-# 4. install gco_python
+# 4. install  - it is now installed with pip
 
 cd projects
-# mkdir gco_python
-# cd gco_python
-git clone https://github.com/mjirik/gco_python.git 
-cd gco_python
-# echo `pwd`
-make
-python setup.py install --user
-cd ..
+## mkdir gco_python
+## cd gco_python
+# git clone https://github.com/mjirik/gco_python.git 
+#cd gco_python
+## echo `pwd`
+# make
+# python setup.py install --user
 # cd ..
+## cd ..
 
 
 # 5. skelet3d - optional for Histology Analyser
