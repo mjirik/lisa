@@ -129,6 +129,7 @@ class ExperimentsTest(unittest.TestCase):
         # self.assertTrue(False)
 
     @attr("incomplete")
+    @attr("slow")
     def test_experiment_set_small(self):
         import lisa.experiments
 
