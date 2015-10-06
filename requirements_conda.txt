@@ -16,7 +16,7 @@ pyyaml=3.11
 vtk=5.10.1
 # pandas is installed with pip
 ipython=3.1.0=py27_0
-SimpleITK=0.9.0
+SimpleITK=0.9.1
 h5py=2.5.0
 # pydicom
 # sed3
