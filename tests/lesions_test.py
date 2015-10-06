@@ -21,6 +21,21 @@ import pysegbase.dcmreaddata as dcmr
 
 class LesionsTest(unittest.TestCase):
 
+    def test_lesion_editor(self):
+        import lesioneditor
+        import lesioneditor.Lession_editor_slim
+        data3d = np.zeros([10, 11, 12], dtype=np.int16)
+        segmentation = np.zeros(data3d.shape, dtype=np.int16)
+        slab = {"liver": 1, "porta": 2}
+        voxelsize_mm = [1.0, 1.2, 1.0]
+
+        datap1={
+            'data3d': data3d,
+            'segmentation': segmentation,
+            'slab': slab,
+            'voxelsize_mm': voxelsize_mm
+        }
+        le = lesioneditor.Lession_editor_slim.LessionEditor(datap1=datap1)
     # @TODO znovu zprovoznit test
     @unittest.skip("Cekame, az to Tomas opravi")
 
@@ -59,19 +74,19 @@ class LesionsTest(unittest.TestCase):
         data3d = (data3d + noise  ).astype(np.int16)
 
 
-        data={'data3d':data3d, 
+        data={'data3d':data3d,
                 'slab':slab,
                 'voxelsize_mm':voxelsize_mm,
                 'segmentation':segm_pre
                 }
 
-# @TODO je tam bug, prohlížeč neumí korektně pracovat s doubly 
+# @TODO je tam bug, prohlížeč neumí korektně pracovat s doubly
 #        app = QApplication(sys.argv)
 #        #pyed = QTSeedEditor(noise )
 #        pyed = QTSeedEditor(data3d)
 #        pyed.exec_()
 #        #img3d = np.zeros([256,256,80], dtype=np.int16)
-        
+
        # pyed = sed3.sed3(data3d)
        # pyed.show()
 
@@ -80,7 +95,7 @@ class LesionsTest(unittest.TestCase):
         tumory.import_data(data)
         tumory.automatic_localization()
         #tumory.visualization()
-         
+
 
 
 # ověření výsledku
@@ -88,7 +103,7 @@ class LesionsTest(unittest.TestCase):
         #pyed.show()
 
         errim = np.abs(
-                (tumory.segmentation == slab['lesions']).astype(np.int) - 
+                (tumory.segmentation == slab['lesions']).astype(np.int) -
                 (segm == slab['lesions']).astype(np.int))
 
 # ověření výsledku
