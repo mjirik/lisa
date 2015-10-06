@@ -9,8 +9,9 @@ virtualenv:
     system_site_packages: true
 before_install:
     - sudo apt-get update -qq
-    - sudo apt-get install -qq python git python-dev g++ sox make  curl cmake
-    - sudo apt-get install -qq cmake libinsighttoolkit3-dev libpng12-dev libgdcm2-dev
+    - sudo apt-get install -qq git g++ sox make curl cmake
+    # - sudo apt-get install -qq python python-dev
+    - sudo apt-get install -qq libinsighttoolkit3-dev libpng12-dev libgdcm2-dev
     - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
     - chmod +x miniconda.sh
     - ./miniconda.sh -b
@@ -35,7 +36,8 @@ install:
     - cmake ..
     - make
     - sudo make install
-    - make install
+    # library is installed but not for anaconda
+    - python setup.py install
     - cd ..
     - cd ..
     # gco_python
