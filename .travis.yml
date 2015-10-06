@@ -35,6 +35,7 @@ install:
     - cmake ..
     - make
     - sudo make install
+    - make install
     - cd ..
     - cd ..
     # gco_python
