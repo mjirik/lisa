@@ -128,6 +128,8 @@ class ExperimentsTest(unittest.TestCase):
         self.assertGreater(len(obj['data']), 0)
         # self.assertTrue(False)
 
+    # not sure why is this test failing on travis. On local there are no
+    # problems.  Maybe it is not called.
     @attr("incomplete")
     @attr("slow")
     def test_experiment_set_small(self):
