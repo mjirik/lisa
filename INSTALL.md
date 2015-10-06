@@ -159,7 +159,7 @@ Install Mac OS
 
 
         curl https://raw.githubusercontent.com/mjirik/lisa/master/installer.sh -o installer.sh
-        source ubuntu_installer.sh
+        source installer.sh
 
      You can run `installer.py` with parameter `devel` or `noclone` to control source files cloning
  
