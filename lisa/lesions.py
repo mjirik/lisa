@@ -40,7 +40,7 @@ from skimage.segmentation import random_walker
 # from skimage import measure as skmeasure
 import scipy.ndimage.morphology as scimorph
 # from scipy.ndimage import generate_binary_structure
-import cv2
+# import cv2
 import tools
 # from mayavi import mlab
 # import pymorph as pm
