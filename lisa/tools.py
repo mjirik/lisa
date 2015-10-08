@@ -6,7 +6,7 @@ from skimage.segmentation import mark_boundaries
 import os
 import glob
 import dicom
-import cv2
+# import cv2
 # from skimage import measure
 import skimage.measure as skimea
 import skimage.morphology as skimor
