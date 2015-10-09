@@ -131,7 +131,6 @@ class ExperimentsTest(unittest.TestCase):
     # not sure why is this test failing on travis. On local there are no
     # problems.  Maybe it is not called.
     @attr("incomplete")
-    @attr("slow")
     def test_experiment_set_small(self):
         import lisa.experiments
 
@@ -186,8 +185,8 @@ class ExperimentsTest(unittest.TestCase):
         self.assertGreater(len(obj['data']), 0)
         # self.assertTrue(False)
 
-   @attr("actual")
-   @unittest.skip("this test is little rebel under travis-ci")
+    @attr("actual")
+   # @unittest.skip("this test is little rebel under travis-ci")
     def test_experiment_set_small_per_partes(self):
         plt.ioff()
         # import lisa.experiments

@@ -21,8 +21,18 @@ import pysegbase.dcmreaddata as dcmr
 
 class LesionsTest(unittest.TestCase):
 
+    def test_import_lesion_editor(self):
+        import lesioneditor
+        import lesioneditor.Lession_editor_slim
+
     @unittest.skip("Cekame, az to Tomas opravi")
     def test_lesion_editor(self):
+        """
+        little more complex try to create editor object but do not run show 
+        function
+
+        """
+        from PyQt4 import QtGui
         import lesioneditor
         import lesioneditor.Lession_editor_slim
         data3d = np.zeros([10, 11, 12], dtype=np.int16)
@@ -36,6 +46,7 @@ class LesionsTest(unittest.TestCase):
             'slab': slab,
             'voxelsize_mm': voxelsize_mm
         }
+        app = QtGui.QApplication(sys.argv)
         le = lesioneditor.Lession_editor_slim.LessionEditor(datap1=datap1)
     # @TODO znovu zprovoznit test
     @unittest.skip("Cekame, az to Tomas opravi")
