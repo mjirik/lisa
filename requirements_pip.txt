@@ -1,7 +1,7 @@
 pydicom>=0.9.9
-pysegbase>=1.0.33
+pysegbase>=1.0.36
 dicom2fem>=1.0.0
-sed3>=1.1.4
+sed3>=1.1.13
 io3d>=1.0.18
 ipdb>=0.8.1
 nearpy>=0.2
