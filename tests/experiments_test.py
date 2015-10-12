@@ -5,7 +5,6 @@
 import sys
 import os.path
 
-path_to_script = os.path.dirname(os.path.abspath(__file__))
 import unittest
 
 import logging
@@ -16,6 +15,8 @@ import numpy as np
 import shutil
 
 import matplotlib.pyplot as plt
+
+path_to_script = os.path.dirname(os.path.abspath(__file__))
 
 import lisa.volumetry_evaluation as ve
 import lisa
@@ -38,7 +39,7 @@ class ExperimentsTest(unittest.TestCase):
 
 # if directory exists, remove it
         experiment_dir = os.path.abspath(
-            path_to_script + "./../sample_data/exp_small2/")
+            path_to_script + "./../tests/tmp_exp_small2/")
         experiment_name = 'exp2'
 
         if os.path.exists(experiment_dir):
@@ -49,7 +50,7 @@ class ExperimentsTest(unittest.TestCase):
         #     path_to_script + "./../sample_data/exp_small2/")
 
         sliver_reference_dir = os.path.abspath(
-            path_to_script + "./../sample_data/exp_small2/seg")
+            path_to_script + "./../sample_data/exp/seg")
 
 # this is setup for visualization
         markers = ['ks',
@@ -91,6 +92,9 @@ class ExperimentsTest(unittest.TestCase):
         self.assertIn('exp2-vs7mm.config', dir_eval)
         # self.assertIn('exp1.yaml', dir_eval)
 #         # self.assertTrue(False)
+        ramr.run_experiments()
+        ramr.evaluation()
+        ramr.report()
         # shutil.rmtree(dire)
 
     @attr("slow")
@@ -131,6 +135,7 @@ class ExperimentsTest(unittest.TestCase):
     # not sure why is this test failing on travis. On local there are no
     # problems.  Maybe it is not called.
     @attr("incomplete")
+    @attr("slow")
     def test_experiment_set_small(self):
         import lisa.experiments
 

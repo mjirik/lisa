@@ -510,6 +510,8 @@ def sliver_eval_all_to_yamls(yaml_files, pklz_dirs, sliver_dir, eval_files,
     """
     This is time consuming.
     It can be specified which should be evaluated with recalculateThis=[2,5]
+
+    :param yaml_files: is list of paths to output yaml files which will be created in this function
     :param special_evaluation_function: evaluation function like fallowing:
         eval_dict = special_evaluation_function(volume1, volume2, voxelsize_mm)
     """
