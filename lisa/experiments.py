@@ -75,12 +75,16 @@ class RunAndMakeReport:
             run_experiments() and evaluation() function only if there are no
             evaluation outputs and experiment_outputs.
         :param markers: Allows to control markes for output graphs
+
+        self.dataframe_all is storage for all outpt mesurements
         """
+
         self.conf_list = conf_list
         self.conf_default = conf_default
         self.labels = labels
         self.sliver_dir = sliver_reference_dir
         self.experiment_dir = experiment_dir
+        self.df_all = None
         if experiment_name is None:
             aa, experiment_name = os.path.split(self.experiment_dir)
         self.experiment_name = experiment_name
@@ -201,6 +205,7 @@ class RunAndMakeReport:
     def get_dataframe(self):
         """
         Dataframe is constructed in report() function
+        :return: all experiments in pandas dataframe
         """
         return self.dataframe_all
 
@@ -893,6 +898,7 @@ def processIt(pklz_dirs, sliver_dir, yaml_files, eval_files, markers, labels):
     print 'Score total: ', scoreTotal
 
     plot_total(scoreMetrics, labels=labels, err_scale=0.05)
+    return df
 
 
 def get_subdirs(dirpath, wildcard='*', outputfile='experiment_data.yaml'):
