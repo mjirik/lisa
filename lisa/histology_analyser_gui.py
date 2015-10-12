@@ -106,6 +106,7 @@ class HistologyAnalyserWindow(QMainWindow):
                 nogui=False, qapp=self.qapp,
                 aggregate_near_nodes_distance=self.args.aggregatenearnodes)
 
+        self.ha.set_anotation(inputfile)
         ### Remove Area (mask)
         logger.debug('Remove area')
         bad_mask = True

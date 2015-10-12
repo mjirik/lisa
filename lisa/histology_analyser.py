@@ -40,7 +40,7 @@ class HistologyAnalyser:
 
     def __init__(self, data3d, metadata, threshold=-1, binaryClosing=-1,
                  binaryOpening=-1, nogui=True, qapp=None,
-                 aggregate_near_nodes_distance=0 ):
+                 aggregate_near_nodes_distance=0, ):
         self.qapp=qapp
         self.data3d = data3d
         if 'voxelsize_mm' not in metadata.keys():
@@ -67,6 +67,10 @@ class HistologyAnalyser:
         
         self.aggregate_near_nodes_distance = aggregate_near_nodes_distance
         self.graph_label = 'microstructure'
+        self.anotation = ''
+
+    def set_anotation(self, text):
+        self.anotation = text
 
     def get_voxelsize(self):
         return self.metadata['voxelsize_mm']
@@ -239,6 +243,7 @@ class HistologyAnalyser:
 
         info = {
             'voxel_size_mm': list(vs),
+            'voxelsize_mm': list(vs),
             'voxel_volume_mm3': float(voxel_volume_mm3),
             'shape_px': list(self.data3d.shape),
             'volume_px': float(volume_px),
@@ -247,7 +252,8 @@ class HistologyAnalyser:
             'used_volume_mm3': float(used_volume_mm3),
             'vessel_volume_fraction': float(vessel_volume_fraction),
             'surface_density': float(sv),
-            'processed_by': 'Histology Analyser'
+            'processed_by': 'Histology Analyser',
+            'anotation': self.anotation
         }
         self.stats.update({'general': info})
 
