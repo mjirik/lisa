@@ -18,6 +18,7 @@ import copy
 # import six
 import pandas
 import traceback
+import shutil
 
 # ----------------- my scripts --------
 import misc
@@ -33,7 +34,8 @@ class RunAndMakeReport:
                  conf_list=None, show=True, use_plt=True,
                  image_basename=None, only_if_necessary=True,
                  pklz_dirs=None, experiment_name=None,
-                 filename_separator='-', markers=None
+                 filename_separator='-', markers=None,
+                 clean_experiment_dir=False
                  ):
 
         """
@@ -82,6 +84,11 @@ class RunAndMakeReport:
         if experiment_name is None:
             aa, experiment_name = os.path.split(self.experiment_dir)
         self.experiment_name = experiment_name
+
+        if clean_experiment_dir:
+            if os.path.exists(experiment_dir):
+                shutil.rmtree(experiment_dir)
+            os.mkdir(experiment_dir)
 
         # if isinstance(pklz_dirs, six.string_types):
         if pklz_dirs is None:
