@@ -199,7 +199,7 @@ lisa.misc module
     :show-inheritance:
 
 lisa.organ_segmentation module
-----------------------------------
+------------------------------
 
 .. automodule:: lisa.organ_segmentation
     :members:

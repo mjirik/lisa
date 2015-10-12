@@ -30,11 +30,12 @@ sys.path.append(os.path.join(path_to_script,
 # import featurevector
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
 # import apdb
-#  apdb.set_trace();
+# apdb.set_trace();
 # import scipy.io
 import numpy as np
 import scipy
@@ -60,19 +61,20 @@ CROP_MARGIN = [20]
 
 
 def evaluateAndWriteToFile(
-    inputYamlFile,
-    directoryPklz,
-    directorySliver,
-    outputfile,
-    visualization,
-    return_dir_lists=False,
-    special_evaluation_function=None
+        inputYamlFile,
+        directoryPklz,
+        directorySliver,
+        outputfile,
+        visualization,
+        return_dir_lists=False,
+        special_evaluation_function=None
 ):
     """
     Function computes yaml file (if there are given input sliver and pklz
     directories). Based on yaml file are compared sliver segmentations and
     our pklz files.
     """
+    dirlists = None
     if (directoryPklz is not None) and (directorySliver is not None):
         dirlists = generate_input_yaml(
             directorySliver,
@@ -99,27 +101,27 @@ def evaluateAndWriteToFile(
 
     if return_dir_lists:
         return dirlists
-    # import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
 
-    # volume
-    # volume_mm3 = np.sum(oseg.segmentation > 0) * np.prod(oseg.voxelsize_mm)
+        # volume
+        # volume_mm3 = np.sum(oseg.segmentation > 0) * np.prod(oseg.voxelsize_mm)
 
-    # pyed = sed3.sed3(oseg.data3d, contour =
-    # oseg.segmentation)
-    # pyed.show()
+        # pyed = sed3.sed3(oseg.data3d, contour =
+        # oseg.segmentation)
+        # pyed.show()
 
-#    if args.show_output:
-#        oseg.show_output()
-#
-#    savestring = raw_input('Save output data? (y/n): ')
-# sn = int(snstring)
-#    if savestring in ['Y', 'y']:
-#
-#        data = oseg.export()
-#
-#        misc.obj_to_file(data, "organ.pkl", filetype='pickle')
-#        misc.obj_to_file(oseg.get_ipars(), 'ipars.pkl', filetype='pickle')
-# output = segmentation.vesselSegmentation(oseg.data3d,
+    # if args.show_output:
+    # oseg.show_output()
+    #
+    # savestring = raw_input('Save output data? (y/n): ')
+    # sn = int(snstring)
+    # if savestring in ['Y', 'y']:
+    #
+    #        data = oseg.export()
+    #
+    #        misc.obj_to_file(data, "organ.pkl", filetype='pickle')
+    #        misc.obj_to_file(oseg.get_ipars(), 'ipars.pkl', filetype='pickle')
+    # output = segmentation.vesselSegmentation(oseg.data3d,
     # oseg.orig_segmentation)
 
 
@@ -192,7 +194,7 @@ def eval_all_from_dataset_metadata(inputdata, visualization=False,
             evaluation_one.update(
                 special_evaluation_function(
                     data3d_a, data3d_b, metadata_a['voxelsize_mm']
-            ))
+                ))
         evaluation_all['file1'].append(data3d_a_path)
         evaluation_all['file2'].append(data3d_b_path)
         for key in evaluation_one.keys():
@@ -218,7 +220,8 @@ def eval_all_from_dataset_metadata(inputdata, visualization=False,
         else:
             try:
                 processing_time = obj_b['processing_information']['organ_segmentation']['processing_time']  # noqa
-                organ_interactivity_counter = obj_b['processing_information']['organ_segmentation']['organ_interactivity_counter']  # noqa
+                organ_interactivity_counter = obj_b['processing_information']['organ_segmentation'][
+                    'organ_interactivity_counter']  # noqa
             except:
                 processing_time = 0
                 organ_interactivity_counter = 0
@@ -228,14 +231,16 @@ def eval_all_from_dataset_metadata(inputdata, visualization=False,
 
     return evaluation_all
 
+
 def compare_volumes_boundingbox(vol1, vol2, voxelsize_mm):
     import qmisc
+
     crinfo = qmisc.crinfo_from_specific_data(vol1, [20, 20, 20])
     vol1[
-        crinfo[0][0]:crinfo[0][1],
-        crinfo[1][0]:crinfo[1][1],
-        crinfo[2][0]:crinfo[2][1]
-    ]=1
+    crinfo[0][0]:crinfo[0][1],
+    crinfo[1][0]:crinfo[1][1],
+    crinfo[2][0]:crinfo[2][1]
+    ] = 1
 
     volume1 = np.sum(vol1 > 0)
     volume2 = np.sum(vol2 > 0)
@@ -276,14 +281,14 @@ def compare_volumes(vol1, vol2, voxelsize_mm, use_logger=False):
 
     if use_logger:
         logger.debug('err- [mm3]: ' + str(df1) + ' err- [%]: '
-                    + str(df1 / volume_avg_mm3 * 100))
+                     + str(df1 / volume_avg_mm3 * 100))
         logger.debug('err+ [mm3]: ' + str(df2) + ' err+ [%]: '
-                    + str(df2 / volume_avg_mm3 * 100))
+                     + str(df2 / volume_avg_mm3 * 100))
 
     # VOE[%]
-    intersection = np.sum(df != 0).astype(float)
+    intersection = np.sum(df != 0).astype(np.float)
     union = (np.sum(vol1 > 0) + np.sum(vol2 > 0)).astype(float)
-    voe = 100 * ((intersection / union))
+    voe = 100 * (intersection / union)
     if use_logger:
         logger.debug('VOE [%]' + str(voe))
 
@@ -361,13 +366,13 @@ def distance_matrics(vol1, vol2, voxelsize_mm):
     # rmsd = ((np.sum(dst_12**2) + dst_21**2)/float(len_d21 + len_d12))**0.5
     avgd = np.average(dst_both)
 
-# there is not clear what is correct
+    # there is not clear what is correct
     # rmsd = np.average(dst_both ** 2)**0.5
     # rmsd = (np.average(dst_12) + np.average(dst_21))**0.5
     rmsd = np.average(dst_both ** 2)
     # rmsd = np.average(dst_b1_to_b2[border2] ** 2)
     maxd = max(np.max(dst_b1_to_b2), np.max(dst_b2_to_b1))
-# old
+    # old
     # avgd = np.average(dst_b1_to_b2[border2])
     # rmsd = np.average(dst_b1_to_b2[border2] ** 2)
     # maxd = np.max(dst_b1_to_b2)
@@ -377,6 +382,7 @@ def distance_matrics(vol1, vol2, voxelsize_mm):
 
 def get_border(image3d):
     import scipy.ndimage
+
     kernel = np.ones([3, 3, 3])
     conv = scipy.ndimage.convolve(image3d, kernel)
     conv[conv == 27] = 0
@@ -394,6 +400,7 @@ def get_border(image3d):
 def write_csv(data, filename='20130812_liver_volumetry.csv'):
     logger.debug(filename)
     import csv
+
     with open(filename, 'wb') as csvfile:
         writer = csv.writer(
             csvfile,
@@ -542,7 +549,6 @@ def make_sum(evaluation):
 
 
 def main():
-
     # logger = logging.getLogger(__name__)
     logger = logging.getLogger()
 
@@ -559,11 +565,11 @@ def main():
         description='Compare two segmentation. Evaluation is similar\
         to MICCAI 2007 workshop.  Metrics are described in\
         www.sliver07.com/p7.pdf')
-    parser.add_argument('-d', '--debug',  action='store_true',
+    parser.add_argument('-d', '--debug', action='store_true',
                         help='run in debug mode', default=False)
-    parser.add_argument('-si', '--sampleInput',  action='store_true',
+    parser.add_argument('-si', '--sampleInput', action='store_true',
                         help='generate sample intput data', default=False)
-    parser.add_argument('-v', '--visualization',  action='store_true',
+    parser.add_argument('-v', '--visualization', action='store_true',
                         help='Turn on visualization', default=False)
     parser.add_argument('-y', '--inputYamlFile', help='input yaml file',
                         default=default_data_file)
@@ -665,18 +671,27 @@ def generate_input_yaml(sliver_dir, pklz_dir,
 
 def sample_input_data():
     inputdata = {'basedir': '/home/mjirik/data/medical/',  # noqa
-            'data': [
-                {'sliverseg': 'data_orig/sliver07/training-part1/liver-seg001.mhd', 'ourseg': 'data_processed/organ_small-liver-orig001.mhd.pkl'},  # noqa
-                {'sliverseg': 'data_orig/sliver07/training-part1/liver-seg002.mhd', 'ourseg': 'data_processed/organ_small-liver-orig002.mhd.pkl'},  # noqa
-                {'sliverseg': 'data_orig/sliver07/training-part1/liver-seg003.mhd', 'ourseg': 'data_processed/organ_small-liver-orig003.mhd.pkl'},  # noqa
-                {'sliverseg': 'data_orig/sliver07/training-part1/liver-seg004.mhd', 'ourseg': 'data_processed/organ_small-liver-orig004.mhd.pkl'},  # noqa
-                {'sliverseg': 'data_orig/sliver07/training-part1/liver-seg005.mhd', 'ourseg': 'data_processed/organ_small-liver-orig005.mhd.pkl'},  # noqa
-                {'sliverseg': 'data_orig/sliver07/training-part2/liver-seg006.mhd', 'ourseg': 'data_processed/organ_small-liver-orig006.mhd.pkl'},  # noqa
-                {'sliverseg': 'data_orig/sliver07/training-part2/liver-seg007.mhd', 'ourseg': 'data_processed/organ_small-liver-orig007.mhd.pkl'},  # noqa
-                {'sliverseg': 'data_orig/sliver07/training-part2/liver-seg008.mhd', 'ourseg': 'data_processed/organ_small-liver-orig008.mhd.pkl'},  # noqa
-                {'sliverseg': 'data_orig/sliver07/training-part2/liver-seg009.mhd', 'ourseg': 'data_processed/organ_small-liver-orig009.mhd.pkl'},  # noqa
-                ]
-            }
+                 'data': [
+                     {'sliverseg': 'data_orig/sliver07/training-part1/liver-seg001.mhd',
+                      'ourseg': 'data_processed/organ_small-liver-orig001.mhd.pkl'},  # noqa
+                     {'sliverseg': 'data_orig/sliver07/training-part1/liver-seg002.mhd',
+                      'ourseg': 'data_processed/organ_small-liver-orig002.mhd.pkl'},  # noqa
+                     {'sliverseg': 'data_orig/sliver07/training-part1/liver-seg003.mhd',
+                      'ourseg': 'data_processed/organ_small-liver-orig003.mhd.pkl'},  # noqa
+                     {'sliverseg': 'data_orig/sliver07/training-part1/liver-seg004.mhd',
+                      'ourseg': 'data_processed/organ_small-liver-orig004.mhd.pkl'},  # noqa
+                     {'sliverseg': 'data_orig/sliver07/training-part1/liver-seg005.mhd',
+                      'ourseg': 'data_processed/organ_small-liver-orig005.mhd.pkl'},  # noqa
+                     {'sliverseg': 'data_orig/sliver07/training-part2/liver-seg006.mhd',
+                      'ourseg': 'data_processed/organ_small-liver-orig006.mhd.pkl'},  # noqa
+                     {'sliverseg': 'data_orig/sliver07/training-part2/liver-seg007.mhd',
+                      'ourseg': 'data_processed/organ_small-liver-orig007.mhd.pkl'},  # noqa
+                     {'sliverseg': 'data_orig/sliver07/training-part2/liver-seg008.mhd',
+                      'ourseg': 'data_processed/organ_small-liver-orig008.mhd.pkl'},  # noqa
+                     {'sliverseg': 'data_orig/sliver07/training-part2/liver-seg009.mhd',
+                      'ourseg': 'data_processed/organ_small-liver-orig009.mhd.pkl'},  # noqa
+                 ]
+                 }
 
     sample_data_file = os.path.join(path_to_script,
                                     "20130812_liver_volumetry_sample.yaml")

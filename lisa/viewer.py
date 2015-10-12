@@ -14,6 +14,7 @@ from PyQt4.QtGui import QApplication, QDialog, QGridLayout, QPushButton
 import vtk
 from vtk.qt4 import QVTKRenderWindowInteractor
 
+
 class QVTKViewer(QDialog):
     """
     Simple VTK Viewer.
@@ -61,7 +62,7 @@ class QVTKViewer(QDialog):
             vtkdata = vtk_data
 
         # VTK surface
-        surface=vtk.vtkDataSetSurfaceFilter()
+        surface = vtk.vtkDataSetSurfaceFilter()
         surface.SetInput(vtkdata)
         surface.Update()
 
@@ -76,15 +77,15 @@ class QVTKViewer(QDialog):
         ren.AddActor(actor)
 
         # annot. cube
-        axesActor = vtk.vtkAnnotatedCubeActor();
+        axesActor = vtk.vtkAnnotatedCubeActor()
         axesActor.SetXPlusFaceText('R')
         axesActor.SetXMinusFaceText('L')
         axesActor.SetYMinusFaceText('H')
         axesActor.SetYPlusFaceText('F')
         axesActor.SetZMinusFaceText('A')
         axesActor.SetZPlusFaceText('P')
-        axesActor.GetTextEdgesProperty().SetColor(1,1,0)
-        axesActor.GetCubeProperty().SetColor(0,0,1)
+        axesActor.GetTextEdgesProperty().SetColor(1, 1, 0)
+        axesActor.GetCubeProperty().SetColor(0, 0, 1)
         self.axes = vtk.vtkOrientationMarkerWidget()
         self.axes.SetOrientationMarker(axesActor)
         self.axes.SetInteractor(iren)
@@ -94,14 +95,16 @@ class QVTKViewer(QDialog):
         ren.ResetCamera()
         iren.Initialize()
 
+
 usage = '%prog [options]\n' + __doc__.rstrip()
 help = {
     'in_file': 'input VTK file with unstructured mesh',
 }
 
+
 def main():
     parser = OptionParser(description='Simple VTK Viewer')
-    parser.add_option('-f','--filename', action='store',
+    parser.add_option('-f', '--filename', action='store',
                       dest='in_filename', default=None,
                       help=help['in_file'])
     (options, args) = parser.parse_args()
@@ -112,6 +115,7 @@ def main():
     app = QApplication(sys.argv)
     viewer = QVTKViewer(options.in_filename)
     sys.exit(app.exec_())
+
 
 if __name__ == "__main__":
     main()
