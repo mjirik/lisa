@@ -28,44 +28,6 @@ import io3d.misc
 
 
 class RunAndMakeReport:
-    """
-    Je potřeba mít připraven adresář s daty(pklz_dirs), v nichž jsou uloženy
-    seedy. Dále pak soubory s konfigurací a stejným jménem jako adresář +
-    přípona '.conf'.
-
-    :param experiment_dir: base directory of experiment outputs
-    :params labels: Labels for describing graphs. They are also used for
-        generating dir names if pklz_dirs is not used.
-    :param sliver_reference_dir: dir with sliver reference data
-    :param input_data_path_pattern: Directory containing data with seeds. For
-        example::
-
-        "/home/mjirik/exp010-seeds/*-seeds.pklz"
-    :param conf_default: default values for config generation.
-        Example::
-
-        conf_default = {
-            'config_version': [1,0,0],
-            'working_voxelsize_mm': 2.0,
-            'segparams': {
-                'pairwise_alpha_per_mm2': 50,
-                'return_only_object_with_seeds': True,
-                'method': 'GC'
-            }
-        }
-    :param experiment_name: string is used as prefix for all output files
-    :param pklz_dirs: List of dirs or string with dir prefix. If the string is
-        given base on labels the list is generated
-        In each will be output for one experiment. There
-        is also required to have file with same name as directory with
-        extension.config. In this files is configuration of Lisa.
-    :param image_basename: Basis for image names. It can be directory, or
-        filename begining
-    :param only_if_necessary: If it is True the make_all() function call
-        run_experiments() and evaluation() function only if there are no
-        evaluation outputs and experiment_outputs.
-    :param markers: Allows to control markes for output graphs
-    """
     def __init__(self, experiment_dir, labels, sliver_reference_dir,
                  input_data_path_pattern, conf_default=None,
                  conf_list=None, show=True, use_plt=True,
@@ -74,6 +36,44 @@ class RunAndMakeReport:
                  filename_separator='-', markers=None
                  ):
 
+        """
+        Je potřeba mít připraven adresář s daty(pklz_dirs), v nichž jsou uloženy
+        seedy. Dále pak soubory s konfigurací a stejným jménem jako adresář +
+        přípona '.conf'.
+
+        :param experiment_dir: base directory of experiment outputs
+        :params labels: Labels for describing graphs. They are also used for
+            generating dir names if pklz_dirs is not used.
+        :param sliver_reference_dir: dir with sliver reference data
+        :param input_data_path_pattern: Directory containing data with seeds. For
+            example::
+
+            "/home/mjirik/exp010-seeds/*-seeds.pklz"
+        :param conf_default: default values for config generation.
+            Example::
+
+            conf_default = {
+                'config_version': [1,0,0],
+                'working_voxelsize_mm': 2.0,
+                'segparams': {
+                    'pairwise_alpha_per_mm2': 50,
+                    'return_only_object_with_seeds': True,
+                    'method': 'GC'
+                }
+            }
+        :param experiment_name: string is used as prefix for all output files
+        :param pklz_dirs: List of dirs or string with dir prefix. If the string is
+            given base on labels the list is generated
+            In each will be output for one experiment. There
+            is also required to have file with same name as directory with
+            extension.config. In this files is configuration of Lisa.
+        :param image_basename: Basis for image names. It can be directory, or
+            filename begining
+        :param only_if_necessary: If it is True the make_all() function call
+            run_experiments() and evaluation() function only if there are no
+            evaluation outputs and experiment_outputs.
+        :param markers: Allows to control markes for output graphs
+        """
         self.conf_list = conf_list
         self.conf_default = conf_default
         self.labels = labels
@@ -118,6 +118,7 @@ class RunAndMakeReport:
         markers = np.asarray(([markers] * ((n / len(markers) + 1)))
                              ).reshape(-1)[:n].tolist()
         self.markers = markers
+        self.dataframe_all = None
 
     def make_all(self):
         """
@@ -163,7 +164,7 @@ class RunAndMakeReport:
         )
 
     def report(self):
-        report(self.eval_files, self.labels, self.markers,
+        self.dataframe_all = report(self.eval_files, self.labels, self.markers,
                show=self.show, output_prefix=self.image_basename,
                use_plt=self.use_plt, experiment_name=self.experiment_name,
                filename_separator=self.filename_separator
@@ -190,10 +191,17 @@ class RunAndMakeReport:
                 return True
         return False
 
+    def get_dataframe(self):
+        """
+        Dataframe is constructed in report() function
+        """
+        return self.dataframe_all
+
 
 def run_and_make_report(*pars, **params):
     rr = RunAndMakeReport(*pars, **params)
     rr.make_all()
+    return rr.get_dataframe()
 
 
 def generate_configs(pklz_dirs, conf_default, conf_list):
@@ -492,6 +500,8 @@ def report(eval_files, labels, markers, show=True, output_prefix='',
         plot_total(scoreMetrics, labels=labels, err_scale=0.05, show=show,
                    filename=output_prefix)
 
+    return df_all
+
 
 def recalculate_suggestion(eval_files):
     """
@@ -521,16 +531,20 @@ def sliver_eval_all_to_yamls(yaml_files, pklz_dirs, sliver_dir, eval_files,
 
     for i in recalculateThis:
         logger.info("Performing evaluation on: " + str(pklz_dirs[i]))
-        a = volumetry_evaluation.evaluateAndWriteToFile(
+        a, data = volumetry_evaluation.evaluate_and_write_to_file(
             yaml_files[i],
             pklz_dirs[i],
             sliver_dir,
             eval_files[i],
             visualization=False,
             return_dir_lists=True,
-            special_evaluation_function=special_evaluation_function
+            special_evaluation_function=special_evaluation_function,
+            return_all_data=True
+
         )
         logger.debug(str(a))
+        # print data
+
 
 
 def plotone(data, expn, keyword, ind, marker, legend):

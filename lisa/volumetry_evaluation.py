@@ -60,14 +60,15 @@ from io3d import datareader
 CROP_MARGIN = [20]
 
 
-def evaluateAndWriteToFile(
+def evaluate_and_write_to_file(
         inputYamlFile,
         directoryPklz,
         directorySliver,
         outputfile,
         visualization,
         return_dir_lists=False,
-        special_evaluation_function=None
+        special_evaluation_function=None,
+        return_all_data=False
 ):
     """
     Function computes yaml file (if there are given input sliver and pklz
@@ -99,8 +100,15 @@ def evaluateAndWriteToFile(
     write_csv(evaluation_all, filename=outputfile + '.csv')
     misc.obj_to_file(evaluation_all, outputfile + '.pkl', filetype='pkl')
 
+    retval = []
+
     if return_dir_lists:
-        return dirlists
+        retval.append(dirlists)
+    if return_all_data:
+        retval.append(evaluation_all)
+    if len(retval) > 0:
+        return retval
+
         # import pdb; pdb.set_trace()
 
         # volume
@@ -591,7 +599,7 @@ def main():
     if args.sampleInput:
         sample_input_data()
 
-    evaluateAndWriteToFile(
+    evaluate_and_write_to_file(
         args.inputYamlFile,
         args.directoryPklz,
         args.directorySliver,
