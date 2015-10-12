@@ -29,6 +29,34 @@ def vt2esofspy(vesseltree, outputfilename="tracer.txt"):
         vt = vesseltree
     print vt['general']
     print vt.keys()
+    vtgm = vt['graph']['microstructure']
+    lines = []
+    vs = vt['general']['voxel_size_mm']
+
+    lines.append("#Tracer+\n")
+    # lines.append("#voxelsize mm %f %f %f\n" % (vs[0], vs[1], vs[2]))
+    lines.append(str(len(vtgm) * 2)+"\n")
+
+    i = 1
+    for id in vtgm:
+        # edge['']
+        try:
+            nda = vtgm[id]['nodeA_ZYX']
+            ndb = vtgm[id]['nodeB_ZYX']
+            lines.append("%i\t%i\t%i\t%i\n" % (nda[0], nda[1], nda[2], i))
+            lines.append("%i\t%i\t%i\t%i\n" % (ndb[0], ndb[1], ndb[2], i))
+            i += 1
+        except:
+            pass
+
+
+    lines.append("%i\t%i\t%i\t%i" % (0, 0, 0, 0))
+    with open(outputfilename, 'wt') as f:
+        f.writelines(lines)
+
+
+    print "urra"
+
 
 
 
