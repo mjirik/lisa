@@ -95,6 +95,16 @@ class HistologyTest(unittest.TestCase):
 
         print "konec podezreleho testu"
 
+    def test_test_export_to_esofspy(self):
+        """
+        tests export function
+        """
+
+        import lisa.vesseltree_export as vt
+        yaml_input = os.path.join(path_to_script, "vt_biodur.yaml")
+        yaml_output = os.path.join(path_to_script, "delme_esofspy.txt")
+        vt.vt2esofspy(yaml_input, yaml_output)
+
     def test_generate_sample_data(self):
         """
         Test has no strong part
