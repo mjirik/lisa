@@ -95,6 +95,16 @@ class HistologyTest(unittest.TestCase):
 
         print "konec podezreleho testu"
 
+
+    def test_import_new_vt_format(self):
+
+        tvg = TreeGenerator()
+        yaml_path = os.path.join(path_to_script, "vt_biodur.yaml")
+        tvg.importFromYaml(yaml_path)
+        tvg.voxelsize_mm = [1, 1, 1]
+        tvg.shape = [150, 150, 150]
+        data3d = tvg.generateTree()
+
     def test_test_export_to_esofspy(self):
         """
         tests export function

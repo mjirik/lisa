@@ -152,7 +152,9 @@ class TreeGenerator:
         self.rawdata = rawdata
 
         try:
-            self.tree_data = self.rawdata['graph']['porta']
+            # key is usually "porta" or "microstructure"
+            keys = self.rawdata['graph'].keys()
+            self.tree_data = self.rawdata['graph'][keys[0]]
         except:
             self.tree_data = self.rawdata['Graph']
 
