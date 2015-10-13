@@ -23,7 +23,7 @@ import scipy.ndimage
 def vt2esofspy(vesseltree, outputfilename="tracer.txt"):
 
     import io3d.misc
-    if os.path.isfile(vesseltree):
+    if (type(vesseltree) == str) and os.path.isfile(vesseltree):
         vt = io3d.misc.obj_from_file(vesseltree)
     else:
         vt = vesseltree
@@ -32,9 +32,11 @@ def vt2esofspy(vesseltree, outputfilename="tracer.txt"):
     vtgm = vt['graph']['microstructure']
     lines = []
     vs = vt['general']['voxel_size_mm']
+    sh = vt['general']['shape_px']
 
     lines.append("#Tracer+\n")
-    # lines.append("#voxelsize mm %f %f %f\n" % (vs[0], vs[1], vs[2]))
+    lines.append("#voxelsize mm %f %f %f\n" % (vs[0], vs[1], vs[2]))
+    lines.append("#shape %i %i %i\n" % (sh[0], sh[1], sh[2]))
     lines.append(str(len(vtgm) * 2)+"\n")
 
     i = 1
@@ -51,16 +53,12 @@ def vt2esofspy(vesseltree, outputfilename="tracer.txt"):
 
 
     lines.append("%i\t%i\t%i\t%i" % (0, 0, 0, 0))
+    lines[3] = str(i - 1) + "\n"
     with open(outputfilename, 'wt') as f:
         f.writelines(lines)
 
 
     print "urra"
-
-
-
-
-
 
 
 if __name__ == "__main__":
@@ -73,18 +71,11 @@ if __name__ == "__main__":
     # logger.debug('input params')
 
     # input parser
-    parser = argparse.ArgumentParser(description='Experiment support')
-    parser.add_argument('--get_subdirs', action='store_true',
-                        default=None,
-                        help='path to data dir')
+    parser = argparse.ArgumentParser(description='Vessel tree export to esofspy')
     parser.add_argument('-o', '--output', default="tracer.txt",
                         help='output file name')
     parser.add_argument('-i', '--input', default=None,
                         help='input')
     args = parser.parse_args()
 
-    if args.get_subdirs:
-        if args.output is None:
-            args.output = 'experiment_data.yaml'
-        get_subdirs(dirpath=args.input, outputfile=args.output)
     vt2esofspy(args.input, outputfilename=args.output)

@@ -371,7 +371,10 @@ class HistologyAnalyser:
 
     def writeStatsToYAML(self, filename='hist_stats.yaml'):
         logger.debug('writeStatsToYAML')
-        
+        self.prepareVesselTree()
+        misc.obj_to_file(self.stats, filename=filename, filetype='yaml')
+
+    def prepareVesselTree(self):
         gr = self.stats['graph'][self.graph_label]
         for i in gr:
             logger.info('Processing edge num '+str(i))
@@ -399,8 +402,16 @@ class HistologyAnalyser:
                 logger.warning('lengthEstimationPixel not a number')
                 gr[i]['lengthEstimationPixel'] = None
         self.stats['graph'][self.graph_label] = gr
+
+    def exportVT2esofspy(self, filename='trace.txt'):
+        import vesseltree_export as vte
+        logger.debug('esofspy export')
+        self.prepareVesselTree()
+
+        vte.vt2esofspy(self.stats, filename)
+
+
         
-        misc.obj_to_file(self.stats, filename=filename, filetype='yaml')
 
     def writeStatsToCSV(self, filename='hist_stats.csv'):
         info = self.stats['general']
@@ -607,9 +618,23 @@ None. Format: "z1 z2 y1 y2 x1 x2". -1 = None (start or end of axis).')
         help='Disable GUI, requires threshold argument')
 
     parser.add_argument(
+        '-vte', '--vt2esofspy',
+        default="trace55.txt",
+        help='name of output vessel tree export to esofspy file')
+
+
+    parser.add_argument(
+        '-vtn', '--vtfile',
+        default=None,
+        help='name of output vessel tree file')
+
+
+    parser.add_argument(
         '-d', '--debug',
         action='store_true',
         help='Debug mode')
+
+
 
     args = parser.parse_args()
 
@@ -631,6 +656,8 @@ def processData(args):
     voxelsize=args.voxelsize
     binaryClosing=args.binaryopening
     binaryOpening=args.binaryclosing
+    vtfile=args.vtfile
+    vt2esofspy=args.vt2esofspy
     
     # Reading/Generating data
     if inputfile is None:  # # Using generated sample data
@@ -677,8 +704,10 @@ def processData(args):
     # Saving files
     logger.info("# ## ## write stats to file")
     ha.writeStatsToCSV()
-    ha.writeStatsToYAML()
-    
+    ha.writeStatsToYAML(vtfile)
+    if vt2esofspy is not None:
+        ha.exportVT2esofspy(vt2esofspy)
+
     # ## Histology report
     logger.info("# ## ## Histology report")
     hr = HistologyReport()
@@ -686,6 +715,7 @@ def processData(args):
     hr.generateStats()
     hr.writeReportToCSV()
     hr.writeReportToYAML()
+
     
     # Add results Record
     if crop is not None:
