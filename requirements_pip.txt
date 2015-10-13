@@ -1,5 +1,5 @@
 pydicom>=0.9.9
-pysegbase>=1.0.37
+pysegbase>=1.0.38
 dicom2fem>=1.0.0
 sed3>=1.1.13
 io3d>=1.0.18
