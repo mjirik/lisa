@@ -20,7 +20,15 @@ import traceback
 import numpy as np
 import scipy.ndimage
 
-def vt2esofspy(vesseltree, outputfilename="tracer.txt"):
+def vt2esofspy(vesseltree, outputfilename="tracer.txt", axisorder=[0, 1, 2]):
+    """
+    exports vesseltree to esofspy format
+
+    :param vesseltree: filename or vesseltree dictionary structure
+    :param outputfilename: output file name
+    :param axisorder: order of axis can be specified with this option
+    :return:
+    """
 
     import io3d.misc
     if (type(vesseltree) == str) and os.path.isfile(vesseltree):
@@ -34,9 +42,12 @@ def vt2esofspy(vesseltree, outputfilename="tracer.txt"):
     vs = vt['general']['voxel_size_mm']
     sh = vt['general']['shape_px']
 
+    # switch axis
+    ax = axisorder
+
     lines.append("#Tracer+\n")
-    lines.append("#voxelsize mm %f %f %f\n" % (vs[0], vs[1], vs[2]))
-    lines.append("#shape %i %i %i\n" % (sh[0], sh[1], sh[2]))
+    lines.append("#voxelsize mm %f %f %f\n" % (vs[ax[0]], vs[ax[1]], vs[ax[2]]))
+    lines.append("#shape %i %i %i\n" % (sh[ax[0]], sh[ax[1]], sh[ax[2]]))
     lines.append(str(len(vtgm) * 2)+"\n")
 
     i = 1
@@ -45,8 +56,8 @@ def vt2esofspy(vesseltree, outputfilename="tracer.txt"):
         try:
             nda = vtgm[id]['nodeA_ZYX']
             ndb = vtgm[id]['nodeB_ZYX']
-            lines.append("%i\t%i\t%i\t%i\n" % (nda[0], nda[1], nda[2], i))
-            lines.append("%i\t%i\t%i\t%i\n" % (ndb[0], ndb[1], ndb[2], i))
+            lines.append("%i\t%i\t%i\t%i\n" % (nda[ax[0]], nda[ax[1]], nda[ax[2]], i))
+            lines.append("%i\t%i\t%i\t%i\n" % (ndb[ax[0]], ndb[ax[1]], ndb[ax[2]], i))
             i += 1
         except:
             pass
@@ -76,6 +87,8 @@ if __name__ == "__main__":
                         help='output file name')
     parser.add_argument('-i', '--input', default=None,
                         help='input')
+    parser.add_argument('-ao', '--axisorder', metavar='N', type=int, nargs=3,
+                        default=[0, 1, 2], help='Drder of axis in output. Default: 0 1 2')
     args = parser.parse_args()
 
-    vt2esofspy(args.input, outputfilename=args.output)
+    vt2esofspy(args.input, outputfilename=args.output, axisorder=args.axisorder)
