@@ -624,7 +624,7 @@ None. Format: "z1 z2 y1 y2 x1 x2". -1 = None (start or end of axis).')
 
 
     parser.add_argument(
-        '-vtn', '--vtfile',
+        '-vtf', '--vtfile',
         default=None,
         help='name of output vessel tree file')
 
