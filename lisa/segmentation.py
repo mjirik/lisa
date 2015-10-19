@@ -13,7 +13,9 @@
 import sys
 sys.path.append("../src/")
 sys.path.append("../extern/")
-import uiThreshold
+import imtools
+from imtools import uiThreshold, thresholding_functions
+# import uiThreshold
 # import thresholding_functions
 import logging
 logger = logging.getLogger(__name__)
