@@ -1002,7 +1002,7 @@ class OrganSegmentation():
         For example interactivity=False, biggestObjects=True, ...
         """
 
-        import segmentation
+        from imtools import segmentation
         logger.info('segmentation max label ' + str(np.max(self.segmentation)))
         # if there is no organ segmentation, use all image
         slab = {'porta': 2}
@@ -1084,7 +1084,7 @@ class OrganSegmentation():
 
     def hepaticVeinsSegmentation(self):
 
-        import segmentation
+        from imtools import segmentation
         outputSegmentation = segmentation.vesselSegmentation(
             self.data3d,
             self.segmentation,
