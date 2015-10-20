@@ -35,8 +35,8 @@ install:
     - cd skelet3d/build
     - cmake ..
     - make
-    - sudo make install
-    - sudo make install
+    - make install
+    # - sudo make install
     # library is installed but not for anaconda
     - python setup.py install
     - cd ..
