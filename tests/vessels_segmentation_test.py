@@ -18,7 +18,7 @@ import numpy as np
 # import sed3
 
 from lisa import organ_segmentation
-from lisa import segmentation
+from imtools import segmentation
 
 
 class VesselsSegmentationTest(unittest.TestCase):

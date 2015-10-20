@@ -8,11 +8,10 @@ import sys
 import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
-sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
+# sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
+# sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
-import unittest
 
 import logging
 logger = logging.getLogger(__name__)
@@ -37,12 +36,8 @@ except:
     logger.warning("Deprecated of pyseg_base as submodule")
     import pycut
 import argparse
-import sed3
-import collections
-import segmentation
 import qmisc
 import io3d
-import ipdb
 import scipy.ndimage.filters as filters
 import scipy.signal
 import multipolyfit as mpf
