@@ -50,18 +50,17 @@ Install Windows with Anaconda
 * Run command line and create conda-virtualenv
 
 
-        conda create --no-default-packages -n lisa pip
+        conda create --no-default-packages -n lisa pip pywget numpy
         activate lisa
 
 * In activated lisa virtualenv run following lines
 
 
-        pip install wget
+        pip install pywget
         python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_conda.txt
-        conda install -y --file requirements_conda.txt
+        conda install -y -c mjirik -c SimpleITK --file requirements_conda.txt
         python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_pip.txt
         pip install -r requirements_pip.txt
-        easy_install SimpleITK mahotas
         mkdir projects
         cd projects
         
@@ -95,6 +94,8 @@ Install Windows with Anaconda
         cd ..
         cd ..
         
+* download lisa
+
         git clone --recursive -b stable https://github.com/mjirik/lisa.git
 
 

@@ -6,4 +6,5 @@ git+https://github.com/mjirik/pyqtconfig.git
 multipolyfit>=0.0.1
 # pandas>=0.16.2
 lesioneditor==0.0.13
+pygco
 
