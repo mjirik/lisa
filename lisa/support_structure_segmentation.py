@@ -30,11 +30,11 @@ try:
 except:
     from pysegbase import dcmreaddata as dcmr
 
-try:
-    from pysegbase import pycut
-except:
-    logger.warning("Deprecated of pyseg_base as submodule")
-    import pycut
+# try:
+#     from pysegbase import pycut
+# except:
+#     logger.warning("Deprecated of pyseg_base as submodule")
+#     import pycut
 import argparse
 import qmisc
 import io3d
