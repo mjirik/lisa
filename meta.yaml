@@ -46,6 +46,7 @@ requirements:
     - pyqt 4.10.4
     - pandas
     - pywget
+    - scikit-learn
 
   run:
     - python
@@ -62,6 +63,7 @@ requirements:
     - pandas
     - simpleitk
     - pywget
+    - scikit-learn
 
 test:
   # Python imports

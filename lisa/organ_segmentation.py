@@ -34,16 +34,17 @@ import argparse
 import morphsnakes as ms
 # tady uz je logger
 # import dcmreaddata as dcmreader
-try:
-    import pysegbase  # noqa
-    from pysegbase import pycut
-except:
-    path_to_script = os.path.dirname(os.path.abspath(__file__))
-    sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
-    logger.warning("Deprecated of pyseg_base as submodule")
-    import traceback
-    traceback.print_exc()
-    import pycut
+from pysegbase import pycut
+# try:
+#     import pysegbase  # noqa
+#     from pysegbase import pycut
+# except:
+#     path_to_script = os.path.dirname(os.path.abspath(__file__))
+#     sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
+#     logger.warning("Deprecated of pyseg_base as submodule")
+#     import traceback
+#     traceback.print_exc()
+#     import pycut
 
 import volumetry_evaluation
 
