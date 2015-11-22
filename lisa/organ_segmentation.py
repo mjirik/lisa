@@ -33,7 +33,7 @@ import datetime
 import argparse
 # tady uz je logger
 # import dcmreaddata as dcmreader
-from pysegbase import pycut
+# from pysegbase import pycut
 # try:
 #     import pysegbase  # noqa
 #     from pysegbase import pycut
@@ -83,12 +83,6 @@ default_segmodelparams = {
     'type': 'gmmsame',
     'params': {cvtype_name: 'full', 'n_components': 3}
 }
-
-default_segparams = {
-    'method': pycut.methods[0],
-    'pairwise_alpha_per_mm2': 40,
-    'use_boundary_penalties': False,
-    'boundary_penalties_sigma': 50}
 
 config_version = [1, 0, 0]
 
@@ -166,6 +160,13 @@ class OrganSegmentation():
         :param seg_postproc_pars: Can be used for setting postprocessing
         parameters. For example
         """
+
+        from pysegbase import pycut
+        default_segparams = {
+            'method': pycut.methods[0],
+            'pairwise_alpha_per_mm2': 40,
+            'use_boundary_penalties': False,
+            'boundary_penalties_sigma': 50}
 
         self.iparams = {}
         self.datapath = datapath
@@ -566,6 +567,7 @@ class OrganSegmentation():
         #        ' d3d ', self.data3d.shape
 
     def _interactivity_begin(self):
+        from pysegbase import pycut
         logger.debug('_interactivity_begin()')
         # TODO make copy and work with it
 
@@ -863,6 +865,7 @@ class OrganSegmentation():
         self._interactivity_end(igc)
 
     def ninteractivity(self):
+        from pysegbase import pycut
         """Function for automatic (noninteractiv) mode."""
         # mport pdb; pdb.set_trace()
         igc = self._interactivity_begin()
