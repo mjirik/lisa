@@ -31,7 +31,6 @@ import scipy.ndimage
 import numpy as np
 import datetime
 import argparse
-import morphsnakes as ms
 # tady uz je logger
 # import dcmreaddata as dcmreader
 from pysegbase import pycut
@@ -779,6 +778,7 @@ class OrganSegmentation():
             self.segm_smoothing(self.seg_postproc_pars['smoothing_mm'])
 
         if self.seg_postproc_pars['snakes']:
+            import morphsnakes as ms
             logger.debug('Making snakes')
             if self.seg_postproc_pars['snakes_method'] is 'ACWE':
                 method = ms.MorphACWE
