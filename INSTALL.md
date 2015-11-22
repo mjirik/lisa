@@ -42,11 +42,8 @@ Install Windows with Anaconda
 =========
 
 * Download and install [miniconda](http://conda.pydata.org/miniconda.html)
-* Download and install [Git](http://www.git-scm.com/download/win)
 * Download and install [MS Visual C++ compiler](http://aka.ms/vcpython27)
 
-     Select "Run Git from the Windows Command Prompt" or "Run Git and included Unix tools from the Windows Command Prompt"
-* Download and install [CMake](http://www.cmake.org/download/#latest)
 * Run command line and create conda-virtualenv
 
 
