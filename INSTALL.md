@@ -57,47 +57,14 @@ Install Windows with Anaconda
 
 
         pip install pywget
-        python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_conda.txt
-        conda install -y -c mjirik -c SimpleITK --file requirements_conda.txt
         python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_pip.txt
         pip install -r requirements_pip.txt
-        mkdir projects
-        cd projects
-        
-* gco_python
-    
-    Fallowing lines downloads gco and gco_python. Then it makes build with mingw compiler and install. 
+        conda install -y -c mjirik -c SimpleITK --file lisa
 
+* Run Lisa
 
-        git clone https://github.com/amueller/gco_python.git
-        cd gco_python
-        mkdir gco_src && cd gco_src
-        curl -O http://vision.csd.uwo.ca/code/gco-v3.0.zip
-        unzip gco-v3.0.zip
-        cd ..
-        curl -O https://raw2.github.com/mjirik/pyseg_base/master/distr/gco_python.pyx.patch
-        patch gco_python.pyx < gco_python.pyx.patch
-        python setup.py build_ext -i --compiler=mingw32
-        python setup.py build --compiler=mingw32
-        python setup.py install --skip-build
-        cd ..
-        
-        python -m wget http://downloads.sourceforge.net/project/itk/itk/4.7/InsightToolkit-4.7.1.zip?r=http%3A%2F%2Fwww.itk.org%2FITK%2Fresources%2Fsoftware.html&ts=1424632138&use_mirror=softlayer-ams
-        unzip InsightToolkit-4.7.1.zip
-        
-        git clone https://github.com/mjirik/skelet3d.git
-        mkdir skelet3d\build
-        cd skelet3d\build
-        cmake ..
-        make
-        sudo make install
-        cd ..
-        cd ..
-        
-* download lisa
-
-        git clone --recursive -b stable https://github.com/mjirik/lisa.git
-
+        activate lisa
+        python -m lisa
 
 
 

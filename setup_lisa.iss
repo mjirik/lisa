@@ -9,7 +9,7 @@
 
 [Files]
 ;Source: "{tmp}\Miniconda-latest-Windows-x86_64.exe"; DestDir: "{app}"; Flags: external; ExternalSize: 22743040
-Source: "lisa\applications\LISA.ico"; DestDir: "{app}"
+Source: "applications\LISA.ico"; DestDir: "{app}"
 ;Source: "..\..\Downloads\Miniconda-latest-Windows-x86_64.exe"; DestDir: "{tmp}"
 Source: "..\..\Downloads\VCForPython27.msi"; DestDir: "{tmp}"
 Source: "installer.bat"; DestDir: "{tmp}"
@@ -30,7 +30,7 @@ DefaultDirName={pf}\{#MyAppName}
 ;DefaultDirName={%HOMEPATH}\{#MyAppName}
 ;DefaultDirName={userpf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
-OutputBaseFilename=setup_quantan
+OutputBaseFilename=setup_lisa
 Compression=lzma
 SolidCompression=yes
 ;PrivilegesRequired=lowest
@@ -48,8 +48,7 @@ Name: "czech"; MessagesFile: "compiler:Languages\Czech.isl"
 [Run]
 Filename: "{tmp}\Miniconda-latest-Windows-x86_64.exe"; Parameters: "/AddToPath=1 /RegisterPython=1 /D={%HOMEPATH}\Minicoconda2"; Flags: waituntilterminated runasoriginaluser
 Filename: "msiexec.exe"; Parameters: "/i ""{tmp}\VCForPython27.msi"""
-; Filename: "{cmd}"; Parameters: "/C ""pause"""
-Filename: "{cmd}"; Parameters: "/C ""conda install --yes -c SimpleITK -c mjirik lisa"""; WorkingDir: "{%HOMEPATH}\Miniconda2\Scripts"; Flags: runasoriginaluser
+;Filename: "{cmd}"; Parameters: "/C ""conda install --yes -c SimpleITK -c mjirik lisa"""; WorkingDir: "{%HOMEPATH}\Miniconda2\Scripts"; Flags: runasoriginaluser
 ;Filename: "{cmd}"; Parameters: "/C ""pause"""
 Filename: "{cmd}"; Parameters: "/C ""{tmp}\installer.bat"""
 
@@ -58,9 +57,8 @@ Filename: "{cmd}"; Parameters: "/C ""{tmp}\installer.bat"""
 procedure InitializeWizard();
 begin
     idpAddFileSize('https://repo.continuum.io/miniconda/Miniconda-latest-Windows-x86_64.exe', ExpandConstant('{tmp}\Miniconda-latest-Windows-x86_64.exe'), 22743040);
-
     idpDownloadAfter(wpReady);
 end;
 
 [Icons]
-Name: "{group}\Lisa"; Filename: "{cmd}"; WorkingDir: "{userdocs}"; Flags: runminimized; IconFilename: "{app}\icon.ico"; IconIndex: 0; Parameters: "/C ""activate lisa & python -m quantan"""
+Name: "{group}\Lisa"; Filename: "{cmd}"; WorkingDir: "{userdocs}"; Flags: runminimized; IconFilename: "{app}\LISA.ico"; IconIndex: 0; Parameters: "/C ""call activate lisa & python -m lisa"""
