@@ -31,7 +31,7 @@ dicom2fem>=1.0.0
 sed3>=1.1.17
 io3d>=1.0.18
 imtools>=0.0.1
-pygco==0.0.5
+# pygco==0.0.5
 joblib>=0.8.4
 morphsnakes
 skelet3d
