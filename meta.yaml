@@ -47,6 +47,7 @@ requirements:
     - pandas
     - pywget
     - scikit-learn
+    - scikit-image
 
   run:
     - python
@@ -64,6 +65,7 @@ requirements:
     - simpleitk
     - pywget
     - scikit-learn
+    - scikit-image
 
 test:
   # Python imports
