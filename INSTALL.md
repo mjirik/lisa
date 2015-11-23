@@ -38,8 +38,12 @@ Install Mac OS
  
    
 
-Install Windows with Anaconda
+Install Lisa for Windows with Anaconda
 =========
+
+Use [windows installer](http://147.228.240.61/queetech/install/setup_lisa.exe)
+
+or
 
 * Download and install [miniconda](http://conda.pydata.org/miniconda.html)
 * Download and install [MS Visual C++ compiler](http://aka.ms/vcpython27)
