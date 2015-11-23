@@ -83,9 +83,9 @@ test:
     # - nose
 
 about:
-  home: https://github.com/mjirik/quanta
+  home: https://github.com/mjirik/lisa
   license: BSD License
-  summary: 'Quantitative histological analyser'
+  summary: 'Liver Surgery Analyser'
 
 # See
 # http://docs.continuum.io/conda/build.html for
