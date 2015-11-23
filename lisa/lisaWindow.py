@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 import sys
 import os
 import numpy as np
+import subprocess
 
 import datetime
 import Tkinter as tk
@@ -124,7 +125,11 @@ class OrganSegmentationWindow(QMainWindow):
         self.uiw['dcmdir'] = btn_config
         grid.addWidget(btn_config, 2, 1)
 
-        grid.addWidget(lisa_logo, 0, 2, 3, 2)
+        btn_update = QPushButton("Update", self)
+        btn_update.clicked.connect(self.btnUpdate)
+        self.uiw['btn_update'] = btn_update
+        grid.addWidget(btn_update, 3, 1)
+        grid.addWidget(lisa_logo, 0, 2, 4, 2)
 
         # rid.setColumnMinimumWidth(1, logo.width()/2)
         # rid.setColumnMinimumWidth(2, logo.width()/2)
@@ -689,6 +694,9 @@ class OrganSegmentationWindow(QMainWindow):
 
         else:
             self.statusBar().showMessage('No segmentation data!')
+
+    def btnUpdate(self, event=None):
+        print subprocess.call(['conda', 'update', 'conda']) #, shell=True)
 
     def btnConfig(self, event=None):
         import configEditor as ce
