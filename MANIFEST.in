@@ -1,0 +1,2 @@
+recursive-include lisa/icons *
+include applications/LISA.ico
