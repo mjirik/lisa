@@ -54,7 +54,11 @@ def find_logo():
     # lisa runtime directory
     logopath = "./LISA256.png"
     if not os.path.exists(logopath):
-        wget.download("https://raw.githubusercontent.com/mjirik/lisa/master/lisa/icons/LISA256.png")
+        try:
+            wget.download("https://raw.githubusercontent.com/mjirik/lisa/master/lisa/icons/LISA256.png")
+        except:
+            logger.warning('logo download failed')
+            pass
     if os.path.exists(logopath):
         return logopath
 
