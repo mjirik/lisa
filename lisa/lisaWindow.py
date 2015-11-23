@@ -1,5 +1,4 @@
 # /usr/bin/env python
-conda install -y -c SimpleITK -c mjirik lisa
 # -*- coding: utf-8 -*-
 """
 Modul is used for GUI of Lisa
