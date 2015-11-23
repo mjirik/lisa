@@ -207,8 +207,8 @@ def getVersionString():
         except:
             logger.warning('Problem with reading file "__VERSION__"')
 
-    if version_string is None:
-        version_string = ""
+    # if version_string is None:
+    #     version_string = ""
     return version_string
 
 

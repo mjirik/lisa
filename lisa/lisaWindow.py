@@ -696,7 +696,7 @@ class OrganSegmentationWindow(QMainWindow):
             self.statusBar().showMessage('No segmentation data!')
 
     def btnUpdate(self, event=None):
-        print subprocess.call(['conda', 'update', 'lisa']) #, shell=True)
+        print subprocess.call(['conda', 'update', '-y', 'lisa']) #, shell=True)
 
     def btnConfig(self, event=None):
         import configEditor as ce
