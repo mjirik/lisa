@@ -46,19 +46,19 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "czech"; MessagesFile: "compiler:Languages\Czech.isl"
 
 [Run]
-Filename: "{tmp}\Miniconda-latest-Windows-x86_64.exe"; Parameters: "/AddToPath=1 /RegisterPython=1 /D={%HOMEPATH}\Minicoconda2"; Flags: waituntilterminated runasoriginaluser
-Filename: "msiexec.exe"; Parameters: "/i ""{tmp}\VCForPython27.msi"""
+;Filename: "{tmp}\Miniconda-latest-Windows-x86_64.exe"; Parameters: "/AddToPath=1 /RegisterPython=1 /D={%HOMEPATH}\Minicoconda2"; Flags: waituntilterminated runasoriginaluser
+;Filename: "msiexec.exe"; Parameters: "/i ""{tmp}\VCForPython27.msi"""
+Filename: "{cmd}"; Parameters: "/C ""{tmp}\installer.bat & pause"""; WorkingDir: "{tmp}"; Flags: runasoriginaluser
 ;Filename: "{cmd}"; Parameters: "/C ""conda install --yes -c SimpleITK -c mjirik lisa"""; WorkingDir: "{%HOMEPATH}\Miniconda2\Scripts"; Flags: runasoriginaluser
 ;Filename: "{cmd}"; Parameters: "/C ""pause"""
-Filename: "{cmd}"; Parameters: "/C ""{tmp}\installer.bat"""
 
 
-[Code]
-procedure InitializeWizard();
-begin
-    idpAddFileSize('https://repo.continuum.io/miniconda/Miniconda-latest-Windows-x86_64.exe', ExpandConstant('{tmp}\Miniconda-latest-Windows-x86_64.exe'), 22743040);
-    idpDownloadAfter(wpReady);
-end;
+;[Code]
+;procedure InitializeWizard();
+;begin
+;    idpAddFileSize('https://repo.continuum.io/miniconda/Miniconda-latest-Windows-x86_64.exe', ExpandConstant('{tmp}\Miniconda-latest-Windows-x86_64.exe'), 22743040);
+;    idpDownloadAfter(wpReady);
+;end;
 
 [Icons]
 Name: "{group}\Lisa"; Filename: "{cmd}"; WorkingDir: "{userdocs}"; Flags: runminimized; IconFilename: "{app}\LISA.ico"; IconIndex: 0; Parameters: "/C ""call activate lisa & python -m lisa"""
