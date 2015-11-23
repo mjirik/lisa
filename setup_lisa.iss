@@ -9,6 +9,7 @@
 
 [Files]
 Source: "applications\LISA.ico"; DestDir: "{app}"
+;Source: "lisa\icons\LISA256.png"; DestDir: "{app}"
 ;Source: "..\..\Downloads\Miniconda-latest-Windows-x86_64.exe"; DestDir: "{tmp}"
 Source: "..\..\Downloads\VCForPython27.msi"; DestDir: "{tmp}"
 Source: "installer.bat"; DestDir: "{tmp}"
