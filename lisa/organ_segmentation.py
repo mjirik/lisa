@@ -201,7 +201,7 @@ class OrganSegmentation():
         self.processing_time = None
         self.experiment_caption = experiment_caption
         self.lisa_operator_identifier = lisa_operator_identifier
-        self.version = "1.6.12"
+        self.version = "1.6.13"
         self.version = qmisc.getVersionString()
         self.viewermax = viewermax
         self.viewermin = viewermin
