@@ -46,6 +46,19 @@ except:
 import volumetry_evaluation
 import sed3
 
+def find_logo():
+    import wget
+    logopath = os.path.join(path_to_script, "./rrrricons/LISA256.png")
+    if os.path.exists(logopath):
+        return logopath
+    # lisa runtime directory
+    logopath = "./LISA256.png"
+    if not os.path.exists(logopath):
+        wget.download("https://raw.githubusercontent.com/mjirik/lisa/master/lisa/icons/LISA256.png")
+    if os.path.exists(logopath):
+        return logopath
+
+    pass
 
 # GUI
 class OrganSegmentationWindow(QMainWindow):
@@ -96,7 +109,7 @@ class OrganSegmentationWindow(QMainWindow):
         info.setFont(font_info)
         lisa_title.setFont(font_label)
         lisa_logo = QLabel()
-        logopath = os.path.join(path_to_script, "../applications/LISA256.png")
+        logopath = find_logo()
         logo = QPixmap(logopath)
         lisa_logo.setPixmap(logo)  # scaledToWidth(128))
         grid.addWidget(lisa_title, 0, 1)
