@@ -136,7 +136,7 @@ class OrganSegmentationWindow(QMainWindow):
         # rid.setColumnMinimumWidth(3, logo.width()/2)
 
         # # dicom reader
-        rstart = 3
+        rstart = 5
         hr = QFrame()
         hr.setFrameShape(QFrame.HLine)
         text_dcm = QLabel('DICOM reader')
@@ -696,7 +696,7 @@ class OrganSegmentationWindow(QMainWindow):
             self.statusBar().showMessage('No segmentation data!')
 
     def btnUpdate(self, event=None):
-        print subprocess.call(['conda', 'update', 'conda']) #, shell=True)
+        print subprocess.call(['conda', 'update', 'lisa']) #, shell=True)
 
     def btnConfig(self, event=None):
         import configEditor as ce
