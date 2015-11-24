@@ -48,6 +48,7 @@ requirements:
     - pywget
     - scikit-learn
     - scikit-image
+    - pyqtconfig
 
   run:
     - python
@@ -66,6 +67,7 @@ requirements:
     - pywget
     - scikit-learn
     - scikit-image
+    - pyqtconfig
 
 test:
   # Python imports
