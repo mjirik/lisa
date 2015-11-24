@@ -49,6 +49,9 @@ requirements:
     - scikit-learn
     - scikit-image
     - pyqtconfig
+    - pip
+    # just for pip install pygco
+    - cython
 
   run:
     - python
@@ -68,6 +71,9 @@ requirements:
     - scikit-learn
     - scikit-image
     - pyqtconfig
+    - pip
+    # just for pip install pygco
+    - cython
 
 test:
   # Python imports
