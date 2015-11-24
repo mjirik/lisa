@@ -51,13 +51,12 @@ or
 * Run command line and create conda-virtualenv
 
 
-        conda create --no-default-packages -n lisa pip pywget numpy
+        conda create --no-default-packages -y -c mjirik -c SimpleITK -n lisa pip lisa
         activate lisa
 
 * In activated lisa virtualenv run following lines
 
 
-        pip install pywget
         python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_pip.txt
         pip install -r requirements_pip.txt
         conda install -y -c mjirik -c SimpleITK --file lisa
