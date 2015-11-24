@@ -57,6 +57,7 @@ from io3d import datawriter
 import data_plus
 import support_structure_segmentation as sss
 import cachefile as cachef
+import config_default
 
 # import audiosupport
 # import skimage
@@ -1277,7 +1278,8 @@ def lisa_config_init():
     cfg.update(cfgplus)
     # now is in cfg default values
 
-    cfg = config.get_config("organ_segmentation.config", cfg)
+    # cfg = config.get_config("organ_segmentation.config", cfg)
+    cfg.update(config_default.CONFIG_DEFAULT)
     user_config_path = os.path.join(cfg['output_datapath'],
                                     "organ_segmentation.config")
     config.check_config_version_and_remove_old_records(
