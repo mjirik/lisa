@@ -1,3 +1,5 @@
+#! /usr/bin/python
+# -*- coding: utf-8 -*-
 
 CONFIG_DEFAULT={
     "autocrop": True,
