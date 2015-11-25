@@ -11,7 +11,7 @@
 Source: "applications\LISA.ico"; DestDir: "{app}"
 ;Source: "lisa\icons\LISA256.png"; DestDir: "{app}"
 ;Source: "..\..\Downloads\Miniconda-latest-Windows-x86_64.exe"; DestDir: "{tmp}"
-Source: "..\..\Downloads\VCForPython27.msi"; DestDir: "{tmp}"
+;Source: "..\..\Downloads\VCForPython27.msi"; DestDir: "{tmp}"
 Source: "installer.bat"; DestDir: "{tmp}"
 
 [Setup]
@@ -26,7 +26,9 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={pf}\{#MyAppName}
+;default is into c:\Users\Public if not, use userpf
+;DefaultDirName={%PUBLIC|{userpf}}\{#MyAppName}
+DefaultDirName={commonappdata}\{#MyAppName}
 ;DefaultDirName={%HOMEPATH}\{#MyAppName}
 ;DefaultDirName={userpf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
@@ -46,19 +48,28 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "czech"; MessagesFile: "compiler:Languages\Czech.isl"
 
 [Run]
-Filename: "{tmp}\Miniconda-latest-Windows-x86_64.exe"; Parameters: "/AddToPath=1 /RegisterPython=1 /D={%HOMEPATH}\Minicoconda2"; Flags: waituntilterminated runasoriginaluser
+;Filename: "{tmp}\Miniconda-latest-Windows-x86_64.exe"; Parameters: "/AddToPath=1 /RegisterPython=1 /D={%PUBLIC}\Minicoconda2"; Flags: waituntilterminated runasoriginaluser
+Filename: "{tmp}\Miniconda-latest-Windows-x86_64.exe"; Parameters: "/AddToPath=1 /RegisterPython=1 /InstallationType=AllUsers"; Flags: waituntilterminated runasoriginaluser
 Filename: "msiexec.exe"; Parameters: "/i ""{tmp}\VCForPython27.msi"""
-Filename: "{cmd}"; Parameters: "/C ""{tmp}\installer.bat"""; WorkingDir: "{tmp}"; Flags: runasoriginaluser
+Filename: "{cmd}"; Parameters: "/C ""{tmp}\installer.bat & pause"""; WorkingDir: "{tmp}"; Flags: runasoriginaluser
 ;Filename: "{cmd}"; Parameters: "/C ""conda install --yes -c SimpleITK -c mjirik lisa"""; WorkingDir: "{%HOMEPATH}\Miniconda2\Scripts"; Flags: runasoriginaluser
 ;Filename: "{cmd}"; Parameters: "/C ""pause"""
-
+;Filename: "conda"; Parameters: "create -y --no-default-packages -c mjirik -c SimpleITK -n lisa lisa pywget pip"
 
 [Code]
+function IsCondaInstalled: boolean;
+begin
+result := not (FileExists('c:\Miniconda2\Scripts\conda.exe') or FileExists('{%HOMEPATH}\Miniconda2\Scripts\conda.exe') or FileExists('c:\Anaconda2\Scripts\conda.exe') or FileExists('c:\Miniconda\Scripts\conda.exe') or FileExists('c:\Anaconda\Scripts\conda.exe') or FileExists('{%HOMEPATH}\Miniconda2\Scripts\conda.exe') or FileExists('{%HOMEPATH}\Miniconda\Scripts\conda.exe') or FileExists('{%HOMEPATH}\Anaconda2\Scripts\conda.exe') or FileExists('{%HOMEPATH}\Anaconda\Scripts\conda.exe'));
+end;
+
 procedure InitializeWizard();
 begin
+  if IsCondaInstalled then
     idpAddFileSize('https://repo.continuum.io/miniconda/Miniconda-latest-Windows-x86_64.exe', ExpandConstant('{tmp}\Miniconda-latest-Windows-x86_64.exe'), 22743040);
-    idpDownloadAfter(wpReady);
+  idpAddFileSize('https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi', ExpandConstant('{tmp}\VCForPython27.msi'), 87891968);
+  idpDownloadAfter(wpReady);
 end;
 
 [Icons]
 Name: "{group}\Lisa"; Filename: "{cmd}"; WorkingDir: "{userdocs}"; Flags: runminimized; IconFilename: "{app}\LISA.ico"; IconIndex: 0; Parameters: "/C ""call activate lisa & python -m lisa"""
+Name: "{commondesktop}\Lisa"; Filename: "{cmd}"; WorkingDir: "{commondocs}"; Flags: runminimized; IconFilename: "{app}\LISA.ico"; IconIndex: 0; Parameters: "/C ""call activate lisa & python -m lisa"""
