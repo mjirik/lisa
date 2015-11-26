@@ -31,7 +31,8 @@ def externfv(data3d, voxelsize_mm):        # scale
         #f2 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=5).reshape(-1, 1) - f0
         #f3 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=10).reshape(-1, 1) - f0
         #f4 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=20).reshape(-1, 1) - f0
-        # position
+        # position asdfas
+        from lisa import body_navigation
         ss = body_navigation.BodyNavigation(data3d, voxelsize_mm)
         fd1 = ss.dist_to_lungs().reshape(-1, 1)
         fd2 = ss.dist_to_spine().reshape(-1, 1)
@@ -162,6 +163,14 @@ def train_liver_localizator_from_sliver_data(
         sliver_reference_dir='~/data/medical/orig/sliver07/training/',
         orig_pattern="*orig*[1-9].mhd",
         ref_pattern="*seg*[1-9].mhd"):
+    """
+    Train liver localization based on spine and lungs from all sliver reference data except number 10 and 20
+    :param output_file:
+    :param sliver_reference_dir:
+    :param orig_pattern:
+    :param ref_pattern:
+    :return:
+    """
 
     sliver_reference_dir = op.expanduser(sliver_reference_dir)
 
@@ -218,11 +227,16 @@ def main():
     parser = argparse.ArgumentParser(
         description=__doc__
     )
+    # parser.add_argument(
+    #     '-i', '--inputfile',
+    #     default=None,
+    #     required=True,
+    #     help='input file'
+    # )
     parser.add_argument(
-        '-i', '--inputfile',
-        default=None,
-        required=True,
-        help='input file'
+        '-o', '--outputfile',
+        default="liver.ol.p",
+        help='output file'
     )
     parser.add_argument(
         '-d', '--debug', action='store_true',
@@ -231,6 +245,7 @@ def main():
 
     if args.debug:
         ch.setLevel(logging.DEBUG)
+    train_liver_localizator_from_sliver_data(args.outputfile)
 
 
 if __name__ == "__main__":
