@@ -120,6 +120,19 @@ class OrganLocalizator():
         print "predict ", pred.shape,
         return imtools.qmisc.resize_to_shape(pred.reshape(data3dr.shape), data3d.shape)
 
+    def predict_w(self, data3d, voxelsize_mm, weight, label0=0, label1=1):
+        """
+        segmentation with weight factor
+        :param data3d:
+        :param voxelsize_mm:
+        :param weight:
+        :return:
+        """
+        scores = self.scores(data3d, voxelsize_mm)
+        out = scores[label1] > (weight * scores[label0])
+
+        return out
+
     def scores(self, data3d, voxelsize_mm):
         data3dr = imtools.qmisc.resize_to_mm(data3d, voxelsize_mm, self.working_voxelsize_mm)
         fv = self._fv(data3dr)
@@ -147,8 +160,8 @@ class OrganLocalizator():
 def train_liver_localizator_from_sliver_data(
         output_file="liver.ol.p",
         sliver_reference_dir='~/data/medical/orig/sliver07/training/',
-        orig_pattern="*orig*[1-2].mhd",
-        ref_pattern="*seg*[1-2].mhd"):
+        orig_pattern="*orig*[1-9].mhd",
+        ref_pattern="*seg*[1-9].mhd"):
 
     sliver_reference_dir = op.expanduser(sliver_reference_dir)
 
