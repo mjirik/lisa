@@ -59,7 +59,8 @@ def externfv(data3d, voxelsize_mm):        # scale
 
 
 class OrganLocalizator():
-    def __init__(self, feature_function=None):
+    def __init__(self):
+        feature_function = None
         self.working_voxelsize_mm = [1.5, 1.5, 1.5]
         self.data=None
         self.target=None
@@ -77,7 +78,7 @@ class OrganLocalizator():
         """
         import dill as pickle
         sv = {
-            'feature_function': self.feature_function,
+            # 'feature_function': self.feature_function,
             'cl': self.cl
 
         }
@@ -87,7 +88,7 @@ class OrganLocalizator():
         import dill as pickle
         sv = pickle.load(open(mdl_file, "rb"))
         self.cl= sv['cl']
-        self.feature_function = sv['feature_function']
+        # self.feature_function = sv['feature_function']
 
 
     def _fv(self, data3dr):
