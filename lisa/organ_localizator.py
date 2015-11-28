@@ -18,6 +18,7 @@ import numpy as np
 import argparse
 import glob
 import os.path as op
+import traceback
 
 import body_navigation
 import imtools
@@ -32,14 +33,15 @@ def externfv(data3d, voxelsize_mm):        # scale
         #f3 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=10).reshape(-1, 1) - f0
         #f4 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=20).reshape(-1, 1) - f0
         # position asdfas
-        from lisa import body_navigation
+        import body_navigation
         ss = body_navigation.BodyNavigation(data3d, voxelsize_mm)
         fd1 = ss.dist_to_lungs().reshape(-1, 1)
         fd2 = ss.dist_to_spine().reshape(-1, 1)
         fd3 = ss.dist_sagittal().reshape(-1, 1)
         fd4 = ss.dist_coronal().reshape(-1, 1)
-        fd5 = ss.dist_to_surface().reshape(-1, 1)
-        fd6 = ss.dist_diaphragm().reshape(-1, 1)
+        fd5 = ss.dist_axial().reshape(-1, 1)
+        fd6 = ss.dist_to_surface().reshape(-1, 1)
+        fd7 = ss.dist_diaphragm().reshape(-1, 1)
 
         # f6 = scipy.ndimage.filters.gaussian_filter(data3d, sigma=[20, 1, 1]).reshape(-1, 1) - f0
         # f7 = scipy.ndimage.filters.gaussian_filter(data3d, sigma=[1, 20, 1]).reshape(-1, 1) - f0
@@ -50,7 +52,7 @@ def externfv(data3d, voxelsize_mm):        # scale
         fv = np.concatenate([
                 # f0,
 #                 f1, f2, f3, f4,
-                fd1, fd2, fd3, fd4, fd5, fd6,
+                fd1, fd2, fd3, fd4, fd5, fd6, fd7,
                 #f6, f7, f8
             ], 1)
 
@@ -117,9 +119,7 @@ class OrganLocalizator():
     def predict(self, data3d, voxelsize_mm):
         data3dr = imtools.qmisc.resize_to_mm(data3d, voxelsize_mm, self.working_voxelsize_mm)
         fv = self._fv(data3dr)
-        print "shape predict ", fv.shape,
         pred = self.cl.predict(fv)
-        print "predict ", pred.shape,
         return imtools.qmisc.resize_to_shape(pred.reshape(data3dr.shape), data3d.shape)
 
     def predict_w(self, data3d, voxelsize_mm, weight, label0=0, label1=1):
@@ -138,7 +138,6 @@ class OrganLocalizator():
     def scores(self, data3d, voxelsize_mm):
         data3dr = imtools.qmisc.resize_to_mm(data3d, voxelsize_mm, self.working_voxelsize_mm)
         fv = self._fv(data3dr)
-        print "shape predict ", fv.shape,
         scoreslin = self.cl.scores(fv)
         scores = {}
         for key in scoreslin:
@@ -199,6 +198,7 @@ def train_liver_localizator_from_sliver_data(
         try:
             sf.add_train_data(data3d_orig, data3d_seg, voxelsize_mm=vs_mm)
         except:
+            traceback.print_exc()
             print "problem"
             pass
         # fvhn = copy.deepcopy(fvh)
