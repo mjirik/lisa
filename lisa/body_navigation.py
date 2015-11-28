@@ -136,6 +136,7 @@ class BodyNavigation:
         axdst = np.ones(self.data3dr.shape, dtype=np.int16)
         axdst[0 ,: ,:] = 0
         iz, ix, iy = np.nonzero(self.diaphragm_mask)
+        # print 'dia level ', self.diaphragm_mask_level
 
         axdst = scipy.ndimage.morphology.distance_transform_edt(axdst) - int(self.diaphragm_mask_level)
         return misc.resize_to_shape(axdst, self.orig_shape)
