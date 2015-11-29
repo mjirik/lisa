@@ -72,7 +72,7 @@ class OrganLocalizator():
         if feature_function is None:
             feature_function = externfv
         self.feature_function = feature_function
-        self.cl = imtools.ml.gmmcl.GMMCl(n_components=3)
+        self.cl = imtools.ml.gmmcl.GMMCl(n_components=5)
 
     def save(self, filename='saved.ol.p'):
         """
