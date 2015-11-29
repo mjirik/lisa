@@ -18,11 +18,12 @@ import argparse
 
 import numpy as np
 from dicom2fem import seg2fem
-import misc
+# import misc
 import viewer
+import io3d
 
 
-def showSegmentation(
+def convert_segmentation(
         segmentation,
         voxelsize_mm=np.ones([3, 1]),
         degrad=4,
@@ -79,9 +80,13 @@ if __name__ == "__main__":
         '-l', '--label', type=int, metavar='N', nargs='+',
         default=[1],
         help='segmentation labels, default 1')
+    parser.add_argument(
+        '-s', '--show', action='store_true',
+        help='Show mode')
     args = parser.parse_args()
 
-    data = misc.obj_from_file(args.inputfile, filetype='pickle')
+    dr = io3d.DataReader()
+    data = dr.Get3DData(args.inputfile, dataplus_format=True)
     # args.label = np.array(eval(args.label))
     # print args.label
     # import pdb; pdb.set_trace()
@@ -89,4 +94,10 @@ if __name__ == "__main__":
     for i in range(0, len(args.label)):
         ds = ds | (data['segmentation'] == args.label[i])
 
-    showSegmentation(ds, degrad=args.degrad)
+    if args.show:
+        import sed3
+        ed = sed3.sed3(ds)
+        ed.show()
+
+
+    convert_segmentation(ds, degrad=args.degrad)
