@@ -268,9 +268,36 @@ def compare_volumes_boundingbox(vol1, vol2, voxelsize_mm):
     }
     return evaluation
 
+def compare_volumes_sliver(vol1, vol2, voxelsize_mm, use_logger=False):
+    """
+    Computes statistics from similarity of vol1 and vol2. Return the same as
+    compare_volumes with additional information with sliver score
+    :param vol1:
+    :param vol2:
+    :param voxelsize_mm:
+    :param use_logger:
+    :return:
+    """
+
+    evaluation = compare_volumes(vol1, vol2, voxelsize_mm, use_logger)
+    sliver_evaluation = sliver_score_one_couple(
+        evaluation,
+        keys=[
+            'sliver_vd_pts',
+            'sliver_voe_pts',
+            'sliver_avgd_pts',
+            'sliver_rmsd_pts',
+            'sliver_maxd_pts'
+        ])
+    overall = sliver_overall_score_for_one_couple(sliver_evaluation)
+
+    evaluation.update(sliver_evaluation)
+    evaluation['sliver_overall_pts'] = overall
 
 def compare_volumes(vol1, vol2, voxelsize_mm, use_logger=False):
     """
+    computes metrics, no sliver computed here, see compare_volumes_sliver
+
     vol1: reference
     vol2: segmentation
     """
@@ -322,12 +349,13 @@ def compare_volumes(vol1, vol2, voxelsize_mm, use_logger=False):
         'err2_mm3': df2,
         'err1_percent': df1 / volume_avg_mm3 * 100,
         'err2_percent': df2 / volume_avg_mm3 * 100,
-        'voe': voe,
         'vd': vd,
+        'voe': voe,
         'avgd': avgd,
         'rmsd': rmsd,
         'maxd': maxd
     }
+
     return evaluation
 
 
@@ -340,8 +368,8 @@ def distance_matrics(vol1, vol2, voxelsize_mm):
     vol1 = qmisc.crop(vol1, crinfo)
     vol2 = qmisc.crop(vol2, crinfo)
 
-    border1 = get_border(vol1)
-    border2 = get_border(vol2)
+    border1 = _get_border(vol1)
+    border2 = _get_border(vol2)
 
     # pyed = sed3.sed3(vol1, contour=vol1)
     # pyed.show()
@@ -388,7 +416,7 @@ def distance_matrics(vol1, vol2, voxelsize_mm):
     return avgd, rmsd, maxd
 
 
-def get_border(image3d):
+def _get_border(image3d):
     import scipy.ndimage
 
     kernel = np.ones([3, 3, 3])
@@ -484,16 +512,19 @@ def sliver_score(measure, metric_type):
     return score
 
 
-def sliver_score_one_couple(data):
+def sliver_score_one_couple(
+        data,
+        keys=['vd', 'voe', 'avgd', 'rmsd', 'maxd']):
     """
     Convert data from compare_volumes() function.
+    :param keys: set output keys
     """
     score = {
-        'vd': sliver_score(data['vd'], 'vd'),
-        'voe': sliver_score(data['voe'], 'voe'),
-        'avgd': sliver_score(data['avgd'], 'avgd'),
-        'rmsd': sliver_score(data['rmsd'], 'rmsd'),
-        'maxd': sliver_score(data['maxd'], 'maxd'),
+        keys[0]: sliver_score(data['vd'], 'vd'),
+        keys[1]: sliver_score(data['voe'], 'voe'),
+        keys[2]: sliver_score(data['avgd'], 'avgd'),
+        keys[3]: sliver_score(data['rmsd'], 'rmsd'),
+        keys[4]: sliver_score(data['maxd'], 'maxd'),
     }
     return score
 

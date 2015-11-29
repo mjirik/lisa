@@ -411,16 +411,16 @@ class OrganSegmentation():
         print "then press 'c' and 'Enter'"
         import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
-        evaluation = volumetry_evaluation.compare_volumes(
+        evaluation = volumetry_evaluation.compare_volumes_sliver(
             data3d_segmentation_actual == label1,
             data3d_segmentation == label2,
             self.voxelsize_mm
             )
-        score = volumetry_evaluation.sliver_score_one_couple(evaluation)
+        # score = volumetry_evaluation.sliver_score_one_couple(evaluation)
         segdiff = qmisc.crop(
             ((data3d_segmentation) - data3d_segmentation_actual),
             self.crinfo)
-        return evaluation, score, segdiff
+        return evaluation, segdiff
 
     def segm_smoothing(self, sigma_mm):
         """
