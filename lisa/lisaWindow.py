@@ -73,7 +73,7 @@ class OrganSegmentationWindow(QMainWindow):
         self.oseg = oseg
 
         QMainWindow.__init__(self)
-        self.initUI()
+        self._initUI()
 
         if oseg is not None:
             if oseg.data3d is not None:
@@ -82,7 +82,9 @@ class OrganSegmentationWindow(QMainWindow):
 
         self.statusBar().showMessage('Ready')
 
-    def initUI(self):
+
+
+    def _initUI(self):
         cw = QWidget()
         self.setCentralWidget(cw)
         grid = QGridLayout()
