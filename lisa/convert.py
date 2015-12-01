@@ -23,16 +23,7 @@ from dicom2fem import seg2fem
 import viewer
 import io3d
 import dicom2fem
-
-def select_labels(segmentation, labels):
-    ds = np.zeros(segmentation.shape, np.bool)
-    for lab in labels:
-        print "print zpracovavam ", lab
-        dadd = (segmentation == lab)
-
-        ds = ds | dadd
-
-    return ds
+from data_manipulation import select_labels
 
 
 def seg2stl(

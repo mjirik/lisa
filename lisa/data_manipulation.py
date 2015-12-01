@@ -18,6 +18,15 @@ import numpy as np
 
 import qmisc
 
+def select_labels(segmentation, labels):
+    ds = np.zeros(segmentation.shape, np.bool)
+    for lab in labels:
+        print "print zpracovavam ", lab
+        dadd = (segmentation == lab)
+
+        ds = ds | dadd
+
+    return ds
 
 def unbiased_brick_filter(binary_data, crinfo):
     """
