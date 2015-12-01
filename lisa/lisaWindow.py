@@ -32,7 +32,7 @@ sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
 from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
     QGridLayout, QLabel, QPushButton, QFrame, \
     QFont, QPixmap, QFileDialog
-
+from PyQt4 import QtGui
 from PyQt4.Qt import QString
 try:
     from pysegbase.seed_editor_qt import QTSeedEditor
