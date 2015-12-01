@@ -83,6 +83,15 @@ class OrganSegmentationWindow(QMainWindow):
         self.statusBar().showMessage('Ready')
 
 
+    def _initMenu(self):
+        exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
+        exitAction.setShortcut('Ctrl+Q')
+        exitAction.setStatusTip('Exit application')
+        exitAction.triggered.connect(QtGui.qApp.quit)
+
+        menubar = self.menuBar()
+        fileMenu = menubar.addMenu('&File')
+        fileMenu.addAction(exitAction)
 
     def _initUI(self):
         cw = QWidget()
@@ -93,6 +102,9 @@ class OrganSegmentationWindow(QMainWindow):
 
         # status bar
         self.statusBar().showMessage('Ready')
+
+        # menubar
+        self._initMenu()
 
         font_label = QFont()
         font_label.setBold(True)
@@ -300,6 +312,7 @@ class OrganSegmentationWindow(QMainWindow):
         self.grid = grid
 
         self.setWindowTitle('LISA')
+
         self.show()
 
     def quit(self, event):
