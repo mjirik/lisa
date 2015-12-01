@@ -265,7 +265,7 @@ def freePostProcesHranice(data3d, utvar):
     je odstraneni zily vystupujici z jater ktera
     je nekdy segmentovana. '''
     prepsany = data3d.astype(np.int8)
-    hranice = ve.get_border(prepsany)
+    hranice = ve._get_border(prepsany)
     uzavrenaHranice = ndimage.binary_closing(hranice, utvar, 4)
     opak = np.negative(uzavrenaHranice)
     rozdeleny = np.multiply(opak, data3d)
@@ -1319,7 +1319,7 @@ def regionGrowingCTIF(ctImage, array, velikostVoxelu, konstanta=100,
     # segmentaceImg = sitk.GetImageFromArray(array) #nepotrebne, zustane ve
     # formatu numpy
 
-    border = ve.get_border(array)
+    border = ve._get_border(array)
 
     # pole s informaci o vektorech (jejich pozice v souradnicich) DRIVE array
     vektory = np.where(border == 1)

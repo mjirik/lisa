@@ -15,19 +15,41 @@ logger = logging.getLogger(__name__)
 from PyQt4.QtGui import QApplication
 import argparse
 
+import vtk
 
 import numpy as np
 from dicom2fem import seg2fem
-import misc
+# import misc
 import viewer
+import io3d
 
+def vtk2stl(fn_in, fn_out, mesh_data):
 
-def showSegmentation(
+    reader = vtk.vtkDataSetReader()
+    reader.SetFileName(fn_in)
+    reader.Update()
+
+    gfilter = vtk.vtkGeometryFilter()
+    # if vtk.VTK_MAJOR_VERSION <= 5:
+    #     gfilter.SetInput(reader.GetOutput())
+    # else:
+    #     import pdb; pdb.set_trace()
+    #     gfilter.SetInputConnection(reader.GetOutputPort())
+    # gfilter.SetInputConnection(reader.GetOutputPort())
+    import pdb; pdb.set_trace()
+    gfilter.SetInputConnection(mesh_data)
+
+    writer = vtk.vtkSTLWriter()
+    writer.SetFileName(fn_out)
+    writer.SetInput(gfilter.GetOutput())
+    writer.Write()
+
+def convert_segmentation(
         segmentation,
         voxelsize_mm=np.ones([3, 1]),
         degrad=4,
         label=1,
-        smoothing=True
+        smoothing=False
         ):
     """
     Funkce vrací trojrozměrné porobné jako data['segmentation']
@@ -46,9 +68,11 @@ def showSegmentation(
         # mesh_data.coors +=
     vtk_file = "mesh_geom.vtk"
     mesh_data.write(vtk_file)
-    QApplication(sys.argv)
-    view = viewer.QVTKViewer(vtk_file)
-    view.exec_()
+    # from dicom2fem import vtk2stl
+    vtk2stl(vtk_file, "mesh.stl", mesh_data)
+    # QApplication(sys.argv)
+    # view = viewer.QVTKViewer(vtk_file)
+    # view.exec_()
 
     return labels
 
@@ -76,17 +100,37 @@ if __name__ == "__main__":
         default=4,
         help='data degradation, default 4')
     parser.add_argument(
-        '-l', '--label', type=int, metavar='N', nargs='+',
+        '-l', '--labels', type=int, metavar='N', nargs='+',
         default=[1],
         help='segmentation labels, default 1')
+    parser.add_argument(
+        '-s', '--show', action='store_true',
+        help='Show mode')
     args = parser.parse_args()
 
-    data = misc.obj_from_file(args.inputfile, filetype='pickle')
+    dr = io3d.DataReader()
+    data = dr.Get3DData(args.inputfile, dataplus_format=True)
     # args.label = np.array(eval(args.label))
     # print args.label
     # import pdb; pdb.set_trace()
     ds = np.zeros(data['segmentation'].shape, np.bool)
-    for i in range(0, len(args.label)):
-        ds = ds | (data['segmentation'] == args.label[i])
+    print 'labels: ', np.unique(data['segmentation'])
+    print np.sum(data['segmentation'] == 0)
+    print args.labels
+    # for i in range(0, len(args.label)):
+    print args.labels[0] + 1
+    for lab in args.labels:
+        print "print zpracovavam ", lab
+        dadd = (data['segmentation'] == lab)
+        print np.sum(dadd)
 
-    showSegmentation(ds, degrad=args.degrad)
+        ds = ds | dadd
+
+    print np.unique(ds)
+    if args.show:
+        import sed3
+        ed = sed3.sed3(ds.astype(np.double))
+        ed.show()
+
+
+    convert_segmentation(ds, degrad=args.degrad)

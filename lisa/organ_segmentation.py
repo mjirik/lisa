@@ -318,6 +318,7 @@ class OrganSegmentation():
         oseg_params['data3d'] = None
         oseg_params['segmentation'] = None
         oseg_params.pop('self')
+        oseg_params.pop('pycut')
         return oseg_params
 
     def process_wvx_size_mm(self, metadata):
@@ -411,16 +412,16 @@ class OrganSegmentation():
         print "then press 'c' and 'Enter'"
         import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
-        evaluation = volumetry_evaluation.compare_volumes(
+        evaluation = volumetry_evaluation.compare_volumes_sliver(
             data3d_segmentation_actual == label1,
             data3d_segmentation == label2,
             self.voxelsize_mm
             )
-        score = volumetry_evaluation.sliver_score_one_couple(evaluation)
+        # score = volumetry_evaluation.sliver_score_one_couple(evaluation)
         segdiff = qmisc.crop(
             ((data3d_segmentation) - data3d_segmentation_actual),
             self.crinfo)
-        return evaluation, score, segdiff
+        return evaluation, segdiff
 
     def segm_smoothing(self, sigma_mm):
         """
@@ -912,6 +913,9 @@ class OrganSegmentation():
             }
         }
         data['processing_information'] = processing_information
+        # from PyQt4 import QtCore
+        # QtCore.pyqtRemoveInputHook()
+        # import ipdb; ipdb.set_trace()
 # TODO add dcmfilelist
         logger.debug("export()")
         # ogger.debug(str(data))
@@ -1172,6 +1176,9 @@ class OrganSegmentation():
 
         if filepath is None:
             filepath = self.get_standard_ouptut_filename()
+        # from PyQt4 import QtCore
+        # QtCore.pyqtRemoveInputHook()
+        # import ipdb; ipdb.set_trace()
         misc.obj_to_file(data, filepath, filetype=self.save_filetype)
 
         # filepath2 = 'organ_last.' + self.save_filetype

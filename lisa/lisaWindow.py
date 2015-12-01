@@ -558,11 +558,12 @@ class OrganSegmentationWindow(QMainWindow):
         self.oseg.import_segmentation_from_file(seg_path)
         self.statusBar().showMessage('Ready')
 
-    def __evaluation_to_text(self, score):
-        overall_score =\
-            volumetry_evaluation.sliver_overall_score_for_one_couple(
-                score
-            )
+    def __evaluation_to_text(self, evaluation):
+        overall_score = evaluation['sliver_overall_pts']
+        # \
+        #     volumetry_evaluation.sliver_overall_score_for_one_couple(
+        #         score
+        #     )
 
         logger.info('overall score: ' + str(overall_score))
         return "Sliver score: " + str(overall_score)
@@ -586,12 +587,12 @@ class OrganSegmentationWindow(QMainWindow):
         if seg_path is None:
             self.statusBar().showMessage('No data path specified!')
             return
-        evaluation, score, segdiff = \
+        evaluation, segdiff = \
             self.oseg.sliver_compare_with_other_volume_from_file(seg_path)
         print 'Evaluation: ', evaluation
-        print 'Score: ', score
+        # print 'Score: ', score
 
-        text = self.__evaluation_to_text(score)
+        text = self.__evaluation_to_text(evaluation)
 
         segdiff[segdiff == -1] = 2
         logger.debug('segdif unique ' + str(np.unique(segdiff)))

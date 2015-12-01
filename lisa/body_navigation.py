@@ -115,7 +115,7 @@ class BodyNavigation:
             self.get_spine()
         spine_mean = np.mean(np.nonzero(self.spine), 1)
         rldst = np.ones(self.data3dr.shape, dtype=np.int16)
-        rldst[:,:,0] = 0
+        rldst[: ,: ,0] = 0
 
         rldst = scipy.ndimage.morphology.distance_transform_edt(rldst) - int(spine_mean[2])
         return misc.resize_to_shape(rldst, self.orig_shape)
@@ -125,10 +125,22 @@ class BodyNavigation:
             self.get_spine()
         spine_mean = np.mean(np.nonzero(self.spine), 1)
         rldst = np.ones(self.data3dr.shape, dtype=np.int16)
-        rldst[:,0,:] = 0
+        rldst[:, 0, :] = 0
 
         rldst = scipy.ndimage.morphology.distance_transform_edt(rldst) - int(spine_mean[1])
         return misc.resize_to_shape(rldst, self.orig_shape)
+
+    def dist_axial(self):
+        if self.diaphragm_mask is None:
+            self.get_diaphragm_mask()
+        axdst = np.ones(self.data3dr.shape, dtype=np.int16)
+        axdst[0 ,: ,:] = 0
+        iz, ix, iy = np.nonzero(self.diaphragm_mask)
+        # print 'dia level ', self.diaphragm_mask_level
+
+        axdst = scipy.ndimage.morphology.distance_transform_edt(axdst) - int(self.diaphragm_mask_level)
+        return misc.resize_to_shape(axdst, self.orig_shape)
+
 
 
     def dist_diaphragm(self):
@@ -141,6 +153,8 @@ class BodyNavigation:
                 1 - self.diaphragm_mask)
               )
         return qmisc.resize_to_shape(dst, self.orig_shape)
+
+
 
     def get_diaphragm_mask(self, axis=0):
         if self.lungs is None:
@@ -189,6 +203,9 @@ class BodyNavigation:
                 mask[:,:,i] = ou > i
 
         self.diaphragm_mask = mask
+
+        # maximal point is used for axial zero plane
+        self.diaphragm_mask_level = np.max(ou)
 
         return misc.resize_to_shape(self.diaphragm_mask, self.orig_shape)
 
