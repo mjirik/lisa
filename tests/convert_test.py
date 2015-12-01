@@ -22,7 +22,7 @@ class MyTestCase(unittest.TestCase):
 
         lisa.convert.seg2stl(seg, outputfile=fn_stl, tempfile=fn_tmp)
         self.assertTrue(op.exists(fn_stl))
-        # os.remove(fn_stl)
+        os.remove(fn_stl)
         os.remove(fn_tmp)
 
 
