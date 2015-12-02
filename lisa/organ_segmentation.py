@@ -45,6 +45,8 @@ import argparse
 #     traceback.print_exc()
 #     import pycut
 
+path_to_script = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(path_to_script, "../../pysegbase/"))
 import volumetry_evaluation
 
 # from seg2fem import gen_mesh_from_voxels, gen_mesh_from_voxels_mc
