@@ -931,7 +931,7 @@ class OrganSegmentation():
 
     #     return self.iparams
 
-    def add_seeds_mm(self, x_mm, y_mm, z_mm, label, radius):
+    def add_seeds_mm(self, x_mm, y_mm, z_mm, label, radius, width=1):
         """
         Function add circle seeds to one slice with defined radius.
 
@@ -939,11 +939,18 @@ class OrganSegmentation():
 
         x_mm, y_mm coordinates of circle in mm. It may be array.
         z_mm = slice coordinates  in mm. It may be array
-        label: one number. 1 is object seed, 2 is background seed
-        radius: is radius of circle in mm
+        :param label: one number. 1 is object seed, 2 is background seed
+        :param radius: is radius of circle in mm
+        :param width: makes circle with defined width (repeat circle every milimeter)
 
         """
+        z_mm = np.array(z_mm)
+        # repeat circle every milimiter
+        for i in range(0, width + 1):
+            self._add_seeds_mm(x_mm, y_mm, z_mm + i, label, radius)
 
+
+    def _add_seeds_mm(self, x_mm, y_mm, z_mm, label, radius):
         x_mm = np.array(x_mm)
         y_mm = np.array(y_mm)
         z_mm = np.array(z_mm)

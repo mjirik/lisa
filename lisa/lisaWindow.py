@@ -27,7 +27,7 @@ except ImportError:
     viewer3D_available = False
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
+sys.path.append(os.path.join(path_to_script, "../extern/pysegbase/src"))
 
 from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
     QGridLayout, QLabel, QPushButton, QFrame, \
