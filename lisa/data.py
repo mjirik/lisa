@@ -48,12 +48,12 @@ def main():
     parser = argparse.ArgumentParser(
         description=__doc__
     )
-    parser.add_argument(
-        '-i', '--inputfile',
-        default=None,
-        required=True,
-        help='input file'
-    )
+    # parser.add_argument(
+    #     '-i', '--inputfile',
+    #     default=None,
+    #     required=True,
+    #     help='input file'
+    # )
     parser.add_argument(
         '-d', '--debug', action='store_true',
         help='Debug mode')
@@ -62,6 +62,7 @@ def main():
     if args.debug:
         ch.setLevel(logging.DEBUG)
 
+    get_sample_data()
 
 if __name__ == "__main__":
     main()
