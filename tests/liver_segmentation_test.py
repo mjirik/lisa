@@ -222,6 +222,7 @@ class LiverSegmentationTest(unittest.TestCase):
     def test_organ_segmentation_with_pretrained_classifier(self):
         """
         Interactivity is stored to file
+        :rtype: object
         """
 
         path_to_data = lisa.data.sample_data_path()
@@ -230,7 +231,7 @@ class LiverSegmentationTest(unittest.TestCase):
         print "Interactive test: with left mouse button select liver, \
             with right mouse button select other tissues"
         # gcparams = {'pairwiseAlpha':10, 'use_boundary_penalties':True}
-        fn_mdl = "/home/mjirik/lisa_data/liver_intensity.Model.p"
+        fn_mdl = os.path.expanduser("~/lisa_data/liver_intensity.Model.p")
         segparams = {}
         segmodelparams={'mdl_stored_file': fn_mdl}
         # 'pairwise_alpha_per': 3,
