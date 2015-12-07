@@ -95,7 +95,7 @@ def externfvmodel(data3dr, voxelsize_mm, seeds=None, unique_cls=None):        # 
         return fv
 
 class ModelTrainer():
-    def __init__(self, feature_function=None):
+    def __init__(self, feature_function=None, modelparams={}):
         self.working_voxelsize_mm = [1.5, 1.5, 1.5]
         self.data=None
         self.target=None
@@ -106,16 +106,18 @@ class ModelTrainer():
             feature_function = externfvmodel
 #         self.feature_function = feature_function
 
-        modelparams = {
+        modelparams_working = {
 
             'fv_type': "fv_extern",
             'fv_extern': feature_function,
             'type': 'gmmsame',
+            # 'params': {'cvtype': 'full', 'n_components': 7},
             'adaptation': 'original_data',
 
 
         }
-        self.cl = pycut.Model(modelparams=modelparams)
+        modelparams_working.update(modelparams)
+        self.cl = pycut.Model(modelparams=modelparams_working)
 
 
     def _fv(self, data3dr, voxelsize_mm):
@@ -180,7 +182,9 @@ def train_liver_model_from_sliver_data(
         output_file="~/lisa_data/liver_intensity.Model.p",
         sliver_reference_dir='~/data/medical/orig/sliver07/training/',
         orig_pattern="*orig*[1-9].mhd",
-        ref_pattern="*seg*[1-9].mhd"):
+        ref_pattern="*seg*[1-9].mhd",
+        modelparams={}
+):
     force = True
     force = False
     fname_vs = 'vs_stats.csv'
@@ -202,7 +206,7 @@ def train_liver_model_from_sliver_data(
 
     #else:
 
-    sf = ModelTrainer()
+    sf = ModelTrainer(modelparams=modelparams)
     for oname, rname in zip(orig_fnames, ref_fnames):
         print oname
         data3d_orig, metadata = io3d.datareader.read(oname)
