@@ -89,8 +89,8 @@ class LiverSegmentationTest(unittest.TestCase):
 
         # misc.obj_to_file(oseg.get_iparams(),'iparams.pkl', filetype='pickle')
 
-        self.assertGreater(volume, 1000000)
-        self.assertLess(volume, 2000000)
+        self.assertGreater(volume, 1300000)
+        self.assertLess(volume, 2100000)
 
     # @unittest.skipIf(not interactiveTest, "interactive test")
     # @unittest.skip("interactivity params are obsolete")
