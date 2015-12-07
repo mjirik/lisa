@@ -227,7 +227,7 @@ def train_liver_model_from_sliver_data(
     sf.fit()
 
     output_file = op.expanduser(output_file)
-    sf.cl.save(outputfile=output_file)
+    sf.cl.save(output_file)
 
 def main():
     logger = logging.getLogger()
