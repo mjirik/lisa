@@ -19,7 +19,7 @@ import os
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../../pysegbase/src"))
 
-from lisa import liver_segmentation
+from lisa import liver_segmentation_cerveny as liver_segmentation
 import os
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 import logging
@@ -252,6 +252,7 @@ class LiverSegmentationTest(unittest.TestCase):
         # misc.obj_to_file(oseg.get_iparams(),'iparams.pkl', filetype='pickle')
 
         self.assertGreater(volume, 1000000)
+        self.assertLess(volume, 2000000)
 
 
 if __name__ == "__main__":
