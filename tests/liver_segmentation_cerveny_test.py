@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 import lisa.data
 from lisa import organ_segmentation
 
-class LiverSegmentationTest(unittest.TestCase):
+class LiverSegmentationCervenyTest(unittest.TestCase):
 
     # test se pouští ze složky lisa
     # nosetests tests/liver_segmentation_test.py -a actual
