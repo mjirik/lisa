@@ -37,6 +37,8 @@ class LiverSegmentationTest(unittest.TestCase):
     def test_automatic(self):
         pass
 
+    def test_train_liver_model(self):
+
 
 
     # @unittest.skipIf(not interactiveTest, "interactive test")
