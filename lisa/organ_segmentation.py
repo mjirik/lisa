@@ -61,6 +61,8 @@ import support_structure_segmentation as sss
 import cachefile as cachef
 import config_default
 
+
+from . import lisa
 # import audiosupport
 # import skimage
 # import skimage.transform
@@ -1083,7 +1085,7 @@ class OrganSegmentation():
 
     def __vesselTree(self, binaryData3d, textLabel):
         import skelet3d
-        import skeleton_analyser  # histology_analyser as skan
+        from skelet3d import skeleton_analyser  # histology_analyser as skan
         data3d_thr = (binaryData3d > 0).astype(np.int8)
         data3d_skel = skelet3d.skelet3d(data3d_thr)
 

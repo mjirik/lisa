@@ -6,7 +6,7 @@
 import sys
 import os.path
 
-path_to_script = os.path.dirname(os.path.abspath(__file__))
+# path_to_script = os.path.dirname(os.path.abspath(__file__))
 import unittest
 
 import numpy as np
@@ -15,6 +15,7 @@ from nose.plugins.attrib import attr
 
 from lisa import organ_segmentation
 import pysegbase.dcmreaddata as dcmr
+import lisa.data
 
 
 # nosetests tests/organ_segmentation_test.py:OrganSegmentationTest.test_create_iparams # noqa
@@ -73,8 +74,11 @@ class OrganSegmentationTest(unittest.TestCase):
         Interactive test uses dicom data for segmentation
         """
         dcmdir = os.path.join(
-            path_to_script,
-            './../sample_data/matlab/examples/sample_data/DICOM/digest_article/') # noqa
+            lisa.data.sample_data_path(),
+            'matlab/examples/sample_data/DICOM/digest_article/'
+        )
+            # path_to_script,
+            # './../sample_data/matlab/examples/sample_data/DICOM/digest_article/') # noqa
         oseg = organ_segmentation.OrganSegmentation(
             dcmdir, working_voxelsize_mm=4, manualroi=False)
 
@@ -109,7 +113,9 @@ and background")
         """
         Interactivity is stored to file
         """
-        dcmdir = os.path.join(path_to_script, './../sample_data/jatra_5mm')
+        dcmdir = os.path.join(
+            lisa.data.sample_data_path(),
+            'jatra_5mm')
 
         print "Interactive test: with left mouse button select liver, \
             with right mouse button select other tissues"
@@ -142,7 +148,8 @@ and background")
         if self.verbose:
             print "test_create_iparams"
         import misc
-        dcmdir = os.path.join(path_to_script, './../sample_data/jatra_5mm')
+        dcmdir = os.path.join(lisa.data.sample_data_path(), 'jatra_5mm')
+            # path_to_script, './../sample_data/jatra_5mm')
 
         segparams = {'pairwiseAlpha': 20,
                      'use_boundary_penalties': False,
@@ -400,9 +407,11 @@ and background")
         Function uses organ_segmentation object for segmentation
         """
         dcmdir = os.path.join(
-            path_to_script,
-            './../sample_data/matlab/examples/\
-sample_data/DICOM/digest_article/')
+            lisa.data.sample_data_path(),
+            'matlab/examples/sample_data/DICOM/digest_article/'
+            # path_to_script,
+            # './../sample_data/matlab/examples/sample_data/DICOM/digest_article/'
+        )
         oseg = organ_segmentation.OrganSegmentation(dcmdir,
                                                     working_voxelsize_mm=4,
                                                     manualroi=False)
