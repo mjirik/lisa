@@ -595,6 +595,10 @@ class OrganSegmentation():
         logger.debug('pycut segparams ' + str(self.segparams) +
                      '\nmodelparams ' + str(self.segmodelparams)
                      )
+        # insert feature function instead of string description
+        import liver_model
+        self.segmodelparams = liver_model.add_fv_extern_into_modelparams(self.segmodelparams)
+
         if 'method' not in self.segparams.keys() or\
                 self.segparams['method'] in pycut.methods:
             igc = pycut.ImageGraphCut(

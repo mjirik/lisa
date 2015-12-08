@@ -27,8 +27,15 @@ import io3d
 from imtools import qmisc
 from pysegbase import pycut
 
+def add_fv_extern_into_modelparams(modelparams):
+    if modelparams['fv_type'] == 'fv_extern':
+        if type(modelparams['fv_extern']) == str:
+            fv_extern_str = modelparams['fv_extern']
+            if fv_extern_str == "intensity_localization_fv":
+                modelparams['fv_extern'] = intensity_localization_fv
+    return modelparams
 
-def externfvmodel(data3dr, voxelsize_mm, seeds=None, unique_cls=None):        # scale
+def intensity_localization_fv(data3dr, voxelsize_mm, seeds=None, unique_cls=None):        # scale
         import scipy
         import numpy as np
         import os.path as op
@@ -103,7 +110,7 @@ class ModelTrainer():
 #         self.cl = sklearn.mixture.GMM()
         #self.cl = sklearn.tree.DecisionTreeClassifier()
         if feature_function is None:
-            feature_function = externfvmodel
+            feature_function = intensity_localization_fv
 #         self.feature_function = feature_function
 
         modelparams_working = {
