@@ -28,6 +28,9 @@ from imtools import qmisc
 from pysegbase import pycut
 
 def add_fv_extern_into_modelparams(modelparams):
+    import PyQt4; PyQt4.QtCore.pyqtRemoveInputHook()
+    import ipdb; ipdb.set_trace()
+
     if modelparams['fv_type'] == 'fv_extern':
         if type(modelparams['fv_extern']) == str:
             fv_extern_str = modelparams['fv_extern']
@@ -185,6 +188,49 @@ class ModelTrainer():
         self._add_to_training_data(data3dr, self.working_voxelsize_mm, segmentationr)
         #f1 scipy.ndimage.filters.gaussian_filter(data3dr, sigma=5)
 
+    def train_liver_model_from_sliver_data(
+            self,
+            output_file="~/lisa_data/liver_intensity.Model.p",
+            sliver_reference_dir='~/data/medical/orig/sliver07/training/',
+            orig_pattern="*orig*[1-9].mhd",
+            ref_pattern="*seg*[1-9].mhd",
+        ):
+
+        sliver_reference_dir = op.expanduser(sliver_reference_dir)
+
+        orig_fnames = glob.glob(sliver_reference_dir + orig_pattern)
+
+        ref_fnames = glob.glob(sliver_reference_dir + ref_pattern)
+
+        orig_fnames.sort()
+        ref_fnames.sort()
+
+        for oname, rname in zip(orig_fnames, ref_fnames):
+            print oname
+            data3d_orig, metadata = io3d.datareader.read(oname)
+            vs_mm1 = metadata['voxelsize_mm']
+            data3d_seg, metadata = io3d.datareader.read(rname)
+            vs_mm = metadata['voxelsize_mm']
+
+            # liver have label 1, background have label 2
+            data3d_seg = 2 - data3d_seg
+
+            #     sf.add_train_data(data3d_orig, data3d_seg, voxelsize_mm=vs_mm)
+            try:
+                self.add_train_data(data3d_orig, data3d_seg, voxelsize_mm=vs_mm)
+            except:
+                traceback.print_exc()
+                print "problem - liver model"
+                pass
+                # fvhn = copy.deepcopy(fvh)
+                #fhs_list.append(fvh)
+
+
+        self.fit()
+
+        output_file = op.expanduser(output_file)
+        self.cl.save(output_file)
+
 def train_liver_model_from_sliver_data(
         output_file="~/lisa_data/liver_intensity.Model.p",
         sliver_reference_dir='~/data/medical/orig/sliver07/training/',
@@ -214,31 +260,39 @@ def train_liver_model_from_sliver_data(
     #else:
 
     sf = ModelTrainer(modelparams=modelparams)
-    for oname, rname in zip(orig_fnames, ref_fnames):
-        print oname
-        data3d_orig, metadata = io3d.datareader.read(oname)
-        vs_mm1 = metadata['voxelsize_mm']
-        data3d_seg, metadata = io3d.datareader.read(rname)
-        vs_mm = metadata['voxelsize_mm']
+    sf.train_liver_model_from_sliver_data(
+        output_file=output_file,
+        sliver_reference_dir=sliver_reference_dir,
+        orig_pattern=orig_pattern,
+        ref_pattern=ref_pattern
+    )
+    return sf.data, sf.target
 
-        # liver have label 1, background have label 2
-        data3d_seg = 2 - data3d_seg
-
-        #     sf.add_train_data(data3d_orig, data3d_seg, voxelsize_mm=vs_mm)
-        try:
-            sf.add_train_data(data3d_orig, data3d_seg, voxelsize_mm=vs_mm)
-        except:
-            traceback.print_exc()
-            print "problem - liver model"
-            pass
-            # fvhn = copy.deepcopy(fvh)
-            #fhs_list.append(fvh)
-
-
-    sf.fit()
-
-    output_file = op.expanduser(output_file)
-    sf.cl.save(output_file)
+    # for oname, rname in zip(orig_fnames, ref_fnames):
+    #     print oname
+    #     data3d_orig, metadata = io3d.datareader.read(oname)
+    #     vs_mm1 = metadata['voxelsize_mm']
+    #     data3d_seg, metadata = io3d.datareader.read(rname)
+    #     vs_mm = metadata['voxelsize_mm']
+    #
+    #     # liver have label 1, background have label 2
+    #     data3d_seg = 2 - data3d_seg
+    #
+    #     #     sf.add_train_data(data3d_orig, data3d_seg, voxelsize_mm=vs_mm)
+    #     try:
+    #         sf.add_train_data(data3d_orig, data3d_seg, voxelsize_mm=vs_mm)
+    #     except:
+    #         traceback.print_exc()
+    #         print "problem - liver model"
+    #         pass
+    #         # fvhn = copy.deepcopy(fvh)
+    #         #fhs_list.append(fvh)
+    #
+    #
+    # sf.fit()
+    #
+    # output_file = op.expanduser(output_file)
+    # sf.cl.save(output_file)
 
 def main():
     logger = logging.getLogger()

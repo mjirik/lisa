@@ -62,7 +62,6 @@ import cachefile as cachef
 import config_default
 
 
-from . import lisa
 # import audiosupport
 # import skimage
 # import skimage.transform
