@@ -44,7 +44,7 @@ class BodyNavigation:
 
     def get_spine(self):
 
-        spine = scipy.ndimage.filters.gaussian_filter(self.data3dr, sigma=[20, 5, 5]) > 250
+        spine = scipy.ndimage.filters.gaussian_filter(self.data3dr, sigma=[20, 5, 5]) > 200
         self.spine = spine
         return qmisc.resize_to_shape(spine, self.orig_shape)
 
