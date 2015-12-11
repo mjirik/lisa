@@ -58,7 +58,7 @@ class BodyNavigation:
         return qmisc.resize_to_shape(self.body, self.orig_shape)
 
     def get_lungs(self):
-        lungs = scipy.ndimage.filters.gaussian_filter(self.data3dr, sigma=[4, 2, 2]) > -200
+        lungs = scipy.ndimage.filters.gaussian_filter(self.data3dr, sigma=[4, 2, 2]) > -150
         lungs[0, :, :] = 1
 
         lungs = scipy.ndimage.morphology.binary_fill_holes(lungs)
