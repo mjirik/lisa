@@ -6,6 +6,7 @@
 # import funkcí z jiného adresáře
 import sys
 import os.path
+import argparse
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 # sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
@@ -154,13 +155,12 @@ class BodyNavigation:
               )
         return qmisc.resize_to_shape(dst, self.orig_shape)
 
-
-
-    def get_diaphragm_profile_image(self, axis=0):
-        if self.lungs is None:
-            self.get_lungs()
-        axis = 0
-        data = self.lungs
+    def _get_ia_ib_ic(self, axis):
+        """
+        according to axis gives order of of three dimensions
+        :param axis:
+        :return:
+        """
         if axis == 0:
             ia = 0
             ib = 1
@@ -173,6 +173,15 @@ class BodyNavigation:
             ia = 2
             ib = 0
             ic = 1
+
+        return ia, ib, ic
+
+    def get_diaphragm_profile_image(self, axis=0):
+        if self.lungs is None:
+            self.get_lungs()
+        axis = 0
+        data = self.lungs
+        ia, ib, ic = self._get_ia_ib_ic(axis)
 
         # gradient
         gr = scipy.ndimage.filters.sobel(data.astype(np.int16), axis=ia)
@@ -222,6 +231,8 @@ class BodyNavigation:
         # plt.imshow(profile_w, cmap='jet')
 
     def get_diaphragm_mask(self, axis=0):
+        ia, ib, ic = self._get_ia_ib_ic(axis)
+        data = self.lungs
         ou = self.get_diaphragm_profile_image(axis=axis)
         # reconstruction mask array
         mask = np.zeros(data.shape)
@@ -240,11 +251,6 @@ class BodyNavigation:
         self.diaphragm_mask_level = np.median(ou)
 
         return misc.resize_to_shape(self.diaphragm_mask, self.orig_shape)
-
-
-
-
-
 
 def main():
 
