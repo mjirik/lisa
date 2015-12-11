@@ -192,7 +192,7 @@ class BodyNavigation:
         ou = flat[(indices[0],indices[1])]
         ou = scipy.ndimage.filters.gaussian_filter(ou, sigma=2)
 
-        self.__filter_diaphragm_profile_image(ou, axis)
+        ou = self.__filter_diaphragm_profile_image(ou, axis)
         return ou
 
     def __filter_diaphragm_profile_image(self, profile, axis=0):
