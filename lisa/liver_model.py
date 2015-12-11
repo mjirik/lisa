@@ -28,8 +28,8 @@ from imtools import qmisc
 from pysegbase import pycut
 
 def add_fv_extern_into_modelparams(modelparams):
-    import PyQt4; PyQt4.QtCore.pyqtRemoveInputHook()
-    import ipdb; ipdb.set_trace()
+    # import PyQt4; PyQt4.QtCore.pyqtRemoveInputHook()
+    # import ipdb; ipdb.set_trace()
 
     if modelparams['fv_type'] == 'fv_extern':
         if type(modelparams['fv_extern']) == str:
@@ -132,7 +132,7 @@ class ModelTrainer():
 
     def _fv(self, data3dr, voxelsize_mm):
         fev = self.cl.features_from_image(data3dr, voxelsize_mm)
-        print fev
+        # print fev
         return fev
 
     def _add_to_training_data(self, data3dr, voxelsize_mm, segmentationr):
@@ -184,7 +184,8 @@ class ModelTrainer():
         data3dr = qmisc.resize_to_mm(data3d, voxelsize_mm, self.working_voxelsize_mm)
         segmentationr = qmisc.resize_to_shape(segmentation, data3dr.shape)
 
-        print np.unique(segmentationr), data3dr.shape, segmentationr.shape
+        logger.debug(str(np.unique(segmentationr)))
+        logger.debug(str(data3dr.shape) + str(segmentationr.shape))
         self._add_to_training_data(data3dr, self.working_voxelsize_mm, segmentationr)
         #f1 scipy.ndimage.filters.gaussian_filter(data3dr, sigma=5)
 
@@ -206,7 +207,7 @@ class ModelTrainer():
         ref_fnames.sort()
 
         for oname, rname in zip(orig_fnames, ref_fnames):
-            print oname
+            logger.debug(oname)
             data3d_orig, metadata = io3d.datareader.read(oname)
             vs_mm1 = metadata['voxelsize_mm']
             data3d_seg, metadata = io3d.datareader.read(rname)

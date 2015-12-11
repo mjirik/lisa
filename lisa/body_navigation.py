@@ -49,7 +49,7 @@ class BodyNavigation:
         return qmisc.resize_to_shape(spine, self.orig_shape)
 
     def get_body(self):
-        body = scipy.ndimage.filters.gaussian_filter(self.data3dr, sigma=3) > -200
+        body = scipy.ndimage.filters.gaussian_filter(self.data3dr, sigma=2) > -150
         body[0, :, :] = 1
         body[-1, :, :] = 1
 
@@ -57,7 +57,7 @@ class BodyNavigation:
         return qmisc.resize_to_shape(self.body, self.orig_shape)
 
     def get_lungs(self):
-        lungs = scipy.ndimage.filters.gaussian_filter(self.data3dr, sigma=3) > -200
+        lungs = scipy.ndimage.filters.gaussian_filter(self.data3dr, sigma=[0.05, 2, 0.05]) > -100
         lungs[0, :, :] = 1
 
         lungs = scipy.ndimage.morphology.binary_fill_holes(lungs)
@@ -156,7 +156,7 @@ class BodyNavigation:
 
 
 
-    def get_diaphragm_mask(self, axis=0):
+    def get_diaphragm_profile_image(self, axis=0):
         if self.lungs is None:
             self.get_lungs()
         axis = 0
@@ -191,7 +191,12 @@ class BodyNavigation:
         indices = scipy.ndimage.morphology.distance_transform_edt(flat==0, return_indices=True, return_distances=False)
         ou = flat[(indices[0],indices[1])]
         ou = scipy.ndimage.filters.gaussian_filter(ou, sigma=2)
+        return ou
 
+
+
+    def get_diaphragm_mask(self, axis=0):
+        ou = self.get_diaphragm_profile_image(axis=axis)
         # reconstruction mask array
         mask = np.zeros(data.shape)
         for i in range(mask.shape[ia]):
@@ -204,8 +209,9 @@ class BodyNavigation:
 
         self.diaphragm_mask = mask
 
-        # maximal point is used for axial zero plane
-        self.diaphragm_mask_level = np.max(ou)
+        # maximal point is used for axial ze
+        # ro plane
+        self.diaphragm_mask_level = np.median(ou)
 
         return misc.resize_to_shape(self.diaphragm_mask, self.orig_shape)
 
