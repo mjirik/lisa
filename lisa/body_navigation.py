@@ -231,6 +231,8 @@ class BodyNavigation:
         # plt.imshow(profile_w, cmap='jet')
 
     def get_diaphragm_mask(self, axis=0):
+        if self.lungs is None:
+            self.get_lungs()
         ia, ib, ic = self._get_ia_ib_ic(axis)
         data = self.lungs
         ou = self.get_diaphragm_profile_image(axis=axis)
