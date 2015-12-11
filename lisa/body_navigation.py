@@ -199,7 +199,8 @@ class BodyNavigation:
         # doplnime praznda mista v ploche mape podle nejblizsi oblasi
         indices = scipy.ndimage.morphology.distance_transform_edt(flat==0, return_indices=True, return_distances=False)
         ou = flat[(indices[0],indices[1])]
-        ou = scipy.ndimage.filters.gaussian_filter(ou, sigma=2)
+        ou = scipy.ndimage.filters.median_filter(ou, size=10)
+        # ou = scipy.ndimage.filters.gaussian_filter(ou, sigma=2)
 
         ou = self.__filter_diaphragm_profile_image(ou, axis)
         return ou
