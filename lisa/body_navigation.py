@@ -202,7 +202,7 @@ class BodyNavigation:
         flat = np.zeros([grt.shape[ib], grt.shape[ic]])
         flat[(nz[ib], nz[ic])] = [nz[ia]]
 
-        profile = self._filter_diaphragm_profile_image_remove_outlayers(profile)
+        flat = self._filter_diaphragm_profile_image_remove_outlayers(flat)
 
 
 
