@@ -191,9 +191,35 @@ class BodyNavigation:
         indices = scipy.ndimage.morphology.distance_transform_edt(flat==0, return_indices=True, return_distances=False)
         ou = flat[(indices[0],indices[1])]
         ou = scipy.ndimage.filters.gaussian_filter(ou, sigma=2)
+
+        self.__filter_diaphragm_profile_image(ou, axis)
         return ou
 
+    def __filter_diaphragm_profile_image(self, profile, axis=0):
+        """
+        filter do not go down in compare to pixel near to the back
+        :param profile:
+        :param axis:
+        :return:
+        """
+        if axis == 0:
 
+            profile_w = profile.copy()
+
+            # profile_out = np.zeros(profile.shape)
+            for i in range(profile_w.shape[0] -1 , 0 , -1):
+                profile_line_0 = profile_w[i, :]
+                profile_line_1 = profile_w[i - 1, :]
+                where_is_bigger = profile_line_1  < (profile_line_0 - 0)
+            #     profile_line_out[where_is_bigger] = profile_line_0[where_is_bigger]
+                profile_w[i - 1, where_is_bigger] = profile_line_0[where_is_bigger]
+                profile_w[i - 1, np.negative(where_is_bigger)] = profile_line_1[np.negative(where_is_bigger)]
+            #     profile_out[where_is_bigger, :] = profile_line_1
+        else:
+            logger.error('other axis not implemented yet')
+
+        return profile_w
+        # plt.imshow(profile_w, cmap='jet')
 
     def get_diaphragm_mask(self, axis=0):
         ou = self.get_diaphragm_profile_image(axis=axis)
