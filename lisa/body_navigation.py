@@ -176,6 +176,14 @@ class BodyNavigation:
 
         return ia, ib, ic
 
+    def _filter_diaphragm_profile_image_remove_outlayers(self, profile, axis=0, tolerance=80):
+        # tolerance * 1.5mm
+
+        med = np.median(profile[profile > 0])
+        profile[np.abs(profile - med) > tolerance] = 0
+        return profile
+
+
     def get_diaphragm_profile_image(self, axis=0):
         if self.lungs is None:
             self.get_lungs()
@@ -193,6 +201,8 @@ class BodyNavigation:
         # z-tove souradnice
         flat = np.zeros([grt.shape[ib], grt.shape[ic]])
         flat[(nz[ib], nz[ic])] = [nz[ia]]
+
+        profile = self._filter_diaphragm_profile_image_remove_outlayers(profile)
 
 
 
