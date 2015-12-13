@@ -47,6 +47,7 @@ class BodyNavigation:
 
         spine = scipy.ndimage.filters.gaussian_filter(self.data3dr, sigma=[20, 5, 5]) > 200
         self.spine = spine
+
         return qmisc.resize_to_shape(spine, self.orig_shape)
 
     def get_body(self):
@@ -124,7 +125,7 @@ class BodyNavigation:
     def dist_coronal(self):
         if self.spine is None:
             self.get_spine()
-        spine_mean = np.mean(np.nonzero(self.spine), 1)
+        spine_mean = np.mean(np.nonzero(self.spine), 2)
         rldst = np.ones(self.data3dr.shape, dtype=np.int16)
         rldst[:, 0, :] = 0
 
