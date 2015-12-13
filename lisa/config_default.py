@@ -15,6 +15,8 @@ CONFIG_DEFAULT={
     "seeds": None,
     "segmentation_smoothing": False,
     "segmodelparams": {
+        "fv_type": 'fv_extern',
+        'fv_extern':'intensity_localization_fv',
         "params": {"covariance_type": "full", "n_components": 3}
     },
     "type": "gmmsame",

@@ -31,7 +31,7 @@ def add_fv_extern_into_modelparams(modelparams):
     # import PyQt4; PyQt4.QtCore.pyqtRemoveInputHook()
     # import ipdb; ipdb.set_trace()
 
-    if modelparams['fv_type'] == 'fv_extern':
+    if "fv_type" in modelparams.keys() and modelparams['fv_type'] == 'fv_extern':
         if type(modelparams['fv_extern']) == str:
             fv_extern_str = modelparams['fv_extern']
             if fv_extern_str == "intensity_localization_fv":
@@ -71,7 +71,7 @@ def intensity_localization_fv(data3dr, voxelsize_mm, seeds=None, unique_cls=None
 
 #         print "pred organ_localizator"
         ol = organ_localizator.OrganLocalizator()
-        ol.load(op.expanduser("/home/mjirik/projects/lisa/liver.ol.p"))
+        ol.load(op.expanduser("~/lisa_data/liver.ol.p"))
 
         fdall = ol.feature_function(data3dr, voxelsize_mm)
 
