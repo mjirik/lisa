@@ -71,7 +71,11 @@ class LiverSegmentationTest(unittest.TestCase):
         # gcparams = {'pairwiseAlpha':10, 'use_boundary_penalties':True}
         # fn_mdl = os.path.expanduser("~/lisa_data/liver_intensity.Model.p")
         segparams = {}
-        segmodelparams={'mdl_stored_file': fn_mdl}
+        segmodelparams={
+            'mdl_stored_file': fn_mdl,
+            'fv_type':'fv_extern',
+            'fv_extern': "intensity_localization_fv"
+        }
         # 'pairwise_alpha_per': 3,
         #              'use_boundary_penalties': True,
         #              'boundary_penalties_sigma': 200}
@@ -111,7 +115,11 @@ class LiverSegmentationTest(unittest.TestCase):
         # gcparams = {'pairwiseAlpha':10, 'use_boundary_penalties':True}
         fn_mdl = os.path.expanduser("~/lisa_data/liver_intensity.Model.p")
         segparams = {}
-        segmodelparams={'mdl_stored_file': fn_mdl}
+        segmodelparams={
+            'mdl_stored_file': fn_mdl,
+            'fv_type':'fv_extern',
+            'fv_extern': "intensity_localization_fv"
+        }
         # 'pairwise_alpha_per': 3,
         #              'use_boundary_penalties': True,
         #              'boundary_penalties_sigma': 200}
