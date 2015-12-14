@@ -60,7 +60,7 @@ import data_plus
 import support_structure_segmentation as sss
 import cachefile as cachef
 import config_default
-
+import liver_seeds
 
 # import audiosupport
 # import skimage
@@ -935,6 +935,9 @@ class OrganSegmentation():
     #     self.iparams['seeds'] = qmisc.SparseMatrix(self.iparams['seeds'])
 
     #     return self.iparams
+
+    def automatic_liver_seeds(self):
+        liver_seeds.automatic_liver_seeds(self.data3d, self.seeds, self.voxelsize_mm)
 
     def add_seeds_mm(self, x_mm, y_mm, z_mm, label, radius, width=1):
         """
