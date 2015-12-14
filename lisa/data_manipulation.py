@@ -114,15 +114,24 @@ def add_seeds_mm(data_seeds, voxelsize_mm, x_mm, y_mm, z_mm, label, radius, widt
     :param width: makes circle with defined width (repeat circle every milimeter)
 
     """
-    z_mm = np.array(z_mm)
+
+    # this do not work for ndarrays
+    # if type(x_mm) is not list:
+    #     x_mm = [x_mm]
+    # if type(y_mm) is not list:
+    #     x_mm = [y_mm]
+    # if type(z_mm) is not list:
+    #     z_mm = [z_mm]
+    z_mm = np.asarray(z_mm)
     # repeat circle every milimiter
     for i in range(0, width + 1):
-        _add_seeds_mm_in_one_slice(data_seeds, voxelsize_mm, x_mm, y_mm, z_mm + i, label, radius)
+        data_seeds = _add_seeds_mm_in_one_slice(data_seeds, voxelsize_mm, x_mm, y_mm, z_mm + i, label, radius)
+    return data_seeds
 
 def _add_seeds_mm_in_one_slice(data_seeds, voxelsize_mm, x_mm, y_mm, z_mm, label, radius):
-    x_mm = np.array(x_mm)
-    y_mm = np.array(y_mm)
-    z_mm = np.array(z_mm)
+    x_mm = np.asarray(x_mm)
+    y_mm = np.asarray(y_mm)
+    z_mm = np.asarray(z_mm)
 
     for i in range(0, len(x_mm)):
 

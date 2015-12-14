@@ -26,18 +26,18 @@ import data_manipulation
 def automatic_liver_seeds(data3d, seeds, voxelsize_mm, fn_mdl='~/lisa_data/liver_intensity.Model.p'):
     # fn_mdl = op.expanduser(fn_mdl)
     mdl = pycut.Model({'mdl_stored_file':fn_mdl, 'fv_extern': liver_model.intensity_localization_fv})
-    working_voxelsize_mm = [4, 4, 4]
+    working_voxelsize_mm = np.asarray([4, 4, 4])
 
     data3dr = imtools.resize_to_mm(data3d, voxelsize_mm, working_voxelsize_mm)
 
-    lik1 = mdl.likelihood_from_image(data3dr, voxelsize_mm, 0)
-    lik2 = mdl.likelihood_from_image(data3dr, voxelsize_mm, 1)
+    lik1 = mdl.likelihood_from_image(data3dr, working_voxelsize_mm, 0)
+    lik2 = mdl.likelihood_from_image(data3dr, working_voxelsize_mm, 1)
 
     dl = lik2 - lik1
 
     seed1 = np.unravel_index(np.argmax(dl), dl.shape)
     seed1_mm = seed1 * working_voxelsize_mm
-    bn = body_navigation.BodyNavigation(data3d)
+    bn = body_navigation.BodyNavigation(data3d, voxelsize_mm)
 
     bn.get_center()
     seed2_mm = bn.center_mm
@@ -47,18 +47,18 @@ def automatic_liver_seeds(data3d, seeds, voxelsize_mm, fn_mdl='~/lisa_data/liver
 
     seeds = data_manipulation.add_seeds_mm(
         seeds, voxelsize_mm,
-        seed1_mm[0],
-        seed1_mm[1],
-        seed1_mm[2],
+        [seed1_mm[0]],
+        [seed1_mm[1]],
+        [seed1_mm[2]],
         label=1,
         radius=10,
         width=5
     )
     seeds = data_manipulation.add_seeds_mm(
         seeds, voxelsize_mm,
-        seed2_mm[0],
-        seed2_mm[1],
-        seed2_mm[2],
+        [seed2_mm[0]],
+        [seed2_mm[1]],
+        [seed2_mm[2]],
         label=2,
         radius=10,
         width=5

@@ -89,9 +89,15 @@ class OrganSegmentationWindow(QMainWindow):
         exitAction.setStatusTip('Exit application')
         exitAction.triggered.connect(QtGui.qApp.quit)
 
+        autoSeedsAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Automatic liver seeds', self)
+        # autoSeedsAction.setShortcut('Ctrl+Q')
+        autoSeedsAction.setStatusTip('Automatic liver seeds')
+        autoSeedsAction.triggered.connect(self.btnAutomaticLiverSeeds)
+
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')
         fileMenu.addAction(exitAction)
+        fileMenu.addAction(autoSeedsAction)
 
     def _initUI(self):
         cw = QWidget()
@@ -714,6 +720,11 @@ class OrganSegmentationWindow(QMainWindow):
     def btnUpdate(self, event=None):
         self.statusBar().showMessage('Checking for update ...')
         print subprocess.call(['conda', 'update', '-y', '-c', 'mjirik', '-c', 'SimpleITK', 'lisa']) #, shell=True)
+        self.statusBar().showMessage('Ready')
+
+    def btnAutomaticLiverSeeds(self, event=None):
+        self.statusBar().showMessage('Automatic liver seeds...')
+        self.oseg.automatic_liver_seeds()
         self.statusBar().showMessage('Ready')
 
     def btnConfig(self, event=None):

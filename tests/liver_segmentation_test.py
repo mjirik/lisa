@@ -140,6 +140,48 @@ class LiverSegmentationTest(unittest.TestCase):
         self.assertGreater(volume, 1000000)
         self.assertLess(volume, 2000000)
 
+    @attr('interactive')
+    @attr('slow')
+    def test_automatic_liver_seeds(self):
+        """
+        Interactivity is stored to file
+        :rtype: object
+        """
+
+        path_to_data = lisa.data.sample_data_path()
+        dcmdir = os.path.join(path_to_data, './liver-orig001.mhd')
+
+        print "Interactive test: with left mouse button select liver, \
+            with right mouse button select other tissues"
+        # gcparams = {'pairwiseAlpha':10, 'use_boundary_penalties':True}
+        fn_mdl = os.path.expanduser("~/lisa_data/liver_intensity.Model.p")
+        segparams = {}
+        segmodelparams={
+            # 'mdl_stored_file': fn_mdl,
+            # 'fv_type':'fv_extern',
+            # 'fv_extern': "intensity_localization_fv"
+        }
+        # 'pairwise_alpha_per': 3,
+        #              'use_boundary_penalties': True,
+        #              'boundary_penalties_sigma': 200}
+        oseg = organ_segmentation.OrganSegmentation(
+            dcmdir, working_voxelsize_mm=4, segparams=segparams, segmodelparams=segmodelparams)
+        # oseg.add_seeds_mm([110, 150], [110, 100], [200], label=1, radius=30, width=5)
+        # oseg.add_seeds_mm([250, 230], [210, 260], [200], label=2, radius=50, width=5)
+        print oseg.seeds
+        oseg.automatic_liver_seeds()
+
+        from PyQt4.QtGui import QApplication
+        app = QApplication(sys.argv)
+        oseg.interactivity()
+        # oseg.ninteractivity()
+
+        volume = oseg.get_segmented_volume_size_mm3()
+
+        # misc.obj_to_file(oseg.get_iparams(),'iparams.pkl', filetype='pickle')
+
+        self.assertGreater(volume, 1000000)
+        self.assertLess(volume, 2000000)
 
 if __name__ == "__main__":
     unittest.main()
