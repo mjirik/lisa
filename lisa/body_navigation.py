@@ -31,8 +31,8 @@ import sed3
 class BodyNavigation:
 
     def __init__(self, data3d, voxelsize_mm):
-        self.voxelsize_mm = voxelsize_mm
-        self.working_vs = [1.5, 1.5, 1.5]
+        self.voxelsize_mm = np.asarray(voxelsize_mm)
+        self.working_vs = np.asarray([1.5, 1.5, 1.5])
         if voxelsize_mm is None:
             self.data3dr = data3d
         else:
@@ -49,8 +49,8 @@ class BodyNavigation:
         spine = scipy.ndimage.filters.gaussian_filter(self.data3dr, sigma=[20, 5, 5]) > 200
         self.spine = spine
 
-        self.center1 = np.mean(np.nonzero(self.spine), 1)
-        self.center2 = np.mean(np.nonzero(self.spine), 2)
+        self.spine_center = np.mean(np.nonzero(self.spine), 1)
+        # self.center2 = np.mean(np.nonzero(self.spine), 2)
         return qmisc.resize_to_shape(spine, self.orig_shape)
 
     def get_body(self):
@@ -128,7 +128,7 @@ class BodyNavigation:
     def dist_coronal(self):
         if self.spine is None:
             self.get_spine()
-        spine_mean = np.mean(np.nonzero(self.spine), 2)
+        spine_mean = np.mean(np.nonzero(self.spine), 1)
         rldst = np.ones(self.data3dr.shape, dtype=np.int16)
         rldst[:, 0, :] = 0
 
@@ -274,7 +274,11 @@ class BodyNavigation:
         self.get_diaphragm_mask()
         self.get_spine()
 
-        return np.array(self.center0, self.center1, self.center2)
+        self.center = np.array([self.diaphragm_mask_level, self.spine_center[0], self.spine_center[1]])
+        self.center_mm = self.center * self.working_vs
+        self.center_orig = self.center * self.voxelsize_mm / self.working_vs.astype(np.double)
+
+        return self.center_orig
 
 def main():
 
