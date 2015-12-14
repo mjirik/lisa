@@ -949,57 +949,14 @@ class OrganSegmentation():
         :param width: makes circle with defined width (repeat circle every milimeter)
 
         """
-        z_mm = np.array(z_mm)
-        # repeat circle every milimiter
-        for i in range(0, width + 1):
-            self._add_seeds_mm(x_mm, y_mm, z_mm + i, label, radius)
+        import data_manipulation
 
-
-    def _add_seeds_mm(self, x_mm, y_mm, z_mm, label, radius):
-        x_mm = np.array(x_mm)
-        y_mm = np.array(y_mm)
-        z_mm = np.array(z_mm)
-
-        for i in range(0, len(x_mm)):
-
-            # xx and yy are 200x200 tables containing the x and y coordinates
-            # values. mgrid is a mesh creation helper
-            xx, yy = np.mgrid[
-                :self.seeds.shape[1],
-                :self.seeds.shape[2]
-            ]
-        # circles contains the squared distance to the (100, 100) point
-        # we are just using the circle equation learnt at school
-            circle = (
-                (xx - x_mm[i] / self.voxelsize_mm[1]) ** 2 +
-                (yy - y_mm[i] / self.voxelsize_mm[2]) ** 2
-            ) ** (0.5)
-        # donuts contains 1's and 0's organized in a donut shape
-        # you apply 2 thresholds on circle to define the shape
-            # slice jen s jednim kruhem
-            slicecircle = circle < radius
-            slicen = int(z_mm / self.voxelsize_mm[0])
-            # slice s tim co už je v něm nastaveno
-            slicetmp = self.seeds[slicen, :, :]
-            # mport pdb; pdb.set_trace()
-
-            slicetmp[slicecircle == 1] = label
-
-            self.seeds[slicen, :, :] = slicetmp
-
-#  QMainWindow
-            # mport sed3
-            # r=sed3.sed3(self.seeds); rr.show()
-
-            # rom seed_editor_qt import QTSeedEditor
-            # rom PyQt4.QtGui import QApplication
-            # pp = QApplication(sys.argv)
-            # yed = QTSeedEditor(circle)
-            # yed.exec_()
-
-            # pp.exit()
-            # mpslice = # p.logical_and(
-            # ircle < (6400 + 60), circle > (6400 - 60))
+        data_manipulation.add_seeds_mm(
+            self.seeds, self.voxelsize_mm,
+            x_mm, y_mm, z_mm,
+            label,
+            radius, width
+        )
 
     def lesionsLocalization(self):
         """ Localization of lession """
