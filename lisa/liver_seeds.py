@@ -52,7 +52,7 @@ def automatic_liver_seeds(data3d, seeds, voxelsize_mm, fn_mdl='~/lisa_data/liver
         [seed1_mm[2]],
         label=1,
         radius=10,
-        width=5
+        width=15
     )
     seeds = data_manipulation.add_seeds_mm(
         seeds, voxelsize_mm,
