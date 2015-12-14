@@ -15,6 +15,7 @@ CONFIG_DEFAULT={
     "seeds": None,
     "segmentation_smoothing": False,
     "segmodelparams": {
+        'mdl_stored_file': '~/lisa_data/liver_intensity.Model.p',
         "fv_type": 'fv_extern',
         'fv_extern':'intensity_localization_fv',
         "params": {"covariance_type": "full", "n_components": 3}
