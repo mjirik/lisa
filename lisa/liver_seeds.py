@@ -35,23 +35,42 @@ def automatic_liver_seeds(data3d, seeds, voxelsize_mm, fn_mdl='~/lisa_data/liver
 
     dl = lik2 - lik1
 
+
+    # Liver seed center
+
+    # seed tam, kde je to nejpravděpodovnější - moc nefunguje
     seed1 = np.unravel_index(np.argmax(dl), dl.shape)
     seed1_mm = seed1 * working_voxelsize_mm
+
+    # find slice with maximum  liver profile
+    sos = np.sum(np.sum(dl > 0, axis=1, keepdims=True), axis=2)
+    maximal_slice_index = np.argmax(sos)
+    # print sos.shape
+    xynz = np.nonzero((dl>0)[maximal_slice_index, :, :])
+
+    import PyQt4; PyQt4.QtCore.pyqtRemoveInputHook()
+    import ipdb; ipdb.set_trace()
+
+    seed1 = np.array([maximal_slice_index, np.mean(xynz[0]), np.mean(xynz[1])])
+    seed1_mm = seed1 * working_voxelsize_mm
+
+
+
+    # background seed center
     bn = body_navigation.BodyNavigation(data3d, voxelsize_mm)
 
     bn.get_center()
     seed2_mm = bn.center_mm
 
     # seeds should be on same slide
-    seed2_mm[0] = seed1_mm[0]
-
+    # seed2_mm[0] = seed1_mm[0]
     seeds = data_manipulation.add_seeds_mm(
         seeds, voxelsize_mm,
         [seed1_mm[0]],
         [seed1_mm[1]],
         [seed1_mm[2]],
         label=1,
-        radius=10,
+        radius=20,
         width=15
     )
     seeds = data_manipulation.add_seeds_mm(
@@ -63,6 +82,8 @@ def automatic_liver_seeds(data3d, seeds, voxelsize_mm, fn_mdl='~/lisa_data/liver
         radius=10,
         width=5
     )
+    import sed3
+    sed3.show_slices(data3dr, dl > 40.0, slice_step=10)
     return seeds
 
 
