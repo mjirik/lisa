@@ -81,8 +81,8 @@ class LiverSegmentationTest(unittest.TestCase):
         #              'boundary_penalties_sigma': 200}
         oseg = organ_segmentation.OrganSegmentation(
             dcmdir, working_voxelsize_mm=4, segparams=segparams, segmodelparams=segmodelparams)
-        oseg.add_seeds_mm([110, 150], [110, 100], [200], label=1, radius=30, width=5)
-        oseg.add_seeds_mm([250, 230], [210, 260], [200], label=2, radius=50, width=5)
+        oseg.add_seeds_mm([200], [110, 150], [110, 100], label=1, radius=30, width=5)
+        oseg.add_seeds_mm([200], [250, 230], [210, 260], label=2, radius=50, width=5)
 
         # from PyQt4.QtGui import QApplication
         # app = QApplication(sys.argv)
@@ -125,8 +125,8 @@ class LiverSegmentationTest(unittest.TestCase):
         #              'boundary_penalties_sigma': 200}
         oseg = organ_segmentation.OrganSegmentation(
             dcmdir, working_voxelsize_mm=4, segparams=segparams, segmodelparams=segmodelparams)
-        oseg.add_seeds_mm([110, 150], [110, 100], [200], label=1, radius=30, width=5)
-        oseg.add_seeds_mm([250, 230], [210, 260], [200], label=2, radius=50, width=5)
+        oseg.add_seeds_mm([200], [110, 150], [110, 100], label=1, radius=30, width=5)
+        oseg.add_seeds_mm([200], [250, 230], [210, 260], label=2, radius=50, width=5)
 
         from PyQt4.QtGui import QApplication
         app = QApplication(sys.argv)

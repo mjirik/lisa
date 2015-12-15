@@ -939,7 +939,7 @@ class OrganSegmentation():
     def automatic_liver_seeds(self):
         liver_seeds.automatic_liver_seeds(self.data3d, self.seeds, self.voxelsize_mm)
 
-    def add_seeds_mm(self, x_mm, y_mm, z_mm, label, radius, width=1):
+    def add_seeds_mm(self, z_mm, x_mm, y_mm, label, radius, width=1):
         """
         Function add circle seeds to one slice with defined radius.
 
@@ -956,7 +956,7 @@ class OrganSegmentation():
 
         data_manipulation.add_seeds_mm(
             self.seeds, self.voxelsize_mm,
-            x_mm, y_mm, z_mm,
+            z_mm, x_mm, y_mm,
             label,
             radius, width
         )

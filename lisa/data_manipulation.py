@@ -100,7 +100,7 @@ def remove_what_is_in_touch_with_mask(imlab, exclude_mask):
 
 
 
-def add_seeds_mm(data_seeds, voxelsize_mm, x_mm, y_mm, z_mm, label, radius, width=1):
+def add_seeds_mm(data_seeds, voxelsize_mm, z_mm, x_mm, y_mm, label, radius, width=1):
 
     """
     Function add circle seeds to one slice with defined radius.
@@ -125,10 +125,10 @@ def add_seeds_mm(data_seeds, voxelsize_mm, x_mm, y_mm, z_mm, label, radius, widt
     z_mm = np.asarray(z_mm)
     # repeat circle every milimiter
     for i in range(0, width + 1):
-        data_seeds = _add_seeds_mm_in_one_slice(data_seeds, voxelsize_mm, x_mm, y_mm, z_mm + i, label, radius)
+        data_seeds = _add_seeds_mm_in_one_slice(data_seeds, voxelsize_mm, z_mm + i, x_mm, y_mm, label, radius)
     return data_seeds
 
-def _add_seeds_mm_in_one_slice(data_seeds, voxelsize_mm, x_mm, y_mm, z_mm, label, radius):
+def _add_seeds_mm_in_one_slice(data_seeds, voxelsize_mm, z_mm, x_mm, y_mm, label, radius):
     x_mm = np.asarray(x_mm)
     y_mm = np.asarray(y_mm)
     z_mm = np.asarray(z_mm)
