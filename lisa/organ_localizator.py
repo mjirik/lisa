@@ -206,7 +206,7 @@ def train_liver_localizator_from_sliver_data(
 
 
     sf.fit()
-    sf.save(output_file)
+    sf.save(op.expanduser(output_file))
 
 def main():
     logger = logging.getLogger()
