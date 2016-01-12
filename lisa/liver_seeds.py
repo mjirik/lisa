@@ -17,13 +17,13 @@ import numpy as np
 import argparse
 
 import liver_model
-from pysegbase import pycut
 import imtools
 import body_navigation
 import data_manipulation
 
 
 def automatic_liver_seeds(data3d, seeds, voxelsize_mm, fn_mdl='~/lisa_data/liver_intensity.Model.p'):
+    from pysegbase import pycut
     # fn_mdl = op.expanduser(fn_mdl)
     mdl = pycut.Model({'mdl_stored_file':fn_mdl, 'fv_extern': liver_model.intensity_localization_fv})
     working_voxelsize_mm = np.asarray([4, 4, 4])
