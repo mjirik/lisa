@@ -39,70 +39,79 @@ def add_fv_extern_into_modelparams(modelparams):
     return modelparams
 
 def intensity_localization_fv(data3dr, voxelsize_mm, seeds=None, unique_cls=None):        # scale
-        import scipy
-        import numpy as np
-        import os.path as op
-        try:
-            from lisa import organ_localizator
-        except:
-            import organ_localizator
+    """
+    Use organ_localizator features plus intensity features
+
+    :param data3dr:
+    :param voxelsize_mm:
+    :param seeds:
+    :param unique_cls:
+    :return:
+    """
+    import scipy
+    import numpy as np
+    import os.path as op
+    try:
+        from lisa import organ_localizator
+    except:
+        import organ_localizator
 
 #         print "po importech"
-        fv = []
-        f0 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=1).reshape(-1, 1)
-        f1 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=3).reshape(-1, 1)
-        #f2 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=5).reshape(-1, 1) - f0
-        #f3 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=10).reshape(-1, 1) - f0
-        #f4 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=20).reshape(-1, 1) - f0
-        # position
-        #ss = lisa.body_navigation.BodyNavigation(data3dr, voxelsize_mm)
-        #ss.feature_function(data3d, voxelsize_mm)
-        #fd1 = ss.dist_to_lungs().reshape(-1, 1)
-        #fd2 = ss.dist_to_spine().reshape(-1, 1)
-        #fd3 = ss.dist_sagittal().reshape(-1, 1)
-        #fd4 = ss.dist_coronal().reshape(-1, 1)
-        #fd5 = ss.dist_to_surface().reshape(-1, 1)
-        #fd6 = ss.dist_diaphragm().reshape(-1, 1)
+    fv = []
+    f0 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=1).reshape(-1, 1)
+    f1 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=3).reshape(-1, 1)
+    #f2 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=5).reshape(-1, 1) - f0
+    #f3 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=10).reshape(-1, 1) - f0
+    #f4 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=20).reshape(-1, 1) - f0
+    # position
+    #ss = lisa.body_navigation.BodyNavigation(data3dr, voxelsize_mm)
+    #ss.feature_function(data3d, voxelsize_mm)
+    #fd1 = ss.dist_to_lungs().reshape(-1, 1)
+    #fd2 = ss.dist_to_spine().reshape(-1, 1)
+    #fd3 = ss.dist_sagittal().reshape(-1, 1)
+    #fd4 = ss.dist_coronal().reshape(-1, 1)
+    #fd5 = ss.dist_to_surface().reshape(-1, 1)
+    #fd6 = ss.dist_diaphragm().reshape(-1, 1)
 
 #         print "pred f6"
-        f6 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=[20, 1, 1]).reshape(-1, 1) - f1
-        f7 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=[1, 20, 1]).reshape(-1, 1) - f1
-        f8 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=[1, 1, 20]).reshape(-1, 1) - f1
+    f6 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=[20, 1, 1]).reshape(-1, 1) - f1
+    f7 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=[1, 20, 1]).reshape(-1, 1) - f1
+    f8 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=[1, 1, 20]).reshape(-1, 1) - f1
 
 #         print "pred organ_localizator"
-        ol = organ_localizator.OrganLocalizator()
-        ol.load(op.expanduser("~/lisa_data/liver.ol.p"))
+    ol = organ_localizator.OrganLocalizator()
+    ol.load(op.expanduser("~/lisa_data/liver.ol.p"))
 
-        fdall = ol.feature_function(data3dr, voxelsize_mm)
-
-
-        middle_liver = ol.predict_w(data3dr, voxelsize_mm, 0.85)
-        mn = np.median(data3dr[middle_liver==1])
-        fdn = np.ones(f0.shape) * mn
+    fdall = ol.feature_function(data3dr, voxelsize_mm)
 
 
-        # print "fv shapes ", f0.shape, fd2.shape, fd3.shape
-        fv = np.concatenate([
-                f0,
-                f1,
+    middle_liver = ol.predict_w(data3dr, voxelsize_mm, 0.85)
+    mn = np.median(data3dr[middle_liver==1])
+    fdn = np.ones(f0.shape) * mn
+
+
+    # print "fv shapes ", f0.shape, fd2.shape, fd3.shape
+    fv = np.concatenate([
+            f0,
+            f1,
 #                 f2, f3, f4,
 #                 fd1, fd2, fd3, fd4, fd5, fd6,
-                fdall,
-                f6, f7, f8,
-                fdn,
+            fdall,
+            f6, f7, f8,
+            fdn,
 
-            ], 1)
-        if seeds is not None:
+        ], 1)
+    if seeds is not None:
 #             logger.debug("seeds " + str(seeds))
 #             print "seeds ", seeds
-            sd = seeds.reshape(-1,1)
-            selection = np.in1d(sd, unique_cls)
-            fv = fv[selection]
-            sd = sd[selection]
-            # sd = sd[]
-            return fv, sd
+        sd = seeds.reshape(-1,1)
+        selection = np.in1d(sd, unique_cls)
+        fv = fv[selection]
+        sd = sd[selection]
+        # sd = sd[]
+        return fv, sd
 
-        return fv
+    return fv
 
 class ModelTrainer():
     def __init__(self, feature_function=None, modelparams={}):
