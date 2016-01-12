@@ -35,6 +35,8 @@ def automatic_liver_seeds(data3d, seeds, voxelsize_mm, fn_mdl='~/lisa_data/liver
 
     dl = lik2 - lik1
 
+    seeds = add_negative_notrain_seeds(seeds,lik1, lik2)
+
 
     # Liver seed center
 
@@ -116,6 +118,21 @@ def automatic_liver_seeds(data3d, seeds, voxelsize_mm, fn_mdl='~/lisa_data/liver
     return seeds
 
 
+def add_negative_notrain_seeds(seeds,lik1, lik2, alpha=1.3):
+    """
+
+    :param seeds:
+    :param lik1:
+    :param lik2:
+    :param alpha: 1.2 means 20% to liver likelihood
+    :return:
+    """
+    # dl = 2*lik2 - lik1
+    dl = (alpha*lik1-lik2)>0
+    dl = imtools.qmisc.resize_to_shape(dl>0, seeds.shape)
+    seeds[dl>0] = 4
+
+    return seeds
 
 
 def main():
