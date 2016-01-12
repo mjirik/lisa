@@ -7,7 +7,8 @@
 # Distributed under terms of the %LICENSE% license.
 
 """
-
+Module is used to train liver localizator based on body_navigation module.
+Output file is placed into ~/lisa_data/liver.ol.p
 """
 
 import logging
@@ -236,7 +237,7 @@ def main():
     # )
     parser.add_argument(
         '-o', '--outputfile',
-        default="liver.ol.p",
+        default="~/lisa_data/liver.ol.p",
         help='output file'
     )
     parser.add_argument(

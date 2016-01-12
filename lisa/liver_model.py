@@ -7,7 +7,9 @@
 # Distributed under terms of the %LICENSE% license.
 
 """
+This module is used to train liver model with intensity.
 
+First use organ_localizator module to train intensity independent model.
 """
 
 import logging
@@ -25,7 +27,6 @@ import numpy as np
 
 import io3d
 from imtools import qmisc
-from pysegbase import pycut
 
 def add_fv_extern_into_modelparams(modelparams):
     # import PyQt4; PyQt4.QtCore.pyqtRemoveInputHook()
@@ -115,6 +116,7 @@ def intensity_localization_fv(data3dr, voxelsize_mm, seeds=None, unique_cls=None
 
 class ModelTrainer():
     def __init__(self, feature_function=None, modelparams={}):
+        from pysegbase import pycut
         self.working_voxelsize_mm = [1.5, 1.5, 1.5]
         self.data=None
         self.target=None
@@ -332,7 +334,7 @@ def main():
     # )
     parser.add_argument(
         '-o', '--outputfile',
-        default="liver.ol.p",
+        default="~/lisa_data/liver_intensity.Model.p",
         help='output file'
     )
     parser.add_argument(
