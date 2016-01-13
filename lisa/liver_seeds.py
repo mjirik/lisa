@@ -20,6 +20,7 @@ import liver_model
 import imtools
 import body_navigation
 import data_manipulation
+import scipy
 
 
 def automatic_liver_seeds(data3d, seeds, voxelsize_mm, fn_mdl='~/lisa_data/liver_intensity.Model.p'):
@@ -41,75 +42,28 @@ def automatic_liver_seeds(data3d, seeds, voxelsize_mm, fn_mdl='~/lisa_data/liver
     # Liver seed center
 
     # seed tam, kde je to nejpravděpodovnější - moc nefunguje
-    # seed1 = np.unravel_index(np.argmax(dl), dl.shape)
-    # seed1_mm = seed1 * working_voxelsize_mm
-
-    # find slice with maximum  liver profile
-    # sos = np.sum(np.sum(dl > 0, axis=1, keepdims=True), axis=2)
-    # maximal_slice_index = np.argmax(sos)
-    # print sos.shape
-    # dl_sl = dl[maximal_slice_index,:,:]
-    # sm = np.sum(dl_sl>0)
-# b, a =np.histogram(dl_sl[dl_sl>0], 80)
-# plt.plot(a[1:],b)
-
-# med = np.median(dl_sl[dl_sl>0])
-#     hi = np.percentile(dl_sl[dl_sl>0],80)
-#     xynz = np.nonzero((dl>hi)[maximal_slice_index, :, :])
-
-
-    # seed1 = np.array([maximal_slice_index, np.mean(xynz[0]), np.mean(xynz[1])])
-    # seed1_mm = seed1 * working_voxelsize_mm
-    # seed1 = np.unravel_index(np.argmax(dl), dl.shape)
-    # seed1_mm = seed1 * working_voxelsize_mm
-
-    # # background seed center
-    # bn = body_navigation.BodyNavigation(data3d, voxelsize_mm)
-    #
-    # bn.get_center()
-    # seed2_mm = bn.center_mm
 # escte jinak
     import scipy
     dst = scipy.ndimage.morphology.distance_transform_edt(dl>0)
     seed1 = np.unravel_index(np.argmax(dst), dst.shape)
     seed1_mm = seed1 * working_voxelsize_mm
 
+    seed1z = seed1[0]
 
-    dll = dl < 0
-    # aby se pocitalo i od okraju obrazku
-    dll[0,:,:] = 0
-    dll[:,0,:] = 0
-    dll[:,:,0] = 0
-    dll[-1,:,:] = 0
-    dll[:,-1,:] = 0
-    dll[:,:,-1] = 0
 
-    dst = scipy.ndimage.morphology.distance_transform_edt(dll)
-    # na nasem rezu
-    dstslice = dst[seed1[0], :, :]
-    seed2xy = np.unravel_index(np.argmax(dstslice), dstslice.shape)
-    # import PyQt4; PyQt4.QtCore.pyqtRemoveInputHook()
-    # import ipdb; ipdb.set_trace()
-    seed2 = np.array([seed1[0], seed2xy[0], seed2xy[1]])
-    seed2_mm = seed2 * working_voxelsize_mm
+    add_negative_train_seeds_blobs(
+        dl < 0,
+        seeds,
+        working_voxelsize_mm,
+        voxelsize_mm,
+        seed1z, n_seed_blob=2)
 
-    # seeds should be on same slide
-    # seed2_mm[0] = seed1_mm[0]
     seeds = data_manipulation.add_seeds_mm(
         seeds, voxelsize_mm,
         [seed1_mm[0]],
         [seed1_mm[1]],
         [seed1_mm[2]],
         label=1,
-        radius=20,
-        width=1
-    )
-    seeds = data_manipulation.add_seeds_mm(
-        seeds, voxelsize_mm,
-        [seed2_mm[0]],
-        [seed2_mm[1]],
-        [seed2_mm[2]],
-        label=2,
         radius=20,
         width=1
     )
@@ -129,11 +83,54 @@ def add_negative_notrain_seeds(seeds,lik1, lik2, alpha=1.3):
     """
     # dl = 2*lik2 - lik1
     dl = (alpha*lik1-lik2)>0
-    dl = imtools.qmisc.resize_to_shape(dl>0, seeds.shape)
+    # for sure we take two iterations from segmentation
+    dl = scipy.ndimage.morphology.binary_erosion(dl, iterations=2)
+
+    # and now i will take just thin surface
+    dl_before=dl
+    dl = scipy.ndimage.morphology.binary_erosion(dl, iterations=2)
+    dl = imtools.qmisc.resize_to_shape((dl_before - dl) > 0, seeds.shape)
     seeds[dl>0] = 4
 
     return seeds
 
+def add_negative_train_seeds_blobs(
+        mask_working,
+        seeds,
+        working_voxelsize_mm,
+        voxelsize_mm,
+        seed1z, n_seed_blob=1):
+    dll = mask_working
+
+    # aby se pocitalo i od okraju obrazku
+    dll[0,:,:] = 0
+    dll[:,0,:] = 0
+    dll[:,:,0] = 0
+    dll[-1,:,:] = 0
+    dll[:,-1,:] = 0
+    dll[:,:,-1] = 0
+    for i in range(0, n_seed_blob):
+
+        dst = scipy.ndimage.morphology.distance_transform_edt(dll)
+        # na nasem rezu
+        dstslice = dst[seed1z, :, :]
+        seed2xy = np.unravel_index(np.argmax(dstslice), dstslice.shape)
+        # import PyQt4; PyQt4.QtCore.pyqtRemoveInputHook()
+        # import ipdb; ipdb.set_trace()
+        seed2 = np.array([seed1z, seed2xy[0], seed2xy[1]])
+        seed2_mm = seed2 * working_voxelsize_mm
+
+        seeds = data_manipulation.add_seeds_mm(
+                seeds, voxelsize_mm,
+                [seed2_mm[0]],
+                [seed2_mm[1]],
+                [seed2_mm[2]],
+                label=2,
+                radius=20,
+                width=1
+        )
+        # for next iteration add hole where this blob is
+        dll[seed1z, seed2xy[0], seed2xy[1]] = 0
 
 def main():
     logger = logging.getLogger()
