@@ -18,6 +18,7 @@ CONFIG_DEFAULT={
         # 'mdl_stored_file': '~/lisa_data/liver_intensity.Model.p',
         # "fv_type": 'fv_extern',
         # 'fv_extern':'intensity_localization_fv',
+        # 'method': 'multiscale_graphcut',
         "params": {"covariance_type": "full", "n_components": 3}
     },
     "type": "gmmsame",

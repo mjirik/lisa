@@ -138,6 +138,7 @@ class OrganSegmentation():
         seg_postproc_pars={},
         cache_filename='cache.yml',
         seg_preproc_pars={},
+        after_load_processing={},
 
 
         #           iparams=None,
@@ -243,6 +244,10 @@ class OrganSegmentation():
             'use_automatic_segmentation': True,
         }
         self.seg_preproc_pars.update(seg_preproc_pars)
+        self.after_load_processing={
+            'run_automatic_liver_seeds': False,
+        }
+        self.after_load_processing.update(after_load_processing)
         # seg_postproc_pars.update(seg_postproc_pars)
         # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
@@ -517,6 +522,9 @@ class OrganSegmentation():
             np.mean(self.working_voxelsize_mm)
 
         self.__import_dataplus_seeds(datap)
+
+        if self.after_load_processing['run_automatic_liver_seeds']:
+            self.automatic_liver_seeds()
 
         # try read prev information about time processing
         try:

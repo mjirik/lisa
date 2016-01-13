@@ -84,11 +84,17 @@ def add_negative_notrain_seeds(seeds,lik1, lik2, alpha=1.3):
     # dl = 2*lik2 - lik1
     dl = (alpha*lik1-lik2)>0
     # for sure we take two iterations from segmentation
-    dl = scipy.ndimage.morphology.binary_erosion(dl, iterations=2)
+    # dl[0,:,:] = True
+    # dl[:,0,:] = True
+    # dl[:,:,0] = True
+    # dl[-1,:,:] = True
+    # dl[:,-1,:] = True
+    # dl[:,:,-1] = True
+    dl = scipy.ndimage.morphology.binary_erosion(dl, iterations=2, border_value=1)
 
     # and now i will take just thin surface
     dl_before=dl
-    dl = scipy.ndimage.morphology.binary_erosion(dl, iterations=2)
+    dl = scipy.ndimage.morphology.binary_erosion(dl, iterations=2, border_value=1)
     dl = imtools.qmisc.resize_to_shape((dl_before - dl) > 0, seeds.shape)
     seeds[dl>0] = 4
 
