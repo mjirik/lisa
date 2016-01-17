@@ -121,17 +121,16 @@ class BodyNavigation:
         tr0, tr1, angle = find_symmetry(img, degrad)
         self.angle = angle
         self.symmetry_point = np.array([tr0, tr1])
-        print angle
 
 
 
     def dist_sagittal(self, degrad=5):
         if self.angle is None:
             self.find_symmetry()
-        rldst = np.ones(self.data3dr.shape, dtype=np.int16)
+        rldst = np.ones(self.orig_shape, dtype=np.int16)
 
         z = split_with_line(self.symmetry_point, self.angle , self.orig_shape[1:])
-        print 'z  ', np.max(z), np.min(z)
+        # print 'z  ', np.max(z), np.min(z)
 
         for i in range(self.orig_shape[0]):
             rldst[i ,: ,:] = z
@@ -143,12 +142,22 @@ class BodyNavigation:
     def dist_coronal(self):
         if self.spine is None:
             self.get_spine()
+        if self.angle is None:
+            self.find_symmetry()
         spine_mean = np.mean(np.nonzero(self.spine), 1)
-        rldst = np.ones(self.data3dr.shape, dtype=np.int16)
-        rldst[:, 0, :] = 0
+        rldst = np.ones(self.orig_shape, dtype=np.int16)
+        # rldst = np.ones(self.data3dr.shape, dtype=np.int16)
+        # rldst[:, 0, :] = 0
+
+        spine_center = spine_mean * self.working_vs / self.voxelsize_mm.astype(np.double)
 
         rldst = scipy.ndimage.morphology.distance_transform_edt(rldst) - int(spine_mean[1])
-        return misc.resize_to_shape(rldst, self.orig_shape)
+
+        z = split_with_line(spine_center[1:], self.angle + 90 , self.orig_shape[1:])
+        for i in range(self.orig_shape[0]):
+            rldst[i ,: ,:] = z
+
+        return rldst
 
     def dist_axial(self):
         if self.diaphragm_mask is None:
