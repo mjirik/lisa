@@ -42,6 +42,7 @@ class BodyNavigation:
         self.body = None
         self.orig_shape = data3d.shape
         self.diaphragm_mask = None
+        self.angle = None
 
 
     def get_spine(self):
@@ -115,15 +116,29 @@ class BodyNavigation:
         ld = scipy.ndimage.morphology.distance_transform_edt(1 - self.spine)
         return misc.resize_to_shape(ld, self.orig_shape)
 
-    def dist_sagittal(self):
-        if self.spine is None:
-            self.get_spine()
-        spine_mean = np.mean(np.nonzero(self.spine), 1)
-        rldst = np.ones(self.data3dr.shape, dtype=np.int16)
-        rldst[: ,: ,0] = 0
+    def find_symmetry(self, degrad=5):
+        img = np.sum(self.data3dr > 430, axis=0)
+        tr0, tr1, angle = find_symmetry(img, degrad)
+        self.angle = angle
+        self.symmetry_point = np.array([tr0, tr1])
+        print angle
 
-        rldst = scipy.ndimage.morphology.distance_transform_edt(rldst) - int(spine_mean[2])
-        return misc.resize_to_shape(rldst, self.orig_shape)
+
+
+    def dist_sagittal(self, degrad=5):
+        if self.angle is None:
+            self.find_symmetry()
+        rldst = np.ones(self.data3dr.shape, dtype=np.int16)
+
+        z = split_with_line(self.symmetry_point, self.angle , self.orig_shape[1:])
+        print 'z  ', np.max(z), np.min(z)
+
+        for i in range(self.orig_shape[0]):
+            rldst[i ,: ,:] = z
+
+        # rldst = scipy.ndimage.morphology.distance_transform_edt(rldst) - int(spine_mean[2])
+        # return misc.resize_to_shape(rldst, self.orig_shape)
+        return rldst
 
     def dist_coronal(self):
         if self.spine is None:
@@ -208,16 +223,23 @@ class BodyNavigation:
 
         flat = self._filter_diaphragm_profile_image_remove_outlayers(flat)
 
+        # jeste filtrujeme ne jen podle stredni hodnoty vysky, ale i v prostoru
+        # flat0 = flat==0
+        # flat[flat0] = None
+        #
+        # flat = scipy.ndimage.filters.median_filter(flat, size=(40,40))
+        # flat[flat0] = 0
 
 
         # doplnime praznda mista v ploche mape podle nejblizsi oblasi
         indices = scipy.ndimage.morphology.distance_transform_edt(flat==0, return_indices=True, return_distances=False)
         ou = flat[(indices[0],indices[1])]
-        ou = scipy.ndimage.filters.median_filter(ou, size=5)
-        # ou = scipy.ndimage.filters.gaussian_filter(ou, sigma=2)
+        ou = scipy.ndimage.filters.median_filter(ou, size=(5,5))
+        ou = scipy.ndimage.filters.gaussian_filter(ou, sigma=2)
 
         ou = self.__filter_diaphragm_profile_image(ou, axis)
         return ou
+
 
     def __filter_diaphragm_profile_image(self, profile, axis=0):
         """
@@ -279,6 +301,125 @@ class BodyNavigation:
         self.center_orig = self.center * self.voxelsize_mm / self.working_vs.astype(np.double)
 
         return self.center_orig
+
+
+def prepare_images(imin0, pivot):
+    imin1 = imin0[:,::-1]
+    img=imin0
+
+    padX0 = [img.shape[1] - pivot[1], pivot[1]]
+    padY0 = [img.shape[0] - pivot[0], pivot[0]]
+    imgP0 = np.pad(img, [padY0, padX0], 'constant')
+
+
+    img = imin1
+    padX1 = [pivot[1], img.shape[1] - pivot[1]]
+    padY1 = [img.shape[0] - pivot[0], pivot[0]]
+    imgP1 = np.pad(img, [padY1, padX1], 'constant')
+    return imgP0, imgP1
+
+def find_symmetry_parameters(imin0, trax, tray, angles):
+    vals = np.zeros([len(trax), len(tray), len(angles)])
+#     angles_vals = []
+
+
+
+    for i, x in enumerate(trax):
+#         print 'x ', x
+        for j, y in enumerate(tray):
+            try:
+                img = imin0
+                pivot=[x,y]
+                imgP0, imgP1 = prepare_images(imin0, pivot)
+
+    #             print 'y ', y
+                for k, angle in enumerate(angles):
+
+    #             print angle
+#                 print imin0.shape, imin.shape, angle, x, y
+#                     imr=rotateImage(imin.astype(int), angle, [imin0.shape[0] - x, y])
+#                     dif = (imr-imin0)**2
+#                     sm = np.sum(dif)
+                    imr = scipy.ndimage.rotate(imgP1, angle, reshape=False)
+                    dif = (imgP0-imr)**2
+                    sm = np.sum(dif)
+                    vals[i,j,k] = sm
+            except:
+                vals[i,j,:] = np.inf
+    #             angles_vals.append(sm)
+
+    # am = np.argmin(angles_vals)
+    am = np.unravel_index(np.argmin(vals), vals.shape)
+    # print am, ' min ', np.min(vals)
+
+    return trax[am[0]], tray[am[1]], angles[am[2]]
+
+def find_symmetry(img, degrad=5):
+    imin0r = scipy.misc.imresize(img, np.asarray(img.shape)/degrad)
+
+    angles = range(-180,180,15)
+    trax = range(1, imin0r.shape[0],10)
+    tray = range(1, imin0r.shape[1],10)
+
+
+
+    tr0, tr1, ang = find_symmetry_parameters(imin0r, trax, tray, angles)
+
+
+    # fine measurement
+    angles = range(ang-20,ang+20, 3)
+    trax = range(np.max([tr0-20, 1]), tr0+20, 3)
+    tray = range(np.max([tr1-20, 1]), tr1+20, 3)
+
+    tr0, tr1, ang = find_symmetry_parameters(imin0r, trax, tray, angles)
+
+    angle = 90-ang/2.0
+
+    return tr0*degrad, tr1*degrad, angle
+
+
+# Rozděl obraz na půl
+def split_with_line(point, orientation, imshape, degrees=True):
+    """
+    :arg point:
+    :arg orientation: angle or oriented vector
+    :arg degrees: if is set to True inptu angle is expected to be in radians, default True
+    """
+
+    if np.isscalar(orientation):
+        angle = orientation
+        if degrees:
+            angle = np.radians(angle)
+
+        # kvadranty
+        angle = angle % (2* np.pi)
+               # kvadranty
+        angle = angle % (2* np.pi)
+        print np.degrees(angle)
+        if (angle > (0.5*np.pi)) and (angle < (1.5*np.pi)):
+
+            zn = -1
+        else:
+            zn = 1
+
+        vector = [np.tan(angle), 1]
+        # vector = [np.tan(angle), 1]
+    else:
+        vector = orientation
+
+    vector = vector / np.linalg.norm(vector)
+    x, y = np.mgrid[:imshape[0], :imshape[1]]
+#     k = -vector[1]/vector[0]
+#     z = ((k * (x - point[0])) + point[1] - y)
+    a = vector[1]
+    b = -vector[0]
+
+    c = -a * point[0] - b * point[1]
+
+
+    z = zn * (a * x + b * y + c) / (a**2 + b**2)**0.5
+    return z
+
 
 def main():
 
