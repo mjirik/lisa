@@ -293,6 +293,7 @@ def compare_volumes_sliver(vol1, vol2, voxelsize_mm, use_logger=False):
 
     evaluation.update(sliver_evaluation)
     evaluation['sliver_overall_pts'] = overall
+    return evaluation
 
 def compare_volumes(vol1, vol2, voxelsize_mm, use_logger=False):
     """
