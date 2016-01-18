@@ -160,7 +160,7 @@ class OrganLocalizator():
 
 
 def train_liver_localizator_from_sliver_data(
-        output_file="liver.ol.p",
+        output_file="~/lisa_data/liver.ol.p",
         sliver_reference_dir='~/data/medical/orig/sliver07/training/',
         orig_pattern="*orig*[1-9].mhd",
         ref_pattern="*seg*[1-9].mhd"):
