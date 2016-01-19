@@ -128,8 +128,9 @@ class BodyNavigation:
         if self.angle is None:
             self.find_symmetry()
         rldst = np.ones(self.orig_shape, dtype=np.int16)
+        symmetry_point_orig_res = self.symmetry_point * self.working_vs[1:] / self.voxelsize_mm[1:].astype(np.double)
 
-        z = split_with_line(self.symmetry_point, self.angle , self.orig_shape[1:])
+        z = split_with_line(symmetry_point_orig_res, self.angle , self.orig_shape[1:])
         # print 'z  ', np.max(z), np.min(z)
 
         for i in range(self.orig_shape[0]):
@@ -404,7 +405,7 @@ def split_with_line(point, orientation, imshape, degrees=True):
         angle = angle % (2* np.pi)
                # kvadranty
         angle = angle % (2* np.pi)
-        print np.degrees(angle)
+        # print np.degrees(angle)
         if (angle > (0.5*np.pi)) and (angle < (1.5*np.pi)):
 
             zn = -1
