@@ -132,7 +132,7 @@ class ModelTrainer():
             'fv_type': "fv_extern",
             'fv_extern': feature_function,
             'type': 'gmmsame',
-            # 'params': {'cvtype': 'full', 'n_components': 7},
+            'params': {'cvtype': 'full', 'n_components': 15},
             'adaptation': 'original_data',
 
 
