@@ -248,6 +248,7 @@ class OrganSegmentation():
             'run_automatic_liver_seeds': False,
         }
         self.after_load_processing.update(after_load_processing)
+        self.apriori = None
         # seg_postproc_pars.update(seg_postproc_pars)
         # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
@@ -625,6 +626,7 @@ class OrganSegmentation():
                 voxelsize_mm=self.working_voxelsize_mm,
                 segparams=self.segparams
             )
+        igc.apriori = self.apriori
 
         # igc.modelparams = self.segmodelparams
 # @TODO uncomment this for kernel model
@@ -945,7 +947,9 @@ class OrganSegmentation():
     #     return self.iparams
 
     def automatic_liver_seeds(self):
-        liver_seeds.automatic_liver_seeds(self.data3d, self.seeds, self.voxelsize_mm)
+        seeds, likdif = liver_seeds.automatic_liver_seeds(self.data3d, self.seeds, self.voxelsize_mm)
+        # přenastavíme na čísla mezi nulou a jedničkou, druhá konstanta je nastavena empiricky
+        self.apriori = boltzman(likdif, 0, 15)
 
     def add_seeds_mm(self, z_mm, x_mm, y_mm, label, radius, width=1):
         """
@@ -1410,6 +1414,12 @@ config and user config.")
     args.update(vars(args_obj))
     return args
 
+def boltzman(x, xmid, tau):
+    """
+    evaluate the boltzman function with midpoint xmid and time constant tau
+    over x
+    """
+    return 1. / (1. + np.exp(-(x-xmid)/tau))
 
 def main():  # pragma: no cover
 

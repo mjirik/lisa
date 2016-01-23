@@ -23,7 +23,13 @@ import data_manipulation
 import scipy
 
 
-def automatic_liver_seeds(data3d, seeds, voxelsize_mm, fn_mdl='~/lisa_data/liver_intensity.Model.p'):
+def automatic_liver_seeds(
+        data3d,
+        seeds,
+        voxelsize_mm,
+        fn_mdl='~/lisa_data/liver_intensity.Model.p',
+        return_likelihood_difference=True
+):
     from pysegbase import pycut
     # fn_mdl = op.expanduser(fn_mdl)
     mdl = pycut.Model({'mdl_stored_file':fn_mdl, 'fv_extern': liver_model.intensity_localization_fv})
@@ -69,7 +75,10 @@ def automatic_liver_seeds(data3d, seeds, voxelsize_mm, fn_mdl='~/lisa_data/liver
     )
     # import sed3
     # sed3.show_slices(data3dr, dl > 40.0, slice_step=10)
-    return seeds
+    if return_likelihood_difference:
+        return seeds, dl
+    else:
+        return seeds
 
 
 def add_negative_notrain_seeds(seeds,lik1, lik2, alpha=1.3):
