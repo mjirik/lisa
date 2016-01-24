@@ -632,9 +632,6 @@ class OrganSegmentation():
                     self.apriori,
                     data3d_res.shape,
             )
-        # todo remove 1 -
-        import PyQt4; PyQt4.QtCore.pyqtRemoveInputHook()
-        import ipdb; ipdb.set_trace()
         igc.apriori = apriori_res
 
         # igc.modelparams = self.segmodelparams
