@@ -752,9 +752,6 @@ class OrganSegmentationWindow(QMainWindow):
             )
         
         self.quit(event)
-        # from PyQt4.QtCore import pyqtRemoveInputHook
-        # pyqtRemoveInputHook()
-        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
     def btnSaveOutDcmOverlay(self, event=None, filename=None):
         if self.oseg.segmentation is not None:
@@ -823,10 +820,6 @@ class OrganSegmentationWindow(QMainWindow):
         )
         self.setLabelText(self.text_seg_data, aux)
 
-        # rom PyQt4.QtCore import pyqtRemoveInputHook
-        # yqtRemoveInputHook()
-        # mport ipdb; ipdb.set_trace() # BREAKPOINT
-        # ass
 
     def btnLesionLocalization(self):
         self.oseg.lesionsLocalization()

@@ -626,7 +626,16 @@ class OrganSegmentation():
                 voxelsize_mm=self.working_voxelsize_mm,
                 segparams=self.segparams
             )
-        igc.apriori = self.apriori
+        if self.apriori is not None:
+            apriori_res = misc.resize_to_shape(
+                    # seeds_res = scipy.ndimage.zoom(
+                    self.apriori,
+                    data3d_res.shape,
+            )
+        # todo remove 1 -
+        import PyQt4; PyQt4.QtCore.pyqtRemoveInputHook()
+        import ipdb; ipdb.set_trace()
+        igc.apriori = apriori_res
 
         # igc.modelparams = self.segmodelparams
 # @TODO uncomment this for kernel model
@@ -949,7 +958,7 @@ class OrganSegmentation():
     def automatic_liver_seeds(self):
         seeds, likdif = liver_seeds.automatic_liver_seeds(self.data3d, self.seeds, self.voxelsize_mm)
         # přenastavíme na čísla mezi nulou a jedničkou, druhá konstanta je nastavena empiricky
-        self.apriori = boltzman(likdif, 0, 15)
+        self.apriori = boltzman(likdif, 0, 200)
 
     def add_seeds_mm(self, z_mm, x_mm, y_mm, label, radius, width=1):
         """
