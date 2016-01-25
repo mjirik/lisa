@@ -516,6 +516,11 @@ class OrganSegmentation():
         else:
             self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
 
+        if ('apriori' in dpkeys) and datap['apriori'] is not None:
+            self.apriori= datap['apriori']
+        else:
+            self.apriori = None
+
         self.dcmfilelist = datap['dcmfilelist']
 
         self.segparams['pairwise_alpha'] = \
@@ -921,6 +926,7 @@ class OrganSegmentation():
         data['data3d'] = self.data3d
         data['crinfo'] = self.crinfo
         data['segmentation'] = self.segmentation
+        data['apriori'] = None
         data['slab'] = slab
         data['voxelsize_mm'] = self.voxelsize_mm
         data['orig_shape'] = self.orig_shape
