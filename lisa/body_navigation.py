@@ -238,10 +238,12 @@ class BodyNavigation:
         flat[(nz[ib], nz[ic])] = [nz[ia]]
 
 
+        # odstranime z dat pruh kolem srdce. Tam byva obcas jicen, nebo je tam oblast nad srdcem
+        z = split_with_line(self.symmetry_point, self.angle , flat.shape)
         z = split_with_line(self.symmetry_point, self.angle , flat.shape)
         seg = (np.abs(z) > zero_stripe_width).astype(np.int)
 
-        flat = flat * z
+        flat = flat * seg
         # flat = self._filter_diaphragm_profile_image_remove_outlayers(flat)
         return flat
 
