@@ -255,11 +255,11 @@ class BodyNavigation:
         # seg = (np.abs(z) > zero_stripe_width).astype(np.int)
         seg = 1 - (z1 * z2)
 
-        flat = flat * seg + seg*10
+        flat = flat * seg # + seg*10
         print 'sp ', spine_mean
         # print 'sporig ', symmetry_point_orig_res
         # flat = seg
-        # flat = self._filter_diaphragm_profile_image_remove_outlayers(flat)
+        flat = self._filter_diaphragm_profile_image_remove_outlayers(flat)
         return flat
 
     def get_diaphragm_profile_image(self, axis=0):
@@ -279,7 +279,7 @@ class BodyNavigation:
         ou = scipy.ndimage.filters.median_filter(ou, size=(15,15))
         ou = scipy.ndimage.filters.gaussian_filter(ou, sigma=2)
 
-        ou = self.__filter_diaphragm_profile_image(ou, axis)
+        # ou = self.__filter_diaphragm_profile_image(ou, axis)
         return ou
 
 
