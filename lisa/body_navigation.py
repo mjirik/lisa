@@ -152,7 +152,7 @@ class BodyNavigation:
 
         spine_center = spine_mean * self.working_vs / self.voxelsize_mm.astype(np.double)
 
-        rldst = scipy.ndimage.morphology.distance_transform_edt(rldst) - int(spine_mean[1])
+        # rldst = scipy.ndimage.morphology.distance_transform_edt(rldst) - int(spine_mean[1])
 
         z = split_with_line(spine_center[1:], self.angle + 90 , self.orig_shape[1:])
         for i in range(self.orig_shape[0]):
@@ -213,10 +213,12 @@ class BodyNavigation:
         return profile
 
     def get_diaphragm_profile_image_with_empty_areas(self, axis=0):
-        zero_stripe_width = 30
+        zero_stripe_width = 10
+        additional_angle = 40
         if self.lungs is None:
             self.get_lungs()
-
+        if self.spine is None:
+            self.get_spine()
         if self.angle is None:
             self.find_symmetry()
         axis = 0
@@ -238,12 +240,25 @@ class BodyNavigation:
         flat[(nz[ib], nz[ic])] = [nz[ia]]
 
 
+        # symmetry_point_orig_res = self.symmetry_point * self.working_vs[1:] / self.voxelsize_mm[1:].astype(np.double)
         # odstranime z dat pruh kolem srdce. Tam byva obcas jicen, nebo je tam oblast nad srdcem
-        z = split_with_line(self.symmetry_point, self.angle , flat.shape)
-        z = split_with_line(self.symmetry_point, self.angle , flat.shape)
-        seg = (np.abs(z) > zero_stripe_width).astype(np.int)
+        # symmetry_point_pixels = self.symmetry_point/ self.working_vs[1:]
 
-        flat = flat * seg
+        spine_mean = np.mean(np.nonzero(self.spine), 1)
+        spine_mean = spine_mean[1:]
+
+        z1 = split_with_line(spine_mean, self.angle + additional_angle , flat.shape)
+        z2 = split_with_line(spine_mean, self.angle - additional_angle, flat.shape)
+
+        z1 = (z1 > zero_stripe_width).astype(np.int8)
+        z2 = (z2 < -zero_stripe_width).astype(np.int8)
+        # seg = (np.abs(z) > zero_stripe_width).astype(np.int)
+        seg = 1 - (z1 * z2)
+
+        flat = flat * seg + seg*10
+        print 'sp ', spine_mean
+        # print 'sporig ', symmetry_point_orig_res
+        # flat = seg
         # flat = self._filter_diaphragm_profile_image_remove_outlayers(flat)
         return flat
 
