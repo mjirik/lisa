@@ -212,17 +212,23 @@ class BodyNavigation:
         profile[np.abs(profile - med) > tolerance] = 0
         return profile
 
-
-    def get_diaphragm_profile_image(self, axis=0):
+    def get_diaphragm_profile_image_with_empty_areas(self, axis=0):
+        zero_stripe_width = 30
         if self.lungs is None:
             self.get_lungs()
+
+        if self.angle is None:
+            self.find_symmetry()
         axis = 0
         data = self.lungs
         ia, ib, ic = self._get_ia_ib_ic(axis)
 
         # gradient
         gr = scipy.ndimage.filters.sobel(data.astype(np.int16), axis=ia)
+        # seg = (np.abs(ss.dist_coronal()) > 20).astype(np.uint8) + (np.abs(ss.dist_sagittal()) > 20).astype(np.uint8)
         grt = gr > 12
+        # seg = (np.abs(self.dist_sagittal()) > zero_stripe_width).astype(np.uint8)
+        # grt = grt * seg
         # nalezneme nenulove body
         nz = np.nonzero(grt)
 
@@ -231,7 +237,16 @@ class BodyNavigation:
         flat = np.zeros([grt.shape[ib], grt.shape[ic]])
         flat[(nz[ib], nz[ic])] = [nz[ia]]
 
-        flat = self._filter_diaphragm_profile_image_remove_outlayers(flat)
+
+        z = split_with_line(self.symmetry_point, self.angle , flat.shape)
+        seg = (np.abs(z) > zero_stripe_width).astype(np.int)
+
+        flat = flat * z
+        # flat = self._filter_diaphragm_profile_image_remove_outlayers(flat)
+        return flat
+
+    def get_diaphragm_profile_image(self, axis=0):
+        flat = self.get_diaphragm_profile_image_with_empty_areas(axis)
 
         # jeste filtrujeme ne jen podle stredni hodnoty vysky, ale i v prostoru
         # flat0 = flat==0

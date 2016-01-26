@@ -529,8 +529,10 @@ class OrganSegmentation():
 
         self.__import_dataplus_seeds(datap)
 
+        # chci, abych nepřepisoval uložené seedy
         if self.after_load_processing['run_automatic_liver_seeds']:
-            self.automatic_liver_seeds()
+            if self.seeds is None or (self.seeds == 0).all():
+                self.automatic_liver_seeds()
 
         # try read prev information about time processing
         try:
@@ -926,7 +928,7 @@ class OrganSegmentation():
         data['data3d'] = self.data3d
         data['crinfo'] = self.crinfo
         data['segmentation'] = self.segmentation
-        data['apriori'] = None
+        data['apriori'] = self.apriori
         data['slab'] = slab
         data['voxelsize_mm'] = self.voxelsize_mm
         data['orig_shape'] = self.orig_shape
