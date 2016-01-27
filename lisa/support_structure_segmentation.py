@@ -30,17 +30,16 @@ try:
 except:
     from pysegbase import dcmreaddata as dcmr
 
-try:
-    from pysegbase import pycut
-except:
-    logger.warning("Deprecated of pyseg_base as submodule")
-    import pycut
+# try:
+#     from pysegbase import pycut
+# except:
+#     logger.warning("Deprecated of pyseg_base as submodule")
+#     import pycut
 import argparse
 import qmisc
 import io3d
 import scipy.ndimage.filters as filters
 import scipy.signal
-import multipolyfit as mpf
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import interpolate
@@ -178,6 +177,7 @@ class SupportStructureSegmentation():
         return interpolate.bisplev(x,y, tck)
 
     def __above_diaphragm_calculation(self, seg_prub, internal_resize_shape=[20, 20, 20], data_degradation=4):
+        import multipolyfit as mpf
         # print seg_prub.dtype
         # seg_prub_tmp = misc.resize_to_shape(seg_prub, internal_resize_shape)
         # print seg_prub_tmp.dtype

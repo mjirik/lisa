@@ -13,8 +13,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 from lisa.gen_volume_tree import TreeGenerator
-from lisa.histology_analyser import HistologyAnalyser
-from lisa.histology_report import HistologyReport
+from quantan.quantan import HistologyAnalyser
+from quantan.histology_report import HistologyReport
 
 
 class HistologyTest(unittest.TestCase):

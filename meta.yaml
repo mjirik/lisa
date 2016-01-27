@@ -1,0 +1,102 @@
+package:
+  name: lisa
+  version: "1.6.24"
+
+source:
+  git_rev: 1.6.24
+  git_url: .
+  # git_url: https://github.com/mjirik/quantan.git
+
+  # fn: quantan-0.0.6.tar.gz
+  # url: https://pypi.python.org/packages/source/q/quantan/quantan-0.0.6.tar.gz
+  # md5: 5d585fdea5cd12803a2e2b0db37d9d76
+#  patches:
+   # List any patch files here
+   # - fix.patch
+
+# build:
+  # noarch_python: True
+  # preserve_egg_dir: True
+  # entry_points:
+    # Put any entry points (scripts to be generated automatically) here. The
+    # syntax is module:function.  For example
+    #
+    # - quantan = quantan:main
+    #
+    # Would create an entry point called quantan that calls quantan.main()
+
+
+  # If this is a new build for the same version, increment the build
+  # number. If you do not include this key, it defaults to 0.
+  # number: 1
+
+requirements:
+  build:
+    - python
+    - setuptools
+    - numpy
+    - scipy
+    - pyyaml
+    - matplotlib
+    - skelet3d
+    - imtools
+    - sed3
+    - pysegbase
+    - io3d
+    - pyqt 4.10.4
+    - pandas
+    - pywget
+    - scikit-learn
+    - scikit-image
+    - pyqtconfig
+    - pip
+    # just for pip install pygco
+    - cython
+
+  run:
+    - python
+    - numpy
+    - scipy
+    - pyyaml
+    - matplotlib
+    - skelet3d
+    - imtools
+    - sed3
+    - pysegbase
+    - io3d
+    - pyqt 4.10.4
+    - pandas
+    - simpleitk
+    - pywget
+    - scikit-learn
+    - scikit-image
+    - pyqtconfig
+    - pip
+    # just for pip install pygco
+    - cython
+
+test:
+  # Python imports
+  imports:
+    - lisa
+
+  # commands:
+    # You can put test commands to be run here.  Use this to test that the
+    # entry points work.
+
+
+  # You can also put a file called run_test.py in the recipe that will be run
+  # at test time.
+
+  # requires:
+    # Put any additional test requirements here.  For example
+    # - nose
+
+about:
+  home: https://github.com/mjirik/lisa
+  license: BSD License
+  summary: 'Liver Surgery Analyser'
+
+# See
+# http://docs.continuum.io/conda/build.html for
+# more information about meta.yaml

@@ -31,20 +31,22 @@ import scipy.ndimage
 import numpy as np
 import datetime
 import argparse
-import morphsnakes as ms
 # tady uz je logger
 # import dcmreaddata as dcmreader
-try:
-    import pysegbase  # noqa
-    from pysegbase import pycut
-except:
-    path_to_script = os.path.dirname(os.path.abspath(__file__))
-    sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
-    logger.warning("Deprecated of pyseg_base as submodule")
-    import traceback
-    traceback.print_exc()
-    import pycut
+# from pysegbase import pycut
+# try:
+#     import pysegbase  # noqa
+#     from pysegbase import pycut
+# except:
+#     path_to_script = os.path.dirname(os.path.abspath(__file__))
+#     sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
+#     logger.warning("Deprecated of pyseg_base as submodule")
+#     import traceback
+#     traceback.print_exc()
+#     import pycut
 
+path_to_script = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(path_to_script, "../../pysegbase/"))
 import volumetry_evaluation
 
 # from seg2fem import gen_mesh_from_voxels, gen_mesh_from_voxels_mc
@@ -57,6 +59,8 @@ from io3d import datawriter
 import data_plus
 import support_structure_segmentation as sss
 import cachefile as cachef
+import config_default
+import liver_seeds
 
 # import audiosupport
 # import skimage
@@ -83,12 +87,6 @@ default_segmodelparams = {
     'type': 'gmmsame',
     'params': {cvtype_name: 'full', 'n_components': 3}
 }
-
-default_segparams = {
-    'method': pycut.methods[0],
-    'pairwise_alpha_per_mm2': 40,
-    'use_boundary_penalties': False,
-    'boundary_penalties_sigma': 50}
 
 config_version = [1, 0, 0]
 
@@ -140,6 +138,7 @@ class OrganSegmentation():
         seg_postproc_pars={},
         cache_filename='cache.yml',
         seg_preproc_pars={},
+        after_load_processing={},
 
 
         #           iparams=None,
@@ -166,6 +165,13 @@ class OrganSegmentation():
         :param seg_postproc_pars: Can be used for setting postprocessing
         parameters. For example
         """
+
+        from pysegbase import pycut
+        default_segparams = {
+            'method': pycut.methods[0],
+            'pairwise_alpha_per_mm2': 40,
+            'use_boundary_penalties': False,
+            'boundary_penalties_sigma': 50}
 
         self.iparams = {}
         self.datapath = datapath
@@ -201,6 +207,8 @@ class OrganSegmentation():
         self.experiment_caption = experiment_caption
         self.lisa_operator_identifier = lisa_operator_identifier
         self.version = qmisc.getVersionString()
+        if self.version is None:
+            self.version = "1.6.24"
         self.viewermax = viewermax
         self.viewermin = viewermin
         self.volume_unit = volume_unit
@@ -236,6 +244,11 @@ class OrganSegmentation():
             'use_automatic_segmentation': True,
         }
         self.seg_preproc_pars.update(seg_preproc_pars)
+        self.after_load_processing={
+            'run_automatic_liver_seeds': False,
+        }
+        self.after_load_processing.update(after_load_processing)
+        self.apriori = None
         # seg_postproc_pars.update(seg_postproc_pars)
         # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
@@ -314,6 +327,7 @@ class OrganSegmentation():
         oseg_params['data3d'] = None
         oseg_params['segmentation'] = None
         oseg_params.pop('self')
+        oseg_params.pop('pycut')
         return oseg_params
 
     def process_wvx_size_mm(self, metadata):
@@ -407,16 +421,16 @@ class OrganSegmentation():
         print "then press 'c' and 'Enter'"
         import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
-        evaluation = volumetry_evaluation.compare_volumes(
+        evaluation = volumetry_evaluation.compare_volumes_sliver(
             data3d_segmentation_actual == label1,
             data3d_segmentation == label2,
             self.voxelsize_mm
             )
-        score = volumetry_evaluation.sliver_score_one_couple(evaluation)
+        # score = volumetry_evaluation.sliver_score_one_couple(evaluation)
         segdiff = qmisc.crop(
             ((data3d_segmentation) - data3d_segmentation_actual),
             self.crinfo)
-        return evaluation, score, segdiff
+        return evaluation, segdiff
 
     def segm_smoothing(self, sigma_mm):
         """
@@ -502,6 +516,11 @@ class OrganSegmentation():
         else:
             self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
 
+        if ('apriori' in dpkeys) and datap['apriori'] is not None:
+            self.apriori= datap['apriori']
+        else:
+            self.apriori = None
+
         self.dcmfilelist = datap['dcmfilelist']
 
         self.segparams['pairwise_alpha'] = \
@@ -509,6 +528,11 @@ class OrganSegmentation():
             np.mean(self.working_voxelsize_mm)
 
         self.__import_dataplus_seeds(datap)
+
+        # chci, abych nepřepisoval uložené seedy
+        if self.after_load_processing['run_automatic_liver_seeds']:
+            if self.seeds is None or (self.seeds == 0).all():
+                self.automatic_liver_seeds()
 
         # try read prev information about time processing
         try:
@@ -566,6 +590,7 @@ class OrganSegmentation():
         #        ' d3d ', self.data3d.shape
 
     def _interactivity_begin(self):
+        from pysegbase import pycut
         logger.debug('_interactivity_begin()')
         # TODO make copy and work with it
 
@@ -585,6 +610,10 @@ class OrganSegmentation():
         logger.debug('pycut segparams ' + str(self.segparams) +
                      '\nmodelparams ' + str(self.segmodelparams)
                      )
+        # insert feature function instead of string description
+        import liver_model
+        self.segmodelparams = liver_model.add_fv_extern_into_modelparams(self.segmodelparams)
+
         if 'method' not in self.segparams.keys() or\
                 self.segparams['method'] in pycut.methods:
             igc = pycut.ImageGraphCut(
@@ -604,6 +633,13 @@ class OrganSegmentation():
                 voxelsize_mm=self.working_voxelsize_mm,
                 segparams=self.segparams
             )
+        if self.apriori is not None:
+            apriori_res = misc.resize_to_shape(
+                    # seeds_res = scipy.ndimage.zoom(
+                    self.apriori,
+                    data3d_res.shape,
+            )
+        igc.apriori = apriori_res
 
         # igc.modelparams = self.segmodelparams
 # @TODO uncomment this for kernel model
@@ -778,6 +814,7 @@ class OrganSegmentation():
             self.segm_smoothing(self.seg_postproc_pars['smoothing_mm'])
 
         if self.seg_postproc_pars['snakes']:
+            import morphsnakes as ms
             logger.debug('Making snakes')
             if self.seg_postproc_pars['snakes_method'] is 'ACWE':
                 method = ms.MorphACWE
@@ -862,6 +899,7 @@ class OrganSegmentation():
         self._interactivity_end(igc)
 
     def ninteractivity(self):
+        from pysegbase import pycut
         """Function for automatic (noninteractiv) mode."""
         # mport pdb; pdb.set_trace()
         igc = self._interactivity_begin()
@@ -890,6 +928,7 @@ class OrganSegmentation():
         data['data3d'] = self.data3d
         data['crinfo'] = self.crinfo
         data['segmentation'] = self.segmentation
+        data['apriori'] = self.apriori
         data['slab'] = slab
         data['voxelsize_mm'] = self.voxelsize_mm
         data['orig_shape'] = self.orig_shape
@@ -905,6 +944,9 @@ class OrganSegmentation():
             }
         }
         data['processing_information'] = processing_information
+        # from PyQt4 import QtCore
+        # QtCore.pyqtRemoveInputHook()
+        # import ipdb; ipdb.set_trace()
 # TODO add dcmfilelist
         logger.debug("export()")
         # ogger.debug(str(data))
@@ -918,7 +960,12 @@ class OrganSegmentation():
 
     #     return self.iparams
 
-    def add_seeds_mm(self, x_mm, y_mm, z_mm, label, radius):
+    def automatic_liver_seeds(self):
+        seeds, likdif = liver_seeds.automatic_liver_seeds(self.data3d, self.seeds, self.voxelsize_mm)
+        # přenastavíme na čísla mezi nulou a jedničkou, druhá konstanta je nastavena empiricky
+        self.apriori = boltzman(likdif, 0, 200)
+
+    def add_seeds_mm(self, z_mm, x_mm, y_mm, label, radius, width=1):
         """
         Function add circle seeds to one slice with defined radius.
 
@@ -926,55 +973,19 @@ class OrganSegmentation():
 
         x_mm, y_mm coordinates of circle in mm. It may be array.
         z_mm = slice coordinates  in mm. It may be array
-        label: one number. 1 is object seed, 2 is background seed
-        radius: is radius of circle in mm
+        :param label: one number. 1 is object seed, 2 is background seed
+        :param radius: is radius of circle in mm
+        :param width: makes circle with defined width (repeat circle every milimeter)
 
         """
+        import data_manipulation
 
-        x_mm = np.array(x_mm)
-        y_mm = np.array(y_mm)
-        z_mm = np.array(z_mm)
-
-        for i in range(0, len(x_mm)):
-
-            # xx and yy are 200x200 tables containing the x and y coordinates
-            # values. mgrid is a mesh creation helper
-            xx, yy = np.mgrid[
-                :self.seeds.shape[1],
-                :self.seeds.shape[2]
-            ]
-        # circles contains the squared distance to the (100, 100) point
-        # we are just using the circle equation learnt at school
-            circle = (
-                (xx - x_mm[i] / self.voxelsize_mm[1]) ** 2 +
-                (yy - y_mm[i] / self.voxelsize_mm[2]) ** 2
-            ) ** (0.5)
-        # donuts contains 1's and 0's organized in a donut shape
-        # you apply 2 thresholds on circle to define the shape
-            # slice jen s jednim kruhem
-            slicecircle = circle < radius
-            slicen = int(z_mm / self.voxelsize_mm[0])
-            # slice s tim co už je v něm nastaveno
-            slicetmp = self.seeds[slicen, :, :]
-            # mport pdb; pdb.set_trace()
-
-            slicetmp[slicecircle == 1] = label
-
-            self.seeds[slicen, :, :] = slicetmp
-
-#  QMainWindow
-            # mport sed3
-            # r=sed3.sed3(self.seeds); rr.show()
-
-            # rom seed_editor_qt import QTSeedEditor
-            # rom PyQt4.QtGui import QApplication
-            # pp = QApplication(sys.argv)
-            # yed = QTSeedEditor(circle)
-            # yed.exec_()
-
-            # pp.exit()
-            # mpslice = # p.logical_and(
-            # ircle < (6400 + 60), circle > (6400 - 60))
+        data_manipulation.add_seeds_mm(
+            self.seeds, self.voxelsize_mm,
+            z_mm, x_mm, y_mm,
+            label,
+            radius, width
+        )
 
     def lesionsLocalization(self):
         """ Localization of lession """
@@ -1063,7 +1074,7 @@ class OrganSegmentation():
 
     def __vesselTree(self, binaryData3d, textLabel):
         import skelet3d
-        import skeleton_analyser  # histology_analyser as skan
+        from skelet3d import skeleton_analyser  # histology_analyser as skan
         data3d_thr = (binaryData3d > 0).astype(np.int8)
         data3d_skel = skelet3d.skelet3d(data3d_thr)
 
@@ -1165,6 +1176,9 @@ class OrganSegmentation():
 
         if filepath is None:
             filepath = self.get_standard_ouptut_filename()
+        # from PyQt4 import QtCore
+        # QtCore.pyqtRemoveInputHook()
+        # import ipdb; ipdb.set_trace()
         misc.obj_to_file(data, filepath, filetype=self.save_filetype)
 
         # filepath2 = 'organ_last.' + self.save_filetype
@@ -1271,7 +1285,8 @@ def lisa_config_init():
     cfg.update(cfgplus)
     # now is in cfg default values
 
-    cfg = config.get_config("organ_segmentation.config", cfg)
+    # cfg = config.get_config("organ_segmentation.config", cfg)
+    cfg.update(config_default.CONFIG_DEFAULT)
     user_config_path = os.path.join(cfg['output_datapath'],
                                     "organ_segmentation.config")
     config.check_config_version_and_remove_old_records(
@@ -1413,6 +1428,12 @@ config and user config.")
     args.update(vars(args_obj))
     return args
 
+def boltzman(x, xmid, tau):
+    """
+    evaluate the boltzman function with midpoint xmid and time constant tau
+    over x
+    """
+    return 1. / (1. + np.exp(-(x-xmid)/tau))
 
 def main():  # pragma: no cover
 

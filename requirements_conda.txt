@@ -18,10 +18,20 @@ vtk=5.10.1
 ipython=3.1.0=py27_0
 SimpleITK=0.9.1
 h5py=2.5.0
-# pydicom
-# sed3
-# io3d
 pywget=2.2
 opencv>=2.4.0
 libpng
-
+pandas
+# -c luispedro
+mahotas
+# -c mjirik
+pydicom>=0.9.9
+pysegbase>=1.0.39
+dicom2fem>=1.0.0
+sed3>=1.1.17
+io3d>=1.0.18
+imtools>=0.0.1
+# pygco==0.0.5
+joblib>=0.8.4
+morphsnakes
+skelet3d

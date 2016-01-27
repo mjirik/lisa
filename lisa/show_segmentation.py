@@ -17,7 +17,7 @@ import argparse
 
 
 import numpy as np
-import seg2fem
+from dicom2fem import seg2fem
 import misc
 import viewer
 

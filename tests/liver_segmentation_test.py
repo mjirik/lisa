@@ -13,13 +13,20 @@ import unittest
 from nose.plugins.attrib import attr
 import io3d
 import numpy as np
+import sys
+import os
 
-from lisa import liver_segmentation
+path_to_script = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(path_to_script, "../../pysegbase/src"))
+
 import os
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 import logging
 logger = logging.getLogger(__name__)
 
+import lisa.data
+from lisa import organ_segmentation
+from lisa import liver_model
 
 class LiverSegmentationTest(unittest.TestCase):
 
@@ -27,183 +34,154 @@ class LiverSegmentationTest(unittest.TestCase):
     # nosetests tests/liver_segmentation_test.py -a actual
 
     @attr('interactive')
+    @attr('slow')
     def test_automatic(self):
         pass
 
-    @attr('actual')
     @attr('slow')
-    def test_liver_segmentation_method_3_real_data(self):
-        # path_to_script = os.path.dirname(os.path.abspath(__file__))
-        # dpath = os.path.join(path_to_script, '../sample_data/jatra_5mm/')
-        dpath = os.path.join(path_to_script, '../sample_data/liver-orig001.mhd')
-        data3d, metadata = io3d.datareader.read(dpath)
-        voxelsize_mm = metadata['voxelsize_mm']
-
-        ls = liver_segmentation.LiverSegmentation(
-            data3d=data3d,
-            voxelsize_mm=voxelsize_mm,
-            segparams={'cisloMetody': 3}
-            # seeds=seeds
+    def test_train_liver_model(self):
+        fn_mdl = "test_liver_intensity.Model.p"
+        liver_model.train_liver_model_from_sliver_data(
+            output_file= fn_mdl,
+            sliver_reference_dir="~/lisa_data/sample_data/",
+            orig_pattern="*orig*01.mhd",
+            ref_pattern="*seg*01.mhd",
         )
-        ls.run()
-        volume = np.sum(ls.segmentation == 1) * np.prod(voxelsize_mm)
 
-        # import sed3
-        # ed = sed3.sed3(data3d, contour=ls.segmentation)  # , seeds=seeds)
-        # ed.show()
-
-
-        # mel by to být litr. tedy milion mm3
-        self.assertGreater(volume, 100000)
-        self.assertLess(volume, 2100000)
 
     @attr('slow')
-    def test_liver_segmentation_method_4_real_data(self):
-        # path_to_script = os.path.dirname(os.path.abspath(__file__))
-        # dpath = os.path.join(path_to_script, '../sample_data/jatra_5mm/')
-        dpath = os.path.join(path_to_script, '../sample_data/liver-orig001.mhd')
-        data3d, metadata = io3d.datareader.read(dpath)
-        voxelsize_mm = metadata['voxelsize_mm']
-
-        ls = liver_segmentation.LiverSegmentation(
-            data3d=data3d,
-            voxelsize_mm=voxelsize_mm,
-            segparams={'cisloMetody': 4}
-            # seeds=seeds
+    def test_train_liver_model_and_liver_segmentation(self):
+        """
+        combination of test_train_liver_model and test_organ_model_with_pretrained_classifier
+        :return:
+        """
+        fn_mdl = "test_liver_intensity.Model.p"
+        liver_model.train_liver_model_from_sliver_data(
+            output_file=fn_mdl,
+            sliver_reference_dir="~/lisa_data/sample_data/",
+            orig_pattern="*orig*01.mhd",
+            ref_pattern="*seg*01.mhd",
         )
-        ls.run()
-        volume = np.sum(ls.segmentation == 1) * np.prod(voxelsize_mm)
 
-        # import sed3
-        # ed = sed3.sed3(data3d, contour=ls.segmentation)  # , seeds=seeds)
-        # ed.show()
+        path_to_data = lisa.data.sample_data_path()
+        dcmdir = os.path.join(path_to_data, './liver-orig001.mhd')
 
+        print "Interactive test: with left mouse button select liver, \
+            with right mouse button select other tissues"
+        # gcparams = {'pairwiseAlpha':10, 'use_boundary_penalties':True}
+        # fn_mdl = os.path.expanduser("~/lisa_data/liver_intensity.Model.p")
+        segparams = {}
+        segmodelparams={
+            'mdl_stored_file': fn_mdl,
+            'fv_type':'fv_extern',
+            'fv_extern': "intensity_localization_fv"
+        }
+        # 'pairwise_alpha_per': 3,
+        #              'use_boundary_penalties': True,
+        #              'boundary_penalties_sigma': 200}
+        oseg = organ_segmentation.OrganSegmentation(
+            dcmdir, working_voxelsize_mm=4, segparams=segparams, segmodelparams=segmodelparams)
+        oseg.add_seeds_mm([200], [110, 150], [110, 100], label=1, radius=30, width=5)
+        oseg.add_seeds_mm([200], [250, 230], [210, 260], label=2, radius=50, width=5)
 
-        # mel by to být litr. tedy milion mm3
-        self.assertGreater(volume, 100000)
+        # from PyQt4.QtGui import QApplication
+        # app = QApplication(sys.argv)
+        # oseg.interactivity()
+        oseg.ninteractivity()
+
+        volume = oseg.get_segmented_volume_size_mm3()
+
+        # misc.obj_to_file(oseg.get_iparams(),'iparams.pkl', filetype='pickle')
+
+        self.assertGreater(volume, 1300000)
         self.assertLess(volume, 2100000)
 
-    @attr('interactive')
-    def test_liver_segmentation(self):
-        import numpy as np
-        # import sed3
-        img3d = np.random.rand(32, 64, 64) * 4
-        img3d[4:24, 12:32, 5:25] = img3d[4:24, 12:32, 5:25] + 25
-
-# seeds
-        seeds = np.zeros([32, 64, 64], np.int8)
-        seeds[9:12, 13:29, 18:24] = 1
-        seeds[9:12, 4:9, 3:32] = 2
-# [mm]  10 x 10 x 10        # voxelsize_mm = [1, 4, 3]
-        voxelsize_mm = [5, 5, 5]
-
-        ls = liver_segmentation.LiverSegmentation(
-            data3d=img3d,
-            voxelsize_mm=voxelsize_mm,
-            # seeds=seeds
-        )
-        ls.run()
-        volume = np.sum(ls.segmentation == 1) * np.prod(voxelsize_mm)
-
-        # ed = sed3.sed3(img3d, contour=ls.segmentation, seeds=seeds)
-        # ed.show()
-
-        # import pdb; pdb.set_trace()
-
-        # mel by to být litr. tedy milion mm3
-        self.assertGreater(volume, 900000)
-        self.assertLess(volume, 1100000)
+    # @unittest.skipIf(not interactiveTest, "interactive test")
+    # @unittest.skip("interactivity params are obsolete")
 
     @attr('interactive')
-    def test_liver_segmenation_just_run(self):
+    @attr('slow')
+    def test_organ_segmentation_with_pretrained_classifier(self):
         """
-        Tests only if it run. No strong assert.
+        Interactivity is stored to file
+        :rtype: object
         """
-        import numpy as np
-        img3d = np.random.rand(32, 64, 64) * 4
-        img3d[4:24, 12:32, 5:25] = img3d[4:24, 12:32, 5:25] + 25
 
-# seeds
-        seeds = np.zeros([32, 64, 64], np.int8)
-        seeds[9:12, 13:29, 18:24] = 1
-        seeds[9:12, 4:9, 3:32] = 2
-# [mm]  10 x 10 x 10        # voxelsize_mm = [1, 4, 3]
-        voxelsize_mm = [5, 5, 5]
+        path_to_data = lisa.data.sample_data_path()
+        dcmdir = os.path.join(path_to_data, './liver-orig001.mhd')
 
-        ls = liver_segmentation.LiverSegmentation(
-            data3d=img3d,
-            voxelsize_mm=voxelsize_mm,
-            # seeds=seeds
-        )
-        ls.run()
+        print "Interactive test: with left mouse button select liver, \
+            with right mouse button select other tissues"
+        # gcparams = {'pairwiseAlpha':10, 'use_boundary_penalties':True}
+        fn_mdl = os.path.expanduser("~/lisa_data/liver_intensity.Model.p")
+        segparams = {}
+        segmodelparams={
+            'mdl_stored_file': fn_mdl,
+            'fv_type':'fv_extern',
+            'fv_extern': "intensity_localization_fv"
+        }
+        # 'pairwise_alpha_per': 3,
+        #              'use_boundary_penalties': True,
+        #              'boundary_penalties_sigma': 200}
+        oseg = organ_segmentation.OrganSegmentation(
+            dcmdir, working_voxelsize_mm=4, segparams=segparams, segmodelparams=segmodelparams)
+        oseg.add_seeds_mm([200], [110, 150], [110, 100], label=1, radius=30, width=5)
+        oseg.add_seeds_mm([200], [250, 230], [210, 260], label=2, radius=50, width=5)
 
-        # ed = sed3.sed3(img3d, contour=ls.segmentation, seeds=seeds)
-        # ed.show()
+        from PyQt4.QtGui import QApplication
+        app = QApplication(sys.argv)
+        oseg.interactivity()
+        # oseg.ninteractivity()
 
-    @attr('incomplete')
-    def test_automatickyTest(self):
-        ''' nacte prvni dva soubory koncici .mhd z adresare sample_data
-        prvni povazuje za originalni a provede na nem segmentaci defaultni
-        metodou z liver_segmentation. Pote nacte druhy a povazuje jej za
-        rucni segmentaci, na vysledku a rucni provede srovnani a podle
-        vysledku vypise verdikt na konzoli'''
+        volume = oseg.get_segmented_volume_size_mm3()
 
-        import io3d
+        # misc.obj_to_file(oseg.get_iparams(),'iparams.pkl', filetype='pickle')
 
-        logger.setLevel(logging.DEBUG) #ZDE UPRAVIT POKUD NECHCETE VSECHNY VYPISY
+        self.assertGreater(volume, 1000000)
+        self.assertLess(volume, 2000000)
 
+    @attr('interactive')
+    @attr('slow')
+    def test_automatic_liver_seeds(self):
+        """
+        Interactivity is stored to file
+        :rtype: object
+        """
 
+        path_to_data = lisa.data.sample_data_path()
+        dcmdir = os.path.join(path_to_data, './liver-orig001.mhd')
 
-        path_to_script = os.path.dirname(os.path.abspath(__file__))
-        # print path_to_script
-        b = path_to_script[0:-5]
-        b = b + 'sample_data'
-        cesta = b
+        print "Interactive test: with left mouse button select liver, \
+            with right mouse button select other tissues"
+        # gcparams = {'pairwiseAlpha':10, 'use_boundary_penalties':True}
+        fn_mdl = os.path.expanduser("~/lisa_data/liver_intensity.Model.p")
+        segparams = {}
+        segmodelparams={
+            # 'mdl_stored_file': fn_mdl,
+            # 'fv_type':'fv_extern',
+            # 'fv_extern': "intensity_localization_fv"
+        }
+        # 'pairwise_alpha_per': 3,
+        #              'use_boundary_penalties': True,
+        #              'boundary_penalties_sigma': 200}
+        oseg = organ_segmentation.OrganSegmentation(
+            dcmdir, working_voxelsize_mm=4, segparams=segparams, segmodelparams=segmodelparams)
+        # oseg.add_seeds_mm([110, 150], [110, 100], [200], label=1, radius=30, width=5)
+        # oseg.add_seeds_mm([250, 230], [210, 260], [200], label=2, radius=50, width=5)
+        print oseg.seeds
+        oseg.automatic_liver_seeds()
 
-        logger.info('probiha nacitani souboru z adresare sample_data')
-        seznamSouboru = liver_segmentation.vyhledejSoubory(cesta)
-        reader = io3d.DataReader()
-        vektorOriginal = liver_segmentation.nactiSoubor(
-            cesta, seznamSouboru, 0, reader)
-        originalPole = vektorOriginal[0]
-        originalVelikost = vektorOriginal[1]
-        logger.info( '***zahajeni segmentace***')
-        vytvoreny = liver_segmentation.LiverSegmentation(
-            originalPole, originalVelikost)
-        #vytvoreny.setCisloMetody(2)
-        vytvoreny.run()
-        segmentovany = vytvoreny.segmentation
-        segmentovanyVelikost = vytvoreny.voxelSize
-        logger.info('segmentace dokoncena, nacitani rucni segmentace z adresare sample_data')
-        vektorOriginal = liver_segmentation.nactiSoubor(
-            cesta, seznamSouboru, 1, reader)
-        rucniPole = vektorOriginal[0]
-        rucniVelikost = vektorOriginal[1]
-        logger.info('zahajeni vyhodnoceni segmentace')
-        vysledky = liver_segmentation.vyhodnoceniSnimku(
-            rucniPole, rucniVelikost, segmentovany, segmentovanyVelikost)
-        logger.info(str(vysledky))
-        skore = vysledky[1]
-        pravda = True
-        import sed3
-        ed = sed3.sed3(vytvoreny.data3d, contour=vytvoreny.segmentation)
-        ed.show()
+        from PyQt4.QtGui import QApplication
+        app = QApplication(sys.argv)
+        oseg.interactivity()
+        # oseg.ninteractivity()
 
+        volume = oseg.get_segmented_volume_size_mm3()
 
-        if(skore > 75):
-            logger.info('metoda funguje uspokojive')
-            pravda = False
-        if(pravda and (skore > 50)):
-            logger.info('metoda funguje relativne dobre')
-            pravda = False
-        if(pravda):
-            logger.info('metoda funguje spatne')
-            pravda = False
-        # self.assertGreater(skore, 5)
+        # misc.obj_to_file(oseg.get_iparams(),'iparams.pkl', filetype='pickle')
 
-        self.assertLess(vysledky[0]['voe'], 50)
-
-        return
+        self.assertGreater(volume, 1000000)
+        self.assertLess(volume, 2000000)
 
 if __name__ == "__main__":
     unittest.main()

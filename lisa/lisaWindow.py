@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 import sys
 import os
 import numpy as np
+import subprocess
 
 import datetime
 import Tkinter as tk
@@ -26,12 +27,12 @@ except ImportError:
     viewer3D_available = False
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
+sys.path.append(os.path.join(path_to_script, "../extern/pysegbase/src"))
 
 from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
     QGridLayout, QLabel, QPushButton, QFrame, \
     QFont, QPixmap, QFileDialog
-
+from PyQt4 import QtGui
 from PyQt4.Qt import QString
 try:
     from pysegbase.seed_editor_qt import QTSeedEditor
@@ -46,6 +47,23 @@ except:
 import volumetry_evaluation
 import sed3
 
+def find_logo():
+    import wget
+    logopath = os.path.join(path_to_script, "./rrrricons/LISA256.png")
+    if os.path.exists(logopath):
+        return logopath
+    # lisa runtime directory
+    logopath = "./LISA256.png"
+    if not os.path.exists(logopath):
+        try:
+            wget.download("https://raw.githubusercontent.com/mjirik/lisa/master/lisa/icons/LISA256.png")
+        except:
+            logger.warning('logo download failed')
+            pass
+    if os.path.exists(logopath):
+        return logopath
+
+    pass
 
 # GUI
 class OrganSegmentationWindow(QMainWindow):
@@ -55,7 +73,7 @@ class OrganSegmentationWindow(QMainWindow):
         self.oseg = oseg
 
         QMainWindow.__init__(self)
-        self.initUI()
+        self._initUI()
 
         if oseg is not None:
             if oseg.data3d is not None:
@@ -64,7 +82,24 @@ class OrganSegmentationWindow(QMainWindow):
 
         self.statusBar().showMessage('Ready')
 
-    def initUI(self):
+
+    def _initMenu(self):
+        exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
+        exitAction.setShortcut('Ctrl+Q')
+        exitAction.setStatusTip('Exit application')
+        exitAction.triggered.connect(QtGui.qApp.quit)
+
+        autoSeedsAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Automatic liver seeds', self)
+        # autoSeedsAction.setShortcut('Ctrl+Q')
+        autoSeedsAction.setStatusTip('Automatic liver seeds')
+        autoSeedsAction.triggered.connect(self.btnAutomaticLiverSeeds)
+
+        menubar = self.menuBar()
+        fileMenu = menubar.addMenu('&File')
+        fileMenu.addAction(exitAction)
+        fileMenu.addAction(autoSeedsAction)
+
+    def _initUI(self):
         cw = QWidget()
         self.setCentralWidget(cw)
         grid = QGridLayout()
@@ -73,6 +108,9 @@ class OrganSegmentationWindow(QMainWindow):
 
         # status bar
         self.statusBar().showMessage('Ready')
+
+        # menubar
+        self._initMenu()
 
         font_label = QFont()
         font_label.setBold(True)
@@ -96,7 +134,7 @@ class OrganSegmentationWindow(QMainWindow):
         info.setFont(font_info)
         lisa_title.setFont(font_label)
         lisa_logo = QLabel()
-        logopath = os.path.join(path_to_script, "../applications/LISA256.png")
+        logopath = find_logo()
         logo = QPixmap(logopath)
         lisa_logo.setPixmap(logo)  # scaledToWidth(128))
         grid.addWidget(lisa_title, 0, 1)
@@ -107,14 +145,18 @@ class OrganSegmentationWindow(QMainWindow):
         self.uiw['dcmdir'] = btn_config
         grid.addWidget(btn_config, 2, 1)
 
-        grid.addWidget(lisa_logo, 0, 2, 3, 2)
+        btn_update = QPushButton("Update", self)
+        btn_update.clicked.connect(self.btnUpdate)
+        self.uiw['btn_update'] = btn_update
+        grid.addWidget(btn_update, 3, 1)
+        grid.addWidget(lisa_logo, 0, 2, 4, 2)
 
         # rid.setColumnMinimumWidth(1, logo.width()/2)
         # rid.setColumnMinimumWidth(2, logo.width()/2)
         # rid.setColumnMinimumWidth(3, logo.width()/2)
 
         # # dicom reader
-        rstart = 3
+        rstart = 5
         hr = QFrame()
         hr.setFrameShape(QFrame.HLine)
         text_dcm = QLabel('DICOM reader')
@@ -276,6 +318,7 @@ class OrganSegmentationWindow(QMainWindow):
         self.grid = grid
 
         self.setWindowTitle('LISA')
+
         self.show()
 
     def quit(self, event):
@@ -521,11 +564,12 @@ class OrganSegmentationWindow(QMainWindow):
         self.oseg.import_segmentation_from_file(seg_path)
         self.statusBar().showMessage('Ready')
 
-    def __evaluation_to_text(self, score):
-        overall_score =\
-            volumetry_evaluation.sliver_overall_score_for_one_couple(
-                score
-            )
+    def __evaluation_to_text(self, evaluation):
+        overall_score = evaluation['sliver_overall_pts']
+        # \
+        #     volumetry_evaluation.sliver_overall_score_for_one_couple(
+        #         score
+        #     )
 
         logger.info('overall score: ' + str(overall_score))
         return "Sliver score: " + str(overall_score)
@@ -549,12 +593,12 @@ class OrganSegmentationWindow(QMainWindow):
         if seg_path is None:
             self.statusBar().showMessage('No data path specified!')
             return
-        evaluation, score, segdiff = \
+        evaluation, segdiff = \
             self.oseg.sliver_compare_with_other_volume_from_file(seg_path)
         print 'Evaluation: ', evaluation
-        print 'Score: ', score
+        # print 'Score: ', score
 
-        text = self.__evaluation_to_text(score)
+        text = self.__evaluation_to_text(evaluation)
 
         segdiff[segdiff == -1] = 2
         logger.debug('segdif unique ' + str(np.unique(segdiff)))
@@ -673,6 +717,16 @@ class OrganSegmentationWindow(QMainWindow):
         else:
             self.statusBar().showMessage('No segmentation data!')
 
+    def btnUpdate(self, event=None):
+        self.statusBar().showMessage('Checking for update ...')
+        print subprocess.call(['conda', 'update', '-y', '-c', 'mjirik', '-c', 'SimpleITK', 'lisa']) #, shell=True)
+        self.statusBar().showMessage('Ready')
+
+    def btnAutomaticLiverSeeds(self, event=None):
+        self.statusBar().showMessage('Automatic liver seeds...')
+        self.oseg.automatic_liver_seeds()
+        self.statusBar().showMessage('Ready')
+
     def btnConfig(self, event=None):
         import configEditor as ce
         import config
@@ -698,9 +752,6 @@ class OrganSegmentationWindow(QMainWindow):
             )
         
         self.quit(event)
-        # from PyQt4.QtCore import pyqtRemoveInputHook
-        # pyqtRemoveInputHook()
-        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
     def btnSaveOutDcmOverlay(self, event=None, filename=None):
         if self.oseg.segmentation is not None:
@@ -769,10 +820,6 @@ class OrganSegmentationWindow(QMainWindow):
         )
         self.setLabelText(self.text_seg_data, aux)
 
-        # rom PyQt4.QtCore import pyqtRemoveInputHook
-        # yqtRemoveInputHook()
-        # mport ipdb; ipdb.set_trace() # BREAKPOINT
-        # ass
 
     def btnLesionLocalization(self):
         self.oseg.lesionsLocalization()
