@@ -1,5 +1,13 @@
 #!/bin/bash
 
+if [ "$1" = "patch" ]; then
+    echo "pull, patch, push, push --tags"
+    git pull
+    bumpversion patch
+    git push
+    git push --tags
+else
+fi
 # upload to pypi
 python setup.py register sdist upload
 
