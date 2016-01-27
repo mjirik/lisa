@@ -6,7 +6,6 @@ if [ "$1" = "patch" ]; then
     bumpversion patch
     git push
     git push --tags
-else
 fi
 # upload to pypi
 python setup.py register sdist upload
