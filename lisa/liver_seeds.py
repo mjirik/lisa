@@ -18,7 +18,6 @@ import argparse
 
 import liver_model
 import imtools
-import body_navigation
 import data_manipulation
 import scipy
 
@@ -28,12 +27,13 @@ def automatic_liver_seeds(
         seeds,
         voxelsize_mm,
         fn_mdl='~/lisa_data/liver_intensity.Model.p',
-        return_likelihood_difference=True
-):
+        return_likelihood_difference=True,
+        gaussian_sigma_mm=[10,10,10]):
     from pysegbase import pycut
     # fn_mdl = op.expanduser(fn_mdl)
     mdl = pycut.Model({'mdl_stored_file':fn_mdl, 'fv_extern': liver_model.intensity_localization_fv})
     working_voxelsize_mm = np.asarray([4, 4, 4])
+    gaussian_sigma_mm = np.asarray(gaussian_sigma_mm)
 
     data3dr = imtools.resize_to_mm(data3d, voxelsize_mm, working_voxelsize_mm)
 
@@ -50,8 +50,10 @@ def automatic_liver_seeds(
     # seed tam, kde je to nejpravděpodovnější - moc nefunguje
 # escte jinak
     import scipy
-    dst = scipy.ndimage.morphology.distance_transform_edt(dl>0)
-    seed1 = np.unravel_index(np.argmax(dst), dst.shape)
+    # dst = scipy.ndimage.morphology.distance_transform_edt(dl>0)
+    # seed1 = np.unravel_index(np.argmax(dst), dst.shape)
+    dl = scipy.ndimage.filters.gaussian_filter(dl, sigma=gaussian_sigma_mm/working_voxelsize_mm)
+    seed1 = np.unravel_index(np.argmax(dl), dl.shape)
     seed1_mm = seed1 * working_voxelsize_mm
 
     seed1z = seed1[0]

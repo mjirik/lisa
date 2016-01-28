@@ -4,9 +4,8 @@
 
 
 # import funkcí z jiného adresáře
-import sys
-import os.path
 import argparse
+import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 # sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
@@ -27,7 +26,6 @@ from imtools import misc, qmisc
 
 
 # ----------------- my scripts --------
-import sed3
 class BodyNavigation:
 
     def __init__(self, data3d, voxelsize_mm):
@@ -206,6 +204,7 @@ class BodyNavigation:
         return ia, ib, ic
 
     def _filter_diaphragm_profile_image_remove_outlayers(self, profile, axis=0, tolerance=80):
+        # import bottleneck
         # tolerance * 1.5mm
 
         med = np.median(profile[profile > 0])
@@ -213,8 +212,6 @@ class BodyNavigation:
         return profile
 
     def get_diaphragm_profile_image_with_empty_areas(self, axis=0):
-        zero_stripe_width = 10
-        additional_angle = 40
         if self.lungs is None:
             self.get_lungs()
         if self.spine is None:
@@ -243,7 +240,17 @@ class BodyNavigation:
         # symmetry_point_orig_res = self.symmetry_point * self.working_vs[1:] / self.voxelsize_mm[1:].astype(np.double)
         # odstranime z dat pruh kolem srdce. Tam byva obcas jicen, nebo je tam oblast nad srdcem
         # symmetry_point_pixels = self.symmetry_point/ self.working_vs[1:]
+        flat[flat==0] = np.NaN
+        return flat
 
+    def remove_pizza(self, flat, zero_stripe_width = 10, additional_angle = 40):
+        """
+        Remove circular sector from the image with center in spine
+        :param flat:
+        :param zero_stripe_width:
+        :param additional_angle:
+        :return:
+        """
         spine_mean = np.mean(np.nonzero(self.spine), 1)
         spine_mean = spine_mean[1:]
 
@@ -256,14 +263,30 @@ class BodyNavigation:
         seg = 1 - (z1 * z2)
 
         flat = flat * seg # + seg*10
-        print 'sp ', spine_mean
+        # print 'sp ', spine_mean
         # print 'sporig ', symmetry_point_orig_res
         # flat = seg
-        flat = self._filter_diaphragm_profile_image_remove_outlayers(flat)
+
         return flat
 
-    def get_diaphragm_profile_image(self, axis=0):
+    def filter_ignoring_nan(self, flat, kernel_size=[11, 11]):
+        kernel = np.ones(kernel_size)
+        kernel = kernel / (1.0 * np.prod(kernel_size))
+        # flat = scipy.ndimage.filters.convolve(flat, kernel)
+        # flat = flat.reshape([flat.shape[0], flat.shape[1], 1])
+
+        print kernel.shape, flat.shape
+        import astropy.convolution
+        flat = astropy.convolution.convolve(flat, kernel)
+        return flat
+
+    def get_diaphragm_profile_image(self, axis=0, preprocessing=True):
         flat = self.get_diaphragm_profile_image_with_empty_areas(axis)
+
+        if preprocessing:
+            flat = self.remove_pizza(flat)
+            flat = self._filter_diaphragm_profile_image_remove_outlayers(flat)
+            flat = self.filter_ignoring_nan(flat)
 
         # jeste filtrujeme ne jen podle stredni hodnoty vysky, ale i v prostoru
         # flat0 = flat==0
@@ -274,7 +297,8 @@ class BodyNavigation:
 
 
         # doplnime praznda mista v ploche mape podle nejblizsi oblasi
-        indices = scipy.ndimage.morphology.distance_transform_edt(flat==0, return_indices=True, return_distances=False)
+        indices = scipy.ndimage.morphology.distance_transform_edt(np.isnan(flat), return_indices=True, return_distances=False)
+        # indices = scipy.ndimage.morphology.distance_transform_edt(flat==0, return_indices=True, return_distances=False)
         ou = flat[(indices[0],indices[1])]
         ou = scipy.ndimage.filters.median_filter(ou, size=(15,15))
         ou = scipy.ndimage.filters.gaussian_filter(ou, sigma=3)
