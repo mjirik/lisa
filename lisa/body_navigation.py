@@ -243,7 +243,7 @@ class BodyNavigation:
         flat[flat==0] = np.NaN
         return flat
 
-    def remove_pizza(self, flat, zero_stripe_width = 10, additional_angle = 40):
+    def remove_pizza(self, flat, zero_stripe_width=10, alpha0=-20, alpha1=40 ):
         """
         Remove circular sector from the image with center in spine
         :param flat:
@@ -254,30 +254,69 @@ class BodyNavigation:
         spine_mean = np.mean(np.nonzero(self.spine), 1)
         spine_mean = spine_mean[1:]
 
-        z1 = split_with_line(spine_mean, self.angle + additional_angle , flat.shape)
-        z2 = split_with_line(spine_mean, self.angle - additional_angle, flat.shape)
+        z1 = split_with_line(spine_mean, self.angle + alpha1, flat.shape)
+        z2 = split_with_line(spine_mean, self.angle + alpha0, flat.shape)
 
         z1 = (z1 > zero_stripe_width).astype(np.int8)
         z2 = (z2 < -zero_stripe_width).astype(np.int8)
         # seg = (np.abs(z) > zero_stripe_width).astype(np.int)
-        seg = 1 - (z1 * z2)
+        seg = (z1 * z2)
 
-        flat = flat * seg # + seg*10
+        flat [seg>0]= np.NaN # + seg*10
         # print 'sp ', spine_mean
         # print 'sporig ', symmetry_point_orig_res
         # flat = seg
 
         return flat
 
-    def filter_ignoring_nan(self, flat, kernel_size=[11, 11]):
+    def filter_ignoring_nan(self, flat, kernel_size_mm=[150, 150], max_dist_mm=30):
+        """
+        Compute filtered plane and removes pixels wiht distance grater then max_dist_mm
+
+        :param flat:
+        :param kernel_size_mm:
+        :param max_dist_mm:
+        :return:
+        """
+        # kernel_size must be odd - lichý
+        kernel_size = np.asarray(kernel_size_mm) / self.working_vs[1:]
+        print 'ks1 ', kernel_size
+        odd = kernel_size % 2
+        kernel_size = kernel_size + 1 - odd
+        print 'ks2 ', kernel_size
+
+        # metoda 1
         kernel = np.ones(kernel_size)
         kernel = kernel / (1.0 * np.prod(kernel_size))
         # flat = scipy.ndimage.filters.convolve(flat, kernel)
-        # flat = flat.reshape([flat.shape[0], flat.shape[1], 1])
 
-        print kernel.shape, flat.shape
+
+        # metoda 2
+        # # flat = flat.reshape([flat.shape[0], flat.shape[1], 1])
         import astropy.convolution
-        flat = astropy.convolution.convolve(flat, kernel)
+        flat_out = astropy.convolution.convolve(flat, kernel, boundary='extend')
+
+        too_bad_pixels = np.abs(flat_out - flat) > (max_dist_mm/self.working_vs[0])
+
+
+        flat[too_bad_pixels] = np.NaN
+        # metoda 3
+        # doplnime na nenulova mista střední hodnotu
+        # flat_mask = np.isnan(flat)
+        #
+        # mn = np.mean(flat[flat_mask == False])
+        #
+        # flat_copy = flat.copy()
+        # flat_copy[flat_mask] = mn
+        #
+        # flat_copy = scipy.ndimage.filters.gaussian_filter(flat_copy, sigma=sigma)
+        # flat = flat_copy
+
+
+
+
+
+
         return flat
 
     def get_diaphragm_profile_image(self, axis=0, preprocessing=True):
@@ -300,7 +339,7 @@ class BodyNavigation:
         indices = scipy.ndimage.morphology.distance_transform_edt(np.isnan(flat), return_indices=True, return_distances=False)
         # indices = scipy.ndimage.morphology.distance_transform_edt(flat==0, return_indices=True, return_distances=False)
         ou = flat[(indices[0],indices[1])]
-        ou = scipy.ndimage.filters.median_filter(ou, size=(15,15))
+        ou = scipy.ndimage.filters.median_filter(ou, size=(10,10))
         ou = scipy.ndimage.filters.gaussian_filter(ou, sigma=3)
 
         # ou = self.__filter_diaphragm_profile_image(ou, axis)
