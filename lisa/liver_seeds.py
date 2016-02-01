@@ -28,7 +28,7 @@ def automatic_liver_seeds(
         voxelsize_mm,
         fn_mdl='~/lisa_data/liver_intensity.Model.p',
         return_likelihood_difference=True,
-        gaussian_sigma_mm=[10,10,10]):
+        gaussian_sigma_mm=[20,20,20]):
     from pysegbase import pycut
     # fn_mdl = op.expanduser(fn_mdl)
     mdl = pycut.Model({'mdl_stored_file':fn_mdl, 'fv_extern': liver_model.intensity_localization_fv})
@@ -49,18 +49,21 @@ def automatic_liver_seeds(
     import scipy
 
     # seed tam, kde je to nejpravděpodovnější - moc nefunguje při blbém natrénování
-    # dl = scipy.ndimage.filters.gaussian_filter(dl, sigma=gaussian_sigma_mm/working_voxelsize_mm)
+    dst = scipy.ndimage.filters.gaussian_filter(dl, sigma=gaussian_sigma_mm/working_voxelsize_mm)
     # seed1 = np.unravel_index(np.argmax(dl), dl.shape)
 
     # escte jinak
     # dáme seed doprostřed oblasti
-    dst = scipy.ndimage.morphology.distance_transform_edt(dl>0)
+    # dst = scipy.ndimage.morphology.distance_transform_edt(dl>0)
+
     seed1 = np.unravel_index(np.argmax(dst), dst.shape)
     # alternativa -
     seed1_mm = seed1 * working_voxelsize_mm
+    print 'seed1 ', seed1, ' shape ', dst.shape
 
     seed1z = seed1[0]
     seed1z_mm = seed1_mm[0]
+    print seed1z_mm
 
 
     add_negative_train_seeds_blobs(
@@ -68,7 +71,7 @@ def automatic_liver_seeds(
         seeds,
         working_voxelsize_mm,
         voxelsize_mm,
-        seed1z_mm, n_seed_blob=2)
+        seed1z_mm, n_seed_blob=3)
 
     seeds = data_manipulation.add_seeds_mm(
         seeds, voxelsize_mm,
@@ -76,7 +79,7 @@ def automatic_liver_seeds(
         [seed1_mm[1]],
         [seed1_mm[2]],
         label=1,
-        radius=20,
+        radius=25,
         width=1
     )
     # import sed3
