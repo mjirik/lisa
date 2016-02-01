@@ -59,7 +59,7 @@ def intensity_localization_fv(data3dr, voxelsize_mm, seeds=None, unique_cls=None
 
 #         print "po importech"
     fv = []
-    f0 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=1).reshape(-1, 1)
+    f0 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=0.5).reshape(-1, 1)
     f1 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=3).reshape(-1, 1)
     #f2 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=5).reshape(-1, 1) - f0
     #f3 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=10).reshape(-1, 1) - f0
@@ -75,9 +75,9 @@ def intensity_localization_fv(data3dr, voxelsize_mm, seeds=None, unique_cls=None
     #fd6 = ss.dist_diaphragm().reshape(-1, 1)
 
 #         print "pred f6"
-    f6 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=[20, 1, 1]).reshape(-1, 1) - f1
-    f7 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=[1, 20, 1]).reshape(-1, 1) - f1
-    f8 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=[1, 1, 20]).reshape(-1, 1) - f1
+#     f6 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=[20, 1, 1]).reshape(-1, 1) - f1
+#     f7 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=[1, 20, 1]).reshape(-1, 1) - f1
+#     f8 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=[1, 1, 20]).reshape(-1, 1) - f1
 
 #         print "pred organ_localizator"
     ol = organ_localizator.OrganLocalizator()
@@ -98,7 +98,7 @@ def intensity_localization_fv(data3dr, voxelsize_mm, seeds=None, unique_cls=None
 #                 f2, f3, f4,
 #                 fd1, fd2, fd3, fd4, fd5, fd6,
             fdall,
-            f6, f7, f8,
+            # f6, f7, f8,
             fdn,
 
         ], 1)
