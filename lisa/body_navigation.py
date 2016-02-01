@@ -121,7 +121,6 @@ class BodyNavigation:
         self.symmetry_point = np.array([tr0, tr1])
 
 
-
     def dist_sagittal(self, degrad=5):
         if self.angle is None:
             self.find_symmetry()
@@ -269,6 +268,34 @@ class BodyNavigation:
 
         return flat
 
+    def filter_remove_outlayers(self, flat, minimum_value=0):
+        """
+        Remove outlayers using ellicptic envelope from scikits learn
+        :param flat:
+        :param minimum_value:
+        :return:
+        """
+        from sklearn.covariance import EllipticEnvelope
+        flat0 = flat.copy()
+        flat0[np.isnan(flat)] = 0
+        x,y = np.nonzero(flat0)
+        # print np.prod(flat.shape)
+        # print len(y)
+
+        z = flat[(x,y)]
+
+        data = np.asarray([x,y,z]).T
+
+        clf = EllipticEnvelope(contamination=.1)
+        clf.fit(data)
+        y_pred = clf.decision_function(data)
+
+
+        out_inds = y_pred < minimum_value
+        flat[(x[out_inds], y[out_inds])] = np.NaN
+        return flat
+
+
     def filter_ignoring_nan(self, flat, kernel_size_mm=[150, 150], max_dist_mm=30):
         """
         Compute filtered plane and removes pixels wiht distance grater then max_dist_mm
@@ -280,10 +307,10 @@ class BodyNavigation:
         """
         # kernel_size must be odd - lichý
         kernel_size = np.asarray(kernel_size_mm) / self.working_vs[1:]
-        print 'ks1 ', kernel_size
+        # print 'ks1 ', kernel_size
         odd = kernel_size % 2
         kernel_size = kernel_size + 1 - odd
-        print 'ks2 ', kernel_size
+        # print 'ks2 ', kernel_size
 
         # metoda 1
         kernel = np.ones(kernel_size)
@@ -319,6 +346,7 @@ class BodyNavigation:
 
         return flat
 
+
     def get_diaphragm_profile_image(self, axis=0, preprocessing=True):
         flat = self.get_diaphragm_profile_image_with_empty_areas(axis)
 
@@ -326,6 +354,9 @@ class BodyNavigation:
             flat = self.remove_pizza(flat)
             flat = self._filter_diaphragm_profile_image_remove_outlayers(flat)
             flat = self.filter_ignoring_nan(flat)
+            flat = self.filter_remove_outlayers(flat)
+
+
 
         # jeste filtrujeme ne jen podle stredni hodnoty vysky, ale i v prostoru
         # flat0 = flat==0
@@ -335,11 +366,21 @@ class BodyNavigation:
         # flat[flat0] = 0
 
 
+        # something like interpolation
         # doplnime praznda mista v ploche mape podle nejblizsi oblasi
-        indices = scipy.ndimage.morphology.distance_transform_edt(np.isnan(flat), return_indices=True, return_distances=False)
-        # indices = scipy.ndimage.morphology.distance_transform_edt(flat==0, return_indices=True, return_distances=False)
-        ou = flat[(indices[0],indices[1])]
-        ou = scipy.ndimage.filters.median_filter(ou, size=(10,10))
+        # filter with big mask
+        ou = fill_nan_with_nearest(flat.copy())
+        ou = scipy.ndimage.filters.gaussian_filter(ou, sigma=5)
+
+
+        # get back valid values on its places
+        valid_flat_inds = 1 - np.isnan(flat)
+        ou[valid_flat_inds] = flat[valid_flat_inds]
+        # flat = ou
+
+        ou = fill_nan_with_nearest(ou)
+        # overal filter
+        ou = scipy.ndimage.filters.median_filter(ou, size=(5,5))
         ou = scipy.ndimage.filters.gaussian_filter(ou, sigma=3)
 
         # ou = self.__filter_diaphragm_profile_image(ou, axis)
@@ -525,6 +566,11 @@ def split_with_line(point, orientation, imshape, degrees=True):
     z = zn * (a * x + b * y + c) / (a**2 + b**2)**0.5
     return z
 
+def fill_nan_with_nearest(flat):
+    indices = scipy.ndimage.morphology.distance_transform_edt(np.isnan(flat), return_indices=True, return_distances=False)
+    # indices = scipy.ndimage.morphology.distance_transform_edt(flat==0, return_indices=True, return_distances=False)
+    ou = flat[(indices[0],indices[1])]
+    return ou
 
 def main():
 
