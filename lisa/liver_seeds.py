@@ -32,7 +32,7 @@ def automatic_liver_seeds(
     from pysegbase import pycut
     # fn_mdl = op.expanduser(fn_mdl)
     mdl = pycut.Model({'mdl_stored_file':fn_mdl, 'fv_extern': liver_model.intensity_localization_fv})
-    working_voxelsize_mm = np.asarray([4, 4, 4])
+    working_voxelsize_mm = np.asarray([1.5, 1.5, 1.5])
     gaussian_sigma_mm = np.asarray(gaussian_sigma_mm)
 
     data3dr = imtools.resize_to_mm(data3d, voxelsize_mm, working_voxelsize_mm)
@@ -46,17 +46,21 @@ def automatic_liver_seeds(
 
 
     # Liver seed center
-
-    # seed tam, kde je to nejpravděpodovnější - moc nefunguje
-# escte jinak
     import scipy
-    # dst = scipy.ndimage.morphology.distance_transform_edt(dl>0)
-    # seed1 = np.unravel_index(np.argmax(dst), dst.shape)
-    dl = scipy.ndimage.filters.gaussian_filter(dl, sigma=gaussian_sigma_mm/working_voxelsize_mm)
-    seed1 = np.unravel_index(np.argmax(dl), dl.shape)
+
+    # seed tam, kde je to nejpravděpodovnější - moc nefunguje při blbém natrénování
+    # dl = scipy.ndimage.filters.gaussian_filter(dl, sigma=gaussian_sigma_mm/working_voxelsize_mm)
+    # seed1 = np.unravel_index(np.argmax(dl), dl.shape)
+
+    # escte jinak
+    # dáme seed doprostřed oblasti
+    dst = scipy.ndimage.morphology.distance_transform_edt(dl>0)
+    seed1 = np.unravel_index(np.argmax(dst), dst.shape)
+    # alternativa -
     seed1_mm = seed1 * working_voxelsize_mm
 
     seed1z = seed1[0]
+    seed1z_mm = seed1_mm[0]
 
 
     add_negative_train_seeds_blobs(
@@ -64,7 +68,7 @@ def automatic_liver_seeds(
         seeds,
         working_voxelsize_mm,
         voxelsize_mm,
-        seed1z, n_seed_blob=2)
+        seed1z_mm, n_seed_blob=2)
 
     seeds = data_manipulation.add_seeds_mm(
         seeds, voxelsize_mm,
@@ -114,9 +118,9 @@ def add_negative_notrain_seeds(seeds,lik1, lik2, alpha=1.3):
 def add_negative_train_seeds_blobs(
         mask_working,
         seeds,
-        working_voxelsize_mm,
-        voxelsize_mm,
-        seed1z, n_seed_blob=1):
+        mask_voxelsize_mm,
+        seeds_voxelsize_mm,
+        seed1z_mm, n_seed_blob=1):
     dll = mask_working
 
     # aby se pocitalo i od okraju obrazku
@@ -130,15 +134,15 @@ def add_negative_train_seeds_blobs(
 
         dst = scipy.ndimage.morphology.distance_transform_edt(dll)
         # na nasem rezu
-        dstslice = dst[seed1z, :, :]
+        dstslice = dst[int(seed1z_mm/ seeds_voxelsize_mm[0]), :, :]
         seed2xy = np.unravel_index(np.argmax(dstslice), dstslice.shape)
         # import PyQt4; PyQt4.QtCore.pyqtRemoveInputHook()
         # import ipdb; ipdb.set_trace()
-        seed2 = np.array([seed1z, seed2xy[0], seed2xy[1]])
-        seed2_mm = seed2 * working_voxelsize_mm
+        seed2 = np.array([seed1z_mm, seed2xy[0], seed2xy[1]])
+        seed2_mm = seed2 * mask_voxelsize_mm
 
         seeds = data_manipulation.add_seeds_mm(
-                seeds, voxelsize_mm,
+                seeds, seeds_voxelsize_mm,
                 [seed2_mm[0]],
                 [seed2_mm[1]],
                 [seed2_mm[2]],
@@ -147,7 +151,7 @@ def add_negative_train_seeds_blobs(
                 width=1
         )
         # for next iteration add hole where this blob is
-        dll[seed1z, seed2xy[0], seed2xy[1]] = 0
+        dll[seed1z_mm, seed2xy[0], seed2xy[1]] = 0
 
 def main():
     logger = logging.getLogger()
