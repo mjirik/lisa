@@ -134,11 +134,14 @@ def add_negative_train_seeds_blobs(
 
         dst = scipy.ndimage.morphology.distance_transform_edt(dll)
         # na nasem rezu
-        dstslice = dst[int(seed1z_mm/ seeds_voxelsize_mm[0]), :, :]
+        seed1z_px_mask = int(seed1z_mm/ mask_voxelsize_mm[0])
+        seed1z_px_seeds= int(seed1z_mm/ seeds_voxelsize_mm[0])
+
+        dstslice = dst[seed1z_px_mask, :, :]
         seed2xy = np.unravel_index(np.argmax(dstslice), dstslice.shape)
         # import PyQt4; PyQt4.QtCore.pyqtRemoveInputHook()
         # import ipdb; ipdb.set_trace()
-        seed2 = np.array([seed1z_mm, seed2xy[0], seed2xy[1]])
+        seed2 = np.array([seed1z_px_mask, seed2xy[0], seed2xy[1]])
         seed2_mm = seed2 * mask_voxelsize_mm
 
         seeds = data_manipulation.add_seeds_mm(
@@ -151,7 +154,7 @@ def add_negative_train_seeds_blobs(
                 width=1
         )
         # for next iteration add hole where this blob is
-        dll[seed1z_mm, seed2xy[0], seed2xy[1]] = 0
+        dll[seed1z_px_mask, seed2xy[0], seed2xy[1]] = 0
 
 def main():
     logger = logging.getLogger()
