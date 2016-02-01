@@ -14,14 +14,12 @@ Output file is placed into ~/lisa_data/liver.ol.p
 import logging
 
 logger = logging.getLogger(__name__)
-import scipy
 import numpy as np
 import argparse
 import glob
 import os.path as op
 import traceback
 
-import body_navigation
 import imtools
 import imtools.ml
 import io3d
@@ -73,7 +71,7 @@ class OrganLocalizator():
         if feature_function is None:
             feature_function = externfv
         self.feature_function = feature_function
-        self.cl = imtools.ml.gmmcl.GMMCl(n_components=5)
+        self.cl = imtools.ml.gmmcl.GMMCl(n_components=6)
 
     def save(self, filename='saved.ol.p'):
         """
