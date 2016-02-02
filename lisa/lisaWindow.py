@@ -12,7 +12,6 @@ import numpy as np
 import subprocess
 
 import datetime
-import Tkinter as tk
 
 from io3d import datareader
 # import segmentation
@@ -44,7 +43,6 @@ except:
         logger.warning("Deprecated of pyseg_base as submodule")
         from seed_editor_qt import QTSeedEditor
 
-import volumetry_evaluation
 import sed3
 
 def find_logo():
@@ -586,9 +584,14 @@ class OrganSegmentationWindow(QMainWindow):
         logger.debug(str(self.oseg.crinfo))
         logger.debug(str(self.oseg.data3d.shape))
         logger.debug(str(self.oseg.segmentation.shape))
+        if 'loadcomparedir' in self.oseg.cache.data.keys():
+            directory = self.oseg.cache.get('loadcomparedir')
+        else:
+            directory = self.oseg.input_datapath_start
+        #
         seg_path = self.__get_datafile(
             app=True,
-            directory=self.oseg.input_datapath_start
+            directory=directory
         )
         if seg_path is None:
             self.statusBar().showMessage('No data path specified!')
@@ -621,7 +624,9 @@ class OrganSegmentationWindow(QMainWindow):
             )
             ed.show()
 
-        self.setLabelText(self.text_seg_data, text)
+        head, teil = os.path.split(seg_path)
+        self.oseg.cache.update('loadcomparedir', head)
+        # self.setLabelText(self.text_seg_data, text)
         self.statusBar().showMessage('Ready')
 
     def liverSeg(self):
@@ -728,7 +733,6 @@ class OrganSegmentationWindow(QMainWindow):
         self.statusBar().showMessage('Ready')
 
     def btnConfig(self, event=None):
-        import configEditor as ce
         import config
         import organ_segmentation as los
         import lisaConfigGui as lcg
