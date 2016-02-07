@@ -639,7 +639,7 @@ class OrganSegmentation():
                     self.apriori,
                     data3d_res.shape,
             )
-        igc.apriori = apriori_res
+            igc.apriori = apriori_res
 
         # igc.modelparams = self.segmodelparams
 # @TODO uncomment this for kernel model
@@ -672,7 +672,7 @@ class OrganSegmentation():
             igc_seeds,
             self.data3d.shape,
             self.zoom
-        )
+        ).astype(np.uint8)
 
 #         try:
 #             # rint 'pred vyjimkou'
@@ -963,7 +963,7 @@ class OrganSegmentation():
     def automatic_liver_seeds(self):
         seeds, likdif = liver_seeds.automatic_liver_seeds(self.data3d, self.seeds, self.voxelsize_mm)
         # přenastavíme na čísla mezi nulou a jedničkou, druhá konstanta je nastavena empiricky
-        self.apriori = boltzman(likdif, 0, 200)
+        self.apriori = boltzman(likdif, 0, 200).astype(np.float16)
 
     def add_seeds_mm(self, z_mm, x_mm, y_mm, label, radius, width=1):
         """
@@ -1176,9 +1176,8 @@ class OrganSegmentation():
 
         if filepath is None:
             filepath = self.get_standard_ouptut_filename()
-        # from PyQt4 import QtCore
-        # QtCore.pyqtRemoveInputHook()
-        # import ipdb; ipdb.set_trace()
+        from PyQt4 import QtCore; QtCore.pyqtRemoveInputHook()
+        import ipdb; ipdb.set_trace()
         misc.obj_to_file(data, filepath, filetype=self.save_filetype)
 
         # filepath2 = 'organ_last.' + self.save_filetype
