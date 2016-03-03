@@ -1176,8 +1176,8 @@ class OrganSegmentation():
 
         if filepath is None:
             filepath = self.get_standard_ouptut_filename()
-        from PyQt4 import QtCore; QtCore.pyqtRemoveInputHook()
-        import ipdb; ipdb.set_trace()
+        # from PyQt4 import QtCore; QtCore.pyqtRemoveInputHook()
+        # import ipdb; ipdb.set_trace()
         misc.obj_to_file(data, filepath, filetype=self.save_filetype)
 
         # filepath2 = 'organ_last.' + self.save_filetype
