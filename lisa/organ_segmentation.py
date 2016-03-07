@@ -1176,22 +1176,13 @@ class OrganSegmentation():
 
         if filepath is None:
             filepath = self.get_standard_ouptut_filename()
+        # import ipdb; ipdb.set_trace()
+        import io3d
+        io3d.write(data, filepath)
         # from PyQt4 import QtCore; QtCore.pyqtRemoveInputHook()
         # import ipdb; ipdb.set_trace()
-        misc.obj_to_file(data, filepath, filetype=self.save_filetype)
+        # misc.obj_to_file(data, filepath, filetype=self.save_filetype)
 
-        # filepath2 = 'organ_last.' + self.save_filetype
-        # filepath2 = op.join(odp, filepath2)
-        # # ilepath = misc.suggest_filename(filepath)
-        # misc.obj_to_file(data, filepath2, filetype=self.save_filetype)
-# save to mat
-
-#        iparams = self.get_iparams()
-        # filepath = 'organ_iparams.pklz'
-        # filepath = op.join(odp, filepath)
-        # misc.obj_to_file(iparams, filepath, filetype='pklz')
-
-        # f savestring in ['a', 'A']:
 
     def save_input_dcm(self, filename):
         # TODO add
