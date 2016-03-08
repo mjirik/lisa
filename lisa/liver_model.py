@@ -145,8 +145,8 @@ def intensity_localization_fv(data3dr, voxelsize_mm, seeds=None, unique_cls=None
     fv = []
     f0 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=0.5).reshape(-1, 1)
     f1 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=3).reshape(-1, 1)
-    f2 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=5).reshape(-1, 1) - f0
-    f3 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=10).reshape(-1, 1) - f0
+    # f2 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=5).reshape(-1, 1) - f0
+    # f3 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=10).reshape(-1, 1) - f0
     # f4 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=20).reshape(-1, 1) - f0
     # position
     #ss = lisa.body_navigation.BodyNavigation(data3dr, voxelsize_mm)
@@ -179,7 +179,7 @@ def intensity_localization_fv(data3dr, voxelsize_mm, seeds=None, unique_cls=None
     fv = np.concatenate([
             f0,
             f1,
-                f2, f3, # f4,
+                # f2, f3, # f4,
 #                 fd1, fd2, fd3, fd4, fd5, fd6,
             fdall,
             # f6, f7, f8,
