@@ -114,11 +114,13 @@ class BodyNavigation:
         ld = scipy.ndimage.morphology.distance_transform_edt(1 - self.spine)
         return misc.resize_to_shape(ld, self.orig_shape)
 
-    def find_symmetry(self, degrad=5):
+    def find_symmetry(self, degrad=5, return_img=False):
         img = np.sum(self.data3dr > 430, axis=0)
         tr0, tr1, angle = find_symmetry(img, degrad)
         self.angle = angle
         self.symmetry_point = np.array([tr0, tr1])
+        if return_img:
+            return img
 
 
     def dist_sagittal(self, degrad=5):
