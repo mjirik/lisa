@@ -4,10 +4,10 @@
 Module for experiment support
 """
 
-import os
 import argparse
-
 import logging
+import os
+
 logger = logging.getLogger(__name__)
 
 import matplotlib.pyplot as plt
@@ -375,6 +375,12 @@ def create_data_frame(data, labels, pklz_dirs, experiment_name=''):
         dat['vd_pts'] = score_data['vd']
         dat['rmsd_pts'] = score_data['rmsd']
 
+        to_mean = [score_data['avgd'],
+             score_data['maxd'],
+             score_data['voe'],
+             score_data['vd'],
+             score_data['rmsd']]
+        dat['score_pts'] = np.mean(to_mean, axis=0)
         df = pandas.DataFrame(dat, columns=dat.keys())
         df_pieces.append(df)
 
@@ -456,6 +462,7 @@ def report(eval_files, labels, markers, show=True, output_prefix='',
         dataplot(data, 'maxd', 'MaxD [mm]', **dp_params)
         dataplot(data, 'avgd', 'AvgD [mm]', **dp_params)
         dataplot(data, 'rmsd', 'RMSD [mm]', **dp_params)
+        # dataplot(data, 'rmsd', 'RMSD [mm]', **dp_params)
 
         logger.debug("Souhrn měření")
 
@@ -492,9 +499,11 @@ def report(eval_files, labels, markers, show=True, output_prefix='',
         dataplot(scoreAll, 'vd', 'Total Volume Difference [points]',
                  **dp_params)
 
-        dataplot(scoreAll, 'maxd', 'MaxD [mm]', **dp_params)
-        dataplot(scoreAll, 'avgd', 'AvgD [mm]', **dp_params)
-        dataplot(scoreAll, 'rmsd', 'RMSD [mm]', **dp_params)
+        dataplot(scoreAll, 'maxd', 'MaxD [points]', **dp_params)
+        dataplot(scoreAll, 'avgd', 'AvgD [points]', **dp_params)
+        dataplot(scoreAll, 'rmsd', 'RMSD [points]', **dp_params)
+        # tohle je zoufale propletani ruznych dat
+        dataplot(data, 'score_pts', 'Score [points]', **dp_params)
 
     vd_mn, tmp = sumplot(scoreAll, 'vd', 'Total Volume Difference', **sp_params)
     voe_mn, tmp = sumplot(scoreAll, 'voe', 'Volume Difference Error',
@@ -573,6 +582,7 @@ def dataplot(data, keyword, ylabel, expn=None, markers=None, labels=None,
     Plot data. Function is prepared for our dataset (for example 5 measures).
 
     """
+    print data[0].keys()
     if expn is None:
         expn = range(0, len(data))
     if markers is None:

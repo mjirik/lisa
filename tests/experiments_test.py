@@ -2,12 +2,11 @@
 # -*- coding: utf-8 -*-
 
 # import funkcí z jiného adresáře
-import sys
+import logging
 import os.path
-
+import sys
 import unittest
 
-import logging
 logger = logging.getLogger(__name__)
 
 from nose.plugins.attrib import attr
@@ -17,6 +16,8 @@ import shutil
 import matplotlib.pyplot as plt
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
+# sys.path.append(os.path.join(path_to_script, "../"))
+# sys.path.append(os.path.join(path_to_script, "../lisa/"))
 
 import lisa.volumetry_evaluation as ve
 import lisa
