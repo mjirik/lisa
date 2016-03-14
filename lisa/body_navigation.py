@@ -599,12 +599,8 @@ def main():
             help='run in debug mode')
     parser.add_argument('-ss', '--segspine', action='store_true',
             help='run spine segmentaiton')
-    parser.add_argument('-sl', '--seglungs', action='store_true',
-            help='run lungs segmentation')
-    parser.add_argument('-sh', '--segheart', action='store_true',
-            help='run heart segmentation')
-    parser.add_argument('-sb', '--segbones', action='store_true',
-            help='run bones segmentation')
+    parser.add_argument('-sb', '--segbody', action='store_true',
+                        help='run body segmentaiton')
     parser.add_argument('-exd', '--exampledata', action='store_true',
             help='run unittest')
     parser.add_argument('-so', '--show_output', action='store_true',
@@ -626,31 +622,27 @@ def main():
     #else:
     #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
     #data3d, metadata = dcmr.dcm_read_from_dir(args.dcmdir)
+    import io3d
 
     data3d , metadata = io3d.datareader.read(args.datadir)
 
-    sseg = SupportStructureSegmentation(data3d = data3d,
+    bn = BodyNavigation(data3d = data3d,
             voxelsize_mm = metadata['voxelsize_mm'],
             )
 
 
+    seg = np.zeros(data3d.shape, dtype=np.int8)
     #sseg.orientation()
-    if args.segbones:
-        sseg.bone_segmentation()
     if args.segspine:
-        sseg.spine_segmentation()
-    if args.seglungs or args.segheart:
-    	sseg.lungs_segmentation()
-    if args.segheart:
-    	sseg.heart_segmentation()
+        seg += bn.get_spine()
+    if args.segspine:
+        seg += bn.get_body()
 
 
-    sseg.resize_back_to_orig()
     #print ("Data size: " + str(data3d.nbytes) + ', shape: ' + str(data3d.shape) )
 
     #igc = pycut.ImageGraphCut(data3d, zoom = 0.5)
     #igc.interactivity()
-
 
     #igc.make_gc()
     #igc.show_segmentation()
@@ -663,16 +655,19 @@ def main():
     #pyed.show()
 
     if args.show_output:
-        sseg.visualization()
+        import sed3
+        sed3.show_slices(data3d, contour=seg)
+
 
     #savestring = raw_input ('Save output data? (y/n): ')
     #sn = int(snstring)
     if args.output is not None: # savestring in ['Y','y']:
-        import misc
+        md = {
+            'voxelsize_mm': metadata['voxelsize_mm'],
+            'segmentation': seg, }
 
-        data = sseg.export()
+        io3d.write(data3d, args.output, metadata=md)
 
-        misc.obj_to_file(data, args.output, filetype = 'pickle')
     #output = segmentation.vesselSegmentation(oseg.data3d, oseg.orig_segmentation)
 
 
