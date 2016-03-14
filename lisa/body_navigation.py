@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 #import scipy.io
 import numpy as np
 import scipy
+import scipy.ndimage
 from imtools import misc, qmisc
 
 
@@ -186,7 +187,7 @@ class BodyNavigation:
     def _get_ia_ib_ic(self, axis):
         """
         according to axis gives order of of three dimensions
-        :param axis:
+        :param axis: 0, 1 or 2 is allowed
         :return:
         """
         if axis == 0:
@@ -201,6 +202,9 @@ class BodyNavigation:
             ia = 2
             ib = 0
             ic = 1
+        else:
+            logger.error('Unrecognized axis')
+
 
         return ia, ib, ic
 
@@ -247,9 +251,10 @@ class BodyNavigation:
     def remove_pizza(self, flat, zero_stripe_width=10, alpha0=-20, alpha1=40 ):
         """
         Remove circular sector from the image with center in spine
-        :param flat:
-        :param zero_stripe_width:
-        :param additional_angle:
+        :param flat: input 2D image
+        :param zero_stripe_width: offset to pivot point. Pizza line is zero_stripe_width far
+        :param alpha0: Additional start angle relative to detected orientation
+        :param alpha1: Additional end angle relative to detected orientation
         :return:
         """
         spine_mean = np.mean(np.nonzero(self.spine), 1)
@@ -298,7 +303,7 @@ class BodyNavigation:
         return flat
 
 
-    def filter_ignoring_nan(self, flat, kernel_size_mm=[150, 150], max_dist_mm=30):
+    def filter_ignoring_nan(self, flat, kernel_size_mm=None , max_dist_mm=30):
         """
         Compute filtered plane and removes pixels wiht distance grater then max_dist_mm
 
@@ -307,6 +312,9 @@ class BodyNavigation:
         :param max_dist_mm:
         :return:
         """
+
+        if kernel_size_mm is None: kernel_size = [150, 150]
+
         # kernel_size must be odd - lichý
         kernel_size = np.asarray(kernel_size_mm) / self.working_vs[1:]
         # print 'ks1 ', kernel_size
