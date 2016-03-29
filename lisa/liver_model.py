@@ -45,9 +45,25 @@ def add_fv_extern_into_modelparams(modelparams):
             elif fv_extern_str == "near_blur_intensity_localization_fv":
                 modelparams['fv_extern'] = near_blur_intensity_localization_fv
                 print "blur intensity"
+            elif fv_extern_str == "with_ribs_fv":
+                modelparams['fv_extern'] = with_ribs_fv
+                logger.debug('with_ribs_fv used')
             else:
                 logger.error("problem in modelparam fv_extern descritprion")
     return modelparams
+
+def with_ribs_fv(data3dr, voxelsize_mm, seeds=None, unique_cls=None):        # scale
+    """
+    Feature vector use intensity and body_navigation module with ribs.
+    Implemented by T. Kolar
+
+    :param data3dr:
+    :param voxelsize_mm:
+    :param seeds:
+    :param unique_cls:
+    :return:
+    """
+    pass
 
 def near_blur_intensity_localization_fv(data3dr, voxelsize_mm, seeds=None, unique_cls=None):        # scale
     """
@@ -221,6 +237,7 @@ class ModelTrainer():
 
 
         }
+        modelparams = add_fv_extern_into_modelparams(modelparams)
         modelparams_working.update(modelparams)
         self.cl = pycut.Model(modelparams=modelparams_working)
 
@@ -422,13 +439,29 @@ def main():
         help='output file'
     )
     parser.add_argument(
+        '-fv', '--extern_fv',
+        default=None,
+        help='string describing extern feature vector function'
+    )
+    parser.add_argument(
         '-d', '--debug', action='store_true',
         help='Debug mode')
     args = parser.parse_args()
 
+    modelparams={}
+
+
     if args.debug:
         ch.setLevel(logging.DEBUG)
-    train_liver_model_from_sliver_data(args.outputfile)
+
+
+    if args.extern_fv is not None:
+        modelparams.update({
+            'fv_type': "fv_extern",
+            'fv_extern': args.extern_fv,
+        })
+
+    train_liver_model_from_sliver_data(args.outputfile, modelparams=modelparams)
 
 
 if __name__ == "__main__":
