@@ -24,6 +24,11 @@ import imtools
 import imtools.ml
 import io3d
 
+import sys
+import os
+import os.path as op
+sys.path.append(op.join(op.dirname(os.path.abspath(__file__)), "../../bodynavigation/"))
+
 def externfv(data3d, voxelsize_mm):        # scale
         fv = []
         # f0 = scipy.ndimage.filters.gaussian_filter(data3d, sigma=3).reshape(-1, 1)
@@ -32,8 +37,8 @@ def externfv(data3d, voxelsize_mm):        # scale
         #f3 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=10).reshape(-1, 1) - f0
         #f4 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=20).reshape(-1, 1) - f0
         # position asdfas
-        import body_navigation
-        ss = body_navigation.BodyNavigation(data3d, voxelsize_mm)
+        import bodynavigation
+        ss = bodynavigation.BodyNavigation(data3d, voxelsize_mm)
         fd1 = ss.dist_to_lungs().reshape(-1, 1)
         fd2 = ss.dist_to_spine().reshape(-1, 1)
         fd3 = ss.dist_sagittal().reshape(-1, 1)
