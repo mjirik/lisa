@@ -8,7 +8,6 @@
 
 """
 This module is used to train liver model with intensity.
-
 First use organ_localizator module to train intensity independent model.
 """
 
@@ -344,6 +343,7 @@ class ModelTrainer():
         output_file = op.expanduser(output_file)
         self.cl.save(output_file)
 
+
 def train_liver_model_from_sliver_data(
         output_file="~/lisa_data/liver_intensity.Model.p",
         sliver_reference_dir='~/data/medical/orig/sliver07/training/',
@@ -406,6 +406,107 @@ def train_liver_model_from_sliver_data(
     #
     # output_file = op.expanduser(output_file)
     # sf.cl.save(output_file)
+
+def model_score_from_sliver_data(
+#         output_file="~/lisa_data/liver_intensity.Model.p",
+        sliver_reference_dir='~/data/medical/orig/sliver07/training/',
+        orig_pattern="*orig*[1-9].mhd",
+        ref_pattern="*seg*[1-9].mhd",
+        modelparams={},
+        likelihood_ratio=0.5,
+        savefig=False,
+        savefig_fn_prefix='../graphics/bn-symmetry-',
+        show=False,
+        label='',
+):
+    """
+
+    :param label: text label added to all records in output table
+    :param sliver_reference_dir:
+    :param orig_pattern:
+    :param ref_pattern:
+    :param modelparams:
+    :param likelihood_ratio: float number between 0 and 1, scalar or list. Set the segmentation threshodl
+    :param savefig:
+    :param savefig_fn_prefix:
+    :param show: show images
+    :return:
+    """
+    import pandas as pd
+    from pysegbase import pycut
+    import sed3
+    import matplotlib.pyplot as plt
+
+    import volumetry_evaluation
+    sliver_reference_dir = op.expanduser(sliver_reference_dir)
+
+    orig_fnames = glob.glob(sliver_reference_dir + orig_pattern)
+    ref_fnames = glob.glob(sliver_reference_dir + ref_pattern)
+
+    orig_fnames.sort()
+    ref_fnames.sort()
+
+    evaluation_all = []
+
+    for oname, rname in zip(orig_fnames, ref_fnames):
+        print oname
+        data3d_orig, metadata = io3d.datareader.read(oname)
+        vs_mm1 = metadata['voxelsize_mm']
+        data3d_seg, metadata = io3d.datareader.read(rname)
+        vs_mm = metadata['voxelsize_mm']
+
+        mdl = pycut.Model(modelparams=modelparams)
+    #     m0 = mdl.mdl[2]
+    #     len(m0.means_)
+
+
+        vs_mmr = [1.5, 1.5, 1.5]
+        data3dr = qmisc.resize_to_mm(data3d_orig, vs_mm1, vs_mmr)
+        lik1 = mdl.likelihood_from_image(data3dr, vs_mmr, 0)
+        lik2 = mdl.likelihood_from_image(data3dr, vs_mmr, 1)
+
+        if np.isscalar(likelihood_ratio):
+            likelihood_ratio = [likelihood_ratio]
+
+        for likelihood_ratio_i in likelihood_ratio:
+            if (likelihood_ratio_i <= 0) or (likelihood_ratio_i >= 1.0):
+                logger.error("likelihood ratio should be between 0 and 1")
+
+            seg = ((likelihood_ratio_i * lik1) > ((1.0 - likelihood_ratio_i) * lik2)).astype(np.uint8)
+        #     seg = (lik1).astype(np.uint8)
+
+
+            seg_orig = qmisc.resize_to_shape(seg, data3d_orig.shape)
+        #       seg_orig = qmisc.resize_to_shape(seg, data3d_orig.shape)
+            if show:
+                plt.figure(figsize = (15,15))
+                sed3.show_slices(data3d_orig , seg_orig, show=False, slice_step=20)
+                # likres = qmisc.resize_to_shape(lik1, data3d_orig.shape)
+                # sed3.show_slices(likres , seg_orig, show=False, slice_step=20)
+
+            import re
+            numeric_label = re.search(".*g(\d+)", oname).group(1)
+
+        #     plt.figure(figsize = (5,5))
+            if savefig:
+                plt.axis('off')
+        #     plt.imshow(symmetry_img)
+                filename = savefig_fn_prefix + numeric_label + '-lr-' + str(likelihood_ratio_i) + ".png"
+                # if np.isscalar(likelihood_ratio):
+                #     filename = filename + ''+str
+                plt.savefig(filename, bbox_inches='tight')
+
+
+            evaluation = volumetry_evaluation.compare_volumes_sliver(seg_orig, data3d_seg, vs_mm)
+            evaluation['likelihood_ratio'] = likelihood_ratio_i
+            evaluation['numeric_label'] = numeric_label
+            evaluation['label'] = label
+
+            evaluation_all.append(evaluation)
+#         print evaluation
+
+    ev = pd.DataFrame(evaluation_all)
+    return ev
 
 def main():
     logger = logging.getLogger()
