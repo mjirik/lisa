@@ -693,6 +693,13 @@ class OrganSegmentation():
             seeds_res = seeds_res.astype(np.int8)
             igc.set_seeds(seeds_res)
 
+        # tohle je tu pro to, aby bylo možné přidávat nově objevené segmentace k těm starým
+        # jinak jsou stará data přepsána
+        if self.segmentation is not None:
+            self.segmentation_prev = copy.copy(self.segmentation)
+        else:
+            self.segmentation_prev = None
+
         return igc
 
     def __resize_to_orig(self, igc_seeds):
@@ -829,7 +836,21 @@ class OrganSegmentation():
         # set label number
 # !! pomaly!!!
 # @TODO make faster
-        self.segmentation[self.segmentation == 1] = self.output_label
+        # spojení staré a nové segmentace
+        if self.segmentation_prev is None:
+            # pokud neznáme žádnou předchozí segmentaci, tak se chováme jako dříve
+            self.segmentation[self.segmentation == 1] = self.output_label
+        else:
+            # remove old pixels for this label
+            self.segmentation_prev[self.segmentation_prev == self.output_label] = 0
+            # set new labels
+            self.segmentation_prev[self.segmentation == 1] = self.output_label
+
+            # clean up
+
+            self.segmentation = self.segmentation_prev
+            self.segmentation_prev = None
+
 #
         logger.debug('self.slab')
         logger.debug(str(self.slab))
