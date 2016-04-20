@@ -149,6 +149,15 @@ class OrganSegmentationWindow(QMainWindow):
         grid.addWidget(btn_update, 3, 1)
         grid.addWidget(lisa_logo, 0, 2, 4, 2)
 
+        combo = QtGui.QComboBox(self)
+        for text in self.oseg.segmentation_alternative_params.keys():
+            combo.addItem(text)
+        combo.activated[str].connect(self.onAlternativeSegmentationParams)
+        grid.addWidget(combo, 4, 1)
+        # combo.addItem("Mandriva")
+        # combo.addItem("Fedora")
+        # combo.addItem("Red Hat")
+        # combo.addItem("Gentoo")
         # rid.setColumnMinimumWidth(1, logo.width()/2)
         # rid.setColumnMinimumWidth(2, logo.width()/2)
         # rid.setColumnMinimumWidth(3, logo.width()/2)
@@ -854,6 +863,9 @@ class OrganSegmentationWindow(QMainWindow):
         self.statusBar().showMessage('Vessel segmentation ...')
         self.oseg.hepaticVeinsSegmentation()
         self.statusBar().showMessage('Ready')
+
+    def onAlternativeSegmentationParams(self, text):
+        self.oseg.update_parameters_based_on_label(str(text))
 
     def view3D(self):
         # rom seg2mesh import gen_mesh_from_voxels, mesh2vtk, smooth_mesh

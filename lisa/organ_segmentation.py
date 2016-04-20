@@ -31,6 +31,7 @@ import scipy.ndimage
 import numpy as np
 import datetime
 import argparse
+import copy
 # tady uz je logger
 # import dcmreaddata as dcmreader
 # from pysegbase import pycut
@@ -139,6 +140,7 @@ class OrganSegmentation():
         cache_filename='cache.yml',
         seg_preproc_pars={},
         after_load_processing={},
+        segmentation_alternative_params={},
 
 
         #           iparams=None,
@@ -164,6 +166,8 @@ class OrganSegmentation():
         working only if smoothing is turned on.
         :param seg_postproc_pars: Can be used for setting postprocessing
         parameters. For example
+        :param segmentation_alternative_params: dict of alternative params f,e.
+        {'vs5: {'voxelsize_mm':[5,5,5]}, 'vs3: {'voxelsize_mm':[3,3,3]}}
         """
 
         from pysegbase import pycut
@@ -217,6 +221,7 @@ class OrganSegmentation():
         self.save_filetype = save_filetype
         self.vessel_tree = {}
         self.debug_mode = debug_mode
+        self.segmentation_alternative_params = segmentation_alternative_params
         # SegPostprocPars = namedtuple(
         #     'SegPostprocPars', [
         #         'smoothing_mm',
@@ -301,6 +306,35 @@ class OrganSegmentation():
     #    self.orig_shape = datap['orig_shape']
     #    self.seeds = datap[
     #        'processing_information']['organ_segmentation']['seeds']
+    def update_parameters_based_on_label(self, label):
+        self.update_parameters(self.segmentation_alternative_params[label])
+
+    def update_parameters(self, params):
+        if 'segmodelparams' in params.keys():
+            self.segmodelparams = params['segmodelparams']
+            logger.debug('segmodelparams updated')
+        if 'output_label' in params.keys():
+            self.output_label = params['output_label']
+            logger.debug('output_label updated')
+        if 'working_voxelsize_mm' in params.keys():
+            self.input_wvx_size = copy.copy(params['working_voxelsize_mm'])
+            self.working_voxelsize_mm = params['working_voxelsize_mm']
+            vx_size = self.working_voxelsize_mm
+
+            if np.isscalar(vx_size):
+                vx_size = ([vx_size] * 3)
+
+            vx_size = np.array(vx_size).astype(float)
+
+            self.working_voxelsize_mm = vx_size
+            logger.debug('working_voxelsize_mm updated')
+        if 'smoothing_mm' in params.keys():
+            self.smoothing_mm = params['smoothing_mm']
+            logger.debug('smoothing_mm updated')
+        if 'seg_postproc_pars' in params.keys():
+            self.seg_postproc_pars = params['seg_postproc_pars']
+            logger.debug('seg_postproc_pars updated')
+
 
     def run_sss(self):
         sseg = sss.SupportStructureSegmentation(
@@ -500,7 +534,6 @@ class OrganSegmentation():
         self.voxelsize_mm = np.array(datap['voxelsize_mm'])
         self.process_wvx_size_mm(datap)
         self.autocrop_margin = self.autocrop_margin_mm / self.voxelsize_mm
-        self.zoom = self.voxelsize_mm / (1.0 * self.working_voxelsize_mm)
         if 'orig_shape' in dpkeys:
             self.orig_shape = datap['orig_shape']
         else:
@@ -599,6 +632,7 @@ class OrganSegmentation():
 
         # print 'zoom ', self.zoom
         # print 'svs_mm ', self.working_voxelsize_mm
+        self.zoom = self.voxelsize_mm / (1.0 * self.working_voxelsize_mm)
         data3d_res = scipy.ndimage.zoom(
             self.data3d,
             self.zoom,
