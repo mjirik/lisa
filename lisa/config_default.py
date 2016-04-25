@@ -44,11 +44,17 @@ CONFIG_DEFAULT={
             },
             'working_voxelsize_mm': 2
         },
-        "kidney":{
-            "output_label": 2,
+        "label kidney L":{
+            "output_label": 15,
         },
-        "liver":{
+        "label kidney R":{
+            "output_label": 16,
+        },
+        "label liver":{
             "output_label": 1,
+        },
+        "label hearth":{
+            "output_label": 10,
         }
     }
 

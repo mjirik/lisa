@@ -20,6 +20,9 @@ def default_slab():
     return {
         'none': 0,
         'liver': 1,
+        'hearth': 10,
+        'left kidney': 15,
+        'right kidney': 16,
     }
 
 def main():
