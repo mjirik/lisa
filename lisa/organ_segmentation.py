@@ -626,6 +626,7 @@ class OrganSegmentation():
         from pysegbase import pycut
         logger.debug('_interactivity_begin()')
         # TODO make copy and work with it
+        # TODO really make the copy and work with it
 
         if self.seg_preproc_pars['use_automatic_segmentation']:
             self.data3d[self.segmentation > 2] = -1000
