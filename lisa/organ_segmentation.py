@@ -628,8 +628,10 @@ class OrganSegmentation():
         # TODO make copy and work with it
         # TODO really make the copy and work with it
 
+        data3d_tmp = self.data3d
         if self.seg_preproc_pars['use_automatic_segmentation']:
-            self.data3d[self.segmentation > 2] = -1000
+            data3d_tmp = self.data3d.copy()
+            data3d_tmp[(self.segmentation > 0) & (self.segmentation != self.output_label)] = -1000
 
         # print 'zoom ', self.zoom
         # print 'svs_mm ', self.working_voxelsize_mm

@@ -44,7 +44,7 @@ CONFIG_DEFAULT={
             },
             'working_voxelsize_mm': 2
         },
-        "simple 3 mm":{
+        "simple 2.5 mm":{
             "segmodelparams": {
                 'mdl_stored_file': None,
                 'fv_type': 'intensity',
@@ -55,7 +55,7 @@ CONFIG_DEFAULT={
                 # 'method': 'multiscale_graphcut',
                 "params": {"covariance_type": "full", "n_components": 3}
             },
-            'working_voxelsize_mm': 3
+            'working_voxelsize_mm': 2.5
         },
         "label kidney L":{
             "output_label": 15,
