@@ -6,6 +6,18 @@ if [ "$1" = "patch" ]; then
     bumpversion patch
     git push
     git push --tags
+elif [ "$1" = "minor" ]; then
+    echo "pull, patch, push, push --tags"
+    git pull
+    bumpversion minor
+    git push
+    git push --tags
+elif [ "$1" = "major" ]; then
+    echo "pull, patch, push, push --tags"
+    git pull
+    bumpversion major 
+    git push
+    git push --tags
 elif [ "$1" = "stable" ]; then
     if [ "$#" -ne 2 ]; then 
         git tag
@@ -13,7 +25,10 @@ elif [ "$1" = "stable" ]; then
         echo "distr.sh stable v1.7"
     else
         git checkout master
-        git tag -a "$2" -m "new stable Lisa version"
+        current_version=`bumpversion --dry-run --list minor | grep new_version | sed -r s,"^.*=",,`
+        git pull
+        bumpversion master
+        git tag -a "v$current_version" -m "new stable Lisa version"
         git push --tags
         git checkout stable
         git pull origin master
