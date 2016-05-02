@@ -27,7 +27,6 @@ elif [ "$1" = "stable" ]; then
         git checkout master
         current_version=`bumpversion --dry-run --list minor | grep new_version | sed -r s,"^.*=",,`
         git pull
-        bumpversion master
         git tag -a "v$current_version" -m "new stable Lisa version"
         git push --tags
         git checkout stable
