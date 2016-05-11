@@ -147,20 +147,22 @@ class OrganSegmentationWindow(QMainWindow):
         btn_update.clicked.connect(self.btnUpdate)
         self.uiw['btn_update'] = btn_update
         grid.addWidget(btn_update, 3, 1)
-        grid.addWidget(lisa_logo, 0, 2, 4, 2)
+        grid.addWidget(lisa_logo, 0, 2, 5, 2)
 
         combo = QtGui.QComboBox(self)
         for text in self.oseg.segmentation_alternative_params.keys():
             combo.addItem(text)
         combo.activated[str].connect(self.onAlternativeSegmentationParams)
         grid.addWidget(combo, 4, 1)
-        # combo.addItem("Mandriva")
-        # combo.addItem("Fedora")
-        # combo.addItem("Red Hat")
-        # combo.addItem("Gentoo")
-        # rid.setColumnMinimumWidth(1, logo.width()/2)
-        # rid.setColumnMinimumWidth(2, logo.width()/2)
-        # rid.setColumnMinimumWidth(3, logo.width()/2)
+
+
+        # right from logo
+        rstart = 0
+
+        btn_sync = QPushButton("Sync", self)
+        btn_sync.clicked.connect(self.sync_lisa_data)
+        self.uiw['sync'] = btn_sync
+        grid.addWidget(btn_sync, rstart + 3, 4)
 
         # # dicom reader
         rstart = 5
@@ -443,6 +445,14 @@ class OrganSegmentationWindow(QMainWindow):
         self.oseg.cache.update('loadfiledir', head)
 
         self.importDataWithGui()
+
+    def sync_lisa_data(self):
+        """
+        set sftp_username and sftp_password in ~/lisa_data/organ_segmentation.config
+        """
+        self.statusBar().showMessage('Sync in progress...')
+        self.oseg.sync_lisa_data(self.oseg.sftp_username, self.oseg.sftp_password)
+        self.statusBar().showMessage('Sync finished')
 
     def loadDataDir(self):
         self.statusBar().showMessage('Reading DICOM directory...')

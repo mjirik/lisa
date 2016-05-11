@@ -141,6 +141,8 @@ class OrganSegmentation():
         seg_preproc_pars={},
         after_load_processing={},
         segmentation_alternative_params={},
+        sftp_username='',
+        sftp_password=''
 
 
         #           iparams=None,
@@ -184,6 +186,8 @@ class OrganSegmentation():
         self._output_datapath_from_server = op.join(self.output_datapath, "from_server/" )
         # used for server sync
         self._output_datapath_to_server = op.join(self.output_datapath, "to_server/" )
+        self.sftp_username=sftp_username
+        self.sftp_password=sftp_password
         self.input_datapath_start = input_datapath_start
         self.crinfo = [[0, None], [0, None], [0, None]]
         self.slab = data_plus.default_slab()
@@ -708,14 +712,17 @@ class OrganSegmentation():
             self.segmentation_prev = None
 
         return igc
-    def sync_lisa_data(self, username, password, host="147.228.47.161"):
+    def sync_lisa_data(self, username, password, host="147.228.47.162"):
         self.create_lisa_data_dir_tree()
 
 
         import sftpsync
+        import paramiko
+
+        paramiko.util.log_to_file('paramiko.log')
         sftp = sftpsync.Sftp(host=host, username=username, password=password)
         localfrom = self._output_datapath_from_server
-        localto = self._output_datapath_from_server
+        localto = self._output_datapath_to_server
         remotefrom = "from_server/"
         remoteto = "to_server/"
 
