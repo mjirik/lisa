@@ -180,6 +180,10 @@ class OrganSegmentation():
         self.iparams = {}
         self.datapath = datapath
         self.output_datapath = output_datapath
+        # used for server sync
+        self._output_datapath_from_server = op.join(self.output_datapath, "from_server/" )
+        # used for server sync
+        self._output_datapath_to_server = op.join(self.output_datapath, "to_server/" )
         self.input_datapath_start = input_datapath_start
         self.crinfo = [[0, None], [0, None], [0, None]]
         self.slab = data_plus.default_slab()
@@ -704,6 +708,25 @@ class OrganSegmentation():
             self.segmentation_prev = None
 
         return igc
+    def sync_lisa_data(self, username, password, host="147.228.47.161"):
+        self.create_lisa_data_dir_tree()
+
+
+        import sftpsync
+        sftp = sftpsync.Sftp(host=host, username=username, password=password)
+        localfrom = self._output_datapath_from_server
+        localto = self._output_datapath_from_server
+        remotefrom = "from_server/"
+        remoteto = "to_server/"
+
+        exclude = []
+
+        logger.info("Download started")
+        sftp.sync(localfrom, remotefrom, download=True, exclude=exclude, delete=False)
+        logger.info("Download finished")
+        logger.info("Upload started")
+        sftp.sync(localto, remoteto, download=False, exclude=exclude, delete=False)
+        logger.info("Upload finished")
 
     def __resize_to_orig(self, igc_seeds):
         # @TODO remove old code in except part
@@ -1228,9 +1251,7 @@ class OrganSegmentation():
 #         filepath = 'org-' + filename + '.' + self.save_filetype
 #         # rint filepath
 #         # rint 'op ', op
-        odp = self.output_datapath
-        if not op.exists(odp):
-            os.makedirs(odp)
+        self.create_lisa_data_dir_tree()
 
         if filepath is None:
             filepath = self.get_standard_ouptut_filename()
@@ -1253,6 +1274,16 @@ class OrganSegmentation():
         # misc.obj_to_file(iparams, filepath, filetype='pklz')
 
         # f savestring in ['a', 'A']:
+    def create_lisa_data_dir_tree(self):
+        odp = self.output_datapath
+        if not op.exists(odp):
+            os.makedirs(odp)
+        odp = self._output_datapath_from_server
+        if not op.exists(odp):
+            os.makedirs(odp)
+        odp = self._output_datapath_to_server
+        if not op.exists(odp):
+            os.makedirs(odp)
 
     def save_input_dcm(self, filename):
         # TODO add
