@@ -35,3 +35,4 @@ imtools>=0.0.1
 joblib>=0.8.4
 morphsnakes
 skelet3d
+sftpsync

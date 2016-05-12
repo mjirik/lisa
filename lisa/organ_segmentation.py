@@ -729,7 +729,7 @@ class OrganSegmentation():
         exclude = []
 
         logger.info("Download started")
-        sftp.sync(localfrom, remotefrom, download=True, exclude=exclude, delete=False)
+        sftp.sync(remotefrom, localfrom, download=True, exclude=exclude, delete=False)
         logger.info("Download finished")
         logger.info("Upload started")
         sftp.sync(localto, remoteto, download=False, exclude=exclude, delete=False)
