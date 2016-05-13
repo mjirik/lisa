@@ -257,10 +257,10 @@ class OrganSegmentationWindow(QMainWindow):
             btn_segview.setEnabled(False)
 
         grid.addWidget(btn_segsave, rstart + 0, 1)
-        grid.addWidget(btn_segview, rstart + 0, 3)
         grid.addWidget(btn_segsavedcm, rstart + 0, 2)
-        grid.addWidget(btn_segsavedcmoverlay, rstart + 1, 2)
-        rstart += 2
+        grid.addWidget(btn_segsavedcmoverlay, rstart + 0, 3)
+        grid.addWidget(btn_segview, rstart + 0, 4)
+        rstart += 1
 
         # # # # Virtual resection
 
@@ -314,13 +314,13 @@ class OrganSegmentationWindow(QMainWindow):
         # quit
         btn_quit = QPushButton("Quit", self)
         btn_quit.clicked.connect(self.quit)
-        grid.addWidget(btn_quit, rstart + 1, 1, 1, 2)
+        grid.addWidget(btn_quit, rstart + -1, 4, 1, 1)
         self.uiw['quit'] = btn_quit
 
         if self.oseg.debug_mode:
             btn_debug = QPushButton("Debug", self)
             btn_debug.clicked.connect(self.run_debug)
-            grid.addWidget(btn_debug, rstart + 1, 3)
+            grid.addWidget(btn_debug, rstart - 2, 4)
 
         cw.setLayout(grid)
         self.cw = cw
