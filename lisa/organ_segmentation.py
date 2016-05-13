@@ -101,6 +101,8 @@ def import_gui():
 
     pass
 
+def printTotals(transferred, toBeTransferred):
+    print "Transferred: {0}\tOut of: {1}".format(transferred, toBeTransferred)
 
 class OrganSegmentation():
     """
@@ -712,7 +714,7 @@ class OrganSegmentation():
             self.segmentation_prev = None
 
         return igc
-    def sync_lisa_data(self, username, password, host="147.228.47.162"):
+    def sync_lisa_data(self, username, password, host="147.228.47.162", callback=printTotals):
         self.create_lisa_data_dir_tree()
 
 
@@ -729,11 +731,12 @@ class OrganSegmentation():
         exclude = []
 
         logger.info("Download started")
-        sftp.sync(remotefrom, localfrom, download=True, exclude=exclude, delete=False)
+        sftp.sync(remotefrom, localfrom, download=True, exclude=exclude, delete=False, callback=callback)
         logger.info("Download finished")
         logger.info("Upload started")
-        sftp.sync(localto, remoteto, download=False, exclude=exclude, delete=False)
+        sftp.sync(localto, remoteto, download=False, exclude=exclude, delete=False, callback=callback)
         logger.info("Upload finished")
+
 
     def __resize_to_orig(self, igc_seeds):
         # @TODO remove old code in except part
@@ -1525,6 +1528,7 @@ config and user config.")
     args = cfg
     args.update(vars(args_obj))
     return args
+
 
 def boltzman(x, xmid, tau):
     """

@@ -451,8 +451,13 @@ class OrganSegmentationWindow(QMainWindow):
         set sftp_username and sftp_password in ~/lisa_data/organ_segmentation.config
         """
         self.statusBar().showMessage('Sync in progress...')
-        self.oseg.sync_lisa_data(self.oseg.sftp_username, self.oseg.sftp_password)
+        self.oseg.sync_lisa_data(self.oseg.sftp_username, self.oseg.sftp_password, callback=self._print_sync_progress)
         self.statusBar().showMessage('Sync finished')
+
+    def _print_sync_progress(self, transferred, toBeTransferred):
+        self.statusBar().showMessage('Sync of current file {0} % '.format((100.0 * transferred) / toBeTransferred ))
+
+        # print "Transferred: {0}\tOut of: {1}".format(transferred, toBeTransferred)
 
     def loadDataDir(self):
         self.statusBar().showMessage('Reading DICOM directory...')
