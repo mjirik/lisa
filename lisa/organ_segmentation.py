@@ -192,12 +192,12 @@ class OrganSegmentation():
         self.iparams = {}
         self.datapath = datapath
         self.output_datapath = output_datapath
+        self.sftp_username=sftp_username
+        self.sftp_password=sftp_password
         # used for server sync
         self._output_datapath_from_server = op.join(self.output_datapath, 'sync', self.sftp_username ,"from_server/" )
         # used for server sync
         self._output_datapath_to_server = op.join(self.output_datapath, 'sync', self.sftp_username, "to_server/" )
-        self.sftp_username=sftp_username
-        self.sftp_password=sftp_password
         self.input_datapath_start = input_datapath_start
         self.crinfo = [[0, None], [0, None], [0, None]]
         self.slab = data_plus.default_slab()
