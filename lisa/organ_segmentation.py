@@ -151,7 +151,7 @@ class OrganSegmentation():
         seg_preproc_pars={},
         after_load_processing={},
         segmentation_alternative_params={},
-        sftp_username='',
+        sftp_username='lisa_default',
         sftp_password=''
 
 
@@ -193,9 +193,9 @@ class OrganSegmentation():
         self.datapath = datapath
         self.output_datapath = output_datapath
         # used for server sync
-        self._output_datapath_from_server = op.join(self.output_datapath, "from_server/" )
+        self._output_datapath_from_server = op.join(self.output_datapath, 'sync', self.sftp_username ,"from_server/" )
         # used for server sync
-        self._output_datapath_to_server = op.join(self.output_datapath, "to_server/" )
+        self._output_datapath_to_server = op.join(self.output_datapath, 'sync', self.sftp_username, "to_server/" )
         self.sftp_username=sftp_username
         self.sftp_password=sftp_password
         self.input_datapath_start = input_datapath_start
