@@ -108,6 +108,16 @@ class OrganSegmentation():
     """
     Main object of Lisa user interface.
     """
+    def set_params(self, *args, **kwargs):
+        """
+        Function set parameters in same way as constructor does
+
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        self.__init__(*args, **kwargs)
+
     def __init__(
         self,
         datapath=None,
