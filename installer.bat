@@ -6,3 +6,6 @@ python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements
 pip install -r requirements_pip.txt
 del requirements_pip.txt
 rem :"w"mkdir %HOMEPATH%\projects
+
+rem :windows specific
+conda install -c jmargeta scikit-fmm

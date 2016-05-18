@@ -36,3 +36,5 @@ joblib>=0.8.4
 morphsnakes
 skelet3d
 sftpsync
+# geodesic distance transform -c jmargeta -c jakirkham
+scikit-fmm
