@@ -568,6 +568,8 @@ class OrganSegmentation():
             self.segmentation = datap['segmentation']
         else:
             self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
+        if 'vessel_tree' in dpkeys:
+            self.vessel_tree = datap['vessel_tree']
 
         if ('apriori' in dpkeys) and datap['apriori'] is not None:
             self.apriori= datap['apriori']
@@ -1200,7 +1202,7 @@ class OrganSegmentation():
         logger.debug('start to generate vtk file from vessel_tree')
         import imtools.gen_vtk_tree
         fn = self.get_standard_ouptut_filename(filetype='vtk', suffix='vt-' + textLabel)
-        imtools.gen_vtk_tree.vt_file_2_vtk_file(self.vessel_tree, fn, label=textLabel)
+        imtools.gen_vtk_tree.vt2_vtk_file(self.vessel_tree, fn, label=textLabel)
         logger.debug('generating vtk file from vessel_tree finished')
 
     def hepaticVeinsSegmentation(self):
