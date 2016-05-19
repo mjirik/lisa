@@ -1191,8 +1191,17 @@ class OrganSegmentation():
 
         self.vessel_tree['Graph'][textLabel] = stats
         # print sa.stats
-# save skeleton to special file
-        misc.obj_to_file(self.vessel_tree, 'vt_' + textLabel + '.yaml', filetype='yaml')
+        logger.debug('save vessel tree to file')
+        fn = self.get_standard_ouptut_filename(filetype='yaml', suffix='vessel_tree')
+# save all skeletons to one special file
+        misc.obj_to_file(self.vessel_tree, fn, filetype='yaml')
+        logger.debug('save vessel tree to file - finished')
+        # generate vtk file
+        logger.debug('start to generate vtk file from vessel_tree')
+        import imtools.gen_vtk_tree
+        fn = self.get_standard_ouptut_filename(filetype='vtk', suffix='vt-' + textLabel)
+        imtools.gen_vtk_tree.vt_file_2_vtk_file(self.vessel_tree, fn, label=textLabel)
+        logger.debug('generating vtk file from vessel_tree finished')
 
     def hepaticVeinsSegmentation(self):
 
