@@ -1192,7 +1192,7 @@ class OrganSegmentation():
         self.vessel_tree['Graph'][textLabel] = stats
         # print sa.stats
 # save skeleton to special file
-        misc.obj_to_file(self.vessel_tree, 'vessel_tree.yaml', filetype='yaml')
+        misc.obj_to_file(self.vessel_tree, 'vt_' + textLabel + '.yaml', filetype='yaml')
 
     def hepaticVeinsSegmentation(self):
 
@@ -1218,7 +1218,7 @@ class OrganSegmentation():
         self.segmentation[outputSegmentation == 1] = slab['hepatic_veins']
 
 # skeletonizace
-        self.__vesselTree(outputSegmentation, 'hepatic_veins')
+#         self.__vesselTree(outputSegmentation, 'hepatic_veins')
 
     def get_segmented_volume_size_mm3(self):
         """Compute segmented volume in mm3, based on subsampeled data."""

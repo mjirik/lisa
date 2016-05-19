@@ -287,7 +287,8 @@ class OrganSegmentationWindow(QMainWindow):
         btn_svhv.clicked.connect(self.btnSaveHepaticVeinsTree)
         btn_svhv.setToolTip(
             "Save Hepatic Veins 1D model into vessel_tree.yaml")
-        btn_svhv.setEnabled(False)
+        btn_svhv.setEnabled(True)
+        # btn_svhv.setEnabled(False)
 
         btn_lesions = QPushButton("Lesions localization", self)
         btn_lesions.clicked.connect(self.btnLesionLocalization)
@@ -864,11 +865,13 @@ class OrganSegmentationWindow(QMainWindow):
 
     def btnSavePortalVeinTree(self):
         self.statusBar().showMessage('Saving vessel tree ...')
+        QApplication.processEvents()
         self.oseg.saveVesselTree('porta')
         self.statusBar().showMessage('Ready')
 
     def btnSaveHepaticVeinsTree(self):
         self.statusBar().showMessage('Saving vessel tree ...')
+        QApplication.processEvents()
         self.oseg.saveVesselTree('hepatic_veins')
         self.statusBar().showMessage('Ready')
 
