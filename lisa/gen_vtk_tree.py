@@ -8,6 +8,7 @@ import vtk
 import numpy as nm
 import yaml
 import sys
+import argparse
 
 #
 # def get_cylinder(upper, height, radius,
@@ -132,44 +133,54 @@ import sys
 #
 #     return outdata
 
-
 def main():
     logger = logging.getLogger()
+
     logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()
     logger.addHandler(ch)
 
-    infile = sys.argv[1]
-    if len(sys.argv) >= 3:
-        outfile = sys.argv[2]
+    # create file handler which logs even debug messages
+    # fh = logging.FileHandler('log.txt')
+    # fh.setLevel(logging.DEBUG)
+    # formatter = logging.Formatter(
+    #     '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    # fh.setFormatter(formatter)
+    # logger.addHandler(fh)
+    # logger.debug('start')
 
-    else:
-        outfile = 'output.vtk'
+    # input parser
+    parser = argparse.ArgumentParser(
+        description=__doc__
+    )
+    parser.add_argument(
+        'inputfile',
+        default=None,
+        help='input file'
+    )
+    parser.add_argument(
+        'outputfile',
+        default='output.vtk',
+        nargs='?',
+        help='output file'
+    )
+    parser.add_argument(
+        '-l','--label',
+        default=None,
+        help='text label of vessel tree. f.e. "porta" or "hepatic_veins". \
+        First label is used if it is set to None'
+    )
+    parser.add_argument(
+        '-d', '--debug', action='store_true',
+        help='Debug mode')
+    args = parser.parse_args()
+
+    if args.debug:
+        ch.setLevel(logging.DEBUG)
 
     import imtools.gen_vtk_tree
-    imtools.gen_vtk_tree.vt_file_2_vtk_file(infile, outfile)
+    imtools.gen_vtk_tree.vt_file_2_vtk_file(args.inputfile, args.outputfile, args.label)
 
-    # yaml_file = open(infile, 'r')
-    # tree_raw_data = yaml.load(yaml_file)
-    #
-    # if 'graph' in tree_raw_data:
-    #     trees = tree_raw_data['graph']
-    # else:
-    #     trees = tree_raw_data['Graph']
-    #
-    # tkeys = trees.keys()
-    #
-    # tree_data = process_tree(trees[tkeys[0]])
-    # # try:
-    # #     trees = process_tree(tree_raw_data['graph']['porta'])
-    # # except:
-    # #     = process_tree(tree_raw_data['Graph']['porta'])
-    # polyData = gen_tree(tree_data)
-    #
-    # writer = vtk.vtkPolyDataWriter()
-    # writer.SetFileName(outfile)
-    # writer.SetInput(polyData)
-    # writer.Write()
 
 if __name__ == "__main__":
     main()
