@@ -7,7 +7,7 @@ import numpy as np
 
 import os.path as op
 from lisa import organ_localizator
-import lisa.data
+import lisa.dataset
 import io3d
 import io3d.datareader
 
@@ -15,7 +15,7 @@ import io3d.datareader
 class LocalizationTests(unittest.TestCase):
     @attr('slow')
     def test_training(self):
-        sample_data_path = lisa.data.sample_data_path()
+        sample_data_path = lisa.dataset.sample_data_path()
         organ_localizator.train_liver_localizator_from_sliver_data(
             "liver.ol.p",
             sliver_reference_dir=sample_data_path,

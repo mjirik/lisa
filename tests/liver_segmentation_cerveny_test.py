@@ -25,7 +25,7 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 import logging
 logger = logging.getLogger(__name__)
 
-import lisa.data
+import lisa.dataset
 from lisa import organ_segmentation
 
 class LiverSegmentationCervenyTest(unittest.TestCase):

@@ -475,8 +475,8 @@ def main():
 
     if args.get_sample_data:
         import lisa
-        import lisa.data
-        lisa.data.get_sample_data()
+        import lisa.dataset
+        lisa.dataset.get_sample_data()
         # get_sample_data()
 
     if args.make_icon:
