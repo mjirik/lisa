@@ -79,6 +79,7 @@ class DataDirIterator:
         self.ref_fnames.sort()
 
         if self.data_dir is not None:
+            self.data_dir = op.expanduser(data_dir)
             patternd = data_pattern % (common_pattern)
             self.data_fnames = glob.glob(data_dir + patternd)
             self.data_fnames.sort()
