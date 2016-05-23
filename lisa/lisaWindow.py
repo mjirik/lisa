@@ -942,7 +942,12 @@ class OrganSegmentationWindow(QMainWindow):
         self.statusBar().showMessage('Ready')
 
     def btnLog(self):
-        pass
+        import logWindow
+        import os.path as op
+        fn = op.expanduser("~/lisa_data/lisa.log")
+        form = logWindow.LogViewerForm(fn) #, qapp=self.app)
+        form.show()
+        form.exec_()
 
     def onAlternativeSegmentationParams(self, text):
         self.oseg.update_parameters_based_on_label(str(text))

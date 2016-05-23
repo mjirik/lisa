@@ -54,8 +54,8 @@ class LogEntryModel(QAbstractListModel):
                 entry = line
                 self.entries.append(entry)
             print str(self.entries[-1]), len(self.entries)
-            self.parent.addItem("adf")
-            self.parent.update()
+            # self.parent.addItem("adf")
+            # self.parent.update()
             # self.appendRow(self.enteries[-1])
 
 
