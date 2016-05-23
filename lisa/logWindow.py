@@ -33,7 +33,7 @@ class LogEntryModel(QAbstractListModel):
         return len(self.entries)
 
     def data(self, index, role):
-        print "data is called ", index.row()
+        # print "data is called ", index.row()
         if index.isValid() and role == Qt.DisplayRole:
             return QVariant(self.entries[index.row()])
         else:
@@ -53,7 +53,7 @@ class LogEntryModel(QAbstractListModel):
                 # entry = "%s %s" % (sender, message)
                 entry = line
                 self.entries.append(entry)
-            print str(self.entries[-1]), len(self.entries)
+            # print str(self.entries[-1]), len(self.entries)
             # self.parent.addItem("adf")
             # self.parent.update()
             # self.appendRow(self.enteries[-1])
@@ -94,7 +94,6 @@ class LogViewerForm(QDialog):
         # import ipdb; ipdb.set_trace()
         from PyQt4 import QtCore
         # QTCore
-        print 'finished'
 
 def main():
     logger = logging.getLogger()

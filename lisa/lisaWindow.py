@@ -98,6 +98,14 @@ class OrganSegmentationWindow(QMainWindow):
         fileMenu.addAction(exitAction)
         fileMenu.addAction(autoSeedsAction)
 
+        imageMenu = menubar.addMenu('&Image')
+
+        randomRotateAction= QtGui.QAction(QtGui.QIcon('exit.png'), '&Random Rotate', self)
+        # autoSeedsAction.setShortcut('Ctrl+Q')
+        randomRotateAction.setStatusTip('Random rotation')
+        randomRotateAction.triggered.connect(self.btnRandomRotate)
+        imageMenu.addAction(randomRotateAction)
+
     def _add_button(
             self,
             text,
@@ -236,8 +244,8 @@ class OrganSegmentationWindow(QMainWindow):
         # voxelsize gui comment
         # grid.addWidget(self.text_vs, rstart + 3, 1)
         # grid.addWidget(combo_vs, rstart + 4, 1)
-        grid.addWidget(self.text_dcm_dir, rstart + 6, 1, 1, 3)
-        grid.addWidget(self.text_dcm_data, rstart + 7, 1, 1, 3)
+        grid.addWidget(self.text_dcm_dir, rstart + 6, 1, 1, 4)
+        grid.addWidget(self.text_dcm_data, rstart + 7, 1, 1, 4)
         rstart += 9
 
         # # # # # # # # #  segmentation
@@ -948,6 +956,13 @@ class OrganSegmentationWindow(QMainWindow):
         form = logWindow.LogViewerForm(fn) #, qapp=self.app)
         form.show()
         form.exec_()
+
+    def btnRandomRotate(self):
+        self.oseg.random_rotate()
+
+    def btnRotateZ(self):
+        pass
+
 
     def onAlternativeSegmentationParams(self, text):
         self.oseg.update_parameters_based_on_label(str(text))

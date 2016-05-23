@@ -1316,6 +1316,16 @@ class OrganSegmentation():
         if not op.exists(odp):
             os.makedirs(odp)
 
+    def rotate(self, angle, axes):
+        self.data3d = scipy.ndimage.interpolation.rotate(self.data3d, angle, axes)
+        self.segmentation = scipy.ndimage.interpolation.rotate(self.segmentation, angle, axes)
+        self.seeds = scipy.ndimage.interpolation.rotate(self.seeds, angle, axes)
+
+
+    def random_rotate(self):
+        angle = np.random.rand() * 360
+        self.rotate(angle, (1, 2))
+
     def save_input_dcm(self, filename):
         # TODO add
         logger.debug('save dcm')
