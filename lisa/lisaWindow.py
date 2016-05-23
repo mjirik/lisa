@@ -30,7 +30,7 @@ sys.path.append(os.path.join(path_to_script, "../extern/pysegbase/src"))
 
 from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
     QGridLayout, QLabel, QPushButton, QFrame, \
-    QFont, QPixmap, QFileDialog
+    QFont, QPixmap, QFileDialog, QStyle
 from PyQt4 import QtGui
 from PyQt4.Qt import QString
 try:
@@ -98,6 +98,27 @@ class OrganSegmentationWindow(QMainWindow):
         fileMenu.addAction(exitAction)
         fileMenu.addAction(autoSeedsAction)
 
+    def _add_button(
+            self,
+            text,
+            callback,
+            uiw_label=None,
+            tooltip=None,
+            icon=None
+                    ):
+        if uiw_label is None:
+            uiw_label = text
+        btn = QPushButton(text, self)
+        btn.clicked.connect(callback)
+        if icon is not None:
+            btn.setIcon(btn.style().standardIcon(icon))
+        self.uiw[uiw_label] = btn
+        if tooltip is not None:
+            btn.setToolTip(tooltip)
+
+        return btn
+
+
     def _initUI(self):
         cw = QWidget()
         self.setCentralWidget(cw)
@@ -141,7 +162,7 @@ class OrganSegmentationWindow(QMainWindow):
 
         btn_config = QPushButton("Configuration", self)
         btn_config.clicked.connect(self.btnConfig)
-        self.uiw['dcmdir'] = btn_config
+        self.uiw['config'] = btn_config
         grid.addWidget(btn_config, 2, 1)
 
         btn_update = QPushButton("Update", self)
@@ -165,19 +186,25 @@ class OrganSegmentationWindow(QMainWindow):
         self.uiw['sync'] = btn_sync
         grid.addWidget(btn_sync, rstart + 3, 4)
 
+        grid.addWidget(
+            self._add_button("Log", self.btnLog, 'Log',
+                             "See log file", QStyle.SP_FileDialogContentsView),
+            rstart + 4, 4)
+
         # # dicom reader
         rstart = 5
         hr = QFrame()
         hr.setFrameShape(QFrame.HLine)
         text_dcm = QLabel('DICOM reader')
         text_dcm.setFont(font_label)
-        btn_dcmdir = QPushButton("Load DICOM", self)
-        btn_dcmdir.clicked.connect(self.loadDataDir)
-        self.uiw['dcmdir'] = btn_dcmdir
 
-        btn_datafile = QPushButton("Load file", self)
-        btn_datafile.clicked.connect(self.loadDataFile)
-        btn_datafile.setToolTip("Load data from pkl file, 3D Dicom, tiff, ...")
+        # btn_dcmdir = QPushButton("Load DICOM", self)
+        # btn_dcmdir.clicked.connect(self.loadDataDir)
+        # btn_dcmdir.setIcon(btn_dcmdir.style().standardIcon(QStyle.SP_DirOpenIcon))
+        # self.uiw['dcmdir'] = btn_dcmdir
+        # btn_datafile = QPushButton("Load file", self)
+        # btn_datafile.clicked.connect(self.loadDataFile)
+        # btn_datafile.setToolTip("Load data from pkl file, 3D Dicom, tiff, ...")
 
         btn_dcmcrop = QPushButton("Crop", self)
         btn_dcmcrop.clicked.connect(self.cropDcm)
@@ -196,8 +223,15 @@ class OrganSegmentationWindow(QMainWindow):
         self.text_dcm_data = QLabel('DICOM data:')
         grid.addWidget(hr, rstart + 0, 2, 1, 4)
         grid.addWidget(text_dcm, rstart + 0, 1, 1, 3)
-        grid.addWidget(btn_dcmdir, rstart + 1, 1)
-        grid.addWidget(btn_datafile, rstart + 1, 2)
+        grid.addWidget(
+            self._add_button("Load dir", self.loadDataDir, 'dcmdir',
+                             "Load data from directory (DICOM, png, jpg...)", QStyle.SP_DirOpenIcon),
+            rstart + 1, 1)
+        grid.addWidget(
+            self._add_button("Load file", self.loadDataFile, 'load_file',
+                             "Load data from pkl file, 3D Dicom, tiff, ...", QStyle.SP_FileIcon),
+            rstart + 1, 2)
+        # grid.addWidget(btn_datafile, rstart + 1, 2)
         grid.addWidget(btn_dcmcrop, rstart + 1, 3)
         # voxelsize gui comment
         # grid.addWidget(self.text_vs, rstart + 3, 1)
@@ -244,8 +278,12 @@ class OrganSegmentationWindow(QMainWindow):
         # # # # # # # # #  save/view
         # hr = QFrame()
         # hr.setFrameShape(QFrame.HLine)
-        btn_segsave = QPushButton("Save", self)
-        btn_segsave.clicked.connect(self.saveOut)
+        grid.addWidget(
+            self._add_button("Save", self.saveOut, 'save',
+                             "Save data with segmentation", QStyle.SP_DialogSaveButton),
+            rstart + 0, 1)
+        # btn_segsave = QPushButton("Save", self)
+        # btn_segsave.clicked.connect(self.saveOut)
         btn_segsavedcmoverlay = QPushButton("Save Dicom Overlay", self)
         btn_segsavedcmoverlay.clicked.connect(self.btnSaveOutDcmOverlay)
         btn_segsavedcm = QPushButton("Save Dicom", self)
@@ -257,7 +295,6 @@ class OrganSegmentationWindow(QMainWindow):
         else:
             btn_segview.setEnabled(False)
 
-        grid.addWidget(btn_segsave, rstart + 0, 1)
         grid.addWidget(btn_segsavedcm, rstart + 0, 2)
         grid.addWidget(btn_segsavedcmoverlay, rstart + 0, 3)
         grid.addWidget(btn_segview, rstart + 0, 4)
@@ -903,6 +940,9 @@ class OrganSegmentationWindow(QMainWindow):
         self.statusBar().showMessage('Vessel segmentation ...')
         self.oseg.hepaticVeinsSegmentation()
         self.statusBar().showMessage('Ready')
+
+    def btnLog(self):
+        pass
 
     def onAlternativeSegmentationParams(self, text):
         self.oseg.update_parameters_based_on_label(str(text))

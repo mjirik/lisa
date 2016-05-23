@@ -1372,9 +1372,12 @@ def logger_init():  # pragma: no cover
     logger.addHandler(ch)
 
     fformatter = logging.Formatter(
-        '%(name)s - %(funcName)s -%(lineno)d - %(levelname)s - %(message)s'
+        '%(asctime)s - %(name)s - %(funcName)s - %(lineno)d - %(levelname)s - %(message)s'
     )
-    fh = logging.FileHandler('lisa.log')
+    logfile = "lisa.log"
+    if op.exists(op.expanduser("~/lisa_data/")):
+        logfile = op.expanduser("~/lisa_data/lisa.log")
+    fh = logging.FileHandler(logfile)
     fh.setFormatter(fformatter)
     fh.setLevel(logging.DEBUG)
     logger.addHandler(fh)
