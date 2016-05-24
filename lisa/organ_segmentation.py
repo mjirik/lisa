@@ -324,8 +324,10 @@ class OrganSegmentation():
     #    self.seeds = datap[
     #        'processing_information']['organ_segmentation']['seeds']
     def update(self):
-        import subprocess
-        print subprocess.call(['conda', 'update', '-y', '-c', 'mjirik', '-c', 'SimpleITK', 'lisa']) #, shell=True)
+        import update_stable
+        update_stable.make_update()
+        # import subprocess
+        # print subprocess.call(['conda', 'update', '-y', '-c', 'mjirik', '-c', 'SimpleITK', 'lisa']) #, shell=True)
 
     def update_parameters_based_on_label(self, label):
         self.update_parameters(self.segmentation_alternative_params[label])

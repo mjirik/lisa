@@ -50,11 +50,16 @@ def update_by_plan(filename="~/lisa_data/.update_plan.yaml", update_periode_days
 
 def update(dry_run=False):
     if update_by_plan():
-        # make_update(dry_run)
-        make_update_with_no_lisa_in_projects_dir(dry_run)
+        make_update(dry_run)
+        # make_update_with_no_lisa_in_projects_dir(dry_run)
 
 
-def make_update_with_no_lisa_in_projects_dir(dry_run=False):
+def make_update(dry_run=False):
+    """
+    Update with no projects/lisa directory
+    :param dry_run:
+    :return:
+    """
     import os.path as op
     conda_ok = True
     print ('Updating conda modules')
@@ -76,7 +81,7 @@ def make_update_with_no_lisa_in_projects_dir(dry_run=False):
 
     print ('Updating pip modules')
     try:
-        req_txt_path = op.expanduser("~/lisa_data")
+        req_txt_path = op.expanduser("~/lisa_data/.lisa/reqirements_pip.txt")
         import wget
         wget.download(
             "https://raw.githubusercontent.com/mjirik/lisa/master/lisa/requirements_pip.txt",
@@ -103,7 +108,7 @@ def make_update_with_no_lisa_in_projects_dir(dry_run=False):
         logger.warning(traceback.format_exc())
         traceback.print_exc()
 
-def make_update(dry_run=False):
+def make_update_old(dry_run=False):
     import os.path as op
     path_to_script = op.dirname(op.abspath(__file__))
     path_to_base = op.abspath(op.join(path_to_script, '../'))
