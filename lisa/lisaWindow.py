@@ -52,10 +52,13 @@ def find_logo():
     if os.path.exists(logopath):
         return logopath
     # lisa runtime directory
-    logopath = "./LISA256.png"
+    logopath = os.path.expanduser("~/lisa_data/LISA256.png")
     if not os.path.exists(logopath):
         try:
-            wget.download("https://raw.githubusercontent.com/mjirik/lisa/master/lisa/icons/LISA256.png")
+            wget.download(
+                "https://raw.githubusercontent.com/mjirik/lisa/master/lisa/icons/LISA256.png",
+                out=logopath
+            )
         except:
             logger.warning('logo download failed')
             pass
@@ -818,7 +821,7 @@ class OrganSegmentationWindow(QMainWindow):
 
         self.statusBar().showMessage('Checking for update ...')
         self.oseg.update()
-        self.statusBar().showMessage('Ready')
+        self.statusBar().showMessage('Update finished. Ready')
 
     def btnAutomaticLiverSeeds(self, event=None):
         self.statusBar().showMessage('Automatic liver seeds...')
