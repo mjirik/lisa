@@ -50,7 +50,8 @@ def update_by_plan(filename="~/lisa_data/.update_plan.yaml", update_periode_days
 
 def update(dry_run=False):
     if update_by_plan():
-        make_update(dry_run)
+        # make_update(dry_run)
+        make_update_with_no_lisa_in_projects_dir(dry_run)
 
 
 def make_update_with_no_lisa_in_projects_dir(dry_run=False):
@@ -80,7 +81,6 @@ def make_update_with_no_lisa_in_projects_dir(dry_run=False):
             "https://raw.githubusercontent.com/mjirik/lisa/master/lisa/requirements_pip.txt",
             out=req_txt_path
         )
-        wget.download()
 
         cmd = ["pip", "install", '-U', '--no-deps']
         if not conda_ok:

@@ -1,5 +1,5 @@
 #!/bin/bash
-export PATH=$HOME/miniconda/bin:$HOME/anaconda/bin:$PATH
+export PATH=$HOME/miniconda2/bin:$HOME/anaconda2/bin:$HOME/miniconda/bin:$HOME/anaconda/bin:$PATH
 SCRIPT_PATH="${BASH_SOURCE[0]}";
 cd `dirname ${SCRIPT_PATH}` > /dev/null
 cd ..
