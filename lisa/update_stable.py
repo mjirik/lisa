@@ -42,6 +42,8 @@ def update_by_plan(filename="~/lisa_data/.update_plan.yaml", update_periode_days
         retval = True
         data = {}
         data['update_datetime'] = str(now)
+        import lisa_data
+        lisa_data.create_lisa_data_dir_tree()
         misc.obj_to_file(data, filename)
 
     return retval

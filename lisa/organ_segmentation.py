@@ -62,6 +62,7 @@ import support_structure_segmentation as sss
 import cachefile as cachef
 import config_default
 import liver_seeds
+import lisa_data
 
 # import audiosupport
 # import skimage
@@ -1306,19 +1307,7 @@ class OrganSegmentation():
 
         # f savestring in ['a', 'A']:
     def create_lisa_data_dir_tree(self):
-        # used for server sync
-        self._output_datapath_from_server = op.join(self.output_datapath, 'sync', self.sftp_username ,"from_server" )
-        # used for server sync
-        self._output_datapath_to_server = op.join(self.output_datapath, 'sync', self.sftp_username, "to_server" )
-        odp = self.output_datapath
-        if not op.exists(odp):
-            os.makedirs(odp)
-        odp = self._output_datapath_from_server
-        if not op.exists(odp):
-            os.makedirs(odp)
-        odp = self._output_datapath_to_server
-        if not op.exists(odp):
-            os.makedirs(odp)
+        lisa_data.create_lisa_data_dir_tree(self)
 
     def rotate(self, angle, axes):
         self.data3d = scipy.ndimage.interpolation.rotate(self.data3d, angle, axes)
@@ -1327,8 +1316,15 @@ class OrganSegmentation():
 
 
     def random_rotate(self):
+        """
+        Rotate data3d, segmentation and seeds with random rotation
+        :return:
+        """
         angle = np.random.rand() * 360
         self.rotate(angle, (1, 2))
+
+        angle = np.random.rand() * 360
+        self.rotate(angle, (0, 1))
 
     def save_input_dcm(self, filename):
         # TODO add
