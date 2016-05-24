@@ -56,6 +56,13 @@ def lidapath():
     return op.expanduser('~/lisa_data')
 
 def __make_icon_osx():
+    lisa_shortcut = op.expanduser("~/Desktop/lisa")
+    with open(lisa_shortcut, 'w') as outfile:
+        outfile.write(
+            "#!/bin/bash\n\
+export PATH=$HOME/miniconda2/bin:$HOME/anaconda2/bin:$HOME/miniconda/bin:$HOME/anaconda/bin:$PATH\n\
+lisa"
+        )
     import wget
     wget.download(
         "https://raw.githubusercontent.com/mjirik/lisa/master/lisa/requirements_pip.txt",
