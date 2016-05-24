@@ -8,15 +8,19 @@ import traceback
 import logging
 logger = logging.getLogger(__name__)
 import datetime
+import os.path as op
 
 
 # def write_update_info_in_file():
 #     import misc
 #     now = datetime.datetime.now() 
-def update_by_plan(filename=".update_plan.yaml", update_periode_days=10):
+def update_by_plan(filename="~/lisa_data/.update_plan.yaml", update_periode_days=10):
     """
     :return: True or False
     """
+
+    filename = op.expanduser(filename)
+
     retval = False
     now = datetime.datetime.now() 
     try:
@@ -75,7 +79,7 @@ def make_update(dry_run=False):
     try:
         cmd = ["conda", "install", "--yes",
                # "-c", 'luispedro ',
-               '-c', 'SimpleITK', "-c", "menpo", "--file",
+               '-c', 'SimpleITK', "-c", "menpo", '-c', 'mjirik', "--file",
                op.join(path_to_base, "requirements_conda.txt")]
         if dry_run:
             cmd.append('--dry-run')
