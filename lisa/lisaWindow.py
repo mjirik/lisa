@@ -48,7 +48,7 @@ import loginWindow
 
 def find_logo():
     import wget
-    logopath = os.path.join(path_to_script, "./rrrricons/LISA256.png")
+    logopath = os.path.join(path_to_script, "./icons/LISA256.png")
     if os.path.exists(logopath):
         return logopath
     # lisa runtime directory
@@ -815,8 +815,9 @@ class OrganSegmentationWindow(QMainWindow):
             self.statusBar().showMessage('No segmentation data!')
 
     def btnUpdate(self, event=None):
+
         self.statusBar().showMessage('Checking for update ...')
-        print subprocess.call(['conda', 'update', '-y', '-c', 'mjirik', '-c', 'SimpleITK', 'lisa']) #, shell=True)
+        self.oseg.update()
         self.statusBar().showMessage('Ready')
 
     def btnAutomaticLiverSeeds(self, event=None):

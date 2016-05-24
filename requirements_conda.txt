@@ -1,6 +1,8 @@
 # This file may be used to create an environment using:
 # $ conda create --name <env> --file <this file>
 # platform: win-64
+#
+# similar list is in meta.yaml
 numpy=1.9.3
 pip>=6.0.8
 python=2.7.9=1
