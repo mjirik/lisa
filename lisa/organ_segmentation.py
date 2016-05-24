@@ -101,11 +101,23 @@ def import_gui():
 
     pass
 
+def printTotals(transferred, toBeTransferred):
+    print "Transferred: {0}\tOut of: {1}".format(transferred, toBeTransferred)
 
 class OrganSegmentation():
     """
     Main object of Lisa user interface.
     """
+    def set_params(self, *args, **kwargs):
+        """
+        Function set parameters in same way as constructor does
+
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        self.__init__(*args, **kwargs)
+
     def __init__(
         self,
         datapath=None,
@@ -141,6 +153,8 @@ class OrganSegmentation():
         seg_preproc_pars={},
         after_load_processing={},
         segmentation_alternative_params={},
+        sftp_username='lisa_default',
+        sftp_password=''
 
 
         #           iparams=None,
@@ -180,6 +194,8 @@ class OrganSegmentation():
         self.iparams = {}
         self.datapath = datapath
         self.output_datapath = output_datapath
+        self.sftp_username=sftp_username
+        self.sftp_password=sftp_password
         self.input_datapath_start = input_datapath_start
         self.crinfo = [[0, None], [0, None], [0, None]]
         self.slab = data_plus.default_slab()
@@ -212,7 +228,7 @@ class OrganSegmentation():
         self.lisa_operator_identifier = lisa_operator_identifier
         self.version = qmisc.getVersionString()
         if self.version is None:
-            self.version = "1.7.1"
+            self.version = "1.8.3"
         self.viewermax = viewermax
         self.viewermin = viewermin
         self.volume_unit = volume_unit
@@ -548,6 +564,8 @@ class OrganSegmentation():
             self.segmentation = datap['segmentation']
         else:
             self.segmentation = np.zeros(self.data3d.shape, dtype=np.int8)
+        if 'vessel_tree' in dpkeys:
+            self.vessel_tree = datap['vessel_tree']
 
         if ('apriori' in dpkeys) and datap['apriori'] is not None:
             self.apriori= datap['apriori']
@@ -704,6 +722,29 @@ class OrganSegmentation():
             self.segmentation_prev = None
 
         return igc
+    def sync_lisa_data(self, username, password, host="147.228.47.162", callback=printTotals):
+        self.create_lisa_data_dir_tree()
+
+
+        import sftpsync
+        import paramiko
+
+        paramiko.util.log_to_file('paramiko.log')
+        sftp = sftpsync.Sftp(host=host, username=username, password=password)
+        localfrom = self._output_datapath_from_server
+        localto = self._output_datapath_to_server
+        remotefrom = "from_server/"
+        remoteto = "to_server/"
+
+        exclude = []
+
+        logger.info("Download started")
+        sftp.sync(remotefrom, localfrom, download=True, exclude=exclude, delete=False, callback=callback)
+        logger.info("Download finished")
+        logger.info("Upload started")
+        sftp.sync(localto, remoteto, download=False, exclude=exclude, delete=False, callback=callback)
+        logger.info("Upload finished")
+
 
     def __resize_to_orig(self, igc_seeds):
         # @TODO remove old code in except part
@@ -1148,8 +1189,17 @@ class OrganSegmentation():
 
         self.vessel_tree['Graph'][textLabel] = stats
         # print sa.stats
-# save skeleton to special file
-        misc.obj_to_file(self.vessel_tree, 'vessel_tree.yaml', filetype='yaml')
+        logger.debug('save vessel tree to file')
+        fn = self.get_standard_ouptut_filename(filetype='yaml', suffix='vessel_tree')
+# save all skeletons to one special file
+        misc.obj_to_file(self.vessel_tree, fn, filetype='yaml')
+        logger.debug('save vessel tree to file - finished')
+        # generate vtk file
+        logger.debug('start to generate vtk file from vessel_tree')
+        import imtools.gen_vtk_tree
+        fn = self.get_standard_ouptut_filename(filetype='vtk', suffix='vt-' + textLabel)
+        imtools.gen_vtk_tree.vt2vtk_file(self.vessel_tree, fn, text_label=textLabel)
+        logger.debug('generating vtk file from vessel_tree finished')
 
     def hepaticVeinsSegmentation(self):
 
@@ -1175,7 +1225,7 @@ class OrganSegmentation():
         self.segmentation[outputSegmentation == 1] = slab['hepatic_veins']
 
 # skeletonizace
-        self.__vesselTree(outputSegmentation, 'hepatic_veins')
+#         self.__vesselTree(outputSegmentation, 'hepatic_veins')
 
     def get_segmented_volume_size_mm3(self):
         """Compute segmented volume in mm3, based on subsampeled data."""
@@ -1228,9 +1278,7 @@ class OrganSegmentation():
 #         filepath = 'org-' + filename + '.' + self.save_filetype
 #         # rint filepath
 #         # rint 'op ', op
-        odp = self.output_datapath
-        if not op.exists(odp):
-            os.makedirs(odp)
+        self.create_lisa_data_dir_tree()
 
         if filepath is None:
             filepath = self.get_standard_ouptut_filename()
@@ -1253,6 +1301,30 @@ class OrganSegmentation():
         # misc.obj_to_file(iparams, filepath, filetype='pklz')
 
         # f savestring in ['a', 'A']:
+    def create_lisa_data_dir_tree(self):
+        # used for server sync
+        self._output_datapath_from_server = op.join(self.output_datapath, 'sync', self.sftp_username ,"from_server" )
+        # used for server sync
+        self._output_datapath_to_server = op.join(self.output_datapath, 'sync', self.sftp_username, "to_server" )
+        odp = self.output_datapath
+        if not op.exists(odp):
+            os.makedirs(odp)
+        odp = self._output_datapath_from_server
+        if not op.exists(odp):
+            os.makedirs(odp)
+        odp = self._output_datapath_to_server
+        if not op.exists(odp):
+            os.makedirs(odp)
+
+    def rotate(self, angle, axes):
+        self.data3d = scipy.ndimage.interpolation.rotate(self.data3d, angle, axes)
+        self.segmentation = scipy.ndimage.interpolation.rotate(self.segmentation, angle, axes)
+        self.seeds = scipy.ndimage.interpolation.rotate(self.seeds, angle, axes)
+
+
+    def random_rotate(self):
+        angle = np.random.rand() * 360
+        self.rotate(angle, (1, 2))
 
     def save_input_dcm(self, filename):
         # TODO add
@@ -1310,9 +1382,12 @@ def logger_init():  # pragma: no cover
     logger.addHandler(ch)
 
     fformatter = logging.Formatter(
-        '%(name)s - %(funcName)s -%(lineno)d - %(levelname)s - %(message)s'
+        '%(asctime)s - %(name)s - %(funcName)s - %(lineno)d - %(levelname)s - %(message)s'
     )
-    fh = logging.FileHandler('lisa.log')
+    logfile = "lisa.log"
+    if op.exists(op.expanduser("~/lisa_data/")):
+        logfile = op.expanduser("~/lisa_data/lisa.log")
+    fh = logging.FileHandler(logfile)
     fh.setFormatter(fformatter)
     fh.setLevel(logging.DEBUG)
     logger.addHandler(fh)
@@ -1487,6 +1562,7 @@ config and user config.")
     args = cfg
     args.update(vars(args_obj))
     return args
+
 
 def boltzman(x, xmid, tau):
     """

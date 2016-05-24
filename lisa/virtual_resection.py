@@ -209,14 +209,26 @@ def split_organ_by_two_vessels(data, lab):
     l2 = 2
 
     # dist se tady počítá od nul jenom v jedničkách
-    dist1 = scipy.ndimage.distance_transform_edt(
+    # dist1 = scipy.ndimage.distance_transform_edt(
+    #     lab != l1,
+    #     sampling=data['voxelsize_mm']
+    # )
+    # dist2 = scipy.ndimage.distance_transform_edt(
+    #     lab != l2,
+    #     sampling=data['voxelsize_mm']
+    # )
+    import skfmm
+    dist1 = skfmm.distance(
         lab != l1,
-        sampling=data['voxelsize_mm']
+        dx=data['voxelsize_mm']
     )
-    dist2 = scipy.ndimage.distance_transform_edt(
+    dist2 = skfmm.distance(
         lab != l2,
-        sampling=data['voxelsize_mm']
+        dx=data['voxelsize_mm']
     )
+    # print 'skfmm'
+    # from PyQt4.QtCore import pyqtRemoveInputHook; pyqtRemoveInputHook()
+    # import ipdb; ipdb.set_trace()
 
     # from PyQt4.QtCore import pyqtRemoveInputHook
     # pyqtRemoveInputHook()

@@ -41,13 +41,16 @@ def showSegmentation(
     mesh_data = seg2fem.gen_mesh_from_voxels_mc(segmentation, voxelsize_mm*degrad)
     if smoothing:
         mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
+        # mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
+
     else:
-        mesh_data = seg2fem.gen_mesh_from_voxels_mc(segmentation, voxelsize_mm * 1.0e-2)
+        mesh_data = seg2fem.gen_mesh_from_voxels_mc(segmentation, voxelsize_mm * degrad * 1.0e-2)
         # mesh_data.coors +=
     vtk_file = "mesh_geom.vtk"
     mesh_data.write(vtk_file)
     QApplication(sys.argv)
     view = viewer.QVTKViewer(vtk_file)
+    print ('show viewer')
     view.exec_()
 
     return labels
@@ -82,6 +85,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     data = misc.obj_from_file(args.inputfile, filetype='pickle')
+    import io3d
+    data = io3d.read(args.inputfile, dataplus_format=True)
     # args.label = np.array(eval(args.label))
     # print args.label
     # import pdb; pdb.set_trace()
@@ -89,4 +94,4 @@ if __name__ == "__main__":
     for i in range(0, len(args.label)):
         ds = ds | (data['segmentation'] == args.label[i])
 
-    showSegmentation(ds, degrad=args.degrad)
+    showSegmentation(ds, degrad=args.degrad, voxelsize_mm=data['voxelsize_mm'])

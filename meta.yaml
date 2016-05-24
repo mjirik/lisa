@@ -1,9 +1,9 @@
 package:
   name: lisa
-  version: "1.7.1"
+  version: "1.8.3"
 
 source:
-  git_rev: 1.7.1
+  git_rev: 1.8.3
   git_url: .
   # git_url: https://github.com/mjirik/quantan.git
 
@@ -14,14 +14,14 @@ source:
    # List any patch files here
    # - fix.patch
 
-# build:
+build:
   # noarch_python: True
   # preserve_egg_dir: True
-  # entry_points:
+  entry_points:
     # Put any entry points (scripts to be generated automatically) here. The
     # syntax is module:function.  For example
     #
-    # - quantan = quantan:main
+    - lisa = lisa:main
     #
     # Would create an entry point called quantan that calls quantan.main()
 

@@ -30,7 +30,7 @@ sys.path.append(os.path.join(path_to_script, "../extern/pysegbase/src"))
 
 from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
     QGridLayout, QLabel, QPushButton, QFrame, \
-    QFont, QPixmap, QFileDialog
+    QFont, QPixmap, QFileDialog, QStyle
 from PyQt4 import QtGui
 from PyQt4.Qt import QString
 try:
@@ -44,6 +44,7 @@ except:
         from seed_editor_qt import QTSeedEditor
 
 import sed3
+import loginWindow
 
 def find_logo():
     import wget
@@ -97,6 +98,35 @@ class OrganSegmentationWindow(QMainWindow):
         fileMenu.addAction(exitAction)
         fileMenu.addAction(autoSeedsAction)
 
+        imageMenu = menubar.addMenu('&Image')
+
+        randomRotateAction= QtGui.QAction(QtGui.QIcon('exit.png'), '&Random Rotate', self)
+        # autoSeedsAction.setShortcut('Ctrl+Q')
+        randomRotateAction.setStatusTip('Random rotation')
+        randomRotateAction.triggered.connect(self.btnRandomRotate)
+        imageMenu.addAction(randomRotateAction)
+
+    def _add_button(
+            self,
+            text,
+            callback,
+            uiw_label=None,
+            tooltip=None,
+            icon=None
+                    ):
+        if uiw_label is None:
+            uiw_label = text
+        btn = QPushButton(text, self)
+        btn.clicked.connect(callback)
+        if icon is not None:
+            btn.setIcon(btn.style().standardIcon(icon))
+        self.uiw[uiw_label] = btn
+        if tooltip is not None:
+            btn.setToolTip(tooltip)
+
+        return btn
+
+
     def _initUI(self):
         cw = QWidget()
         self.setCentralWidget(cw)
@@ -140,27 +170,34 @@ class OrganSegmentationWindow(QMainWindow):
 
         btn_config = QPushButton("Configuration", self)
         btn_config.clicked.connect(self.btnConfig)
-        self.uiw['dcmdir'] = btn_config
+        self.uiw['config'] = btn_config
         grid.addWidget(btn_config, 2, 1)
 
         btn_update = QPushButton("Update", self)
         btn_update.clicked.connect(self.btnUpdate)
         self.uiw['btn_update'] = btn_update
         grid.addWidget(btn_update, 3, 1)
-        grid.addWidget(lisa_logo, 0, 2, 4, 2)
+        grid.addWidget(lisa_logo, 0, 2, 5, 2)
 
         combo = QtGui.QComboBox(self)
         for text in self.oseg.segmentation_alternative_params.keys():
             combo.addItem(text)
         combo.activated[str].connect(self.onAlternativeSegmentationParams)
         grid.addWidget(combo, 4, 1)
-        # combo.addItem("Mandriva")
-        # combo.addItem("Fedora")
-        # combo.addItem("Red Hat")
-        # combo.addItem("Gentoo")
-        # rid.setColumnMinimumWidth(1, logo.width()/2)
-        # rid.setColumnMinimumWidth(2, logo.width()/2)
-        # rid.setColumnMinimumWidth(3, logo.width()/2)
+
+
+        # right from logo
+        rstart = 0
+
+        btn_sync = QPushButton("Sync", self)
+        btn_sync.clicked.connect(self.sync_lisa_data)
+        self.uiw['sync'] = btn_sync
+        grid.addWidget(btn_sync, rstart + 3, 4)
+
+        grid.addWidget(
+            self._add_button("Log", self.btnLog, 'Log',
+                             "See log file", QStyle.SP_FileDialogContentsView),
+            rstart + 4, 4)
 
         # # dicom reader
         rstart = 5
@@ -168,13 +205,14 @@ class OrganSegmentationWindow(QMainWindow):
         hr.setFrameShape(QFrame.HLine)
         text_dcm = QLabel('DICOM reader')
         text_dcm.setFont(font_label)
-        btn_dcmdir = QPushButton("Load DICOM", self)
-        btn_dcmdir.clicked.connect(self.loadDataDir)
-        self.uiw['dcmdir'] = btn_dcmdir
 
-        btn_datafile = QPushButton("Load file", self)
-        btn_datafile.clicked.connect(self.loadDataFile)
-        btn_datafile.setToolTip("Load data from pkl file, 3D Dicom, tiff, ...")
+        # btn_dcmdir = QPushButton("Load DICOM", self)
+        # btn_dcmdir.clicked.connect(self.loadDataDir)
+        # btn_dcmdir.setIcon(btn_dcmdir.style().standardIcon(QStyle.SP_DirOpenIcon))
+        # self.uiw['dcmdir'] = btn_dcmdir
+        # btn_datafile = QPushButton("Load file", self)
+        # btn_datafile.clicked.connect(self.loadDataFile)
+        # btn_datafile.setToolTip("Load data from pkl file, 3D Dicom, tiff, ...")
 
         btn_dcmcrop = QPushButton("Crop", self)
         btn_dcmcrop.clicked.connect(self.cropDcm)
@@ -193,14 +231,21 @@ class OrganSegmentationWindow(QMainWindow):
         self.text_dcm_data = QLabel('DICOM data:')
         grid.addWidget(hr, rstart + 0, 2, 1, 4)
         grid.addWidget(text_dcm, rstart + 0, 1, 1, 3)
-        grid.addWidget(btn_dcmdir, rstart + 1, 1)
-        grid.addWidget(btn_datafile, rstart + 1, 2)
+        grid.addWidget(
+            self._add_button("Load dir", self.loadDataDir, 'dcmdir',
+                             "Load data from directory (DICOM, png, jpg...)", QStyle.SP_DirOpenIcon),
+            rstart + 1, 1)
+        grid.addWidget(
+            self._add_button("Load file", self.loadDataFile, 'load_file',
+                             "Load data from pkl file, 3D Dicom, tiff, ...", QStyle.SP_FileIcon),
+            rstart + 1, 2)
+        # grid.addWidget(btn_datafile, rstart + 1, 2)
         grid.addWidget(btn_dcmcrop, rstart + 1, 3)
         # voxelsize gui comment
         # grid.addWidget(self.text_vs, rstart + 3, 1)
         # grid.addWidget(combo_vs, rstart + 4, 1)
-        grid.addWidget(self.text_dcm_dir, rstart + 6, 1, 1, 3)
-        grid.addWidget(self.text_dcm_data, rstart + 7, 1, 1, 3)
+        grid.addWidget(self.text_dcm_dir, rstart + 6, 1, 1, 4)
+        grid.addWidget(self.text_dcm_data, rstart + 7, 1, 1, 4)
         rstart += 9
 
         # # # # # # # # #  segmentation
@@ -241,8 +286,12 @@ class OrganSegmentationWindow(QMainWindow):
         # # # # # # # # #  save/view
         # hr = QFrame()
         # hr.setFrameShape(QFrame.HLine)
-        btn_segsave = QPushButton("Save", self)
-        btn_segsave.clicked.connect(self.saveOut)
+        grid.addWidget(
+            self._add_button("Save", self.saveOut, 'save',
+                             "Save data with segmentation", QStyle.SP_DialogSaveButton),
+            rstart + 0, 1)
+        # btn_segsave = QPushButton("Save", self)
+        # btn_segsave.clicked.connect(self.saveOut)
         btn_segsavedcmoverlay = QPushButton("Save Dicom Overlay", self)
         btn_segsavedcmoverlay.clicked.connect(self.btnSaveOutDcmOverlay)
         btn_segsavedcm = QPushButton("Save Dicom", self)
@@ -254,11 +303,10 @@ class OrganSegmentationWindow(QMainWindow):
         else:
             btn_segview.setEnabled(False)
 
-        grid.addWidget(btn_segsave, rstart + 0, 1)
-        grid.addWidget(btn_segview, rstart + 0, 3)
         grid.addWidget(btn_segsavedcm, rstart + 0, 2)
-        grid.addWidget(btn_segsavedcmoverlay, rstart + 1, 2)
-        rstart += 2
+        grid.addWidget(btn_segsavedcmoverlay, rstart + 0, 3)
+        grid.addWidget(btn_segview, rstart + 0, 4)
+        rstart += 1
 
         # # # # Virtual resection
 
@@ -276,7 +324,8 @@ class OrganSegmentationWindow(QMainWindow):
         btn_svpv = QPushButton("Save PV tree", self)
         btn_svpv.clicked.connect(self.btnSavePortalVeinTree)
         btn_svpv.setToolTip("Save Portal Vein 1D model into vessel_tree.yaml")
-        btn_svpv.setEnabled(False)
+        # btn_svpv.setEnabled(False)
+        btn_svpv.setEnabled(True)
 
         btn_hvseg = QPushButton("Hepatic veins seg.", self)
         btn_hvseg.clicked.connect(self.btnHepaticVeinsSegmentation)
@@ -284,7 +333,8 @@ class OrganSegmentationWindow(QMainWindow):
         btn_svhv.clicked.connect(self.btnSaveHepaticVeinsTree)
         btn_svhv.setToolTip(
             "Save Hepatic Veins 1D model into vessel_tree.yaml")
-        btn_svhv.setEnabled(False)
+        btn_svhv.setEnabled(True)
+        # btn_svhv.setEnabled(False)
 
         btn_lesions = QPushButton("Lesions localization", self)
         btn_lesions.clicked.connect(self.btnLesionLocalization)
@@ -312,13 +362,13 @@ class OrganSegmentationWindow(QMainWindow):
         # quit
         btn_quit = QPushButton("Quit", self)
         btn_quit.clicked.connect(self.quit)
-        grid.addWidget(btn_quit, rstart + 1, 1, 1, 2)
+        grid.addWidget(btn_quit, rstart + -1, 4, 1, 1)
         self.uiw['quit'] = btn_quit
 
         if self.oseg.debug_mode:
             btn_debug = QPushButton("Debug", self)
             btn_debug.clicked.connect(self.run_debug)
-            grid.addWidget(btn_debug, rstart + 1, 3)
+            grid.addWidget(btn_debug, rstart - 2, 4)
 
         cw.setLayout(grid)
         self.cw = cw
@@ -443,6 +493,39 @@ class OrganSegmentationWindow(QMainWindow):
         self.oseg.cache.update('loadfiledir', head)
 
         self.importDataWithGui()
+
+    def sync_lisa_data(self):
+        """
+        set sftp_username and sftp_password in ~/lisa_data/organ_segmentation.config
+        """
+        self.statusBar().showMessage('Sync in progress...')
+        login = loginWindow.Login(checkLoginFcn=self.__loginCheckFcn)
+        login.exec_()
+        # print repr(self.oseg.sftp_username)
+        # print repr(self.oseg.sftp_password)
+        try:
+            self.oseg.sync_lisa_data(self.oseg.sftp_username, self.oseg.sftp_password, callback=self._print_sync_progress)
+        except:
+            import traceback
+            traceback.print_exc()
+            logger.error(traceback.format_exc())
+
+            QtGui.QMessageBox.warning(
+                self, 'Error', 'Sync error')
+
+        self.oseg.sftp_username = ''
+        self.oseg.sftp_password = ''
+        self.statusBar().showMessage('Sync finished')
+
+    def __loginCheckFcn(self, textname, textpass):
+        self.oseg.sftp_username = textname
+        self.oseg.sftp_password = textpass
+        return True
+
+    def _print_sync_progress(self, transferred, toBeTransferred):
+        self.statusBar().showMessage('Sync of current file {0} % '.format((100.0 * transferred) / toBeTransferred ))
+
+        # print "Transferred: {0}\tOut of: {1}".format(transferred, toBeTransferred)
 
     def loadDataDir(self):
         self.statusBar().showMessage('Reading DICOM directory...')
@@ -848,11 +931,13 @@ class OrganSegmentationWindow(QMainWindow):
 
     def btnSavePortalVeinTree(self):
         self.statusBar().showMessage('Saving vessel tree ...')
+        QApplication.processEvents()
         self.oseg.saveVesselTree('porta')
         self.statusBar().showMessage('Ready')
 
     def btnSaveHepaticVeinsTree(self):
         self.statusBar().showMessage('Saving vessel tree ...')
+        QApplication.processEvents()
         self.oseg.saveVesselTree('hepatic_veins')
         self.statusBar().showMessage('Ready')
 
@@ -863,6 +948,21 @@ class OrganSegmentationWindow(QMainWindow):
         self.statusBar().showMessage('Vessel segmentation ...')
         self.oseg.hepaticVeinsSegmentation()
         self.statusBar().showMessage('Ready')
+
+    def btnLog(self):
+        import logWindow
+        import os.path as op
+        fn = op.expanduser("~/lisa_data/lisa.log")
+        form = logWindow.LogViewerForm(fn) #, qapp=self.app)
+        form.show()
+        form.exec_()
+
+    def btnRandomRotate(self):
+        self.oseg.random_rotate()
+
+    def btnRotateZ(self):
+        pass
+
 
     def onAlternativeSegmentationParams(self, text):
         self.oseg.update_parameters_based_on_label(str(text))

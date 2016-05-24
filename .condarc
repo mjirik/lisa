@@ -1,0 +1,5 @@
+channels:
+  - mjirik
+  - menpo
+  - SimpleITK
+  - defaults

@@ -2,8 +2,13 @@
 #
 # if script is called with:
 #   no argument: stable version is installed 
-#   devel: devel version with ssh 
+#   devel: devel version with ssh
+#   noclone: requirements are installed but lisa is not cloned
 #   any other argument: devel version with https is used
+#
+# installer.sh - main script for linux and osx
+# install_nosudo.sh - install conda requirements and skelet3d (to ~/projects/ directory) for linux and osx
+#
 NARGS=$#
 ARG1=$1
 cd ~
@@ -86,18 +91,23 @@ else
             wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86.sh -O Miniconda-latest-Linux-x86.sh
             bash Miniconda-latest-Linux-x86.sh -b
         fi
+        # we are not sure which version will be installed
         echo "export PATH=$HOMEDIR/miniconda/bin:\$PATH" >> ~/.bashrc
-        
+        echo "export PATH=$HOMEDIR/miniconda2/bin:\$PATH" >> ~/.bashrc
+
     elif [[ "$OSTYPE" == "darwin"* ]]; then
         echo "Installing conda"
         curl "http://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh" -o "Miniconda-latest.sh"
         bash Miniconda-latest.sh -b
+        # we are not sure which version will be installed
         echo "export PATH=$HOMEDIR/miniconda/bin:\$PATH" >> ~/.profile
-        
+        echo "export PATH=$HOMEDIR/miniconda2/bin:\$PATH" >> ~/.profile
+
         curl https://raw.githubusercontent.com/mjirik/lisa/master/install_nosudo.sh -o install_nosudo.sh
     fi
     export PATH=$HOMEDIR/miniconda/bin:$PATH
-    conda
+    export PATH=$HOMEDIR/miniconda2/bin:$PATH
+    conda -V
 fi
 
 

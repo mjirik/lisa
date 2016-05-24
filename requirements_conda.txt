@@ -22,8 +22,8 @@ pywget=2.2
 opencv>=2.4.0
 libpng
 pandas
-# -c luispedro
-mahotas
+# -c luispedro but only for linux-64
+# mahotas
 # -c mjirik
 pydicom>=0.9.9
 pysegbase>=1.0.39
@@ -35,3 +35,6 @@ imtools>=0.0.1
 joblib>=0.8.4
 morphsnakes
 skelet3d
+sftpsync
+# geodesic distance transform -c jmargeta -c jakirkham
+scikit-fmm

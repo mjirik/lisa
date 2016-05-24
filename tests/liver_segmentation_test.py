@@ -24,7 +24,7 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 import logging
 logger = logging.getLogger(__name__)
 
-import lisa.data
+import lisa.dataset
 from lisa import organ_segmentation
 from lisa import liver_model
 
@@ -63,7 +63,7 @@ class LiverSegmentationTest(unittest.TestCase):
             ref_pattern="*seg*01.mhd",
         )
 
-        path_to_data = lisa.data.sample_data_path()
+        path_to_data = lisa.dataset.sample_data_path()
         dcmdir = os.path.join(path_to_data, './liver-orig001.mhd')
 
         print "Interactive test: with left mouse button select liver, \
@@ -107,7 +107,7 @@ class LiverSegmentationTest(unittest.TestCase):
         :rtype: object
         """
 
-        path_to_data = lisa.data.sample_data_path()
+        path_to_data = lisa.dataset.sample_data_path()
         dcmdir = os.path.join(path_to_data, './liver-orig001.mhd')
 
         print "Interactive test: with left mouse button select liver, \
@@ -148,7 +148,7 @@ class LiverSegmentationTest(unittest.TestCase):
         :rtype: object
         """
 
-        path_to_data = lisa.data.sample_data_path()
+        path_to_data = lisa.dataset.sample_data_path()
         dcmdir = os.path.join(path_to_data, './liver-orig001.mhd')
 
         print "Interactive test: with left mouse button select liver, \
