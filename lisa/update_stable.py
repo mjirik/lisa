@@ -52,6 +52,48 @@ def update(dry_run=False):
     if update_by_plan():
         make_update(dry_run)
 
+
+def make_update_with_no_lisa_in_projects_dir(dry_run=False):
+    import os.path as op
+    conda_ok = True
+    print ('Updating conda modules')
+    try:
+        cmd = ["conda", "install", "--yes",
+               # "-c", 'luispedro ',
+               '-c', 'SimpleITK', "-c", "menpo", '-c', 'mjirik', "lisa"
+               ]
+        if dry_run:
+            cmd.append('--dry-run')
+        subprocess.call(cmd)
+    except:
+        logger.warning('Problem with conda update')
+        traceback.print_exc()
+        conda_ok = False
+        # try:
+        #     install_and_import('wget', '--user')
+
+    print ('Updating pip modules')
+    try:
+        req_txt_path = op.expanduser("~/lisa_data")
+        import wget
+        wget.download(
+            "https://raw.githubusercontent.com/mjirik/lisa/master/lisa/requirements_pip.txt",
+            out=req_txt_path
+        )
+        wget.download()
+
+        cmd = ["pip", "install", '-U', '--no-deps']
+        if not conda_ok:
+            cmd.append('--user')
+        cmd = cmd + ["-r", req_txt_path]
+        if dry_run:
+            cmd.insert(1, '-V')
+        subprocess.call(cmd)
+    except:
+        logger.warning('Problem with pip update')
+        logger.warning(traceback.format_exc())
+        traceback.print_exc()
+
 def make_update(dry_run=False):
     import os.path as op
     path_to_script = op.dirname(op.abspath(__file__))
