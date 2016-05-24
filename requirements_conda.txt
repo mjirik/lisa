@@ -35,6 +35,6 @@ imtools>=0.0.1
 joblib>=0.8.4
 morphsnakes
 skelet3d
-sftpsync
+sftpsync>=1.0.2
 # geodesic distance transform -c jmargeta -c jakirkham
 scikit-fmm
