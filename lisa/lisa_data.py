@@ -58,40 +58,6 @@ def make_icon():
 def lidapath():
     return op.expanduser('~/lisa_data')
 
-def __make_icon_osx():
-    lisa_shortcut = op.expanduser("~/Desktop/lisa")
-    if not os.path.exists(lisa_shortcut):
-        with open(lisa_shortcut, 'w') as outfile:
-            outfile.write(
-            "\
-#!/bin/bash\n\
-export PATH=$HOME/miniconda2/bin:$HOME/anaconda2/bin:$HOME/miniconda/bin:$HOME/anaconda/bin:$PATH\n\
-lisa"
-            )
-        os.chmod(lisa_shortcut, stat.S_IXUSR)
-        os.chmod(lisa_shortcut, stat.S_IXGRP)
-        os.chmod(lisa_shortcut, stat.S_IXOTH)
-
-    import wget
-    lisa_icon_path= op.expanduser("~/lisa_data/.lisa/LISA256.icns")
-    if not os.path.exists(lisa_icon_path):
-        try:
-            wget.download(
-                "https://raw.githubusercontent.com/mjirik/lisa/master/applications/LISA256.icns",
-                out=lisa_icon_path
-            )
-        except:
-            logger.warning('logo download failed')
-            pass
-    # import wget
-    # wget.download(
-    #     "https://raw.githubusercontent.com/mjirik/lisa/master/lisa/requirements_pip.txt",
-    #     out=lidapath() + "lisa_gui"
-    # )
-    # home_path = os.path.expanduser('~')
-    # in_path = os.path.join(path_to_script, "applications/lisa_gui")
-    # dt_path = os.path.join(home_path, "Desktop")
-    # subprocess.call(['ln', '-s', in_path, dt_path])
 def get_conda_path():
     import os.path as op
     conda_path_candidates = [
@@ -125,6 +91,42 @@ def file_copy_and_replace_lines(in_path, out_path):
         # line = line.replace("@{LISA_PATH}", lisa_path)
         line = line.replace("@{CONDA_PATH}", conda_path)
         print line
+
+def __make_icon_osx():
+    lisa_shortcut = op.expanduser("~/Desktop/lisa")
+    if not os.path.exists(lisa_shortcut):
+        with open(lisa_shortcut, 'w') as outfile:
+            outfile.write(
+            "\
+#!/bin/bash\n\
+export PATH=$HOME/miniconda2/bin:$HOME/anaconda2/bin:$HOME/miniconda/bin:$HOME/anaconda/bin:$PATH\n\
+lisa"
+            )
+        os.chmod(lisa_shortcut,
+                 stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH | stat.S_IRUSR | stat.S_IRGRP)
+        os.chmod(lisa_shortcut, )
+        os.chmod(lisa_shortcut, )
+
+    import wget
+    lisa_icon_path= op.expanduser("~/lisa_data/.lisa/LISA256.icns")
+    if not os.path.exists(lisa_icon_path):
+        try:
+            wget.download(
+                "https://raw.githubusercontent.com/mjirik/lisa/master/applications/LISA256.icns",
+                out=lisa_icon_path
+            )
+        except:
+            logger.warning('logo download failed')
+            pass
+    # import wget
+    # wget.download(
+    #     "https://raw.githubusercontent.com/mjirik/lisa/master/lisa/requirements_pip.txt",
+    #     out=lidapath() + "lisa_gui"
+    # )
+    # home_path = os.path.expanduser('~')
+    # in_path = os.path.join(path_to_script, "applications/lisa_gui")
+    # dt_path = os.path.join(home_path, "Desktop")
+    # subprocess.call(['ln', '-s', in_path, dt_path])
 
 def __make_icon_linux():
     import wget
