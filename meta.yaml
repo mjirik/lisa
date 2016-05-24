@@ -1,9 +1,9 @@
 package:
   name: lisa
-  version: "1.8.3"
+  version: "1.8.5"
 
 source:
-  git_rev: 1.8.3
+  git_rev: 1.8.5
   git_url: .
   # git_url: https://github.com/mjirik/quantan.git
 
@@ -72,6 +72,7 @@ requirements:
     - scikit-image
     - pyqtconfig
     - pip
+    - sftpsync >=1.0.2
     # just for pip install pygco
     - cython
 

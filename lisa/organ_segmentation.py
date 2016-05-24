@@ -228,7 +228,7 @@ class OrganSegmentation():
         self.lisa_operator_identifier = lisa_operator_identifier
         self.version = qmisc.getVersionString()
         if self.version is None:
-            self.version = "1.8.3"
+            self.version = "1.8.5"
         self.viewermax = viewermax
         self.viewermin = viewermin
         self.volume_unit = volume_unit
@@ -322,6 +322,10 @@ class OrganSegmentation():
     #    self.orig_shape = datap['orig_shape']
     #    self.seeds = datap[
     #        'processing_information']['organ_segmentation']['seeds']
+    def update(self):
+        import subprocess
+        print subprocess.call(['conda', 'update', '-y', '-c', 'mjirik', '-c', 'SimpleITK', 'lisa']) #, shell=True)
+
     def update_parameters_based_on_label(self, label):
         self.update_parameters(self.segmentation_alternative_params[label])
 
