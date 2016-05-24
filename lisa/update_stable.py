@@ -68,6 +68,7 @@ def make_update_with_no_lisa_in_projects_dir(dry_run=False):
         subprocess.call(cmd)
     except:
         logger.warning('Problem with conda update')
+        logger.warning(traceback.format_exc())
         traceback.print_exc()
         conda_ok = False
         # try:
@@ -91,6 +92,14 @@ def make_update_with_no_lisa_in_projects_dir(dry_run=False):
         subprocess.call(cmd)
     except:
         logger.warning('Problem with pip update')
+        logger.warning(traceback.format_exc())
+        traceback.print_exc()
+
+    try:
+        import lisa_data
+        lisa_data.make_icon()
+    except:
+        logger.warning('Problem with icon')
         logger.warning(traceback.format_exc())
         traceback.print_exc()
 

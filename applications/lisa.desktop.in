@@ -4,10 +4,10 @@
 Name=LISA
 GenericName=LISA
 Comment=LIver Surgery Analyser
-Exec=bash -c 'export PATH=@{CONDA_PATH}:$PATH ; @{LISA_PATH}/applications/lisa.sh'
+Exec=bash -c 'export PATH=@{CONDA_PATH}:$PATH ; lisa'
 Terminal=false
 Type=Application
-Icon=@{LISA_PATH}/applications/LISA256.png
+Icon=@{HOME_PATH}/lisa_data/.lisa/LISA256.png
 Categories=Application;Science;MedicalSoftware;
 StartupNotify=false
 
