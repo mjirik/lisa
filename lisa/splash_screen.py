@@ -77,7 +77,7 @@ def main():
     splash = splash_screen(app)
     time.sleep(2)
 
-    form = PyQt4.QtGui.Form()
+    form = PyQt4.QtCore.Form()
     form.show()
     splash.finish(form)
     app.exec_()
