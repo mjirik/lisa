@@ -84,7 +84,7 @@ def make_update(dry_run=False):
         req_txt_path = op.expanduser("~/lisa_data/.lisa/reqirements_pip.txt")
         import wget
         wget.download(
-            "https://raw.githubusercontent.com/mjirik/lisa/master/lisa/requirements_pip.txt",
+            "https://raw.githubusercontent.com/mjirik/lisa/master/requirements_pip.txt",
             out=req_txt_path
         )
 
