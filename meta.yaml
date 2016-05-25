@@ -22,7 +22,7 @@ build:
     # syntax is module:function.  For example
     #
 #    - lisa = lisa:main
-    - lisa = lisa:__main__
+    - lisa = lisa:lisa_main
     #
     # Would create an entry point called quantan that calls quantan.main()
 
