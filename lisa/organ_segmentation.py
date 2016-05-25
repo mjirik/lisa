@@ -1556,7 +1556,7 @@ config and user config.")
         '--make_icon',
         action='store_true',
         help='Create desktop icon on OS X and Linux',
-        default=cfg["make_icon"]
+        default=False
     )
     parser.add_argument(
         '--save_filetype', type=str,  # type=int,
