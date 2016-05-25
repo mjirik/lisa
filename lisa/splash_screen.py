@@ -76,10 +76,14 @@ def main():
     app = PyQt4.QtGui.QApplication(sys.argv)
     splash = splash_screen(app)
     time.sleep(2)
-
-    form = PyQt4.QtCore.Form()
-    form.show()
-    splash.finish(form)
+    w = PyQt4.QtGui.QWidget()
+    b = PyQt4.QtGui.QLabel(w)
+    b.setText("Hello World!")
+    w.setGeometry(100,100,200,50)
+    b.move(50,20)
+    w.setWindowTitle("PyQt")
+    w.show()
+    splash.finish(w)
     app.exec_()
 if __name__ == "__main__":
     main()

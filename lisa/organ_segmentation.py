@@ -1573,7 +1573,7 @@ def boltzman(x, xmid, tau):
     """
     return 1. / (1. + np.exp(-(x-xmid)/tau))
 
-def main():  # pragma: no cover
+def main(app=None, splash=None):  # pragma: no cover
 
     #    import ipdb; ipdb.set_trace() # BREAKPOINT
     try:
@@ -1607,12 +1607,12 @@ def main():  # pragma: no cover
             import PyQt4
             import PyQt4.QtGui
             from PyQt4.QtGui import QApplication
-            app = QApplication(sys.argv)
+            if app is None:
+                app = QApplication(sys.argv)
             # Create and display the splash screen
-            import splash_screen
-            splash = splash_screen.splash_screen(app)
             oseg_w = OrganSegmentationWindow(oseg)  # noqa
-            splash.finish(oseg_w)
+            if splash is not None:
+                splash.finish(oseg_w)
 #    import pdb; pdb.set_trace()
             sys.exit(app.exec_())
 
