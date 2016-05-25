@@ -111,7 +111,19 @@ else
 fi
 
 
-
+# clean before install_nosudo.sh
+file="requirements_pip.txt"
+if [ -f $file ] ; then
+    rm $file
+fi
+file="requirements_root.txt"
+if [ -f $file ] ; then
+    rm $file
+fi
+file="requirements_conda.txt"
+if [ -f $file ] ; then
+    rm $file
+fi
 
 bash install_nosudo.sh
 
