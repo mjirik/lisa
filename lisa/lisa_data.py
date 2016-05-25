@@ -103,7 +103,10 @@ export PATH=$HOME/miniconda2/bin:$HOME/anaconda2/bin:$HOME/miniconda/bin:$HOME/a
 lisa"
             )
         os.chmod(lisa_shortcut,
-                 stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH | stat.S_IRUSR | stat.S_IRGRP)
+                 stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH |
+                 stat.S_IRUSR | stat.S_IRGRP | stat.S_IXOTH |
+                 stat.S_IWUSR | stat.S_IWGRP
+                 )
         os.chmod(lisa_shortcut, )
         os.chmod(lisa_shortcut, )
 
