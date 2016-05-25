@@ -55,8 +55,15 @@ def make_icon():
         create_lisa_data_dir_tree()
         __make_icon_linux()
 
-def lidapath():
-    return op.expanduser('~/lisa_data')
+def path(path_suffix=None):
+    """
+    :path_suffix: relative path in lisa_data dir
+    :return: directory with lisa data
+    """
+    lpath = op.expanduser('~/lisa_data')
+    if path_suffix is not None:
+        lpath = op.join(lpath, path_suffix)
+    return lpath
 
 def get_conda_path():
     import os.path as op

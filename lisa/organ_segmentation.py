@@ -1604,9 +1604,15 @@ def main():  # pragma: no cover
         else:
             # mport_gui()
             from lisaWindow import OrganSegmentationWindow
+            import PyQt4
+            import PyQt4.QtGui
             from PyQt4.QtGui import QApplication
             app = QApplication(sys.argv)
+            # Create and display the splash screen
+            import splash_screen
+            splash = splash_screen.splash_screen(app)
             oseg_w = OrganSegmentationWindow(oseg)  # noqa
+            splash.finish(oseg_w)
 #    import pdb; pdb.set_trace()
             sys.exit(app.exec_())
 

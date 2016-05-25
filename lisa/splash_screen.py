@@ -1,0 +1,83 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+# vim:fenc=utf-8
+#
+# Copyright © %YEAR% %USER% <%MAIL%>
+#
+# Distributed under terms of the %LICENSE% license.
+
+"""
+%HERE%
+"""
+
+import logging
+
+logger = logging.getLogger(__name__)
+import argparse
+import lisa_data
+import PyQt4 #import QtGui, QtCore
+import PyQt4.QtCore
+import PyQt4.QtGui
+import sys
+
+
+def splash_screen(qapp):
+    """
+    create lisa splash screen
+    :param qapp:
+    :return:
+    """
+   # Create and display the splash screen
+    splash_pix = PyQt4.QtGui.QPixmap(lisa_data.path('.lisa/LISA256.png'))
+    splash = PyQt4.QtGui.QSplashScreen(splash_pix, PyQt4.Qt.WindowStaysOnTopHint)
+    splash.setMask(splash_pix.mask())
+    splash.show()
+    qapp.processEvents()
+    return splash
+
+
+def main():
+    logger = logging.getLogger()
+
+    logger.setLevel(logging.DEBUG)
+    ch = logging.StreamHandler()
+    logger.addHandler(ch)
+
+    # create file handler which logs even debug messages
+    # fh = logging.FileHandler('log.txt')
+    # fh.setLevel(logging.DEBUG)
+    # formatter = logging.Formatter(
+    #     '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    # fh.setFormatter(formatter)
+    # logger.addHandler(fh)
+    # logger.debug('start')
+
+    # input parser
+    parser = argparse.ArgumentParser(
+        description=__doc__
+    )
+    parser.add_argument(
+        '-i', '--inputfile',
+        default=None,
+        # required=True,
+        help='input file'
+    )
+    parser.add_argument(
+        '-d', '--debug', action='store_true',
+        help='Debug mode')
+    args = parser.parse_args()
+
+    if args.debug:
+        ch.setLevel(logging.DEBUG)
+ # Simulate something that takes time
+
+    app = PyQt4.QtGui.QApplication(sys.argv)
+    splash = splash_screen()
+    PyQt4.QtCore.time.sleep(2)
+
+    form = PyQt4.QtGui.Form()
+    form.show()
+    splash.finish(form)
+    app.exec_()
+if __name__ == "__main__":
+    main()
