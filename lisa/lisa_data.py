@@ -126,8 +126,6 @@ lisa"
                  stat.S_IRUSR | stat.S_IRGRP | stat.S_IXOTH |
                  stat.S_IWUSR | stat.S_IWGRP
                  )
-        os.chmod(lisa_shortcut, )
-        os.chmod(lisa_shortcut, )
 
     import wget
     lisa_icon_path= op.expanduser("~/lisa_data/.lisa/LISA256.icns")

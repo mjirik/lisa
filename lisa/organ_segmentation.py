@@ -1553,6 +1553,12 @@ config and user config.")
         default=cfg["segmentation_smoothing"]
     )
     parser.add_argument(
+        '--make_icon',
+        action='store_true',
+        help='Create desktop icon on OS X and Linux',
+        default=cfg["make_icon"]
+    )
+    parser.add_argument(
         '--save_filetype', type=str,  # type=int,
         help='File type of saving data. It can be pklz(default), pkl or mat',
         default=cfg["save_filetype"])
@@ -1580,6 +1586,11 @@ def main(app=None, splash=None):  # pragma: no cover
         ch, fh = logger_init()
         cfg = lisa_config_init()
         args = parser_init(cfg)
+
+        if cfg['make_icon'] is True:
+            import lisa_data
+            lisa_data.make_icon()
+            return
 
         # rint args["arg"]
         oseg_argspec_keys = config.get_function_keys(
