@@ -76,6 +76,8 @@ requirements:
     - sftpsync >=1.0.2
     # just for pip install pygco
     - cython
+    - vtk
+    - dicom2fem
 
 test:
   # Python imports

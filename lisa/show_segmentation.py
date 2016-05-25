@@ -17,7 +17,12 @@ import argparse
 
 
 import numpy as np
-from dicom2fem import seg2fem
+try:
+    from dicom2fem import seg2fem
+    from seg2fem import gen_mesh_from_voxels_mc, smooth_mesh
+except:
+    logger.warning('dicom2fem not found')
+    from seg2mesh import gen_mesh_from_voxels, smooth_mesh
 import misc
 import viewer
 
@@ -38,13 +43,13 @@ def showSegmentation(
     segmentation = segmentation[::degrad, ::degrad, ::degrad]
 
     # import pdb; pdb.set_trace()
-    mesh_data = seg2fem.gen_mesh_from_voxels_mc(segmentation, voxelsize_mm*degrad)
+    mesh_data = gen_mesh_from_voxels_mc(segmentation, voxelsize_mm*degrad)
     if smoothing:
-        mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
+        mesh_data.coors = smooth_mesh(mesh_data)
         # mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
 
     else:
-        mesh_data = seg2fem.gen_mesh_from_voxels_mc(segmentation, voxelsize_mm * degrad * 1.0e-2)
+        mesh_data = gen_mesh_from_voxels_mc(segmentation, voxelsize_mm * degrad * 1.0e-2)
         # mesh_data.coors +=
     vtk_file = "mesh_geom.vtk"
     mesh_data.write(vtk_file)
