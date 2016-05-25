@@ -43,7 +43,7 @@ requirements:
     - sed3
     - pysegbase
     - io3d
-    - pyqt 4.10.4
+    - pyqt 4.11.*
     - pandas
     - pywget
     - scikit-learn
@@ -64,7 +64,7 @@ requirements:
     - sed3
     - pysegbase
     - io3d
-    - pyqt 4.10.4
+    - pyqt 4.11.*
     - pandas
     - simpleitk
     - pywget
