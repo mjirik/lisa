@@ -2,10 +2,10 @@ conda install --yes pip
 pip install wget
 python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_pip.txt -o requirements_pip.txt
 #python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_conda.txt -o requirements_conda.txt
-python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_conda_root.txt -o requirements_conda_root.txt
+#python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_conda_root.txt -o requirements_conda_root.txt
 
 
-conda install --yes --file requirements_conda_root.txt
+#conda install --yes --file requirements_conda_root.txt
 #conda install --yes -c SimpleITK -c menpo -c mjirik  --file requirements_conda.txt
 conda install --yes -c SimpleITK -c menpo -c mjirik  lisa
 # mahotas on luispedro is only for linux
