@@ -1,4 +1,4 @@
-
+# This is because we want to draw splash screen before time-consuming imports
 import argparse
 
 parser = argparse.ArgumentParser(
