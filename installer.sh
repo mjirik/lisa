@@ -158,14 +158,15 @@ else
 #    git clone --recursive https://github.com/mjirik/lisa.git
 
 fi
+lisa --make_icon
 if [ "$ARG1" = "noclone" ] ; then
     echo "Just requirements"
 else
-    cd lisa
-    python mysetup.py -d
-    python mysetup.py -icn
-
-    cd $HOMEDIR
+#    cd lisa
+#    python mysetup.py -d
+#    python mysetup.py -icn
+#
+#    cd $HOMEDIR
 fi
 # python src/update_stable.py
 # python lisa.py $@
