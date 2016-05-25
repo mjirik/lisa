@@ -73,7 +73,7 @@ def main():
  # Simulate something that takes time
 
     app = PyQt4.QtGui.QApplication(sys.argv)
-    splash = splash_screen()
+    splash = splash_screen(app)
     PyQt4.QtCore.time.sleep(2)
 
     form = PyQt4.QtGui.Form()
