@@ -111,7 +111,19 @@ else
 fi
 
 
-
+# clean before install_nosudo.sh
+file="requirements_pip.txt"
+if [ -f $file ] ; then
+    rm $file
+fi
+file="requirements_root.txt"
+if [ -f $file ] ; then
+    rm $file
+fi
+file="requirements_conda.txt"
+if [ -f $file ] ; then
+    rm $file
+fi
 
 bash install_nosudo.sh
 
@@ -127,10 +139,11 @@ sudo make install
 # Clone Lisa, make icons
 cd
 cd projects
-if [ "$ARG1" = "" ] ; then
-    echo "Cloning stable version"
+if [ "$ARG1" = "stable" ] ; then
+    echo "Stable vesrion does not requre cloning any more"
     # stable version
-    git clone --recursive -b stable https://github.com/mjirik/lisa.git
+    # there is no cloning for stable version now
+    # git clone --recursive -b stable https://github.com/mjirik/lisa.git
 elif [ "$ARG1" = "devel" ] ; then
     echo "Cloning unstable branch using ssh"
     # if there is an any argument, install as developer
@@ -141,7 +154,8 @@ elif [ "$ARG1" = "noclone" ] ; then
 
 else
     echo "Cloning unstable branch using http"
-    git clone --recursive https://github.com/mjirik/lisa.git
+    echo "Stable vesrion does not requre cloning any more"
+#    git clone --recursive https://github.com/mjirik/lisa.git
 
 fi
 if [ "$ARG1" = "noclone" ] ; then

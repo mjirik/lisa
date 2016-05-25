@@ -25,6 +25,18 @@ def create_lisa_data_dir_tree(oseg=None):
     if not op.exists(odp):
         os.makedirs(odp)
 
+    import wget
+    lisa_icon_path= path(".lisa/LISA256.png")
+    if not op.exists(lisa_icon_path):
+        try:
+            wget.download(
+                "https://raw.githubusercontent.com/mjirik/lisa/master/lisa/icons/LISA256.png",
+                out=lisa_icon_path)
+        except:
+            import traceback
+            logger.warning('logo download failed')
+            logger.warning(traceback.format_exc())
+
     if oseg is not None:
         # used for server sync
         oseg._output_datapath_from_server = op.join(oseg.output_datapath, 'sync', oseg.sftp_username, "from_server")
@@ -55,8 +67,15 @@ def make_icon():
         create_lisa_data_dir_tree()
         __make_icon_linux()
 
-def lidapath():
-    return op.expanduser('~/lisa_data')
+def path(path_suffix=None):
+    """
+    :path_suffix: relative path in lisa_data dir
+    :return: directory with lisa data
+    """
+    lpath = op.expanduser('~/lisa_data')
+    if path_suffix is not None:
+        lpath = op.join(lpath, path_suffix)
+    return lpath
 
 def get_conda_path():
     import os.path as op
@@ -103,7 +122,10 @@ export PATH=$HOME/miniconda2/bin:$HOME/anaconda2/bin:$HOME/miniconda/bin:$HOME/a
 lisa"
             )
         os.chmod(lisa_shortcut,
-                 stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH | stat.S_IRUSR | stat.S_IRGRP)
+                 stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH |
+                 stat.S_IRUSR | stat.S_IRGRP | stat.S_IXOTH |
+                 stat.S_IWUSR | stat.S_IWGRP
+                 )
         os.chmod(lisa_shortcut, )
         os.chmod(lisa_shortcut, )
 

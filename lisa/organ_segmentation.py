@@ -229,7 +229,7 @@ class OrganSegmentation():
         self.lisa_operator_identifier = lisa_operator_identifier
         self.version = qmisc.getVersionString()
         if self.version is None:
-            self.version = "1.8.8"
+            self.version = "1.8.13"
         self.viewermax = viewermax
         self.viewermin = viewermin
         self.volume_unit = volume_unit
@@ -324,8 +324,10 @@ class OrganSegmentation():
     #    self.seeds = datap[
     #        'processing_information']['organ_segmentation']['seeds']
     def update(self):
-        import subprocess
-        print subprocess.call(['conda', 'update', '-y', '-c', 'mjirik', '-c', 'SimpleITK', 'lisa']) #, shell=True)
+        import update_stable
+        update_stable.make_update()
+        # import subprocess
+        # print subprocess.call(['conda', 'update', '-y', '-c', 'mjirik', '-c', 'SimpleITK', 'lisa']) #, shell=True)
 
     def update_parameters_based_on_label(self, label):
         self.update_parameters(self.segmentation_alternative_params[label])
@@ -1571,7 +1573,7 @@ def boltzman(x, xmid, tau):
     """
     return 1. / (1. + np.exp(-(x-xmid)/tau))
 
-def main():  # pragma: no cover
+def main(app=None, splash=None):  # pragma: no cover
 
     #    import ipdb; ipdb.set_trace() # BREAKPOINT
     try:
@@ -1602,9 +1604,15 @@ def main():  # pragma: no cover
         else:
             # mport_gui()
             from lisaWindow import OrganSegmentationWindow
+            import PyQt4
+            import PyQt4.QtGui
             from PyQt4.QtGui import QApplication
-            app = QApplication(sys.argv)
+            if app is None:
+                app = QApplication(sys.argv)
+            # Create and display the splash screen
             oseg_w = OrganSegmentationWindow(oseg)  # noqa
+            if splash is not None:
+                splash.finish(oseg_w)
 #    import pdb; pdb.set_trace()
             sys.exit(app.exec_())
 

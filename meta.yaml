@@ -1,9 +1,9 @@
 package:
   name: lisa
-  version: "1.8.8"
+  version: "1.8.13"
 
 source:
-  git_rev: 1.8.8
+  git_rev: 1.8.13
   git_url: .
   # git_url: https://github.com/mjirik/quantan.git
 
@@ -21,7 +21,8 @@ build:
     # Put any entry points (scripts to be generated automatically) here. The
     # syntax is module:function.  For example
     #
-    - lisa = lisa:main
+#    - lisa = lisa:main
+    - lisa = lisa:__main__
     #
     # Would create an entry point called quantan that calls quantan.main()
 
@@ -43,7 +44,7 @@ requirements:
     - sed3
     - pysegbase
     - io3d
-    - pyqt 4.10.4
+    - pyqt 4.11.*
     - pandas
     - pywget
     - scikit-learn
@@ -64,7 +65,7 @@ requirements:
     - sed3
     - pysegbase
     - io3d
-    - pyqt 4.10.4
+    - pyqt 4.11.*
     - pandas
     - simpleitk
     - pywget
