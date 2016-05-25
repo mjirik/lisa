@@ -28,6 +28,7 @@ def splash_screen(qapp):
     :return:
     """
    # Create and display the splash screen
+    lisa_data.create_lisa_data_dir_tree()
     splash_pix = PyQt4.QtGui.QPixmap(lisa_data.path('.lisa/LISA256.png'))
     splash = PyQt4.QtGui.QSplashScreen(splash_pix, PyQt4.Qt.WindowStaysOnTopHint)
     splash.setMask(splash_pix.mask())

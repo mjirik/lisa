@@ -25,6 +25,18 @@ def create_lisa_data_dir_tree(oseg=None):
     if not op.exists(odp):
         os.makedirs(odp)
 
+    import wget
+    lisa_icon_path= path(".lisa/LISA256.png")
+    if not op.exists(lisa_icon_path):
+        try:
+            wget.download(
+                "https://raw.githubusercontent.com/mjirik/lisa/master/lisa/icons/LISA256.png",
+                out=lisa_icon_path)
+        except:
+            import traceback
+            logger.warning('logo download failed')
+            logger.warning(traceback.format_exc())
+
     if oseg is not None:
         # used for server sync
         oseg._output_datapath_from_server = op.join(oseg.output_datapath, 'sync', oseg.sftp_username, "from_server")
