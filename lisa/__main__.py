@@ -20,6 +20,7 @@ else:
 
     import PyQt4
     import PyQt4.QtGui
+    import sys
     from PyQt4.QtGui import QApplication
     app = QApplication(sys.argv)
     # Create and display the splash screen
