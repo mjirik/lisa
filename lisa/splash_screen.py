@@ -19,6 +19,7 @@ import PyQt4 #import QtGui, QtCore
 import PyQt4.QtCore
 import PyQt4.QtGui
 import sys
+import time
 
 
 def splash_screen(qapp):
@@ -74,7 +75,7 @@ def main():
 
     app = PyQt4.QtGui.QApplication(sys.argv)
     splash = splash_screen(app)
-    PyQt4.QtCore.time.sleep(2)
+    time.sleep(2)
 
     form = PyQt4.QtGui.Form()
     form.show()
