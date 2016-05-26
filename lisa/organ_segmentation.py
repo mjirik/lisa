@@ -1328,6 +1328,18 @@ class OrganSegmentation():
         angle = np.random.rand() * 360
         self.rotate(angle, (0, 1))
 
+    def mirror_z_axis(self):
+        """
+        mirror data3d, segmentation and seeds Z-zaxis
+        :return:
+        """
+        self.data3d = self.data3d[-1::-1]
+        if self.segmentation is not None:
+            self.segmentation = self.segmentation[-1::-1]
+        if self.seeds is not None:
+            self.seeds = self.seeds[-1::-1]
+
+
     def save_input_dcm(self, filename):
         # TODO add
         logger.debug('save dcm')

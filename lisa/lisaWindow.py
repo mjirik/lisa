@@ -109,6 +109,11 @@ class OrganSegmentationWindow(QMainWindow):
         randomRotateAction.triggered.connect(self.btnRandomRotate)
         imageMenu.addAction(randomRotateAction)
 
+        mirrorZAxisAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Mirror Z-axis', self)
+        mirrorZAxisAction.setStatusTip('Mirror Z-axis')
+        mirrorZAxisAction.triggered.connect(self.oseg.mirror_z_axis)
+        imageMenu.addAction(mirrorZAxisAction)
+
     def _add_button(
             self,
             text,
