@@ -159,15 +159,15 @@ else
 
 fi
 lisa --make_icon
-if [ "$ARG1" = "noclone" ] ; then
-    echo "Just requirements"
-else
+#if [ "$ARG1" = "noclone" ] ; then
+#    echo "Just requirements"
+#else
 #    cd lisa
 #    python mysetup.py -d
 #    python mysetup.py -icn
 #
 #    cd $HOMEDIR
-fi
+#fi
 # python src/update_stable.py
 # python lisa.py $@
 
