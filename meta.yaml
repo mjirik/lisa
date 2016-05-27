@@ -78,7 +78,7 @@ requirements:
     - cython
     - vtk
     - dicom2fem
-#    - nomkl
+    - nomkl
 
 test:
   # Python imports
