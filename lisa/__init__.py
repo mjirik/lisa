@@ -2,7 +2,7 @@ __all__ = ['organ_segmentation']
 #, 'qmisc', 'misc', 'experiments',
            #'support_structure_segmentation']
 import organ_segmentation
-from organ_segmentation import main
+from main import lisa_main
 # import qmisc
 # import misc
 # import experiments

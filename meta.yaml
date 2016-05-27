@@ -1,9 +1,9 @@
 package:
   name: lisa
-  version: "1.8.13"
+  version: "1.8.20"
 
 source:
-  git_rev: 1.8.13
+  git_rev: 1.8.20
   git_url: .
   # git_url: https://github.com/mjirik/quantan.git
 
@@ -22,7 +22,7 @@ build:
     # syntax is module:function.  For example
     #
 #    - lisa = lisa:main
-    - lisa = lisa:__main__
+    - lisa = lisa:lisa_main
     #
     # Would create an entry point called quantan that calls quantan.main()
 
@@ -76,6 +76,9 @@ requirements:
     - sftpsync >=1.0.2
     # just for pip install pygco
     - cython
+    - vtk
+    - dicom2fem
+    - nomkl
 
 test:
   # Python imports

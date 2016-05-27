@@ -8,6 +8,7 @@ import traceback
 import logging
 logger = logging.getLogger(__name__)
 import datetime
+import os
 import os.path as op
 
 
@@ -81,7 +82,11 @@ def make_update(dry_run=False):
 
     print ('Updating pip modules')
     try:
+
         req_txt_path = op.expanduser("~/lisa_data/.lisa/reqirements_pip.txt")
+        if op.exists(req_txt_path):
+            os.remove(req_txt_path)
+
         import wget
         wget.download(
             "https://raw.githubusercontent.com/mjirik/lisa/master/requirements_pip.txt",

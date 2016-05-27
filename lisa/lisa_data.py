@@ -18,6 +18,11 @@ import os
 import os.path as op
 import stat
 
+def rm_smart(filename):
+    filename = op.expanduser(filename)
+    if op.exists(filename):
+        os.remove(filename)
+
 
 def create_lisa_data_dir_tree(oseg=None):
 
@@ -109,6 +114,7 @@ def file_copy_and_replace_lines(in_path, out_path):
         # coma on end makes no linebreak
         # line = line.replace("@{LISA_PATH}", lisa_path)
         line = line.replace("@{CONDA_PATH}", conda_path)
+        line = line.replace("@{LISA_DATA_PATH}", path())
         print line
 
 def __make_icon_osx():
@@ -126,8 +132,6 @@ lisa"
                  stat.S_IRUSR | stat.S_IRGRP | stat.S_IXOTH |
                  stat.S_IWUSR | stat.S_IWGRP
                  )
-        os.chmod(lisa_shortcut, )
-        os.chmod(lisa_shortcut, )
 
     import wget
     lisa_icon_path= op.expanduser("~/lisa_data/.lisa/LISA256.icns")
@@ -153,6 +157,7 @@ lisa"
 def __make_icon_linux():
     import wget
     in_path = op.expanduser("~/lisa_data/.lisa/lisa.desktop.in")
+    rm_smart(in_path)
     lisa_icon_path= op.expanduser("~/lisa_data/.lisa/LISA256.png")
     if not op.exists(in_path):
         try:

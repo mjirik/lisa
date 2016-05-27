@@ -69,7 +69,7 @@ class LogViewerForm(QDialog):
         self.qapp = qapp
 
         # build the list widget
-        list_label = QLabel(QString("<strong>MoMo</strong> Log Viewer"))
+        list_label = QLabel(QString("<strong>%s</strong> " %(logfile)))
         list_model = LogEntryModel(logfile)
         self.list_model = list_model
         self.list_view = QListView()
@@ -81,6 +81,9 @@ class LogViewerForm(QDialog):
         layout.addWidget(list_label)
         layout.addWidget(self.list_view)
         self.setLayout(layout)
+        self.resize(800, 400)
+        self.list_view.scrollToBottom()
+
 
     def update_log(self):
         print 'file changed'

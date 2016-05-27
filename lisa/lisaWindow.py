@@ -12,6 +12,7 @@ import numpy as np
 import subprocess
 
 import datetime
+import functools
 
 from io3d import datareader
 # import segmentation
@@ -52,7 +53,7 @@ def find_logo():
     if os.path.exists(logopath):
         return logopath
     # lisa runtime directory
-    logopath = os.path.expanduser("~/lisa_data/LISA256.png")
+    logopath = os.path.expanduser("~/lisa_data/.lisa/LISA256.png")
     if not os.path.exists(logopath):
         try:
             wget.download(
@@ -108,6 +109,24 @@ class OrganSegmentationWindow(QMainWindow):
         randomRotateAction.setStatusTip('Random rotation')
         randomRotateAction.triggered.connect(self.btnRandomRotate)
         imageMenu.addAction(randomRotateAction)
+
+        mirrorZAxisAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Mirror Z-axis', self)
+        mirrorZAxisAction.setStatusTip('Mirror Z-axis')
+        mirrorZAxisAction.triggered.connect(self.oseg.mirror_z_axis)
+        imageMenu.addAction(mirrorZAxisAction)
+
+        configMenu = menubar.addMenu('&Config')
+        # combo = QtGui.QComboBox(self)
+        for text in self.oseg.segmentation_alternative_params.keys():
+            iAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&' + text, self)
+            iAction.setStatusTip('Use predefined config "%s"' % (text))
+            # something like lambda
+            fn = functools.partial(self.onAlternativeSegmentationParams, text)
+            iAction.triggered.connect(fn)
+
+            configMenu.addAction(iAction)
+        # combo.activated[str].connect(self.onAlternativeSegmentationParams)
+        # grid.addWidget(combo, 4, 1)
 
     def _add_button(
             self,
@@ -182,12 +201,11 @@ class OrganSegmentationWindow(QMainWindow):
         grid.addWidget(btn_update, 3, 1)
         grid.addWidget(lisa_logo, 0, 2, 5, 2)
 
-        combo = QtGui.QComboBox(self)
-        for text in self.oseg.segmentation_alternative_params.keys():
-            combo.addItem(text)
-        combo.activated[str].connect(self.onAlternativeSegmentationParams)
-        grid.addWidget(combo, 4, 1)
-
+        # combo = QtGui.QComboBox(self)
+        # for text in self.oseg.segmentation_alternative_params.keys():
+        #     combo.addItem(text)
+        # combo.activated[str].connect(self.onAlternativeSegmentationParams)
+        # grid.addWidget(combo, 4, 1)
 
         # right from logo
         rstart = 0
@@ -195,12 +213,12 @@ class OrganSegmentationWindow(QMainWindow):
         btn_sync = QPushButton("Sync", self)
         btn_sync.clicked.connect(self.sync_lisa_data)
         self.uiw['sync'] = btn_sync
-        grid.addWidget(btn_sync, rstart + 3, 4)
+        grid.addWidget(btn_sync, rstart + 2, 4)
 
         grid.addWidget(
             self._add_button("Log", self.btnLog, 'Log',
                              "See log file", QStyle.SP_FileDialogContentsView),
-            rstart + 4, 4)
+            rstart + 3, 4)
 
         # # dicom reader
         rstart = 5

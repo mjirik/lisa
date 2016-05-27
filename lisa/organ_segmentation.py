@@ -227,9 +227,9 @@ class OrganSegmentation():
         self.processing_time = None
         self.experiment_caption = experiment_caption
         self.lisa_operator_identifier = lisa_operator_identifier
-        self.version = qmisc.getVersionString()
-        if self.version is None:
-            self.version = "1.8.13"
+        # self.version = qmisc.getVersionString()
+        # if self.version is None:
+        self.version = "1.8.20"
         self.viewermax = viewermax
         self.viewermin = viewermin
         self.volume_unit = volume_unit
@@ -1328,6 +1328,18 @@ class OrganSegmentation():
         angle = np.random.rand() * 360
         self.rotate(angle, (0, 1))
 
+    def mirror_z_axis(self):
+        """
+        mirror data3d, segmentation and seeds Z-zaxis
+        :return:
+        """
+        self.data3d = self.data3d[-1::-1]
+        if self.segmentation is not None:
+            self.segmentation = self.segmentation[-1::-1]
+        if self.seeds is not None:
+            self.seeds = self.seeds[-1::-1]
+
+
     def save_input_dcm(self, filename):
         # TODO add
         logger.debug('save dcm')
@@ -1553,6 +1565,12 @@ config and user config.")
         default=cfg["segmentation_smoothing"]
     )
     parser.add_argument(
+        '--make_icon',
+        action='store_true',
+        help='Create desktop icon on OS X and Linux',
+        default=False
+    )
+    parser.add_argument(
         '--save_filetype', type=str,  # type=int,
         help='File type of saving data. It can be pklz(default), pkl or mat',
         default=cfg["save_filetype"])
@@ -1580,6 +1598,11 @@ def main(app=None, splash=None):  # pragma: no cover
         ch, fh = logger_init()
         cfg = lisa_config_init()
         args = parser_init(cfg)
+
+        if cfg['make_icon'] is True:
+            import lisa_data
+            lisa_data.make_icon()
+            return
 
         # rint args["arg"]
         oseg_argspec_keys = config.get_function_keys(

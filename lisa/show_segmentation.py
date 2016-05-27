@@ -17,7 +17,12 @@ import argparse
 
 
 import numpy as np
-from dicom2fem import seg2fem
+try:
+    from dicom2fem import seg2fem
+    from seg2fem import gen_mesh_from_voxels_mc, smooth_mesh
+except:
+    logger.warning('dicom2fem not found')
+    from seg2mesh import gen_mesh_from_voxels, smooth_mesh
 import misc
 import viewer
 
@@ -27,26 +32,29 @@ def showSegmentation(
         voxelsize_mm=np.ones([3, 1]),
         degrad=4,
         label=1,
-        smoothing=True
+        smoothing=True,
+        vtk_file=None
         ):
     """
     Funkce vrací trojrozměrné porobné jako data['segmentation']
     v data['slab'] je popsáno, co která hodnota znamená
     """
+
+    if vtk_file is None:
+        vtk_file = "mesh_geom.vtk"
     labels = []
 
     segmentation = segmentation[::degrad, ::degrad, ::degrad]
 
     # import pdb; pdb.set_trace()
-    mesh_data = seg2fem.gen_mesh_from_voxels_mc(segmentation, voxelsize_mm*degrad)
+    mesh_data = gen_mesh_from_voxels_mc(segmentation, voxelsize_mm*degrad)
     if smoothing:
-        mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
+        mesh_data.coors = smooth_mesh(mesh_data)
         # mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
 
     else:
-        mesh_data = seg2fem.gen_mesh_from_voxels_mc(segmentation, voxelsize_mm * degrad * 1.0e-2)
+        mesh_data = gen_mesh_from_voxels_mc(segmentation, voxelsize_mm * degrad * 1.0e-2)
         # mesh_data.coors +=
-    vtk_file = "mesh_geom.vtk"
     mesh_data.write(vtk_file)
     QApplication(sys.argv)
     view = viewer.QVTKViewer(vtk_file)
@@ -75,6 +83,10 @@ if __name__ == "__main__":
         default='organ.pkl',
         help='input file')
     parser.add_argument(
+        '-o', '--outputfile',
+        default='~/lisa_data/mesh_geom.vtk',
+        help='output file')
+    parser.add_argument(
         '-d', '--degrad', type=int,
         default=4,
         help='data degradation, default 4')
@@ -84,7 +96,7 @@ if __name__ == "__main__":
         help='segmentation labels, default 1')
     args = parser.parse_args()
 
-    data = misc.obj_from_file(args.inputfile, filetype='pickle')
+    # data = misc.obj_from_file(args.inputfile, filetype='pickle')
     import io3d
     data = io3d.read(args.inputfile, dataplus_format=True)
     # args.label = np.array(eval(args.label))
@@ -94,4 +106,6 @@ if __name__ == "__main__":
     for i in range(0, len(args.label)):
         ds = ds | (data['segmentation'] == args.label[i])
 
-    showSegmentation(ds, degrad=args.degrad, voxelsize_mm=data['voxelsize_mm'])
+    outputfile = os.path.expanduser(args.outputfile)
+
+    showSegmentation(ds, degrad=args.degrad, voxelsize_mm=data['voxelsize_mm'], vtk_file=outputfile)
