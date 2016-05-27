@@ -1291,6 +1291,7 @@ class OrganSegmentation():
             filepath = self.get_standard_ouptut_filename()
         # import ipdb; ipdb.set_trace()
         import io3d
+        logger.debug("save outputs to file %s" % (filepath))
         io3d.write(data, filepath)
         # from PyQt4 import QtCore; QtCore.pyqtRemoveInputHook()
         # import ipdb; ipdb.set_trace()
