@@ -9,4 +9,6 @@ multipolyfit>=0.0.1
 # pandas>=0.16.2
 lesioneditor==0.0.13
 pygco
-
+# geodesic distance transform -c jmargeta -c jakirkham
+# on osx install with pip
+scikit-fmm

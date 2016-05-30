@@ -39,4 +39,5 @@ morphsnakes
 skelet3d
 sftpsync>=1.0.2
 # geodesic distance transform -c jmargeta -c jakirkham
-scikit-fmm
+# on osx install with pip
+# scikit-fmm
