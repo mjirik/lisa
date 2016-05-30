@@ -1322,11 +1322,22 @@ class OrganSegmentation():
         Rotate data3d, segmentation and seeds with random rotation
         :return:
         """
-        angle = np.random.rand() * 360
-        self.rotate(angle, (1, 2))
+        xi1 = np.random.rand(1000)
+        xi2 = np.random.rand(1000)
 
-        angle = np.random.rand() * 360
-        self.rotate(angle, (0, 1))
+        # theta = np.arccos(np.sqrt(1.0-xi1))
+        theta = np.arccos(1.0 - (xi1 * 1))
+        phi = xi2 * 2 * np.pi
+
+        # xs = np.sin(theta) * np.cos(phi)
+        # ys = np.sin(theta) * np.sin(phi)
+        # zs = np.cos(theta)
+
+        phi_deg = np.degrees(phi)
+        self.rotate(phi_deg, (1, 2))
+        theta_deg = np.degrees(theta)
+        self.rotate(theta_deg, (0, 1))
+
 
     def mirror_z_axis(self):
         """
@@ -1640,6 +1651,7 @@ def main(app=None, splash=None):  # pragma: no cover
             sys.exit(app.exec_())
 
     except Exception as e:
+        import traceback
         # mport exceptionProcessing
         exceptionProcessing.reportException(e)
         print traceback.format_exc()
