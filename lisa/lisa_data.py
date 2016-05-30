@@ -201,6 +201,11 @@ def __make_icon_linux():
         print out_path, out_path_ha
         file_copy_and_replace_lines(in_path, out_path)
 
+        os.chmod(out_path,
+                 stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH |
+                 stat.S_IRUSR | stat.S_IRGRP | stat.S_IXOTH |
+                 stat.S_IWUSR | stat.S_IWGRP
+                 )
     # copy desktop files to $HOME/.local/share/applications/
     # to be accesable in application menu (Linux)
     local_app_path = os.path.join(home_path, '.local/share/applications')
