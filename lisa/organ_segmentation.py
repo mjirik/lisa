@@ -1337,6 +1337,7 @@ class OrganSegmentation():
         self.rotate(phi_deg, (1, 2))
         theta_deg = np.degrees(theta)
         self.rotate(theta_deg, (0, 1))
+        # TODO independent on voxlelsize (2016-techtest-rotate3d.ipynb)
 
 
     def mirror_z_axis(self):
