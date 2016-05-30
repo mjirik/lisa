@@ -64,7 +64,7 @@ requirements:
     - imtools >=1.0.5
     - sed3 >=1.1.33
     - pysegbase
-    - io3d >= 1.0.34
+    - io3d >=1.0.34
     - pyqt 4.11.*
     - pandas
     - simpleitk
