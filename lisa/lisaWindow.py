@@ -308,8 +308,12 @@ class OrganSegmentationWindow(QMainWindow):
         # hr = QFrame()
         # hr.setFrameShape(QFrame.HLine)
         grid.addWidget(
-            self._add_button("Save", self.saveOut, 'save',
-                             "Save data with segmentation", QStyle.SP_DialogSaveButton),
+            self._add_button(
+                "Save",
+                self.saveOut,
+                'save',
+                "Save data with segmentation. Use filename 'slice{:04d}.tiff' to store slices",
+                QStyle.SP_DialogSaveButton),
             rstart + 0, 1)
         # btn_segsave = QPushButton("Save", self)
         # btn_segsave.clicked.connect(self.saveOut)

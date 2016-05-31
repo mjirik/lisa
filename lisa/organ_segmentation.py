@@ -1323,8 +1323,8 @@ class OrganSegmentation():
         Rotate data3d, segmentation and seeds with random rotation
         :return:
         """
-        xi1 = np.random.rand(1000)
-        xi2 = np.random.rand(1000)
+        xi1 = np.random.rand()
+        xi2 = np.random.rand()
 
         # theta = np.arccos(np.sqrt(1.0-xi1))
         theta = np.arccos(1.0 - (xi1 * 1))
