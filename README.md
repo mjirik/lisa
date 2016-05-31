@@ -33,7 +33,7 @@ or use [Lisa in Ubuntu for VirtualBox](http://147.228.240.61/queetech/install/li
 Get sample data
 ---------------
 
-    python mysetup.py -d
+    python -m lisa --get_sample_data
 
 
 
@@ -42,11 +42,19 @@ Run
 
 Object (usualy liver) extraction is started by organ_segmentation script
 
+    lisa
+
+or
+
     ./lisa.sh
 
 or
 
-    python lisa.py
+    python lisa
+
+or
+
+    python -m lisa
 
 Segmentation use two types of seeds wich are setted by left and right mouse
 button. For better volume measurement control use additional parameters
