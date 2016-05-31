@@ -97,6 +97,12 @@ def get_conda_path():
     return None
 
 def file_copy_and_replace_lines(in_path, out_path):
+    """
+    Used for
+    :param in_path:
+    :param out_path:
+    :return:
+    """
     import shutil
     import fileinput
 
@@ -105,7 +111,7 @@ def file_copy_and_replace_lines(in_path, out_path):
     # lisa_path = os.path.abspath(path_to_script)
     #
     shutil.copy2(in_path, out_path)
-    conda_path = get_conda_path()
+    # conda_path = get_conda_path()
 
     # print 'ip ', in_path
     # print 'op ', out_path
@@ -113,9 +119,14 @@ def file_copy_and_replace_lines(in_path, out_path):
     for line in fileinput.input(out_path, inplace=True):
         # coma on end makes no linebreak
         # line = line.replace("@{LISA_PATH}", lisa_path)
-        line = line.replace("@{CONDA_PATH}", conda_path)
-        line = line.replace("@{LISA_DATA_PATH}", path())
+        line = replace_tags(line)
         print line
+
+def replace_tags(text):
+    conda_path = get_conda_path()
+    text = text.replace("@{CONDA_PATH}", conda_path)
+    text = text.replace("@{LISA_DATA_PATH}", path())
+    return text
 
 def __make_icon_osx():
     lisa_shortcut = op.expanduser("~/Desktop/lisa")
@@ -159,15 +170,15 @@ def __make_icon_linux():
     in_path = op.expanduser("~/lisa_data/.lisa/lisa.desktop.in")
     rm_smart(in_path)
     lisa_icon_path= op.expanduser("~/lisa_data/.lisa/LISA256.png")
-    if not op.exists(in_path):
-        try:
-            wget.download(
-                "https://raw.githubusercontent.com/mjirik/lisa/master/applications/lisa.desktop.in",
-                out=in_path)
-        except:
-            import traceback
-            logger.warning('logo download failed')
-            logger.warning(traceback.format_exc())
+    # if not op.exists(in_path):
+    #     try:
+    #         wget.download(
+    #             "https://raw.githubusercontent.com/mjirik/lisa/master/applications/lisa.desktop.in",
+    #             out=in_path)
+    #     except:
+    #         import traceback
+    #         logger.warning('logo download failed')
+    #         logger.warning(traceback.format_exc())
     if not op.exists(lisa_icon_path):
         try:
             wget.download(
@@ -189,37 +200,47 @@ def __make_icon_linux():
         desktop_path = os.path.join(home_path, 'Plocha')
     else:
         print "Cannot find desktop directory"
+        logger.error("Cannot find desktop directory")
         desktop_path = None
 
     # copy desktop files to desktop
     if desktop_path is not None:
         out_path = os.path.join(desktop_path, "lisa.desktop")
-        out_path_ha = os.path.join(desktop_path, "ha.desktop")
+        __make_linux_icon_file(out_path)
 
-        # fi = fileinput.input(out_path, inplace=True)
-        print "icon output path:"
-        print out_path, out_path_ha
-        file_copy_and_replace_lines(in_path, out_path)
-
-        os.chmod(out_path,
-                 stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH |
-                 stat.S_IRUSR | stat.S_IRGRP | stat.S_IXOTH |
-                 stat.S_IWUSR | stat.S_IWGRP
-                 )
     # copy desktop files to $HOME/.local/share/applications/
     # to be accesable in application menu (Linux)
     local_app_path = os.path.join(home_path, '.local/share/applications')
     if os.path.exists(local_app_path) and os.path.isdir(local_app_path):
         out_path = os.path.join(local_app_path, "lisa.desktop")
-
-        out_path_ha = os.path.join(local_app_path, "ha.desktop")
-
-        print "icon output path:"
-        print out_path, out_path_ha
-        file_copy_and_replace_lines(in_path, out_path)
-
+        __make_linux_icon_file(out_path)
     else:
         print "Couldnt find $HOME/.local/share/applications/."
+
+def __make_linux_icon_file(lisa_shortcut):
+    if not os.path.exists(lisa_shortcut):
+        file_content = "\
+[Desktop Entry]\n\
+Name=LISA\n\
+GenericName=LISA\n\
+Comment=LIver Surgery Analyser\n\
+Exec=bash -c 'export PATH=@{CONDA_PATH}:$PATH ; lisa'\n\
+Terminal=false\n\
+Type=Application\n\
+Icon=@{LISA_DATA_PATH}/.lisa/LISA256.png\n\
+Categories=Application;Science;MedicalSoftware;\n\
+StartupNotify=false\n"
+        file_content = replace_tags(file_content)
+        with open(lisa_shortcut, 'w') as outfile:
+            outfile.write(file_content)
+        os.chmod(lisa_shortcut,
+                 stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH |
+                 stat.S_IRUSR | stat.S_IRGRP | stat.S_IXOTH |
+                 stat.S_IWUSR | stat.S_IWGRP
+                 )
+    # fi = fileinput.input(out_path, inplace=True)
+    print "icon output path: \n", lisa_shortcut
+
 
 def main():
     logger = logging.getLogger()
