@@ -1578,9 +1578,15 @@ config and user config.")
         default=cfg["segmentation_smoothing"]
     )
     parser.add_argument(
-        '--make_icon',
+        '-icn', '--make_icon',
         action='store_true',
         help='Create desktop icon on OS X and Linux',
+        default=False
+    )
+    parser.add_argument(
+        '-gsd', '--get_sample_data',
+        action='store_true',
+        help='Download sample data',
         default=False
     )
     parser.add_argument(
@@ -1615,6 +1621,10 @@ def main(app=None, splash=None):  # pragma: no cover
         if cfg['make_icon'] is True:
             import lisa_data
             lisa_data.make_icon()
+            return
+        if cfg['get_sample_data'] is True:
+            import dataset
+            dataset.get_sample_data()
             return
 
         # rint args["arg"]

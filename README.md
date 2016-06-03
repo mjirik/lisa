@@ -18,15 +18,13 @@ Install
 See our [install notes](https://github.com/mjirik/lisa/blob/master/INSTALL.md) for Linux, Mac OS and Windows 
 
 
-Install stable branche
+Install stable branche on Linux or Mac OS with:
 
     wget https://raw.githubusercontent.com/mjirik/lisa/master/installer.sh
     source installer.sh stable
 
-or for current developement
 
-    wget https://raw.githubusercontent.com/mjirik/lisa/master/installer.sh
-    source installer.sh devel
+or use [windows installer](http://147.228.240.61/queetech/install/setup_lisa.exe)
 
 or use [Lisa in Ubuntu for VirtualBox](http://147.228.240.61/queetech/install/lisa_ubuntu14.04.vdi)
 
@@ -35,7 +33,7 @@ or use [Lisa in Ubuntu for VirtualBox](http://147.228.240.61/queetech/install/li
 Get sample data
 ---------------
 
-    python mysetup.py -d
+    python -m lisa --get_sample_data
 
 
 
@@ -44,11 +42,19 @@ Run
 
 Object (usualy liver) extraction is started by organ_segmentation script
 
+    lisa
+
+or
+
     ./lisa.sh
 
 or
 
-    python lisa.py
+    python lisa
+
+or
+
+    python -m lisa
 
 Segmentation use two types of seeds wich are setted by left and right mouse
 button. For better volume measurement control use additional parameters
