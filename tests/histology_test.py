@@ -111,7 +111,7 @@ class HistologyTest(unittest.TestCase):
         tests export function
         """
 
-        import lisa.vesseltree_export as vt
+        import imtools.vesseltree_export as vt
         yaml_input = os.path.join(path_to_script, "vt_biodur.yaml")
         yaml_output = os.path.join(path_to_script, "delme_esofspy.txt")
         vt.vt2esofspy(yaml_input, yaml_output)
