@@ -20,9 +20,22 @@ import config_default
 import imtools
 import imtools.sample_data
 import glob
+import os.path
 import os.path as op
 import re
 
+
+def join_sdp(path_to_join):
+    """
+    join input path to sample data path (usually in ~/lisa_data)
+    :param path_to_join:
+    :return:
+    """
+    sdp = sample_data_path()
+    pth = os.path.join(sdp, path_to_join)
+    logger.debug('sample_data_path' + sdp)
+    logger.debug('path ' + pth)
+    return pth
 
 def sample_data_path():
     return op.expanduser("~/lisa_data/sample_data/")

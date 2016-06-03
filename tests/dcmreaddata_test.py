@@ -25,6 +25,7 @@ dicom.debug(False)
 #
 import io3d
 import pysegbase.dcmreaddata as dcmr
+import lisa.dataset
 
 class DicomReaderTest(unittest.TestCase):
     interactivetTest = False
@@ -39,7 +40,7 @@ class DicomReaderTest(unittest.TestCase):
     def test_DicomReader_overlay(self):
         #import matplotlib.pyplot as plt
 
-        dcmdir = os.path.join(path_to_script, '../sample_data/volumetrie/')
+        dcmdir = lisa.dataset.join_sdp('volumetrie/')
         #dcmdir = '/home/mjirik/data/medical/data_orig/jatra-kma/jatra_5mm/'
         #self.data3d, self.metadata = dcmr.dcm_read_from_dir(self.dcmdir)
         reader = dcmr.DicomReader(dcmdir)
@@ -59,7 +60,7 @@ class DicomReaderTest(unittest.TestCase):
         import dicom
         # import sed3
         #import matplotlib.pyplot as plt
-        dcmfile = os.path.join(path_to_script, '../sample_data/volumetrie/volumetry_slice.DCM')
+        dcmfile = lisa.dataset.join_sdp('volumetrie/volumetry_slice.DCM')
         data = dicom.read_file(dcmfile)
 
 
@@ -109,7 +110,7 @@ class DicomReaderTest(unittest.TestCase):
 
     def test_dcmread(self):
 
-        dcmdir = os.path.join(path_to_script, '../sample_data/jatra_5mm')
+        dcmdir = lisa.dataset.join_sdp('jatra_5mm')
         #dcmdir = '/home/mjirik/data/medical/data_orig/jatra-kma/jatra_5mm/'
         #self.data3d, self.metadata = dcmr.dcm_read_from_dir(self.dcmdir)
         reader = dcmr.DicomReader(dcmdir)
@@ -121,7 +122,7 @@ class DicomReaderTest(unittest.TestCase):
         self.assertEqual(metadata['voxelsize_mm'][0],5)
 
     def test_dicomread_read(self):
-        dcmdir = os.path.join(path_to_script, '../sample_data/jatra_5mm')
+        dcmdir = lisa.dataset.join_sdp('jatra_5mm')
         #dcmdir = '/home/mjirik/data/medical/data_orig/jatra-kma/jatra_5mm/'
         #self.data3d, self.metadata = dcmr.dcm_read_from_dir(self.dcmdir)
         data3d, metadata = io3d.datareader.read(dcmdir)
@@ -132,7 +133,7 @@ class DicomReaderTest(unittest.TestCase):
 
     def test_dcmread_series_number(self):
 
-        dcmdir = os.path.join(path_to_script, '../sample_data/jatra_5mm')
+        dcmdir = lisa.dataset.join_sdp('jatra_5mm')
         #dcmdir = '/home/mjirik/data/medical/data_orig/jatra-kma/jatra_5mm/'
         #self.data3d, self.metadata = dcmr.dcm_read_from_dir(self.dcmdir)
 # spravne cislo serie je 7
