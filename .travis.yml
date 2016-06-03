@@ -50,7 +50,7 @@ install:
     # - 'sudo ./ubuntu_installer.sh devel'
     - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
     - 'sudo ldconfig -v'
-    - python mysetup.py -d
+    - python lisa --get_sample_data
     
 # command to run tests
 script: nosetests --with-coverage --verbose --cover-package=lisa
