@@ -10,6 +10,7 @@
 
 """
 import unittest
+
 from nose.plugins.attrib import attr
 import sys
 
@@ -17,6 +18,8 @@ from PyQt4.QtGui import QApplication
 from PyQt4.QtTest import QTest
 from PyQt4.QtCore import Qt
 import lisa.histology_analyser_gui as HA_GUI
+import lisa
+import lisa.dataset
 
 
 class HAGUITest(unittest.TestCase):
@@ -38,7 +41,7 @@ class HAGUITest(unittest.TestCase):
         Tests event of quit
         """
         self.form = HA_GUI.HistologyAnalyserWindow(
-            inputfile='sample_data/biodur_sample',
+            inputfile=lisa.dataset.sample_data_path() + '/sample_data/biodur_sample',
             crop=[0, 50, 300, 401, 400, 502]
         )
 

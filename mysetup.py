@@ -231,6 +231,10 @@ def downzip(url, destination='./sample_data/'):
 
 
 def get_sample_data():
+    """
+    This function is deprecated. Now we use imtools.qmisc.get_sample_data
+    :return:
+    """
     # download sample data
     print('Downloading sample data')
 

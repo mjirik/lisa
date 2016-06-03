@@ -13,6 +13,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from lisa.gen_volume_tree import TreeGenerator
+import lisa.dataset
 from quantan.quantan import HistologyAnalyser
 from quantan.histology_report import HistologyReport
 
@@ -128,7 +129,7 @@ class HistologyTest(unittest.TestCase):
         import lisa.surface_measurement as sm
         import io3d
         dr = io3d.datareader.DataReader()
-        datap = dr.Get3DData('sample_data/gensei_slices/',
+        datap = dr.Get3DData(lisa.dataset.sample_data_path() + '/sample_data/gensei_slices/',
                              dataplus_format=True)
         # total object volume fraction:           0.081000
         # total object volume [(mm)^3]:           81.000000

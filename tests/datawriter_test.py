@@ -20,7 +20,7 @@ dicom.debug(False)
 #
 import io3d.datawriter as dwriter
 import io3d.datareader as dreader
-
+import lisa.dataset
 # import sed3 as pyed
 
 
@@ -78,9 +78,10 @@ class DicomWriterTest(unittest.TestCase):
 
         # metadata = {'voxelsize_mm': [1, 2, 3]}
         dw = dwriter.DataWriter()
+
         dw.add_overlay_to_slice_file(
             # 'sample_data/jatra_5mm/IM-0001-0019.dcm',
-            'sample_data/volumetrie/volumetry_slice.DCM',
+            lisa.dataset.sample_data_path() + '/sample_data/volumetrie/volumetry_slice.DCM',
             overlay,
             i_overlay,
             filename
@@ -114,7 +115,7 @@ class DicomWriterTest(unittest.TestCase):
 # open copied data to obtain dcmfilefilelist
         dr = dreader.DataReader()
         data3d, metadata = dr.Get3DData(
-            'sample_data/jatra_5mm/'
+            lisa.dataset.sample_data_path() + '/sample_data/jatra_5mm/'
             # 'sample_data/volumetrie/'
         )
 # for test we are working only with small number of files (n_files)
