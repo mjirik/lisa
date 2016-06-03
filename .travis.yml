@@ -34,13 +34,10 @@ install:
     - mkdir skelet3d/build
     - cd skelet3d/build
     - cmake ..
-    - make
-    - make install
+    - cmake --build .
+    - sudo make install
     # - sudo make install
     # library is installed but not for anaconda
-    - python setup.py install
-    - cd ..
-    - cd ..
     # gco_python
     # - "git clone https://github.com/mjirik/gco_python.git"
     # - "cd gco_python"
