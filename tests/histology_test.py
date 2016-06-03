@@ -176,7 +176,7 @@ class HistologyTest(unittest.TestCase):
         # ed.show()
 
     def test_surface_measurement_voxelsize_mm(self):
-        import lisa.surface_measurement as sm
+        import imtools.surface_measurement as sm
         import scipy
 
 # data 1
