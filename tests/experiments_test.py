@@ -22,6 +22,7 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 import lisa.volumetry_evaluation as ve
 import lisa
 import lisa.experiments
+import lisa.dataset
 
 
 # just test if everything is going ok
@@ -198,8 +199,7 @@ class ExperimentsTest(unittest.TestCase):
         # import lisa.experiments
 
         # os.path.join(path_to_script, "..")
-        experiment_dir = os.path.abspath(
-            path_to_script + "./../sample_data/exp22")
+        experiment_dir = lisa.dataset.join_sdp("exp22")
 
         sliver_reference_dir = os.path.abspath(
             path_to_script + "./../sample_data/exp_small/seg")
@@ -209,8 +209,7 @@ class ExperimentsTest(unittest.TestCase):
         labels = ['vs6mm',
                   # '02smoothing'
                   ]
-        input_data_path_pattern = os.path.abspath(
-            path_to_script + "./../sample_data/exp_small/seeds/*.pklz")
+        input_data_path_pattern = lisa.dataset.join_sdp("exp_small/seeds/*.pklz")
 
         conf_default = {
             'config_version': [1, 0, 0], 'working_voxelsize_mm': 2.0,
@@ -249,8 +248,7 @@ class ExperimentsTest(unittest.TestCase):
         self.assertFalse(ramr.is_evaluation_necessary())
         self.assertFalse(ramr.is_run_experiments_necessary())
 
-        data_path = os.path.abspath(
-            path_to_script + "./../sample_data/exp22/")
+        data_path = lisa.dataset.join_sdp("exp22/")
         dir_eval = os.listdir(data_path)
         self.assertIn('exp22-vs6mm_eval.pkl', dir_eval)
         self.assertIn('exp22-vs6mm_eval.csv', dir_eval)
@@ -269,13 +267,12 @@ class ExperimentsTest(unittest.TestCase):
         """
 
         pklz_dirs = [
-            os.path.abspath(path_to_script + "./../sample_data/exp_synth/exp1"),
-            os.path.abspath(path_to_script + "./../sample_data/exp_synth/exp2"),
-
+            lisa.dataset.join_sdp("exp_synth/exp1"),
+            lisa.dataset.join_sdp("exp_synth/exp2")
             ]
 
         os.mkdir(
-            os.path.abspath(path_to_script + "./../sample_data/exp_synth"),
+            lisa.dataset.join_sdp("exp_synth"),
         )
         os.mkdir(pklz_dirs[0])
         os.mkdir(pklz_dirs[1])
