@@ -36,6 +36,8 @@ install:
     - cmake ..
     - cmake --build .
     - sudo make install
+    - cd ..
+    - cd ..
     # - sudo make install
     # library is installed but not for anaconda
     # gco_python
