@@ -64,6 +64,7 @@ def make_update(dry_run=False):
     import os.path as op
     conda_ok = True
     print ('Updating conda modules')
+    logger.debug("Updating conda modules")
     try:
         cmd = ["conda", "install", "--yes",
                # "-c", 'luispedro ',
@@ -83,6 +84,7 @@ def make_update(dry_run=False):
         #     install_and_import('wget', '--user')
 
     print ('Updating pip modules')
+    logger.debug("Updating pip modules")
     try:
 
         req_txt_path = op.expanduser("~/lisa_data/.lisa/reqirements_pip.txt")
