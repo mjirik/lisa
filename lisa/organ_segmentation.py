@@ -742,7 +742,8 @@ class OrganSegmentation():
         import sftpsync
         import paramiko
 
-        paramiko.util.log_to_file('paramiko.log')
+        paramiko_log = os.path.join(self.output_datapath, 'paramiko.log')
+        paramiko.util.log_to_file(paramiko_log)
         sftp = sftpsync.Sftp(host=host, username=username, password=password)
         localfrom = self._output_datapath_from_server
         localto = self._output_datapath_to_server
