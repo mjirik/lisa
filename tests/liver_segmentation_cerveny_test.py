@@ -11,6 +11,7 @@
 """
 import unittest
 from nose.plugins.attrib import attr
+from nose.tools import nottest
 import io3d
 import numpy as np
 import sys
@@ -21,11 +22,12 @@ sys.path.append(os.path.join(path_to_script, "../../pysegbase/src"))
 
 from lisa import liver_segmentation_cerveny as liver_segmentation
 import os
+import lisa.dataset
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 import logging
 logger = logging.getLogger(__name__)
 
-import lisa.dataset
+from lisa.dataset import join_sdp
 from lisa import organ_segmentation
 
 class LiverSegmentationCervenyTest(unittest.TestCase):
@@ -42,7 +44,7 @@ class LiverSegmentationCervenyTest(unittest.TestCase):
     def test_liver_segmentation_method_3_real_data(self):
         # path_to_script = os.path.dirname(os.path.abspath(__file__))
         # dpath = os.path.join(path_to_script, '../sample_data/jatra_5mm/')
-        dpath = os.path.join(lisa.dataset.sample_data_path(), 'sample_data/liver-orig001.mhd')
+        dpath = join_sdp('liver-orig001.mhd')
         data3d, metadata = io3d.datareader.read(dpath)
         voxelsize_mm = metadata['voxelsize_mm']
 
@@ -68,7 +70,7 @@ class LiverSegmentationCervenyTest(unittest.TestCase):
     def test_liver_segmentation_method_4_real_data(self):
         # path_to_script = os.path.dirname(os.path.abspath(__file__))
         # dpath = os.path.join(path_to_script, '../sample_data/jatra_5mm/')
-        dpath = os.path.join(lisa.dataset.sample_data_path(), 'sample_data/liver-orig001.mhd')
+        dpath = join_sdp('liver-orig001.mhd')
         data3d, metadata = io3d.datareader.read(dpath)
         voxelsize_mm = metadata['voxelsize_mm']
 
@@ -148,6 +150,7 @@ class LiverSegmentationCervenyTest(unittest.TestCase):
         # ed.show()
 
     @attr('incomplete')
+    @nottest
     def test_automatickyTest(self):
         ''' nacte prvni dva soubory koncici .mhd z adresare sample_data
         prvni povazuje za originalni a provede na nem segmentaci defaultni
@@ -161,11 +164,11 @@ class LiverSegmentationCervenyTest(unittest.TestCase):
 
 
 
-        path_to_script = os.path.dirname(os.path.abspath(__file__))
-        # print path_to_script
-        b = path_to_script[0:-5]
-        b = b + 'sample_data'
-        cesta = b
+        # path_to_script = os.path.dirname(os.path.abspath(__file__))
+        # # print path_to_script
+        # b = path_to_script[0:-5]
+        # b = b + 'sample_data'
+        cesta = lisa.dataset.sample_data_path()
 
         logger.info('probiha nacitani souboru z adresare sample_data')
         seznamSouboru = liver_segmentation.vyhledejSoubory(cesta)

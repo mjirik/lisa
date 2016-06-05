@@ -324,7 +324,7 @@ and background")
         # dcmdir = os.path.join(path_to_script,'./../sample_data/matlab/examples/sample_data/DICOM/digest_article/') # noqa
 # data
         img3d = np.random.rand(32, 64, 64) * 3
-        img3d[4:24, 12:32, 5:25] = img3d[4:24, 12:32, 5:25] + 25
+        img3d[4:24, 12:32, 5:25] = img3d[4:24, 12:32, 5:25] + 30
 
 # seeds
         seeds = np.zeros([32, 64, 64], np.int8)
@@ -416,10 +416,12 @@ and background")
                                                     working_voxelsize_mm=4,
                                                     manualroi=False)
 
-        oseg.add_seeds_mm([120], [120], [80], 1, 25)
-        oseg.add_seeds_mm([25], [100], [80], 2, 25)
+        oseg.add_seeds_mm([80], [120], [120], 1, 25)
+        oseg.add_seeds_mm([80], [40], [130], 2, 25)
 
         # pro kontrolu lze odkomentovat
+        # from PyQt4.QtGui import QApplication
+        # app = QApplication(sys.argv)
         # oseg.interactivity()
 
         oseg.ninteractivity()
