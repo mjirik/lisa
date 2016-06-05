@@ -67,7 +67,9 @@ def make_update(dry_run=False):
     try:
         cmd = ["conda", "install", "--yes",
                # "-c", 'luispedro ',
-               '-c', 'SimpleITK', "-c", "menpo", '-c', 'mjirik', "lisa"
+               '-c', 'SimpleITK', "-c", "menpo", '-c', 'mjirik',
+               "-c", "menpo", "-c", "auto",
+               "lisa"
                ]
         if dry_run:
             cmd.append('--dry-run')

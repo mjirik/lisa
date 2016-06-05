@@ -72,10 +72,6 @@ requirements:
     - scikit-learn
     - scikit-image
     - pyqtconfig
-    # bitarray and redis is required in experiments_test cerveny
-    - bitarray
-    # redus from channel -c auto works
-    - redis
     - pip
     - sftpsync >=1.0.2
     # just for pip install pygco
@@ -84,6 +80,10 @@ requirements:
     - dicom2fem
     # nomkl package does not exist on windows
     # - nomkl
+    # bitarray and redis is required in experiments_test cerveny
+    # - bitarray
+    # redus from channel -c auto works
+    # - redis
 
 test:
   # Python imports
