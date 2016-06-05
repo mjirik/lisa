@@ -194,7 +194,7 @@ class OrganSegmentation():
 
         self.iparams = {}
         self.datapath = datapath
-        self.output_datapath = output_datapath
+        self.set_output_datapath(output_datapath)
         self.sftp_username=sftp_username
         self.sftp_password=sftp_password
         self.input_datapath_start = input_datapath_start
@@ -323,6 +323,12 @@ class OrganSegmentation():
     #    self.orig_shape = datap['orig_shape']
     #    self.seeds = datap[
     #        'processing_information']['organ_segmentation']['seeds']
+
+    def set_output_datapath(self, output_datapath):
+        if output_datapath is None:
+            output_datapath = '~/lisa_data'
+        self.output_datapath = os.path.expanduser(output_datapath)
+
     def update(self):
         import update_stable
         update_stable.make_update()
@@ -895,7 +901,7 @@ class OrganSegmentation():
             # remove old pixels for this label
             self.segmentation_prev[self.segmentation_prev == self.output_label] = 0
             # set new labels
-            self.segmentation_prev[self.segmentation == 1] = self.output_label
+            self.segmentation_prev[np.where(self.segmentation == 1)] = self.output_label
 
             # clean up
 
@@ -1250,8 +1256,13 @@ class OrganSegmentation():
 
         output_dir = self.output_datapath
 
-        pth, filename = op.split(op.normpath(self.datapath))
-        filename += "-" + self.experiment_caption
+        if self.datapath is not None:
+            pth, filename = op.split(op.normpath(self.datapath))
+        else:
+            filename = ''
+        if len(filename) > 0 and len(self.experiment_caption) > 0:
+            filename += "-"
+        filename += self.experiment_caption
 #        if savestring in ['a', 'A']:
 # save renamed file too
         filename = '' + filename + suffix + '.' + filetype
