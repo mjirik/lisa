@@ -654,18 +654,18 @@ def generate_input_yaml(sliver_dir, pklz_dir,
     import re
 
     if not os.path.exists(sliver_dir):
-        raise IOError("Directory with reference data does not exists")
+        raise IOError("Directory with reference data (" + sliver_dir + ") does not exists")
     if not os.path.exists(pklz_dir):
-        raise IOError("Directory with input pklz data does not exists")
+        raise IOError("Directory with input pklz data (" + pklz_dir + ") does not exists")
 
     onlyfiles1 = glob.glob(os.path.join(sliver_dir, sliver_ext))
     onlyfiles2 = glob.glob(os.path.join(pklz_dir, pklz_ext))
     onlyfiles1.sort()
     onlyfiles2.sort()
     if len(onlyfiles1) == 0:
-        raise IOError("Directory with reference data appears to be empty")
+        raise IOError("Directory with reference data (%s) appears to be empty" % (sliver_dir))
     if len(onlyfiles2) == 0:
-        raise IOError("Directory with pklz data appears to be empty")
+        raise IOError("Directory with pklz data (%s) appears to be empty" % (pklz_dir))
 
     logger.debug('sliver files \n' + str(onlyfiles1))
     logger.debug('pklz files \n' + str(onlyfiles2))

@@ -32,6 +32,9 @@ def speceval(vol1, vol2, vs):
     """
     return {'one': 1}
 
+def join_sdp(datapath):
+    return lisa.dataset.join_sdp(datapath)
+
 class ExperimentsTest(unittest.TestCase):
 
     def test_experiment_set_(self):
@@ -40,19 +43,16 @@ class ExperimentsTest(unittest.TestCase):
         """
 
 # if directory exists, remove it
-        experiment_dir = os.path.abspath(
-            path_to_script + "./../tests/tmp_exp_small2/")
+        experiment_dir = join_sdp("tmp_tests/tmp_exp_small2/")
         experiment_name = 'exp2'
 
         if os.path.exists(experiment_dir):
             shutil.rmtree(experiment_dir)
-        os.mkdir(experiment_dir)
+        os.makedirs(experiment_dir)
 
-        # experiment_dir = os.path.abspath(
-        #     path_to_script + "./../sample_data/exp_small2/")
+        # experiment_dir = join_sdp("exp_small2/")
 
-        sliver_reference_dir = os.path.abspath(
-            path_to_script + "./../sample_data/exp/seg")
+        sliver_reference_dir = join_sdp("exp/seg")
 
 # this is setup for visualization
         markers = ['ks',
@@ -61,8 +61,7 @@ class ExperimentsTest(unittest.TestCase):
         labels = ['vs 6 mm',
                   'vs 7 mm'
                   ]
-        input_data_path_pattern = os.path.abspath(
-            path_to_script + "./../sample_data/exp_small/seeds/*.pklz")
+        input_data_path_pattern = join_sdp("exp_small/seeds/*.pklz")
 
         conf_default = {
             'config_version': [1, 0, 0], 'working_voxelsize_mm': 2.0,
@@ -103,32 +102,32 @@ class ExperimentsTest(unittest.TestCase):
     def test_experiment_set(self):
         import lisa.experiments
 
-        os.path.join(path_to_script, "..")
+        experiment_path = join_sdp("exp")
+        # this var is no necessary
         pklz_dirs = [
-            os.path.abspath(path_to_script + "./../sample_data/exp/exp1"),
-            os.path.abspath(path_to_script + "./../sample_data/exp/exp2"),
+            join_sdp("exp/exp1"),
+            join_sdp("exp/exp2"),
             # "/home/mjirik/projects/lisa/sample_data/exp1",
             # "/home/mjirik/projects/lisa/sample_data/exp2",
 
         ]
-        sliver_reference_dir = os.path.abspath(
-            path_to_script + "./../sample_data/exp/seg")
+        sliver_reference_dir = join_sdp("exp/seg")
         # "/home/mjirik/data/medical/orig/sliver07/training/"
 
 # this is setup for visualization
         markers = ['ks', 'r<']
         labels = ['3gaus', '02smoothing']
-        input_data_path_pattern = os.path.abspath(
-            path_to_script + "./../sample_data/exp/seeds/*.pklz")
+        input_data_path_pattern = join_sdp("exp/seeds/*.pklz")
 
 # if directory exists, remove it
         for dire in pklz_dirs:
-            shutil.rmtree(dire)
+            if os.path.exists(dire):
+                shutil.rmtree(dire)
 
 # experiment_support.report(pklz_dirs, labels, markers)
         lisa.experiments.run_and_make_report(
-            pklz_dirs, labels, markers, sliver_reference_dir,
-            input_data_path_pattern, show=False)
+            experiment_path, labels, sliver_reference_dir,
+            input_data_path_pattern, markers=markers, pklz_dirs=pklz_dirs, show=False)
         import io3d.misc
         obj = io3d.misc.obj_from_file(pklz_dirs[0] + '.yaml', filetype='yaml')
         self.assertGreater(len(obj['data']), 0)
@@ -142,14 +141,12 @@ class ExperimentsTest(unittest.TestCase):
         import lisa.experiments
 
         # os.path.join(path_to_script, "..")
-        pklz_dirs = [
-            os.path.abspath(
-                path_to_script + "./../sample_data/exp_small/exp1"),
-            # os.path.abspath(
-            #     path_to_script + "./../sample_data/exp_small/exp2"),
-        ]
-        sliver_reference_dir = os.path.abspath(
-            path_to_script + "./../sample_data/exp_small/seg")
+        # pklz_dirs = [
+        #     join_sdp("exp_small/exp1"),
+        #     # join_sdp("exp_small/exp2"),
+        # ]
+        experiment_dir = join_sdp("tmp_tests/exp1")
+        sliver_reference_dir = join_sdp("exp_small/seg")
         # "/home/mjirik/data/medical/orig/sliver07/training/"
 
 # this is setup for visualization
@@ -159,8 +156,7 @@ class ExperimentsTest(unittest.TestCase):
         labels = ['vs6mm',
                   # '02smoothing'
                   ]
-        input_data_path_pattern = os.path.abspath(
-            path_to_script + "./../sample_data/exp_small/seeds/*.pklz")
+        input_data_path_pattern = join_sdp("exp_small/seeds/*.pklz")
 
         conf_default = {
             'config_version': [1, 0, 0], 'working_voxelsize_mm': 2.0,
@@ -174,13 +170,12 @@ class ExperimentsTest(unittest.TestCase):
         ]
 
 # if directory exists, remove it
-        for dire in pklz_dirs:
-            if os.path.exists(dire):
-                shutil.rmtree(dire)
+        if os.path.exists(experiment_dir):
+            shutil.rmtree(experiment_dir)
 
 # experiment_support.report(pklz_dirs, labels, markers)
         lisa.experiments.run_and_make_report(
-            pklz_dirs, labels, sliver_reference_dir,
+            experiment_dir, labels, sliver_reference_dir,
             input_data_path_pattern,
             conf_default=conf_default,
             conf_list=conf_list,
@@ -188,7 +183,8 @@ class ExperimentsTest(unittest.TestCase):
             markers=markers
         )
         import io3d.misc
-        obj = io3d.misc.obj_from_file(pklz_dirs[0] + '.yaml', filetype='yaml')
+        path_to_yaml = join_sdp("tests_tmp/exp1/exp1-vs6mm.yaml")
+        obj = io3d.misc.obj_from_file(path_to_yaml, filetype='yaml')
         self.assertGreater(len(obj['data']), 0)
         # self.assertTrue(False)
 
@@ -201,8 +197,7 @@ class ExperimentsTest(unittest.TestCase):
         # os.path.join(path_to_script, "..")
         experiment_dir = lisa.dataset.join_sdp("exp22")
 
-        sliver_reference_dir = os.path.abspath(
-            path_to_script + "./../sample_data/exp_small/seg")
+        sliver_reference_dir = join_sdp("exp_small/seg")
         # "/home/mjirik/data/medical/orig/sliver07/training/"
 
 # this is setup for visualization
@@ -398,7 +393,7 @@ class ExperimentsTest(unittest.TestCase):
         eval1 = ve.distance_matrics(vol1, vol2, [1, 1, 1])
 
         self.assertAlmostEquals(eval1[2], 3 ** (0.5) * 2)
-        import lisa.liver_segmentation as ls
+        import lisa.liver_segmentation_cerveny as ls
         import nearpy
         engine = nearpy.Engine(dim=3)
         eval2 = ls.vzdalenosti(vol1, vol2, [1, 1, 1], engine)
@@ -421,7 +416,7 @@ class ExperimentsTest(unittest.TestCase):
 
         eval1 = ve.distance_matrics(vol1, vol2, [1, 1, 1])
 
-        import lisa.liver_segmentation as ls
+        import lisa.liver_segmentation_cerveny as ls
         import nearpy
         engine = nearpy.Engine(dim=3)
         eval2 = ls.vzdalenosti(vol1, vol2, [1, 1, 1], engine)

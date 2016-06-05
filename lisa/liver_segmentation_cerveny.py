@@ -26,7 +26,7 @@ import os.path as op
 import volumetry_evaluation as ve
 import sed3
 from sklearn import mixture
-import skimage.filter
+import skimage.filters
 from scipy.cluster.vq import kmeans
 import random
 
