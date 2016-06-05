@@ -18,7 +18,7 @@ easy_install -U --user mahotas
 pip install -U --no-deps -r requirements_pip.txt --user
 
 # linux specific
-pip install scikit-fmm
+pip install scikit-fmm nomkl
 
 mkdir projects
 

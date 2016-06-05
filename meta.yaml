@@ -82,7 +82,8 @@ requirements:
     - cython
     - vtk
     - dicom2fem
-    - nomkl
+    # nomkl package does not exist on windows
+    # - nomkl
 
 test:
   # Python imports
