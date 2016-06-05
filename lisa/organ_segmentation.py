@@ -752,10 +752,11 @@ class OrganSegmentation():
 
         exclude = []
 
-        logger.info("Download started")
+        logger.info("Download started\nremote from {}\nlocal from {}".format(remotefrom, localfrom))
+        logger.info("from")
         sftp.sync(remotefrom, localfrom, download=True, exclude=exclude, delete=False, callback=callback)
         logger.info("Download finished")
-        logger.info("Upload started")
+        logger.info("Upload started\nremote to {}\nlocal to {}".format(remoteto, localto))
         sftp.sync(localto, remoteto, download=False, exclude=exclude, delete=False, callback=callback)
         logger.info("Upload finished")
 
