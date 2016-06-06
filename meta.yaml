@@ -63,7 +63,7 @@ requirements:
     - skelet3d >=1.4.26
     - imtools >=0.1.5
     - sed3 >=1.1.33
-    - pysegbase
+    - pysegbase >=1.2.9
     - io3d >=1.0.34
     - pyqt 4.11.*
     - pandas
