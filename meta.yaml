@@ -73,7 +73,7 @@ requirements:
     - scikit-image
     - pyqtconfig
     - pip
-    - sftpsync >=1.0.2
+    - sftpsync >=1.0.3
     # just for pip install pygco
     - cython
     - vtk
