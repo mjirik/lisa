@@ -745,8 +745,13 @@ class OrganSegmentation():
         paramiko_log = os.path.join(self.output_datapath, 'paramiko.log')
         paramiko.util.log_to_file(paramiko_log)
         sftp = sftpsync.Sftp(host=host, username=username, password=password)
-        localfrom = self._output_datapath_from_server.replace("/", os.sep)
-        localto = self._output_datapath_to_server.replace("/", os.sep)
+        localfrom = self._output_datapath_from_server.replace(os.sep, '/')
+        localto = self._output_datapath_to_server.replace(os.sep, '/')
+        # this makes sure that all paths ends with slash
+        if not localfrom.endswith('/'):
+            localfrom += '/'
+        if not localto.endswith('/'):
+            localto += '/'
         remotefrom = "from_server/"
         remoteto = "to_server/"
 

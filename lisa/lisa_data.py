@@ -44,9 +44,9 @@ def create_lisa_data_dir_tree(oseg=None):
 
     if oseg is not None:
         # used for server sync
-        oseg._output_datapath_from_server = op.join(oseg.output_datapath, 'sync', oseg.sftp_username)
+        oseg._output_datapath_from_server = op.join(oseg.output_datapath, 'sync', oseg.sftp_username, "from_server/")
         # used for server sync
-        oseg._output_datapath_to_server = op.join(oseg.output_datapath, 'sync', oseg.sftp_username, "to_server")
+        oseg._output_datapath_to_server = op.join(oseg.output_datapath, 'sync', oseg.sftp_username, "to_server/")
         odp = oseg.output_datapath
         if not op.exists(odp):
             os.makedirs(odp)
