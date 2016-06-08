@@ -843,7 +843,7 @@ class OrganSegmentationWindow(QMainWindow):
 
         self.statusBar().showMessage('Checking for update ...')
         self.oseg.update()
-        self.statusBar().showMessage('Update finished. Ready')
+        self.statusBar().showMessage('Update finished. Please restart Lisa')
 
     def btnAutomaticLiverSeeds(self, event=None):
         self.statusBar().showMessage('Automatic liver seeds...')
