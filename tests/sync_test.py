@@ -1,6 +1,8 @@
 # ! /usr/bin/python
 # -*- coding: utf-8 -*-
 
+import logging
+logger = logging.getLogger(__name__)
 
 # import funkcí z jiného adresáře
 import sys
@@ -37,31 +39,19 @@ class OrganSegmentationTest(unittest.TestCase):
         metadata = {'voxelsize_mm': voxelsize_mm}
         return img3d, metadata, seeds, segmentation
 
-    @unittest.skip("in progress")
+    # @unittest.skip("in progress")
     def test_sync_paul(self):
         """
         sync with paul account
         """
 
-        # gcparams = {'pairwiseAlpha':10, 'use_boundary_penalties':True}
         oseg = organ_segmentation.OrganSegmentation(None)
-        # oseg.add_seeds_mm([120], [120], [400], label=1, radius=30)
-        # oseg.add_seeds_mm([170, 220, 250], [250, 280, 200], [400], label=2,
-        #                   radius=30)
-
-        # "boundary penalties"
-        # oseg.interactivity()
-        # oseg.ninteractivity()
-
-        # volume = oseg.get_segmented_volume_size_mm3()
-
-        # misc.obj_to_file(oseg.get_iparams(),'iparams.pkl', filetype='pickle')
         oseg.sync_lisa_data('paul','P4ul')
 
 
-        file_path = os.path.join(lisa.lisa_data, 'sync','paul', 'from_server', 'test.txt')
+        file_path = lisa.lisa_data.path('sync','paul', 'from_server', 'test.txt')
+        logger.debug('file_path %s', file_path)
         self.assertTrue(os.path.exists(file_path))
-    # @unittest.skipIf(not interactiveTest, "interactive test")
 
 if __name__ == "__main__":
     unittest.main()
