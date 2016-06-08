@@ -29,6 +29,12 @@ class CacheFile():
     def get(self, key):
         return self.data[key]
 
+    def get_or_none(self, key):
+        if key in self.data.keys():
+            return self.data[key]
+        else:
+            return None
+
     def update(self, key, value):
         self.data[key] = value
         io3d.misc.obj_to_file(self.data, self.filename)
