@@ -735,10 +735,10 @@ class OrganSegmentation():
             self.segmentation_prev = None
 
         return igc
+
     def sync_lisa_data(self, username, password, host="147.228.47.162", callback=printTotals):
         self.sftp_username = username
         self.create_lisa_data_dir_tree()
-
 
         import sftpsync
         import paramiko

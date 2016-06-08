@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 # import funkcí z jiného adresáře
 import sys
 import os.path
+import shutil
 
 # path_to_script = os.path.dirname(os.path.abspath(__file__))
 import unittest
@@ -45,6 +46,10 @@ class OrganSegmentationTest(unittest.TestCase):
         sync with paul account
         """
 
+        path_to_paul = lisa.lisa_data.path('sync','paul')
+
+        if os.path.exists(path_to_paul):
+            shutil.rmtree(path_to_paul)
         oseg = organ_segmentation.OrganSegmentation(None)
         oseg.sync_lisa_data('paul','P4ul')
 
