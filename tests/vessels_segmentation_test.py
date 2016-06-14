@@ -120,7 +120,7 @@ class VesselsSegmentationTest(unittest.TestCase):
                  'voxelsize_mm': voxelsize_mm, 'slab': slab}
 
         datap = vr.resection(
-            datap, use_old_editor=True,
+            datap, method=True,
             interactivity=False, seeds=seeds
         )
 

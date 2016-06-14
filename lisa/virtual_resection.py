@@ -174,10 +174,12 @@ def change(data, name):
     cut_editor(segmentation == data['slab'][name])
 
 
-def resection(data, name=None, use_old_editor=False,
+def resection(data, name=None, method='PV',
               interactivity=True, seeds=None):
-    if use_old_editor:
+    if method is 'PV':
         return resection_old(data, interactivity=interactivity, seeds=seeds)
+    elif method is 'planar':
+        return resection_planar(data, interactivity=interactivity, seeds=seeds)
     else:
         return resection_new(data, name)
 
@@ -427,7 +429,7 @@ if __name__ == "__main__":
 
     # cut_editor(data,args.inputfile)
     if args.use_old_editor:
-        resection(data, name, use_old_editor=args.use_old_editor)
+        resection(data, name, method=args.use_old_editor)
     else:
         cut_editor(data, args.picklefile)
     # print normal
