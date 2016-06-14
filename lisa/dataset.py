@@ -122,6 +122,35 @@ class DataDirIterator:
             self.current += 1
             return out
 
+def generate_sample_data(shape=[30, 30, 30], dataplus=True):
+    import numpy as np
+
+    img3d = (np.random.rand(shape[0], shape[1], shape[2])*10).astype(np.int16)
+    seeds = (np.zeros(img3d.shape)).astype(np.int8)
+    segmentation = (np.zeros(img3d.shape)).astype(np.int8)
+    segmentation[10:25, 4:24, 2:16] = 1
+    img3d = img3d + segmentation*20
+    seeds[12:18, 9:16, 3:6] = 1
+    seeds[19:22, 21:27, 19:21] = 2
+
+    voxelsize_mm = [5, 5, 5]
+    metadata = {'voxelsize_mm': voxelsize_mm}
+    slab = {
+        'liver': 1,
+        'porta': 2,
+        'resected_liver': 3,
+        'resected_porta': 4}
+
+    if dataplus:
+        return {
+            'data3d': img3d,
+            'seeds': seeds,
+            'segmentation': segmentation,
+            'voxelsize_mm': voxelsize_mm,
+            'slab': slab,
+        }
+    else:
+        return img3d, metadata, seeds, segmentation
 
 def main():
     logger = logging.getLogger()

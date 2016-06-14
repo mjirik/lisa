@@ -199,6 +199,52 @@ def resection_old(data, interactivity=True, seeds=None):
                                            interactivity=interactivity)
     return data
 
+def resection_planar(data, interactivity, seeds=None):
+    """
+    Based on input seeds the cutting plane is constructed
+
+    :param data:
+    :param interactivity:
+    :param seeds:
+    :return:
+    """
+    if seeds is None:
+        if interactivity:
+            print ("Select cut")
+            seeds = cut_editor_old(data)
+        else:
+            logger.error('seeds is None and interactivity is False')
+            return None
+
+    segm, dist1, dist2 = split_organ_by_plane(data, seeds)
+    cut = dist1**2 < 3
+    # TODO split this function from visualization
+    data = virtual_resection_visualization(data, segm, dist1,
+                                           dist2, cut,
+                                           interactivity=interactivity)
+    return data
+
+def split_organ_by_plane(data, seeds):
+    """
+    Based on seeds split nonzero segmentation with plane
+
+    :param data:
+    :param seeds:
+    :return:
+    """
+    import geometry3d
+    import data_manipulation
+    l1 = 1
+    l2 = 2
+
+    point, vector = geometry3d.plane_fit(seeds.nonzero())
+    dist1 = data_manipulation.split_with_plane(point, vector, data['data3d'].shape)
+    dist2 = dist1 * -1
+
+    segm = (((data['segmentation'] != 0) * (dist1 < dist2)).astype('int8') +
+            (data['segmentation'] != 0).astype('int8'))
+
+    return segm, dist1, dist2
 
 def split_organ_by_two_vessels(data, lab):
     """

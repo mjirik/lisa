@@ -86,6 +86,34 @@ def keep_what_is_in_touch_with_mask(imlab, keep_mask, max_label):
 
     return imlab
 
+# Rozděl obraz na půl
+def split_with_plane(point, orientation, imshape):
+    """
+    Return 3d ndarray with distances from splitting plane
+
+    :arg point:
+    :arg orientation: oriented vector
+    :arg shape: shape of output data
+    """
+
+    vector = orientation
+    vector = vector / np.linalg.norm(vector)
+
+    a = vector[0]
+    b = vector[1]
+    c = vector[2]
+    x, y, z = np.mgrid[:imshape[0], :imshape[1], :imshape[2]]
+    a = vector[0]
+    b = vector[1]
+    c = vector[2]
+
+
+    d = -a * point[0] - b * point[1] - c * point[2]
+
+
+    z = (a * x + b * y + c*z + d) / (a**2 + b**2 +c**2)**0.5
+    return z
+
 def remove_what_is_in_touch_with_mask(imlab, exclude_mask):
     datatmp = imlab * exclude_mask
     nz = np.nonzero(datatmp)
