@@ -76,7 +76,7 @@ def Rez_podle_roviny(plane, data, voxel):
 # ----------------------------------------------------------
 def cut_editor_old(data):
 
-    pyed = sed3.sed3qt(data['segmentation'])
+    pyed = sed3.sed3qt(data['data3d'], contour=data['segmentation'])
     pyed.exec_()
 
     return pyed.seeds
@@ -219,7 +219,7 @@ def resection_planar(data, interactivity, seeds=None):
             return None
 
     segm, dist1, dist2 = split_organ_by_plane(data, seeds)
-    cut = dist1**2 < 3
+    cut = dist1**2 < 2
     # TODO split this function from visualization
     data = virtual_resection_visualization(data, segm, dist1,
                                            dist2, cut,

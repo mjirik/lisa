@@ -365,15 +365,26 @@ class OrganSegmentationWindow(QMainWindow):
         btn_lesions.clicked.connect(self.btnLesionLocalization)
         # btn_lesions.setEnabled(False)
 
-        btn_resection = QPushButton("Virtual resection", self)
-        btn_resection.clicked.connect(self.btnVirtualResection)
+        grid.addWidget(
+            self._add_button("Resection (PV)", self.btnVirtualResectionPV, 'btn_resection_pv',
+                             "Portal Vein based virtual resection"),
+            rstart + 2, 3)
+        grid.addWidget(
+            self._add_button("Resection (planar)", self.btnVirtualResectionPlanar, 'btn_resection_planar',
+                             "Plane based virtual resection"),
+            rstart + 1, 3)
+        # btn_resection_pv = QPushButton("Resection (PV)", self)
+        # btn_resection_pv.clicked.connect(self.btnVirtualResectionPV)
+        # btn_resection_planar = QPushButton("Resection (planar)", self)
+        # btn_resection_planar.clicked.connect(self.btnVirtualResectionPV)
 
         grid.addWidget(hr, rstart + 0, 2, 1, 4)
         grid.addWidget(text_resection, rstart + 0, 1)
         grid.addWidget(btn_pvseg, rstart + 1, 1)
         grid.addWidget(btn_hvseg, rstart + 1, 2)
-        grid.addWidget(btn_lesions, rstart + 1, 3)
-        grid.addWidget(btn_resection, rstart + 2, 3)
+        # grid.addWidget(btn_resection_planar, rstart + 1, 3)
+        # grid.addWidget(btn_resection_pv, rstart + 2, 3)
+        grid.addWidget(btn_lesions, rstart + 1, 4)
         grid.addWidget(btn_svpv, rstart + 2, 1)
         grid.addWidget(btn_svhv, rstart + 2, 2)
 
@@ -913,7 +924,13 @@ class OrganSegmentationWindow(QMainWindow):
         else:
             self.statusBar().showMessage('No segmentation data!')
 
-    def btnVirtualResection(self):
+    def btnVirtualResectionPV(self):
+        self._virtual_resection('PV')
+
+    def btnVirtualResectionPlanar(self):
+        self._virtual_resection('planar')
+
+    def _virtual_resection(self, method='planar'):
         # mport vessel_cut
 
         self.statusBar().showMessage('Performing virtual resection ...')
@@ -922,7 +939,7 @@ class OrganSegmentationWindow(QMainWindow):
                 'slab': self.oseg.slab,
                 'voxelsize_mm': self.oseg.voxelsize_mm
                 }
-        cut = virtual_resection.resection(data, method=True)
+        cut = virtual_resection.resection(data, method=method)
         self.oseg.segmentation = cut['segmentation']
         self.oseg.slab = cut['slab']
 
