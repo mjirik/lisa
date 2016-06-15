@@ -290,7 +290,7 @@ class OrganSegmentationWindow(QMainWindow):
         btn_segliver.clicked.connect(self.liverSeg)
         self.btn_segauto = QPushButton("Auto seg.", self)
         self.btn_segauto.clicked.connect(self.autoSeg)
-        btn_segman = QPushButton("Manual seg.", self)
+        btn_segman = QPushButton("Viewer", self)
         btn_segman.clicked.connect(self.manualSeg)
         self.text_seg_data = QLabel('segmented data:')
         grid.addWidget(hr, rstart + 0, 2, 1, 4)
