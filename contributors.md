@@ -49,3 +49,8 @@ Run tests in project directory
 Test code beauty
 
     pep8
+
+## Documentation
+
+in `docs/conf.py` have to be listed all extern modules to generate documentation.
+You can check [build log](https://readthedocs.org/projects/liver-surgery-analyser)

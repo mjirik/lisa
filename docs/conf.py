@@ -42,6 +42,7 @@ MOCK_MODULES = [
     'scipy.stats', 'io3d.misc', 'lisa.extern.lar', 'scipy.cluster',
     'scipy.cluster.vq', 'scipy.cluster.vq',
     'ipdb', 'multipolyfit', 'PIL', 'yaml', 'SimpleITK',
+    'imtools', 'imtools.misc', 'imtools.qmisc'
     # 'six', 'nearpy', 'SimpleITK', 'lar', 'pandas'
 ]
 #
