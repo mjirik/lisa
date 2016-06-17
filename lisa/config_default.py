@@ -59,15 +59,19 @@ CONFIG_DEFAULT={
         },
         "label kidney L":{
             "output_label": 15,
+            'clean_seeds_after_update_parameters': True,
         },
         "label kidney R":{
             "output_label": 16,
+            'clean_seeds_after_update_parameters': True,
         },
         "label liver":{
             "output_label": 1,
+            'clean_seeds_after_update_parameters': True,
         },
         "label hearth":{
             "output_label": 10,
+            'clean_seeds_after_update_parameters': True,
         }
     }
 

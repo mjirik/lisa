@@ -363,6 +363,11 @@ class OrganSegmentation():
         if 'seg_postproc_pars' in params.keys():
             self.seg_postproc_pars = params['seg_postproc_pars']
             logger.debug('seg_postproc_pars updated')
+        if 'clean_seeds_after_update_parameters' in params.keys():
+
+            if self.seeds is not None:
+                self.seeds[...] = 0
+            logger.debug('clean_seeds_after_update_parameters')
 
 
     def run_sss(self):
