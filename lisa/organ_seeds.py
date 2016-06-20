@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 import numpy as np
 import argparse
 
-import liver_model
+import organ_model
 import imtools
 import data_manipulation
 import scipy
@@ -31,7 +31,7 @@ def automatic_liver_seeds(
         gaussian_sigma_mm=[20,20,20]):
     from pysegbase import pycut
     # fn_mdl = op.expanduser(fn_mdl)
-    mdl = pycut.Model({'mdl_stored_file':fn_mdl, 'fv_extern': liver_model.intensity_localization_fv})
+    mdl = pycut.Model({'mdl_stored_file':fn_mdl, 'fv_extern': organ_model.intensity_localization_fv})
     working_voxelsize_mm = np.asarray([1.5, 1.5, 1.5])
     gaussian_sigma_mm = np.asarray(gaussian_sigma_mm)
 

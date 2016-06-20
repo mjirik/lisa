@@ -17,7 +17,7 @@ import argparse
 
 
 import organ_localizator
-import liver_model
+import organ_model
 
 def main():
     logger = logging.getLogger()
@@ -68,7 +68,7 @@ def main():
 
 
     if args.liver_model or args.all:
-        liver_model.train_liver_model_from_sliver_data()
+        organ_model.train_liver_model_from_sliver_data()
 
 
 if __name__ == "__main__":

@@ -30,6 +30,10 @@ import os.path as op
 sys.path.append(op.join(op.dirname(os.path.abspath(__file__)), "../../bodynavigation/"))
 
 def externfv(data3d, voxelsize_mm):        # scale
+    return localization_fv(data3d=data3d, voxelsize_mm=voxelsize_mm)
+
+
+def localization_fv(data3d, voxelsize_mm):        # scale
         fv = []
         # f0 = scipy.ndimage.filters.gaussian_filter(data3d, sigma=3).reshape(-1, 1)
         #f1 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=1).reshape(-1, 1) - f0
@@ -62,6 +66,23 @@ def externfv(data3d, voxelsize_mm):        # scale
 
 
         return fv
+
+def localization_intensity_fv(data3d, voxelsize_mm):
+    """
+    feature vector combine intensity and localization information
+    :param data3d:
+    :param voxelsize_mm:
+    :return:
+    """
+    fvloc = localization_fv(data3d, voxelsize_mm)
+    fv = np.concatenate([
+        fvloc,
+        data3d.reshape(-1, 1)
+        # f0,
+        #                 f1, f2, f3, f4,
+        #f6, f7, f8
+    ], 1)
+    return fv
 
 
 class OrganLocalizator():

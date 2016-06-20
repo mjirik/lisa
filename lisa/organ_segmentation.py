@@ -61,7 +61,7 @@ import data_plus
 import support_structure_segmentation as sss
 import cachefile as cachef
 import config_default
-import liver_seeds
+import organ_seeds
 import lisa_data
 
 # import audiosupport
@@ -684,8 +684,8 @@ class OrganSegmentation():
                      '\nmodelparams ' + str(self.segmodelparams)
                      )
         # insert feature function instead of string description
-        import liver_model
-        self.segmodelparams = liver_model.add_fv_extern_into_modelparams(self.segmodelparams)
+        import organ_model
+        self.segmodelparams = organ_model.add_fv_extern_into_modelparams(self.segmodelparams)
 
         if 'method' not in self.segparams.keys() or\
                 self.segparams['method'] in pycut.methods:
@@ -1086,7 +1086,7 @@ class OrganSegmentation():
     #     return self.iparams
 
     def automatic_liver_seeds(self):
-        seeds, likdif = liver_seeds.automatic_liver_seeds(self.data3d, self.seeds, self.voxelsize_mm)
+        seeds, likdif = organ_seeds.automatic_liver_seeds(self.data3d, self.seeds, self.voxelsize_mm)
         # přenastavíme na čísla mezi nulou a jedničkou, druhá konstanta je nastavena empiricky
         self.apriori = boltzman(likdif, 0, 200).astype(np.float16)
 

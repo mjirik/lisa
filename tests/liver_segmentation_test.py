@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 import lisa.dataset
 from lisa import organ_segmentation
-from lisa import liver_model
+from lisa import organ_model
 
 class LiverSegmentationTest(unittest.TestCase):
 
@@ -41,7 +41,7 @@ class LiverSegmentationTest(unittest.TestCase):
     @attr('slow')
     def test_train_liver_model(self):
         fn_mdl = "test_liver_intensity.Model.p"
-        liver_model.train_liver_model_from_sliver_data(
+        organ_model.train_liver_model_from_sliver_data(
             output_file= fn_mdl,
             sliver_reference_dir="~/lisa_data/sample_data/",
             orig_pattern="*orig*01.mhd",
@@ -56,7 +56,7 @@ class LiverSegmentationTest(unittest.TestCase):
         :return:
         """
         fn_mdl = "test_liver_intensity.Model.p"
-        liver_model.train_liver_model_from_sliver_data(
+        organ_model.train_liver_model_from_sliver_data(
             output_file=fn_mdl,
             sliver_reference_dir="~/lisa_data/sample_data/",
             orig_pattern="*orig*01.mhd",
