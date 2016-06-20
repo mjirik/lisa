@@ -300,13 +300,38 @@ class ModelTrainer():
         self._add_to_training_data(data3dr, self.working_voxelsize_mm, segmentationr)
         #f1 scipy.ndimage.filters.gaussian_filter(data3dr, sigma=5)
 
-    def train_liver_model_from_sliver_data(
+
+
+    def train_liver_model_from_sliver_data(self, *args, **kwargs):
+        """
+        see train_sliver_from_dir()
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        return self.train_organ_model_from_dir(*args, **kwargs)
+
+    def train_organ_model_from_dir(
             self,
             output_file="~/lisa_data/liver_intensity.Model.p",
             sliver_reference_dir='~/data/medical/orig/sliver07/training/',
             orig_pattern="*orig*[1-9].mhd",
             ref_pattern="*seg*[1-9].mhd",
+            label=1,
+            segmentation_key=False
         ):
+        """
+
+        :param output_file:
+        :param sliver_reference_dir:
+        :param orig_pattern:
+        :param ref_pattern:
+        :param label: label with the segmentation, if string is used, list of labels "slab" is used (works for .pklz)
+        :param segmentation_key: Load segmentation from "segmentation" key in .pklz file
+        :return:
+        """
+        logger.debug("safasfdsafdsafasfadfsadf")
+        logger.debug("label: {}".format(str(label)))
 
         sliver_reference_dir = op.expanduser(sliver_reference_dir)
 
@@ -316,6 +341,8 @@ class ModelTrainer():
 
         orig_fnames.sort()
         ref_fnames.sort()
+        if len(orig_fnames) == 0:
+            logger.warning("No file found in path:\n{}".format(sliver_reference_dir + orig_pattern))
 
         for oname, rname in zip(orig_fnames, ref_fnames):
             logger.debug(oname)
@@ -323,9 +350,23 @@ class ModelTrainer():
             vs_mm1 = metadata['voxelsize_mm']
             data3d_seg, metadata = io3d.datareader.read(rname)
             vs_mm = metadata['voxelsize_mm']
+            if segmentation_key is not None:
+                data3d_seg = metadata['segmentation']
+
+            if type(label) == str:
+                try:
+                    label = metadata["slab"][label]
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error("Problem with label\nRequested label: {}\n".format(str(label)))
+                    if "slab" in metadata.keys():
+                        logger.error("slab:")
+                        logger.error(str(metadata['slab']))
+                    logger.error("unique numeric labels in segmentation:\n{}".format(str(np.unique(data3d_seg))))
+                    raise
 
             # liver have label 1, background have label 2
-            data3d_seg = 2 - data3d_seg
+            data3d_seg = (data3d_seg == label).astype(np.int8)
 
             #     sf.add_train_data(data3d_orig, data3d_seg, voxelsize_mm=vs_mm)
             try:
@@ -337,47 +378,35 @@ class ModelTrainer():
                 # fvhn = copy.deepcopy(fvh)
                 #fhs_list.append(fvh)
 
-
         self.fit()
 
         output_file = op.expanduser(output_file)
         self.cl.save(output_file)
 
 
-def train_liver_model_from_sliver_data(
+def train_liver_model_from_sliver_data(*args, **kwargs
+):
+    return train_organ_model_from_dir(*args, **kwargs)
+
+def train_organ_model_from_dir(
+        args,
         output_file="~/lisa_data/liver_intensity.Model.p",
         sliver_reference_dir='~/data/medical/orig/sliver07/training/',
         orig_pattern="*orig*[1-9].mhd",
         ref_pattern="*seg*[1-9].mhd",
+        label=1,
+        segmentation_key=False,
         modelparams={}
 ):
-    force = True
-    force = False
-    fname_vs = 'vs_stats.csv'
-    fname_fhs = 'fhs_stats.pklz'
-
-    sliver_reference_dir = op.expanduser(sliver_reference_dir)
-
-    orig_fnames = glob.glob(sliver_reference_dir + orig_pattern)
-
-    ref_fnames = glob.glob(sliver_reference_dir + ref_pattern)
-
-    orig_fnames.sort()
-    ref_fnames.sort()
-
-
-    #if op.exists(fname_vs) and op.exists(fname_fhs) and (force is False):
-    #    dfvs = pd.read_csv(fname_vs, index_col=0)
-    #    fhs_list = io3d.misc.obj_from_file(fname_fhs, 'auto')
-
-    #else:
 
     sf = ModelTrainer(modelparams=modelparams)
-    sf.train_liver_model_from_sliver_data(
+    sf.train_organ_model_from_dir(
         output_file=output_file,
         sliver_reference_dir=sliver_reference_dir,
         orig_pattern=orig_pattern,
-        ref_pattern=ref_pattern
+        ref_pattern=ref_pattern,
+        label=label,
+        segmentation_key=segmentation_key
     )
     return sf.data, sf.target
 
