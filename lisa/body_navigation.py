@@ -313,7 +313,8 @@ class BodyNavigation:
         :return:
         """
 
-        if kernel_size_mm is None: kernel_size = [150, 150]
+        if kernel_size_mm is None:
+            kernel_size_mm = [150, 150]
 
         # kernel_size must be odd - lichý
         kernel_size = np.asarray(kernel_size_mm) / self.working_vs[1:]

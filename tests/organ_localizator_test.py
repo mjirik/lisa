@@ -52,7 +52,7 @@ class LocalizationTests(unittest.TestCase):
 
         organ_model.train_organ_model_from_dir(
             "left_kidney.ol.p",
-            sliver_reference_dir=sample_data_path,
+            reference_dir=sample_data_path,
             orig_pattern="*orig*.pklz",
             ref_pattern="*orig*.pklz",
             label=label,

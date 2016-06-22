@@ -41,6 +41,8 @@ def add_fv_extern_into_modelparams(modelparams):
             fv_extern_str = modelparams['fv_extern']
             if fv_extern_str == "intensity_localization_fv":
                 modelparams['fv_extern'] = intensity_localization_fv
+            if fv_extern_str == "intensity_localization_2steps_fv":
+                modelparams['fv_extern'] = intensity_localization_2steps_fv
             elif fv_extern_str == "near_blur_intensity_localization_fv":
                 modelparams['fv_extern'] = near_blur_intensity_localization_fv
                 print "blur intensity"
@@ -138,7 +140,53 @@ def near_blur_intensity_localization_fv(data3dr, voxelsize_mm, seeds=None, uniqu
         return fv, sd
 
     return fv
+
 def intensity_localization_fv(data3dr, voxelsize_mm, seeds=None, unique_cls=None):        # scale
+    """
+    Use organ_localizator features plus intensity features
+
+    :param data3dr:
+    :param voxelsize_mm:
+    :param seeds:
+    :param unique_cls:
+    :return:
+    """
+    import scipy
+    import numpy as np
+    import os.path as op
+    try:
+        from lisa import organ_localizator
+    except:
+        import organ_localizator
+
+    f0 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=0.5).reshape(-1, 1)
+    f1 = scipy.ndimage.filters.gaussian_filter(data3dr, sigma=3).reshape(-1, 1)
+    import organ_localizator
+    fvall = organ_localizator.localization_fv(data3dr, voxelsize_mm)
+    # fvall = organ_localizator.localization_intensity_fv(data3dr, voxelsize_mm)
+
+
+    fv = np.concatenate([
+        f0,
+        f1,
+        # f2, f3, # f4,
+        #                 fd1, fd2, fd3, fd4, fd5, fd6,
+        fvall,
+        # f6, f7, f8,
+    ], 1)
+    if seeds is not None:
+        #             logger.debug("seeds " + str(seeds))
+        #             print "seeds ", seeds
+        sd = seeds.reshape(-1,1)
+        selection = np.in1d(sd, unique_cls)
+        fv = fv[selection]
+        sd = sd[selection]
+        # sd = sd[]
+        return fv, sd
+
+    return fv
+
+def intensity_localization_2steps_fv(data3dr, voxelsize_mm, seeds=None, unique_cls=None):        # scale
     """
     Use organ_localizator features plus intensity features
 
@@ -314,7 +362,7 @@ class ModelTrainer():
     def train_organ_model_from_dir(
             self,
             output_file="~/lisa_data/liver_intensity.Model.p",
-            sliver_reference_dir='~/data/medical/orig/sliver07/training/',
+            reference_dir='~/data/medical/orig/sliver07/training/',
             orig_pattern="*orig*[1-9].mhd",
             ref_pattern="*seg*[1-9].mhd",
             label=1,
@@ -323,26 +371,27 @@ class ModelTrainer():
         """
 
         :param output_file:
-        :param sliver_reference_dir:
+        :param reference_dir:
         :param orig_pattern:
         :param ref_pattern:
         :param label: label with the segmentation, if string is used, list of labels "slab" is used (works for .pklz)
         :param segmentation_key: Load segmentation from "segmentation" key in .pklz file
         :return:
         """
-        logger.debug("safasfdsafdsafasfadfsadf")
         logger.debug("label: {}".format(str(label)))
 
-        sliver_reference_dir = op.expanduser(sliver_reference_dir)
+        reference_dir = op.expanduser(reference_dir)
 
-        orig_fnames = glob.glob(sliver_reference_dir + orig_pattern)
+        orig_fnames = glob.glob(reference_dir + orig_pattern)
 
-        ref_fnames = glob.glob(sliver_reference_dir + ref_pattern)
+        ref_fnames = glob.glob(reference_dir + ref_pattern)
 
         orig_fnames.sort()
         ref_fnames.sort()
         if len(orig_fnames) == 0:
-            logger.warning("No file found in path:\n{}".format(sliver_reference_dir + orig_pattern))
+            logger.warning("No file found in path:\n{}".format(reference_dir + orig_pattern))
+
+        print (ref_fnames)
 
         for oname, rname in zip(orig_fnames, ref_fnames):
             logger.debug(oname)
@@ -381,6 +430,7 @@ class ModelTrainer():
         self.fit()
 
         output_file = op.expanduser(output_file)
+        print "Saved into: ", output_file
         self.cl.save(output_file)
 
 
@@ -389,9 +439,8 @@ def train_liver_model_from_sliver_data(*args, **kwargs
     return train_organ_model_from_dir(*args, **kwargs)
 
 def train_organ_model_from_dir(
-        args,
         output_file="~/lisa_data/liver_intensity.Model.p",
-        sliver_reference_dir='~/data/medical/orig/sliver07/training/',
+        reference_dir='~/data/medical/orig/sliver07/training/',
         orig_pattern="*orig*[1-9].mhd",
         ref_pattern="*seg*[1-9].mhd",
         label=1,
@@ -402,7 +451,7 @@ def train_organ_model_from_dir(
     sf = ModelTrainer(modelparams=modelparams)
     sf.train_organ_model_from_dir(
         output_file=output_file,
-        sliver_reference_dir=sliver_reference_dir,
+        reference_dir=reference_dir,
         orig_pattern=orig_pattern,
         ref_pattern=ref_pattern,
         label=label,
@@ -410,31 +459,6 @@ def train_organ_model_from_dir(
     )
     return sf.data, sf.target
 
-    # for oname, rname in zip(orig_fnames, ref_fnames):
-    #     print oname
-    #     data3d_orig, metadata = io3d.datareader.read(oname)
-    #     vs_mm1 = metadata['voxelsize_mm']
-    #     data3d_seg, metadata = io3d.datareader.read(rname)
-    #     vs_mm = metadata['voxelsize_mm']
-    #
-    #     # liver have label 1, background have label 2
-    #     data3d_seg = 2 - data3d_seg
-    #
-    #     #     sf.add_train_data(data3d_orig, data3d_seg, voxelsize_mm=vs_mm)
-    #     try:
-    #         sf.add_train_data(data3d_orig, data3d_seg, voxelsize_mm=vs_mm)
-    #     except:
-    #         traceback.print_exc()
-    #         print "problem - liver model"
-    #         pass
-    #         # fvhn = copy.deepcopy(fvh)
-    #         #fhs_list.append(fvh)
-    #
-    #
-    # sf.fit()
-    #
-    # output_file = op.expanduser(output_file)
-    # sf.cl.save(output_file)
 
 def model_score_from_sliver_data(
 #         output_file="~/lisa_data/liver_intensity.Model.p",
