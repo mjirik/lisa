@@ -77,6 +77,7 @@ class OrganSegmentationWindow(QMainWindow):
 
         QMainWindow.__init__(self)
         self._initUI()
+        self._initMenu()
 
         if oseg is not None:
             if oseg.data3d is not None:
@@ -87,21 +88,88 @@ class OrganSegmentationWindow(QMainWindow):
 
 
     def _initMenu(self):
+        menubar = self.menuBar()
+
+        ###### FILE MENU ######
+        fileMenu = menubar.addMenu('&File')
+        loadSubmenu = fileMenu.addMenu('&Load')
+        # load dir
+        loadDirAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Directory', self)
+        loadDirAction.setStatusTip('Load data from directory (DICOM, jpg, png...)')
+        loadDirAction.triggered.connect(self.loadDataDir)
+        loadSubmenu.addAction(loadDirAction)
+        # load file
+        loadFileAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&File', self)
+        loadFileAction.setStatusTip('Load data from file (pkl, 3D Dicom, tiff...)')
+        loadFileAction.triggered.connect(self.loadDataFile)
+        loadSubmenu.addAction(loadFileAction) 
+        
+        saveSubmenu = fileMenu.addMenu('&Save')
+        # save file
+        saveFileAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&File', self)
+        saveFileAction.setStatusTip('Save data with segmentation')
+        saveFileAction.triggered.connect(self.saveOut)
+        saveSubmenu.addAction(saveFileAction)   
+        # save dicom
+        saveDicomAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&DICOM', self)
+        saveDicomAction.setStatusTip('Save DICOM data')
+        saveDicomAction.triggered.connect(self.btnSaveOutDcm)
+        saveSubmenu.addAction(saveDicomAction)
+        # save dicom overlay
+        saveDicomOverlayAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&DICOM overlay', self)
+        saveDicomOverlayAction.setStatusTip('Save overlay DICOM data')
+        saveDicomOverlayAction.triggered.connect(self.btnSaveOutDcmOverlay)
+        saveSubmenu.addAction(saveDicomOverlayAction)     
+        # save PV tree
+        savePVAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&PV tree', self)
+        savePVAction.setStatusTip('Save Portal Vein 1D model')
+        savePVAction.triggered.connect(self.btnSavePortalVeinTree)
+        saveSubmenu.addAction(savePVAction)     
+        # save HV tree
+        saveHVAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&HV tree', self)
+        saveHVAction.setStatusTip('Save Hepatic Veins 1D model')
+        saveHVAction.triggered.connect(self.btnSaveHepaticVeinsTree)
+        saveSubmenu.addAction(saveHVAction)     
+
+        separator = fileMenu.addAction("")
+        separator.setSeparator(True)
+
+        autoSeedsAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Automatic liver seeds', self)
+        autoSeedsAction.setStatusTip('Automatic liver seeds')
+        autoSeedsAction.triggered.connect(self.btnAutomaticLiverSeeds)
+        fileMenu.addAction(autoSeedsAction)
+
+        autoSegAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Automatic segmentation', self)
+        autoSegAction.setStatusTip('Automatic segmentation')
+        autoSegAction.triggered.connect(self.autoSeg)
+        fileMenu.addAction(autoSegAction)
+
+        cropAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Crop', self)
+        cropAction.setStatusTip('')
+        cropAction.triggered.connect(self.cropDcm)
+        fileMenu.addAction(cropAction)
+
+        maskAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Mask region', self)
+        maskAction.setStatusTip('')
+        maskAction.triggered.connect(self.maskRegion)
+        fileMenu.addAction(maskAction)
+
+        view3DAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&View 3D', self)
+        view3DAction.setStatusTip('View segmentation in 3D model')
+        view3DAction.triggered.connect(self.view3D)
+        fileMenu.addAction(view3DAction)
+
+        separator = fileMenu.addAction("")
+        separator.setSeparator(True)
+
         exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
         exitAction.setShortcut('Ctrl+Q')
         exitAction.setStatusTip('Exit application')
         exitAction.triggered.connect(QtGui.qApp.quit)
-
-        autoSeedsAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Automatic liver seeds', self)
-        # autoSeedsAction.setShortcut('Ctrl+Q')
-        autoSeedsAction.setStatusTip('Automatic liver seeds')
-        autoSeedsAction.triggered.connect(self.btnAutomaticLiverSeeds)
-
-        menubar = self.menuBar()
-        fileMenu = menubar.addMenu('&File')
         fileMenu.addAction(exitAction)
-        fileMenu.addAction(autoSeedsAction)
 
+
+        ###### IMAGE MENU ######
         imageMenu = menubar.addMenu('&Image')
 
         randomRotateAction= QtGui.QAction(QtGui.QIcon('exit.png'), '&Random Rotate', self)
@@ -115,6 +183,32 @@ class OrganSegmentationWindow(QMainWindow):
         mirrorZAxisAction.triggered.connect(self.oseg.mirror_z_axis)
         imageMenu.addAction(mirrorZAxisAction)
 
+
+        ###### OPTION MENU ######
+        optionMenu = menubar.addMenu('&Option')
+        
+        configAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Configuration', self)
+        configAction.setStatusTip('Config settings')
+        configAction.triggered.connect(self.btnConfig)
+        optionMenu.addAction(configAction)
+
+        logAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Log', self)
+        logAction.setStatusTip('See log file')
+        logAction.triggered.connect(self.btnLog)
+        optionMenu.addAction(logAction)
+
+        syncAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Sync', self)
+        syncAction.setStatusTip('Synchronize files from the server')
+        syncAction.triggered.connect(self.sync_lisa_data)
+        optionMenu.addAction(syncAction)        
+
+        updateAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Update', self)
+        updateAction.setStatusTip('Check new update')
+        updateAction.triggered.connect(self.btnUpdate)
+        optionMenu.addAction(updateAction)
+
+
+        ###### CONFIG MENU ######
         configMenu = menubar.addMenu('&Config')
         # combo = QtGui.QComboBox(self)
         for text in self.oseg.segmentation_alternative_params.keys():
@@ -154,252 +248,148 @@ class OrganSegmentationWindow(QMainWindow):
         self.setCentralWidget(cw)
         grid = QGridLayout()
         grid.setSpacing(10)
+
         self.uiw = {}
 
         # status bar
         self.statusBar().showMessage('Ready')
 
-        # menubar
-        self._initMenu()
+        ## menubar
+        #self._initMenu()
 
         font_label = QFont()
         font_label.setBold(True)
         font_info = QFont()
         font_info.setItalic(True)
         font_info.setPixelSize(10)
-
+        
         # # # # # # #
         # #  LISA logo
         # font_title = QFont()
         # font_title.setBold(True)
         # font_title.setSize(24)
 
-        lisa_title = QLabel('LIver Surgery Analyser')
-        info = QLabel('Developed by:\n' +
-                      'University of West Bohemia\n' +
-                      'Faculty of Applied Sciences\n' +
-                      QString.fromUtf8('M. Jiřík, V. Lukeš - 2013') +
-                      '\n\nVersion: ' + self.oseg.version
-                      )
-        info.setFont(font_info)
-        lisa_title.setFont(font_label)
+        #lisa_title = QLabel('Liver Surgery Analyser')
+        #info = QLabel('Developed by:\n' +
+        #              'University of West Bohemia\n' +
+        #              'Faculty of Applied Sciences\n' +
+        #              QString.fromUtf8('M. Jiřík, V. Lukeš - 2013') +
+        #              '\n\nVersion: ' + self.oseg.version
+        #              )
+        #info.setFont(font_info)
+        #lisa_title.setFont(font_label)
+        #grid.addWidget(lisa_title, 0, 1)
+        #grid.addWidget(info, 1, 1)
+
         lisa_logo = QLabel()
         logopath = find_logo()
         logo = QPixmap(logopath)
         lisa_logo.setPixmap(logo)  # scaledToWidth(128))
-        grid.addWidget(lisa_title, 0, 1)
-        grid.addWidget(info, 1, 1)
-
-        btn_config = QPushButton("Configuration", self)
-        btn_config.clicked.connect(self.btnConfig)
-        self.uiw['config'] = btn_config
-        grid.addWidget(btn_config, 2, 1)
-
-        btn_update = QPushButton("Update", self)
-        btn_update.clicked.connect(self.btnUpdate)
-        self.uiw['btn_update'] = btn_update
-        grid.addWidget(btn_update, 3, 1)
         grid.addWidget(lisa_logo, 0, 2, 5, 2)
 
-        # combo = QtGui.QComboBox(self)
-        # for text in self.oseg.segmentation_alternative_params.keys():
-        #     combo.addItem(text)
-        # combo.activated[str].connect(self.onAlternativeSegmentationParams)
-        # grid.addWidget(combo, 4, 1)
+        ##### MAIN MENU #####
+        btnLoad = QPushButton("Load", self)
+        btnLoad.clicked.connect(self.btnLoad)
+        grid.addWidget(btnLoad, 5, 2)
 
-        # right from logo
-        rstart = 0
+        btnSave = QPushButton("Save", self)
+        btnSave.clicked.connect(self.btnSave)
+        grid.addWidget(btnSave, 6, 2)
 
-        btn_sync = QPushButton("Sync", self)
-        btn_sync.clicked.connect(self.sync_lisa_data)
-        self.uiw['sync'] = btn_sync
-        grid.addWidget(btn_sync, rstart + 2, 4)
+        btnSegmentation = QPushButton("Segmentation", self)
+        btnSegmentation.clicked.connect(self.btnSegmentation)
+        grid.addWidget(btnSegmentation, 7, 2)
 
-        grid.addWidget(
-            self._add_button("Log", self.btnLog, 'Log',
-                             "See log file", QStyle.SP_FileDialogContentsView),
-            rstart + 3, 4)
+        btnCompare = QPushButton("Compare", self)
+        btnCompare.clicked.connect(self.compareSegmentationWithFile)
+        grid.addWidget(btnCompare, 8, 2)
 
-        # # dicom reader
-        rstart = 5
-        hr = QFrame()
-        hr.setFrameShape(QFrame.HLine)
-        text_dcm = QLabel('DICOM reader')
-        text_dcm.setFont(font_label)
+        btnQuit = QPushButton("Quit", self)
+        btnQuit.clicked.connect(self.quit)
+        grid.addWidget(btnQuit, 9, 2)
 
-        # btn_dcmdir = QPushButton("Load DICOM", self)
-        # btn_dcmdir.clicked.connect(self.loadDataDir)
-        # btn_dcmdir.setIcon(btn_dcmdir.style().standardIcon(QStyle.SP_DirOpenIcon))
-        # self.uiw['dcmdir'] = btn_dcmdir
-        # btn_datafile = QPushButton("Load file", self)
-        # btn_datafile.clicked.connect(self.loadDataFile)
-        # btn_datafile.setToolTip("Load data from pkl file, 3D Dicom, tiff, ...")
 
-        btn_dcmcrop = QPushButton("Crop", self)
-        btn_dcmcrop.clicked.connect(self.cropDcm)
+        ##### LOAD MENU #####
+        loadWidget = QWidget()
+        loadGrid = QGridLayout()
+        loadGrid.setSpacing(10)
+        lisa_logo = QLabel()
+        lisa_logo.setPixmap(logo)
+        loadGrid.addWidget(lisa_logo, 0, 2, 5, 2)
 
-        # voxelsize gui comment
-        # elf.scaling_mode = 'original'
-        # ombo_vs = QComboBox(self)
-        # ombo_vs.activated[str].connect(self.changeVoxelSize)
-        # eys = scaling_modes.keys()
-        # eys.sort()
-        # ombo_vs.addItems(keys)
-        # ombo_vs.setCurrentIndex(keys.index(self.scaling_mode))
-        # elf.text_vs = QLabel('Voxel size:')
-        # end-- voxelsize gui
-        self.text_dcm_dir = QLabel('DICOM dir:')
-        self.text_dcm_data = QLabel('DICOM data:')
-        grid.addWidget(hr, rstart + 0, 2, 1, 4)
-        grid.addWidget(text_dcm, rstart + 0, 1, 1, 3)
-        grid.addWidget(
-            self._add_button("Load dir", self.loadDataDir, 'dcmdir',
-                             "Load data from directory (DICOM, png, jpg...)", QStyle.SP_DirOpenIcon),
-            rstart + 1, 1)
-        grid.addWidget(
-            self._add_button("Load file", self.loadDataFile, 'load_file',
-                             "Load data from pkl file, 3D Dicom, tiff, ...", QStyle.SP_FileIcon),
-            rstart + 1, 2)
-        # grid.addWidget(btn_datafile, rstart + 1, 2)
-        grid.addWidget(btn_dcmcrop, rstart + 1, 3)
-        # voxelsize gui comment
-        # grid.addWidget(self.text_vs, rstart + 3, 1)
-        # grid.addWidget(combo_vs, rstart + 4, 1)
-        grid.addWidget(self.text_dcm_dir, rstart + 6, 1, 1, 4)
-        grid.addWidget(self.text_dcm_data, rstart + 7, 1, 1, 4)
-        rstart += 9
+        btnLoadFile = QPushButton("File", self)
+        btnLoadFile.clicked.connect(self.loadDataFile)
+        loadGrid.addWidget(btnLoadFile, 5, 2)
 
-        # # # # # # # # #  segmentation
-        hr = QFrame()
-        hr.setFrameShape(QFrame.HLine)
-        text_seg = QLabel('Segmentation')
-        text_seg.setFont(font_label)
+        btnLoadDir = QPushButton("Directory", self)
+        btnLoadDir.clicked.connect(self.loadDataDir)
+        loadGrid.addWidget(btnLoadDir, 6, 2)
 
-        btn_segfile = QPushButton("Seg. from file", self)
-        btn_segfile.clicked.connect(self.loadSegmentationFromFile)
-        btn_segfile.setToolTip("Load segmentation from pkl file, raw, ...")
+        btnMainMenu = QPushButton("Back", self)
+        btnMainMenu.clicked.connect(self.btnMainMenu)
+        loadGrid.addWidget(btnMainMenu, 7, 2)
 
-        btn_segcompare = QPushButton("Compare", self)
-        btn_segcompare.clicked.connect(self.compareSegmentationWithFile)
-        btn_segcompare.setToolTip(
-            "Compare data with segmentation from pkl file, raw, ...")
 
-        btn_mask = QPushButton("Mask region", self)
-        btn_mask.clicked.connect(self.maskRegion)
-        btn_segliver = QPushButton("Liver seg.", self)
-        btn_segliver.clicked.connect(self.liverSeg)
-        self.btn_segauto = QPushButton("Auto seg.", self)
-        self.btn_segauto.clicked.connect(self.autoSeg)
-        btn_segman = QPushButton("Viewer", self)
-        btn_segman.clicked.connect(self.manualSeg)
-        self.text_seg_data = QLabel('segmented data:')
-        grid.addWidget(hr, rstart + 0, 2, 1, 4)
-        grid.addWidget(text_seg, rstart + 0, 1)
-        grid.addWidget(btn_segfile, rstart + 1, 1)
-        grid.addWidget(btn_segcompare, rstart + 1, 3)
-        grid.addWidget(btn_mask, rstart + 2, 1)
-        grid.addWidget(btn_segliver, rstart + 2, 2)
-        grid.addWidget(self.btn_segauto, rstart + 1, 2)
-        grid.addWidget(btn_segman, rstart + 2, 3)
-        grid.addWidget(self.text_seg_data, rstart + 3, 1, 1, 3)
-        rstart += 4
+        ##### SAVE MENU #####
+        saveWidget = QWidget()
+        saveGrid = QGridLayout()
+        saveGrid.setSpacing(10)
+        lisa_logo = QLabel()
+        lisa_logo.setPixmap(logo)
+        saveGrid.addWidget(lisa_logo, 0, 2, 5, 2)
 
-        # # # # # # # # #  save/view
-        # hr = QFrame()
-        # hr.setFrameShape(QFrame.HLine)
-        grid.addWidget(
-            self._add_button(
-                "Save",
-                self.saveOut,
-                'save',
-                "Save data with segmentation. Use filename 'slice{:04d}.tiff' to store slices",
-                QStyle.SP_DialogSaveButton),
-            rstart + 0, 1)
-        # btn_segsave = QPushButton("Save", self)
-        # btn_segsave.clicked.connect(self.saveOut)
-        btn_segsavedcmoverlay = QPushButton("Save Dicom Overlay", self)
-        btn_segsavedcmoverlay.clicked.connect(self.btnSaveOutDcmOverlay)
-        btn_segsavedcm = QPushButton("Save Dicom", self)
-        btn_segsavedcm.clicked.connect(self.btnSaveOutDcm)
-        btn_segview = QPushButton("View3D", self)
-        if viewer3D_available:
-            btn_segview.clicked.connect(self.view3D)
+        btnSaveFile = QPushButton("File", self)
+        btnSaveFile.clicked.connect(self.saveOut)
+        saveGrid.addWidget(btnSaveFile, 5, 2)
 
-        else:
-            btn_segview.setEnabled(False)
+        btnSaveDcm = QPushButton("Dicom", self)
+        btnSaveDcm.clicked.connect(self.btnSaveOutDcm)
+        saveGrid.addWidget(btnSaveDcm, 6, 2)
 
-        grid.addWidget(btn_segsavedcm, rstart + 0, 2)
-        grid.addWidget(btn_segsavedcmoverlay, rstart + 0, 3)
-        grid.addWidget(btn_segview, rstart + 0, 4)
-        rstart += 1
+        btnSaveDcmOverlay = QPushButton("Dicom overlay", self)
+        btnSaveDcmOverlay.clicked.connect(self.btnSaveOutDcmOverlay)
+        saveGrid.addWidget(btnSaveDcmOverlay, 6, 3)
 
-        # # # # Virtual resection
+        btnSavePV = QPushButton("PV tree", self)
+        btnSavePV.clicked.connect(self.btnSavePortalVeinTree)
+        saveGrid.addWidget(btnSavePV, 7, 2)
 
-        hr = QFrame()
-        hr.setFrameShape(QFrame.HLine)
-        rstart += 1
+        btnSaveHV = QPushButton("HV tree", self)
+        btnSaveHV.clicked.connect(self.btnSaveHepaticVeinsTree)
+        saveGrid.addWidget(btnSaveHV, 8, 2)
 
-        hr = QFrame()
-        hr.setFrameShape(QFrame.HLine)
-        text_resection = QLabel('Virtual resection')
-        text_resection.setFont(font_label)
+        btnMainMenu = QPushButton("Back", self)
+        btnMainMenu.clicked.connect(self.btnMainMenu)
+        saveGrid.addWidget(btnMainMenu, 9, 2)
 
-        btn_pvseg = QPushButton("Portal vein seg.", self)
-        btn_pvseg.clicked.connect(self.btnPortalVeinSegmentation)
-        btn_svpv = QPushButton("Save PV tree", self)
-        btn_svpv.clicked.connect(self.btnSavePortalVeinTree)
-        btn_svpv.setToolTip("Save Portal Vein 1D model into vessel_tree.yaml")
-        # btn_svpv.setEnabled(False)
-        btn_svpv.setEnabled(True)
 
-        btn_hvseg = QPushButton("Hepatic veins seg.", self)
-        btn_hvseg.clicked.connect(self.btnHepaticVeinsSegmentation)
-        btn_svhv = QPushButton("Save HV tree", self)
-        btn_svhv.clicked.connect(self.btnSaveHepaticVeinsTree)
-        btn_svhv.setToolTip(
-            "Save Hepatic Veins 1D model into vessel_tree.yaml")
-        btn_svhv.setEnabled(True)
-        # btn_svhv.setEnabled(False)
+        ##### SEGMENTATION MENU #####
+        segWidget = QWidget()
+        segGrid = QGridLayout()
+        segGrid.setSpacing(10)
+        lisa_logo = QLabel()
+        lisa_logo.setPixmap(logo)
+        segGrid.addWidget(lisa_logo, 0, 2, 5, 2)
 
-        btn_lesions = QPushButton("Lesions localization", self)
-        btn_lesions.clicked.connect(self.btnLesionLocalization)
-        # btn_lesions.setEnabled(False)
+        btnSegManual = QPushButton("Manual", self)
+        btnSegManual.clicked.connect(self.liverSeg)
+        segGrid.addWidget(btnSegManual, 5, 2)
 
-        grid.addWidget(
-            self._add_button("Resection (PV)", self.btnVirtualResectionPV, 'btn_resection_pv',
-                             "Portal Vein based virtual resection"),
-            rstart + 2, 3)
-        grid.addWidget(
-            self._add_button("Resection (planar)", self.btnVirtualResectionPlanar, 'btn_resection_planar',
-                             "Plane based virtual resection"),
-            rstart + 1, 3)
-        # btn_resection_pv = QPushButton("Resection (PV)", self)
-        # btn_resection_pv.clicked.connect(self.btnVirtualResectionPV)
-        # btn_resection_planar = QPushButton("Resection (planar)", self)
-        # btn_resection_planar.clicked.connect(self.btnVirtualResectionPV)
+        btnSegMask = QPushButton("Mask", self)
+        btnSegMask.clicked.connect(self.maskRegion)
+        segGrid.addWidget(btnSegMask, 6, 2)
 
-        grid.addWidget(hr, rstart + 0, 2, 1, 4)
-        grid.addWidget(text_resection, rstart + 0, 1)
-        grid.addWidget(btn_pvseg, rstart + 1, 1)
-        grid.addWidget(btn_hvseg, rstart + 1, 2)
-        # grid.addWidget(btn_resection_planar, rstart + 1, 3)
-        # grid.addWidget(btn_resection_pv, rstart + 2, 3)
-        grid.addWidget(btn_lesions, rstart + 1, 4)
-        grid.addWidget(btn_svpv, rstart + 2, 1)
-        grid.addWidget(btn_svhv, rstart + 2, 2)
+        btnSegPV = QPushButton("Portal Vein", self)
+        btnSegPV.clicked.connect(self.btnPortalVeinSegmentation)
+        segGrid.addWidget(btnSegPV, 7, 2)
 
-        # # # # # # #
+        btnSegHV = QPushButton("Hepatic Vein", self)
+        btnSegHV.clicked.connect(self.btnHepaticVeinsSegmentation)
+        segGrid.addWidget(btnSegHV, 8, 2)
 
-        hr = QFrame()
-        hr.setFrameShape(QFrame.HLine)
-        # rid.addWidget(hr, rstart + 0, 0, 1, 4)
-
-        rstart += 3
-        # quit
-        btn_quit = QPushButton("Quit", self)
-        btn_quit.clicked.connect(self.quit)
-        grid.addWidget(btn_quit, rstart + -1, 4, 1, 1)
-        self.uiw['quit'] = btn_quit
+        btnMainMenu = QPushButton("Back", self)
+        btnMainMenu.clicked.connect(self.btnMainMenu)
+        segGrid.addWidget(btnMainMenu, 9, 2)
 
         if self.oseg.debug_mode:
             btn_debug = QPushButton("Debug", self)
@@ -409,10 +399,44 @@ class OrganSegmentationWindow(QMainWindow):
         cw.setLayout(grid)
         self.cw = cw
         self.grid = grid
+        
+        loadWidget.setLayout(loadGrid)
+        self.loadWidget = loadWidget
+        self.loadGrid = loadGrid
+        self.loadWidget.hide()
+
+        saveWidget.setLayout(saveGrid)
+        self.saveWidget = saveWidget
+        self.saveGrid = saveGrid
+        self.saveWidget.hide()
+
+        segWidget.setLayout(segGrid)
+        self.segWidget = segWidget
+        self.segGrid = segGrid
+        self.segWidget.hide()
 
         self.setWindowTitle('LISA')
 
         self.show()
+
+
+    def btnLoad(self, event):
+        self.cw.hide()
+        self.setCentralWidget(self.loadWidget)
+        self.loadWidget.show()
+
+    def btnSave(self, event):
+        self.cw.hide()
+        self.setCentralWidget(self.saveWidget)
+        self.saveWidget.show()
+
+    def btnSegmentation(self, event):
+        self.cw.hide()
+        self.setCentralWidget(self.segWidget)
+        self.segWidget.show()
+
+    def btnMainMenu(self, event):
+        self._initUI()
 
     def quit(self, event):
         return self.close()
