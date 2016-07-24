@@ -885,6 +885,20 @@ class OrganSegmentationWindow(QMainWindow):
         self.oseg.automatic_liver_seeds()
         self.statusBar().showMessage('Ready')
 
+    def btnSaveSegmentation(self, event=None):
+        """
+        Not fully implemented yet
+        :param event:
+        :return:
+        """
+        import dictGUI
+        slab_selection = {}
+        for label, value in  self.oseg.slab.iteritems():
+            slab_selection[label] = True
+
+        slab_selection = dictGUI.dictGui(slab_selection)
+        # TODO use some function from oseg to store
+
     def btnConfig(self, event=None):
         import config
         import organ_segmentation as los
