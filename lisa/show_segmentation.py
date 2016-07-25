@@ -18,10 +18,14 @@ import argparse
 
 import numpy as np
 try:
-    from dicom2fem import seg2fem
-    from seg2fem import gen_mesh_from_voxels_mc, smooth_mesh
+    import dicom2fem
+    import dicom2fem.seg2fem
+    # from dicom2fem import seg2fem
+    from dicom2fem.seg2fem import gen_mesh_from_voxels_mc, smooth_mesh
 except:
-    logger.warning('dicom2fem not found')
+
+    print('dicom2fem not found')
+    # logger.warning('dicom2fem not found')
     from seg2mesh import gen_mesh_from_voxels, smooth_mesh
 import misc
 import viewer
@@ -33,7 +37,9 @@ def showSegmentation(
         degrad=4,
         label=1,
         smoothing=True,
-        vtk_file=None
+        vtk_file=None,
+        qt_app=None,
+        show=True
         ):
     """
     Funkce vrací trojrozměrné porobné jako data['segmentation']
@@ -56,14 +62,17 @@ def showSegmentation(
         mesh_data = gen_mesh_from_voxels_mc(segmentation, voxelsize_mm * degrad * 1.0e-2)
         # mesh_data.coors +=
     mesh_data.write(vtk_file)
-    QApplication(sys.argv)
-    view = viewer.QVTKViewer(vtk_file)
-    print ('show viewer')
-    view.exec_()
+    if qt_app is None:
+        qt_app = QApplication(sys.argv)
+        logger.debug("qapp constructed")
+    if show:
+        view = viewer.QVTKViewer(vtk_file)
+        print ('show viewer')
+        view.exec_()
 
     return labels
 
-if __name__ == "__main__":
+def main():
     logger = logging.getLogger()
 
     logger.setLevel(logging.WARNING)
@@ -109,3 +118,6 @@ if __name__ == "__main__":
     outputfile = os.path.expanduser(args.outputfile)
 
     showSegmentation(ds, degrad=args.degrad, voxelsize_mm=data['voxelsize_mm'], vtk_file=outputfile)
+
+if __name__ == "__main__":
+    main()

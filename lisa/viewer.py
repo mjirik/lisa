@@ -12,7 +12,7 @@ import sys
 
 from PyQt4.QtGui import QApplication, QDialog, QGridLayout, QPushButton
 import vtk
-from vtk.qt4 import QVTKRenderWindowInteractor
+from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 
 class QVTKViewer(QDialog):
@@ -63,11 +63,12 @@ class QVTKViewer(QDialog):
 
         # VTK surface
         surface = vtk.vtkDataSetSurfaceFilter()
-        surface.SetInput(vtkdata)
+        surface.SetInputData(vtkdata)
+        # surface.SetInput(vtkdata)
         surface.Update()
 
         mapper = vtk.vtkDataSetMapper()
-        mapper.SetInput(surface.GetOutput())
+        mapper.SetInputData(surface.GetOutput())
 
         actor = vtk.vtkActor()
         actor.SetMapper(mapper)
