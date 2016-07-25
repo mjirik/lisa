@@ -54,11 +54,16 @@ def showSegmentation(
     segmentation = segmentation[::degrad, ::degrad, ::degrad]
     voxelsize_mm = voxelsize_mm * degrad
 
-    if resize_mm is None:
+    _stats(segmentation)
+    if resize_mm is not None:
+        logger.debug("resize begin")
+        print "resize"
         new_voxelsize_mm = np.asarray([resize_mm, resize_mm, resize_mm])
         import imtools
         segmentation = imtools.misc.resize_to_mm(segmentation, voxelsize_mm=voxelsize_mm, new_voxelsize_mm=new_voxelsize_mm)
         voxelsize_mm = new_voxelsize_mm
+        logger.debug("resize begin")
+    _stats(segmentation)
 
     # import pdb; pdb.set_trace()
     mesh_data = gen_mesh_from_voxels_mc(segmentation, voxelsize_mm)
@@ -79,6 +84,12 @@ def showSegmentation(
         view.exec_()
 
     return labels
+
+def _stats(data):
+    print "stats"
+    un = np.unique(data)
+    for lab in un:
+        print lab, " : ", np.sum(data==lab)
 
 def main():
     logger = logging.getLogger()
