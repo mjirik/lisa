@@ -141,7 +141,7 @@ class OrganSegmentationWindow(QMainWindow):
 
         autoSegAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Automatic segmentation', self)
         autoSegAction.setStatusTip('Automatic segmentation')
-        autoSegAction.triggered.connect(self.autoSeg)
+        autoSegAction.triggered.connect(self.btnAutoSeg)
         fileMenu.addAction(autoSegAction)
 
         cropAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Crop', self)
@@ -344,9 +344,13 @@ class OrganSegmentationWindow(QMainWindow):
         btnLoadDir.clicked.connect(self.loadDataDir)
         loadGrid.addWidget(btnLoadDir, 6, 2)
 
+        btnLoadSeg = QPushButton("Segmentation from file", self)
+        btnLoadSeg.clicked.connect(self.btnLoadSegmentationFromFile)
+        loadGrid.addWidget(btnLoadSeg, 7, 2)
+
         btnMainMenu = QPushButton("Back", self)
         btnMainMenu.clicked.connect(self.btnMainMenu)
-        loadGrid.addWidget(btnMainMenu, 7, 2)
+        loadGrid.addWidget(btnMainMenu, 8, 2)
 
 
         ##### SAVE MENU #####
@@ -384,8 +388,12 @@ class OrganSegmentationWindow(QMainWindow):
         segGrid = QGridLayout()
         segGrid.setSpacing(10)
 
+        btnSegAuto = QPushButton("Semi-automatic", self)
+        btnSegAuto.clicked.connect(self.btnSemiautoSeg)
+        segGrid.addWidget(btnSegAuto, 4, 2)
+
         btnSegManual = QPushButton("Manual", self)
-        btnSegManual.clicked.connect(self.liverSeg)
+        btnSegManual.clicked.connect(self.btnManualSeg)
         segGrid.addWidget(btnSegManual, 5, 2)
 
         btnSegMask = QPushButton("Mask", self)
@@ -721,7 +729,7 @@ class OrganSegmentationWindow(QMainWindow):
 
         self.statusBar().showMessage('Ready')
 
-    def loadSegmentationFromFile(self):
+    def btnLoadSegmentationFromFile(self):
         """
         Function make GUI for reading segmentaion file and calls
         organ_segmentation function to do the work.
@@ -809,7 +817,7 @@ class OrganSegmentationWindow(QMainWindow):
         # self.setLabelText(self.text_seg_data, text)
         self.statusBar().showMessage('Ready')
 
-    def liverSeg(self):
+    def btnSemiautoSeg(self):
         self.statusBar().showMessage('Performing liver segmentation ...')
         if self.oseg.data3d is None:
             self.statusBar().showMessage('No DICOM data!')
@@ -821,7 +829,7 @@ class OrganSegmentationWindow(QMainWindow):
         self.checkSegData('auto. seg., ')
         self.statusBar().showMessage('Ready')
 
-    def autoSeg(self):
+    def btnAutoSeg(self):
         self.statusBar().showMessage('Performing automatic segmentation...')
         QApplication.processEvents()
         if self.oseg.data3d is None:
@@ -831,7 +839,7 @@ class OrganSegmentationWindow(QMainWindow):
         self.oseg.run_sss()
         self.statusBar().showMessage('Automatic segmentation finished')
 
-    def manualSeg(self):
+    def btnManualSeg(self):
         oseg = self.oseg
         # rint 'ms d3d ', oseg.data3d.shape
         # rint 'ms seg ', oseg.segmentation.shape
