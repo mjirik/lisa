@@ -6,6 +6,7 @@ Module is used for visualization of segmentation stored in pkl file.
 
 import sys
 import os.path
+
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
 import logging
@@ -49,6 +50,8 @@ def showSegmentation(
 
     if vtk_file is None:
         vtk_file = "mesh_geom.vtk"
+    vtk_file = os.path.expanduser(vtk_file)
+
     labels = []
 
     segmentation = segmentation[::degrad, ::degrad, ::degrad]

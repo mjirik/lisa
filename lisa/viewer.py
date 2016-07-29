@@ -72,9 +72,15 @@ class QVTKViewer(QDialog):
 
         actor = vtk.vtkActor()
         actor.SetMapper(mapper)
-        actor.GetProperty().EdgeVisibilityOff()
-        # actor.GetProperty().SetEdgeColor(1,1,1)
-        # actor.GetProperty().SetLineWidth(0.1)
+        # actor.GetProperty().EdgeVisibilityOff()
+        actor.GetProperty().SetEdgeColor(1,0.0,1)
+        actor.GetProperty().SetDiffuseColor(1,0.0,1.0)
+        actor.GetProperty().SetAmbientColor(1,0.0,1)
+        actor.GetProperty().SetLineWidth(0.1)
+        # import pdb; pdb.set_trace()
+        # actor.GetProperty().SetColor(1, 0, 1)
+        actor.GetProperty().SetOpacity(0.3)
+
         ren.AddActor(actor)
 
         # annot. cube
@@ -85,7 +91,7 @@ class QVTKViewer(QDialog):
         axesActor.SetYPlusFaceText('F')
         axesActor.SetZMinusFaceText('A')
         axesActor.SetZPlusFaceText('P')
-        axesActor.GetTextEdgesProperty().SetColor(1, 1, 0)
+        axesActor.GetTextEdgesProperty().SetColor(1, 0, 0)
         axesActor.GetCubeProperty().SetColor(0, 0, 1)
         self.axes = vtk.vtkOrientationMarkerWidget()
         self.axes.SetOrientationMarker(axesActor)
@@ -93,6 +99,7 @@ class QVTKViewer(QDialog):
         self.axes.EnabledOn()
         self.axes.InteractiveOn()
 
+        ren.SetBackground(0.5, 0.5, 0.5)
         ren.ResetCamera()
         iren.Initialize()
 
