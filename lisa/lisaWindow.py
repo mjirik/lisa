@@ -255,6 +255,12 @@ class OrganSegmentationWindow(QMainWindow):
         grid.addWidget(self.text_seg_data, rstart + 4, 1, 1, 4)
         return grid
 
+    def _activate_widget(self, widget):
+        self.currentWidget.hide()
+        self.grid.addWidget(widget,6,2)
+        widget.show()
+        self.currentWidget = widget
+
     def _initUI(self):
         cw = QWidget()
         self.setCentralWidget(cw)
@@ -299,32 +305,36 @@ class OrganSegmentationWindow(QMainWindow):
 
 
         ##### MAIN MENU #####
+        mainWidget = QWidget()
+        mainGrid = QGridLayout()
+        mainGrid.setSpacing(10)
+
         btnLoad = QPushButton("Load", self)
         btnLoad.clicked.connect(self.btnLoad)
-        grid.addWidget(btnLoad, 5, 2)
+        mainGrid.addWidget(btnLoad, 5, 2)
 
         btnSave = QPushButton("Save", self)
         btnSave.clicked.connect(self.btnSave)
-        grid.addWidget(btnSave, 6, 2)
+        mainGrid.addWidget(btnSave, 6, 2)
 
         btnSegmentation = QPushButton("Segmentation", self)
         btnSegmentation.clicked.connect(self.btnSegmentation)
-        grid.addWidget(btnSegmentation, 7, 2)
+        mainGrid.addWidget(btnSegmentation, 7, 2)
 
         btnCompare = QPushButton("Compare", self)
         btnCompare.clicked.connect(self.compareSegmentationWithFile)
-        grid.addWidget(btnCompare, 8, 2)
+        mainGrid.addWidget(btnCompare, 8, 2)
 
         btnQuit = QPushButton("Quit", self)
         btnQuit.clicked.connect(self.quit)
-        grid.addWidget(btnQuit, 9, 2)
+        mainGrid.addWidget(btnQuit, 9, 2)
+
 
 
         ##### LOAD MENU #####
         loadWidget = QWidget()
         loadGrid = QGridLayout()
         loadGrid.setSpacing(10)
-        loadGrid = self._initUI_logo(loadGrid)
 
         btnLoadFile = QPushButton("File", self)
         btnLoadFile.clicked.connect(self.loadDataFile)
@@ -343,7 +353,6 @@ class OrganSegmentationWindow(QMainWindow):
         saveWidget = QWidget()
         saveGrid = QGridLayout()
         saveGrid.setSpacing(10)
-        saveGrid = self._initUI_logo(saveGrid)
 
         btnSaveFile = QPushButton("File", self)
         btnSaveFile.clicked.connect(self.saveOut)
@@ -374,7 +383,6 @@ class OrganSegmentationWindow(QMainWindow):
         segWidget = QWidget()
         segGrid = QGridLayout()
         segGrid.setSpacing(10)
-        self._initUI_logo(segGrid)
 
         btnSegManual = QPushButton("Manual", self)
         btnSegManual.clicked.connect(self.liverSeg)
@@ -405,6 +413,12 @@ class OrganSegmentationWindow(QMainWindow):
         cw.setLayout(grid)
         self.cw = cw
         self.grid = grid
+        self.grid.addWidget(mainWidget,6,2)
+
+        mainWidget.setLayout(mainGrid)
+        self.mainWidget = mainWidget
+        self.mainGrid = mainGrid
+        self.currentWidget = mainWidget
 
         loadWidget.setLayout(loadGrid)
         self.loadWidget = loadWidget
@@ -422,31 +436,35 @@ class OrganSegmentationWindow(QMainWindow):
         self.segWidget.hide()
 
         self.setWindowTitle('LISA')
-        self._initUI_logo(self.grid)
+        # self._initUI_logo(self.grid)
 
         self.show()
 
 
     def btnLoad(self, event):
-        self.cw.hide()
-        self.setCentralWidget(self.loadWidget)
-        self._initUI_logo(self.loadGrid)
-        self.loadWidget.show()
+        self._activate_widget(self.loadWidget)
+        # self.cw.hide()
+        # self.setCentralWidget(self.loadWidget)
+        # self._initUI_logo(self.loadGrid)
+        # self.loadWidget.show()
 
     def btnSave(self, event):
-        self.cw.hide()
-        self.setCentralWidget(self.saveWidget)
-        self._initUI_logo(self.saveGrid)
-        self.saveWidget.show()
+        self._activate_widget(self.saveWidget)
+        # self.cw.hide()
+        # self.setCentralWidget(self.saveWidget)
+        # self._initUI_logo(self.saveGrid)
+        # self.saveWidget.show()
 
     def btnSegmentation(self, event):
-        self.cw.hide()
-        self.setCentralWidget(self.segWidget)
-        self.segWidget.show()
+        self._activate_widget(self.segWidget)
+        # self.cw.hide()
+        # self.setCentralWidget(self.segWidget)
+        # self.segWidget.show()
 
     def btnMainMenu(self, event):
-        self._initUI()
-        self._initUI_logo(self.grid)
+        self._activate_widget(self.mainWidget)
+        # self._initUI()
+        # self._initUI_logo(self.grid)
 
     def quit(self, event):
         return self.close()
