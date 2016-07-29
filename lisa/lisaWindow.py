@@ -242,6 +242,18 @@ class OrganSegmentationWindow(QMainWindow):
 
         return btn
 
+    def _initUI_logo(self, grid):
+        lisa_logo = QLabel()
+        logopath = find_logo()
+        logo = QPixmap(logopath)
+        lisa_logo.setPixmap(logo)  # scaledToWidth(128))
+        grid.addWidget(lisa_logo, 0, 2, 2, 1)
+
+        rstart = 0
+        grid.addWidget(self.text_dcm_dir, rstart + 2, 1, 1, 4)
+        grid.addWidget(self.text_dcm_data, rstart + 3, 1, 1, 4)
+        grid.addWidget(self.text_seg_data, rstart + 4, 1, 1, 4)
+        return grid
 
     def _initUI(self):
         cw = QWidget()
@@ -280,12 +292,11 @@ class OrganSegmentationWindow(QMainWindow):
         #lisa_title.setFont(font_label)
         #grid.addWidget(lisa_title, 0, 1)
         #grid.addWidget(info, 1, 1)
+        self.text_dcm_dir = QLabel('DICOM dir:')
+        self.text_dcm_data = QLabel('DICOM data:')
+        self.text_seg_data = QLabel('')
+        grid = self._initUI_logo(grid)
 
-        lisa_logo = QLabel()
-        logopath = find_logo()
-        logo = QPixmap(logopath)
-        lisa_logo.setPixmap(logo)  # scaledToWidth(128))
-        grid.addWidget(lisa_logo, 0, 2, 5, 2)
 
         ##### MAIN MENU #####
         btnLoad = QPushButton("Load", self)
@@ -313,9 +324,7 @@ class OrganSegmentationWindow(QMainWindow):
         loadWidget = QWidget()
         loadGrid = QGridLayout()
         loadGrid.setSpacing(10)
-        lisa_logo = QLabel()
-        lisa_logo.setPixmap(logo)
-        loadGrid.addWidget(lisa_logo, 0, 2, 5, 2)
+        loadGrid = self._initUI_logo(loadGrid)
 
         btnLoadFile = QPushButton("File", self)
         btnLoadFile.clicked.connect(self.loadDataFile)
@@ -334,15 +343,13 @@ class OrganSegmentationWindow(QMainWindow):
         saveWidget = QWidget()
         saveGrid = QGridLayout()
         saveGrid.setSpacing(10)
-        lisa_logo = QLabel()
-        lisa_logo.setPixmap(logo)
-        saveGrid.addWidget(lisa_logo, 0, 2, 5, 2)
+        saveGrid = self._initUI_logo(saveGrid)
 
         btnSaveFile = QPushButton("File", self)
         btnSaveFile.clicked.connect(self.saveOut)
         saveGrid.addWidget(btnSaveFile, 5, 2)
 
-        btnSaveDcm = QPushButton("Dicom", self)
+        btnSaveDcm = QPushButton("Export Dicom", self)
         btnSaveDcm.clicked.connect(self.btnSaveOutDcm)
         saveGrid.addWidget(btnSaveDcm, 6, 2)
 
@@ -367,9 +374,7 @@ class OrganSegmentationWindow(QMainWindow):
         segWidget = QWidget()
         segGrid = QGridLayout()
         segGrid.setSpacing(10)
-        lisa_logo = QLabel()
-        lisa_logo.setPixmap(logo)
-        segGrid.addWidget(lisa_logo, 0, 2, 5, 2)
+        self._initUI_logo(segGrid)
 
         btnSegManual = QPushButton("Manual", self)
         btnSegManual.clicked.connect(self.liverSeg)
@@ -392,6 +397,7 @@ class OrganSegmentationWindow(QMainWindow):
         segGrid.addWidget(btnMainMenu, 9, 2)
 
         if self.oseg.debug_mode:
+            rstart = 5
             btn_debug = QPushButton("Debug", self)
             btn_debug.clicked.connect(self.run_debug)
             grid.addWidget(btn_debug, rstart - 2, 4)
@@ -399,7 +405,7 @@ class OrganSegmentationWindow(QMainWindow):
         cw.setLayout(grid)
         self.cw = cw
         self.grid = grid
-        
+
         loadWidget.setLayout(loadGrid)
         self.loadWidget = loadWidget
         self.loadGrid = loadGrid
@@ -416,6 +422,7 @@ class OrganSegmentationWindow(QMainWindow):
         self.segWidget.hide()
 
         self.setWindowTitle('LISA')
+        self._initUI_logo(self.grid)
 
         self.show()
 
@@ -423,11 +430,13 @@ class OrganSegmentationWindow(QMainWindow):
     def btnLoad(self, event):
         self.cw.hide()
         self.setCentralWidget(self.loadWidget)
+        self._initUI_logo(self.loadGrid)
         self.loadWidget.show()
 
     def btnSave(self, event):
         self.cw.hide()
         self.setCentralWidget(self.saveWidget)
+        self._initUI_logo(self.saveGrid)
         self.saveWidget.show()
 
     def btnSegmentation(self, event):
@@ -437,6 +446,7 @@ class OrganSegmentationWindow(QMainWindow):
 
     def btnMainMenu(self, event):
         self._initUI()
+        self._initUI_logo(self.grid)
 
     def quit(self, event):
         return self.close()
@@ -1053,13 +1063,21 @@ class OrganSegmentationWindow(QMainWindow):
         # rom viewer import QVTKViewer
         oseg = self.oseg
         if oseg.segmentation is not None:
-            pts, els, et = gen_mesh_from_voxels(oseg.segmentation,
-                                                oseg.voxelsize_mm,
-                                                etype='q', mtype='s')
-            pts = smooth_mesh(pts, els, et,
-                              n_iter=10)
-            vtkdata = mesh2vtk(pts, els, et)
-            view = QVTKViewer(vtk_data=vtkdata)
+            import show_segmentation
+
+            show_segmentation.showSegmentation(
+                oseg.segmentation==1,
+                voxelsize_mm=oseg.voxelsize_mm,
+                degrad=1,
+                resize_mm=1.5
+            )
+            # pts, els, et = gen_mesh_from_voxels(oseg.segmentation,
+            #                                     oseg.voxelsize_mm,
+            #                                     etype='q', mtype='s')
+            # pts = smooth_mesh(pts, els, et,
+            #                   n_iter=10)
+            # vtkdata = mesh2vtk(pts, els, et)
+            # view = QVTKViewer(vtk_data=vtkdata)
             view.exec_()
 
         else:
