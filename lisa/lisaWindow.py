@@ -247,9 +247,10 @@ class OrganSegmentationWindow(QMainWindow):
         logopath = find_logo()
         logo = QPixmap(logopath)
         lisa_logo.setPixmap(logo)  # scaledToWidth(128))
-        grid.addWidget(lisa_logo, 0, 2, 2, 1)
+        grid.addWidget(lisa_logo, 0, 2, 1, 1)
 
         rstart = 0
+        grid.addWidget(self.text_info, rstart + 1, 1, 1, 4)
         grid.addWidget(self.text_dcm_dir, rstart + 2, 1, 1, 4)
         grid.addWidget(self.text_dcm_data, rstart + 3, 1, 1, 4)
         grid.addWidget(self.text_seg_data, rstart + 4, 1, 1, 4)
@@ -288,13 +289,14 @@ class OrganSegmentationWindow(QMainWindow):
         # font_title.setSize(24)
 
         #lisa_title = QLabel('Liver Surgery Analyser')
-        #info = QLabel('Developed by:\n' +
-        #              'University of West Bohemia\n' +
-        #              'Faculty of Applied Sciences\n' +
-        #              QString.fromUtf8('M. Jiřík, V. Lukeš - 2013') +
-        #              '\n\nVersion: ' + self.oseg.version
-        #              )
-        #info.setFont(font_info)
+        self.text_info = QLabel(
+        #     'Developed by:\n' +
+        #     'University of West Bohemia\n' +
+        #     'Faculty of Applied Sciences\n' +
+        #     QString.fromUtf8('M. Jiřík, V. Lukeš - 2013') +
+            'Version: ' + self.oseg.version
+        )
+        self.text_info.setFont(font_info)
         #lisa_title.setFont(font_label)
         #grid.addWidget(lisa_title, 0, 1)
         #grid.addWidget(info, 1, 1)

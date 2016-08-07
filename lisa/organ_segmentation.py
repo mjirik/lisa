@@ -441,6 +441,19 @@ class OrganSegmentation():
         criterium = (wanted_volume - vol2) ** 2
         return criterium
 
+    def load_data(self, datapath):
+        self.datapath = datapath
+
+        reader = datareader.DataReader()
+
+        # seg.data3d, metadata =
+        datap = reader.Get3DData(self.datapath, dataplus_format=True)
+        # rint datap.keys()
+        # self.iparams['series_number'] = self.metadata['series_number']
+        # self.iparams['datapath'] = self.datapath
+        self.import_dataplus(datap)
+
+
     def sliver_compare_with_other_volume_from_file(self, filepath):
         reader = datareader.DataReader()
         segmentation_datap = reader.Get3DData(filepath, dataplus_format=True)
