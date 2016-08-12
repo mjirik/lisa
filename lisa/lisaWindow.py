@@ -4,8 +4,9 @@
 Modul is used for GUI of Lisa
 """
 import logging
-from lisa.logWindow import QVBoxLayout
 logger = logging.getLogger(__name__)
+# from lisa.logWindow import QVBoxLayout
+from PyQt4.QtGui import QVBoxLayout
 
 import sys
 import os
