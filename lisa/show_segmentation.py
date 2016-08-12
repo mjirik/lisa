@@ -6,6 +6,7 @@ Module is used for visualization of segmentation stored in pkl file.
 
 import sys
 import os.path
+
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
 import logging
@@ -18,10 +19,14 @@ import argparse
 
 import numpy as np
 try:
-    from dicom2fem import seg2fem
-    from seg2fem import gen_mesh_from_voxels_mc, smooth_mesh
+    import dicom2fem
+    import dicom2fem.seg2fem
+    # from dicom2fem import seg2fem
+    from dicom2fem.seg2fem import gen_mesh_from_voxels_mc, smooth_mesh
 except:
-    logger.warning('dicom2fem not found')
+
+    print('dicom2fem not found')
+    # logger.warning('dicom2fem not found')
     from seg2mesh import gen_mesh_from_voxels, smooth_mesh
 import misc
 import viewer
@@ -33,7 +38,10 @@ def showSegmentation(
         degrad=4,
         label=1,
         smoothing=True,
-        vtk_file=None
+        vtk_file=None,
+        qt_app=None,
+        show=True,
+        resize_mm=None
         ):
     """
     Funkce vrací trojrozměrné porobné jako data['segmentation']
@@ -42,28 +50,51 @@ def showSegmentation(
 
     if vtk_file is None:
         vtk_file = "mesh_geom.vtk"
+    vtk_file = os.path.expanduser(vtk_file)
+
     labels = []
 
     segmentation = segmentation[::degrad, ::degrad, ::degrad]
+    voxelsize_mm = voxelsize_mm * degrad
+
+    _stats(segmentation)
+    if resize_mm is not None:
+        logger.debug("resize begin")
+        print "resize"
+        new_voxelsize_mm = np.asarray([resize_mm, resize_mm, resize_mm])
+        import imtools
+        segmentation = imtools.misc.resize_to_mm(segmentation, voxelsize_mm=voxelsize_mm, new_voxelsize_mm=new_voxelsize_mm)
+        voxelsize_mm = new_voxelsize_mm
+        logger.debug("resize begin")
+    _stats(segmentation)
 
     # import pdb; pdb.set_trace()
-    mesh_data = gen_mesh_from_voxels_mc(segmentation, voxelsize_mm*degrad)
+    mesh_data = gen_mesh_from_voxels_mc(segmentation, voxelsize_mm)
     if smoothing:
         mesh_data.coors = smooth_mesh(mesh_data)
         # mesh_data.coors = seg2fem.smooth_mesh(mesh_data)
 
     else:
-        mesh_data = gen_mesh_from_voxels_mc(segmentation, voxelsize_mm * degrad * 1.0e-2)
+        mesh_data = gen_mesh_from_voxels_mc(segmentation, voxelsize_mm * 1.0e-2)
         # mesh_data.coors +=
     mesh_data.write(vtk_file)
-    QApplication(sys.argv)
-    view = viewer.QVTKViewer(vtk_file)
-    print ('show viewer')
-    view.exec_()
+    if qt_app is None:
+        qt_app = QApplication(sys.argv)
+        logger.debug("qapp constructed")
+    if show:
+        view = viewer.QVTKViewer(vtk_file)
+        print ('show viewer')
+        view.exec_()
 
     return labels
 
-if __name__ == "__main__":
+def _stats(data):
+    print "stats"
+    un = np.unique(data)
+    for lab in un:
+        print lab, " : ", np.sum(data==lab)
+
+def main():
     logger = logging.getLogger()
 
     logger.setLevel(logging.WARNING)
@@ -91,6 +122,10 @@ if __name__ == "__main__":
         default=4,
         help='data degradation, default 4')
     parser.add_argument(
+        '-r', '--resize', type=float,
+        default=None,
+        help='resize voxel to defined size in milimeters, default is None')
+    parser.add_argument(
         '-l', '--label', type=int, metavar='N', nargs='+',
         default=[1],
         help='segmentation labels, default 1')
@@ -108,4 +143,7 @@ if __name__ == "__main__":
 
     outputfile = os.path.expanduser(args.outputfile)
 
-    showSegmentation(ds, degrad=args.degrad, voxelsize_mm=data['voxelsize_mm'], vtk_file=outputfile)
+    showSegmentation(ds, degrad=args.degrad, voxelsize_mm=data['voxelsize_mm'], vtk_file=outputfile, resize_mm=args.resize)
+
+if __name__ == "__main__":
+    main()

@@ -41,7 +41,9 @@ def add_fv_extern_into_modelparams(modelparams):
             fv_extern_str = modelparams['fv_extern']
             if fv_extern_str == "intensity_localization_fv":
                 modelparams['fv_extern'] = intensity_localization_fv
-            if fv_extern_str == "intensity_localization_2steps_fv":
+            elif fv_extern_str == "localization_fv":
+                modelparams['fv_extern'] = localization_fv
+            elif fv_extern_str == "intensity_localization_2steps_fv":
                 modelparams['fv_extern'] = intensity_localization_2steps_fv
             elif fv_extern_str == "near_blur_intensity_localization_fv":
                 modelparams['fv_extern'] = near_blur_intensity_localization_fv
@@ -140,6 +142,51 @@ def near_blur_intensity_localization_fv(data3dr, voxelsize_mm, seeds=None, uniqu
         return fv, sd
 
     return fv
+
+def localization_fv(data3dr, voxelsize_mm, seeds=None, unique_cls=None):        # scale
+    import scipy
+    import numpy as np
+    import os.path as op
+    try:
+        from lisa import organ_localizator
+    except:
+        import organ_localizator
+
+    import organ_localizator
+    fvall = organ_localizator.localization_fv(data3dr, voxelsize_mm)
+    return combine_fv_and_seeds([fvall], seeds, unique_cls)
+
+
+
+def combine_fv_and_seeds(feature_vectors, seeds=None, unique_cls=None):
+    """
+    Function can be used to combine information from feature vector and seeds. This functionality can be
+    implemented more efficiently.
+    :param feature_vector:
+    :param seeds:
+    :param unique_cls:
+    :return:
+    """
+
+    if type(feature_vectors) != list:
+        logger.error("Wrong type: feature_vectors should be list")
+        return
+    fv = np.concatenate(feature_vectors, 1)
+
+
+    if seeds is not None:
+        #             logger.debug("seeds " + str(seeds))
+        #             print "seeds ", seeds
+        sd = seeds.reshape(-1,1)
+        selection = np.in1d(sd, unique_cls)
+        fv = fv[selection]
+        sd = sd[selection]
+        # sd = sd[]
+        return fv, sd
+
+    return fv
+    return
+
 
 def intensity_localization_fv(data3dr, voxelsize_mm, seeds=None, unique_cls=None):        # scale
     """

@@ -229,7 +229,7 @@ class OrganSegmentation():
         self.lisa_operator_identifier = lisa_operator_identifier
         # self.version = qmisc.getVersionString()
         # if self.version is None:
-        self.version = "1.8.37"
+        self.version = "1.9.3"
         self.viewermax = viewermax
         self.viewermin = viewermin
         self.volume_unit = volume_unit
@@ -440,6 +440,19 @@ class OrganSegmentation():
         vol2 = np.sum(segm)
         criterium = (wanted_volume - vol2) ** 2
         return criterium
+
+    def load_data(self, datapath):
+        self.datapath = datapath
+
+        reader = datareader.DataReader()
+
+        # seg.data3d, metadata =
+        datap = reader.Get3DData(self.datapath, dataplus_format=True)
+        # rint datap.keys()
+        # self.iparams['series_number'] = self.metadata['series_number']
+        # self.iparams['datapath'] = self.datapath
+        self.import_dataplus(datap)
+
 
     def sliver_compare_with_other_volume_from_file(self, filepath):
         reader = datareader.DataReader()
@@ -1286,29 +1299,10 @@ class OrganSegmentation():
 
     def save_outputs(self, filepath=None):
 
-        # savestring_qt, ok = QInputDialog.getText(
-        #     None,
-        #     "Save",
-        #     'Save output data? Yes/No/All with input data (y/n/a):',
-        #     text="a"
-        #     )
-
-        # savestring = str(savestring_qt)
-
-        #    if savestring in ['Y', 'y', 'a', 'A']:
-
         data = self.export()
         data['version'] = self.version  # qmisc.getVersionString()
         data['experiment_caption'] = self.experiment_caption
         data['lisa_operator_identifier'] = self.lisa_operator_identifier
-#       data['organ_interactivity_counter'] = self.organ_interactivity_counter
-# save renamed file too
-#         pth, filename = op.split(op.normpath(self.datapath))
-#         filename += "-" + self.experiment_caption
-# #        if savestring in ['a', 'A']:
-#         filepath = 'org-' + filename + '.' + self.save_filetype
-#         # rint filepath
-#         # rint 'op ', op
         self.create_lisa_data_dir_tree()
 
         if filepath is None:
@@ -1317,22 +1311,7 @@ class OrganSegmentation():
         import io3d
         logger.debug("save outputs to file %s" % (filepath))
         io3d.write(data, filepath)
-        # from PyQt4 import QtCore; QtCore.pyqtRemoveInputHook()
-        # import ipdb; ipdb.set_trace()
-        # misc.obj_to_file(data, filepath, filetype=self.save_filetype)
 
-        # filepath2 = 'organ_last.' + self.save_filetype
-        # filepath2 = op.join(odp, filepath2)
-        # # ilepath = misc.suggest_filename(filepath)
-        # misc.obj_to_file(data, filepath2, filetype=self.save_filetype)
-# save to mat
-
-#        iparams = self.get_iparams()
-        # filepath = 'organ_iparams.pklz'
-        # filepath = op.join(odp, filepath)
-        # misc.obj_to_file(iparams, filepath, filetype='pklz')
-
-        # f savestring in ['a', 'A']:
     def create_lisa_data_dir_tree(self):
         lisa_data.create_lisa_data_dir_tree(self)
 
