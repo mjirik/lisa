@@ -42,11 +42,11 @@ install:
     # fix openssl problem with
     # _openssl.so: undefined symbol: X509_VERIFY_PARAM_set1_ip_asc
     # conda install openssl=1.0.2
-    conda list
-    apt-cache policy openssl
+    - conda list
+    - apt-cache policy openssl
 
-    apt-get install openssl=1.0.1
-    apt-cache policy openssl
+    - apt-get install openssl=1.0.1
+    - apt-cache policy openssl
 
 
     # - sudo make install
