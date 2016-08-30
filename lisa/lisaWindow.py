@@ -1214,7 +1214,9 @@ class OrganSegmentationWindow(QMainWindow):
 
         self.oseg.interactivity(
             min_val=self.oseg.viewermin,
-            max_val=self.oseg.viewermax)
+            max_val=self.oseg.viewermax),
+            # TODO
+            # self.sublayout_segmentace
         self.checkSegData('auto. seg., ')
         self.statusBar().showMessage('Ready')
 

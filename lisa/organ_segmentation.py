@@ -993,7 +993,7 @@ class OrganSegmentation():
 
 #    def interactivity(self, min_val=800, max_val=1300):
 # @TODO generovat QApplication
-    def interactivity(self, min_val=None, max_val=None):
+    def interactivity(self, min_val=None, max_val=None, layout=None):
         try:
             from pysegbase.seed_editor_qt import QTSeedEditor
         except:
@@ -1009,11 +1009,20 @@ class OrganSegmentation():
         # pyqtRemoveInputHook()
         # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
-        pyed = QTSeedEditor(igc.img,
-                            seeds=igc.seeds,
-                            modeFun=igc.interactivity_loop,
-                            voxelSize=igc.voxelsize,
-                            volume_unit='ml')
+        if layout is None:
+            pyed = QTSeedEditor(igc.img,
+                                seeds=igc.seeds,
+                                modeFun=igc.interactivity_loop,
+                                voxelSize=igc.voxelsize,
+                                volume_unit='ml')
+        else:
+            from pysegbase import QTSeedEditorWidget
+            pyed = QTSeedEditorWidget(igc.img,
+                                seeds=igc.seeds,
+                                modeFun=igc.interactivity_loop,
+                                voxelSize=igc.voxelsize,
+                                volume_unit='ml')
+            layout.addWidget(pyed)
 
         # set window
         if min_val is None:
