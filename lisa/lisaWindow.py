@@ -355,6 +355,11 @@ class OrganSegmentationWindow(QMainWindow):
         saveFileAction.triggered.connect(self.saveOut)
         menu.addAction(saveFileAction)
 
+        saveImageStackAction = group.addAction("Image stack")
+        saveImageStackAction.setCheckable(False)
+        saveImageStackAction.triggered.connect(self.saveOutImageStack)
+        menu.addAction(saveImageStackAction)
+
         saveDicomAction = group.addAction("Export Dicom")
         saveDicomAction.setCheckable(False)
         saveDicomAction.triggered.connect(self.btnSaveOutDcm)
@@ -1278,7 +1283,15 @@ class OrganSegmentationWindow(QMainWindow):
         else:
             self.statusBar().showMessage('No segmentation!')
 
-    def saveOut(self, event=None, filename=None):
+    def saveOutImageStack(self, event=None):
+        """
+        Open dialog with filename suggestion to save output as image stack
+        :param event:
+        :return:
+        """
+        self.saveOut(image_stack=True)
+
+    def saveOut(self, event=None, filename=None, image_stack=False):
         """
         Open dialog for selecting file output filename. Uniqe name is as
         suggested.
@@ -1286,7 +1299,11 @@ class OrganSegmentationWindow(QMainWindow):
         if self.oseg.segmentation is not None:
             self.statusBar().showMessage('Saving segmentation data...')
             QApplication.processEvents()
-            ofilename = self.oseg.get_standard_ouptut_filename()
+            if image_stack:
+                suffix = "{:04d}"
+                ofilename = self.oseg.get_standard_ouptut_filename(filetype="dcm", suffix=suffix)
+            else:
+                ofilename = self.oseg.get_standard_ouptut_filename()
             filename = str(QFileDialog.getSaveFileName(
                 self,
                 "Save file",
