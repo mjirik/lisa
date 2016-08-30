@@ -44,6 +44,7 @@ install:
     # conda install openssl=1.0.2
     - conda list
     - apt-cache policy openssl
+    - conda install --yes paramiko=1.16.0
 
     # - sudo apt-get install openssl=1.0.1
     # - apt-cache policy openssl
