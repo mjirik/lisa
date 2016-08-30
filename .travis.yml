@@ -45,8 +45,8 @@ install:
     - conda list
     - apt-cache policy openssl
 
-    - sudo apt-get install openssl=1.0.1
-    - apt-cache policy openssl
+    # - sudo apt-get install openssl=1.0.1
+    # - apt-cache policy openssl
 
 
     # - sudo make install
