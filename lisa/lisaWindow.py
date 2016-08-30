@@ -344,7 +344,7 @@ class OrganSegmentationWindow(QMainWindow):
         #group.triggered.connect(self.btnLoadEvent)
 
         #--save--
-        btnSave = QPushButton("Save", self)
+        btnSave = QPushButton("Save/Export", self)
         menuLayout.addWidget(btnSave)
         menu = QtGui.QMenu(btnSave)
         group = QtGui.QActionGroup(btnSave)
@@ -355,12 +355,12 @@ class OrganSegmentationWindow(QMainWindow):
         saveFileAction.triggered.connect(self.saveOut)
         menu.addAction(saveFileAction)
 
-        saveDicomAction = group.addAction("Dicom")
+        saveDicomAction = group.addAction("Export Dicom")
         saveDicomAction.setCheckable(False)
         saveDicomAction.triggered.connect(self.btnSaveOutDcm)
         menu.addAction(saveDicomAction)
 
-        saveDicomOverlayAction = group.addAction("Dicom overlay")
+        saveDicomOverlayAction = group.addAction("Export Dicom overlay")
         saveDicomOverlayAction.setCheckable(False)
         saveDicomOverlayAction.triggered.connect(self.btnSaveOutDcmOverlay)
         menu.addAction(saveDicomOverlayAction)
@@ -608,6 +608,10 @@ class OrganSegmentationWindow(QMainWindow):
         btnSegManual.clicked.connect(self.btnManualSeg)
         segTypeLayout.addWidget(btnSegManual)
 
+        btnSegSemiAuto = QPushButton("Semi-automatic", self)
+        btnSegSemiAuto.clicked.connect(self.btnSemiautoSeg)
+        segTypeLayout.addWidget(btnSegSemiAuto)
+
         btnSegMask = QPushButton("Mask", self)
         btnSegMask.clicked.connect(self.maskRegion)
         segTypeLayout.addWidget(btnSegMask)
@@ -661,6 +665,7 @@ class OrganSegmentationWindow(QMainWindow):
         self.btnSimple20 = btnSimple20
         self.btnSimple25 = btnSimple25
         self.btnSegManual = btnSegManual
+        self.btnSegSemiAuto = btnSegSemiAuto
         self.btnSegMask = btnSegMask
         self.btnSegPV = btnSegPV
         self.btnSegHV = btnSegHV
@@ -677,6 +682,7 @@ class OrganSegmentationWindow(QMainWindow):
         self.btnSegmentation.setDisabled(True)
         self.btnCompare.setDisabled(True)
         self.btnSegManual.setDisabled(True)
+        self.btnSegSemiAuto.setDisabled(True)
         self.btnSegMask.setDisabled(True)
         self.btnSegPV.setDisabled(True)
         self.btnSegHV.setDisabled(True)
@@ -696,6 +702,7 @@ class OrganSegmentationWindow(QMainWindow):
 
     def enableSegType(self):
         self.btnSegManual.setDisabled(False)
+        self.btnSegSemiAuto.setDisabled(False)
         self.btnSegMask.setDisabled(False)
         self.btnSegPV.setDisabled(False)
         self.btnSegHV.setDisabled(False)
