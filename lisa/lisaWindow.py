@@ -1454,17 +1454,34 @@ class OrganSegmentationWindow(QMainWindow):
         self.oseg.portalVeinSegmentation()
         self.statusBar().showMessage('Ready')
 
+    def __saveVesselTreeGui(self, textLabel):
+        fn_yaml = self.oseg.get_standard_ouptut_filename(filetype='yaml', suffix='-vt-' + textLabel)
+        fn_vtk = self.oseg.get_standard_ouptut_filename(filetype='vtk', suffix='-vt-' + textLabel)
+
+        fn_yaml = str(QFileDialog.getSaveFileName(
+            self,
+            "Save file",
+            fn_yaml,
+            filter="*.*"))
+        fn_vtk = str(QFileDialog.getSaveFileName(
+            self,
+            "Save file",
+            fn_vtk,
+            filter="*.*"))
+        self.oseg.saveVesselTree(textLabel, fn_yaml=fn_yaml, fn_vtk=fn_vtk)
+        self.statusBar().showMessage('Ready')
+
     def btnSavePortalVeinTree(self):
         self.statusBar().showMessage('Saving vessel tree ...')
         QApplication.processEvents()
-        self.oseg.saveVesselTree('porta')
-        self.statusBar().showMessage('Ready')
+        textLabel = 'porta'
+        self.__saveVesselTreeGui(textLabel)
 
     def btnSaveHepaticVeinsTree(self):
         self.statusBar().showMessage('Saving vessel tree ...')
         QApplication.processEvents()
-        self.oseg.saveVesselTree('hepatic_veins')
-        self.statusBar().showMessage('Ready')
+        textLabel = "hepatic_veins"
+        self.__saveVesselTreeGui(textLabel)
 
     def btnHepaticVeinsSegmentation(self):
         """
