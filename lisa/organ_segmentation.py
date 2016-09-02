@@ -1210,16 +1210,18 @@ class OrganSegmentation():
 
         # self.__vesselTree(outputSegmentation, 'porta')
 
-    def saveVesselTree(self, textLabel):
+    def saveVesselTree(self, textLabel, fn_yaml=None, fn_vtk=None):
         """
         textLabel: 'porta' or 'hepatic_veins'
         """
         self.__vesselTree(
             self.segmentation == self.slab[textLabel],
-            textLabel
+            textLabel,
+            fn_yaml=fn_yaml,
+            fn_vtk=fn_vtk,
         )
 
-    def __vesselTree(self, binaryData3d, textLabel):
+    def __vesselTree(self, binaryData3d, textLabel, fn_yaml=None, fn_vtk=None):
         import skelet3d
         from skelet3d import skeleton_analyser  # histology_analyser as skan
         data3d_thr = (binaryData3d > 0).astype(np.int8)
@@ -1238,15 +1240,17 @@ class OrganSegmentation():
         self.vessel_tree['Graph'][textLabel] = stats
         # print sa.stats
         logger.debug('save vessel tree to file')
-        fn = self.get_standard_ouptut_filename(filetype='yaml', suffix='vessel_tree')
+        if fn_yaml is None:
+            fn_yaml = self.get_standard_ouptut_filename(filetype='yaml', suffix='-vt-' + textLabel)
 # save all skeletons to one special file
-        misc.obj_to_file(self.vessel_tree, fn, filetype='yaml')
+        misc.obj_to_file(self.vessel_tree, fn_yaml, filetype='yaml')
         logger.debug('save vessel tree to file - finished')
         # generate vtk file
         logger.debug('start to generate vtk file from vessel_tree')
         import imtools.gen_vtk_tree
-        fn = self.get_standard_ouptut_filename(filetype='vtk', suffix='vt-' + textLabel)
-        imtools.gen_vtk_tree.vt2vtk_file(self.vessel_tree, fn, text_label=textLabel)
+        if fn_vtk is None:
+            fn_vtk = self.get_standard_ouptut_filename(filetype='vtk', suffix='-vt-' + textLabel)
+        imtools.gen_vtk_tree.vt2vtk_file(self.vessel_tree, fn_vtk, text_label=textLabel)
         logger.debug('generating vtk file from vessel_tree finished')
 
     def hepaticVeinsSegmentation(self):
@@ -1293,6 +1297,7 @@ class OrganSegmentation():
 
         if self.datapath is not None:
             pth, filename = op.split(op.normpath(self.datapath))
+            filename, ext = os.path.splitext(filename)
         else:
             filename = ''
         if len(filename) > 0 and len(self.experiment_caption) > 0:
