@@ -207,13 +207,17 @@ class OrganSegmentationWindow(QMainWindow):
         syncAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Sync', self)
         syncAction.setStatusTip('Synchronize files from the server')
         syncAction.triggered.connect(self.sync_lisa_data)
-        optionMenu.addAction(syncAction)        
+        optionMenu.addAction(syncAction)
 
         updateAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Update', self)
         updateAction.setStatusTip('Check new update')
         updateAction.triggered.connect(self.btnUpdate)
         optionMenu.addAction(updateAction)
 
+        editSlab = QtGui.QAction(QtGui.QIcon('exit.png'), '&Edit labels', self)
+        editSlab.setStatusTip('Edit segmentation labels')
+        editSlab.triggered.connect(self.btnEditSlab)
+        optionMenu.addAction(editSlab)
 
         ###### CONFIG MENU ######
         configMenu = menubar.addMenu('&Config')
@@ -1490,6 +1494,19 @@ class OrganSegmentationWindow(QMainWindow):
         self.statusBar().showMessage('Vessel segmentation ...')
         self.oseg.hepaticVeinsSegmentation()
         self.statusBar().showMessage('Ready')
+
+    def btnEditSlab(self):
+        print self.oseg.slab
+        # run gui
+        # predtim
+        print self.oseg.slab
+
+        from PyQt4.QtCore import pyqtRemoveInputHook
+        pyqtRemoveInputHook()
+        import ipdb; ipdb.set_trace()
+
+        # potom
+        print self.oseg.slab
 
     def btnLog(self):
         import logWindow
