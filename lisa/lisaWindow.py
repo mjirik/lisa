@@ -300,34 +300,6 @@ class OrganSegmentationWindow(QMainWindow):
         lisa_logo.setPixmap(logo)  # scaledToWidth(128))
         menuLayout.addWidget(lisa_logo)
 
-        #----- menu -----
-        #btnLoad = QPushButton("Load", self)
-        #btnLoad.clicked.connect(self.btnLoadEvent)
-        #menuLayout.addWidget(btnLoad)
-        
-        #btnBackLoad = QPushButton("Load", self)
-        #btnBackLoad.setStyleSheet('QPushButton {background-color: #BA5190; color: #BBBBBB}')
-        #btnBackLoad.clicked.connect(self.btnBackLoadEvent)
-        #menuLayout.addWidget(btnBackLoad)
-
-        #btnSave = QPushButton("Save", self)
-        #btnSave.clicked.connect(self.btnSaveEvent)
-        #menuLayout.addWidget(btnSave)
-
-        #btnBackSave = QPushButton("Save", self)
-        #btnBackSave.setStyleSheet('QPushButton {background-color: #BA5190; color: #BBBBBB}')
-        #btnBackSave.clicked.connect(self.btnBackSaveEvent)
-        #menuLayout.addWidget(btnBackSave)
-
-        #btnSegmentation = QPushButton("Segmentation", self)
-        #btnSegmentation.clicked.connect(self.btnSegmentationEvent)
-        #menuLayout.addWidget(btnSegmentation)
-
-        #btnBackSegmentation = QPushButton("Segmentation", self)
-        #btnBackSegmentation.setStyleSheet('QPushButton {background-color: #BA5190; color: #BBBBBB}')
-        #btnBackSegmentation.clicked.connect(self.btnBackSegmentationEvent)
-        #menuLayout.addWidget(btnBackSegmentation)
-
         #--load--
         btnLoad = QPushButton("Load", self)
         menuLayout.addWidget(btnLoad)
@@ -394,34 +366,7 @@ class OrganSegmentationWindow(QMainWindow):
         btnBackSegmentation.setStyleSheet('QPushButton {background-color: #BA5190; color: #FFFFFF}')
         btnBackSegmentation.clicked.connect(self.btnBackSegmentationEvent)
         menuLayout.addWidget(btnBackSegmentation)
-        ####
-        #btnSeg = QPushButton("Segmentation", self)
-        #menuLayout.addWidget(btnSeg)
-        #menu = QtGui.QMenu(btnSeg)
-        #group = QtGui.QActionGroup(btnSeg)
-        #group.setExclusive(True)
-
-        #segManualAction = group.addAction("Manual")
-        #segManualAction.setCheckable(False)
-        #segManualAction.triggered.connect(self.liverSeg)
-        #menu.addAction(segManualAction)
-
-        #segMaskAction = group.addAction("Mask")
-        #segMaskAction.setCheckable(False)
-        #segMaskAction.triggered.connect(self.maskRegion)
-        #menu.addAction(segMaskAction)
-
-        #segPVAction = group.addAction("Portal Vein")
-        #segPVAction.setCheckable(False)
-        #segPVAction.triggered.connect(self.btnPortalVeinSegmentation)
-        #menu.addAction(segPVAction)
-
-        #segHVAction = group.addAction("Hepatic Vein")
-        #segHVAction.setCheckable(False)
-        #segHVAction.triggered.connect(self.btnHepaticVeinsSegmentation)
-        #menu.addAction(segHVAction)
-        #btnSeg.setMenu(menu)
-        
+      
         #--others--
         btnCompare = QPushButton("Compare", self)
         btnCompare.clicked.connect(self.compareSegmentationWithFile)
@@ -430,98 +375,6 @@ class OrganSegmentationWindow(QMainWindow):
         btnQuit = QPushButton("Quit", self)
         btnQuit.clicked.connect(self.quit)
         menuLayout.addWidget(btnQuit)
-
-
-        ###### LOAD MENU #####
-        #loadMenu = QtGui.QWidget()
-        #loadMenuLayout = QVBoxLayout()
-        #mainLayout.addWidget(loadMenu)
-        #loadMenu.setLayout(loadMenuLayout)
-        #mainLayout.addLayout(loadMenuLayout)
-        #loadMenuLayout.addSpacing(126)
-
-        #btnLoadFile = QPushButton("File", self)
-        #btnLoadFile.setStyleSheet('QPushButton {background-color: #e600e6; color: #FFFFFF}\n'
-        #                            'QPushButton:hover {background-color: #FF44FF; color: #000000;}')
-        #btnLoadFile.clicked.connect(self.loadDataFile)
-        #loadMenuLayout.addWidget(btnLoadFile)
-
-        #btnLoadDir = QPushButton("Directory", self)
-        #btnLoadDir.setStyleSheet('QPushButton {background-color: #e600e6; color: #FFFFFF}\n'
-        #                            'QPushButton:hover {background-color: #FF44FF; color: #000000;}')
-        #btnLoadDir.clicked.connect(self.loadDataDir)
-        #loadMenuLayout.addWidget(btnLoadDir)
-
-        ####### SAVE MENU #####
-        #saveMenu = QWidget()
-        #saveMenuLayout = QVBoxLayout()
-        #mainLayout.addWidget(saveMenu)
-        #saveMenu.setLayout(saveMenuLayout)
-        #mainLayout.addLayout(saveMenuLayout)
-        #saveMenuLayout.addSpacing(126)
-
-        #btnSaveFile = QPushButton("File", self)
-        #btnSaveFile.setStyleSheet('QPushButton {background-color: #e600e6; color: #FFFFFF}\n'
-        #                            'QPushButton:hover {background-color: #FF44FF; color: #000000;}')
-        #btnSaveFile.clicked.connect(self.saveOut)
-        #saveMenuLayout.addWidget(btnSaveFile)
-
-        #btnSaveDcm = QPushButton("Dicom", self)
-        #btnSaveDcm.setStyleSheet('QPushButton {background-color: #e600e6; color: #FFFFFF}\n'
-        #                            'QPushButton:hover {background-color: #FF44FF; color: #000000;}')
-        #btnSaveDcm.clicked.connect(self.btnSaveOutDcm)
-        #saveMenuLayout.addWidget(btnSaveDcm)
-
-        #btnSaveDcmOverlay = QPushButton("Dicom overlay", self)
-        #btnSaveDcmOverlay.setStyleSheet('QPushButton {background-color: #e600e6; color: #FFFFFF}\n'
-        #                            'QPushButton:hover {background-color: #FF44FF; color: #000000;}')
-        #btnSaveDcmOverlay.clicked.connect(self.btnSaveOutDcmOverlay)
-        #saveMenuLayout.addWidget(btnSaveDcmOverlay)
-
-        #btnSavePV = QPushButton("PV tree", self)
-        #btnSavePV.setStyleSheet('QPushButton {background-color: #e600e6; color: #FFFFFF}\n'
-        #                            'QPushButton:hover {background-color: #FF44FF; color: #000000;}')
-        #btnSavePV.clicked.connect(self.btnSavePortalVeinTree)
-        #saveMenuLayout.addWidget(btnSavePV)
-
-        #btnSaveHV = QPushButton("HV tree", self)
-        #btnSaveHV.setStyleSheet('QPushButton {background-color: #e600e6; color: #FFFFFF}\n'
-        #                            'QPushButton:hover {background-color: #FF44FF; color: #000000;}')
-        #btnSaveHV.clicked.connect(self.btnSaveHepaticVeinsTree)
-        #saveMenuLayout.addWidget(btnSaveHV)
-
-
-        ####### SEGMENTATION MENU #####
-        #segMenu = QWidget()
-        #segMenuLayout = QVBoxLayout()
-        #mainLayout.addWidget(segMenu)
-        #segMenu.setLayout(segMenuLayout)
-        #mainLayout.addLayout(segMenuLayout)
-        #segMenuLayout.addSpacing(126)
-
-        #btnSegManual = QPushButton("Manual", self)
-        #btnSegManual.setStyleSheet('QPushButton {background-color: #e600e6; color: #FFFFFF}\n'
-        #                            'QPushButton:hover {background-color: #FF44FF; color: #000000;}')
-        #btnSegManual.clicked.connect(self.liverSeg)
-        #segMenuLayout.addWidget(btnSegManual)
-
-        #btnSegMask = QPushButton("Mask", self)
-        #btnSegMask.setStyleSheet('QPushButton {background-color: #e600e6; color: #FFFFFF}\n'
-        #                            'QPushButton:hover {background-color: #FF44FF; color: #000000;}')
-        #btnSegMask.clicked.connect(self.maskRegion)
-        #segMenuLayout.addWidget(btnSegMask)
-
-        #btnSegPV = QPushButton("Portal Vein", self)
-        #btnSegPV.setStyleSheet('QPushButton {background-color: #e600e6; color: #FFFFFF}\n'
-        #                            'QPushButton:hover {background-color: #FF44FF; color: #000000;}')
-        #btnSegPV.clicked.connect(self.btnPortalVeinSegmentation)
-        #segMenuLayout.addWidget(btnSegPV)
-
-        #btnSegHV = QPushButton("Hepatic Vein", self)
-        #btnSegHV.setStyleSheet('QPushButton {background-color: #e600e6; color: #FFFFFF}\n'
-        #                            'QPushButton:hover {background-color: #FF44FF; color: #000000;}')
-        #btnSegHV.clicked.connect(self.btnHepaticVeinsSegmentation)
-        #segMenuLayout.addWidget(btnSegHV)
 
 
         ##### SEPARATING LINE #####
@@ -592,16 +445,6 @@ class OrganSegmentationWindow(QMainWindow):
         btnLiver.clicked.connect(self.btnLiverEvent)
         segConfigLayout.addWidget(btnLiver)
 
-        btnSimple20 = QPushButton("Simple 2.0 mm", self)
-        btnSimple20.setCheckable(True)
-        btnSimple20.clicked.connect(self.btnSimple20Event)
-        segConfigLayout.addWidget(btnSimple20)
-
-        btnSimple25 = QPushButton("Simple 2.5 mm", self)
-        btnSimple25.setCheckable(True)
-        btnSimple25.clicked.connect(self.btnSimple25Event)
-        segConfigLayout.addWidget(btnSimple25)
-
         ###
         lblSegType = QLabel('Choose type of segmentation')
         lblSegType.setFont(font_label)
@@ -671,8 +514,6 @@ class OrganSegmentationWindow(QMainWindow):
         self.btnKidneyL = btnKidneyL
         self.btnKidneyR = btnKidneyR
         self.btnLiver = btnLiver
-        self.btnSimple20 = btnSimple20
-        self.btnSimple25 = btnSimple25
         self.btnSegManual = btnSegManual
         self.btnSegSemiAuto = btnSegSemiAuto
         self.btnSegMask = btnSegMask
@@ -717,64 +558,36 @@ class OrganSegmentationWindow(QMainWindow):
         self.btnSegHV.setDisabled(False)
 
     def btnHearthEvent(self, event):
-        functools.partial(self.onAlternativeSegmentationParams, "label hearth")
+        self.oseg.update_parameters_based_on_label("label hearth")
         self.enableSegType()
         self.btnHearth.setChecked(True)
         self.btnKidneyL.setChecked(False)
         self.btnKidneyR.setChecked(False)
         self.btnLiver.setChecked(False)
-        self.btnSimple20.setChecked(False)
-        self.btnSimple25.setChecked(False)
 
     def btnKidneyLEvent(self, event):
-        functools.partial(self.onAlternativeSegmentationParams, "label kidney L")
+        self.oseg.update_parameters_based_on_label("label kidney L")
         self.enableSegType()
         self.btnHearth.setChecked(False)
         self.btnKidneyL.setChecked(True)
         self.btnKidneyR.setChecked(False)
         self.btnLiver.setChecked(False)
-        self.btnSimple20.setChecked(False)
-        self.btnSimple25.setChecked(False)
 
     def btnKidneyREvent(self, event):
-        functools.partial(self.onAlternativeSegmentationParams, "label kidney R")
+        self.oseg.update_parameters_based_on_label("label kidney R")
         self.enableSegType()
         self.btnHearth.setChecked(False)
         self.btnKidneyL.setChecked(False)
         self.btnKidneyR.setChecked(True)
         self.btnLiver.setChecked(False)
-        self.btnSimple20.setChecked(False)
-        self.btnSimple25.setChecked(False)
 
     def btnLiverEvent(self, event):
-        functools.partial(self.onAlternativeSegmentationParams, "label liver")
+        self.oseg.update_parameters_based_on_label("label liver")
         self.enableSegType()
         self.btnHearth.setChecked(False)
         self.btnKidneyL.setChecked(False)
         self.btnKidneyR.setChecked(False)
         self.btnLiver.setChecked(True)
-        self.btnSimple20.setChecked(False)
-        self.btnSimple25.setChecked(False)
-
-    def btnSimple20Event(self, event):
-        functools.partial(self.onAlternativeSegmentationParams, "simple 2 mm")
-        self.enableSegType()
-        self.btnHearth.setChecked(False)
-        self.btnKidneyL.setChecked(False)
-        self.btnKidneyR.setChecked(False)
-        self.btnLiver.setChecked(False)
-        self.btnSimple20.setChecked(True)
-        self.btnSimple25.setChecked(False)
-
-    def btnSimple25Event(self, event):
-        functools.partial(self.onAlternativeSegmentationParams, "simple 2.5 mm")
-        self.enableSegType()
-        self.btnHearth.setChecked(False)
-        self.btnKidneyL.setChecked(False)
-        self.btnKidneyR.setChecked(False)
-        self.btnLiver.setChecked(False)
-        self.btnSimple20.setChecked(False)
-        self.btnSimple25.setChecked(True)
 
 
     def btnSegmentationEvent(self, event):
@@ -792,73 +605,6 @@ class OrganSegmentationWindow(QMainWindow):
         self.segBody.hide()
         self.segConfig.hide()
         self.segType.hide()
-
-
-    #def btnBackLoadEvent(self, event):
-    #    self.btnLoad.show()
-    #    self.btnBackLoad.hide()
-
-    #    self.loadMenu.hide()
-
-    #def btnBackSaveEvent(self, event):
-    #    self.btnSave.show()
-    #    self.btnBackSave.hide()
-
-    #    self.saveMenu.hide()
-
-    #def btnBackSegmentationEvent(self, event):
-    #    self.btnSegmentation.show()
-    #    self.btnBackSegmentation.hide()
-
-    #    self.segMenu.hide()
-
-
-    #def btnLoadEvent(self, event):
-    #    self.btnBackLoad.show()
-    #    self.btnLoad.hide()
-    #    self.btnBackSave.hide()
-    #    self.btnSave.show()
-    #    self.btnBackSegmentation.hide()
-    #    self.btnSegmentation.show()
-        
-    #    self.loadMenu.show()
-    #    self.saveMenu.hide()
-    #    self.segMenu.hide()
-
-    #def btnSaveEvent(self, event):
-    #    self.btnBackLoad.hide()
-    #    self.btnLoad.show()
-    #    self.btnBackSave.show()
-    #    self.btnSave.hide()
-    #    self.btnBackSegmentation.hide()
-    #    self.btnSegmentation.show()
-
-    #    self.loadMenu.hide()
-    #    self.saveMenu.show()
-    #    self.segMenu.hide()
-
-    #def btnSegmentationEvent(self, event):
-    #    self.btnBackLoad.hide()
-    #    self.btnLoad.show()
-    #    self.btnBackSave.hide()
-    #    self.btnSave.show()
-    #    self.btnBackSegmentation.show()
-    #    self.btnSegmentation.hide()
-
-    #    self.loadMenu.hide()
-    #    self.saveMenu.hide()
-    #    self.segMenu.show()
-
-    #def btnMainMenu(self, event):
-    #    self.btnLoad.clicked.connect(self.btnLoadEvent)
-    #    self.btnSave.clicked.connect(self.btnSaveEvent)
-    #    self.btnSegmentation.clicked.connect(self.btnSegmentationEvent)
-    #    self.btnLoad.setStyleSheet('')
-    #    self.btnSave.setStyleSheet('')
-    #    self.btnSegmentation.setStyleSheet('')
-    #    self.loadMenu.hide()
-    #    self.saveMenu.hide()
-    #    self.segMenu.hide()
 
 
 
