@@ -32,7 +32,7 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pysegbase/src"))
 
 from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
-    QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame, \
+    QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QPushButton, QLineEdit, QFrame, \
     QFont, QPixmap, QFileDialog, QStyle
 from PyQt4 import QtGui
 from PyQt4.Qt import QString
@@ -372,6 +372,11 @@ class OrganSegmentationWindow(QMainWindow):
         btnCompare.clicked.connect(self.compareSegmentationWithFile)
         menuLayout.addWidget(btnCompare)
 
+        if self.oseg.debug_mode:
+            btn_debug = QPushButton("Debug", self)
+            btn_debug.clicked.connect(self.run_debug)
+            menuLayout.addWidget(btn_debug)
+
         btnQuit = QPushButton("Quit", self)
         btnQuit.clicked.connect(self.quit)
         menuLayout.addWidget(btnQuit)
@@ -387,6 +392,7 @@ class OrganSegmentationWindow(QMainWindow):
 
         ##### BODY #####
         bodyLayout = QVBoxLayout()
+        self.bodyLayout = bodyLayout
         mainLayout.addLayout(bodyLayout)
 
         #--- title ---
@@ -476,11 +482,43 @@ class OrganSegmentationWindow(QMainWindow):
         btnSegHV.clicked.connect(self.btnHepaticVeinsSegmentation)
         segTypeLayout.addWidget(btnSegHV)
 
-        if self.oseg.debug_mode:
-            rstart = 5
-            btn_debug = QPushButton("Debug", self)
-            btn_debug.clicked.connect(self.run_debug)
-            grid.addWidget(btn_debug, rstart - 2, 4)
+        
+        #--- edit slab ---
+        slabBody = QtGui.QWidget()
+        slabBodyLayout = QGridLayout()
+        self.slabBodyLayout = slabBodyLayout
+        slabBody.setLayout(slabBodyLayout)
+        bodyLayout.addWidget(slabBody)
+        bodyLayout.addLayout(slabBodyLayout)
+
+        self.slabBodyLayout.addWidget(QLabel("Key"), 0, 1)
+        self.slabBodyLayout.addWidget(QLabel("Value"), 0, 2)
+
+        self.pos = 1
+        for key, value in self.oseg.slab.items():
+            self.slabBodyLayout.addWidget(QLineEdit(key), self.pos, 1)
+            self.slabBodyLayout.addWidget(QLineEdit(str(value)), self.pos, 2)
+            
+            self.pos += 1
+   
+        self.lblSlabError = QLabel()
+        self.lblSlabError.setStyleSheet("color: red;");
+        slabBodyLayout.addWidget(self.lblSlabError, 20, 1, 1, 2)
+
+        btnAddLabel = QPushButton("Add label", self)
+        btnAddLabel.clicked.connect(self.addLabel)
+        slabBodyLayout.addWidget(btnAddLabel, 21, 2)
+
+        slabBodyLayout.addWidget(QLabel("             "), 0, 3)
+
+        btnSaveSlab = QPushButton("Save", self)
+        btnSaveSlab.clicked.connect(self.btnSaveSlab)
+        slabBodyLayout.addWidget(btnSaveSlab, 1, 4)
+
+        btnBack = QPushButton("Back", self)
+        btnBack.clicked.connect(self.btnBackSegmentationEvent)
+        slabBodyLayout.addWidget(btnBack, 2, 4)
+
 
         #--- file info (footer) ---
         bodyLayout.addStretch()
@@ -524,11 +562,11 @@ class OrganSegmentationWindow(QMainWindow):
         #self.segMenu = segMenu
         self.infoBody = infoBody
         self.segBody = segBody
+        self.slabBody = slabBody
         self.segConfig = segConfig
         self.segType = segType
 
         self.btnSave.setDisabled(True)
-        #self.btnSeg.setDisabled(True)
         self.btnSegmentation.setDisabled(True)
         self.btnCompare.setDisabled(True)
         self.btnSegManual.setDisabled(True)
@@ -537,13 +575,10 @@ class OrganSegmentationWindow(QMainWindow):
         self.btnSegPV.setDisabled(True)
         self.btnSegHV.setDisabled(True)
 
-        #self.btnBackLoad.hide()
-        #self.btnBackSave.hide()
+
         self.btnBackSegmentation.hide()
-        #self.loadMenu.hide()
-        #self.saveMenu.hide()
-        #self.segMenu.hide()
         self.segBody.hide()
+        self.slabBody.hide()
         self.segConfig.hide()
         self.segType.hide()
         self.show()
@@ -597,6 +632,7 @@ class OrganSegmentationWindow(QMainWindow):
         self.segBody.show()
         self.segConfig.show()
         self.segType.show()
+        self.slabBody.hide()
 
     def btnBackSegmentationEvent(self, event):
         self.btnSegmentation.show()
@@ -605,8 +641,19 @@ class OrganSegmentationWindow(QMainWindow):
         self.segBody.hide()
         self.segConfig.hide()
         self.segType.hide()
+        self.slabBody.hide()
 
+    def btnSaveSlab(self, event):
+        print "work in progress"
+        self.lblSlabError.setText("It does not work :)")
 
+    def addLabel(self):
+        if self.pos < 13:
+            self.slabBodyLayout.addWidget(QLineEdit(), self.pos, 1)
+            self.slabBodyLayout.addWidget(QLineEdit(), self.pos, 2)
+            self.pos += 1
+        else:
+            self.lblSlabError.setText("You cannot add new label")
 
     def quit(self, event):
         return self.close()
@@ -1242,14 +1289,20 @@ class OrganSegmentationWindow(QMainWindow):
         self.statusBar().showMessage('Ready')
 
     def btnEditSlab(self):
-        print self.oseg.slab
         # run gui
+        self.btnSegmentation.show()
+        self.btnBackSegmentation.hide()
+        self.infoBody.hide()
+        self.segBody.hide()
+        self.segConfig.hide()
+        self.segType.hide()
+        self.slabBody.show()
         # predtim
         print self.oseg.slab
 
-        from PyQt4.QtCore import pyqtRemoveInputHook
-        pyqtRemoveInputHook()
-        import ipdb; ipdb.set_trace()
+        #from PyQt4.QtCore import pyqtRemoveInputHook
+        #pyqtRemoveInputHook()
+        #import ipdb; ipdb.set_trace()
 
         # potom
         print self.oseg.slab
