@@ -14,37 +14,78 @@ import logging
 
 logger = logging.getLogger(__name__)
 import argparse
+from PyQt4.QtGui import QGridLayout, QLabel, QPushButton, QLineEdit
 from PyQt4 import QtGui
-from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
-    QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QPushButton, QLineEdit, QFrame, \
-    QFont, QPixmap, QFileDialog, QStyle
-from PyQt4 import QtGui
-from PyQt4.Qt import QString
 import sys
 
 class DictEdit(QtGui.QWidget):
 
-    def __init__(self, dictionary={}):
+    def __init__(self, dictionary):
         super(DictEdit, self).__init__()
 
-        self.dictionary={}
+        self.dictionary = dictionary
         self.initUI()
-        self.text.setText(str(dictionary))
 
 
     def initUI(self):
-        mainLayout = QHBoxLayout(self)
+        self.mainLayout = QGridLayout(self)
+        self.mainLayout.addWidget(QLabel("Key"), 0, 1)
+        self.mainLayout.addWidget(QLabel("Value"), 0, 2)
 
-        #self.setGeometry(300, 300, 250, 150)
-        #self.setWindowTitle('Icon')
-        #self.setWindowIcon(QtGui.QIcon('web.png'))
+        self.slabKeys = []
+        self.slabValues = []
+        self.pos = 1
+        for key, value in self.dictionary.slab.items(): #self.oseg.slab.items():
+            keyW = QLineEdit(key)
+            valueW = QLineEdit(str(value))
+            self.mainLayout.addWidget(keyW, self.pos, 1)
+            self.mainLayout.addWidget(valueW, self.pos, 2)
+            self.slabKeys.append(keyW)
+            self.slabValues.append(valueW)
+            self.pos += 1
 
-        btn = QtGui.QPushButton('Button', self)
-        mainLayout.addWidget(btn)
+        self.lblSlabError = QLabel()
+        self.lblSlabError.setStyleSheet("color: red;");
+        self.mainLayout.addWidget(self.lblSlabError, 20, 1, 1, 2)
 
-        self.text = QtGui.QTextEdit()
-        mainLayout.addWidget(self.text)
+        btnAddLabel = QPushButton("Add label", self)
+        btnAddLabel.clicked.connect(self.addLabel)
+        self.mainLayout.addWidget(btnAddLabel, 21, 2)
 
+        self.mainLayout.addWidget(QLabel("             "), 0, 3)
+
+        btnSaveSlab = QPushButton("Save", self)
+        btnSaveSlab.clicked.connect(self.saveSlab)
+        self.mainLayout.addWidget(btnSaveSlab, 1, 4)
+
+
+        self.btnBack = QPushButton("Back", self)
+        self.mainLayout.addWidget(self.btnBack, 2, 4)
+
+    def addLabel(self):
+        if self.pos < 13:
+            keyW = QLineEdit()
+            valueW = QLineEdit()
+            self.mainLayout.addWidget(keyW, self.pos, 1)
+            self.mainLayout.addWidget(valueW, self.pos, 2)
+            self.slabKeys.append(keyW)
+            self.slabValues.append(valueW)
+            self.pos += 1
+        else:
+            self.lblSlabError.setText("You cannot add new label")
+
+    def saveSlab(self, event):
+        self.lblSlabError.setText('')
+        newSlab = {}
+        for i in range(0, len(self.slabKeys)):
+            wk = str(self.slabKeys[i].text())
+            wv = str(self.slabValues[i].text())
+            if wk != '':
+                newSlab[wk] = wv
+            elif wv != '':
+                self.lblSlabError.setText("You have to name key!")
+        self.dictionary = newSlab
+        print self.dictionary
 
     def getDict(self):
         return self.dictionary

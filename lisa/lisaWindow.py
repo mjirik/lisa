@@ -48,6 +48,8 @@ except:
 
 import sed3
 import loginWindow
+import dictEditQt
+import segmentationQt
 
 def find_logo():
     import wget
@@ -199,6 +201,11 @@ class OrganSegmentationWindow(QMainWindow):
         configAction.triggered.connect(self.btnConfig)
         optionMenu.addAction(configAction)
 
+        editSlab = QtGui.QAction(QtGui.QIcon('exit.png'), '&Edit labels', self)
+        editSlab.setStatusTip('Edit segmentation labels')
+        editSlab.triggered.connect(self.btnEditSlab)
+        optionMenu.addAction(editSlab)
+
         logAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Log', self)
         logAction.setStatusTip('See log file')
         logAction.triggered.connect(self.btnLog)
@@ -214,10 +221,6 @@ class OrganSegmentationWindow(QMainWindow):
         updateAction.triggered.connect(self.btnUpdate)
         optionMenu.addAction(updateAction)
 
-        editSlab = QtGui.QAction(QtGui.QIcon('exit.png'), '&Edit labels', self)
-        editSlab.setStatusTip('Edit segmentation labels')
-        editSlab.triggered.connect(self.btnEditSlab)
-        optionMenu.addAction(editSlab)
 
         ###### CONFIG MENU ######
         configMenu = menubar.addMenu('&Config')
@@ -253,20 +256,6 @@ class OrganSegmentationWindow(QMainWindow):
 
         return btn
 
-    def _initUI_logo(self, grid):
-        lisa_logo = QLabel()
-        logopath = find_logo()
-        logo = QPixmap(logopath)
-        lisa_logo.setPixmap(logo)  # scaledToWidth(128))
-        grid.addWidget(lisa_logo, 0, 2, 1, 1)
-
-        rstart = 0
-        grid.addWidget(self.text_info, rstart + 1, 1, 1, 4)
-        grid.addWidget(self.text_dcm_dir, rstart + 2, 1, 1, 4)
-        grid.addWidget(self.text_dcm_data, rstart + 3, 1, 1, 4)
-        grid.addWidget(self.text_seg_data, rstart + 4, 1, 1, 4)
-        return grid
-
     def _activate_widget(self, widget):
         self.currentWidget.hide()
         self.grid.addWidget(widget,6,2)
@@ -280,128 +269,33 @@ class OrganSegmentationWindow(QMainWindow):
         self.resize(800, 600)
         self.setWindowTitle('LISA')
         self.statusBar().showMessage('Ready')
-        mainLayout = QHBoxLayout(window)
-
-        ###### MAIN MENU ######
-        menuLayout = QVBoxLayout()
-        mainLayout.addLayout(menuLayout)
-
-        #----- logo -----
-        font_label = QFont()
-        font_label.setBold(True)
-        font_info = QFont()
-        font_info.setItalic(True)
-        font_info.setPixelSize(12)
-
-        lisa_logo = QLabel()
-        logopath = find_logo()
-        logo = QPixmap(logopath)
-        logo = logo.scaled(130, 130)
-        lisa_logo.setPixmap(logo)  # scaledToWidth(128))
-        menuLayout.addWidget(lisa_logo)
-
-        #--load--
-        btnLoad = QPushButton("Load", self)
-        menuLayout.addWidget(btnLoad)
-        menu = QtGui.QMenu(btnLoad)
-        group = QtGui.QActionGroup(btnLoad)
-        group.setExclusive(True)
-
-        loadFileAction = group.addAction("File")
-        loadFileAction.setCheckable(False)
-        loadFileAction.triggered.connect(self.loadDataFile)
-        menu.addAction(loadFileAction)
-
-        loadDirAction = group.addAction("Directory")
-        loadDirAction.setCheckable(False)
-        loadDirAction.triggered.connect(self.loadDataDir)
-        menu.addAction(loadDirAction)
-        btnLoad.setMenu(menu)
-        #group.triggered.connect(self.btnLoadEvent)
-
-        #--save--
-        btnSave = QPushButton("Save/Export", self)
-        menuLayout.addWidget(btnSave)
-        menu = QtGui.QMenu(btnSave)
-        group = QtGui.QActionGroup(btnSave)
-        group.setExclusive(True)
-
-        saveFileAction = group.addAction("File")
-        saveFileAction.setCheckable(False)
-        saveFileAction.triggered.connect(self.saveOut)
-        menu.addAction(saveFileAction)
-
-        saveImageStackAction = group.addAction("Image stack")
-        saveImageStackAction.setCheckable(False)
-        saveImageStackAction.triggered.connect(self.saveOutImageStack)
-        menu.addAction(saveImageStackAction)
-
-        saveDicomAction = group.addAction("Export Dicom")
-        saveDicomAction.setCheckable(False)
-        saveDicomAction.triggered.connect(self.btnSaveOutDcm)
-        menu.addAction(saveDicomAction)
-
-        saveDicomOverlayAction = group.addAction("Export Dicom overlay")
-        saveDicomOverlayAction.setCheckable(False)
-        saveDicomOverlayAction.triggered.connect(self.btnSaveOutDcmOverlay)
-        menu.addAction(saveDicomOverlayAction)
-
-        savePVTreeAction = group.addAction("PV Tree")
-        savePVTreeAction.setCheckable(False)
-        savePVTreeAction.triggered.connect(self.btnSavePortalVeinTree)
-        menu.addAction(savePVTreeAction)
-
-        saveHVTreeAction = group.addAction("HV Tree")
-        saveHVTreeAction.setCheckable(False)
-        saveHVTreeAction.triggered.connect(self.btnSaveHepaticVeinsTree)
-        menu.addAction(saveHVTreeAction)
-        btnSave.setMenu(menu)
-
-        #--segmentation--
-        btnSegmentation = QPushButton("Segmentation", self)
-        btnSegmentation.clicked.connect(self.btnSegmentationEvent)
-        menuLayout.addWidget(btnSegmentation)
-
-        btnBackSegmentation = QPushButton("Segmentation", self)
-        btnBackSegmentation.setStyleSheet('QPushButton {background-color: #BA5190; color: #FFFFFF}')
-        btnBackSegmentation.clicked.connect(self.btnBackSegmentationEvent)
-        menuLayout.addWidget(btnBackSegmentation)
-      
-        #--others--
-        btnCompare = QPushButton("Compare", self)
-        btnCompare.clicked.connect(self.compareSegmentationWithFile)
-        menuLayout.addWidget(btnCompare)
-
-        if self.oseg.debug_mode:
-            btn_debug = QPushButton("Debug", self)
-            btn_debug.clicked.connect(self.run_debug)
-            menuLayout.addWidget(btn_debug)
-
-        btnQuit = QPushButton("Quit", self)
-        btnQuit.clicked.connect(self.quit)
-        menuLayout.addWidget(btnQuit)
+        self.mainLayout = QHBoxLayout(window)
+        window.setLayout(self.mainLayout)
 
 
-        ##### SEPARATING LINE #####
+        #### MENU ####
+        self.initUIMenu()
         line = QFrame()
         line.setFrameShape(QFrame.VLine)
-
-        mainLayout.addWidget(line)
-        window.setLayout(mainLayout)
+        self.mainLayout.addWidget(line)
 
 
         ##### BODY #####
         bodyLayout = QVBoxLayout()
         self.bodyLayout = bodyLayout
-        mainLayout.addLayout(bodyLayout)
+        self.mainLayout.addLayout(bodyLayout)
 
         #--- title ---
-        infoBody = QtGui.QWidget()
+        self.infoBody = QtGui.QWidget()
         infoBodyLayout = QVBoxLayout()
-        bodyLayout.addWidget(infoBody)
-        infoBody.setLayout(infoBodyLayout)
-        bodyLayout.addLayout(infoBodyLayout)
+        bodyLayout.addWidget(self.infoBody)
+        self.infoBody.setLayout(infoBodyLayout)
 
+        font_label = QFont()
+        font_label.setBold(True)
+        font_info = QFont()
+        font_info.setItalic(True)
+        font_info.setPixelSize(12)
         lisa_title = QLabel('Liver Surgery Analyser')
         info = QLabel('Developed by:\n' +
                       'University of West Bohemia\n' +
@@ -415,109 +309,23 @@ class OrganSegmentationWindow(QMainWindow):
         infoBodyLayout.addWidget(info)
 
         #--- segmentation option ---
-        segBody = QtGui.QWidget()
-        segBodyLayout = QVBoxLayout()
-        bodyLayout.addWidget(segBody)
-        segBody.setLayout(segBodyLayout)
-        bodyLayout.addLayout(segBodyLayout)
-
-        lblSegConfig = QLabel('Choose configure')
-        lblSegConfig.setFont(font_label)
-        segBodyLayout.addWidget(lblSegConfig)
-
-        segConfig = QtGui.QWidget()
-        segConfigLayout = QHBoxLayout()
-        segBodyLayout.addWidget(segConfig)
-        segConfig.setLayout(segConfigLayout)
-        segBodyLayout.addLayout(segConfigLayout)
-
-        btnHearth = QPushButton("Hearth", self)
-        btnHearth.setCheckable(True)
-        btnHearth.clicked.connect(self.btnHearthEvent)
-        segConfigLayout.addWidget(btnHearth)
-
-        btnKidneyL = QPushButton("Kidney Left", self)
-        btnKidneyL.setCheckable(True)
-        btnKidneyL.clicked.connect(self.btnKidneyLEvent)
-        segConfigLayout.addWidget(btnKidneyL)
-
-        btnKidneyR = QPushButton("Kidney Right", self)
-        btnKidneyR.setCheckable(True)
-        btnKidneyR.clicked.connect(self.btnKidneyREvent)
-        segConfigLayout.addWidget(btnKidneyR)
-        
-        btnLiver = QPushButton("Liver", self)
-        btnLiver.setCheckable(True)
-        btnLiver.clicked.connect(self.btnLiverEvent)
-        segConfigLayout.addWidget(btnLiver)
+        self.segBody = segmentationQt.SegmentationWidget()
+        self.segBody.oseg = self.oseg
+        bodyLayout.addWidget(self.segBody)
 
         ###
-        lblSegType = QLabel('Choose type of segmentation')
-        lblSegType.setFont(font_label)
-        segBodyLayout.addWidget(lblSegType)
-
-        segType = QtGui.QWidget()
-        segTypeLayout = QHBoxLayout()
-        segBodyLayout.addWidget(segType)
-        segType.setLayout(segTypeLayout)
-        segBodyLayout.addLayout(segTypeLayout)
-        
-        btnSegManual = QPushButton("Manual", self)
-        btnSegManual.clicked.connect(self.btnManualSeg)
-        segTypeLayout.addWidget(btnSegManual)
-
-        btnSegSemiAuto = QPushButton("Semi-automatic", self)
-        btnSegSemiAuto.clicked.connect(self.btnSemiautoSeg)
-        segTypeLayout.addWidget(btnSegSemiAuto)
-
-        btnSegMask = QPushButton("Mask", self)
-        btnSegMask.clicked.connect(self.maskRegion)
-        segTypeLayout.addWidget(btnSegMask)
-
-        btnSegPV = QPushButton("Portal Vein", self)
-        btnSegPV.clicked.connect(self.btnPortalVeinSegmentation)
-        segTypeLayout.addWidget(btnSegPV)
-
-        btnSegHV = QPushButton("Hepatic Vein", self)
-        btnSegHV.clicked.connect(self.btnHepaticVeinsSegmentation)
-        segTypeLayout.addWidget(btnSegHV)
+        self.segBody.btnSegManual.clicked.connect(self.btnManualSeg)
+        self.segBody.btnSegSemiAuto.clicked.connect(self.btnSemiautoSeg)
+        self.segBody.btnSegMask.clicked.connect(self.maskRegion)
+        self.segBody.btnSegPV.clicked.connect(self.btnPortalVeinSegmentation)
+        self.segBody.btnSegHV.clicked.connect(self.btnHepaticVeinsSegmentation)
 
         
         #--- edit slab ---
-        slabBody = QtGui.QWidget()
-        slabBodyLayout = QGridLayout()
-        self.slabBodyLayout = slabBodyLayout
-        slabBody.setLayout(slabBodyLayout)
-        bodyLayout.addWidget(slabBody)
-        bodyLayout.addLayout(slabBodyLayout)
-
-        self.slabBodyLayout.addWidget(QLabel("Key"), 0, 1)
-        self.slabBodyLayout.addWidget(QLabel("Value"), 0, 2)
-
-        self.pos = 1
-        for key, value in self.oseg.slab.items():
-            self.slabBodyLayout.addWidget(QLineEdit(key), self.pos, 1)
-            self.slabBodyLayout.addWidget(QLineEdit(str(value)), self.pos, 2)
-            
-            self.pos += 1
-   
-        self.lblSlabError = QLabel()
-        self.lblSlabError.setStyleSheet("color: red;");
-        slabBodyLayout.addWidget(self.lblSlabError, 20, 1, 1, 2)
-
-        btnAddLabel = QPushButton("Add label", self)
-        btnAddLabel.clicked.connect(self.addLabel)
-        slabBodyLayout.addWidget(btnAddLabel, 21, 2)
-
-        slabBodyLayout.addWidget(QLabel("             "), 0, 3)
-
-        btnSaveSlab = QPushButton("Save", self)
-        btnSaveSlab.clicked.connect(self.btnSaveSlab)
-        slabBodyLayout.addWidget(btnSaveSlab, 1, 4)
-
-        btnBack = QPushButton("Back", self)
-        btnBack.clicked.connect(self.btnBackSegmentationEvent)
-        slabBodyLayout.addWidget(btnBack, 2, 4)
+        self.slabBody = dictEditQt.DictEdit(self.oseg)
+        self.slabBody.dictionary = self.oseg
+        bodyLayout.addWidget(self.slabBody)
+        self.slabBody.btnBack.clicked.connect(lambda: self.changeWidget('Main'))
 
 
         #--- file info (footer) ---
@@ -527,62 +335,129 @@ class OrganSegmentationWindow(QMainWindow):
         bodyLayout.addWidget(self.text_dcm_dir)
         bodyLayout.addWidget(self.text_dcm_data)
 
-        #if self.oseg.debug_mode:
-        #    btn_debug = QPushButton("Debug", self)
-        #    btn_debug.clicked.connect(self.run_debug)
-        #    grid.addWidget(btn_debug, rstart - 2, 4)
-
-
         ##### OTHERS #####
-        mainLayout.addStretch()
-        menuLayout.addStretch()
-        #loadMenuLayout.addStretch()
-        #saveMenuLayout.addStretch()
-        #segMenuLayout.addStretch()
-
-        self.btnLoad = btnLoad
-        self.btnSave = btnSave
-        #self.btnSeg = btnSeg
-        #self.btnBackLoad = btnBackLoad
-        #self.btnBackSave = btnBackSave
-        self.btnBackSegmentation = btnBackSegmentation
-        self.btnSegmentation = btnSegmentation
-        self.btnCompare = btnCompare
-        self.btnHearth = btnHearth
-        self.btnKidneyL = btnKidneyL
-        self.btnKidneyR = btnKidneyR
-        self.btnLiver = btnLiver
-        self.btnSegManual = btnSegManual
-        self.btnSegSemiAuto = btnSegSemiAuto
-        self.btnSegMask = btnSegMask
-        self.btnSegPV = btnSegPV
-        self.btnSegHV = btnSegHV
-        #self.loadMenu = loadMenu
-        #self.saveMenu = saveMenu
-        #self.segMenu = segMenu
-        self.infoBody = infoBody
-        self.segBody = segBody
-        self.slabBody = slabBody
-        self.segConfig = segConfig
-        self.segType = segType
+        self.mainLayout.addStretch()
 
         self.btnSave.setDisabled(True)
         self.btnSegmentation.setDisabled(True)
         self.btnCompare.setDisabled(True)
-        self.btnSegManual.setDisabled(True)
-        self.btnSegSemiAuto.setDisabled(True)
-        self.btnSegMask.setDisabled(True)
-        self.btnSegPV.setDisabled(True)
-        self.btnSegHV.setDisabled(True)
-
-
-        self.btnBackSegmentation.hide()
-        self.segBody.hide()
-        self.slabBody.hide()
-        self.segConfig.hide()
-        self.segType.hide()
+        self.changeWidget('Main')
         self.show()
 
+    def initLogo(self, layout):
+        font_label = QFont()
+        font_label.setBold(True)
+        font_info = QFont()
+        font_info.setItalic(True)
+        font_info.setPixelSize(12)
+
+        lisa_logo = QLabel()
+        logopath = find_logo()
+        logo = QPixmap(logopath)
+        logo = logo.scaled(130, 130)
+        lisa_logo.setPixmap(logo)  # scaledToWidth(128))
+        layout.addWidget(lisa_logo)
+        return layout
+
+    def initUIMenu(self):
+        ###### MAIN MENU ######
+        menuLayout = QVBoxLayout()
+        self.mainLayout.addLayout(menuLayout)
+
+        # ----- logo -----
+        self.initLogo(menuLayout)
+
+        # --load--
+        self.btnLoad = QPushButton("Load", self)
+        menuLayout.addWidget(self.btnLoad)
+
+        loadFileAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&File', self)
+        loadFileAction.triggered.connect(self.loadDataFile)
+
+        loadDirAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Directory', self)
+        loadDirAction.triggered.connect(self.loadDataDir)
+
+        menu = QtGui.QMenu(self.btnLoad)
+        menu.addAction(loadFileAction)
+        menu.addAction(loadDirAction)
+        self.btnLoad.setMenu(menu)
+
+        # --save--
+        self.btnSave = QPushButton("Save/Export")
+        menuLayout.addWidget(self.btnSave)
+
+        saveFileAction = QtGui.QAction(QtGui.QIcon('exit.png'), "File", self)
+        saveFileAction.triggered.connect(self.saveOut)
+
+        saveDicomAction = QtGui.QAction(QtGui.QIcon('exit.png'), "Export Dicom", self)
+        saveDicomAction.triggered.connect(self.btnSaveOutDcm)
+
+        saveDicomOverlayAction = QtGui.QAction(QtGui.QIcon('exit.png'), "Export Dicom overlay", self)
+        saveDicomOverlayAction.triggered.connect(self.btnSaveOutDcmOverlay)
+
+        saveImageStackAction = QtGui.QAction(QtGui.QIcon('exit.png'), "Image stack", self)
+        saveImageStackAction.triggered.connect(self.saveOutImageStack)
+
+        savePVTreeAction = QtGui.QAction(QtGui.QIcon('exit.png'), "PV Tree", self)
+        savePVTreeAction.triggered.connect(self.btnSavePortalVeinTree)
+
+        saveHVTreeAction = QtGui.QAction(QtGui.QIcon('exit.png'), "HV Tree", self)
+        saveHVTreeAction.triggered.connect(self.btnSaveHepaticVeinsTree)
+
+        menu = QtGui.QMenu(self.btnSave)
+        menu.addAction(saveFileAction)
+        menu.addAction(saveImageStackAction)
+        menu.addAction(saveDicomAction)
+        menu.addAction(saveDicomOverlayAction)
+        menu.addAction(savePVTreeAction)
+        menu.addAction(saveHVTreeAction)
+        self.btnSave.setMenu(menu)
+
+        # --segmentation--
+        self.btnSegmentation = QPushButton("Segmentation", self)
+        self.btnSegmentation.clicked.connect(lambda: self.changeWidget('Segmentation'))
+        menuLayout.addWidget(self.btnSegmentation)
+
+        self.btnBackSegmentation = QPushButton("Segmentation", self)
+        self.btnBackSegmentation.setStyleSheet('QPushButton {background-color: #BA5190; color: #FFFFFF}')
+        self.btnBackSegmentation.clicked.connect(lambda: self.changeWidget('Main'))
+        menuLayout.addWidget(self.btnBackSegmentation)
+
+        # --others--
+        self.btnCompare = QPushButton("Compare", self)
+        self.btnCompare.clicked.connect(self.compareSegmentationWithFile)
+        menuLayout.addWidget(self.btnCompare)
+
+        if self.oseg.debug_mode:
+            btn_debug = QPushButton("Debug", self)
+            btn_debug.clicked.connect(self.run_debug)
+            menuLayout.addWidget(btn_debug)
+
+        btnQuit = QPushButton("Quit", self)
+        btnQuit.clicked.connect(self.quit)
+        menuLayout.addWidget(btnQuit)
+
+        menuLayout.addStretch()
+
+    def changeWidget(self, option):
+        if option == 'EditSlab':
+            self.btnSegmentation.show()
+            self.btnBackSegmentation.hide()
+            self.infoBody.hide()
+            self.segBody.hide()
+            self.slabBody.show()
+        elif option == 'Main':
+            self.btnSegmentation.show()
+            self.btnBackSegmentation.hide()
+            self.infoBody.show()
+            self.segBody.hide()
+            self.slabBody.hide()
+        elif option == 'Segmentation':
+            self.btnSegmentation.hide()
+            self.btnBackSegmentation.show()
+            self.infoBody.hide()
+            self.segBody.show()
+            self.slabBody.hide()
 
 
     def enableSegType(self):
@@ -623,37 +498,6 @@ class OrganSegmentationWindow(QMainWindow):
         self.btnKidneyL.setChecked(False)
         self.btnKidneyR.setChecked(False)
         self.btnLiver.setChecked(True)
-
-
-    def btnSegmentationEvent(self, event):
-        self.btnSegmentation.hide()
-        self.btnBackSegmentation.show()
-        self.infoBody.hide()
-        self.segBody.show()
-        self.segConfig.show()
-        self.segType.show()
-        self.slabBody.hide()
-
-    def btnBackSegmentationEvent(self, event):
-        self.btnSegmentation.show()
-        self.btnBackSegmentation.hide()
-        self.infoBody.show()
-        self.segBody.hide()
-        self.segConfig.hide()
-        self.segType.hide()
-        self.slabBody.hide()
-
-    def btnSaveSlab(self, event):
-        print "work in progress"
-        self.lblSlabError.setText("It does not work :)")
-
-    def addLabel(self):
-        if self.pos < 13:
-            self.slabBodyLayout.addWidget(QLineEdit(), self.pos, 1)
-            self.slabBodyLayout.addWidget(QLineEdit(), self.pos, 2)
-            self.pos += 1
-        else:
-            self.lblSlabError.setText("You cannot add new label")
 
     def quit(self, event):
         return self.close()
@@ -1290,13 +1134,7 @@ class OrganSegmentationWindow(QMainWindow):
 
     def btnEditSlab(self):
         # run gui
-        self.btnSegmentation.show()
-        self.btnBackSegmentation.hide()
-        self.infoBody.hide()
-        self.segBody.hide()
-        self.segConfig.hide()
-        self.segType.hide()
-        self.slabBody.show()
+        self.changeWidget('EditSlab')
         # predtim
         print self.oseg.slab
 
