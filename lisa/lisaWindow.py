@@ -320,7 +320,6 @@ class OrganSegmentationWindow(QMainWindow):
         self.segBody.btnSegPV.clicked.connect(self.btnPortalVeinSegmentation)
         self.segBody.btnSegHV.clicked.connect(self.btnHepaticVeinsSegmentation)
 
-        
         #--- edit slab ---
         self.slabBody = dictEditQt.DictEdit(self.oseg)
         self.slabBody.dictionary = self.oseg
@@ -334,6 +333,13 @@ class OrganSegmentationWindow(QMainWindow):
         self.text_dcm_data = QLabel('DICOM data:')
         bodyLayout.addWidget(self.text_dcm_dir)
         bodyLayout.addWidget(self.text_dcm_data)
+
+
+        # -- load widget
+        import io3d.datareaderqt
+        self.read_widget = io3d.datareaderqt.DataReaderWidget()
+        bodyLayout.addWidget(self.read_widget)
+
 
         ##### OTHERS #####
         self.mainLayout.addStretch()
@@ -381,6 +387,12 @@ class OrganSegmentationWindow(QMainWindow):
         menu.addAction(loadFileAction)
         menu.addAction(loadDirAction)
         self.btnLoad.setMenu(menu)
+
+        # new load widget
+
+        self.btnLoadWidget = QPushButton("New load", self)
+        self.btnLoadWidget.clicked.connect(lambda: self.changeWidget('Load'))
+        menuLayout.addWidget(self.btnLoadWidget)
 
         # --save--
         self.btnSave = QPushButton("Save/Export")
@@ -440,24 +452,40 @@ class OrganSegmentationWindow(QMainWindow):
         menuLayout.addStretch()
 
     def changeWidget(self, option):
+        widgets = [
+            self.btnSegmentation,
+            self.btnBackSegmentation,
+            self.infoBody,
+            self.segBody,
+            self.slabBody,
+            self.read_widget
+        ]
+        for w in widgets:
+            w.hide()
         if option == 'EditSlab':
             self.btnSegmentation.show()
-            self.btnBackSegmentation.hide()
-            self.infoBody.hide()
-            self.segBody.hide()
+            # self.btnBackSegmentation.hide()
+            # self.infoBody.hide()
+            # self.segBody.hide()
             self.slabBody.show()
         elif option == 'Main':
             self.btnSegmentation.show()
-            self.btnBackSegmentation.hide()
+            # self.btnBackSegmentation.hide()
             self.infoBody.show()
-            self.segBody.hide()
-            self.slabBody.hide()
+            # self.segBody.hide()
+            # self.slabBody.hide()
         elif option == 'Segmentation':
-            self.btnSegmentation.hide()
+            # self.btnSegmentation.hide()
             self.btnBackSegmentation.show()
-            self.infoBody.hide()
+            # self.infoBody.hide()
             self.segBody.show()
-            self.slabBody.hide()
+            # self.slabBody.hide()
+        elif option == 'Load':
+            self.read_widget.show()
+            # self.btnBackSegmentation.show()
+            # self.infoBody.hide()
+            # self.segBody.show()
+            # self.slabBody.hide()
 
 
     def enableSegType(self):
