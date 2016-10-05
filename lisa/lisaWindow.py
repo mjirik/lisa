@@ -615,39 +615,6 @@ class OrganSegmentationWindow(QMainWindow):
 
         self.importDataWithGui()
 
-    def sync_lisa_data(self):
-        """
-        set sftp_username and sftp_password in ~/lisa_data/organ_segmentation.config
-        """
-        self.statusBar().showMessage('Sync in progress...')
-        login = loginWindow.Login(checkLoginFcn=self.__loginCheckFcn)
-        login.exec_()
-        # print repr(self.oseg.sftp_username)
-        # print repr(self.oseg.sftp_password)
-        try:
-            self.oseg.sync_lisa_data(self.oseg.sftp_username, self.oseg.sftp_password, callback=self._print_sync_progress)
-        except:
-            import traceback
-            traceback.print_exc()
-            logger.error(traceback.format_exc())
-
-            QtGui.QMessageBox.warning(
-                self, 'Error', 'Sync error')
-
-        self.oseg.sftp_username = ''
-        self.oseg.sftp_password = ''
-        self.statusBar().showMessage('Sync finished')
-
-    def __loginCheckFcn(self, textname, textpass):
-        self.oseg.sftp_username = textname
-        self.oseg.sftp_password = textpass
-        return True
-
-    def _print_sync_progress(self, transferred, toBeTransferred):
-        self.statusBar().showMessage('Sync of current file {0} % '.format((100.0 * transferred) / toBeTransferred ))
-
-        # print "Transferred: {0}\tOut of: {1}".format(transferred, toBeTransferred)
-
     def loadDataDir(self):
         self.statusBar().showMessage('Reading DICOM directory...')
         QApplication.processEvents()
@@ -695,6 +662,40 @@ class OrganSegmentationWindow(QMainWindow):
         self.btnCompare.setDisabled(False)
 
         #self.loadMenu.hide()
+
+
+    def sync_lisa_data(self):
+        """
+        set sftp_username and sftp_password in ~/lisa_data/organ_segmentation.config
+        """
+        self.statusBar().showMessage('Sync in progress...')
+        login = loginWindow.Login(checkLoginFcn=self.__loginCheckFcn)
+        login.exec_()
+        # print repr(self.oseg.sftp_username)
+        # print repr(self.oseg.sftp_password)
+        try:
+            self.oseg.sync_lisa_data(self.oseg.sftp_username, self.oseg.sftp_password, callback=self._print_sync_progress)
+        except:
+            import traceback
+            traceback.print_exc()
+            logger.error(traceback.format_exc())
+
+            QtGui.QMessageBox.warning(
+                self, 'Error', 'Sync error')
+
+        self.oseg.sftp_username = ''
+        self.oseg.sftp_password = ''
+        self.statusBar().showMessage('Sync finished')
+
+    def __loginCheckFcn(self, textname, textpass):
+        self.oseg.sftp_username = textname
+        self.oseg.sftp_password = textpass
+        return True
+
+    def _print_sync_progress(self, transferred, toBeTransferred):
+        self.statusBar().showMessage('Sync of current file {0} % '.format((100.0 * transferred) / toBeTransferred ))
+
+        # print "Transferred: {0}\tOut of: {1}".format(transferred, toBeTransferred)
 
     def cropDcm(self):
         oseg = self.oseg
