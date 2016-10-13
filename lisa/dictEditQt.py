@@ -17,6 +17,7 @@ import argparse
 from PyQt4.QtGui import QGridLayout, QLabel, QPushButton, QLineEdit
 from PyQt4 import QtGui
 import sys
+import copy
 
 class DictEdit(QtGui.QWidget):
 
@@ -35,14 +36,27 @@ class DictEdit(QtGui.QWidget):
         self.slabKeys = []
         self.slabValues = []
         self.pos = 1
+        self.ui_label_lines = []
         for key, value in self.dictionary.slab.items(): #self.oseg.slab.items():
             keyW = QLineEdit(key)
             valueW = QLineEdit(str(value))
-            self.mainLayout.addWidget(keyW, self.pos, 1)
-            self.mainLayout.addWidget(valueW, self.pos, 2)
+            btnDlt = QPushButton("X")
+            pos = copy.copy(self.pos)
+            ui_label_line = [pos, keyW, valueW, btnDlt]
+            self.ui_label_lines.append(ui_label_line)
+            btnDlt.setFixedWidth(30)
+            #btnDlt.clicked.connect(lambda: self.deleteLine(str(pos)))
+            def f1():
+                self.deleteLine(pos)
+            btnDlt.clicked.connect(lambda state, x=ui_label_line: self.deleteLine(x))
+            self.mainLayout.addWidget(keyW, pos, 1)
+            self.mainLayout.addWidget(valueW, pos, 2)
+            self.mainLayout.addWidget(btnDlt, pos, 3)
             self.slabKeys.append(keyW)
             self.slabValues.append(valueW)
             self.pos += 1
+            #smazat prvek: keyW.deleteLater() nebo skryt: keyW.setParent(None)
+
 
         self.lblSlabError = QLabel()
         self.lblSlabError.setStyleSheet("color: red;");
@@ -58,9 +72,11 @@ class DictEdit(QtGui.QWidget):
         btnSaveSlab.clicked.connect(self.saveSlab)
         self.mainLayout.addWidget(btnSaveSlab, 1, 4)
 
-
         self.btnBack = QPushButton("Back", self)
         self.mainLayout.addWidget(self.btnBack, 2, 4)
+
+    def deleteLine(self, event):
+        print event
 
     def addLabel(self):
         if self.pos < 13:
