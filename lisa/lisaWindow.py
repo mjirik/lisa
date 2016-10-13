@@ -373,6 +373,11 @@ class OrganSegmentationWindow(QMainWindow):
         # ----- logo -----
         self.initLogo(menuLayout)
 
+        self.btnBackSegmentation = QPushButton("Home", self)
+        # self.btnBackSegmentation.setStyleSheet('QPushButton {background-color: #BA5190; color: #FFFFFF}')
+        self.btnBackSegmentation.clicked.connect(lambda: self.changeWidget('Main'))
+        menuLayout.addWidget(self.btnBackSegmentation)
+
         # --load--
         self.btnLoad = QPushButton("Load", self)
         menuLayout.addWidget(self.btnLoad)
@@ -430,10 +435,6 @@ class OrganSegmentationWindow(QMainWindow):
         self.btnSegmentation.clicked.connect(lambda: self.changeWidget('Segmentation'))
         menuLayout.addWidget(self.btnSegmentation)
 
-        self.btnBackSegmentation = QPushButton("Segmentation", self)
-        self.btnBackSegmentation.setStyleSheet('QPushButton {background-color: #BA5190; color: #FFFFFF}')
-        self.btnBackSegmentation.clicked.connect(lambda: self.changeWidget('Main'))
-        menuLayout.addWidget(self.btnBackSegmentation)
 
         # --others--
         self.btnCompare = QPushButton("Compare", self)
@@ -453,8 +454,8 @@ class OrganSegmentationWindow(QMainWindow):
 
     def changeWidget(self, option):
         widgets = [
-            self.btnSegmentation,
-            self.btnBackSegmentation,
+            # self.btnSegmentation,
+            # self.btnBackSegmentation,
             self.infoBody,
             self.segBody,
             self.slabBody,
@@ -463,20 +464,20 @@ class OrganSegmentationWindow(QMainWindow):
         for w in widgets:
             w.hide()
         if option == 'EditSlab':
-            self.btnSegmentation.show()
+            # self.btnSegmentation.show()
             # self.btnBackSegmentation.hide()
             # self.infoBody.hide()
             # self.segBody.hide()
             self.slabBody.show()
         elif option == 'Main':
-            self.btnSegmentation.show()
+            # self.btnSegmentation.show()
             # self.btnBackSegmentation.hide()
             self.infoBody.show()
             # self.segBody.hide()
             # self.slabBody.hide()
         elif option == 'Segmentation':
             # self.btnSegmentation.hide()
-            self.btnBackSegmentation.show()
+            # self.btnBackSegmentation.show()
             # self.infoBody.hide()
             self.segBody.show()
             # self.slabBody.hide()
