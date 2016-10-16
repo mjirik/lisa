@@ -324,8 +324,11 @@ class OrganSegmentationWindow(QMainWindow):
         self.slabBody = dictEditQt.DictEdit(self.oseg)
         self.slabBody.dictionary = self.oseg
         bodyLayout.addWidget(self.slabBody)
-        self.slabBody.btnBack.clicked.connect(lambda: self.changeWidget('Main'))
 
+        # -- load widget
+        import io3d.datareaderqt
+        self.read_widget = io3d.datareaderqt.DataReaderWidget()
+        bodyLayout.addWidget(self.read_widget)
 
         #--- file info (footer) ---
         bodyLayout.addStretch()
@@ -333,13 +336,6 @@ class OrganSegmentationWindow(QMainWindow):
         self.text_dcm_data = QLabel('DICOM data:')
         bodyLayout.addWidget(self.text_dcm_dir)
         bodyLayout.addWidget(self.text_dcm_data)
-
-
-        # -- load widget
-        import io3d.datareaderqt
-        self.read_widget = io3d.datareaderqt.DataReaderWidget()
-        bodyLayout.addWidget(self.read_widget)
-
 
         ##### OTHERS #####
         self.mainLayout.addStretch()
@@ -362,6 +358,7 @@ class OrganSegmentationWindow(QMainWindow):
         logo = QPixmap(logopath)
         logo = logo.scaled(130, 130)
         lisa_logo.setPixmap(logo)  # scaledToWidth(128))
+        lisa_logo.mousePressEvent = lambda event: self.changeWidget('Main')
         layout.addWidget(lisa_logo)
         return layout
 
@@ -372,11 +369,6 @@ class OrganSegmentationWindow(QMainWindow):
 
         # ----- logo -----
         self.initLogo(menuLayout)
-
-        self.btnBackSegmentation = QPushButton("Home", self)
-        # self.btnBackSegmentation.setStyleSheet('QPushButton {background-color: #BA5190; color: #FFFFFF}')
-        self.btnBackSegmentation.clicked.connect(lambda: self.changeWidget('Main'))
-        menuLayout.addWidget(self.btnBackSegmentation)
 
         # --load--
         self.btnLoad = QPushButton("Load", self)
@@ -432,9 +424,10 @@ class OrganSegmentationWindow(QMainWindow):
 
         # --segmentation--
         self.btnSegmentation = QPushButton("Segmentation", self)
+        self.btnSegmentation.setCheckable(True)
         self.btnSegmentation.clicked.connect(lambda: self.changeWidget('Segmentation'))
+        self.btnSegmentation.setStyleSheet('QPushButton:checked,QPushButton:pressed {border: 1px solid #25101C; background-color: #BA5190; color: #FFFFFF}')
         menuLayout.addWidget(self.btnSegmentation)
-
 
         # --others--
         self.btnCompare = QPushButton("Compare", self)
@@ -454,8 +447,6 @@ class OrganSegmentationWindow(QMainWindow):
 
     def changeWidget(self, option):
         widgets = [
-            # self.btnSegmentation,
-            # self.btnBackSegmentation,
             self.infoBody,
             self.segBody,
             self.slabBody,
@@ -464,29 +455,27 @@ class OrganSegmentationWindow(QMainWindow):
         for w in widgets:
             w.hide()
         if option == 'EditSlab':
-            # self.btnSegmentation.show()
-            # self.btnBackSegmentation.hide()
             # self.infoBody.hide()
             # self.segBody.hide()
             self.slabBody.show()
         elif option == 'Main':
-            # self.btnSegmentation.show()
-            # self.btnBackSegmentation.hide()
             self.infoBody.show()
             # self.segBody.hide()
             # self.slabBody.hide()
         elif option == 'Segmentation':
-            # self.btnSegmentation.hide()
-            # self.btnBackSegmentation.show()
-            # self.infoBody.hide()
-            self.segBody.show()
-            # self.slabBody.hide()
+            if self.btnSegmentation.isChecked() == True:
+                # self.infoBody.hide()
+                self.segBody.show()
+                # self.slabBody.hide()
+            else:
+                self.infoBody.show()
+            return
         elif option == 'Load':
             self.read_widget.show()
-            # self.btnBackSegmentation.show()
             # self.infoBody.hide()
             # self.segBody.show()
             # self.slabBody.hide()
+        self.btnSegmentation.setChecked(False)
 
 
     def enableSegType(self):

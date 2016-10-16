@@ -40,6 +40,10 @@ class SegmentationWidget(QtGui.QWidget):
         self.lblSegError.setStyleSheet("color: red;");
         self.mainLayout.addWidget(self.lblSegError, 10, 1, 1, 6)
 
+        lblSegConfigBETA = QLabel('Choose configure (beta)')
+        self.mainLayout.addWidget(lblSegConfigBETA, 11, 1, 1, 6)
+        self.initLabelsAuto()
+
     def initLabels(self):
         btnHearth = QPushButton("Hearth", self)
         btnHearth.setCheckable(True)
@@ -70,6 +74,21 @@ class SegmentationWidget(QtGui.QWidget):
         self.group.setId(btnKidneyL, 2)
         self.group.setId(btnKidneyR, 3)
         self.group.setId(btnLiver, 4)
+
+    def initLabelsAuto(self):
+        position = 1
+        self.groupA = QtGui.QButtonGroup()
+        # for key, value in self.oseg.slab.items():
+        #     btnLabel = QPushButton(key)
+        #     btnLabel.setCheckable(True)
+        #     btnLabel.clicked.connect(self.configAutoEvent)
+        #     self.mainLayout.addWidget(btnLabel, 12, position)
+        #     self.groupA.addButton(btnLabel)
+        #     self.groupA.setId(btnLabel, position)
+        #     position += 1
+
+    def configAutoEvent(self):
+        print self.groupA.checkedId()
 
     def initConfigs(self):
         self.btnSegManual = QPushButton("Manual", self)

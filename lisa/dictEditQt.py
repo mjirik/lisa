@@ -37,55 +37,118 @@ class DictEdit(QtGui.QWidget):
         self.slabValues = []
         self.pos = 1
         self.ui_label_lines = []
-        for key, value in self.dictionary.slab.items(): #self.oseg.slab.items():
-            keyW = QLineEdit(key)
-            valueW = QLineEdit(str(value))
-            btnDlt = QPushButton("X")
-            pos = copy.copy(self.pos)
-            ui_label_line = [pos, keyW, valueW, btnDlt]
-            self.ui_label_lines.append(ui_label_line)
-            btnDlt.setFixedWidth(30)
-            #btnDlt.clicked.connect(lambda: self.deleteLine(str(pos)))
-            def f1():
-                self.deleteLine(pos)
-            btnDlt.clicked.connect(lambda state, x=ui_label_line: self.deleteLine(x))
-            self.mainLayout.addWidget(keyW, pos, 1)
-            self.mainLayout.addWidget(valueW, pos, 2)
-            self.mainLayout.addWidget(btnDlt, pos, 3)
-            self.slabKeys.append(keyW)
-            self.slabValues.append(valueW)
-            self.pos += 1
-            #smazat prvek: keyW.deleteLater() nebo skryt: keyW.setParent(None)
+
+        self.initLines()
+
+        # for key, value in self.dictionary.slab.items(): #self.oseg.slab.items():
+        #     keyW = QLineEdit(key)
+        #     valueW = QLineEdit(str(value))
+        #
+        #     btnDlt = QPushButton(u"\u00D7")
+        #     btnDlt.setFixedWidth(30)
+        #     btnDlt.setStyleSheet('QPushButton {background-color: red; color: #FFFFFF}')
+        #
+        #     ui_label_line = [self.pos, keyW, valueW, btnDlt]
+        #     self.ui_label_lines.append(ui_label_line)
+        #     btnDlt.clicked.connect(lambda state, x=ui_label_line: self.deleteLine(x))
+        #
+        #     self.mainLayout.addWidget(keyW, self.pos, 1)
+        #     self.mainLayout.addWidget(valueW, self.pos, 2)
+        #     self.mainLayout.addWidget(btnDlt, self.pos, 3)
+        #
+        #
+        #     self.slabKeys.append(keyW)
+        #     self.slabValues.append(valueW)
+        #     self.pos += 1
 
 
-        self.lblSlabError = QLabel()
+        self.lblSlabError = QLabel("Work in progress!")
         self.lblSlabError.setStyleSheet("color: red;");
         self.mainLayout.addWidget(self.lblSlabError, 20, 1, 1, 2)
 
-        btnAddLabel = QPushButton("Add label", self)
+        btnAddLabel = QPushButton("+", self)
+        btnAddLabel.setFixedWidth(30)
+        btnAddLabel.setStyleSheet('QPushButton {background-color: green; color: #FFFFFF}')
         btnAddLabel.clicked.connect(self.addLabel)
-        self.mainLayout.addWidget(btnAddLabel, 21, 2)
-
-        self.mainLayout.addWidget(QLabel("             "), 0, 3)
+        self.mainLayout.addWidget(btnAddLabel, 21, 3)
 
         btnSaveSlab = QPushButton("Save", self)
         btnSaveSlab.clicked.connect(self.saveSlab)
-        self.mainLayout.addWidget(btnSaveSlab, 1, 4)
+        self.mainLayout.addWidget(btnSaveSlab, 21, 1)
 
-        self.btnBack = QPushButton("Back", self)
-        self.mainLayout.addWidget(self.btnBack, 2, 4)
+        self.btnDiscard = QPushButton("Discard", self)
+        self.btnDiscard.clicked.connect(self.discardChanges)
+        self.mainLayout.addWidget(self.btnDiscard, 21, 2)
 
-    def deleteLine(self, event):
-        print event
+    def initLines(self):
+        for key, value in self.dictionary.slab.items(): #self.oseg.slab.items():
+            keyW = QLineEdit(key)
+            valueW = QLineEdit(str(value))
 
-    def addLabel(self):
-        if self.pos < 13:
-            keyW = QLineEdit()
-            valueW = QLineEdit()
+            btnDlt = QPushButton(u"\u00D7")
+            btnDlt.setFixedWidth(30)
+            btnDlt.setStyleSheet('QPushButton {background-color: red; color: #FFFFFF}')
+
+            ui_label_line = [self.pos, keyW, valueW, btnDlt]
+            self.ui_label_lines.append(ui_label_line)
+            btnDlt.clicked.connect(lambda state, x=ui_label_line: self.deleteLine(x))
+
             self.mainLayout.addWidget(keyW, self.pos, 1)
             self.mainLayout.addWidget(valueW, self.pos, 2)
+            self.mainLayout.addWidget(btnDlt, self.pos, 3)
+
+
             self.slabKeys.append(keyW)
             self.slabValues.append(valueW)
+            self.pos += 1
+
+    def deleteLines(self):
+        for i in range(0, len(self.ui_label_lines)):
+            self.ui_label_lines[i][1].deleteLater()
+            self.ui_label_lines[i][2].deleteLater()
+            self.ui_label_lines[i][3].deleteLater()
+
+        self.slabKeys = []
+        self.slabValues = []
+        self.pos = 1
+        self.ui_label_lines = []
+
+    def deleteLine(self, event):
+        self.slabKeys.remove(event[1])
+        self.slabValues.remove(event[2])
+
+        event[1].deleteLater()
+        event[2].deleteLater()
+        event[3].deleteLater()
+
+        self.sortLines(event[0])
+        self.ui_label_lines.remove(event)
+        self.pos -= 1
+
+    def sortLines(self, whence):
+        for i in range(whence, len(self.ui_label_lines)):
+            self.ui_label_lines[i][0] = i
+            self.mainLayout.addWidget(self.ui_label_lines[i][1], i, 1)
+            self.mainLayout.addWidget(self.ui_label_lines[i][2], i, 2)
+            self.mainLayout.addWidget(self.ui_label_lines[i][3], i, 3)
+
+    def addLabel(self):
+        if self.pos < 12:
+            keyW = QLineEdit()
+            valueW = QLineEdit()
+            btnDlt = QPushButton("X")
+            btnDlt.setFixedWidth(30)
+            btnDlt.setStyleSheet('QPushButton {background-color: red; color: #FFFFFF}')
+            ui_label_line = [self.pos, keyW, valueW, btnDlt]
+            self.ui_label_lines.append(ui_label_line)
+            btnDlt.clicked.connect(lambda state, x=ui_label_line: self.deleteLine(x))
+
+            self.mainLayout.addWidget(keyW, self.pos, 1)
+            self.mainLayout.addWidget(valueW, self.pos, 2)
+            self.mainLayout.addWidget(btnDlt, self.pos, 3)
+            self.slabKeys.append(keyW)
+            self.slabValues.append(valueW)
+
             self.pos += 1
         else:
             self.lblSlabError.setText("You cannot add new label")
@@ -100,8 +163,12 @@ class DictEdit(QtGui.QWidget):
                 newSlab[wk] = wv
             elif wv != '':
                 self.lblSlabError.setText("You have to name key!")
-        self.dictionary = newSlab
-        print self.dictionary
+        self.dictionary.slab = newSlab
+        print self.dictionary.slab
+
+    def discardChanges(self, event):
+        self.deleteLines()
+        self.initLines()
 
     def getDict(self):
         return self.dictionary
