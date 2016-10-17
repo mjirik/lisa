@@ -309,8 +309,8 @@ class OrganSegmentationWindow(QMainWindow):
         infoBodyLayout.addWidget(info)
 
         #--- segmentation option ---
-        self.segBody = segmentationQt.SegmentationWidget()
-        self.segBody.oseg = self.oseg
+        self.segBody = segmentationQt.SegmentationWidget(oseg=self.oseg)
+        # self.segBody.oseg = self.oseg
         bodyLayout.addWidget(self.segBody)
 
         ###

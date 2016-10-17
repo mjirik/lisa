@@ -26,6 +26,8 @@ def reportException(exception):
         print str(exception)
         print excstr
 
+    logger.exception(excstr)
+
     raise(exception)
 
 

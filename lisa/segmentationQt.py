@@ -22,8 +22,8 @@ import sys
 class SegmentationWidget(QtGui.QWidget):
     def __init__(self, oseg = None):
         super(SegmentationWidget, self).__init__()
-        self.initUI()
         self.oseg = oseg
+        self.initUI()
 
     def initUI(self):
         self.mainLayout = QGridLayout(self)
@@ -78,14 +78,14 @@ class SegmentationWidget(QtGui.QWidget):
     def initLabelsAuto(self):
         position = 1
         self.groupA = QtGui.QButtonGroup()
-        # for key, value in self.oseg.slab.items():
-        #     btnLabel = QPushButton(key)
-        #     btnLabel.setCheckable(True)
-        #     btnLabel.clicked.connect(self.configAutoEvent)
-        #     self.mainLayout.addWidget(btnLabel, 12, position)
-        #     self.groupA.addButton(btnLabel)
-        #     self.groupA.setId(btnLabel, position)
-        #     position += 1
+        for key, value in self.oseg.slab.items():
+            btnLabel = QPushButton(key)
+            btnLabel.setCheckable(True)
+            btnLabel.clicked.connect(self.configAutoEvent)
+            self.mainLayout.addWidget(btnLabel, 12, position)
+            self.groupA.addButton(btnLabel)
+            self.groupA.setId(btnLabel, position)
+            position += 1
 
     def configAutoEvent(self):
         print self.groupA.checkedId()
