@@ -58,19 +58,19 @@ CONFIG_DEFAULT={
             'working_voxelsize_mm': 2.5
         },
         "label kidney L":{
-            "output_label": 15,
+            "output_label": 'left kidney',
             'clean_seeds_after_update_parameters': True,
         },
         "label kidney R":{
-            "output_label": 16,
+            "output_label": 'right kidney',
             'clean_seeds_after_update_parameters': True,
         },
         "label liver":{
-            "output_label": 1,
+            "output_label": 'liver',
             'clean_seeds_after_update_parameters': True,
         },
         "label hearth":{
-            "output_label": 10,
+            "output_label": 'hearth',
             'clean_seeds_after_update_parameters': True,
         }
     }

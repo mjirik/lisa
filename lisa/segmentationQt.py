@@ -20,7 +20,7 @@ import sys
 
 
 class SegmentationWidget(QtGui.QWidget):
-    def __init__(self, oseg = None):
+    def __init__(self, oseg):
         super(SegmentationWidget, self).__init__()
         self.oseg = oseg
         self.initUI()
@@ -88,7 +88,15 @@ class SegmentationWidget(QtGui.QWidget):
             position += 1
 
     def configAutoEvent(self):
-        print self.groupA.checkedId()
+        alt_seg_params = {
+            "output_label": 'left kidney',
+            'clean_seeds_after_update_parameters': True,
+        }
+        id = self.groupA.checkedId()
+        print id
+        selected_label = self.oseg.slab.keys()[id - 1]
+        alt_seg_params['output_label'] = selected_label
+        self.oseg.update_parameters(alt_seg_params)
 
     def initConfigs(self):
         self.btnSegManual = QPushButton("Manual", self)

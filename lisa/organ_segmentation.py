@@ -339,12 +339,21 @@ class OrganSegmentation():
         self.update_parameters(self.segmentation_alternative_params[label])
 
     def update_parameters(self, params):
+        """
+
+        :param params:
+        :return:
+        """
         if 'segmodelparams' in params.keys():
             self.segmodelparams = params['segmodelparams']
             logger.debug('segmodelparams updated')
         if 'output_label' in params.keys():
+            # logger.debug("output label " + str(params["output_label"]))
+            if type(params['output_label']) is str:
+                key = params["output_label"]
+                params["output_label"] = self.slab[key]
             self.output_label = params['output_label']
-            logger.debug('output_label updated')
+            logger.debug("'output_label' updated to " + str(self.slab[key]))
         if 'working_voxelsize_mm' in params.keys():
             self.input_wvx_size = copy.copy(params['working_voxelsize_mm'])
             self.working_voxelsize_mm = params['working_voxelsize_mm']
@@ -368,7 +377,6 @@ class OrganSegmentation():
             if self.seeds is not None:
                 self.seeds[...] = 0
             logger.debug('clean_seeds_after_update_parameters')
-
 
     def run_sss(self):
         sseg = sss.SupportStructureSegmentation(
