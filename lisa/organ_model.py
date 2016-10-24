@@ -58,7 +58,7 @@ def add_fv_extern_into_modelparams(modelparams):
 def with_ribs_fv(data3dr, voxelsize_mm, seeds=None, unique_cls=None):        # scale
     """
     Feature vector use intensity and body_navigation module with ribs.
-    Implemented by T. Kolar
+    Implemented by M Bulka
 
     :param data3dr:
     :param voxelsize_mm:

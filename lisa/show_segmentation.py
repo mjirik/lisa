@@ -28,8 +28,6 @@ except:
     print('dicom2fem not found')
     # logger.warning('dicom2fem not found')
     from seg2mesh import gen_mesh_from_voxels, smooth_mesh
-import misc
-import viewer
 
 
 def showSegmentation(
@@ -82,6 +80,7 @@ def showSegmentation(
         qt_app = QApplication(sys.argv)
         logger.debug("qapp constructed")
     if show:
+        import viewer
         view = viewer.QVTKViewer(vtk_file)
         print ('show viewer')
         view.exec_()
