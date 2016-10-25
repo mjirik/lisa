@@ -54,12 +54,21 @@ or
         conda create --no-default-packages -y -c mjirik -c SimpleITK -n lisa pip lisa
         activate lisa
 
-* In activated lisa virtualenv run following lines
+* In activated lisa virtualenv run following lines to satisfy some requirements
 
 
         python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_pip.txt
         pip install -r requirements_pip.txt
-        conda install -y -c mjirik -c SimpleITK --file lisa
+
+* You can have Lisa from sources 
+        
+        conda install -y -c mjirik -c SimpleITK --file requirements_conda.txt
+        git clone https://github.com/mjirik/lisa.git
+        
+    or from conda package
+    
+        conda install -y -c mjirik -c SimpleITK lisa
+        
 
 * Run Lisa
 
@@ -75,6 +84,7 @@ Use VirtualBox (old Lisa version)
 * Download Lisa Image (http://uloz.to/xU4oHfKw/lisa-ubuntu14-04-vdi)
 
 or 
+
 * Download Lisa Image (http://147.228.240.61/queetech/install/lisa_ubuntu14.04.vdi)
 
 In VirtualBox
