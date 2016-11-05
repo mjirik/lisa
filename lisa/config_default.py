@@ -57,11 +57,11 @@ CONFIG_DEFAULT={
             },
             'working_voxelsize_mm': 2.5
         },
-        "label kidney L":{
+        "label left kidney":{
             "output_label": 'left kidney',
             'clean_seeds_after_update_parameters': True,
         },
-        "label kidney R":{
+        "label right kidney":{
             "output_label": 'right kidney',
             'clean_seeds_after_update_parameters': True,
         },
