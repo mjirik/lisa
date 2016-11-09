@@ -67,7 +67,8 @@ requirements:
     - io3d >=1.1.1
     - pyqt 4.11.*
     - pandas
-    - simpleitk
+    - simpleitk=0.9.* # problem with dicom write
+    - libpng=1.5.13 # kvuli simpleik 0.9.
     - pywget
     - scikit-learn
     - scikit-image

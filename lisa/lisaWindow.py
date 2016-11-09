@@ -271,6 +271,8 @@ class OrganSegmentationWindow(QMainWindow):
         self.statusBar().showMessage('Ready')
         self.mainLayout = QHBoxLayout(window)
         window.setLayout(self.mainLayout)
+        self.ui_widgets = {}
+        self.ui_buttons = {}
 
 
         #### MENU ####
@@ -290,6 +292,7 @@ class OrganSegmentationWindow(QMainWindow):
         infoBodyLayout = QVBoxLayout()
         bodyLayout.addWidget(self.infoBody)
         self.infoBody.setLayout(infoBodyLayout)
+        self.ui_widgets["Main"] = self.infoBody
 
         font_label = QFont()
         font_label.setBold(True)
@@ -312,6 +315,7 @@ class OrganSegmentationWindow(QMainWindow):
         self.segBody = segmentationQt.SegmentationWidget(oseg=self.oseg)
         # self.segBody.oseg = self.oseg
         bodyLayout.addWidget(self.segBody)
+        self.ui_widgets["Segmentation"] = self.segBody
 
         ###
         self.segBody.btnSegManual.clicked.connect(self.btnManualSeg)
@@ -324,11 +328,13 @@ class OrganSegmentationWindow(QMainWindow):
         self.slabBody = dictEditQt.DictEdit(self.oseg)
         self.slabBody.dictionary = self.oseg
         bodyLayout.addWidget(self.slabBody)
+        self.ui_widgets["EditSlab"] = self.slabBody
 
         # -- load widget
         import io3d.datareaderqt
         self.read_widget = io3d.datareaderqt.DataReaderWidget()
         bodyLayout.addWidget(self.read_widget)
+        self.ui_widgets["Load"] = self.read_widget
 
         #--- file info (footer) ---
         bodyLayout.addStretch()
@@ -434,6 +440,17 @@ class OrganSegmentationWindow(QMainWindow):
         self.btnCompare.clicked.connect(self.compareSegmentationWithFile)
         menuLayout.addWidget(self.btnCompare)
 
+
+
+        # --others--
+        keyword = "3D Visualization"
+        tmp = QPushButton(keyword, self)
+        tmp.clicked.connect(self.action3DVisualizationWidget)
+        menuLayout.addWidget(tmp)
+        self.ui_buttons[keyword] = tmp
+        # import imtools.show_segmentation_qt as itss
+        # itss.ShowSegmentationWidget()
+
         if self.oseg.debug_mode:
             btn_debug = QPushButton("Debug", self)
             btn_debug.clicked.connect(self.run_debug)
@@ -446,14 +463,16 @@ class OrganSegmentationWindow(QMainWindow):
         menuLayout.addStretch()
 
     def changeWidget(self, option):
-        widgets = [
-            self.infoBody,
-            self.segBody,
-            self.slabBody,
-            self.read_widget
-        ]
-        for w in widgets:
-            w.hide()
+        # widgets = [
+        #     self.infoBody,
+        #     self.segBody,
+        #     self.slabBody,
+        #     self.read_widget
+        # ]
+        for key, widget in self.ui_widgets.iteritems():
+
+            widget.hide()
+
         if option == 'EditSlab':
             # self.infoBody.hide()
             # self.segBody.hide()
@@ -475,6 +494,10 @@ class OrganSegmentationWindow(QMainWindow):
             # self.infoBody.hide()
             # self.segBody.show()
             # self.slabBody.hide()
+
+        elif option in self.ui_widgets.keys():
+            self.ui_widgets[option].show()
+
         self.btnSegmentation.setChecked(False)
 
 
@@ -1163,6 +1186,9 @@ class OrganSegmentationWindow(QMainWindow):
 
         # potom
         print self.oseg.slab
+
+    def action3DVisualizationWidget(self):
+        self.changeWidget("3D Visualization")
 
     def btnLog(self):
         import logWindow
