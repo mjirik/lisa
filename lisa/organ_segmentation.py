@@ -59,7 +59,7 @@ from io3d import datareader
 from io3d import datawriter
 import data_plus
 import support_structure_segmentation as sss
-import cachefile as cachef
+import io3d.cachefile as cachef
 import config_default
 import organ_seeds
 import lisa_data

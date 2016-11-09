@@ -333,8 +333,10 @@ class OrganSegmentationWindow(QMainWindow):
         # -- load widget
         import io3d.datareaderqt
         self.read_widget = io3d.datareaderqt.DataReaderWidget(
+            before_function=self._before_read_callback,
             after_function=self._after_read_callback
         )
+        self.read_widget.cache = self.oseg.cache
         bodyLayout.addWidget(self.read_widget)
         self.ui_widgets["Load"] = self.read_widget
 
@@ -652,10 +654,18 @@ class OrganSegmentationWindow(QMainWindow):
 
         self.importDataWithGui()
 
+    def _before_read_callback(self, readerWidget):
+        self.statusBar().showMessage('Reading data file...')
+        QApplication.processEvents()
+
     def _after_read_callback(self, readerWidget):
-        print readerWidget.loaddir
-        print readerWidget.loadfiledir
-        import ipdb; ipdb.set_trace()
+        self.statusBar().showMessage('Ready')
+        QApplication.processEvents()
+        self.oseg.datapath = readerWidget.datapath
+        self.importDataWithGui()
+        # print readerWidget.loaddir
+        # print readerWidget.loadfiledir
+        # import ipdb; ipdb.set_trace()
 
     def loadDataDir(self):
         self.statusBar().showMessage('Reading DICOM directory...')
