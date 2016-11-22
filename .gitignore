@@ -59,3 +59,13 @@ experiments/20130812_liver_volumetry.yaml
 *.yaml
 lisa/seed_editor_qt.py
 lisa/extern/seed_editor_qt.py
+lisa/.idea/lisa.iml
+lisa/Scripts/deactivate.bat
+lisa/Scripts/deactivate
+lisa/.idea/misc.xml
+lisa/Scripts/activate.bat
+lisa/.idea/modules.xml
+lisa/.idea/workspace.xml
+lisa/Scripts/conda.bat
+lisa/Scripts/activate
+lisa/Scripts/conda
