@@ -317,6 +317,7 @@ class OrganSegmentationWindow(QMainWindow):
         bodyLayout.addWidget(self.segBody)
         self.ui_widgets["Segmentation"] = self.segBody
 
+
         ###
         self.segBody.btnSegManual.clicked.connect(self.btnManualSeg)
         self.segBody.btnSegSemiAuto.clicked.connect(self.btnSemiautoSeg)

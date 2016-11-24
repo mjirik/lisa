@@ -1048,8 +1048,7 @@ class OrganSegmentation():
         pyed.exec_()
         from PyQt4 import QtCore
         QtCore.pyqtRemoveInputHook()
-        import ipdb
-        ipdb.set_trace()
+        # import ipdb; ipdb.set_trace()
 # @TODO někde v igc.interactivity() dochází k přehození nul za jedničy,
 # tady se to řeší hackem
         if igc.segmentation is not None:
