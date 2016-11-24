@@ -344,6 +344,8 @@ class OrganSegmentationWindow(QMainWindow):
         #--- file info (footer) ---
         bodyLayout.addStretch()
 
+
+
         ##### OTHERS #####
         self.mainLayout.addStretch()
 
@@ -444,9 +446,13 @@ class OrganSegmentationWindow(QMainWindow):
         # --others--
         keyword = "3D Visualization"
         tmp = QPushButton(keyword, self)
-        tmp.clicked.connect(self.action3DVisualizationWidget)
+        # tmp.clicked.connect(self.action3DVisualizationWidget)
+        tmp.clicked.connect(lambda: self.changeWidget(keyword))
         menuLayout.addWidget(tmp)
         self.ui_buttons[keyword] = tmp
+
+        import imtools.show_segmentation_qt
+        self.ui_widgets[keyword] = imtools.show_segmentation_qt.ShowSegmentationWidget(None)
         # import imtools.show_segmentation_qt as itss
         # itss.ShowSegmentationWidget()
 
