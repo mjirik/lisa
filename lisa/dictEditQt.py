@@ -40,28 +40,6 @@ class DictEdit(QtGui.QWidget):
 
         self.initLines()
 
-        # for key, value in self.dictionary.slab.items(): #self.oseg.slab.items():
-        #     keyW = QLineEdit(key)
-        #     valueW = QLineEdit(str(value))
-        #
-        #     btnDlt = QPushButton(u"\u00D7")
-        #     btnDlt.setFixedWidth(30)
-        #     btnDlt.setStyleSheet('QPushButton {background-color: red; color: #FFFFFF}')
-        #
-        #     ui_label_line = [self.pos, keyW, valueW, btnDlt]
-        #     self.ui_label_lines.append(ui_label_line)
-        #     btnDlt.clicked.connect(lambda state, x=ui_label_line: self.deleteLine(x))
-        #
-        #     self.mainLayout.addWidget(keyW, self.pos, 1)
-        #     self.mainLayout.addWidget(valueW, self.pos, 2)
-        #     self.mainLayout.addWidget(btnDlt, self.pos, 3)
-        #
-        #
-        #     self.slabKeys.append(keyW)
-        #     self.slabValues.append(valueW)
-        #     self.pos += 1
-
-
         self.lblSlabError = QLabel("Work in progress!")
         self.lblSlabError.setStyleSheet("color: red;");
         self.mainLayout.addWidget(self.lblSlabError, 20, 1, 1, 2)

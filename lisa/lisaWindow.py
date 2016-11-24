@@ -343,10 +343,6 @@ class OrganSegmentationWindow(QMainWindow):
 
         #--- file info (footer) ---
         bodyLayout.addStretch()
-        self.text_dcm_dir = QLabel('DICOM dir:')
-        self.text_dcm_data = QLabel('DICOM data:')
-        bodyLayout.addWidget(self.text_dcm_dir)
-        bodyLayout.addWidget(self.text_dcm_data)
 
         ##### OTHERS #####
         self.mainLayout.addStretch()
@@ -502,46 +498,6 @@ class OrganSegmentationWindow(QMainWindow):
             self.ui_widgets[option].show()
 
         self.btnSegmentation.setChecked(False)
-
-
-    def enableSegType(self):
-        self.btnSegManual.setDisabled(False)
-        self.btnSegSemiAuto.setDisabled(False)
-        self.btnSegMask.setDisabled(False)
-        self.btnSegPV.setDisabled(False)
-        self.btnSegHV.setDisabled(False)
-
-    def btnHearthEvent(self, event):
-        self.oseg.update_parameters_based_on_label("label hearth")
-        self.enableSegType()
-        self.btnHearth.setChecked(True)
-        self.btnKidneyL.setChecked(False)
-        self.btnKidneyR.setChecked(False)
-        self.btnLiver.setChecked(False)
-
-    def btnKidneyLEvent(self, event):
-        self.oseg.update_parameters_based_on_label("label kidney L")
-        self.enableSegType()
-        self.btnHearth.setChecked(False)
-        self.btnKidneyL.setChecked(True)
-        self.btnKidneyR.setChecked(False)
-        self.btnLiver.setChecked(False)
-
-    def btnKidneyREvent(self, event):
-        self.oseg.update_parameters_based_on_label("label kidney R")
-        self.enableSegType()
-        self.btnHearth.setChecked(False)
-        self.btnKidneyL.setChecked(False)
-        self.btnKidneyR.setChecked(True)
-        self.btnLiver.setChecked(False)
-
-    def btnLiverEvent(self, event):
-        self.oseg.update_parameters_based_on_label("label liver")
-        self.enableSegType()
-        self.btnHearth.setChecked(False)
-        self.btnKidneyL.setChecked(False)
-        self.btnKidneyR.setChecked(False)
-        self.btnLiver.setChecked(True)
 
     def quit(self, event):
         return self.close()
@@ -702,8 +658,6 @@ class OrganSegmentationWindow(QMainWindow):
         # self.iparams['series_number'] = self.metadata['series_number']
         # self.iparams['datapath'] = self.datapath
         oseg.import_dataplus(datap)
-        self.setLabelText(self.text_dcm_dir, oseg.datapath)
-        self.setLabelText(self.text_dcm_data, self.getDcmInfo())
         self.statusBar().showMessage('Ready')
 
         #### SET BUTTONS/MENU ####

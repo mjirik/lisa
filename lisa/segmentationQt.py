@@ -30,7 +30,7 @@ class SegmentationWidget(QtGui.QWidget):
 
         lblSegConfig = QLabel('Choose configure')
         self.mainLayout.addWidget(lblSegConfig, 1, 1, 1, 6)
-        self.initLabels()
+        self.initLabelsAuto()
 
         lblSegType = QLabel('Choose type of segmentation')
         self.mainLayout.addWidget(lblSegType, 5, 1, 1, 6)
@@ -40,63 +40,33 @@ class SegmentationWidget(QtGui.QWidget):
         self.lblSegError.setStyleSheet("color: red;");
         self.mainLayout.addWidget(self.lblSegError, 10, 1, 1, 6)
 
-        lblSegConfigBETA = QLabel('Choose configure (beta)')
-        self.mainLayout.addWidget(lblSegConfigBETA, 11, 1, 1, 6)
-        self.initLabelsAuto()
-
-    def initLabels(self):
-        btnHearth = QPushButton("Hearth", self)
-        btnHearth.setCheckable(True)
-        btnHearth.clicked.connect(self.configEvent)
-        self.mainLayout.addWidget(btnHearth, 2, 1)
-
-        btnKidneyL = QPushButton("Kidney Left", self)
-        btnKidneyL.setCheckable(True)
-        btnKidneyL.clicked.connect(self.configEvent)
-        self.mainLayout.addWidget(btnKidneyL, 2, 2)
-
-        btnKidneyR = QPushButton("Kidney Right", self)
-        btnKidneyR.setCheckable(True)
-        btnKidneyR.clicked.connect(self.configEvent)
-        self.mainLayout.addWidget(btnKidneyR, 2, 3)
-
-        btnLiver = QPushButton("Liver", self)
-        btnLiver.setCheckable(True)
-        btnLiver.clicked.connect(self.configEvent)
-        self.mainLayout.addWidget(btnLiver, 2, 4)
-
-        self.group = QtGui.QButtonGroup()
-        self.group.addButton(btnHearth)
-        self.group.addButton(btnKidneyL)
-        self.group.addButton(btnKidneyR)
-        self.group.addButton(btnLiver)
-        self.group.setId(btnHearth, 1)
-        self.group.setId(btnKidneyL, 2)
-        self.group.setId(btnKidneyR, 3)
-        self.group.setId(btnLiver, 4)
-
     def initLabelsAuto(self):
         position = 1
         self.groupA = QtGui.QButtonGroup()
+        id = 1
         for key, value in self.oseg.slab.items():
-            btnLabel = QPushButton(key)
-            btnLabel.setCheckable(True)
-            btnLabel.clicked.connect(self.configAutoEvent)
-            self.mainLayout.addWidget(btnLabel, 12, position)
-            self.groupA.addButton(btnLabel)
-            self.groupA.setId(btnLabel, position)
-            position += 1
+            if "label " + key in self.oseg.segmentation_alternative_params.keys():
+                btnLabel = QPushButton(key)
+                btnLabel.setCheckable(True)
+                btnLabel.clicked.connect(self.configAutoEvent)
+                self.mainLayout.addWidget(btnLabel, 2, position)
+                self.groupA.addButton(btnLabel)
+                self.groupA.setId(btnLabel, id)
+                position += 1
+            id += 1
 
     def configAutoEvent(self):
+        id = self.groupA.checkedId()
+        selected_label = self.oseg.slab.keys()[id - 1]
         alt_seg_params = {
-            "output_label": 'left kidney',
+            "output_label": selected_label,
             'clean_seeds_after_update_parameters': True,
         }
-        id = self.groupA.checkedId()
-        print id
-        selected_label = self.oseg.slab.keys()[id - 1]
-        alt_seg_params['output_label'] = selected_label
+
+         #alt_seg_params['output_label'] = selected_label
         self.oseg.update_parameters(alt_seg_params)
+
+        self.enableSegType()
 
     def initConfigs(self):
         self.btnSegManual = QPushButton("Manual", self)
@@ -120,25 +90,6 @@ class SegmentationWidget(QtGui.QWidget):
         self.mainLayout.addWidget(self.btnSegHV, 6, 5)
 
         self.disableSegType()
-
-    def configEvent(self, event):
-        id = self.group.checkedId()
-        self.lblSegError.setText("")
-        if id == 1:
-            self.oseg.update_parameters_based_on_label("label hearth")
-            self.enableSegType()
-        elif id == 2:
-            self.oseg.update_parameters_based_on_label("label kidney L")
-            self.enableSegType()
-        elif id == 3:
-            self.oseg.update_parameters_based_on_label("label kidney R")
-            self.enableSegType()
-        elif id == 4:
-            self.oseg.update_parameters_based_on_label("label liver")
-            self.enableSegType()
-        else:
-            self.lblSegError.setText("Unknown error: Config have not been set.")
-            self.disableSegType()
 
     def enableSegType(self):
         self.btnSegManual.setDisabled(False)
