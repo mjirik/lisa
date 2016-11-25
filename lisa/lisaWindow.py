@@ -373,15 +373,16 @@ class OrganSegmentationWindow(QMainWindow):
 
     def initUIMenu(self):
         ###### MAIN MENU ######
-        menuLayout = QVBoxLayout()
-        self.mainLayout.addLayout(menuLayout)
+        self.mainLayoutRight = QVBoxLayout()
+        mainLayoutRight = self.mainLayoutRight
+        self.mainLayout.addLayout(mainLayoutRight)
 
         # ----- logo -----
-        self.initLogo(menuLayout)
+        self.initLogo(mainLayoutRight)
 
         # --load--
         self.btnLoad = QPushButton("Load", self)
-        menuLayout.addWidget(self.btnLoad)
+        mainLayoutRight.addWidget(self.btnLoad)
 
         loadFileAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&File', self)
         loadFileAction.triggered.connect(self.loadDataFile)
@@ -398,11 +399,11 @@ class OrganSegmentationWindow(QMainWindow):
 
         self.btnLoadWidget = QPushButton("New load", self)
         self.btnLoadWidget.clicked.connect(lambda: self.changeWidget('Load'))
-        menuLayout.addWidget(self.btnLoadWidget)
+        mainLayoutRight.addWidget(self.btnLoadWidget)
 
         # --save--
         self.btnSave = QPushButton("Save/Export")
-        menuLayout.addWidget(self.btnSave)
+        mainLayoutRight.addWidget(self.btnSave)
 
         saveFileAction = QtGui.QAction(QtGui.QIcon('exit.png'), "File", self)
         saveFileAction.triggered.connect(self.saveOut)
@@ -436,19 +437,19 @@ class OrganSegmentationWindow(QMainWindow):
         self.btnSegmentation.setCheckable(True)
         self.btnSegmentation.clicked.connect(lambda: self.changeWidget('Segmentation'))
         self.btnSegmentation.setStyleSheet('QPushButton:checked,QPushButton:pressed {border: 1px solid #25101C; background-color: #BA5190; color: #FFFFFF}')
-        menuLayout.addWidget(self.btnSegmentation)
+        mainLayoutRight.addWidget(self.btnSegmentation)
 
         # --others--
         self.btnCompare = QPushButton("Compare", self)
         self.btnCompare.clicked.connect(self.compareSegmentationWithFile)
-        menuLayout.addWidget(self.btnCompare)
+        mainLayoutRight.addWidget(self.btnCompare)
 
         # --others--
         keyword = "3D Visualization"
         tmp = QPushButton(keyword, self)
         # tmp.clicked.connect(self.action3DVisualizationWidget)
         tmp.clicked.connect(lambda: self.changeWidget(keyword))
-        menuLayout.addWidget(tmp)
+        mainLayoutRight.addWidget(tmp)
         self.ui_buttons[keyword] = tmp
 
         import imtools.show_segmentation_qt
@@ -459,13 +460,13 @@ class OrganSegmentationWindow(QMainWindow):
         if self.oseg.debug_mode:
             btn_debug = QPushButton("Debug", self)
             btn_debug.clicked.connect(self.run_debug)
-            menuLayout.addWidget(btn_debug)
+            mainLayoutRight.addWidget(btn_debug)
 
         btnQuit = QPushButton("Quit", self)
         btnQuit.clicked.connect(self.quit)
-        menuLayout.addWidget(btnQuit)
+        mainLayoutRight.addWidget(btnQuit)
 
-        menuLayout.addStretch()
+        mainLayoutRight.addStretch()
 
     def changeWidget(self, option):
         # widgets = [
@@ -494,6 +495,19 @@ class OrganSegmentationWindow(QMainWindow):
             else:
                 self.infoBody.show()
             return
+        elif option == "3D Visualization":
+            # remove old
+            import imtools.show_segmentation_qt
+            widget = self.ui_widgets[option]
+            self.mainLayoutRight.removeWidget(widget)
+            widget.deleteLater()
+            widget = None
+
+            # add new
+            widget = imtools.show_segmentation_qt.ShowSegmentationWidget(None)
+            self.ui_widgets[option] = widget
+            self.mainLayoutRight.addWidget(widget)
+            widget.show()
         elif option == 'Load':
             self.read_widget.show()
             # self.infoBody.hide()
