@@ -1214,9 +1214,9 @@ class OrganSegmentation():
             # binaryClosingIterations=2,
             # binaryOpeningIterations=0
         )
-        from PyQt4.QtCore import pyqtRemoveInputHook
-        pyqtRemoveInputHook()
-        import ipdb; ipdb.set_trace() # BREAKPOINT
+        # from PyQt4.QtCore import pyqtRemoveInputHook
+        # pyqtRemoveInputHook()
+        # import ipdb; ipdb.set_trace() # BREAKPOINT
         self.segmentation[outputSegmentation == 1] = slab['porta']
 
         # self.__vesselTree(outputSegmentation, 'porta')
