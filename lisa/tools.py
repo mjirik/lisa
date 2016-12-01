@@ -10,7 +10,7 @@ import dicom
 # from skimage import measure
 import skimage.measure as skimea
 import skimage.morphology as skimor
-import skimage.filter as skifil
+import skimage.filters as skifil
 import scipy.stats as scista
 
 #----------------------------------------------------------------------------------------------------------------------
