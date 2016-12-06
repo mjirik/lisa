@@ -806,7 +806,7 @@ def konvolucniOperace(prahovany, voxelSize):
     nasobeny = prahovany * 100
     konvoluce = filtrVariabilni(nasobeny, voxelSize, mm=3.5)
 
-    val = skimage.filter.threshold_otsu(konvoluce)
+    val = skimage.filters.threshold_otsu(konvoluce)
     otsuPrahovany = konvoluce > val
     filtrovany = ndimage.minimum_filter(otsuPrahovany, size=[9, 9, 9])
 
