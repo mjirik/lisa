@@ -78,6 +78,7 @@ class OrganSegmentationWindow(QMainWindow):
     def __init__(self, oseg=None):
 
         self.oseg = oseg
+        self.text_seg_data = ""
 
         QMainWindow.__init__(self)
         self._initUI()
@@ -316,6 +317,9 @@ class OrganSegmentationWindow(QMainWindow):
         # self.segBody.oseg = self.oseg
         bodyLayout.addWidget(self.segBody)
         self.ui_widgets["Segmentation"] = self.segBody
+        self.segBody.lblSegData.setText(self.text_seg_data)
+        self.segBody.btnVirtualResectionPV.clicked.connect(self.btnVirtualResectionPlanar)
+        self.segBody.btnVirtualResectionPlanar.clicked.connect(self.btnVirtualResectionPlanar)
 
 
         ###
@@ -378,23 +382,7 @@ class OrganSegmentationWindow(QMainWindow):
         self.initLogo(menuLayout)
 
         # --load--
-        self.btnLoad = QPushButton("Load", self)
-        menuLayout.addWidget(self.btnLoad)
-
-        loadFileAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&File', self)
-        loadFileAction.triggered.connect(self.loadDataFile)
-
-        loadDirAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Directory', self)
-        loadDirAction.triggered.connect(self.loadDataDir)
-
-        menu = QtGui.QMenu(self.btnLoad)
-        menu.addAction(loadFileAction)
-        menu.addAction(loadDirAction)
-        self.btnLoad.setMenu(menu)
-
-        # new load widget
-
-        self.btnLoadWidget = QPushButton("New load", self)
+        self.btnLoadWidget = QPushButton("Load", self)
         self.btnLoadWidget.clicked.connect(lambda: self.changeWidget('Load'))
         menuLayout.addWidget(self.btnLoadWidget)
 
@@ -856,7 +844,7 @@ class OrganSegmentationWindow(QMainWindow):
             ed.show()
 
         head, teil = os.path.split(seg_path)
-        self.oseg.cache.update('loadcomparedir', head)
+        self.oseg.cache.update('loadcompatext_seg_dataredir', head)
         self.setLabelText(self.text_seg_data, text)
         self.statusBar().showMessage('Ready')
 

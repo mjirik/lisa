@@ -34,7 +34,13 @@ class SegmentationWidget(QtGui.QWidget):
 
         lblSegType = QLabel('Choose type of segmentation')
         self.mainLayout.addWidget(lblSegType, 5, 1, 1, 6)
+        lblSegType = QLabel('Choose virtual resection')
+        self.mainLayout.addWidget(lblSegType, 7, 1, 1, 6)
         self.initConfigs()
+
+
+        self.lblSegData = QLabel()
+        self.mainLayout.addWidget(self.lblSegData, 9, 1, 1, 6)
 
         self.lblSegError = QLabel()
         self.lblSegError.setStyleSheet("color: red;");
@@ -45,7 +51,9 @@ class SegmentationWidget(QtGui.QWidget):
         self.groupA = QtGui.QButtonGroup()
         id = 1
         for key, value in self.oseg.slab.items():
-            if "label " + key in self.oseg.segmentation_alternative_params.keys():
+            if key == "none":
+                continue
+            else:
                 btnLabel = QPushButton(key)
                 btnLabel.setCheckable(True)
                 btnLabel.clicked.connect(self.configAutoEvent)
@@ -89,6 +97,15 @@ class SegmentationWidget(QtGui.QWidget):
         # btnSegHV.clicked.connect(self.btnHepaticVeinsSegmentation)
         self.mainLayout.addWidget(self.btnSegHV, 6, 5)
 
+        #dalsi radek
+        self.btnVirtualResectionPV = QPushButton("Portal Vein", self)
+        # btnVirtualResectionPV.clicked.connect(self.btnVirtualResectionPV)
+        self.mainLayout.addWidget(self.btnVirtualResectionPV, 8, 1)
+
+        self.btnVirtualResectionPlanar = QPushButton("Planar", self)
+        # btnVirtualResectionPlanar.clicked.connect(self.btnVirtualResectionPlanar)
+        self.mainLayout.addWidget(self.btnVirtualResectionPlanar, 8, 2)
+
         self.disableSegType()
 
     def enableSegType(self):
@@ -97,6 +114,8 @@ class SegmentationWidget(QtGui.QWidget):
         self.btnSegMask.setDisabled(False)
         self.btnSegPV.setDisabled(False)
         self.btnSegHV.setDisabled(False)
+        self.btnVirtualResectionPV.setDisabled(False)
+        self.btnVirtualResectionPlanar.setDisabled(False)
 
     def disableSegType(self):
         self.btnSegManual.setDisabled(True)
@@ -104,6 +123,8 @@ class SegmentationWidget(QtGui.QWidget):
         self.btnSegMask.setDisabled(True)
         self.btnSegPV.setDisabled(True)
         self.btnSegHV.setDisabled(True)
+        self.btnVirtualResectionPV.setDisabled(True)
+        self.btnVirtualResectionPlanar.setDisabled(True)
 
 
 def main():
