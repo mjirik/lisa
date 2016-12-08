@@ -928,6 +928,8 @@ class OrganSegmentation():
 # !! pomaly!!!
 # @TODO make faster
         # spojení staré a nové segmentace
+        # from PyQt4.QtCore import pyqtRemoveInputHook; pyqtRemoveInputHook()
+        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
         if self.segmentation_prev is None:
             # pokud neznáme žádnou předchozí segmentaci, tak se chováme jako dříve
             self.segmentation[self.segmentation == 1] = self.output_label
