@@ -49,8 +49,9 @@ class SegmentationWidget(QtGui.QWidget):
     def initLabelsAuto(self):
         position = 1
         self.groupA = QtGui.QButtonGroup()
-        id = 1
+        id = 0
         for key, value in self.oseg.slab.items():
+            id += 1
             if key == "none":
                 continue
             else:
@@ -61,7 +62,7 @@ class SegmentationWidget(QtGui.QWidget):
                 self.groupA.addButton(btnLabel)
                 self.groupA.setId(btnLabel, id)
                 position += 1
-            id += 1
+
 
     def configAutoEvent(self):
         id = self.groupA.checkedId()

@@ -78,7 +78,7 @@ class OrganSegmentationWindow(QMainWindow):
     def __init__(self, oseg=None):
 
         self.oseg = oseg
-        self.text_seg_data = ""
+
 
         QMainWindow.__init__(self)
         self._initUI()
@@ -317,8 +317,8 @@ class OrganSegmentationWindow(QMainWindow):
         # self.segBody.oseg = self.oseg
         bodyLayout.addWidget(self.segBody)
         self.ui_widgets["Segmentation"] = self.segBody
-        self.segBody.lblSegData.setText(self.text_seg_data)
-        self.segBody.btnVirtualResectionPV.clicked.connect(self.btnVirtualResectionPlanar)
+        # self.segBody.lblSegData.setText(self.text_seg_data)
+        self.segBody.btnVirtualResectionPV.clicked.connect(self.btnVirtualResectionPV)
         self.segBody.btnVirtualResectionPlanar.clicked.connect(self.btnVirtualResectionPlanar)
 
 
@@ -487,15 +487,16 @@ class OrganSegmentationWindow(QMainWindow):
             # remove old
             import imtools.show_segmentation_qt
             widget = self.ui_widgets[option]
-            self.mainLayoutRight.removeWidget(widget)
+            self.bodyLayout.removeWidget(widget)
             widget.deleteLater()
             widget = None
 
             # add new
             widget = imtools.show_segmentation_qt.ShowSegmentationWidget(None)
             self.ui_widgets[option] = widget
-            self.mainLayoutRight.addWidget(widget)
+            self.bodyLayout.addWidget(widget)
             widget.show()
+
         elif option == 'Load':
             self.read_widget.show()
             # self.infoBody.hide()
@@ -865,7 +866,7 @@ class OrganSegmentationWindow(QMainWindow):
 
         head, teil = os.path.split(seg_path)
         self.oseg.cache.update('loadcompatext_seg_dataredir', head)
-        self.setLabelText(self.text_seg_data, text)
+        self.setLabelText(self.segBody.lblSegData, text)
         self.statusBar().showMessage('Ready')
 
     def btnSemiautoSeg(self):
@@ -934,7 +935,7 @@ class OrganSegmentationWindow(QMainWindow):
                       (nn * voxelvolume_mm3 / 1000, timstr)
             else:
                 aux = 'volume = %.6e mm3' % (nn * voxelvolume_mm3, )
-            self.setLabelText(self.text_seg_data, msg + aux)
+            self.setLabelText(self.segBody.lblSegData, msg + aux)
             self.statusBar().showMessage('Ready')
 
         else:
@@ -1096,7 +1097,7 @@ class OrganSegmentationWindow(QMainWindow):
             100 * v1 / (v1 + v2),
             100 * v2 / (v1 + v2)
         )
-        self.setLabelText(self.text_seg_data, aux)
+        self.setLabelText(self.segBody.lblSegData, aux)
 
 
     def btnLesionLocalization(self):
