@@ -6,19 +6,16 @@ Modul is used for GUI of Lisa
 import logging
 logger = logging.getLogger(__name__)
 # from lisa.logWindow import QVBoxLayout
-from PyQt4.QtGui import QVBoxLayout
 
 import sys
 import os
 import numpy as np
-import subprocess
 
 import datetime
 import functools
 
 from io3d import datareader
 # import segmentation
-from seg2mesh import gen_mesh_from_voxels, mesh2vtk, smooth_mesh
 import virtual_resection
 
 try:
@@ -31,9 +28,8 @@ except ImportError:
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pysegbase/src"))
 
-from PyQt4.QtGui import QApplication, QMainWindow, QWidget,\
-    QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QPushButton, QLineEdit, QFrame, \
-    QFont, QPixmap, QFileDialog, QStyle
+from PyQt4.QtGui import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame, \
+    QFont, QPixmap, QFileDialog
 from PyQt4 import QtGui
 from PyQt4.Qt import QString
 try:
@@ -495,6 +491,7 @@ class OrganSegmentationWindow(QMainWindow):
             widget = imtools.show_segmentation_qt.ShowSegmentationWidget(None)
             self.ui_widgets[option] = widget
             self.bodyLayout.addWidget(widget)
+            widget.add_data(self.oseg.segmentation, self.oseg.voxelsize_mm, self.oseg.slab)
             widget.show()
 
         elif option == 'Load':
