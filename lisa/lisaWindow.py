@@ -326,10 +326,10 @@ class OrganSegmentationWindow(QMainWindow):
         self.segBody.btnSegHV.clicked.connect(self.btnHepaticVeinsSegmentation)
 
         #--- edit slab ---
-        self.slabBody = dictEditQt.DictEdit(self.oseg)
-        self.slabBody.dictionary = self.oseg
+        self.slabBody = dictEditQt.DictEdit(dictionary=self.oseg)
         bodyLayout.addWidget(self.slabBody)
         self.ui_widgets["EditSlab"] = self.slabBody
+        self.slabBody.btnSaveSlab.clicked.connect(self.segBody.reinitLabels)
 
         # -- load widget
         import io3d.datareaderqt
@@ -1158,6 +1158,7 @@ class OrganSegmentationWindow(QMainWindow):
 
         # potom
         print self.oseg.slab
+
 
     def action3DVisualizationWidget(self):
         self.changeWidget("3D Visualization")

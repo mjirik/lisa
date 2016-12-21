@@ -20,11 +20,11 @@ import sys
 import copy
 
 class DictEdit(QtGui.QWidget):
-
     def __init__(self, dictionary):
         super(DictEdit, self).__init__()
 
         self.dictionary = dictionary
+        self.autoValue = 1
         self.initUI()
 
 
@@ -40,7 +40,7 @@ class DictEdit(QtGui.QWidget):
 
         self.initLines()
 
-        self.lblSlabError = QLabel("Work in progress!")
+        self.lblSlabError = QLabel()
         self.lblSlabError.setStyleSheet("color: red;");
         self.mainLayout.addWidget(self.lblSlabError, 20, 1, 1, 2)
 
@@ -53,6 +53,7 @@ class DictEdit(QtGui.QWidget):
         btnSaveSlab = QPushButton("Save", self)
         btnSaveSlab.clicked.connect(self.saveSlab)
         self.mainLayout.addWidget(btnSaveSlab, 21, 1)
+        self.btnSaveSlab = btnSaveSlab
 
         self.btnDiscard = QPushButton("Discard", self)
         self.btnDiscard.clicked.connect(self.discardChanges)
@@ -60,6 +61,8 @@ class DictEdit(QtGui.QWidget):
 
     def initLines(self):
         for key, value in self.dictionary.slab.items(): #self.oseg.slab.items():
+            if key == "none":
+                continue
             keyW = QLineEdit(key)
             valueW = QLineEdit(str(value))
 
@@ -112,9 +115,15 @@ class DictEdit(QtGui.QWidget):
 
     def addLabel(self):
         if self.pos < 12:
+            actualValues = []
+            for i in range(0, len(self.slabValues)):
+                actualValues.append(int(self.slabValues[i].text()))
+            while self.autoValue in actualValues:
+                self.autoValue += 1
+
             keyW = QLineEdit()
-            valueW = QLineEdit()
-            btnDlt = QPushButton("X")
+            valueW = QLineEdit(str(self.autoValue))
+            btnDlt = QPushButton(u"\u00D7")
             btnDlt.setFixedWidth(30)
             btnDlt.setStyleSheet('QPushButton {background-color: red; color: #FFFFFF}')
             ui_label_line = [self.pos, keyW, valueW, btnDlt]
@@ -142,7 +151,6 @@ class DictEdit(QtGui.QWidget):
             elif wv != '':
                 self.lblSlabError.setText("You have to name key!")
         self.dictionary.slab = newSlab
-        print self.dictionary.slab
 
     def discardChanges(self, event):
         self.deleteLines()

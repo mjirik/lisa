@@ -30,7 +30,7 @@ class SegmentationWidget(QtGui.QWidget):
 
         lblSegConfig = QLabel('Choose configure')
         self.mainLayout.addWidget(lblSegConfig, 1, 1, 1, 6)
-        self.initLabelsAuto()
+        self.initLabels()
 
         lblSegType = QLabel('Choose type of segmentation')
         self.mainLayout.addWidget(lblSegType, 5, 1, 1, 6)
@@ -46,8 +46,9 @@ class SegmentationWidget(QtGui.QWidget):
         self.lblSegError.setStyleSheet("color: red;");
         self.mainLayout.addWidget(self.lblSegError, 10, 1, 1, 6)
 
-    def initLabelsAuto(self):
-        position = 1
+    def initLabels(self):
+        column = 1
+        row = 2
         self.groupA = QtGui.QButtonGroup()
         id = 0
         for key, value in self.oseg.slab.items():
@@ -57,14 +58,23 @@ class SegmentationWidget(QtGui.QWidget):
             else:
                 btnLabel = QPushButton(key)
                 btnLabel.setCheckable(True)
-                btnLabel.clicked.connect(self.configAutoEvent)
-                self.mainLayout.addWidget(btnLabel, 2, position)
+                btnLabel.clicked.connect(self.configEvent)
+                self.mainLayout.addWidget(btnLabel, row, column)
                 self.groupA.addButton(btnLabel)
                 self.groupA.setId(btnLabel, id)
-                position += 1
+                column += 1
+                if column == 7:
+                    column = 1
+                    row += 1
+
+    def reinitLabels(self):
+        for btn in self.groupA.buttons():
+            btn.deleteLater()
+            self.groupA.removeButton(btn)
+        self.initLabels()
 
 
-    def configAutoEvent(self):
+    def configEvent(self):
         id = self.groupA.checkedId()
         selected_label = self.oseg.slab.keys()[id - 1]
         alt_seg_params = {
