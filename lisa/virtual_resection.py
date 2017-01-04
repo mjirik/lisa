@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 
 # import funkcí z jiného adresáře
-import sys
 import os.path
+import sys
+
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
 # from ..extern.sed3 import sed3
@@ -31,6 +32,28 @@ import misc
 import sed3
 # import show3
 import qmisc
+
+
+def resection(data, name=None, method='PV',
+              interactivity=True, seeds=None, **kwargs):
+    """
+    Main resection function.
+
+    :param data: dictionaru with data3d, segmentation and slab key.
+    :param method: "PV", "planar"
+    :param interactivity: True or False, use seeds if interactivity is False
+    :param seeds: used as initial interactivity state
+    :param kwargs: other parameters for resection algorithm
+    :return:
+    """
+    if method is 'PV':
+        return resection_old(data, interactivity=interactivity, seeds=seeds)
+    elif method is 'planar':
+        return resection_planar(data, interactivity=interactivity, seeds=seeds)
+    elif method is "PV_new":
+        resection_portal_vein_new(data, interactivity=interactivity, seeds=seeds, **kwargs)
+    else:
+        return resection_with_3d_visualization(data, **kwargs)
 
 
 def Rez_podle_roviny(plane, data, voxel):
@@ -173,16 +196,32 @@ def change(data, name):
     segmentation = data['segmentation']
     cut_editor(segmentation == data['slab'][name])
 
+def resection_portal_vein_new(data, interactivity=interactivity, seeds=seeds, **kwargs):
+    """
+    New function for portal vein segmentation
+    :param data:
+    :param interactivity:
+    :param seeds:
+    :param kwargs:
+    :return:
+    """
 
-def resection(data, name=None, method='PV',
-              interactivity=True, seeds=None):
-    if method is 'PV':
-        return resection_old(data, interactivity=interactivity, seeds=seeds)
-    elif method is 'planar':
-        return resection_planar(data, interactivity=interactivity, seeds=seeds)
-    else:
-        return resection_new(data, name)
+    # @TODO zde nahradit střeve čímkoliv smysluplnějším
+    if interactivity:
+        print ("Select cut")
+        seeds = cut_editor_old(data)
+    elif seeds is None:
+        logger.error('seeds is None and interactivity is False')
+        return None
 
+    # seeds[56][60][78] = 1
+    lab, cut = split_vessel(data, seeds)
+    segm, dist1, dist2 = split_organ_by_two_vessels(data, lab)
+    # TODO split this function from visualization
+    data = virtual_resection_visualization(data, segm, dist1,
+                                           dist2, cut,
+                                           interactivity=interactivity)
+    return data
 
 def resection_old(data, interactivity=True, seeds=None):
     if interactivity:
@@ -347,7 +386,7 @@ def virtual_resection_visualization(data, segm, dist1, dist2, cut,
     return data
 
 
-def resection_new(data, name):
+def resection_with_3d_visualization(data, name):
 
     # data['segmentation'][vessels == 2] = data['slab']['porta']
     # segmentation = data['segmentation']
