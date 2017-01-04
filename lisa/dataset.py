@@ -14,9 +14,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 import argparse
-import os.path as op
 
-import config_default
 import imtools
 import imtools.sample_data
 import glob
@@ -129,6 +127,9 @@ def generate_sample_data(shape=[30, 30, 30], dataplus=True):
     seeds = (np.zeros(img3d.shape)).astype(np.int8)
     segmentation = (np.zeros(img3d.shape)).astype(np.int8)
     segmentation[10:25, 4:24, 2:16] = 1
+    # porta
+    segmentation[7:17, 10:13, 8:10] = 2
+    segmentation[15:17, 6:20, 8:10] = 2
     img3d = img3d + segmentation*20
     seeds[12:18, 9:16, 3:6] = 1
     seeds[19:22, 21:27, 19:21] = 2

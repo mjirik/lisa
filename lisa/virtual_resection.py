@@ -105,7 +105,7 @@ def cut_editor_old(data):
     return pyed.seeds
 
 
-def split_vessel(data, seeds):
+def split_vessel(data, seeds, vessel_volume_threshold=0.95, dilatation_iterations=1):
 
     split_obj0 = seeds
     split_obj = split_obj0.copy()
@@ -122,9 +122,9 @@ def split_vessel(data, seeds):
 
     # while n_obj < 2 :
 # dokud neni z celkoveho objektu ustipnuto alespon 80 procent
-    while np.sum(lab == qmisc.max_area_index(lab, n_obj)) > (0.95 * sumall):
+    while np.sum(lab == qmisc.max_area_index(lab, n_obj)) > (vessel_volume_threshold * sumall):
 
-        split_obj = scipy.ndimage.binary_dilation(split_obj, iterations=3)
+        split_obj = scipy.ndimage.binary_dilation(split_obj, iterations=dilatation_iterations)
         vesselstmp = vessels * (1 - split_obj)
 
         lab, n_obj = scipy.ndimage.label(vesselstmp)
@@ -196,7 +196,7 @@ def change(data, name):
     segmentation = data['segmentation']
     cut_editor(segmentation == data['slab'][name])
 
-def resection_portal_vein_new(data, interactivity=interactivity, seeds=seeds, **kwargs):
+def resection_portal_vein_new(data, interactivity=False, seeds=None, **kwargs):
     """
     New function for portal vein segmentation
     :param data:
