@@ -17,6 +17,7 @@ import argparse
 from PyQt4.QtGui import QGridLayout, QLabel, QPushButton, QLineEdit
 from PyQt4 import QtGui
 import sys
+import virtual_resection
 
 
 class SegmentationWidget(QtGui.QWidget):
@@ -37,7 +38,6 @@ class SegmentationWidget(QtGui.QWidget):
         lblSegType = QLabel('Choose virtual resection')
         self.mainLayout.addWidget(lblSegType, 7, 1, 1, 6)
         self.initConfigs()
-
 
         self.lblSegData = QLabel()
         self.mainLayout.addWidget(self.lblSegData, 9, 1, 1, 6)
@@ -117,6 +117,10 @@ class SegmentationWidget(QtGui.QWidget):
         # btnVirtualResectionPlanar.clicked.connect(self.btnVirtualResectionPlanar)
         self.mainLayout.addWidget(self.btnVirtualResectionPlanar, 8, 2)
 
+        self.btnVirtualResectionPV_testing = QPushButton("PV testing", self)
+        # self.btnVirtualResectionPV_testing.clicked.connect(    )
+        self.mainLayout.addWidget(self.btnVirtualResectionPV_testing, 8, 4)
+
         self.disableSegType()
 
     def enableSegType(self):
@@ -136,7 +140,6 @@ class SegmentationWidget(QtGui.QWidget):
         self.btnSegHV.setDisabled(True)
         self.btnVirtualResectionPV.setDisabled(True)
         self.btnVirtualResectionPlanar.setDisabled(True)
-
 
 def main():
     logger = logging.getLogger()
