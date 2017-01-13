@@ -96,6 +96,9 @@ class ResectionTest(unittest.TestCase):
         inds = np.asarray([[15, 15], [15, 15], [8, 9]])
         seeds [inds[0], inds[1], inds[2]] = 1
 
+        # import sed3
+        # ed = sed3.sed3(datap["data3d"], seeds=seeds, contour=datap['segmentation'])
+        # ed.show()
         datap = lisa.virtual_resection.resection_old(datap, interactivity=False, seeds=seeds)
 
         sonda1 = datap['segmentation'][11, 5, 4]
