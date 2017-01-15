@@ -287,10 +287,22 @@ def split_organ_by_plane(data, seeds):
 
     return segm, dist1, dist2
 
-def split_organ_by_two_vessels(data, lab):
+def split_organ_by_two_vessels(datap, labeled):
     """
+
     Input of function is ndarray with 2 labeled vessels and data.
     Output is segmented organ by vessls using minimum distance criterium.
+
+    datap: dictionary with 3d data, segmentation, and other information
+           "data3d": 3d-ndarray with intensity data
+           "voxelsize_mm",
+           "segmentation": 3d ndarray with image segmentation
+           "slab": segmentation labels
+    labeled: ndarray with same size as data3d
+            0: empty volume
+            1: first part of portal vein
+            2: second part of portal vein
+
     """
     l1 = 1
     l2 = 2
@@ -306,12 +318,12 @@ def split_organ_by_two_vessels(data, lab):
     # )
     import skfmm
     dist1 = skfmm.distance(
-        lab != l1,
-        dx=data['voxelsize_mm']
+        labeled != l1,
+        dx=datap['voxelsize_mm']
     )
     dist2 = skfmm.distance(
-        lab != l2,
-        dx=data['voxelsize_mm']
+        labeled != l2,
+        dx=datap['voxelsize_mm']
     )
     # print 'skfmm'
     # from PyQt4.QtCore import pyqtRemoveInputHook; pyqtRemoveInputHook()
@@ -322,8 +334,8 @@ def split_organ_by_two_vessels(data, lab):
     # import ipdb; ipdb.set_trace() # BREAKPOINT
 
     # segm = (dist1 < dist2) * (data['segmentation'] != data['slab']['none'])
-    segm = (((data['segmentation'] != 0) * (dist1 < dist2)).astype('int8') +
-            (data['segmentation'] != 0).astype('int8'))
+    segm = (((datap['segmentation'] != 0) * (dist1 < dist2)).astype('int8') +
+            (datap['segmentation'] != 0).astype('int8'))
 
     return segm, dist1, dist2
 

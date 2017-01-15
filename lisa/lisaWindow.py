@@ -316,6 +316,7 @@ class OrganSegmentationWindow(QMainWindow):
         # self.segBody.lblSegData.setText(self.text_seg_data)
         self.segBody.btnVirtualResectionPV.clicked.connect(self.btnVirtualResectionPV)
         self.segBody.btnVirtualResectionPlanar.clicked.connect(self.btnVirtualResectionPlanar)
+        self.segBody.btnVirtualResectionPV_testing.clicked.connect(self.btnVirtualResectionPV_new)
 
 
         ###
@@ -797,6 +798,7 @@ class OrganSegmentationWindow(QMainWindow):
             self.statusBar().showMessage('No data path specified!')
             return
         self.oseg.import_segmentation_from_file(seg_path)
+        self.segBody.enableSegType()
         self.statusBar().showMessage('Ready')
 
     def __evaluation_to_text(self, evaluation):
@@ -1063,6 +1065,9 @@ class OrganSegmentationWindow(QMainWindow):
 
     def btnVirtualResectionPV(self):
         self._virtual_resection('PV')
+
+    def btnVirtualResectionPV_new(self):
+        self._virtual_resection('PV_new')
 
     def btnVirtualResectionPlanar(self):
         self._virtual_resection('planar')
