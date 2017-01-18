@@ -18,6 +18,7 @@ Email: miroslav.jirik@gmail.com
 
 import logging
 logger = logging.getLogger(__name__)
+import logging.handlers
 
 import sys
 import os
@@ -1445,9 +1446,8 @@ def logger_init():  # pragma: no cover
     logfile = "lisa.log"
     if op.exists(op.expanduser("~/lisa_data/")):
         logfile = op.expanduser("~/lisa_data/lisa.log")
-    # import logging.handlers
-    # fh = logging.handlers.RotatingFileHandler(logfile, maxBytes=100000, backupCount=9)
-    fh = logging.FileHandler(logfile)
+    fh = logging.handlers.RotatingFileHandler(logfile, maxBytes=100000, backupCount=9)
+    # fh = logging.FileHandler(logfile)
     fh.setFormatter(fformatter)
     fh.setLevel(logging.DEBUG)
     logger.addHandler(fh)
