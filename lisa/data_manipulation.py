@@ -151,15 +151,20 @@ def add_seeds_mm(data_seeds, voxelsize_mm, z_mm, x_mm, y_mm, label, radius, widt
     # if type(z_mm) is not list:
     #     z_mm = [z_mm]
     z_mm = np.asarray(z_mm)
+    # z_mm = z_mm.squeeze()
+    for z_mm_j in z_mm:
+        z_mm_j = np.asarray([z_mm_j])
     # repeat circle every milimiter
-    for i in range(0, width + 1):
-        data_seeds = _add_seeds_mm_in_one_slice(data_seeds, voxelsize_mm, z_mm + i, x_mm, y_mm, label, radius)
+        for i in range(0, width + 1):
+            data_seeds = _add_seeds_mm_in_one_slice(data_seeds, voxelsize_mm, z_mm_j + i, x_mm, y_mm, label, radius)
     return data_seeds
 
 def _add_seeds_mm_in_one_slice(data_seeds, voxelsize_mm, z_mm, x_mm, y_mm, label, radius):
     x_mm = np.asarray(x_mm)
     y_mm = np.asarray(y_mm)
     z_mm = np.asarray(z_mm)
+    if len(z_mm) > 1:
+        logger.error("Expected single value for z-axis")
 
     for i in range(0, len(x_mm)):
 

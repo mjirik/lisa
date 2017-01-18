@@ -64,6 +64,7 @@ import io3d.cachefile as cachef
 import config_default
 import organ_seeds
 import lisa_data
+import data_manipulation
 
 # import audiosupport
 # import skimage
@@ -1138,7 +1139,6 @@ class OrganSegmentation():
         :param width: makes circle with defined width (repeat circle every milimeter)
 
         """
-        import data_manipulation
 
         data_manipulation.add_seeds_mm(
             self.seeds, self.voxelsize_mm,

@@ -5,6 +5,7 @@
 # import funkcí z jiného adresáře
 import os.path
 
+import sys
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 # sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
 # sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
@@ -14,8 +15,8 @@ import unittest
 from nose.plugins.attrib import attr
 import numpy as np
 
-# from PyQt4.QtGui import QApplication
-# import sed3
+from PyQt4.QtGui import QApplication
+import sed3
 
 from lisa import organ_segmentation
 from imtools import segmentation
@@ -135,17 +136,26 @@ class VesselsSegmentationTest(unittest.TestCase):
 
     @attr('slow')
     def test_real_data_segmentation(self):
+        import lisa.dataset
+        app = QApplication(sys.argv)
 
-        dcmdir = os.path.join(path_to_script, './../sample_data/jatra_5mm')
+        dcmdir = os.path.join(lisa.dataset.sample_data_path(), 'jatra_5mm')
 
         oseg = organ_segmentation.OrganSegmentation(dcmdir,
                                                     working_voxelsize_mm=4)
-        oseg.add_seeds_mm([120], [120], [-81],
+        oseg.add_seeds_mm([81], [120], [120],
                           label=1, radius=30)
-        oseg.add_seeds_mm([170, 220, 250], [250, 250, 200], [-81],
+        oseg.add_seeds_mm([81], [170, 220, 250], [250, 250, 200],
                           label=2, radius=30)
+        oseg.add_seeds_mm([100], [170], [140],
+                          label=10, radius=5)
         # oseg.interactivity(min_val=-200, max_val=200)
         oseg.ninteractivity()
+
+        ed = sed3.sed3(oseg.data3d, contour=oseg.segmentation, seeds=oseg.seeds)
+        ed.show()
+
+        oseg.portalVeinSegmentation(seeds=(oseg.seeds==10))
 
 #
 #
