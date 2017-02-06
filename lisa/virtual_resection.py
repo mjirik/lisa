@@ -17,7 +17,7 @@ import numpy as np
 import scipy.ndimage
 # import vtk
 import argparse
-
+from skimage import morphology
 
 # from PyQt4 import QtCore, QtGui
 # from PyQt4.QtGui import *
@@ -196,6 +196,38 @@ def change(data, name):
     segmentation = data['segmentation']
     cut_editor(segmentation == data['slab'][name])
 
+def velikosti(a):
+    a_index = [0, 0, 0]
+    for x in range(0, len(a)):
+        for y in range(0, len(a[0])):
+            for z in range(0, len(a[0][0])):
+                if a[x][y][z] == 1:
+                    a_index[0] += 1
+                elif a[x][y][z] == 2:
+                    a_index[1] += 1
+                elif a[x][y][z] == 3:
+                    a_index[2] += 1
+    return a_index
+
+def nejnizsi(a, b, c):
+    if a > b:
+        if b > c:
+            return 3
+        else:
+            return 2
+    elif b > c:
+        if c > a:
+            return 1
+        else:
+            return 3
+    elif c > a:
+        if a > b:
+            return 2
+        else:
+            return 1
+    else:
+        print "chyba"
+
 def resection_portal_vein_new(data, interactivity=False, seeds=None, **kwargs):
     """
     New function for portal vein segmentation
@@ -217,6 +249,22 @@ def resection_portal_vein_new(data, interactivity=False, seeds=None, **kwargs):
     # seeds[56][60][78] = 1
     lab, cut = split_vessel(data, seeds)
     segm, dist1, dist2 = split_organ_by_two_vessels(data, lab)
+
+    # jatra rozdeleny na 3 kusy
+    a = morphology.label(segm, background=0)
+    if 3 in a: #zda se v segmentaci objevuje 3. cast
+        print "slape :) :) :P"
+        a_index = velikosti(segm)
+        i = nejnizsi(a_index[0], a_index[1], a_index[2])
+        for x in range(0, len(a)):
+            for y in range(0, len(a[0])):
+                for z in range(0, len(a[0][0])):
+                    if a[x][y][z] == i:
+                        if segm[x][y][z] == 1:
+                            segm[x][y][z] = 2
+                        else:
+                            segm[x][y][z] = 1
+
     # TODO split this function from visualization
     data = virtual_resection_visualization(data, segm, dist1,
                                            dist2, cut,
@@ -306,25 +354,24 @@ def split_organ_by_two_vessels(datap, labeled):
     """
     l1 = 1
     l2 = 2
-
     # dist se tady počítá od nul jenom v jedničkách
-    # dist1 = scipy.ndimage.distance_transform_edt(
-    #     lab != l1,
-    #     sampling=data['voxelsize_mm']
-    # )
-    # dist2 = scipy.ndimage.distance_transform_edt(
-    #     lab != l2,
-    #     sampling=data['voxelsize_mm']
-    # )
-    import skfmm
-    dist1 = skfmm.distance(
+    dist1 = scipy.ndimage.distance_transform_edt(
         labeled != l1,
-        dx=datap['voxelsize_mm']
+        sampling=datap['voxelsize_mm']
     )
-    dist2 = skfmm.distance(
+    dist2 = scipy.ndimage.distance_transform_edt(
         labeled != l2,
-        dx=datap['voxelsize_mm']
+        sampling=datap['voxelsize_mm']
     )
+    # import skfmm
+    # dist1 = skfmm.distance(
+    #     labeled != l1,
+    #     dx=datap['voxelsize_mm']
+    # )
+    # dist2 = skfmm.distance(
+    #     labeled != l2,
+    #     dx=datap['voxelsize_mm']
+    # )
     # print 'skfmm'
     # from PyQt4.QtCore import pyqtRemoveInputHook; pyqtRemoveInputHook()
     # import ipdb; ipdb.set_trace()
@@ -334,6 +381,7 @@ def split_organ_by_two_vessels(datap, labeled):
     # import ipdb; ipdb.set_trace() # BREAKPOINT
 
     # segm = (dist1 < dist2) * (data['segmentation'] != data['slab']['none'])
+
     segm = (((datap['segmentation'] != 0) * (dist1 < dist2)).astype('int8') +
             (datap['segmentation'] != 0).astype('int8'))
 
