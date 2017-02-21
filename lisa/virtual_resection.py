@@ -197,16 +197,22 @@ def change(data, name):
     cut_editor(segmentation == data['slab'][name])
 
 def velikosti(a):
-    a_index = [0, 0, 0]
-    for x in range(0, len(a)):
-        for y in range(0, len(a[0])):
-            for z in range(0, len(a[0][0])):
-                if a[x][y][z] == 1:
-                    a_index[0] += 1
-                elif a[x][y][z] == 2:
-                    a_index[1] += 1
-                elif a[x][y][z] == 3:
-                    a_index[2] += 1
+    # a_index = [0, 0, 0]
+    # for x in range(0, len(a)):
+    #     for y in range(0, len(a[0])):
+    #         for z in range(0, len(a[0][0])):
+    #             if a[x][y][z] == 1:
+    #                 a_index[0] += 1
+    #             elif a[x][y][z] == 2:
+    #                 a_index[1] += 1
+    #             elif a[x][y][z] == 3:
+    #                 a_index[2] += 1
+    mx = np.max(a)
+    a_index = []
+    for i in range(mx):
+        sm = np.sum(a == i)
+        a_index.append(sm)
+
     return a_index
 
 def nejnizsi(a, b, c):
@@ -250,6 +256,10 @@ def resection_portal_vein_new(data, interactivity=False, seeds=None, **kwargs):
     lab, cut = split_vessel(data, seeds)
     segm, dist1, dist2 = split_organ_by_two_vessels(data, lab)
 
+    # import imtools.misc
+    import sed3
+    ed = sed3.sed3(segm)
+    ed.show()
     # jatra rozdeleny na 3 kusy
     a = morphology.label(segm, background=0)
     if 3 in a: #zda se v segmentaci objevuje 3. cast
@@ -264,6 +274,7 @@ def resection_portal_vein_new(data, interactivity=False, seeds=None, **kwargs):
                             segm[x][y][z] = 2
                         else:
                             segm[x][y][z] = 1
+
 
     # TODO split this function from visualization
     data = virtual_resection_visualization(data, segm, dist1,

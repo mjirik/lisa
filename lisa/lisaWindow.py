@@ -489,7 +489,7 @@ class OrganSegmentationWindow(QMainWindow):
             widget = None
 
             # add new
-            widget = imtools.show_segmentation_qt.ShowSegmentationWidget(None)
+            widget = imtools.show_segmentation_qt.ShowSegmentationWidget(None, show_load_interface=True)
             self.ui_widgets[option] = widget
             self.bodyLayout.addWidget(widget)
             widget.add_data(self.oseg.segmentation, self.oseg.voxelsize_mm, self.oseg.slab)
