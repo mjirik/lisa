@@ -272,6 +272,8 @@ def resection_portal_vein_new(data, interactivity=False, seeds=None, **kwargs):
 
     # jatra rozdeleny na 3 kusy
     a = morphology.label(segm, background=0)
+    # ed = sed3.sed3(a)
+    # ed.show()
     if 3 in a: # zda se v segmentaci objevuje 3. cast
         print "slape :) :) :P"
         a_index = velikosti(segm)
