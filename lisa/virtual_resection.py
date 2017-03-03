@@ -209,7 +209,7 @@ def velikosti(a):
     #                 a_index[2] += 1
     mx = np.max(a)
     a_index = []
-    for i in range(mx):
+    for i in range(1, mx + 1):
         sm = np.sum(a == i)
         a_index.append(sm)
 
@@ -234,6 +234,7 @@ def nejnizsi(a, b, c):
     else:
         print "chyba"
 
+
 def resection_portal_vein_new(data, interactivity=False, seeds=None, **kwargs):
     """
     New function for portal vein segmentation
@@ -243,38 +244,55 @@ def resection_portal_vein_new(data, interactivity=False, seeds=None, **kwargs):
     :param kwargs:
     :return:
     """
+    segmentation = data["segmentation"]
+    data3d = data["data3d"]
+
+    crinfo = qmisc.crinfo_from_specific_data(segmentation, [0])
+    c_segmentation = qmisc.crop(segmentation, crinfo)
+    c_data3d = qmisc.crop(data3d, crinfo)
+    data["segmentation"] = c_segmentation
+    data["data3d"] = c_data3d
 
     # @TODO zde nahradit střeve čímkoliv smysluplnějším
     if interactivity:
         print ("Select cut")
+        # seeds = cut_editor_old(data)
         seeds = cut_editor_old(data)
     elif seeds is None:
         logger.error('seeds is None and interactivity is False')
         return None
+
 
     # seeds[56][60][78] = 1
     lab, cut = split_vessel(data, seeds)
     segm, dist1, dist2 = split_organ_by_two_vessels(data, lab)
 
     # import imtools.misc
-    import sed3
-    ed = sed3.sed3(segm)
-    ed.show()
+    # import sed3
+    # ed = sed3.sed3(segm)
+    # ed.show()
+
     # jatra rozdeleny na 3 kusy
     a = morphology.label(segm, background=0)
     if 3 in a: #zda se v segmentaci objevuje 3. cast
         print "slape :) :) :P"
         a_index = velikosti(segm)
         i = nejnizsi(a_index[0], a_index[1], a_index[2])
-        for x in range(0, len(a)):
-            for y in range(0, len(a[0])):
-                for z in range(0, len(a[0][0])):
-                    if a[x][y][z] == i:
-                        if segm[x][y][z] == 1:
-                            segm[x][y][z] = 2
-                        else:
-                            segm[x][y][z] = 1
+        segm = ((a == i) * (celk == 1).astype('int8') +
+                (a != i)*(celk == 2).astype('int8') +
+                (celk != 0).astype('int8'))
 
+        # for x in range(0, len(a)):
+        #     for y in range(0, len(a[0])):
+        #         for z in range(0, len(a[0][0])):
+        #             if a[x][y][z] == i:
+        #                 if segm[x][y][z] == 1:
+        #                     segm[x][y][z] = 2
+        #                 else:
+        #                     segm[x][y][z] = 1
+    #
+    # data["segmentation"] = qmisc.uncrop(c_segmentation, crinfo, segmentation)
+    # data["data3d"] = qmisc.uncrop(c_data3d, crinfo, data3d)
 
     # TODO split this function from visualization
     data = virtual_resection_visualization(data, segm, dist1,
