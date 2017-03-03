@@ -209,7 +209,7 @@ def velikosti(a):
     #                 a_index[2] += 1
     mx = np.max(a)
     a_index = []
-    for i in range(1, mx + 1):
+    for i in range(1, 4): # for i in range(1, mx + 1):
         sm = np.sum(a == i)
         a_index.append(sm)
 
@@ -267,20 +267,19 @@ def resection_portal_vein_new(data, interactivity=False, seeds=None, **kwargs):
     lab, cut = split_vessel(data, seeds)
     segm, dist1, dist2 = split_organ_by_two_vessels(data, lab)
 
-    # import imtools.misc
-    # import sed3
-    # ed = sed3.sed3(segm)
-    # ed.show()
+    import imtools.misc
+    import sed3
 
     # jatra rozdeleny na 3 kusy
     a = morphology.label(segm, background=0)
-    if 3 in a: #zda se v segmentaci objevuje 3. cast
+    if 3 in a: # zda se v segmentaci objevuje 3. cast
         print "slape :) :) :P"
         a_index = velikosti(segm)
+        print a_index
         i = nejnizsi(a_index[0], a_index[1], a_index[2])
-        segm = ((a == i) * (celk == 1).astype('int8') +
-                (a != i)*(celk == 2).astype('int8') +
-                (celk != 0).astype('int8'))
+        segm = ((a == i) * (segm == 1).astype('int8') +
+                (a != i)*(segm == 2).astype('int8') +
+                (segm != 0).astype('int8'))
 
         # for x in range(0, len(a)):
         #     for y in range(0, len(a[0])):
