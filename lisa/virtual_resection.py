@@ -51,7 +51,7 @@ def resection(data, name=None, method='PV',
     elif method is 'planar':
         return resection_planar(data, interactivity=interactivity, seeds=seeds)
     elif method is "PV_new":
-        resection_portal_vein_new(data, interactivity=interactivity, seeds=seeds, **kwargs)
+        return resection_portal_vein_new(data, interactivity=interactivity, seeds=seeds, **kwargs)
     else:
         return resection_with_3d_visualization(data, **kwargs)
 
@@ -266,9 +266,6 @@ def resection_portal_vein_new(data, interactivity=False, seeds=None, **kwargs):
     # seeds[56][60][78] = 1
     lab, cut = split_vessel(data, seeds)
     segm, dist1, dist2 = split_organ_by_two_vessels(data, lab)
-
-    import imtools.misc
-    import sed3
 
     # jatra rozdeleny na 3 kusy
     a = morphology.label(segm, background=0)
