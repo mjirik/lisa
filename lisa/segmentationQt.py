@@ -53,7 +53,7 @@ class SegmentationWidget(QtGui.QWidget):
         id = 0
         for key, value in self.oseg.slab.items():
             id += 1
-            if key == "none":
+            if key == "none" or key == 'lesions' or key == 'porta':
                 continue
             else:
                 btnLabel = QPushButton(key)
@@ -81,7 +81,6 @@ class SegmentationWidget(QtGui.QWidget):
             "output_label": selected_label,
             'clean_seeds_after_update_parameters': True,
         }
-
          #alt_seg_params['output_label'] = selected_label
         self.oseg.update_parameters(alt_seg_params)
 

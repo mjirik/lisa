@@ -51,7 +51,7 @@ def resection(data, name=None, method='PV',
     elif method is 'planar':
         return resection_planar(data, interactivity=interactivity, seeds=seeds)
     elif method is "PV_new":
-        return resection_portal_vein_new(data, interactivity=interactivity, seeds=seeds, **kwargs)
+        return resection_portal_vein_new(data, data["slab"]["liver"], data["slab"]["porta"], interactivity=interactivity, seeds=seeds, **kwargs)
     else:
         return resection_with_3d_visualization(data, **kwargs)
 
@@ -235,7 +235,7 @@ def nejnizsi(a, b, c):
         print "chyba"
 
 
-def resection_portal_vein_new(data, interactivity=False, seeds=None, **kwargs):
+def resection_portal_vein_new(data, label, vein, interactivity=False, seeds=None, **kwargs):
     """
     New function for portal vein segmentation
     :param data:
@@ -244,14 +244,30 @@ def resection_portal_vein_new(data, interactivity=False, seeds=None, **kwargs):
     :param kwargs:
     :return:
     """
+    # ed = sed3.sed3(a)
+    # ed.show()
+
+    # from PyQt4 import QtGui
+    # from PyQt4.QtGui import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame, \
+    # QFont, QPixmap, QFileDialog
+    #
+    # window = QtGui.QWidget()
+    # mainLayout = QVBoxLayout()
+    # window.setLayout(mainLayout)
+    # mainLayout.addWidget(sed3.sed3qtWidget(data['data3d'], contour=data['segmentation']))
+
+    # zachovani puvodnich dat
     segmentation = data["segmentation"]
     data3d = data["data3d"]
 
-    crinfo = qmisc.crinfo_from_specific_data(segmentation, [0])
-    c_segmentation = qmisc.crop(segmentation, crinfo)
-    c_data3d = qmisc.crop(data3d, crinfo)
-    data["segmentation"] = c_segmentation
-    data["data3d"] = c_data3d
+    # data pouze se segmentacemi
+    segm = ((data["segmentation"] == label) * label +
+            (data["segmentation"] == vein) * vein)
+
+    # ufiknutí segmentace
+    crinfo = qmisc.crinfo_from_specific_data(segm, [0])
+    data["segmentation"] = qmisc.crop(segm, crinfo)
+    data["data3d"] = qmisc.crop(data3d, crinfo)
 
     # @TODO zde nahradit střeve čímkoliv smysluplnějším
     if interactivity:
@@ -262,15 +278,12 @@ def resection_portal_vein_new(data, interactivity=False, seeds=None, **kwargs):
         logger.error('seeds is None and interactivity is False')
         return None
 
-
-    # seeds[56][60][78] = 1
     lab, cut = split_vessel(data, seeds)
     segm, dist1, dist2 = split_organ_by_two_vessels(data, lab)
 
     # jatra rozdeleny na 3 kusy
     a = morphology.label(segm, background=0)
-    # ed = sed3.sed3(a)
-    # ed.show()
+    ### podmínka nefunguje
     if 3 in a: # zda se v segmentaci objevuje 3. cast
         print "slape :) :) :P"
         a_index = velikosti(segm)
@@ -280,22 +293,18 @@ def resection_portal_vein_new(data, interactivity=False, seeds=None, **kwargs):
                 (a != i)*(segm == 2).astype('int8') +
                 (segm != 0).astype('int8'))
 
-        # for x in range(0, len(a)):
-        #     for y in range(0, len(a[0])):
-        #         for z in range(0, len(a[0][0])):
-        #             if a[x][y][z] == i:
-        #                 if segm[x][y][z] == 1:
-        #                     segm[x][y][z] = 2
-        #                 else:
-        #                     segm[x][y][z] = 1
-    #
-    # data["segmentation"] = qmisc.uncrop(c_segmentation, crinfo, segmentation)
-    # data["data3d"] = qmisc.uncrop(c_data3d, crinfo, data3d)
-
     # TODO split this function from visualization
     data = virtual_resection_visualization(data, segm, dist1,
                                            dist2, cut,
                                            interactivity=interactivity)
+
+    # vrácení původních dat a spojení s upravenými daty
+    data["data3d"] = data3d
+    data["segmentation"] = qmisc.uncrop(data["segmentation"], crinfo, (len(segmentation), len(segmentation[0]), len(segmentation[0])))
+
+    #segmentation = segmentation == vein
+    data["segmentation"] = (data["segmentation"] +
+                            (segmentation != label) * segmentation) - (segmentation == vein) * vein
     return data
 
 def resection_old(data, interactivity=True, seeds=None):
