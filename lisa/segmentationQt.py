@@ -53,7 +53,7 @@ class SegmentationWidget(QtGui.QWidget):
         id = 0
         for key, value in self.oseg.slab.items():
             id += 1
-            if key == "none" or key == 'lesions' or key == 'porta':
+            if key == "none":
                 continue
             else:
                 btnLabel = QPushButton(key)

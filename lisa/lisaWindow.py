@@ -75,8 +75,6 @@ class OrganSegmentationWindow(QMainWindow):
 
         self.oseg = oseg
 
-        oseg.slab['lesions'] = 6
-        oseg.slab['porta'] = 2
 
         QMainWindow.__init__(self)
         self._initUI()
