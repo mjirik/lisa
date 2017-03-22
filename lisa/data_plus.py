@@ -14,6 +14,7 @@ Module for work with dataplus format
 import logging
 logger = logging.getLogger(__name__)
 import argparse
+import numpy as np
 
 
 def default_slab():
@@ -24,6 +25,16 @@ def default_slab():
         'left kidney': 15,
         'right kidney': 16,
     }
+
+def get_slab_value(slab, label, value=None):
+    if label in slab.keys():
+        return slab[label]
+    else:
+        if value is None:
+            value = np.max(slab.values()) + 1
+        slab[label] = value
+
+# class Slab(dict):
 
 def main():
     logger = logging.getLogger()
