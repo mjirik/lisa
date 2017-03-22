@@ -36,6 +36,7 @@ import qmisc
 
 def resection(data, name=None, method='PV',
               interactivity=True, seeds=None, **kwargs):
+
     """
     Main resection function.
 
@@ -46,12 +47,13 @@ def resection(data, name=None, method='PV',
     :param kwargs: other parameters for resection algorithm
     :return:
     """
+    print kwargs["ptakovine"]
     if method is 'PV':
         return resection_old(data, interactivity=interactivity, seeds=seeds)
     elif method is 'planar':
         return resection_planar(data, interactivity=interactivity, seeds=seeds)
     elif method is "PV_new":
-        return resection_portal_vein_new(data, data["slab"]["liver"], data["slab"]["porta"], interactivity=interactivity, seeds=seeds, **kwargs)
+        return resection_portal_vein_new(data, interactivity=interactivity, seeds=seeds, **kwargs)
     else:
         return resection_with_3d_visualization(data, **kwargs)
 
@@ -235,7 +237,7 @@ def nejnizsi(a, b, c):
         print "chyba"
 
 
-def resection_portal_vein_new(data, label, vein, interactivity=False, seeds=None, **kwargs):
+def resection_portal_vein_new(data, interactivity=False, seeds=None, label=10, vein=6, **kwargs):
     """
     New function for portal vein segmentation
     :param data:

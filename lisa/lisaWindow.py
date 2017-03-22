@@ -1068,15 +1068,18 @@ class OrganSegmentationWindow(QMainWindow):
             self.statusBar().showMessage('No segmentation data!')
 
     def btnVirtualResectionPV(self):
-        self._virtual_resection('PV')
+        self._virtual_resection('PV', )
 
     def btnVirtualResectionPV_new(self):
-        self._virtual_resection('PV_new')
+        self._virtual_resection('PV_new',
+                                label=self.oseg.get_slab_value("liver"),
+                                vein=2
+                                )
 
     def btnVirtualResectionPlanar(self):
         self._virtual_resection('planar')
 
-    def _virtual_resection(self, method='planar'):
+    def _virtual_resection(self, method='planar', **kwargs):
         # mport vessel_cut
 
         self.statusBar().showMessage('Performing virtual resection ...')
