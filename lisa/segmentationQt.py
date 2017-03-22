@@ -81,7 +81,6 @@ class SegmentationWidget(QtGui.QWidget):
             "output_label": selected_label,
             'clean_seeds_after_update_parameters': True,
         }
-
          #alt_seg_params['output_label'] = selected_label
         self.oseg.update_parameters(alt_seg_params)
 
