@@ -346,6 +346,7 @@ class OrganSegmentationWindow(QMainWindow):
         bodyLayout.addStretch()
 
 
+        self.oseg.gui_update = self.gui_update
 
         ##### OTHERS #####
         self.mainLayout.addStretch()
@@ -355,6 +356,9 @@ class OrganSegmentationWindow(QMainWindow):
         self.btnCompare.setDisabled(True)
         self.changeWidget('Main')
         self.show()
+
+    def gui_update(self):
+        pass
 
     def initLogo(self, layout):
         font_label = QFont()
@@ -1064,15 +1068,18 @@ class OrganSegmentationWindow(QMainWindow):
             self.statusBar().showMessage('No segmentation data!')
 
     def btnVirtualResectionPV(self):
-        self._virtual_resection('PV')
+        self._virtual_resection('PV', )
 
     def btnVirtualResectionPV_new(self):
-        self._virtual_resection('PV_new')
+        self._virtual_resection('PV_new',
+                                label=self.oseg.get_slab_value("liver"),
+                                vein=2
+                                )
 
     def btnVirtualResectionPlanar(self):
         self._virtual_resection('planar')
 
-    def _virtual_resection(self, method='planar'):
+    def _virtual_resection(self, method='planar', **kwargs):
         # mport vessel_cut
 
         self.statusBar().showMessage('Performing virtual resection ...')

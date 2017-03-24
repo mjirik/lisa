@@ -240,6 +240,7 @@ class OrganSegmentation():
         self.save_filetype = save_filetype
         self.vessel_tree = {}
         self.debug_mode = debug_mode
+        self.gui_update = None
         self.segmentation_alternative_params = segmentation_alternative_params
         # SegPostprocPars = namedtuple(
         #     'SegPostprocPars', [
@@ -462,6 +463,13 @@ class OrganSegmentation():
         # self.iparams['series_number'] = self.metadata['series_number']
         # self.iparams['datapath'] = self.datapath
         self.import_dataplus(datap)
+
+    def get_slab_value(self, label, value=None):
+        value = data_plus.get_slab_value(self.slab, label, value)
+        if self.gui_update is not None:
+            self.gui_update()
+
+        return value
 
 
     def sliver_compare_with_other_volume_from_file(self, filepath):
