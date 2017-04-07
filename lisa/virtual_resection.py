@@ -47,7 +47,6 @@ def resection(data, name=None, method='PV',
     :param kwargs: other parameters for resection algorithm
     :return:
     """
-    print kwargs["ptakovine"]
     if method is 'PV':
         return resection_old(data, interactivity=interactivity, seeds=seeds)
     elif method is 'planar':
