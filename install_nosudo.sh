@@ -7,7 +7,7 @@ python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements
 
 #conda install --yes --file requirements_conda_root.txt
 #conda install --yes -c SimpleITK -c menpo -c mjirik  --file requirements_conda.txt
-conda install --yes -c SimpleITK -c menpo -c mjirik  lisa
+conda install --yes -c SimpleITK -c menpo -c mjirik -c conda-forge lisa
 # mahotas on luispedro is only for linux
 # conda install --yes -c SimpleITK -c luispedro --file requirements_conda.txt
 

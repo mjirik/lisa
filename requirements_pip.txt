@@ -1,5 +1,5 @@
 # pydicom>=0.9.9
-ipdb>=0.8.1
+# ipdb>=0.8.1
 nearpy>=0.2
 # git+https://github.com/mjirik/morphsnakes.git
 # from pypi/mjirik

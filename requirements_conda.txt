@@ -41,3 +41,5 @@ sftpsync>=1.0.2
 # geodesic distance transform -c jmargeta -c jakirkham
 # on osx install with pip
 # scikit-fmm
+# -c conda-forge
+ipdb>=0.8.1
