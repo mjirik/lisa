@@ -52,7 +52,8 @@ def resection(data, name=None, method='PV',
     elif method is 'planar':
         return resection_planar(data, interactivity=interactivity, seeds=seeds)
     elif method is "PV_new":
-        return resection_portal_vein_new(data, interactivity=interactivity, seeds=seeds, **kwargs)
+        return resection_portal_vein_new(data, interactivity=interactivity, seeds=seeds, label=data["slab"]["liver"], vein=data["slab"]["porta"])
+        # return resection_portal_vein_new(data, interactivity=interactivity, seeds=seeds, **kwargs)
     else:
         return resection_with_3d_visualization(data, **kwargs)
 
@@ -236,7 +237,7 @@ def nejnizsi(a, b, c):
         print "chyba"
 
 
-def resection_portal_vein_new(data, interactivity=False, seeds=None, label=10, vein=6, **kwargs):
+def resection_portal_vein_new(data, interactivity=False, seeds=None, label=10, vein=2):
     """
     New function for portal vein segmentation
     :param data:
@@ -264,6 +265,10 @@ def resection_portal_vein_new(data, interactivity=False, seeds=None, label=10, v
     # data pouze se segmentacemi
     segm = ((data["segmentation"] == label) * label +
             (data["segmentation"] == vein) * vein)
+
+
+    # ed = sed3.sed3(segm)
+    # ed.show()
 
     # ufiknutí segmentace
     crinfo = qmisc.crinfo_from_specific_data(segm, [0])
