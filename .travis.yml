@@ -8,10 +8,10 @@ python:
 virtualenv:
     system_site_packages: true
 before_install:
-    - apt-get update -qq
-    - apt-get install -qq git g++ sox make curl cmake
+    - sudo apt-get update -qq
+    - sudo apt-get install -qq git g++ sox make curl cmake
     # - sudo apt-get install -qq python python-dev
-    - apt-get install -qq libinsighttoolkit3-dev libpng12-dev libgdcm2-dev
+    - sudo apt-get install -qq libinsighttoolkit3-dev libpng12-dev libgdcm2-dev
     - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
     - chmod +x miniconda.sh
     - ./miniconda.sh -b
@@ -21,7 +21,7 @@ before_install:
     # GUI
     - "export DISPLAY=:99.0"
     - sh -e /etc/init.d/xvfb start
-sudo: false
+# sudo: false
 # command to install dependencies
 install:
     - conda update --yes conda
@@ -37,7 +37,7 @@ install:
     - cmake ..
     - cmake --build .
 #    - sudo make install
-    - make install
+    - sudo make install
     - cd ..
     - cd ..
 
