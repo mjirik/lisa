@@ -64,7 +64,7 @@ install:
     # - 'sudo ./ubuntu_installer.sh devel'
     - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
 #    - 'sudo ldconfig -v'
-    - ldconfig -v
+    - sudo ldconfig -v
     - python lisa --get_sample_data
     
 # command to run tests
