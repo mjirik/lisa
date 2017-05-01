@@ -140,7 +140,7 @@ class DictEdit(QtGui.QWidget):
         else:
             self.lblSlabError.setText("You cannot add new label")
 
-    def saveSlab(self, event):
+    def saveSlab(self):
         self.lblSlabError.setText('')
         newSlab = {}
         for i in range(0, len(self.slabKeys)):
@@ -152,7 +152,7 @@ class DictEdit(QtGui.QWidget):
                 self.lblSlabError.setText("You have to name key!")
         self.dictionary.slab = newSlab
 
-    def discardChanges(self, event):
+    def discardChanges(self):
         self.deleteLines()
         self.initLines()
 

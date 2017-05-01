@@ -345,8 +345,7 @@ class OrganSegmentationWindow(QMainWindow):
         #--- file info (footer) ---
         bodyLayout.addStretch()
 
-
-        self.oseg.gui_update = self.gui_update
+        self.oseg.gui_update = self.gui_update # nefunguje automaticky !!
 
         ##### OTHERS #####
         self.mainLayout.addStretch()
@@ -358,7 +357,8 @@ class OrganSegmentationWindow(QMainWindow):
         self.show()
 
     def gui_update(self):
-        pass
+        self.segBody.reinitLabels()
+        self.slabBody.discardChanges()
 
     def initLogo(self, layout):
         font_label = QFont()
