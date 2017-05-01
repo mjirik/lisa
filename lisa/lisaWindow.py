@@ -794,9 +794,12 @@ class OrganSegmentationWindow(QMainWindow):
         logger.debug(str(self.oseg.crinfo))
         logger.debug(str(self.oseg.data3d.shape))
         logger.debug(str(self.oseg.segmentation.shape))
+        path = self.oseg.cache.get_or_none('loadfiledir')
+        if path is None:
+            path = self.oseg.input_datapath_start
         seg_path = self.__get_datafile(
             app=True,
-            directory=self.oseg.input_datapath_start
+            directory=path
         )
         if seg_path is None:
             self.statusBar().showMessage('No data path specified!')
