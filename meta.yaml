@@ -78,7 +78,7 @@ requirements:
     # just for pip install pygco
     - cython
     - vtk
-    - dicom2fem
+    - dicom2fem >=1.0.18
     # nomkl package does not exist on windows
     # - nomkl
     # bitarray and redis is required in experiments_test cerveny
