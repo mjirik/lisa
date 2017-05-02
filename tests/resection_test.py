@@ -69,18 +69,19 @@ class ResectionTest(unittest.TestCase):
         inds = np.asarray([[15, 15], [15, 15], [8, 9]])
         seeds [inds[0], inds[1], inds[2]] = 1
 
-        datap = lisa.virtual_resection.resection_portal_vein_new(datap, interactivity=False, seeds=seeds)
+        datap = lisa.virtual_resection.resection_portal_vein_new(
+            datap, interactivity=False, seeds=seeds)
 
         sonda1 = datap['segmentation'][11, 5, 4]
         sonda2 = datap['segmentation'][22, 22, 14]
 
         liver_labels = [datap['slab']['liver'], datap['slab']['resected_liver']]
-        self.assertIn(sonda1, liver_labels)
-        self.assertIn(sonda2, liver_labels)
-        self.assertNotEqual(sonda1, sonda2)
         # import sed3
         # ed = sed3.sed3(datap['segmentation'])
         # ed.show()
+        self.assertIn(sonda1, liver_labels)
+        self.assertIn(sonda2, liver_labels)
+        self.assertNotEqual(sonda1, sonda2)
 
 
     def test_portal_vein_resection(self):

@@ -52,7 +52,7 @@ def resection(data, name=None, method='PV',
     elif method is 'planar':
         return resection_planar(data, interactivity=interactivity, seeds=seeds)
     elif method is "PV_new":
-        return resection_portal_vein_new(data, interactivity=interactivity, seeds=seeds, label=data["slab"]["liver"], vein=data["slab"]["porta"])
+        return resection_portal_vein_new(data, interactivity=interactivity, seeds=seeds, organ_label=data["slab"]["liver"], vein_label=data["slab"]["porta"])
         # return resection_portal_vein_new(data, interactivity=interactivity, seeds=seeds, **kwargs)
     else:
         return resection_with_3d_visualization(data, **kwargs)
@@ -237,7 +237,7 @@ def nejnizsi(a, b, c):
         print "chyba"
 
 
-def resection_portal_vein_new(data, interactivity=False, seeds=None, label=10, vein=2):
+def resection_portal_vein_new(data, interactivity=False, seeds=None, organ_label=1, vein_label=2):
     """
     New function for portal vein segmentation
     :param data:
@@ -263,8 +263,8 @@ def resection_portal_vein_new(data, interactivity=False, seeds=None, label=10, v
     data3d = data["data3d"]
 
     # data pouze se segmentacemi
-    segm = ((data["segmentation"] == label) * label +
-            (data["segmentation"] == vein) * vein)
+    segm = ((data["segmentation"] == organ_label) * organ_label +
+            (data["segmentation"] == vein_label) * vein_label)
 
 
     # ed = sed3.sed3(segm)
@@ -274,6 +274,8 @@ def resection_portal_vein_new(data, interactivity=False, seeds=None, label=10, v
     crinfo = qmisc.crinfo_from_specific_data(segm, [0])
     data["segmentation"] = qmisc.crop(segm, crinfo)
     data["data3d"] = qmisc.crop(data3d, crinfo)
+    if seeds is not None:
+        seeds = qmisc.crop(seeds, crinfo)
 
     # @TODO zde nahradit střeve čímkoliv smysluplnějším
     if interactivity:
@@ -306,11 +308,12 @@ def resection_portal_vein_new(data, interactivity=False, seeds=None, label=10, v
 
     # vrácení původních dat a spojení s upravenými daty
     data["data3d"] = data3d
-    data["segmentation"] = qmisc.uncrop(data["segmentation"], crinfo, (len(segmentation), len(segmentation[0]), len(segmentation[0])))
+    # orig_shape = (len(segmentation), len(segmentation[0]), len(segmentation[1]))
+    data["segmentation"] = qmisc.uncrop(data["segmentation"], crinfo, orig_shape=segmentation.shape)
 
     #segmentation = segmentation == vein
     data["segmentation"] = (data["segmentation"] +
-                            (segmentation != label) * segmentation) - (segmentation == vein) * vein
+                            (segmentation != organ_label) * segmentation) - (segmentation == vein_label) * vein_label
     return data
 
 def resection_old(data, interactivity=True, seeds=None):
