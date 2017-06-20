@@ -29,7 +29,7 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pysegbase/src"))
 
 from PyQt4.QtGui import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame, \
-    QFont, QPixmap, QFileDialog
+    QFont, QPixmap, QFileDialog, QInputDialog
 from PyQt4 import QtGui
 from PyQt4.Qt import QString
 try:
@@ -71,9 +71,10 @@ def find_logo():
 # GUI
 class OrganSegmentationWindow(QMainWindow):
 
-    def __init__(self, oseg=None):
+    def __init__(self, oseg=None, qapp=None):
 
         self.oseg = oseg
+        self.qapp = qapp
 
 
         QMainWindow.__init__(self)
@@ -818,6 +819,23 @@ class OrganSegmentationWindow(QMainWindow):
         logger.info('overall score: ' + str(overall_score))
         return "Sliver score: " + str(overall_score)
 
+    def ui_select_label(self):
+        """ Get label with GUI.
+
+        :return: numeric_label, string_label
+        """
+
+        self.oseg.slab
+        strlab, ok = \
+            QInputDialog.getItem(self.qapp,
+                                 'Serie Selection',
+                                 'Select serie:',
+                                 self.oseg.slab.keys(),
+                                 editable=False)
+
+        numlab = self.oseg.slab[strlab]
+        return numlab, strlab
+
     def compareSegmentationWithFile(self):
         """
         Function make GUI for reading segmentaion file to compare it with
@@ -1121,7 +1139,8 @@ class OrganSegmentationWindow(QMainWindow):
         """
 
         self.statusBar().showMessage('Vessel segmentation ...')
-        self.oseg.portalVeinSegmentation()
+        numeric_label, string_label = self.ui_select_label()
+        self.oseg.portalVeinSegmentation(numeric_label=numeric_label, string_label=string_label)
         self.statusBar().showMessage('Ready')
 
     def __saveVesselTreeGui(self, textLabel):

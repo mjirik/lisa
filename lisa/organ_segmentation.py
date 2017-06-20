@@ -1167,7 +1167,7 @@ class OrganSegmentation():
 
         self.segmentation = tumory.segmentation
 
-    def portalVeinSegmentation(self, **inparams):
+    def portalVeinSegmentation(self, numeric_label=2, string_label="porta", **inparams):
         """
         Segmentation of vein in specified volume. It is given by label "liver".
         Usualy it is number 1. If there is no specified volume all image is
@@ -1184,7 +1184,7 @@ class OrganSegmentation():
         from imtools import segmentation
         logger.info('segmentation max label ' + str(np.max(self.segmentation)))
         # if there is no organ segmentation, use all image
-        slab = {'porta': 2}
+        slab = {string_label: numeric_label}
         slab.update(self.slab)
         logger.debug('self.slab')
         logger.debug(str(self.slab))
@@ -1228,7 +1228,7 @@ class OrganSegmentation():
         # from PyQt4.QtCore import pyqtRemoveInputHook
         # pyqtRemoveInputHook()
         # import ipdb; ipdb.set_trace() # BREAKPOINT
-        self.segmentation[outputSegmentation == 1] = slab['porta']
+        self.segmentation[outputSegmentation == 1] = slab[string_label]
 
         # self.__vesselTree(outputSegmentation, 'porta')
 
@@ -1697,7 +1697,7 @@ def main(app=None, splash=None):  # pragma: no cover
             if app is None:
                 app = QApplication(sys.argv)
             # Create and display the splash screen
-            oseg_w = OrganSegmentationWindow(oseg)  # noqa
+            oseg_w = OrganSegmentationWindow(oseg, qapp=app)  # noqa
             if splash is not None:
                 splash.finish(oseg_w)
 #    import pdb; pdb.set_trace()
