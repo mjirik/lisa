@@ -827,14 +827,15 @@ class OrganSegmentationWindow(QMainWindow):
 
         self.oseg.slab
         strlab, ok = \
-            QInputDialog.getItem(self.qapp,
+            QInputDialog.getItem(self,
+                                 # self.qapp,
                                  'Serie Selection',
                                  'Select serie:',
                                  self.oseg.slab.keys(),
                                  editable=False)
 
-        numlab = self.oseg.slab[strlab]
-        return numlab, strlab
+        numlab = self.oseg.slab[str(strlab)]
+        return numlab, str(strlab)
 
     def compareSegmentationWithFile(self):
         """
@@ -1139,6 +1140,7 @@ class OrganSegmentationWindow(QMainWindow):
         """
 
         self.statusBar().showMessage('Vessel segmentation ...')
+        self.oseg.add_slab_label_carefully(numeric_label=2, string_label="porta")
         numeric_label, string_label = self.ui_select_label()
         self.oseg.portalVeinSegmentation(numeric_label=numeric_label, string_label=string_label)
         self.statusBar().showMessage('Ready')

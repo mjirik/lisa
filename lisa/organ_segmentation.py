@@ -1167,6 +1167,20 @@ class OrganSegmentation():
 
         self.segmentation = tumory.segmentation
 
+    def add_slab_label_carefully(self, numeric_label, string_label):
+        """ Add label to slab if it is not there yet.
+
+        :param numeric_label:
+        :param string_label:
+        :return:
+        """
+        slab = {string_label: numeric_label}
+        slab.update(self.slab)
+        self.slab = slab
+        logger.debug('self.slab')
+        logger.debug(str(self.slab))
+
+
     def portalVeinSegmentation(self, numeric_label=2, string_label="porta", **inparams):
         """
         Segmentation of vein in specified volume. It is given by label "liver".
@@ -1184,11 +1198,7 @@ class OrganSegmentation():
         from imtools import segmentation
         logger.info('segmentation max label ' + str(np.max(self.segmentation)))
         # if there is no organ segmentation, use all image
-        slab = {string_label: numeric_label}
-        slab.update(self.slab)
-        logger.debug('self.slab')
-        logger.debug(str(self.slab))
-        self.slab = slab
+        self.add_slab_label_carefully(numeric_label=numeric_label, string_label=string_label)
 
         # if there is no liver segmentation, use whole image
         if np.max(self.segmentation) == 0:
@@ -1196,7 +1206,7 @@ class OrganSegmentation():
 
         # remove prev segmentation
         # TODO rozdělit na vnitřní a vnější část portální žíly
-        self.segmentation[self.segmentation == slab['porta']] = slab['liver']
+        self.segmentation[self.segmentation == self.slab[string_label]] = self.slab['liver']
 
         params = {
             'threshold': -1,
@@ -1228,7 +1238,7 @@ class OrganSegmentation():
         # from PyQt4.QtCore import pyqtRemoveInputHook
         # pyqtRemoveInputHook()
         # import ipdb; ipdb.set_trace() # BREAKPOINT
-        self.segmentation[outputSegmentation == 1] = slab[string_label]
+        self.segmentation[outputSegmentation == 1] = self.slab[string_label]
 
         # self.__vesselTree(outputSegmentation, 'porta')
 
