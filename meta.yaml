@@ -68,7 +68,7 @@ requirements:
     - pyqt 4.11.*
     - pandas
     - simpleitk 0.9.* # problem with dicom write
-    - libpng =1.5.13 # kvuli simpleik 0.9.
+    - libpng 1.5.13 # kvuli simpleik 0.9.
     - pywget
     - scikit-learn
     - scikit-image
