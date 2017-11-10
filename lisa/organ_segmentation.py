@@ -231,7 +231,7 @@ class OrganSegmentation():
         self.lisa_operator_identifier = lisa_operator_identifier
         # self.version = qmisc.getVersionString()
         # if self.version is None:
-        self.version = "1.9.3"
+        self.version = "1.9.4"
         self.viewermax = viewermax
         self.viewermin = viewermin
         self.volume_unit = volume_unit
