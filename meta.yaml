@@ -1,9 +1,9 @@
 package:
   name: lisa
-  version: "1.9.11"
+  version: "1.9.9"
 
 source:
-  git_rev: 1.9.11
+  git_rev: 1.9.9
   git_url: .
   # git_url: https://github.com/mjirik/quantan.git
 
@@ -67,8 +67,10 @@ requirements:
     - io3d >=1.1.6
     - pyqt 4.11.*
     - pandas
-    - simpleitk 0.9.* # problem with dicom write
-    - libpng 1.5.13 # kvuli simpleik 0.9.
+    - simpleitk 0.9.1
+    - libpng
+    # - simpleitk 0.9.* # problem with dicom write
+    # - libpng 1.5.13 # kvuli simpleik 0.9.
     - pywget
     - scikit-learn
     - scikit-image
