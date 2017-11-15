@@ -120,7 +120,7 @@ def file_copy_and_replace_lines(in_path, out_path):
         # coma on end makes no linebreak
         # line = line.replace("@{LISA_PATH}", lisa_path)
         line = replace_tags(line)
-        print line
+        print(line)
 
 def replace_tags(text):
     conda_path = get_conda_path()
@@ -199,7 +199,7 @@ def __make_icon_linux():
     elif os.path.exists(os.path.join(home_path, 'Plocha')):
         desktop_path = os.path.join(home_path, 'Plocha')
     else:
-        print "Cannot find desktop directory"
+        print("Cannot find desktop directory")
         logger.error("Cannot find desktop directory")
         desktop_path = None
 
@@ -215,7 +215,7 @@ def __make_icon_linux():
         out_path = os.path.join(local_app_path, "lisa.desktop")
         __make_linux_icon_file(out_path)
     else:
-        print "Couldnt find $HOME/.local/share/applications/."
+        print("Couldnt find $HOME/.local/share/applications/.")
 
 def __make_linux_icon_file(lisa_shortcut):
     if not os.path.exists(lisa_shortcut):
@@ -239,7 +239,7 @@ StartupNotify=false\n"
                  stat.S_IWUSR | stat.S_IWGRP
                  )
     # fi = fileinput.input(out_path, inplace=True)
-    print "icon output path: \n", lisa_shortcut
+    print("icon output path: \n", lisa_shortcut)
 
 
 def main():
