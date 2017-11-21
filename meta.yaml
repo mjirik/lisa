@@ -46,7 +46,9 @@ requirements:
     - io3d
     - pyqt 4.11.*
     - pandas
-    - pywget
+    - wget 
+    # use wget instead of pywget because pywget for py36 doesnt exist
+    #- pywget
     - scikit-learn
     - scikit-image
     - pyqtconfig
@@ -71,7 +73,9 @@ requirements:
     - libpng
     # - simpleitk 0.9.* # problem with dicom write
     # - libpng 1.5.13 # kvuli simpleik 0.9.
-    - pywget
+    - wget 
+    # use wget instead of pywget because pywget for py36 doesnt exist
+    # - pywget
     - scikit-learn
     - scikit-image
     - pyqtconfig
