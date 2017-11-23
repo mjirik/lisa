@@ -1,5 +1,5 @@
 set PATH=%PATH%;%HOMEPATH%\Miniconda2;%HOMEPATH%\Miniconda2\Scripts;C:\Miniconda2\Scripts;C:\Miniconda2
-conda create -y -c mjirik -c SimpleITK -c menpo --no-default-packages -n lisa pywget wget wget pip lisa
+conda create -y -c mjirik -c SimpleITK -c menpo --no-default-packages -n lisa pywget wget pip lisa pygco
 
 call activate lisa
 rem :windows specific
