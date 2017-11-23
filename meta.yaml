@@ -92,6 +92,9 @@ requirements:
     # redus from channel -c auto works
     # - redis
 
+    # rem :pygco is not compiled for osx now this is why it is not in meta.yaml
+    # - pygco
+
 test:
   # Python imports
   imports:
