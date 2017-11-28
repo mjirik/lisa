@@ -93,120 +93,120 @@ def read_pkl_and_pklz(filename):
 
     return fcontent
 
+from io3d.misc import obj_to_file
+# def obj_to_file(obj, filename='annotation.yaml', filetype='yaml'):
+#     '''Writes annotation in file.
+#
+#     Filetypes:
+#         yaml
+#         pkl, pickle
+#         pklz, picklezip
+#     '''
+#     # import json
+#     # with open(filename, mode='w') as f:
+#     #    json.dump(annotation,f)
+#
+#     # write to yaml
+#     d = os.path.dirname(os.path.abspath(filename))
+#     if not os.path.exists(d):
+#         os.makedirs(d)
+#
+#     if filetype == 'auto':
+#         _, ext = os.path.splitext(filename)
+#         filetype = ext[1:]
+#
+#     if filetype == 'yaml':
+#         f = open(filename, 'wb')
+#         import yaml
+#         yaml.dump(obj, f)
+#         f.close
+#     elif filetype in ('pickle', 'pkl'):
+#         f = open(filename, 'wb')
+#         import cPickle as pickle
+#         pickle.dump(obj, f)
+#         f.close
+#     elif filetype in ('streamingpicklezip', 'spklz'):
+#         # this is not working :-(
+#         import gzip
+#         import sPickle as pickle
+#         f = gzip.open(filename, 'wb', compresslevel=1)
+#         # f = open(filename, 'wb')
+#         pickle.s_dump(obj, f)
+#         f.close
+#     elif filetype in ('picklezip', 'pklz'):
+#         import gzip
+#         import cPickle as pickle
+#         f = gzip.open(filename, 'wb', compresslevel=1)
+#         # f = open(filename, 'wb')
+#         pickle.dump(obj, f)
+#         f.close
+#     elif filetype in('mat'):
+#
+#         import scipy.io as sio
+#         sio.savemat(filename, obj)
+#     else:
+#         logger.error('Unknown filetype ' + filetype)
 
-def obj_to_file(obj, filename='annotation.yaml', filetype='yaml'):
-    '''Writes annotation in file.
-
-    Filetypes:
-        yaml
-        pkl, pickle
-        pklz, picklezip
-    '''
-    # import json
-    # with open(filename, mode='w') as f:
-    #    json.dump(annotation,f)
-
-    # write to yaml
-    d = os.path.dirname(os.path.abspath(filename))
-    if not os.path.exists(d):
-        os.makedirs(d)
-
-    if filetype == 'auto':
-        _, ext = os.path.splitext(filename)
-        filetype = ext[1:]
-
-    if filetype == 'yaml':
-        f = open(filename, 'wb')
-        import yaml
-        yaml.dump(obj, f)
-        f.close
-    elif filetype in ('pickle', 'pkl'):
-        f = open(filename, 'wb')
-        import cPickle as pickle
-        pickle.dump(obj, f)
-        f.close
-    elif filetype in ('streamingpicklezip', 'spklz'):
-        # this is not working :-(
-        import gzip
-        import sPickle as pickle
-        f = gzip.open(filename, 'wb', compresslevel=1)
-        # f = open(filename, 'wb')
-        pickle.s_dump(obj, f)
-        f.close
-    elif filetype in ('picklezip', 'pklz'):
-        import gzip
-        import cPickle as pickle
-        f = gzip.open(filename, 'wb', compresslevel=1)
-        # f = open(filename, 'wb')
-        pickle.dump(obj, f)
-        f.close
-    elif filetype in('mat'):
-
-        import scipy.io as sio
-        sio.savemat(filename, obj)
-    else:
-        logger.error('Unknown filetype ' + filetype)
-
-
-def resize_to_shape(data, shape, zoom=None, mode='nearest', order=0):
-    """
-    Function resize input data to specific shape.
-
-    :param data: input 3d array-like data
-    :param shape: shape of output data
-    :param zoom: zoom is used for back compatibility
-    :mode: default is 'nearest'
-    """
-    # @TODO remove old code in except part
-
-    try:
-        # rint 'pred vyjimkou'
-        # aise Exception ('test without skimage')
-        # rint 'za vyjimkou'
-        import skimage
-        import skimage.transform
-# Now we need reshape  seeds and segmentation to original size
-
-        segm_orig_scale = skimage.transform.resize(
-            data, shape, order=0,
-            preserve_range=True
-        )
-
-        segmentation = segm_orig_scale
-        logger.debug('resize to orig with skimage')
-    except:
-        import scipy
-        import scipy.ndimage
-        dtype = data.dtype
-        if zoom is None:
-            zoom = shape / np.asarray(data.shape).astype(np.double)
-
-        segm_orig_scale = scipy.ndimage.zoom(
-            data,
-            1.0 / zoom,
-            mode=mode,
-            order=order
-        ).astype(dtype)
-        logger.debug('resize to orig with scipy.ndimage')
-
-# @TODO odstranit hack pro oříznutí na stejnou velikost
-# v podstatě je to vyřešeno, ale nechalo by se to dělat elegantněji v zoom
-# tam je bohužel patrně bug
-        # rint 'd3d ', self.data3d.shape
-        # rint 's orig scale shape ', segm_orig_scale.shape
-        shp = [
-            np.min([segm_orig_scale.shape[0], shape[0]]),
-            np.min([segm_orig_scale.shape[1], shape[1]]),
-            np.min([segm_orig_scale.shape[2], shape[2]]),
-        ]
-        # elf.data3d = self.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
-        # mport ipdb; ipdb.set_trace() # BREAKPOINT
-
-        segmentation = np.zeros(shape, dtype=dtype)
-        segmentation[
-            0:shp[0],
-            0:shp[1],
-            0:shp[2]] = segm_orig_scale[0:shp[0], 0:shp[1], 0:shp[2]]
-
-        del segm_orig_scale
-    return segmentation
+from io3d.misc import resize_to_shape
+# def resize_to_shape(data, shape, zoom=None, mode='nearest', order=0):
+#     """
+#     Function resize input data to specific shape.
+#
+#     :param data: input 3d array-like data
+#     :param shape: shape of output data
+#     :param zoom: zoom is used for back compatibility
+#     :mode: default is 'nearest'
+#     """
+#     # @TODO remove old code in except part
+#
+#     try:
+#         # rint 'pred vyjimkou'
+#         # aise Exception ('test without skimage')
+#         # rint 'za vyjimkou'
+#         import skimage
+#         import skimage.transform
+# # Now we need reshape  seeds and segmentation to original size
+#
+#         segm_orig_scale = skimage.transform.resize(
+#             data, shape, order=0,
+#             preserve_range=True
+#         )
+#
+#         segmentation = segm_orig_scale
+#         logger.debug('resize to orig with skimage')
+#     except:
+#         import scipy
+#         import scipy.ndimage
+#         dtype = data.dtype
+#         if zoom is None:
+#             zoom = shape / np.asarray(data.shape).astype(np.double)
+#
+#         segm_orig_scale = scipy.ndimage.zoom(
+#             data,
+#             1.0 / zoom,
+#             mode=mode,
+#             order=order
+#         ).astype(dtype)
+#         logger.debug('resize to orig with scipy.ndimage')
+#
+# # @TODO odstranit hack pro oříznutí na stejnou velikost
+# # v podstatě je to vyřešeno, ale nechalo by se to dělat elegantněji v zoom
+# # tam je bohužel patrně bug
+#         # rint 'd3d ', self.data3d.shape
+#         # rint 's orig scale shape ', segm_orig_scale.shape
+#         shp = [
+#             np.min([segm_orig_scale.shape[0], shape[0]]),
+#             np.min([segm_orig_scale.shape[1], shape[1]]),
+#             np.min([segm_orig_scale.shape[2], shape[2]]),
+#         ]
+#         # elf.data3d = self.data3d[0:shp[0], 0:shp[1], 0:shp[2]]
+#         # mport ipdb; ipdb.set_trace() # BREAKPOINT
+#
+#         segmentation = np.zeros(shape, dtype=dtype)
+#         segmentation[
+#             0:shp[0],
+#             0:shp[1],
+#             0:shp[2]] = segm_orig_scale[0:shp[0], 0:shp[1], 0:shp[2]]
+#
+#         del segm_orig_scale
+#     return segmentation

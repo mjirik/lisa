@@ -1334,6 +1334,11 @@ class OrganSegmentation():
         return filepath
 
     def save_outputs(self, filepath=None):
+        """ Save input data, segmentation and all other metadata to file.
+
+        :param filepath:
+        :return:
+        """
 
         data = self.export()
         data['version'] = self.version  # qmisc.getVersionString()

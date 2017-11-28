@@ -5,6 +5,8 @@
 # import funkcí z jiného adresáře
 import sys
 import os.path
+import os.path as op
+
 
 # path_to_script = os.path.dirname(os.path.abspath(__file__))
 import unittest
@@ -16,6 +18,7 @@ import numpy as np
 from lisa import organ_segmentation
 import pysegbase.dcmreaddata as dcmr
 import lisa.dataset
+import io3d
 
 
 # nosetests tests/organ_segmentation_test.py:OrganSegmentationTest.test_create_iparams # noqa
@@ -78,6 +81,13 @@ class InOutTest(unittest.TestCase):
 
         os.remove(output_datapath)
         os.remove(output_segpath)
+
+    def test_lisa_read_mhd_save_pklz(self):
+        infn = op.join(op.expanduser(io3d.datasets.local_dir), "sliver07/training/liver-orig001.mhd")
+
+        oseg = lisa.organ_segmentation.OrganSegmentation(infn)
+        oseg.save_outputs("test_mhd.pklz")
+        # self.oseg_w = OrganSegmentationWindow(oseg) # noqa
 
 
 if __name__ == "__main__":
