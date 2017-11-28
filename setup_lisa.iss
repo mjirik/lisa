@@ -49,7 +49,7 @@ Name: "czech"; MessagesFile: "compiler:Languages\Czech.isl"
 
 [Run]
 ;Filename: "{tmp}\Miniconda-latest-Windows-x86_64.exe"; Parameters: "/AddToPath=1 /RegisterPython=1 /D={%PUBLIC}\Minicoconda2"; Flags: waituntilterminated runasoriginaluser
-Filename: "{tmp}\Miniconda-latest-Windows-x86_64.exe"; Parameters: "/AddToPath=1 /RegisterPython=1 /InstallationType=AllUsers"; Flags: waituntilterminated runasoriginaluser
+Filename: "{tmp}\Miniconda2-latest-Windows-x86_64.exe"; Parameters: "/AddToPath=1 /RegisterPython=1 /InstallationType=AllUsers"; Flags: waituntilterminated runasoriginaluser
 Filename: "msiexec.exe"; Parameters: "/i ""{tmp}\VCForPython27.msi"""
 Filename: "{cmd}"; Parameters: "/C ""{tmp}\installer.bat & pause"""; WorkingDir: "{tmp}"; Flags: runasoriginaluser
 ;Filename: "{cmd}"; Parameters: "/C ""conda install --yes -c SimpleITK -c mjirik lisa"""; WorkingDir: "{%HOMEPATH}\Miniconda2\Scripts"; Flags: runasoriginaluser
@@ -65,7 +65,7 @@ end;
 procedure InitializeWizard();
 begin
   if IsCondaInstalled then
-    idpAddFileSize('https://repo.continuum.io/miniconda/Miniconda-latest-Windows-x86_64.exe', ExpandConstant('{tmp}\Miniconda-latest-Windows-x86_64.exe'), 22743040);
+    idpAddFileSize('https://repo.continuum.io/miniconda/Miniconda2-latest-Windows-x86_64.exe', ExpandConstant('{tmp}\Miniconda2-latest-Windows-x86_64.exe'), 22743040);
   idpAddFileSize('https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi', ExpandConstant('{tmp}\VCForPython27.msi'), 87891968);
   idpDownloadAfter(wpReady);
 end;

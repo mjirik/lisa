@@ -1,9 +1,9 @@
 package:
   name: lisa
-  version: "1.9.3"
+  version: "1.9.22"
 
 source:
-  git_rev: 1.9.3
+  git_rev: 1.9.22
   git_url: .
   # git_url: https://github.com/mjirik/quantan.git
 
@@ -46,7 +46,9 @@ requirements:
     - io3d
     - pyqt 4.11.*
     - pandas
-    - pywget
+    - wget 
+    # use wget instead of pywget because pywget for py36 doesnt exist
+    #- pywget
     - scikit-learn
     - scikit-image
     - pyqtconfig
@@ -67,9 +69,13 @@ requirements:
     - io3d >=1.1.6
     - pyqt 4.11.*
     - pandas
-    - simpleitk=0.9.* # problem with dicom write
-    - libpng=1.5.13 # kvuli simpleik 0.9.
-    - pywget
+    - simpleitk 0.9.1
+    - libpng
+    # - simpleitk 0.9.* # problem with dicom write
+    # - libpng 1.5.13 # kvuli simpleik 0.9.
+    - wget 
+    # use wget instead of pywget because pywget for py36 doesnt exist
+    # - pywget
     - scikit-learn
     - scikit-image
     - pyqtconfig
@@ -85,6 +91,9 @@ requirements:
     # - bitarray
     # redus from channel -c auto works
     # - redis
+
+    # rem :pygco is not compiled for osx now this is why it is not in meta.yaml
+    # - pygco
 
 test:
   # Python imports
