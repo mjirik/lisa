@@ -98,7 +98,7 @@ if __name__ == "__main__":
     #oseg.data3d = oseg.data3d[cri[0][0]:cri[0][1],cri[1][0]:cri[1][1],cri[2][0]:cri[2][1]]
     #pyed = sed3.sed3(oseg.data3d, contour = oseg.orig_scale_segmentation)
 
-    print 'slab', data['slab']
+    print('slab', data['slab'])
     #import ipdb; ipdb.set_trace()  # BREAKPOINT
     #pyed = sed3.sed3(data['data3d'], contour = data['segmentation'])
     #pyed.show()

@@ -54,7 +54,7 @@ def show(data3d_a_path, sliver_seg_path, ourSegmentation):
             sliver_seg = sliver_datap['data3d']
 
         pyed = sed3.sed3(data3d_a, contour=sliver_seg)
-        print "Sliver07 segmentation"
+        print("Sliver07 segmentation")
         pyed.show()
 
     if ourSegmentation != None:
@@ -67,7 +67,7 @@ def show(data3d_a_path, sliver_seg_path, ourSegmentation):
 
     if ourSegmentation != None:
         pyed = sed3.sed3(data3d_a, contour=our_seg)
-        print "Our segmentation"
+        print("Our segmentation")
         pyed.show()
 
     if (ourSegmentation is not None) and (sliver_seg_path is not None):
@@ -76,7 +76,7 @@ def show(data3d_a_path, sliver_seg_path, ourSegmentation):
         #import ipdb; ipdb.set_trace() # BREAKPOINT
         pyed = sed3.sed3(data3d_a, contour=our_seg,
                                              seeds=diff)
-        print "Sliver07 and our segmentation differences"
+        print("Sliver07 and our segmentation differences")
         pyed.show()
 
 

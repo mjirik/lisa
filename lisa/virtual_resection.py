@@ -71,7 +71,7 @@ def Rez_podle_roviny(plane, data, voxel):
     vetsi = 0
     mensi_objekt = 0
     vetsi_objekt = 0
-    print 'x: ', a, ' y: ', b, ' z: ', c
+    print('x: ', a, ' y: ', b, ' z: ', c)
     print('Pocitani rezu...')
     prava_strana = np.ones((data.shape[0], data.shape[1], data.shape[2]))
     leva_strana = np.ones((data.shape[0], data.shape[1], data.shape[2]))
@@ -93,7 +93,7 @@ def Rez_podle_roviny(plane, data, voxel):
     leva_strana = leva_strana * data
     objekt = mensi_objekt + vetsi_objekt
     odstraneni_procenta = ((100 * mensi_objekt) / objekt)
-    print leva_strana
+    print(leva_strana)
 
     return leva_strana, odstraneni_procenta
 
@@ -234,7 +234,7 @@ def nejnizsi(a, b, c):
         else:
             return 1
     else:
-        print "chyba"
+        print("chyba")
 
 
 def resection_portal_vein_new(data, interactivity=False, seeds=None, organ_label=1, vein_label=2):
@@ -293,9 +293,9 @@ def resection_portal_vein_new(data, interactivity=False, seeds=None, organ_label
     a = morphology.label(segm, background=0)
     ### podmínka nefunguje
     if 3 in a: # zda se v segmentaci objevuje 3. cast
-        print "slape :) :) :P"
+        print("slape :) :) :P")
         a_index = velikosti(segm)
-        print a_index
+        print(a_index)
         i = nejnizsi(a_index[0], a_index[1], a_index[2])
         segm = ((a == i) * (segm == 1).astype('int8') +
                 (a != i)*(segm == 2).astype('int8') +
@@ -438,8 +438,8 @@ def virtual_resection_visualization(data, segm, dist1, dist2, cut,
     v1, v2 = liver_spit_volume_mm3(segm, data['voxelsize_mm'])
 
     if interactivity:
-        print "Liver volume: %.4g l" % ((v1 + v2) * 1e-6)
-        print "volume1: %.4g l  (%.3g %%)" % (
+        print("Liver volume: %.4g l" % ((v1 + v2) * 1e-6))
+        print("volume1: %.4g l  (%.3g %%)" % ()
             (v1) * 1e-6, 100 * v1 / (v1 + v2))
         print "volume2: %.4g l  (%.3g %%)" % (
             (v2) * 1e-6, 100 * v2 / (v1 + v2))

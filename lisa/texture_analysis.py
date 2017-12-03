@@ -55,7 +55,7 @@ def segmentation(data3d, segmentation, params):
                 lbpReftmp = lbpLib.realTimeLbpImNp(lbp, data3d[j-15:j+16,k-15:k+16,pyed.actual_slice])
                 for z in range(256):
                     lbpRef[actualpatterns, z] = lbpReftmp[z]
-                print lbpRef[actualpatterns,]
+                print(lbpRef[actualpatterns,])
                 actualpatterns += 1                   
 
     # uprava velikosti dat

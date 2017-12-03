@@ -209,7 +209,7 @@ def experiment(path_to_yaml, featrs_plus_classifs,
 
         result = {'params': str(fpc), 'fvall': fvall}
         results.append(result)
-        print results
+        print(results)
 
     return results
 

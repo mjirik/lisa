@@ -66,7 +66,7 @@ def main():
     dirlist = experiments.get_subdirs(dirpath)
 
     for key in dirlist:
-        print key
+        print(key)
 
 #        import pdb; pdb.set_trace()
         try:
@@ -76,7 +76,7 @@ def main():
             oseg = organ_segmentation.OrganSegmentation(**params)
 
             oseg.interactivity()
-            print (
+            print(()
                     "Volume " +
                     str(oseg.get_segmented_volume_size_mm3() / 1000000.0)
                     + ' [l]')
@@ -95,8 +95,8 @@ def main():
             misc.obj_to_file(experiment_results, filename_organ + "-info.yaml", filetype='yaml')
 
         except:
-            print 'Selhani, pokracujeme dal'
-            print traceback.format_exc()
+            print('Selhani, pokracujeme dal')
+            print(traceback.format_exc())
             import pdb; pdb.set_trace()
 
     misc.obj_to_file(experiment_results, "results.yaml", filetype='yaml')

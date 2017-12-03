@@ -52,8 +52,8 @@ class ShapeModel():
         """
         # Průměrování
         mdl = self.model / self.data_number
-        print mdl.shape
-        print crinfo
+        print(mdl.shape)
+        print(crinfo)
         # mdl_res = qmisc.resize_to_shape(mdl, crinfo[0][]
         uncr = qmisc.uncrop(mdl, crinfo, image_shape, resize=True)
         return uncr
@@ -169,7 +169,7 @@ class ShapeModel():
         funkce je ze Y a Z osy maji stejne rozliseni
         funkce vyuziva pythagorovu vetu'''
     
-        print 'zahajeno vytvareni 3D objektu'
+        print('zahajeno vytvareni 3D objektu')
     
         x = voxelSize_mm[0]
         y = voxelSize_mm[1]
@@ -186,7 +186,7 @@ class ShapeModel():
         for xR in range(xVoxely*2+1):
     
             if(xR == xStred):
-                print '3D objekt z 50% vytvoren'
+                print('3D objekt z 50% vytvoren')
     
             c = polomer_mm #nejdelsi strana
             a = (xStred-xR )*x
@@ -201,7 +201,7 @@ class ShapeModel():
             kruznice = self.vytvoritTFKruznici(yVoxely,rKruznice)
             koule[xR,0:konec,0:konec] = kruznice[0:konec,0:konec]
     
-        print '3D objekt uspesne vytvoren'
+        print('3D objekt uspesne vytvoren')
         return koule
 
     def vytvoritTFKruznici(self,polomerPole,polomerKruznice):

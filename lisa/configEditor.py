@@ -42,7 +42,7 @@ def apply(root,d,pos, use_list=True):
             for (kk,possible) in enumerate(v):
                 possibleSaved= "%s" %possible
                 ent.m.add_command(label=str(possible), command= doLambda(updateMB,saisies[k],str(d[k][kk]) ) )
-                print possible
+                print(possible)
         else:
             """value is not a list => classical edit => use Entry"""
             #saisies[k]= tk.StringVar(name=str(n),value= str(v))
@@ -78,12 +78,12 @@ def main():
     m.config(menu=mm)
 
     s= apply(root,d,(0,2,0,0))
-    print isinstance(d, dict)
+    print(isinstance(d, dict))
     root.mainloop()
     #print d
-    print s
+    print(s)
     for (k,v) in s.iteritems():
-        print str(k), '->',str(v.get())
+        print(str(k), '->',str(v.get()))
 
 def testindependance():
     root = tk.Tk()
@@ -93,21 +93,17 @@ def testindependance():
     dd= {'oui':1,'a':'b', 'non':['?','!non'],'mode':[1.1,2.1,3.1]}
     ss= apply(root,dd,(0,5,0,0))
 
-    print "s =",s
-    print "ss=",ss
-
-    print isinstance(d, dict)
     root.mainloop()
     #print d
     #print s
     for (k,v) in s.iteritems():
-        print str(k), '->',str(v.get())
-    print "-"*10
+        print(str(k), '->',str(v.get()))
+    print("-"*10)
     for (k,v) in ss.iteritems():
-        print str(k), '->',str(v.get())
-    print "="*10
-    print get(s)
-    print get(ss)
+        print(str(k), '->',str(v.get()))
+    print("="*10)
+    print(get(s))
+    print(get(ss))
 
 
 if __name__ == '__main__':

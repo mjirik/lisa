@@ -97,7 +97,7 @@ class TexturesTest(unittest.TestCase):
                 vzi
                 ]
             patch = np.squeeze(patch)
-            print  it.iterindex, ' - ', vxi, ' ',  vyi, ' ',vzi , ' - ',it.multi_index
+            print( it.iterindex, ' - ', vxi, ' ',  vyi, ' ',vzi , ' - ',it.multi_index)
             #import pdb; pdb.set_trace()
             glcm = greycomatrix(patch,
                 [5],[0],256,

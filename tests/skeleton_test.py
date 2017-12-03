@@ -101,7 +101,7 @@ class TemplateTest(unittest.TestCase):
 
     def test_generate_elipse(self):
         mask = sk.generate_binary_elipsoid([6, 4, 3])
-        print mask.shape
+        print(mask.shape)
 
 
 

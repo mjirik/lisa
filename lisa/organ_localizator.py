@@ -178,7 +178,7 @@ class OrganLocalizator():
         data3dr = imtools.qmisc.resize_to_mm(data3d, voxelsize_mm, self.working_voxelsize_mm)
         segmentationr = imtools.qmisc.resize_to_shape(segmentation, data3dr.shape)
 
-        print np.unique(segmentationr), data3dr.shape, segmentationr.shape
+        print(np.unique(segmentationr), data3dr.shape, segmentationr.shape)
         self._add_to_training_data(data3dr, segmentationr)
         #f1 scipy.ndimage.filters.gaussian_filter(data3dr, sigma=5)
 
@@ -211,7 +211,7 @@ def train_liver_localizator_from_sliver_data(
     hist=[]
     fhs_list = []
     for oname, rname in zip(orig_fnames, ref_fnames):
-        print oname
+        print(oname)
         data3d_orig, metadata = io3d.datareader.read(oname)
         vs_mm1 = metadata['voxelsize_mm']
         data3d_seg, metadata = io3d.datareader.read(rname)
@@ -224,7 +224,7 @@ def train_liver_localizator_from_sliver_data(
             sf.add_train_data(data3d_orig, data3d_seg, voxelsize_mm=vs_mm)
         except:
             traceback.print_exc()
-            print "problem"
+            print("problem")
             pass
         # fvhn = copy.deepcopy(fvh)
         #fhs_list.append(fvh)

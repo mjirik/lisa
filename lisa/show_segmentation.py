@@ -58,7 +58,7 @@ def showSegmentation(
     _stats(segmentation)
     if resize_mm is not None:
         logger.debug("resize begin")
-        print "resize"
+        print("resize")
         new_voxelsize_mm = np.asarray([resize_mm, resize_mm, resize_mm])
         import imtools
         segmentation = imtools.misc.resize_to_mm(segmentation, voxelsize_mm=voxelsize_mm, new_voxelsize_mm=new_voxelsize_mm)
@@ -88,10 +88,10 @@ def showSegmentation(
     return labels
 
 def _stats(data):
-    print "stats"
+    print("stats")
     un = np.unique(data)
     for lab in un:
-        print lab, " : ", np.sum(data==lab)
+        print(lab, " : ", np.sum(data==lab))
 
 def main():
     logger = logging.getLogger()

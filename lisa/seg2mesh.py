@@ -21,7 +21,7 @@ except AttributeError:
     factorial = scm.factorial
 
 def output(msg):
-    print msg
+    print(msg)
 
 def elems_q2t(el):
 

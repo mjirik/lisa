@@ -66,7 +66,7 @@ class LiverSegmentationTest(unittest.TestCase):
         path_to_data = lisa.dataset.sample_data_path()
         dcmdir = os.path.join(path_to_data, './liver-orig001.mhd')
 
-        print "Interactive test: with left mouse button select liver, \
+        print("Interactive test: with left mouse button select liver, \)
             with right mouse button select other tissues"
         # gcparams = {'pairwiseAlpha':10, 'use_boundary_penalties':True}
         # fn_mdl = os.path.expanduser("~/lisa_data/liver_intensity.Model.p")
@@ -110,7 +110,7 @@ class LiverSegmentationTest(unittest.TestCase):
         path_to_data = lisa.dataset.sample_data_path()
         dcmdir = os.path.join(path_to_data, './liver-orig001.mhd')
 
-        print "Interactive test: with left mouse button select liver, \
+        print("Interactive test: with left mouse button select liver, \)
             with right mouse button select other tissues"
         # gcparams = {'pairwiseAlpha':10, 'use_boundary_penalties':True}
         fn_mdl = os.path.expanduser("~/lisa_data/liver_intensity.Model.p")
@@ -168,7 +168,7 @@ class LiverSegmentationTest(unittest.TestCase):
             dcmdir, working_voxelsize_mm=4, segparams=segparams, segmodelparams=segmodelparams)
         # oseg.add_seeds_mm([110, 150], [110, 100], [200], label=1, radius=30, width=5)
         # oseg.add_seeds_mm([250, 230], [210, 260], [200], label=2, radius=50, width=5)
-        print oseg.seeds
+        print(oseg.seeds)
         oseg.automatic_liver_seeds()
 
         from PyQt4.QtGui import QApplication

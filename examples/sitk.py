@@ -7,7 +7,7 @@ sz = image.GetSize()
 imagetrans = sitk.Image(sz[0],sz[1],sz[2], sitk.sitkInt16)
 
 for i in range(0,sz[0]):
-    print i
+    print(i)
     for j in range(0,sz[1]):
         for k in range(0,sz[2]):
             imagetrans[i,j,k]=image[i,j,k]

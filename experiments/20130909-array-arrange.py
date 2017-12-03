@@ -14,7 +14,7 @@ for j in range (0,100):
         data2 = data[10,:,:]
     t1 = time.time()
     ta.append(t1-t0)
-    print 'cas A: ', t1 - t0
+    print('cas A: ', t1 - t0)
 
 
 
@@ -27,10 +27,10 @@ for j in range (0,100):
     t1 = time.time()
 
     tb.append(t1-t0)
-    print 'cas B: ', t1 - t0
+    print('cas B: ', t1 - t0)
 
-print 'sum A: ', np.sum(ta)
-print 'sum B: ', np.sum(tb)
+print('sum A: ', np.sum(ta))
+print('sum B: ', np.sum(tb))
 
 #import pdb; pdb.set_trace()
 

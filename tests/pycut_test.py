@@ -120,8 +120,8 @@ class PycutTest(unittest.TestCase):
         filtered2 = (-np.power(filtered,2)/(512*np.var(data)))
 # Přičítám tu 1024 což je empiricky zjištěná hodnota - aby to dobře vyšlo
         filtered2 = filtered2 + 0 # - np.min(filtered2) + 1e-30
-        print 'max '  , np.max(filtered2)
-        print 'min '  , np.min(filtered2)
+        print('max '  , np.max(filtered2))
+        print('min '  , np.min(filtered2))
         import pdb; pdb.set_trace()
         #np.exp(-np.random.normal(0
 

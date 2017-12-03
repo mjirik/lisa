@@ -162,13 +162,13 @@ def eval_all_from_dataset_metadata(inputdata, visualization=False,
         data3d_a_path = os.path.join(inputdata['basedir'],
                                      inputdata['data'][i]['sliverseg'])
         data3d_a, metadata_a = reader.Get3DData(data3d_a_path)
-        print "inputdata ", inputdata['data'][i].values()
+        print("inputdata ", inputdata['data'][i].values())
         try:
             # if there is defined overlay
             data3d_a = reader.GetOverlay()[inputdata['data'][i][
                 'overlay_number']]
             logger.info('overlay loaded')
-            print 'overlay loaded'
+            print('overlay loaded')
         except:
             logger.debug("overlay not loaded")
             pass
@@ -474,7 +474,7 @@ def sliverScore(measure, metric_type):
     """
     deprecated name of sliver_score. Use new sliver_score() function.
     """
-    print "Deprecated function sliverScore(). Use sliver_score()."
+    print("Deprecated function sliverScore(). Use sliver_score().")
     return sliver_score(measure, metric_type)
 
 
@@ -581,7 +581,7 @@ def make_sum(evaluation):
             avgi = np.average(evaluation[key])
             vari = np.var(evaluation[key])
         except Exception:
-            print "problem with key: ", key
+            print("problem with key: ", key)
             # print evaluation[key]
         avg.append(avgi)
         var.append(vari)

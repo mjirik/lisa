@@ -21,7 +21,7 @@ import qmisc
 def select_labels(segmentation, labels):
     ds = np.zeros(segmentation.shape, np.bool)
     for lab in labels:
-        print "print zpracovavam ", lab
+        print("print zpracovavam ", lab)
         dadd = (segmentation == lab)
 
         ds = ds | dadd

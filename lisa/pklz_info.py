@@ -38,7 +38,7 @@ def main():
     args = parser.parse_args()
 
     data = misc.obj_from_file(args.pklzFile, 'pickle')
-    print data
+    print(data)
 
     try:
         pyed = sed3.sed3(data['data3d'], contour=data['segmentation'])
@@ -49,7 +49,7 @@ def main():
             pyed = sed3.sed3(data['data3d'])
             pyed.show()
         except:
-            print "Problem with visualization"
+            print("Problem with visualization")
 
 
 

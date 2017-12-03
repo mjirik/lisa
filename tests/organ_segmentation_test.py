@@ -90,7 +90,7 @@ and background")
         oseg.interactivity()
 
         volume = oseg.get_segmented_volume_size_mm3()
-        print volume
+        print(volume)
 
         self.assertGreater(volume, 50000)
         self.assertLess(volume, 1200000)
@@ -146,7 +146,7 @@ and background")
         Interactivity is stored to file
         """
         if self.verbose:
-            print "test_create_iparams"
+            print("test_create_iparams")
         import misc
         dcmdir = os.path.join(lisa.dataset.sample_data_path(), 'jatra_5mm')
             # path_to_script, './../sample_data/jatra_5mm')

@@ -176,7 +176,7 @@ class QmiscTest(unittest.TestCase):
         new_voxelsize_mm = [1, 3, 2]
         expected_shape = [6, 4, 3]
         data_out = qmisc.resize_to_mm(data, voxelsize_mm, new_voxelsize_mm)
-        print data_out.shape
+        print(data_out.shape)
         # print data
         # print data_out
         self.assertItemsEqual(expected_shape, data_out.shape)

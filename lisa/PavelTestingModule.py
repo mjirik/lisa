@@ -27,34 +27,34 @@ def main1():
     matrix[6, 6] = 1
     matrix[5:, 0:2] = 0
     matrix[3:5, 4] = 0
-    print 'Matrix:'
-    print matrix
+    print('Matrix:')
+    print(matrix)
 
     matrixX = matrix.copy()
     matrixX[matrixX != 0] = 1
-    print 'Matrix binary:'
-    print matrixX
+    print('Matrix binary:')
+    print(matrixX)
 
     ## Vratit 4 nejvetsi objekty - v debug modu.
     obj = 2
-    print '>>> Nejvetsi objekty v matici (' + str(obj) + '):'
+    print('>>> Nejvetsi objekty v matici (' + str(obj) + '):')
     matrix2 = sg.getPriorityObjects(matrix, nObj = obj, seeds = None, debug = True)
 
     ## Vytvoreni seedu - uhlopricka "/".
-    print '>>> Moje seeds:'
+    print('>>> Moje seeds:')
     mySeeds = np.zeros((7, 7))
     for index in range(0, 7):
         mySeeds[6 - index, index] = 1
-    print 'mySeeds:'
-    print mySeeds
+    print('mySeeds:')
+    print(mySeeds)
     mySeeds = mySeeds.nonzero()
-    print 'mySeeds (nonzero):'
-    print mySeeds
+    print('mySeeds (nonzero):')
+    print(mySeeds)
 
     ## Uplatneni seedu na celou matici
-    print '>>> Seeds na celou matici:'
+    print('>>> Seeds na celou matici:')
     matrix3 = sg.getPriorityObjects(matrix, nObj = obj, seeds = mySeeds, debug = True)
-    print '>>> Seeds na matici po vraceni nejvetsich objektu:'
+    print('>>> Seeds na matici po vraceni nejvetsich objektu:')
     ## Uplatneni seedu na matici po ziskani nejvetsich objektu
     matrix4 = sg.getPriorityObjects(matrix2, nObj = obj, seeds = mySeeds, debug = True)
 
@@ -103,7 +103,7 @@ def main2():
         binaryOpeningIterations = 1)
 
     if outputTmp == None:
-       print 'Final output is None'
+       print('Final output is None')
 
 def main3():
 

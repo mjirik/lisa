@@ -443,7 +443,7 @@ def get_overlay(mask, alpha=0.3, color='r'):
     elif color == 'y':
         layer = alpha * np.dstack((mask, mask, np.zeros_like(mask)))
     else:
-        print 'Unknown color, using red as default.'
+        print('Unknown color, using red as default.')
         layer = alpha * np.dstack((mask, np.zeros_like(mask), np.zeros_like(mask)))
     return layer
 

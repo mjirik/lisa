@@ -105,7 +105,7 @@ def import_gui():
     pass
 
 def printTotals(transferred, toBeTransferred):
-    print "Transferred: {0}\tOut of: {1}".format(transferred, toBeTransferred)
+    print("Transferred: {0}\tOut of: {1}".format(transferred, toBeTransferred))
 
 class OrganSegmentation():
     """
@@ -514,10 +514,10 @@ class OrganSegmentation():
 # TODO make GUI in Qt
         from PyQt4.QtCore import pyqtRemoveInputHook
         pyqtRemoveInputHook()
-        print 'unique data1 ', np.unique(data3d_segmentation_actual)
-        print 'unique data2 ', np.unique(data3d_segmentation)
-        print "set label1 and label2"
-        print "then press 'c' and 'Enter'"
+        print('unique data1 ', np.unique(data3d_segmentation_actual))
+        print('unique data2 ', np.unique(data3d_segmentation))
+        print("set label1 and label2")
+        print("then press 'c' and 'Enter'")
         import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
         evaluation = volumetry_evaluation.compare_volumes_sliver(
@@ -1235,8 +1235,6 @@ class OrganSegmentation():
             # binaryClosingIterations=2,
             # binaryOpeningIterations=0
         )
-        # from PyQt4.QtCore import pyqtRemoveInputHook
-        # pyqtRemoveInputHook()
         # import ipdb; ipdb.set_trace() # BREAKPOINT
         self.segmentation[outputSegmentation == 1] = self.slab[string_label]
 
@@ -1717,10 +1715,10 @@ def main(app=None, splash=None):  # pragma: no cover
         import traceback
         # mport exceptionProcessing
         exceptionProcessing.reportException(e)
-        print traceback.format_exc()
+        print(traceback.format_exc())
         # aise e
 
 
 if __name__ == "__main__":
     main()
-    print "Thank you for using Lisa"
+    print("Thank you for using Lisa")

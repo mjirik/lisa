@@ -863,7 +863,7 @@ class OrganSegmentationWindow(QMainWindow):
             return
         evaluation, segdiff = \
             self.oseg.sliver_compare_with_other_volume_from_file(seg_path)
-        print 'Evaluation: ', evaluation
+        print('Evaluation: ', evaluation)
         # print 'Score: ', score
 
         text = self.__evaluation_to_text(evaluation)
@@ -1186,14 +1186,14 @@ class OrganSegmentationWindow(QMainWindow):
         # run gui
         self.changeWidget('EditSlab')
         # predtim
-        print self.oseg.slab
+        print(self.oseg.slab)
 
         #from PyQt4.QtCore import pyqtRemoveInputHook
         #pyqtRemoveInputHook()
         #import ipdb; ipdb.set_trace()
 
         # potom
-        print self.oseg.slab
+        print(self.oseg.slab)
 
 
     def action3DVisualizationWidget(self):
