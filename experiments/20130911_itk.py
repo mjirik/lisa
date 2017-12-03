@@ -24,7 +24,7 @@ pimsh = sitk.Show(im1)
 import pdb; pdb.set_trace()
 
 #--------------------------------------------
-print 'im2: 3D dicom image readed with our DataReader and visualization with SimpleITK'
+print('im2: 3D dicom image readed with our DataReader and visualization with SimpleITK')
 dr = datareader.DataReader()
 data3d, metadata = dr.Get3DData(data_path)
 
