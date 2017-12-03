@@ -3,8 +3,8 @@ __all__ = ['organ_segmentation']
            #'support_structure_segmentation']
 __version__ = "1.9.33"
 
-import organ_segmentation
-from main import lisa_main
+from . import organ_segmentation
+from .main import lisa_main
 # import qmisc
 # import misc
 # import experiments
