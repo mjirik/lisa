@@ -231,7 +231,7 @@ class OrganSegmentation():
         self.lisa_operator_identifier = lisa_operator_identifier
         # self.version = qmisc.getVersionString()
         # if self.version is None:
-        self.version = "1.9.3"
+        self.version = "1.9.32"
         self.viewermax = viewermax
         self.viewermin = viewermin
         self.volume_unit = volume_unit
@@ -1342,6 +1342,11 @@ class OrganSegmentation():
         return filepath
 
     def save_outputs(self, filepath=None):
+        """ Save input data, segmentation and all other metadata to file.
+
+        :param filepath:
+        :return:
+        """
 
         data = self.export()
         data['version'] = self.version  # qmisc.getVersionString()

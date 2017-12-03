@@ -29,6 +29,8 @@ import os
 import os.path as op
 sys.path.append(op.join(op.dirname(os.path.abspath(__file__)), "../../bodynavigation/"))
 
+from imtools.trainer3d import Trainer3D as OrganLocalizator
+
 def externfv(data3d, voxelsize_mm):        # scale
     return localization_fv(data3d=data3d, voxelsize_mm=voxelsize_mm)
 
@@ -85,102 +87,6 @@ def localization_intensity_fv(data3d, voxelsize_mm):
     return fv
 
 
-class OrganLocalizator():
-    def __init__(self):
-        feature_function = None
-        self.working_voxelsize_mm = [1.5, 1.5, 1.5]
-        self.data=None
-        self.target=None
-#         self.cl = sklearn.naive_bayes.GaussianNB()
-#         self.cl = sklearn.mixture.GMM()
-        #self.cl = sklearn.tree.DecisionTreeClassifier()
-        if feature_function is None:
-            feature_function = externfv
-        self.feature_function = feature_function
-        self.cl = imtools.ml.gmmcl.GMMCl(n_components=6)
-
-    def save(self, filename='saved.ol.p'):
-        """
-        Save model to pickle file
-        """
-        import dill as pickle
-        sv = {
-            # 'feature_function': self.feature_function,
-            'cl': self.cl
-
-        }
-        pickle.dump(sv, open(filename, "wb"))
-
-    def load(self, mdl_file='saved.ol.p'):
-        import dill as pickle
-        sv = pickle.load(open(mdl_file, "rb"))
-        self.cl= sv['cl']
-        # self.feature_function = sv['feature_function']
-
-
-    def _fv(self, data3dr):
-        return self.feature_function(data3dr, self.working_voxelsize_mm)
-
-
-    def _add_to_training_data(self, data3dr, segmentationr):
-        fv = self._fv(data3dr)
-        data = fv[::50]
-        target = np.reshape(segmentationr, [-1, 1])[::50]
-        #         print "shape ", data.shape, "  ", target.shape
-
-        if self.data is None:
-            self.data = data
-            self.target = target
-        else:
-            self.data = np.concatenate([self.data, data], 0)
-            self.target = np.concatenate([self.target, target], 0)
-        # self.cl.fit(data, target)
-
-        #f1[segmentationr == 0]
-    def fit(self):
-        #         print "sf fit data shape ", self.data.shape
-        self.cl.fit(self.data, self.target)
-
-    def predict(self, data3d, voxelsize_mm):
-        data3dr = imtools.qmisc.resize_to_mm(data3d, voxelsize_mm, self.working_voxelsize_mm)
-        fv = self._fv(data3dr)
-        pred = self.cl.predict(fv)
-        return imtools.qmisc.resize_to_shape(pred.reshape(data3dr.shape), data3d.shape)
-
-    def predict_w(self, data3d, voxelsize_mm, weight, label0=0, label1=1):
-        """
-        segmentation with weight factor
-        :param data3d:
-        :param voxelsize_mm:
-        :param weight:
-        :return:
-        """
-        scores = self.scores(data3d, voxelsize_mm)
-        out = scores[label1] > (weight * scores[label0])
-
-        return out
-
-    def scores(self, data3d, voxelsize_mm):
-        data3dr = imtools.qmisc.resize_to_mm(data3d, voxelsize_mm, self.working_voxelsize_mm)
-        fv = self._fv(data3dr)
-        scoreslin = self.cl.scores(fv)
-        scores = {}
-        for key in scoreslin:
-            scores[key] = imtools.qmisc.resize_to_shape(scoreslin[key].reshape(data3dr.shape), data3d.shape)
-
-        return scores
-
-
-    def __preprocessing(data3d):
-        pass
-
-    def add_train_data(self, data3d, segmentation, voxelsize_mm):
-        data3dr = imtools.qmisc.resize_to_mm(data3d, voxelsize_mm, self.working_voxelsize_mm)
-        segmentationr = imtools.qmisc.resize_to_shape(segmentation, data3dr.shape)
-
-        print(np.unique(segmentationr), data3dr.shape, segmentationr.shape)
-        self._add_to_training_data(data3dr, segmentationr)
-        #f1 scipy.ndimage.filters.gaussian_filter(data3dr, sigma=5)
 
 
 def train_liver_localizator_from_sliver_data(
@@ -211,7 +117,7 @@ def train_liver_localizator_from_sliver_data(
     hist=[]
     fhs_list = []
     for oname, rname in zip(orig_fnames, ref_fnames):
-        print(oname)
+        print oname
         data3d_orig, metadata = io3d.datareader.read(oname)
         vs_mm1 = metadata['voxelsize_mm']
         data3d_seg, metadata = io3d.datareader.read(rname)
@@ -224,7 +130,7 @@ def train_liver_localizator_from_sliver_data(
             sf.add_train_data(data3d_orig, data3d_seg, voxelsize_mm=vs_mm)
         except:
             traceback.print_exc()
-            print("problem")
+            print "problem"
             pass
         # fvhn = copy.deepcopy(fvh)
         #fhs_list.append(fvh)
