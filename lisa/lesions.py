@@ -428,8 +428,8 @@ class Lesions:
         print('thresh = %.4f' % (percT * energy.max()))
         print(seeds.min())
         print(seeds.max())
-        print('seed perc = %.2f' % ()
-            (energy > percT * energy.max()).sum()/np.float(energy.nbytes))
+        print('seed perc = %.2f' % (
+            (energy > percT * energy.max()).sum()/np.float(energy.nbytes)))
         sed3.sed3(seeds).show()
 
         # removing to small objects

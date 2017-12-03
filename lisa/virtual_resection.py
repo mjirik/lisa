@@ -439,10 +439,10 @@ def virtual_resection_visualization(data, segm, dist1, dist2, cut,
 
     if interactivity:
         print("Liver volume: %.4g l" % ((v1 + v2) * 1e-6))
-        print("volume1: %.4g l  (%.3g %%)" % ()
-            (v1) * 1e-6, 100 * v1 / (v1 + v2))
-        print "volume2: %.4g l  (%.3g %%)" % (
-            (v2) * 1e-6, 100 * v2 / (v1 + v2))
+        print("volume1: %.4g l  (%.3g %%)" % (
+            (v1) * 1e-6, 100 * v1 / (v1 + v2)))
+        print("volume2: %.4g l  (%.3g %%)" % (
+            (v2) * 1e-6, 100 * v2 / (v1 + v2)))
 
     # pyed = sed3.sed3(segm)
     # pyed.show()

@@ -1625,7 +1625,7 @@ def vyhodnoceniMetodyTri(metoda, path=None):
         vektor2 = nactiSoubor(cesta, originalNazev, 0, ctenar)
         originalPole = vektor2[0]
         originalVelikost = vektor2[1]
-        print'probiha nastavovani parametru'
+        print('probiha nastavovani parametru')
         vytvoreny = LiverSegmentation(originalPole, originalVelikost)
         vytvoreny.setVysledky(vysledkySeg)
         vytvoreny.setMethodNumber(metoda)  # ZVOLENI METODY

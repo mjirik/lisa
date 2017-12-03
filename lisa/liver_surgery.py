@@ -212,7 +212,7 @@ class MainWindow(QMainWindow):
 
         oseg.interactivity()
 
-        print(()
+        print(
                 "Volume " +
                 str(oseg.get_segmented_volume_size_mm3() / 1000000.0) + ' [l]')
 
@@ -318,7 +318,7 @@ def main():
     # volume
     #volume_mm3 = np.sum(oseg.segmentation > 0) * np.prod(oseg.voxelsize_mm)
 
-    print (
+    print(
             "Volume " +
             str(oseg.get_segmented_volume_size_mm3() / 1000000.0) + ' [l]')
     #pyed = sed3.sed3(oseg.data3d, contour =
