@@ -76,7 +76,7 @@ def freeOperace3(pomocny, tretiVrstva, voxelSize, nezadouci):
     souctu pruniku a vstupu
     pri odstraneni nezadoucich je uzavreny objekt bran jako zadouci
     vraci: raw, segmentovany binarni obraz'''
-    print 'probiha vymezeni okraju 3. vrstvy'
+    print('probiha vymezeni okraju 3. vrstvy')
 
     prunik, uzavreny = freeOperace3saver(pomocny, tretiVrstva, voxelSize,
                                          nezadouci)
@@ -532,7 +532,7 @@ def prahovaniKonvoluce(data3d, voxelSize, konstSpicky=0.95):
         segmentaceVysledek = np.multiply(vetsi, mensi)
         return segmentaceVysledek
     else:
-        print 'SELHANI NALEZENI SPICEK V HISTOGRAMU'
+        print('SELHANI NALEZENI SPICEK V HISTOGRAMU')
     return
 
 
@@ -822,7 +822,7 @@ def konvolucniOperace(prahovany, voxelSize):
 
 def pouzijSnake(featureImage, segmentace, iterace=5):
     '''Malladi et al paper'''
-    print 'zahajen beh morphsnakes'
+    print('zahajen beh morphsnakes')
     # prepsany = segmentace.astype(np.float32)
     prepsany = segmentace.astype(np.int8)
 
@@ -839,7 +839,7 @@ def pouzijSnake(featureImage, segmentace, iterace=5):
     obrazec = sitk.GetArrayFromImage(levelset)
     zobrazitOriginal(obrazec)
     vysledek = obrazec >= 0
-    print 'morphsnakes uspesne ukonceny'
+    print('morphsnakes uspesne ukonceny')
     return vysledek
 
 
@@ -932,14 +932,14 @@ def objectRemovalDistanceBased(data3d, threshold=1):
 
     if(labels[1] == 1):  # jediny objekt
         return data3d
-    print 'probiha odstranovani postrannich objektu'
+    print('probiha odstranovani postrannich objektu')
     # zde budou odchylky objektu od celkoveho stredu
     odchylky = np.zeros(labels[1])
     for misto in range(labels[1]):
         odchylka = np.array(stred) - np.array(stredy[misto])
         odchylka = np.linalg.norm(odchylka)
         odchylky[misto] = odchylka
-    print odchylky
+    print(odchylky)
 
     prumer = np.mean(odchylky)
     TF = odchylky < prumer * threshold
@@ -1087,14 +1087,14 @@ def binarniOperace3D2D(pole3d, voxelSize, rKoule=2.5, rKruznice=2):
 
     rezNovy2 = ndimage.binary_opening(rezNovy, struktura1, hodnota)
 
-    print 'probiha vybrani nejvetsiho objektu'
+    print('probiha vybrani nejvetsiho objektu')
     [labelImage, labels] = ndimage.label(rezNovy2)
     # print nb_labels
     vytvoreny = np.zeros(labelImage.shape, dtype=np.int8)
     nejvetsi = 0  # index nejvetsiho objektu
     maximum = 0
     for x in range(labels):
-        print str(x + 1) + '/' + str(labels)
+        print(str(x + 1) + '/' + str(labels))
         vytvoreny = (labelImage == x + 1)
         suma = np.sum(vytvoreny)
         # print suma
@@ -1127,7 +1127,7 @@ def binarniOperaceNove(pole3d, voxelsize):
         novy = np.multiply(silny, pole3d)
         return novy
 
-    print 'probihaji 3D binarni operace'
+    print('probihaji 3D binarni operace')
     koule = vytvorKouli3D([1, 1, 1], 3)
     # print np.sum(koule)
 
@@ -1149,14 +1149,14 @@ def binarniOperaceNove(pole3d, voxelsize):
         pomocny = pomocny + 1
     okraj = rezNovy
 
-    print 'probiha vybrani nejvetsiho objektu'
+    print('probiha vybrani nejvetsiho objektu')
     [labelImage, labels] = ndimage.label(okraj)
     # print nb_labels
     vytvoreny = np.zeros(labelImage.shape, dtype=np.int8)
     nejvetsi = 0  # index nejvetsiho objektu
     maximum = 0
     for x in range(labels):
-        print str(x + 1) + '/' + str(labels)
+        print(str(x + 1) + '/' + str(labels))
         vytvoreny = (labelImage == x + 1)
         suma = np.sum(vytvoreny)
         if(suma > maximum):
@@ -1231,9 +1231,9 @@ def prahovaniProcenta(data3d, procentaHranice=0.32, procentaJatra=0.18):
 
     'gaussovsky model'
     clf = mixture.GMM(n_components=2, covariance_type='full')
-    print 'probiha modelovani normalnimi funkcemi'
+    print('probiha modelovani normalnimi funkcemi')
     clf.fit(data)
-    print 'modelovani dokonceno'
+    print('modelovani dokonceno')
     stredniHodnoty = clf.means_  # [m1,m2]
     vahy = clf.weights_  # [w1,w2]
     # c1, c2 = clf.covars_ #kovariance, netreba
@@ -1371,7 +1371,7 @@ def regionGrowingCTIF(ctImage, array, velikostVoxelu, konstanta=100,
 
     for x in range(len(vektory[0])):
         if((x % (len(vektory[0]) / 5)) == 0):
-            print str(x) + '/' + str(len(vektory[0]))
+            print(str(x) + '/' + str(len(vektory[0])))
         if((x % downsampling) == 0):
             array = iterace(
                 x, vektory, segmentationFilter, konstanta, array, koule)
@@ -1396,7 +1396,7 @@ def vytvorKouli3D(voxelSize_mm, polomer_mm):
     funkce je ze Y a Z osy maji stejne rozliseni
     funkce vyuziva pythagorovu vetu'''
 
-    print 'zahajeno vytvareni 3D objektu'
+    print('zahajeno vytvareni 3D objektu')
 
     x = voxelSize_mm[0]
     y = voxelSize_mm[1]
@@ -1413,7 +1413,7 @@ def vytvorKouli3D(voxelSize_mm, polomer_mm):
     for xR in range(xVoxely * 2 + 1):
 
         if(xR == xStred):
-            print '3D objekt z 50% vytvoren'
+            print('3D objekt z 50% vytvoren')
 
         c = polomer_mm  # nejdelsi strana
         a = (xStred - xR) * x
@@ -1428,7 +1428,7 @@ def vytvorKouli3D(voxelSize_mm, polomer_mm):
         kruznice = vytvoritTFKruznici(yVoxely, rKruznice)
         koule[xR, 0:konec, 0:konec] = kruznice[0:konec, 0:konec]
 
-    print '3D objekt uspesne vytvoren'
+    print('3D objekt uspesne vytvoren')
     return koule
 
 
@@ -1508,7 +1508,7 @@ def souborAsegmentace(cisloSouboru, metoda, cesta):
     vrati parametry potrebne pro evaluaci'''
     ctenar = io3d.DataReader()
     seznamSouboru = vyhledejSoubory(cesta)
-    print 'probiha nacitani souboru'
+    print('probiha nacitani souboru')
     vektor = nactiSoubor(
         cesta, seznamSouboru, (cisloSouboru + len(seznamSouboru) / 2), ctenar)
     rucniPole = vektor[0]
@@ -1618,22 +1618,22 @@ def vyhodnoceniMetodyTri(metoda, path=None):
     def vyhodnotSoubor(cesta, x, seznamTestovaci, ctenar, vysledkySeg, metoda):
         originalNazev = [seznamTestovaci[x]]
         rucniNazev = [seznamTestovaci[x + len(seznamTestovaci) / 2]]
-        print 'probiha nacitani souboru'
+        print('probiha nacitani souboru')
         vektor = nactiSoubor(cesta, rucniNazev, 0, ctenar)
         rucniPole = vektor[0]
         rucniVelikost = vektor[1]
         vektor2 = nactiSoubor(cesta, originalNazev, 0, ctenar)
         originalPole = vektor2[0]
         originalVelikost = vektor2[1]
-        print'probiha nastavovani parametru'
+        print('probiha nastavovani parametru')
         vytvoreny = LiverSegmentation(originalPole, originalVelikost)
         vytvoreny.setVysledky(vysledkySeg)
         vytvoreny.setMethodNumber(metoda)  # ZVOLENI METODY
-        print 'probiha segmentace'
+        print('probiha segmentace')
         vytvoreny.runVolby()
         segmentovany = vytvoreny.segmentation
         segmentovanyVelikost = vytvoreny.voxelSize
-        print 'zahajeno vyhodnoceni'
+        print('zahajeno vyhodnoceni')
         rucniPole.astype(np.int8)
         segmentovany.astype(np.int8)
         vysledky = vyhodnoceniSnimku(
@@ -1648,11 +1648,11 @@ def vyhodnoceniMetodyTri(metoda, path=None):
     else:
         cesta = path
 
-    print 'ANALYZA PRVNI TRETINY'
+    print('ANALYZA PRVNI TRETINY')
     seznam1 = nacteniMnoziny('Tren1+2.yml', cesta, metoda)
-    print 'ANALYZA DRUHE TRETINY'
+    print('ANALYZA DRUHE TRETINY')
     seznam2 = nacteniMnoziny('Tren1+3.yml', cesta, metoda)
-    print 'ANALYZA TRETI TRETINY'
+    print('ANALYZA TRETI TRETINY')
     seznam3 = nacteniMnoziny('Tren2+3.yml', cesta, metoda)
     seznamVsech = seznam1 + seznam2 + seznam3
     prumerSeznam = np.zeros(len(seznamVsech))
@@ -1663,9 +1663,9 @@ def vyhodnoceniMetodyTri(metoda, path=None):
     celkovyPrumer = np.mean(prumerSeznam)
     zapsat = [seznamVsech, celkovyPrumer]
 
-    print 'celkovy prumer je: ' + str(celkovyPrumer)
+    print('celkovy prumer je: ' + str(celkovyPrumer))
     zapisYamlSoubor('vysledky.yml', zapsat)
-    print 'soubory zapsany do vysledky.yml'
+    print('soubory zapsany do vysledky.yml')
 
     return
 
@@ -1676,7 +1676,7 @@ def vyhodnoceniSnimku(snimek1, voxelsize1, snimek2, voxelsize2):
     dale protoze velikosti voxelu se mirne lisi u rucni segmentace
     a originalniho obrazku (10^-2 a mene) udela z nich prumer
     '''
-    print 'probiha vyhodnoceni snimku pockejte prosim'
+    print('probiha vyhodnoceni snimku pockejte prosim')
     voxelsize_mm = [((voxelsize1[0] +
                       voxelsize2[0]) / 2.0), ((voxelsize1[1] +
                                                voxelsize2[1]) / 2.0),
@@ -1746,7 +1746,7 @@ def prumerovaciFIltr(konvoluce, velikostVoxelu, soucet, k1=0.3, k2=750,
     a = np.round(mm / velikostVoxelu[0])
     b = np.round(mm / velikostVoxelu[1])
     c = np.round(mm / velikostVoxelu[2])
-    print [a, b, c]
+    print([a, b, c])
     mean = ndimage.uniform_filter(zobrazeny, size=[a, b, c])
     # odstraneny = objectRemovalDistanceBased(vyriznuty,threshold=1.5)
 
@@ -1873,14 +1873,14 @@ def trenovaniCele(metoda, path=None):
         vybrano = True
 
     if(not vybrano):
-        print "spatne zvolena metoda trenovani"
+        print("spatne zvolena metoda trenovani")
         return
 
-    print "Probiha trenovani"
+    print("Probiha trenovani")
     vysledek1 = metoda(cesta, seznamSouboru)
     # soubor = open("TrenC.yml","wb")
     zapisYamlSoubor("TrenC.yml", vysledek1)
-    print "trenovani  dokonceno"
+    print("trenovani  dokonceno")
 
 
 def trenovaniTri(metoda, path=None):
@@ -1947,31 +1947,31 @@ def trenovaniTri(metoda, path=None):
             return vysledek
         vybrano = True
     if(not vybrano):
-        print "spatne zvolena metoda trenovani"
+        print("spatne zvolena metoda trenovani")
         return
 
-    print "Probiha trenovani Prvni Casti"
+    print("Probiha trenovani Prvni Casti")
     vysledek1 = metoda(cesta, tren12)
     poleMega = [tren12, cast3, vysledek1]
     zapisYamlSoubor("Tren1+2.yml", poleMega)
 
-    print "Probiha trenovani druhe casti"
+    print("Probiha trenovani druhe casti")
     vysledek2 = metoda(cesta, tren23)
     poleMega = [tren23, cast1, vysledek2]
     zapisYamlSoubor("Tren2+3.yml", poleMega)
 
-    print "Probiha trenovani treti casti"
+    print("Probiha trenovani treti casti")
     vysledek3 = metoda(cesta, tren13)
     poleMega = [tren13, cast2, vysledek3]
     zapisYamlSoubor("Tren1+3.yml", poleMega)
-    print "trenovani  dokonceno"
+    print("trenovani  dokonceno")
 
 
 def zapisCestu():
     cesta = 'C:/Users/asus/workspace/training'
-    print cesta
+    print(cesta)
     zapisYamlSoubor('path.yml', cesta)
-    print "cesta uspesne zapsana"
+    print("cesta uspesne zapsana")
 
 
 def vyhledejSoubory(cesta):
@@ -2090,7 +2090,7 @@ def metoda1(cesta, seznamSouboru):
         bezNul = X.compressed()
         return bezNul
 
-    print "zahajeno trenovani metodou c.1"
+    print("zahajeno trenovani metodou c.1")
     pocetSouboru = len(seznamSouboru)
     pocetOrig = pocetSouboru / 2
     ctenar = io3d.DataReader()
@@ -2102,7 +2102,7 @@ def metoda1(cesta, seznamSouboru):
     pomocny = 0
     for soubor in seznamSouboru:
         ukazatel = str(pomocny + 1) + "/" + str(pocetOrig)
-        print ukazatel
+        print(ukazatel)
         bezNul = zpracuj(cesta, seznamSouboru, pomocny, ctenar, pocetOrig)
 
         prumery.append(np.mean(bezNul))
@@ -2113,15 +2113,15 @@ def metoda1(cesta, seznamSouboru):
         '''NASLEDUJICI RADEK LZE OMEZIT CISLEM PRO NETRENOVANI CELE MNOZINY'''
         # print (pomocny+1 >= pocetOrig)
         if(pomocny + 1 >= pocetOrig):  # if(pomocny >= pocetOrig):
-            print "trenovani ukonceno"
+            print("trenovani ukonceno")
             break
     prumer = vypoctiPrumer(poctyVzorku, prumery)
     var = vypoctiVar(poctyVzorku, prumery, variance, prumer)
 
-    print "vysledny prumer a variance:"
-    print prumer
-    print var
-    print "vysledky ukladany do souboru 'Metoda1.yml'"
+    print("vysledny prumer a variance:")
+    print(prumer)
+    print(var)
+    print("vysledky ukladany do souboru 'Metoda1.yml'")
     zapisPrumVar(prumer, var)
     return [prumer, var]
 

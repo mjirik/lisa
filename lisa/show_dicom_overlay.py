@@ -109,7 +109,7 @@ def main():
     data3d, metadata = reader.Get3DData(args['inputdatapath'], qt_app=None)
     overlays = reader.GetOverlay()
     overlay = np.zeros(data3d.shape, dtype=np.int8)
-    print "overlays ", overlays.keys()
+    print("overlays ", overlays.keys())
     for key in overlays:
         overlay += overlays[key]
 

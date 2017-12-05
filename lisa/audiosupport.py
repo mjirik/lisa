@@ -68,7 +68,7 @@ def beep():# pragma: no cover
         subprocess.call('play -q -n synth 0.3 sine 880 vol 0.3', shell=True)
     else:
     #if platform == "win32":
-        print '\7'
+        print('\7')
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

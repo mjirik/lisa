@@ -570,8 +570,8 @@ def one_exp_set_for_whole_dataset(
         visualization=False):
     fvall = []
     # fv_tiles = []
-    print "classif_fcn ", classif_fcn_plus_params
-    print "feature_fcn ", feature_fcn_plus_params
+    print("classif_fcn ", classif_fcn_plus_params)
+    print("feature_fcn ", feature_fcn_plus_params)
     clf = one_exp_set_training(
         training_yaml, tile_shape,
         feature_fcn_plus_params,
@@ -626,7 +626,7 @@ def experiment(training_yaml_path, testing_yaml_path,  featers_plus_classifs,
 
         result = {'params': str(fpc), 'fvall': fvall}
         results.append(result)
-        print results
+        print(results)
 
     return results
 
@@ -740,7 +740,7 @@ def main():
     # training_yaml_path = args.training_yaml_path
     # testing_yaml_path = args.testing_yaml_path
     if args.testing_yaml_path is None:
-        print 'testing is same as training'
+        print('testing is same as training')
         args.testing_yaml_path = args.training_yaml_path
 
     # write_csv(fvall)

@@ -139,11 +139,11 @@ class Lesions:
 
         # seeds = self.get_seeds_using_class_1(class1)
         liver = self.data3d * (self.segmentation != 0)
-        print 'analyzing histogram...'
+        print('analyzing histogram...')
         class1 = tools.analyse_histogram(self.data3d,
                                          roi=self.segmentation != 0)
         # sed3.sed3(self.data3d, seeds=class1).show()
-        print 'getting seeds...'
+        print('getting seeds...')
         seeds = self.get_seeds_using_prob_class1(
             liver,
             class1,
@@ -217,10 +217,10 @@ class Lesions:
             features[lab-1, 0] = size
             features[lab-1, 1] = compactness
 
-            print 'size = %i' % size
-            print 'compactness = %.3f' % compactness
+            print('size = %i' % sizeú)
+            print('compactness = %.3f' % compactness)
             # sed3.sed3(self.data3d, contour=(labels==lab)).show() # noqa
-        print features[:, 1]
+        print(features[:, 1])
         return features
 
 # ---------------------------------------------------------------------------
@@ -242,27 +242,27 @@ class Lesions:
                 label=self.data['slab']['porta'])
 
         # removing to small objects
-        print 'Small objects removal:'
+        print('Small objects removal:')
         _, nlabels = scimeas.label(objects)
-        print '    before: nlabels = %i' % nlabels
+        print('    before: nlabels = %i' % nlabels)
         objects = skimor.remove_small_objects(
             objects, min_size=self.min_size_of_comp,
             connectivity=1, in_place=False)
         _, n_labels = scimeas.label(objects)
-        print '    after: nlabels = %i' % nlabels
+        print('    after: nlabels = %i' % nlabels)
 
         # computing object features
         labels, n_labels = scimeas.label(objects)
         features = self.get_features(labels, n_labels)
 
-        print 'Non-compact objects removal:'
-        print '    before: nlabels = %i' % n_labels
+        print('Non-compact objects removal:')
+        print('    before: nlabels = %i' % n_labels)
         # filtering objects with respect to their features
         features_ok = features[:, 1] >= min_comp
         objs_ok = np.zeros_like(objects)
         for i in np.argwhere(features_ok > 0):
             objs_ok += labels == (i + 1)
-        print '\tafter: nlabels = %i' % features_ok.sum()
+        print('\tafter: nlabels = %i' % features_ok.sum())
 
         return objs_ok
 
@@ -423,22 +423,22 @@ class Lesions:
 
         # TODO: tady je problem, ze energy je v intervalu <0.961, 1> - hrozne
         # maly rozsah
-        print 'energy max = %.4f' % energy.max()
-        print 'energy min = %.4f' % energy.min()
-        print 'thresh = %.4f' % (percT * energy.max())
-        print seeds.min()
-        print seeds.max()
-        print 'seed perc = %.2f' % (
-            (energy > percT * energy.max()).sum()/np.float(energy.nbytes))
+        print('energy max = %.4f' % energy.max())
+        print('energy min = %.4f' % energy.min())
+        print('thresh = %.4f' % (percT * energy.max()))
+        print(seeds.min())
+        print(seeds.max())
+        print('seed perc = %.2f' % (
+            (energy > percT * energy.max()).sum()/np.float(energy.nbytes)))
         sed3.sed3(seeds).show()
 
         # removing to small objects
         min_size_of_seed_area = 60
-        print 'before removing: %i' % seeds.sum()
+        print('before removing: %i' % seeds.sum())
         seeds = skimor.remove_small_objects(
             seeds, min_size=min_size_of_seed_area, connectivity=1,
             in_place=False)
-        print 'after removing: %i' % seeds.sum()
+        print('after removing: %i' % seeds.sum())
 
         all_seeds = np.zeros(data.shape, dtype=np.int)
         # allSeeds[np.nonzero(self.segmentation)] = 80

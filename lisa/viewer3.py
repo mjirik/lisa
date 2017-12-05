@@ -50,7 +50,7 @@ from Tkinter import *
 try:
     from dicom2fem import seg2fem
 except:
-    print "deprecated import of seg2fem"
+    print("deprecated import of seg2fem")
 
     import seg2fem
 
@@ -253,7 +253,7 @@ class Viewer(QMainWindow):
     Tato metoda slouží pro vytvoření virtuálního bodu. K tomu je využita třída z VTK vtkPointWidget()
     '''
     def Point(self):
-            print 'Point'
+            print('Point')
             self.cut_point = vtk.vtkPointWidget()
             self.cut_point.SetInput(surface.GetOutput())
             self.cut_point.AllOff()
@@ -489,8 +489,8 @@ def main():
             mesh = viewer.generate_mesh(viewer.data['segmentation'] == viewer.data['slab'][args.slab],viewer.data['voxelsize_mm'])
         except KeyError:
             try:
-                print 'Data bohuzel neobsahuji zadany slab:', args.slab
-                print 'Zobrazena budou pouze dostupna data'
+                print('Data bohuzel neobsahuji zadany slab:', args.slab)
+                print('Zobrazena budou pouze dostupna data')
                 viewer.info_text.appendPlainText (_fromUtf8('Data bohužel neobsahují zadanou část jater'))
                 viewer.info_text.appendPlainText (_fromUtf8('Zobrazena budou pouze dostupná data'))
                 mesh = viewer.generate_mesh(viewer.data['segmentation'] == viewer.data['slab']['liver'],viewer.data['voxelsize_mm'])

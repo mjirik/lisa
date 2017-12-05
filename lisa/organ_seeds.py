@@ -59,11 +59,11 @@ def automatic_liver_seeds(
     seed1 = np.unravel_index(np.argmax(dst), dst.shape)
     # alternativa -
     seed1_mm = seed1 * working_voxelsize_mm
-    print 'seed1 ', seed1, ' shape ', dst.shape
+    print('seed1 ', seed1, ' shape ', dst.shape)
 
     seed1z = seed1[0]
     seed1z_mm = seed1_mm[0]
-    print seed1z_mm
+    print(seed1z_mm)
 
 
     add_negative_train_seeds_blobs(

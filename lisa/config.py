@@ -54,7 +54,7 @@ def delete_config_records(filename, records_to_save=[]):
     if os.path.isfile(filename):
         cfg = misc.obj_from_file(filename, filetype='yaml')
         new_cfg = subdict(cfg, records_to_save)
-        print cfg
+        print(cfg)
         misc.obj_to_file(new_cfg, "test_" + filename , filetype='yaml')
 
 
@@ -65,7 +65,7 @@ def update_config_records(filename, new_cfg):
     if os.path.isfile(filename):
         cfg = misc.obj_from_file(filename, filetype='yaml')
         cfg.update(new_cfg)
-        print cfg
+        print(cfg)
         misc.obj_to_file(new_cfg, "test_" + filename , filetype='yaml')
 
 
@@ -85,10 +85,10 @@ def check_config_version_and_remove_old_records(filename, version,
 # older version of config file
             cfg = misc.obj_from_file(filename, filetype='yaml')
             misc.obj_to_file(cfg, filename + '.old', filetype='yaml')
-            print 'cfg ', cfg
+            print('cfg ', cfg)
             new_cfg = subdict(cfg, records_to_save)
             new_cfg['config_version'] = version
-            print 'ncfg ', new_cfg
+            print('ncfg ', new_cfg)
             misc.obj_to_file(new_cfg, filename, filetype='yaml')
 
 

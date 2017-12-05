@@ -29,7 +29,7 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pysegbase/src"))
 
 from PyQt4.QtGui import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame, \
-    QFont, QPixmap, QFileDialog
+    QFont, QPixmap, QFileDialog, QInputDialog
 from PyQt4 import QtGui
 from PyQt4.Qt import QString
 try:
@@ -71,9 +71,10 @@ def find_logo():
 # GUI
 class OrganSegmentationWindow(QMainWindow):
 
-    def __init__(self, oseg=None):
+    def __init__(self, oseg=None, qapp=None):
 
         self.oseg = oseg
+        self.qapp = qapp
 
 
         QMainWindow.__init__(self)
@@ -818,6 +819,24 @@ class OrganSegmentationWindow(QMainWindow):
         logger.info('overall score: ' + str(overall_score))
         return "Sliver score: " + str(overall_score)
 
+    def ui_select_label(self):
+        """ Get label with GUI.
+
+        :return: numeric_label, string_label
+        """
+
+        self.oseg.slab
+        strlab, ok = \
+            QInputDialog.getItem(self,
+                                 # self.qapp,
+                                 'Serie Selection',
+                                 'Select serie:',
+                                 self.oseg.slab.keys(),
+                                 editable=False)
+
+        numlab = self.oseg.slab[str(strlab)]
+        return numlab, str(strlab)
+
     def compareSegmentationWithFile(self):
         """
         Function make GUI for reading segmentaion file to compare it with
@@ -844,7 +863,7 @@ class OrganSegmentationWindow(QMainWindow):
             return
         evaluation, segdiff = \
             self.oseg.sliver_compare_with_other_volume_from_file(seg_path)
-        print 'Evaluation: ', evaluation
+        print('Evaluation: ', evaluation)
         # print 'Score: ', score
 
         text = self.__evaluation_to_text(evaluation)
@@ -1121,7 +1140,9 @@ class OrganSegmentationWindow(QMainWindow):
         """
 
         self.statusBar().showMessage('Vessel segmentation ...')
-        self.oseg.portalVeinSegmentation()
+        self.oseg.add_slab_label_carefully(numeric_label=2, string_label="porta")
+        numeric_label, string_label = self.ui_select_label()
+        self.oseg.portalVeinSegmentation(numeric_label=numeric_label, string_label=string_label)
         self.statusBar().showMessage('Ready')
 
     def __saveVesselTreeGui(self, textLabel):
@@ -1165,14 +1186,14 @@ class OrganSegmentationWindow(QMainWindow):
         # run gui
         self.changeWidget('EditSlab')
         # predtim
-        print self.oseg.slab
+        print(self.oseg.slab)
 
         #from PyQt4.QtCore import pyqtRemoveInputHook
         #pyqtRemoveInputHook()
         #import ipdb; ipdb.set_trace()
 
         # potom
-        print self.oseg.slab
+        print(self.oseg.slab)
 
 
     def action3DVisualizationWidget(self):

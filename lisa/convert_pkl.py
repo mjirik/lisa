@@ -28,6 +28,6 @@ def main():
     import SimpleITK as sitk
     sitk_img = sitk.GetImageFromArray(data3d_uncrop.astype(np.uint16), isVector=True)
     sitk.WriteImage(sitk_img, args.outputfile)
-    print "Warning: .mhd and .raw format has corupted metadta. You can edit it manually."
+    print("Warning: .mhd and .raw format has corupted metadta. You can edit it manually.")
 if __name__ == "__main__":
     main()

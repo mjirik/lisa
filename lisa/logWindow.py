@@ -23,7 +23,7 @@ from PyQt4.QtGui import *
 class LogEntryModel(QAbstractListModel):
     def __init__(self, logfile, parent=None):
         super(LogEntryModel, self).__init__(parent)
-        print logfile
+        print(logfile)
         self.parent = parent
         self.entries = None
         self.slurp(logfile)
@@ -86,7 +86,7 @@ class LogViewerForm(QDialog):
 
 
     def update_log(self):
-        print 'file changed'
+        print('file changed')
         self.list_model.slurp(self.list_model.logfile)
         self.list_view.updateGeometries()
         self.list_view.update()

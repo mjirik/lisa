@@ -39,7 +39,7 @@ def seg2stl(
     Funkce vrací trojrozměrné porobné jako data['segmentation']
     v data['slab'] je popsáno, co která hodnota znamená
     """
-    print np.unique(segmentation)
+    print(np.unique(segmentation))
     segmentation = select_labels(segmentation, labels)
 
     # print 'labels: ', np.unique(data['segmentation'])
@@ -49,7 +49,7 @@ def seg2stl(
 
     segmentation = segmentation[::degrad, ::degrad, ::degrad]
 
-    print np.unique(segmentation)
+    print(np.unique(segmentation))
 
     # import pdb; pdb.set_trace()
     if smoothing:

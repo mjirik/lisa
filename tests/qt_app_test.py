@@ -52,18 +52,18 @@ class QtAppTest(unittest.TestCase):
 
         #import pdb; pdb.set_trace()
         img = np.random.rand(30,30,30)
-        print '1'
+        print('1')
         app = QApplication(sys.argv)
-        print '2'
+        print('2')
         pyed = QTSeedEditor(img)
-        print '3'
+        print('3')
         app.exec_()
         del(app)
 
         app = QApplication(sys.argv)
-        print '2'
+        print('2')
         pyed = QTSeedEditor(img)
-        print '3'
+        print('3')
         app.exec_()
         del(app)
 

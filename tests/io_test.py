@@ -50,7 +50,7 @@ class InOutTest(unittest.TestCase):
         import io3d.datareader
 
         if self.verbose:
-            print "test_create_iparams"
+            print("test_create_iparams")
         data_path = os.path.join(lisa.dataset.sample_data_path(), 'liver-orig001.mhd')
         seg_path = os.path.join(lisa.dataset.sample_data_path(), 'liver-seg001.mhd')
 

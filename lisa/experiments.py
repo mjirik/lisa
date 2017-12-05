@@ -269,7 +269,7 @@ def run_all_liver_segmentation_experiments_with_conf(
                 '" does not exist. Create it with "lisa -cf" parameter.'
             logger.warning(confs)
 
-            print confs
+            print(confs)
 
 
 def run_liver_segmentation_experiment_with_conf(
@@ -313,12 +313,12 @@ def run_liver_segmentation_experiment_with_conf(
             bsh_config = "-cf " + config_file_path
             bsh = bsh + bsh_config + bsh_output
 
-        print bsh
+        print(bsh)
         if not dry_run:
             if use_subprocess:
                 process = subprocess.Popen(bsh.split(), stdout=subprocess.PIPE)
                 output = process.communicate()[0]
-                print output
+                print(output)
             else:
                 import lisa.organ_segmentation
                 import sys
@@ -582,7 +582,7 @@ def dataplot(data, keyword, ylabel, expn=None, markers=None, labels=None,
     Plot data. Function is prepared for our dataset (for example 5 measures).
 
     """
-    print data[0].keys()
+    print(data[0].keys())
     if expn is None:
         expn = range(0, len(data))
     if markers is None:
@@ -829,7 +829,7 @@ def processIt(pklz_dirs, sliver_dir, yaml_files, eval_files, markers, labels):
     data = [misc.obj_from_file(fname + '.pkl', filetype='pkl')
             for fname in eval_files]
 
-    print "Jednotlivá měření"
+    print("Jednotlivá měření")
     dataplot(data, 'voe', 'Volume Difference Error [%]', markers=markers,
              labels=labels, loc=0)
     dataplot(data, 'vd', 'Total Volume Difference [%]', markers=markers,
@@ -842,15 +842,15 @@ def processIt(pklz_dirs, sliver_dir, yaml_files, eval_files, markers, labels):
     dataplot(data, 'avgd', 'AvgD [mm]', markers=markers, labels=labels, loc=0)
     dataplot(data, 'rmsd', 'RMSD [mm]', markers=markers, labels=labels, loc=0)
 
-    print "Souhrn měření"
+    print("Souhrn měření")
 
     # import "experiment_support.ipynb"
 
     expn = np.array(range(0, len(labels)))
     expn_labels = labels
 
-    print expn_labels
-    print expn
+    print(expn_labels)
+    print(expn)
 
     vd_mn, tmp = sumplot(
         data, 'vd', 'Total Volume Difference', expn, expn_labels)
@@ -862,13 +862,13 @@ def processIt(pklz_dirs, sliver_dir, yaml_files, eval_files, markers, labels):
         data, 'maxd', 'Maxiamal Distance', expn, expn_labels)
     rmsd_mn, tmp = sumplot(data, 'rmsd', 'Square Distance', expn, expn_labels)
 
-    print 'vd   ', vd_mn
-    print "voe ", voe_mn
-    print 'maxd ', maxd_mn
-    print 'avgd ', avgd_mn
-    print 'rmsd ', rmsd_mn
+    print('vd   ', vd_mn)
+    print("voe ", voe_mn)
+    print('maxd ', maxd_mn)
+    print('avgd ', avgd_mn)
+    print('rmsd ', rmsd_mn)
 
-    print "Přepočteno na skóre"
+    print("Přepočteno na skóre")
 
     import pandas
     # print tables[0].shape
@@ -878,7 +878,7 @@ def processIt(pklz_dirs, sliver_dir, yaml_files, eval_files, markers, labels):
     tables, indexes, columns = scoreTableEvaluation(scoreMetrics)
 
     df = pandas.DataFrame(tables[0], index=indexes[0], columns=columns[0])
-    print df.to_string()
+    print(df.to_string())
     dataplot(scoreAll, 'voe', 'Volume Difference Error [points]',
              markers=markers, labels=labels, loc=0)
     dataplot(scoreAll, 'vd', 'Total Volume Difference [points]',
@@ -905,7 +905,7 @@ def processIt(pklz_dirs, sliver_dir, yaml_files, eval_files, markers, labels):
     # scoreTotal, scoreMetrics, scoreAll =
     # volumetry_evaluation.sliverScoreAll(data)
     scoreTotal, scoreMetrics, scoreAll = sliverScoreAll(data)
-    print 'Score total: ', scoreTotal
+    print('Score total: ', scoreTotal)
 
     plot_total(scoreMetrics, labels=labels, err_scale=0.05)
     return df
@@ -951,13 +951,13 @@ def get_subdirs(dirpath, wildcard='*', outputfile='experiment_data.yaml'):
 def getArea(data, sp, area):
     if((sp[0] + area[0]) > data.shape[0]):
         sp[0] = data.shape[0] - area[0] - 1
-        print "Funkce getArea() : Byla prekrocena velikost dat v ose Z"
+        print("Funkce getArea() : Byla prekrocena velikost dat v ose Z")
     if((sp[1] + area[1]) > data.shape[1]):
         sp[1] = data.shape[1] - area[0] - 1
-        print "Funkce getArea() : Byla prekrocena velikost dat v ose Y"
+        print("Funkce getArea() : Byla prekrocena velikost dat v ose Y")
     if((sp[2] + area[2]) > data.shape[2]):
         sp[2] = data.shape[2] - area[0] - 1
-        print "Funkce getArea() : Byla prekrocena velikost dat v ose X"
+        print("Funkce getArea() : Byla prekrocena velikost dat v ose X")
     return data[sp[0]:sp[0] + area[0],
                 sp[1]:sp[1] + area[1],
                 sp[2]:sp[2] + area[2]]
@@ -967,13 +967,13 @@ def setArea(data, sp, area, value):
 
     if((sp[0] + area[0]) > data.shape[0]):
         sp[0] = data.shape[0] - area[0] - 1
-        print "Funkce getArea() : Byla prekrocena velikost dat v ose Z"
+        print("Funkce getArea() : Byla prekrocena velikost dat v ose Z")
     if((sp[1] + area[1]) > data.shape[1]):
         sp[1] = data.shape[1] - area[0] - 1
-        print "Funkce getArea() : Byla prekrocena velikost dat v ose Y"
+        print("Funkce getArea() : Byla prekrocena velikost dat v ose Y")
     if((sp[2] + area[2]) > data.shape[2]):
         sp[2] = data.shape[2] - area[0] - 1
-        print "Funkce getArea() : Byla prekrocena velikost dat v ose X"
+        print("Funkce getArea() : Byla prekrocena velikost dat v ose X")
 
     data[sp[0]:sp[0] + area[0], sp[1]:sp[1]
          + area[1], sp[2]:sp[2] + area[2]] = value

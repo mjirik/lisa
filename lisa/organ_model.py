@@ -47,7 +47,7 @@ def add_fv_extern_into_modelparams(modelparams):
                 modelparams['fv_extern'] = intensity_localization_2steps_fv
             elif fv_extern_str == "near_blur_intensity_localization_fv":
                 modelparams['fv_extern'] = near_blur_intensity_localization_fv
-                print "blur intensity"
+                print("blur intensity")
             elif fv_extern_str == "with_ribs_fv":
                 modelparams['fv_extern'] = with_ribs_fv
                 logger.debug('with_ribs_fv used')
@@ -469,7 +469,7 @@ class ModelTrainer():
                 self.add_train_data(data3d_orig, data3d_seg, voxelsize_mm=vs_mm)
             except:
                 traceback.print_exc()
-                print "problem - liver model"
+                print("problem - liver model")
                 pass
                 # fvhn = copy.deepcopy(fvh)
                 #fhs_list.append(fvh)
@@ -477,7 +477,7 @@ class ModelTrainer():
         self.fit()
 
         output_file = op.expanduser(output_file)
-        print "Saved into: ", output_file
+        print("Saved into: ", output_file)
         self.cl.save(output_file)
 
 
@@ -549,7 +549,7 @@ def model_score_from_sliver_data(
     evaluation_all = []
 
     for oname, rname in zip(orig_fnames, ref_fnames):
-        print oname
+        print(oname)
         data3d_orig, metadata = io3d.datareader.read(oname)
         vs_mm1 = metadata['voxelsize_mm']
         data3d_seg, metadata = io3d.datareader.read(rname)

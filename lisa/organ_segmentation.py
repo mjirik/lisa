@@ -106,7 +106,7 @@ def import_gui():
     pass
 
 def printTotals(transferred, toBeTransferred):
-    print "Transferred: {0}\tOut of: {1}".format(transferred, toBeTransferred)
+    print("Transferred: {0}\tOut of: {1}".format(transferred, toBeTransferred))
 
 class OrganSegmentation():
     """
@@ -232,7 +232,7 @@ class OrganSegmentation():
         self.lisa_operator_identifier = lisa_operator_identifier
         # self.version = qmisc.getVersionString()
         # if self.version is None:
-        self.version = "1.9.29"
+        self.version = "1.9.39"
         self.viewermax = viewermax
         self.viewermin = viewermin
         self.volume_unit = volume_unit
@@ -515,10 +515,10 @@ class OrganSegmentation():
 # TODO make GUI in Qt
         from PyQt4.QtCore import pyqtRemoveInputHook
         pyqtRemoveInputHook()
-        print 'unique data1 ', np.unique(data3d_segmentation_actual)
-        print 'unique data2 ', np.unique(data3d_segmentation)
-        print "set label1 and label2"
-        print "then press 'c' and 'Enter'"
+        print('unique data1 ', np.unique(data3d_segmentation_actual))
+        print('unique data2 ', np.unique(data3d_segmentation))
+        print("set label1 and label2")
+        print("then press 'c' and 'Enter'")
         import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
         evaluation = volumetry_evaluation.compare_volumes_sliver(
@@ -1168,7 +1168,21 @@ class OrganSegmentation():
 
         self.segmentation = tumory.segmentation
 
-    def portalVeinSegmentation(self, **inparams):
+    def add_slab_label_carefully(self, numeric_label, string_label):
+        """ Add label to slab if it is not there yet.
+
+        :param numeric_label:
+        :param string_label:
+        :return:
+        """
+        slab = {string_label: numeric_label}
+        slab.update(self.slab)
+        self.slab = slab
+        logger.debug('self.slab')
+        logger.debug(str(self.slab))
+
+
+    def portalVeinSegmentation(self, numeric_label=2, string_label="porta", **inparams):
         """
         Segmentation of vein in specified volume. It is given by label "liver".
         Usualy it is number 1. If there is no specified volume all image is
@@ -1185,11 +1199,7 @@ class OrganSegmentation():
         from imtools import segmentation
         logger.info('segmentation max label ' + str(np.max(self.segmentation)))
         # if there is no organ segmentation, use all image
-        slab = {'porta': 2}
-        slab.update(self.slab)
-        logger.debug('self.slab')
-        logger.debug(str(self.slab))
-        self.slab = slab
+        self.add_slab_label_carefully(numeric_label=numeric_label, string_label=string_label)
 
         # if there is no liver segmentation, use whole image
         if np.max(self.segmentation) == 0:
@@ -1197,7 +1207,7 @@ class OrganSegmentation():
 
         # remove prev segmentation
         # TODO rozdělit na vnitřní a vnější část portální žíly
-        self.segmentation[self.segmentation == slab['porta']] = slab['liver']
+        self.segmentation[self.segmentation == self.slab[string_label]] = self.slab['liver']
 
         params = {
             'threshold': -1,
@@ -1226,10 +1236,8 @@ class OrganSegmentation():
             # binaryClosingIterations=2,
             # binaryOpeningIterations=0
         )
-        # from PyQt4.QtCore import pyqtRemoveInputHook
-        # pyqtRemoveInputHook()
         # import ipdb; ipdb.set_trace() # BREAKPOINT
-        self.segmentation[outputSegmentation == 1] = slab['porta']
+        self.segmentation[outputSegmentation == 1] = self.slab[string_label]
 
         # self.__vesselTree(outputSegmentation, 'porta')
 
@@ -1703,7 +1711,7 @@ def main(app=None, splash=None):  # pragma: no cover
             if app is None:
                 app = QApplication(sys.argv)
             # Create and display the splash screen
-            oseg_w = OrganSegmentationWindow(oseg)  # noqa
+            oseg_w = OrganSegmentationWindow(oseg, qapp=app)  # noqa
             if splash is not None:
                 splash.finish(oseg_w)
 #    import pdb; pdb.set_trace()
@@ -1713,10 +1721,10 @@ def main(app=None, splash=None):  # pragma: no cover
         import traceback
         # mport exceptionProcessing
         exceptionProcessing.reportException(e)
-        print traceback.format_exc()
+        print(traceback.format_exc())
         # aise e
 
 
 if __name__ == "__main__":
     main()
-    print "Thank you for using Lisa"
+    print("Thank you for using Lisa")

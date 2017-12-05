@@ -59,12 +59,12 @@ class DataManipulationTest(unittest.TestCase):
 
             outputdata = dama.unbiased_brick_filter(data, shi)
             imlab, num_features = scipy.ndimage.measurements.label(outputdata)
-            print num_features
+            print(num_features)
             suma += num_features
 
-        print "for is over"
+        print("for is over")
 
-        print suma
+        print(suma)
         # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
 

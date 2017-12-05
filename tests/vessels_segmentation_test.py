@@ -174,5 +174,30 @@ class VesselsSegmentationTest(unittest.TestCase):
 #
 #
 
+    @attr('interactive')
+    def test_ui_threshold_same_params_as_portal_segmentation(self):
+
+        params = {
+            'threshold': -1,
+            'inputSigma': 0.15,
+            'dilationIterations': 10,
+            'nObj': 1,
+            'biggestObjects': False,
+            'useSeedsOfCompactObjects': True,
+            'interactivity': True,
+            'binaryClosingIterations': 2,
+            'binaryOpeningIterations': 0
+        }
+        import imtools
+        import imtools.sample_data
+        datap = imtools.sample_data.generate()
+        app = QApplication(sys.argv)
+        outputTmp = segmentation.vesselSegmentation(
+            datap['data3d'],
+            datap['segmentation'],
+            # datap['voxelsize_mm'],
+            **params)
+        # uit.run()
+        # plt.show()
 if __name__ == "__main__":
     unittest.main()

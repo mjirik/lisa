@@ -31,10 +31,10 @@ class ResectionTest(unittest.TestCase):
         import sys
         from PyQt4.QtGui import QApplication
         app = QApplication(sys.argv)
-        print "Select points for planar virtual resection"
+        print("Select points for planar virtual resection")
         datap = lisa.virtual_resection.resection_planar(datap, interactivity=True, seeds=None)
 
-    def test_planar_resection(self):
+    def test_planar_resection2(self):
         """
         Check planar virtual resection
         :return:

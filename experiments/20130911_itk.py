@@ -18,13 +18,13 @@ data_path = os.path.join(path_to_script, '../sample_data/jatra_5mm/')
 
 
 
-print 'im1: 2D dicom image with SimpleITK'
+print('im1: 2D dicom image with SimpleITK')
 im1 = sitk.ReadImage(os.path.join(path_to_script,"../sample_data/jatra_5mm/IM-0001-0005.dcm"))
 pimsh = sitk.Show(im1)
 import pdb; pdb.set_trace()
 
 #--------------------------------------------
-print 'im2: 3D dicom image readed with our DataReader and visualization with SimpleITK'
+print('im2: 3D dicom image readed with our DataReader and visualization with SimpleITK')
 dr = datareader.DataReader()
 data3d, metadata = dr.Get3DData(data_path)
 

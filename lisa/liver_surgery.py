@@ -199,7 +199,7 @@ class MainWindow(QMainWindow):
         os_pars_all = self.pars['os_pars'].copy()
         os_pars_all.update(self.inps['os_inps'])
         os_pars_all.update({'qt_app':self.qt_app})
-        print os_pars_all
+        print(os_pars_all)
         oseg = organ_segmentation.OrganSegmentation(**os_pars_all)
       #  args.dcmdir,
       #          working_voxelsize_mm=args.voxelsize_mm,
@@ -212,7 +212,7 @@ class MainWindow(QMainWindow):
 
         oseg.interactivity()
 
-        print (
+        print(
                 "Volume " +
                 str(oseg.get_segmented_volume_size_mm3() / 1000000.0) + ' [l]')
 
@@ -318,7 +318,7 @@ def main():
     # volume
     #volume_mm3 = np.sum(oseg.segmentation > 0) * np.prod(oseg.voxelsize_mm)
 
-    print (
+    print(
             "Volume " +
             str(oseg.get_segmented_volume_size_mm3() / 1000000.0) + ' [l]')
     #pyed = sed3.sed3(oseg.data3d, contour =
