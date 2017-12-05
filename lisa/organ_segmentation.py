@@ -24,7 +24,6 @@ import sys
 import os
 import os.path as op
 # from collections import namedtuple
-import exceptionProcessing
 
 # from scipy.io import loadmat, savemat
 import scipy
@@ -33,6 +32,8 @@ import numpy as np
 import datetime
 import argparse
 import copy
+
+from . import exceptionProcessing
 # tady uz je logger
 # import dcmreaddata as dcmreader
 # from pysegbase import pycut
@@ -53,18 +54,18 @@ import volumetry_evaluation
 
 # from seg2fem import gen_mesh_from_voxels, gen_mesh_from_voxels_mc
 # from viewer import QVTKViewer
-import qmisc
-import misc
-import config
 from io3d import datareader
 from io3d import datawriter
-import data_plus
-import support_structure_segmentation as sss
 import io3d.cachefile as cachef
-import config_default
-import organ_seeds
-import lisa_data
-import data_manipulation
+from . import data_plus
+from . import support_structure_segmentation as sss
+from . import config_default
+from . import organ_seeds
+from . import lisa_data
+from . import data_manipulation
+from . import qmisc
+from . import misc
+from . import config
 
 # import audiosupport
 # import skimage
