@@ -117,7 +117,7 @@ def train_liver_localizator_from_sliver_data(
     hist=[]
     fhs_list = []
     for oname, rname in zip(orig_fnames, ref_fnames):
-        print oname
+        print(oname)
         data3d_orig, metadata = io3d.datareader.read(oname)
         vs_mm1 = metadata['voxelsize_mm']
         data3d_seg, metadata = io3d.datareader.read(rname)
@@ -130,8 +130,7 @@ def train_liver_localizator_from_sliver_data(
             sf.add_train_data(data3d_orig, data3d_seg, voxelsize_mm=vs_mm)
         except:
             traceback.print_exc()
-            print "problem"
-            pass
+            print("problem")
         # fvhn = copy.deepcopy(fvh)
         #fhs_list.append(fvh)
 

@@ -15,11 +15,12 @@ import logging
 logger = logging.getLogger(__name__)
 import numpy as np
 import argparse
-
-import organ_model
-import imtools
-import data_manipulation
 import scipy
+
+import imtools
+
+from . import organ_model
+from . import data_manipulation
 
 
 def automatic_liver_seeds(

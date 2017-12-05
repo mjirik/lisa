@@ -37,11 +37,9 @@ import sed3
 import argparse
 #import sed3
 
-import segmentation
-import qmisc
-import misc
-import organ_segmentation
-import experiments
+from .. import misc
+from .. import organ_segmentation
+from .. import experiments
 
 
 def main():
@@ -76,8 +74,7 @@ def main():
             oseg = organ_segmentation.OrganSegmentation(**params)
 
             oseg.interactivity()
-            print(()
-                    "Volume " +
+            print("Volume " +
                     str(oseg.get_segmented_volume_size_mm3() / 1000000.0)
                     + ' [l]')
 
