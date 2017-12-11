@@ -99,20 +99,43 @@ def Rez_podle_roviny(plane, data, voxel):
 
 
 # ----------------------------------------------------------
-def cut_editor_old(data):
+def cut_editor_old(data, label=None):
 
-    pyed = sed3.sed3qt(data['data3d'], contour=data['segmentation'])
+    if label is None:
+        contour=data['segmentation']
+    else:
+        if type(label) == str:
+            label = data['slab'][label]
+        contour=(data['segmentation'] == label).astype(np.int8)
+    pyed = sed3.sed3qt(data['data3d'], contour=contour)
     pyed.exec_()
 
     return pyed.seeds
 
 
-def split_vessel(data, seeds, vessel_volume_threshold=0.95, dilatation_iterations=1):
+def split_vessel(datap, seeds, vessel_volume_threshold=0.95, dilatation_iterations=1, input_label="porta",
+                 output_label1 = 1, output_label2 = 2, input_seeds_cut_label=1, input_seeds_select_label=3):
+    """
 
-    split_obj0 = seeds
+    :param datap: data plus format with data3d, segmentation, slab ...
+    :param seeds: 3d ndarray same size as data3d, label 1 is place where should be vessel cuted. Label 2 points to
+    the vessel with output label 1 after the segmentation
+    :param vessel_volume_threshold:
+    :param dilatation_iterations:
+    :param input_label: which vessel should be splited
+    :param output_label1: output label for vessel part marked with right button (if it is used)
+    :param output_label2: ouput label for not-marked vessel part
+    :return:
+    """
+    split_obj0 = (seeds == input_seeds_cut_label).astype(np.int8)
     split_obj = split_obj0.copy()
 
-    vessels = data['segmentation'] == data['slab']['porta']
+    if type(input_label) is str:
+        numeric_label = datap['slab'][input_label]
+    else:
+        numeric_label = input_label
+
+    vessels = datap['segmentation'] == numeric_label
     vesselstmp = vessels
     sumall = np.sum(vessels == 1)
 
@@ -120,7 +143,7 @@ def split_vessel(data, seeds, vessel_volume_threshold=0.95, dilatation_iteration
     # vesselstmp = vessels * (1 - split_obj)
 
     lab, n_obj = scipy.ndimage.label(vesselstmp)
-    print(n_obj)
+    logger.debug("number of objects " + str(n_obj))
 
     # while n_obj < 2 :
 # dokud neni z celkoveho objektu ustipnuto alespon 80 procent
@@ -139,11 +162,21 @@ def split_vessel(data, seeds, vessel_volume_threshold=0.95, dilatation_iteration
 # vymaz nejvetsiho
     lab[obj1 == 1] = 0
     obj2 = get_biggest_object(lab)
-    # from PyQt4.QtCore import pyqtRemoveInputHook
-    # pyqtRemoveInputHook()
-    # import ipdb; ipdb.set_trace() # BREAKPOINT
 
-    lab = obj1 + 2 * obj2
+    pixel = obj1[seeds == input_seeds_select_label][0]
+    from PyQt4.QtCore import pyqtRemoveInputHook
+    pyqtRemoveInputHook()
+    import ipdb; ipdb.set_trace() # BREAKPOINT
+
+    if pixel > 0:
+        ol1 = output_label1
+        ol2 = output_label2
+    else:
+        ol2 = output_label1
+        ol1 = output_label2
+
+    # first selected pixel with right button
+    lab = ol1 * obj1 + ol2 * obj2
     cut_by_user = split_obj0
     return lab, cut_by_user
 
@@ -380,7 +413,7 @@ def split_organ_by_plane(data, seeds):
 
     return segm, dist1, dist2
 
-def split_organ_by_two_vessels(datap, labeled):
+def split_organ_by_two_vessels(datap, seeds, organ_label=1, seed_label1=1, seed_label2=2):
     """
 
     Input of function is ndarray with 2 labeled vessels and data.
@@ -391,21 +424,18 @@ def split_organ_by_two_vessels(datap, labeled):
            "voxelsize_mm",
            "segmentation": 3d ndarray with image segmentation
            "slab": segmentation labels
-    labeled: ndarray with same size as data3d
-            0: empty volume
-            1: first part of portal vein
-            2: second part of portal vein
+    seeds: ndarray with same size as data3d
+            1: first part of portal vein (or defined in seed1_label)
+            2: second part of portal vein (or defined in seed2_label)
 
     """
-    l1 = 1
-    l2 = 2
     # dist se tady počítá od nul jenom v jedničkách
     dist1 = scipy.ndimage.distance_transform_edt(
-        labeled != l1,
+        seeds != seed_label1,
         sampling=datap['voxelsize_mm']
     )
     dist2 = scipy.ndimage.distance_transform_edt(
-        labeled != l2,
+        seeds != seed_label2,
         sampling=datap['voxelsize_mm']
     )
     # import skfmm
@@ -427,8 +457,8 @@ def split_organ_by_two_vessels(datap, labeled):
 
     # segm = (dist1 < dist2) * (data['segmentation'] != data['slab']['none'])
 
-    segm = (((datap['segmentation'] != 0) * (dist1 < dist2)).astype('int8') +
-            (datap['segmentation'] != 0).astype('int8'))
+    segm = (((datap['segmentation'] == organ_label) * (dist1 > dist2)).astype('int8') +
+            (datap['segmentation'] == organ_label).astype('int8'))
 
     return segm, dist1, dist2
 

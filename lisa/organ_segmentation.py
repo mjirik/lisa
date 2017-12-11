@@ -1448,6 +1448,74 @@ class OrganSegmentation():
                 output_dicom_dir, overlays,
                 data['crinfo'], data['orig_shape'])
 
+    def fill_holes_in_segmentation(self, label=None):
+        """
+        Fill holes in segmentation.
+
+        Label could be set interactivelly.
+
+        :param label:
+        :return:
+        """
+        import imtools.show_segmentation
+        zero_label = 0
+        if label is None:
+            from PyQt4.QtCore import pyqtRemoveInputHook
+            pyqtRemoveInputHook()
+            # mport ipdb; ipdb.set_trace() # BREAKPOINT
+            print("label to fill holes")
+            print("--------------------")
+            print("for example >> label = 1 ")
+            label = 1
+            import ipdb
+            ipdb.set_trace()
+        segm_to_fill = self.segmentation == label
+        self.segmentation[segm_to_fill] = zero_label
+        segm_to_fill = scipy.ndimage.morphology.binary_fill_holes(segm_to_fill)
+        self.segmentation[segm_to_fill] = label
+
+        # segm = imtools.show_segmentation.select_labels(segmentation=self.segmentation, labels=labels)
+        # self.
+
+    def split_vessel(self, input_label=None, output_label1=1, output_label2=2, **kwargs):
+        """
+        Split vessel based on user interactivity.
+
+        More documentation in virtual_resection.split_vessel()
+
+
+        :param input_label:
+        :param output_label1:
+        :param output_label2:
+        :param kwargs: read function virtual_resection.split_vessel() for more information.
+        :return:
+        """
+        if input_label is None:
+            from PyQt4.QtCore import pyqtRemoveInputHook
+            pyqtRemoveInputHook()
+            # mport ipdb; ipdb.set_trace() # BREAKPOINT
+            print("label of vessel to split")
+            print("--------------------")
+            print("for example >> input_label = 2 ")
+            input_label = "porta"
+            import ipdb
+            ipdb.set_trace()
+
+        import virtual_resection
+        datap = self.export()
+        seeds = virtual_resection.cut_editor_old(datap, label=input_label)
+        lab, cut_by_user = virtual_resection.split_vessel(datap=datap, seeds=seeds, input_label=input_label, **kwargs)
+        self.segmentation[lab==1] = output_label1
+        self.segmentation[lab==2] = output_label2
+
+    def split_organ_by_two_vessels(self, output_label1=1, output_label2=5, **kwargs):
+        import virtual_resection
+        datap = self.export()
+        segm, dist1, dist2 = virtual_resection.split_organ_by_two_vessels(datap, self.segmentation, **kwargs)
+        self.segmentation[segm==1] = output_label1
+        self.segmentation[segm==2] = output_label2
+
+
 def logger_init():  # pragma: no cover
     # import logging
     logger = logging.getLogger()
