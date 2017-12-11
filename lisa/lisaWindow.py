@@ -784,6 +784,39 @@ class OrganSegmentationWindow(QMainWindow):
 
         self.statusBar().showMessage('Ready')
 
+    def mask_segmentation(self):
+        # @todo add button for this functionality
+        if self.oseg.data3d is None:
+            self.statusBar().showMessage('No DICOM data!')
+            return
+
+        self.statusBar().showMessage('Mask region...')
+        QApplication.processEvents()
+
+        pyed = QTSeedEditor(
+            self.oseg.segmentation, mode='mask',
+            voxelSize=self.oseg.voxelsize_mm,
+            contours=((self.oseg.segmentation == 0).astype(np.int8)*2)
+        )
+
+        pyed.contours_old = pyed.contours.copy()
+        # initial mask set
+        # pyed.masked = np.ones(self.oseg.data3d.shape, np.int8)
+        # pyed.masked = (self.oseg.segmentation == 0).astype(np.int8)
+
+        mx = self.oseg.viewermax
+        mn = self.oseg.viewermin
+        width = mx - mn
+        # enter = (float(mx)-float(mn))
+        center = np.average([mx, mn])
+        logger.debug("window params max %f min %f width, %f center %f" %
+                     (mx, mn, width, center))
+        pyed.changeC(center)
+        pyed.changeW(width)
+        pyed.exec_()
+
+        self.statusBar().showMessage('Ready')
+
     def btnLoadSegmentationFromFile(self):
         """
         Function make GUI for reading segmentaion file and calls
