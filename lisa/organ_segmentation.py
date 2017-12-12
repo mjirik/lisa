@@ -1168,6 +1168,56 @@ class OrganSegmentation():
 
         self.segmentation = tumory.segmentation
 
+
+    def nlabela(self, label, label_meta=None):
+        """
+        Like function label_add().
+
+        :param label:
+        :param label_meta:
+        :return:
+        """
+        return self.label_add(label, label_meta)
+
+    def label_add(self, label, label_meta=None):
+
+        """
+        Add label if it is necessery and return its numeric value.
+
+        If "new" keyword is used and no other information is provided, the max + 1 label is created.
+        If "new" keyword is used and additional numeric info is provided, the number is used also as a key.
+        :param label: string, number or "new"
+        :param label_meta: string, number or "new
+        :return:
+        """
+
+        if type(label) == str:
+            if label_meta is None:
+                if label not in self.slab.keys():
+                    free_numeric_label = np.max(self.slab.values()) + 1
+                    if label == "new":
+                        label = str(free_numeric_label)
+                    self.slab[label] = free_numeric_label
+                    return self.slab[label]
+                else:
+                    return self.slab[label]
+            else:
+                if label == "new":
+                    label = str(label_meta)
+                self.add_slab_label_carefully(label_meta, label)
+                return label_meta
+        else:
+            if label_meta is None:
+                self.add_slab_label_carefully(label, str(label))
+                return label
+            else:
+                if label_meta == "new":
+                    label_meta = str(label)
+                self.add_slab_label_carefully(label, label_meta)
+                return label
+
+
+
     def add_slab_label_carefully(self, numeric_label, string_label):
         """ Add label to slab if it is not there yet.
 
@@ -1181,8 +1231,30 @@ class OrganSegmentation():
         logger.debug('self.slab')
         logger.debug(str(self.slab))
 
+    def nlabel(self, label):
+        """
+        Get numeric label
+        :param label:
+        :return:
+        """
 
-    def portalVeinSegmentation(self, numeric_label=2, string_label="porta", **inparams):
+        if type(label) == str:
+            return self.slab[label]
+        else:
+            return label
+
+    def segmentation_relabel(self, from_label, to_label):
+        """
+        Relabel segmentation
+        :param from_label: int or string
+        :param to_label: int or string
+        :return:
+        """
+        from_label = self.nlabel(from_label)
+        to_label = self.nlabel(to_label)
+        self.segmentation[self.segmentation == from_label] = to_label
+
+    def portalVeinSegmentation(self, inner_vessel_label="porta", organ_label="liver", outer_vessel_label=None, **inparams):
         """
         Segmentation of vein in specified volume. It is given by label "liver".
         Usualy it is number 1. If there is no specified volume all image is
@@ -1196,10 +1268,14 @@ class OrganSegmentation():
         For example interactivity=False, biggestObjects=True, ...
         """
 
+
         from imtools import segmentation
         logger.info('segmentation max label ' + str(np.max(self.segmentation)))
+
+        if outer_vessel_label is None:
+            outer_vessel_label = inner_vessel_label
         # if there is no organ segmentation, use all image
-        self.add_slab_label_carefully(numeric_label=numeric_label, string_label=string_label)
+        # self.add_slab_label_carefully(numeric_label=numeric_label, string_label=string_label)
 
         # if there is no liver segmentation, use whole image
         if np.max(self.segmentation) == 0:
@@ -1207,7 +1283,6 @@ class OrganSegmentation():
 
         # remove prev segmentation
         # TODO rozdělit na vnitřní a vnější část portální žíly
-        self.segmentation[self.segmentation == self.slab[string_label]] = self.slab['liver']
 
         params = {
             'threshold': -1,
@@ -1221,9 +1296,11 @@ class OrganSegmentation():
             'binaryOpeningIterations': 0
         }
         params.update(inparams)
+        # logger.debug("ogran_label ", organ_label)
+        target_segmentation = (self.segmentation == self.nlabel(organ_label)).astype(np.int8)
         outputSegmentation = segmentation.vesselSegmentation(
             self.data3d,
-            self.segmentation,
+            target_segmentation,
             **params
             # threshold=-1,
             # inputSigma=0.15,
@@ -1237,7 +1314,15 @@ class OrganSegmentation():
             # binaryOpeningIterations=0
         )
         # import ipdb; ipdb.set_trace() # BREAKPOINT
-        self.segmentation[outputSegmentation == 1] = self.slab[string_label]
+        # outputSegmentation = outputSegmentation + target_segmentation
+        # self.segmentation[outputSegmentation == 1] = self.nlabela(outer_vessel_label)
+        # self.segmentation[outputSegmentation == 2] = self.nlabela(inner_vessel_label)
+
+        from PyQt4.QtCore import pyqtRemoveInputHook
+        pyqtRemoveInputHook()
+        import ipdb; ipdb.set_trace()
+        self.segmentation[(outputSegmentation==1) & (target_segmentation==1)] = self.nlabela(inner_vessel_label)
+        self.segmentation[(outputSegmentation==1) & (target_segmentation==0)] = self.nlabela(outer_vessel_label)
 
         # self.__vesselTree(outputSegmentation, 'porta')
 
