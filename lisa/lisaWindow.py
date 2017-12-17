@@ -868,7 +868,7 @@ class OrganSegmentationWindow(QMainWindow):
                                  self.oseg.slab.keys(),
                                  editable=True)
 
-        numlab = self.oseg.nlabela(str(strlab))
+        numlab = self.oseg.nlabels(str(strlab))
         return numlab, str(strlab)
 
     def compareSegmentationWithFile(self):
@@ -1174,8 +1174,8 @@ class OrganSegmentationWindow(QMainWindow):
         """
 
         self.statusBar().showMessage('Vessel segmentation ...')
-        self.oseg.add_slab_label_carefully(numeric_label=2, string_label="porta")
-        self.oseg.add_slab_label_carefully(numeric_label=3, string_label="hepatic_veins")
+        self.oseg.nlabels(2, "porta")
+        self.oseg.nlabels(3, "hepatic_veins")
         organ_numeric_label, string_label = self.ui_select_label("Organ label")
         vessel_numeric_label, string_label = self.ui_select_label("Vessel label")
         # from PyQt4.QtCore import pyqtRemoveInputHook

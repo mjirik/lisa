@@ -18,15 +18,25 @@ import numpy as np
 
 import qmisc
 
-def select_labels(segmentation, labels):
-    ds = np.zeros(segmentation.shape, np.bool)
-    for lab in labels:
-        print("print zpracovavam ", lab)
-        dadd = (segmentation == lab)
 
-        ds = ds | dadd
+def fill_holes_in_segmentation(segmentation, label):
+    """
+    Fill holes in segmentation.
 
-    return ds
+    Label could be set interactivelly.
+
+    :param label:
+    :return:
+    """
+    import imtools.show_segmentation
+    zero_label = 0
+    segm_to_fill = segmentation == label
+    segm_to_fill = scipy.ndimage.morphology.binary_fill_holes(segm_to_fill)
+    return segm_to_fill
+    # self.segmentation[segm_to_fill] = label
+
+    # segm = imtools.show_segmentation.select_labels(segmentation=self.segmentation, labels=labels)
+    # self.
 
 def unbiased_brick_filter(binary_data, crinfo):
     """

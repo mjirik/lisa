@@ -28,10 +28,12 @@ from skimage import morphology
 #     QFont, QInputDialog, QComboBox, QRadioButton, QButtonGroup
 
 # ----------------- my scripts --------
-import misc
+from . import misc
 import sed3
 # import show3
-import qmisc
+from . import qmisc
+from . import data_manipulation
+import imtools.image_manipulation as imma
 
 
 def resection(data, name=None, method='PV',
@@ -429,13 +431,21 @@ def split_organ_by_two_vessels(datap, seeds, organ_label=1, seed_label1=1, seed_
             2: second part of portal vein (or defined in seed2_label)
 
     """
+    slab = datap["slab"]
+    segmentation = datap["segmentation"]
+    if type(seed_label1) != list:
+        seed_label1 = [seed_label1]
+    if type(seed_label2) != list:
+        seed_label2 = [seed_label2]
     # dist se tady počítá od nul jenom v jedničkách
     dist1 = scipy.ndimage.distance_transform_edt(
-        seeds != seed_label1,
+        1 - imma.select_labels(seeds, seed_label1, slab),
+        # seeds != seed_label1,
         sampling=datap['voxelsize_mm']
     )
     dist2 = scipy.ndimage.distance_transform_edt(
-        seeds != seed_label2,
+        1 - imma.select_labels(seeds, seed_label2, slab),
+        # seeds != seed_label2,
         sampling=datap['voxelsize_mm']
     )
     # import skfmm
@@ -456,9 +466,9 @@ def split_organ_by_two_vessels(datap, seeds, organ_label=1, seed_label1=1, seed_
     # import ipdb; ipdb.set_trace() # BREAKPOINT
 
     # segm = (dist1 < dist2) * (data['segmentation'] != data['slab']['none'])
-
-    segm = (((datap['segmentation'] == organ_label) * (dist1 > dist2)).astype('int8') +
-            (datap['segmentation'] == organ_label).astype('int8'))
+    target_organ_segmentation = imma.select_labels(segmentation, organ_label, slab)
+    segm = ((target_organ_segmentation * (dist1 > dist2)).astype('int8') +
+            target_organ_segmentation.astype('int8'))
 
     return segm, dist1, dist2
 

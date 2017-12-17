@@ -33,7 +33,7 @@ class VesselsSegmentationTest(unittest.TestCase):
 
     def synthetic_data(self):
         # data
-        slab = {'none': 0, 'liver': 1, 'porta': 2}
+        slab = {'none': 0, 'liver': 1, 'porta': 2, "hepatic_veins": 3}
         voxelsize_mm = np.array([1.0, 1.0, 1.2])
 
         segm = np.zeros([256, 256, 80], dtype=np.int16)
@@ -44,6 +44,7 @@ class VesselsSegmentationTest(unittest.TestCase):
         segm[120:130, 70:190, 40:45] = slab['porta']
         segm[80:130, 100:110, 40:45] = slab['porta']
         segm[120:170, 130:135, 40:44] = slab['porta']
+        segm[150:160, 70:190, 51:55] = slab['hepatic_veins']
 
         data3d = np.zeros(segm.shape)
         data3d[segm == slab['liver']] = 156
@@ -133,6 +134,40 @@ class VesselsSegmentationTest(unittest.TestCase):
 
         self.assertGreater(ratio, 0.17)
         self.assertLess(ratio, 0.19)
+
+    def test_split_by_two_vessels(self):
+        """
+        Make virtual resection on synthetic data
+        """
+        import lisa.virtual_resection as vr
+        data3d, segm, voxelsize_mm, slab = self.synthetic_data()
+        seeds = np.zeros([256, 256, 80], dtype=np.int16)
+        seeds[125, 160, 44] = 1
+        datap = {'data3d': data3d, 'segmentation': segm,
+                 'voxelsize_mm': voxelsize_mm, 'slab': slab}
+
+        oseg = organ_segmentation.OrganSegmentation()
+        oseg.import_dataplus(datap)
+
+        oseg.split_organ_by_two_vessels(
+            seed_label1="porta",
+            seed_label2="hepatic_veins",
+            organ_label="liver",
+            output_label1="liver",
+            output_label2="liver_remnant"
+        )
+
+        resected = np.sum(
+            datap['segmentation'] == datap['slab']['liver'])
+        remaining = np.sum(
+            datap['segmentation'] == datap['slab']['liver_remnant'])
+        ratio = np.double(resected)/(resected+remaining)
+        # ed = sed3.sed3(datap["segmentation"])
+        # ed.show()
+        # print(ratio)
+
+        self.assertGreater(ratio, 0.6)
+        self.assertLess(ratio, 0.8)
 
     @attr('slow')
     def test_real_data_segmentation(self):

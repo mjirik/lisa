@@ -66,6 +66,9 @@ from . import qmisc
 from . import misc
 from . import config
 from . import volumetry_evaluation
+import imtools
+# import imtools.image_manipulation
+import imtools.image_manipulation as imma
 
 # import audiosupport
 # import skimage
@@ -662,9 +665,12 @@ class OrganSegmentation():
             logger.debug("Seeds are generated")
             self.seeds = np.zeros(self.data3d.shape, dtype=np.int8)
         logger.debug("unique seeds labels " + str(np.unique(self.seeds)))
-        logger.info('dir ' + str(self.datapath) + ", series_number" +
-                    str(datap['series_number']) + 'voxelsize_mm' +
-                    str(self.voxelsize_mm))
+        info_text = 'dir ' + str(self.datapath)
+        if "series_number" in datap.keys():
+
+            info_text += ", series_number " + str(datap['series_number'])
+        info_text += 'voxelsize_mm ' + str(self.voxelsize_mm)
+        logger.info(info_text)
 
     def crop(self, tmpcrinfo):
         """
@@ -1169,20 +1175,10 @@ class OrganSegmentation():
         self.segmentation = tumory.segmentation
 
 
-    def nlabela(self, label, label_meta=None):
-        """
-        Like function label_add().
-
-        :param label:
-        :param label_meta:
-        :return:
-        """
-        return self.label_add(label, label_meta)
-
-    def label_add(self, label, label_meta=None):
+    def nlabels(self, label, label_meta=None):
 
         """
-        Add label if it is necessery and return its numeric value.
+        Add one or more labels if it is necessery and return its numeric values.
 
         If "new" keyword is used and no other information is provided, the max + 1 label is created.
         If "new" keyword is used and additional numeric info is provided, the number is used also as a key.
@@ -1191,57 +1187,10 @@ class OrganSegmentation():
         :return:
         """
 
-        if type(label) == str:
-            if label_meta is None:
-                if label not in self.slab.keys():
-                    free_numeric_label = np.max(self.slab.values()) + 1
-                    if label == "new":
-                        label = str(free_numeric_label)
-                    self.slab[label] = free_numeric_label
-                    return self.slab[label]
-                else:
-                    return self.slab[label]
-            else:
-                if label == "new":
-                    label = str(label_meta)
-                self.add_slab_label_carefully(label_meta, label)
-                return label_meta
-        else:
-            if label_meta is None:
-                self.add_slab_label_carefully(label, str(label))
-                return label
-            else:
-                if label_meta == "new":
-                    label_meta = str(label)
-                self.add_slab_label_carefully(label, label_meta)
-                return label
+        return imma.get_nlabels(self.slab, label, label_meta)
 
-
-
-    def add_slab_label_carefully(self, numeric_label, string_label):
-        """ Add label to slab if it is not there yet.
-
-        :param numeric_label:
-        :param string_label:
-        :return:
-        """
-        slab = {string_label: numeric_label}
-        slab.update(self.slab)
-        self.slab = slab
-        logger.debug('self.slab')
-        logger.debug(str(self.slab))
-
-    def nlabel(self, label):
-        """
-        Get numeric label
-        :param label:
-        :return:
-        """
-
-        if type(label) == str:
-            return self.slab[label]
-        else:
-            return label
+    def add_missing_labels(self):
+        imma.add_missing_labels(self.segmentation, self.slab)
 
     def segmentation_relabel(self, from_label, to_label):
         """
@@ -1250,8 +1199,8 @@ class OrganSegmentation():
         :param to_label: int or string
         :return:
         """
-        from_label = self.nlabel(from_label)
-        to_label = self.nlabel(to_label)
+        from_label = self.nlabels(from_label)
+        to_label = self.nlabels(to_label)
         self.segmentation[self.segmentation == from_label] = to_label
 
     def portalVeinSegmentation(self, inner_vessel_label="porta", organ_label="liver", outer_vessel_label=None, **inparams):
@@ -1297,32 +1246,24 @@ class OrganSegmentation():
         }
         params.update(inparams)
         # logger.debug("ogran_label ", organ_label)
-        target_segmentation = (self.segmentation == self.nlabel(organ_label)).astype(np.int8)
+        # target_segmentation = (self.segmentation == self.nlabels(organ_label)).astype(np.int8)
+        target_segmentation = imma.select_labels(
+            self.segmentation, organ_label, self.slab
+        )
         outputSegmentation = segmentation.vesselSegmentation(
             self.data3d,
-            target_segmentation,
+            # target_segmentation,
+            segmentation=self.segmentation,
+            organ_label=organ_label,
+            slab=self.slab,
             **params
-            # threshold=-1,
-            # inputSigma=0.15,
-            # dilationIterations=10,
-            # nObj=1,
-            # biggestObjects=False,
-            # useSeedsOfCompactObjects=True,
-            # # useSeedsOfCompactObjects=False,
-            # interactivity=True,
-            # binaryClosingIterations=2,
-            # binaryOpeningIterations=0
         )
-        # import ipdb; ipdb.set_trace() # BREAKPOINT
-        # outputSegmentation = outputSegmentation + target_segmentation
-        # self.segmentation[outputSegmentation == 1] = self.nlabela(outer_vessel_label)
-        # self.segmentation[outputSegmentation == 2] = self.nlabela(inner_vessel_label)
 
         from PyQt4.QtCore import pyqtRemoveInputHook
         pyqtRemoveInputHook()
         import ipdb; ipdb.set_trace()
-        self.segmentation[(outputSegmentation==1) & (target_segmentation==1)] = self.nlabela(inner_vessel_label)
-        self.segmentation[(outputSegmentation==1) & (target_segmentation==0)] = self.nlabela(outer_vessel_label)
+        self.segmentation[(outputSegmentation==1) & (target_segmentation==1)] = self.nlabels(inner_vessel_label)
+        self.segmentation[(outputSegmentation==1) & (target_segmentation==0)] = self.nlabels(outer_vessel_label)
 
         # self.__vesselTree(outputSegmentation, 'porta')
 
@@ -1533,7 +1474,7 @@ class OrganSegmentation():
                 output_dicom_dir, overlays,
                 data['crinfo'], data['orig_shape'])
 
-    def fill_holes_in_segmentation(self, label=None):
+    def fill_holes_in_segmentation(self, label):
         """
         Fill holes in segmentation.
 
@@ -1544,17 +1485,7 @@ class OrganSegmentation():
         """
         import imtools.show_segmentation
         zero_label = 0
-        if label is None:
-            from PyQt4.QtCore import pyqtRemoveInputHook
-            pyqtRemoveInputHook()
-            # mport ipdb; ipdb.set_trace() # BREAKPOINT
-            print("label to fill holes")
-            print("--------------------")
-            print("for example >> label = 1 ")
-            label = 1
-            import ipdb
-            ipdb.set_trace()
-        segm_to_fill = self.segmentation == label
+        segm_to_fill = self.segmentation == self.nlabels(label)
         self.segmentation[segm_to_fill] = zero_label
         segm_to_fill = scipy.ndimage.morphology.binary_fill_holes(segm_to_fill)
         self.segmentation[segm_to_fill] = label
@@ -1592,13 +1523,34 @@ class OrganSegmentation():
         lab, cut_by_user = virtual_resection.split_vessel(datap=datap, seeds=seeds, input_label=input_label, **kwargs)
         self.segmentation[lab==1] = output_label1
         self.segmentation[lab==2] = output_label2
+        
+    def new_label_from_compact_segmentation(self, seeds):
+        """
 
-    def split_organ_by_two_vessels(self, output_label1=1, output_label2=5, **kwargs):
+        :param seeds:
+        :return:
+        """
+
+
+    def split_organ_by_two_vessels(
+            self, output_label1=1, output_label2=5,
+            organ_label=1,
+            seed_label1=1,
+            seed_label2=2,
+            **kwargs):
         import virtual_resection
         datap = self.export()
-        segm, dist1, dist2 = virtual_resection.split_organ_by_two_vessels(datap, self.segmentation, **kwargs)
-        self.segmentation[segm==1] = output_label1
-        self.segmentation[segm==2] = output_label2
+        segm, dist1, dist2 = virtual_resection.split_organ_by_two_vessels(
+            datap, seeds=self.segmentation,
+            organ_label=organ_label,
+            seed_label1=seed_label1,
+            seed_label2=seed_label2,
+            **kwargs)
+        # import sed3
+        # ed = sed3.sed3(segm)
+        # ed.show()
+        self.segmentation[segm==1] = self.nlabels(output_label1)
+        self.segmentation[segm==2] = self.nlabels(output_label2)
 
 
 def logger_init():  # pragma: no cover
