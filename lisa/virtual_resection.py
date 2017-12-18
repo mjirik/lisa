@@ -415,7 +415,7 @@ def split_organ_by_plane(data, seeds):
 
     return segm, dist1, dist2
 
-def split_organ_by_two_vessels(datap, seeds, organ_label=1, seed_label1=1, seed_label2=2):
+def split_organ_by_two_vessels(datap, seeds, organ_label=1, seed_label1=1, seed_label2=2, weight1=1, weight2=1):
     """
 
     Input of function is ndarray with 2 labeled vessels and data.
@@ -467,7 +467,7 @@ def split_organ_by_two_vessels(datap, seeds, organ_label=1, seed_label1=1, seed_
 
     # segm = (dist1 < dist2) * (data['segmentation'] != data['slab']['none'])
     target_organ_segmentation = imma.select_labels(segmentation, organ_label, slab)
-    segm = ((target_organ_segmentation * (dist1 > dist2)).astype('int8') +
+    segm = ((target_organ_segmentation * ((dist1* weight2) > (dist2 * weight2))).astype('int8') +
             target_organ_segmentation.astype('int8'))
 
     return segm, dist1, dist2
