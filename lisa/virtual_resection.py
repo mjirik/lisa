@@ -415,22 +415,29 @@ def split_organ_by_plane(data, seeds):
 
     return segm, dist1, dist2
 
-def split_organ_by_two_vessels(datap, seeds, organ_label=1, seed_label1=1, seed_label2=2, weight1=1, weight2=1):
+def split_organ_by_two_vessels(datap,
+                               seeds, organ_label=1,
+                               seed_label1=1, seed_label2=2,
+                               weight1=1, weight2=1):
     """
 
     Input of function is ndarray with 2 labeled vessels and data.
     Output is segmented organ by vessls using minimum distance criterium.
 
-    datap: dictionary with 3d data, segmentation, and other information
+    :param datap: dictionary with 3d data, segmentation, and other information
            "data3d": 3d-ndarray with intensity data
            "voxelsize_mm",
            "segmentation": 3d ndarray with image segmentation
            "slab": segmentation labels
-    seeds: ndarray with same size as data3d
+    :param seeds: ndarray with same size as data3d
             1: first part of portal vein (or defined in seed1_label)
             2: second part of portal vein (or defined in seed2_label)
+    :param weight1: distance weight from seed_label1
+    :param weight2: distance weight from seed_label2
 
     """
+    weight1 = 1 if weight1 is None else weight1
+
     slab = datap["slab"]
     segmentation = datap["segmentation"]
     if type(seed_label1) != list:
@@ -467,7 +474,7 @@ def split_organ_by_two_vessels(datap, seeds, organ_label=1, seed_label1=1, seed_
 
     # segm = (dist1 < dist2) * (data['segmentation'] != data['slab']['none'])
     target_organ_segmentation = imma.select_labels(segmentation, organ_label, slab)
-    segm = ((target_organ_segmentation * ((dist1* weight2) > (dist2 * weight2))).astype('int8') +
+    segm = ((target_organ_segmentation * ((dist1 / weight1) > (dist2 / weight2))).astype('int8') +
             target_organ_segmentation.astype('int8'))
 
     return segm, dist1, dist2

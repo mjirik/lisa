@@ -23,7 +23,7 @@ from dicom2fem import seg2fem
 import viewer
 import io3d
 import dicom2fem
-from data_manipulation import select_labels
+from imtools.image_manipulation import select_labels
 
 
 def seg2stl(
