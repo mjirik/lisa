@@ -66,6 +66,7 @@ from . import qmisc
 from . import misc
 from . import config
 from . import volumetry_evaluation
+from . import segmentation_general
 import imtools
 # import imtools.image_manipulation
 import imtools.image_manipulation as imma
@@ -447,15 +448,6 @@ class OrganSegmentation():
         self.working_voxelsize_mm = vx_size
         # return vx_size
 
-    def __volume_blowup_criterial_function(self, threshold, wanted_volume,
-                                           segmentation_smooth
-                                           ):
-
-        segm = (1.0 * segmentation_smooth > threshold).astype(np.int8)
-        vol2 = np.sum(segm)
-        criterium = (wanted_volume - vol2) ** 2
-        return criterium
-
     def load_data(self, datapath):
         self.datapath = datapath
 
@@ -535,45 +527,33 @@ class OrganSegmentation():
             self.crinfo)
         return evaluation, segdiff
 
-    def segm_smoothing(self, sigma_mm):
+    def segm_smoothing(self, sigma_mm, labels="liver", background_label="none"):
         """
         Shape of output segmentation is smoothed with gaussian filter.
 
         Sigma is computed in mm
 
         """
+        segmentation_general.segmentation_smoothing(
+            self.segmentation,
+            sigma_mm,
+            labels=labels,
+            voxelsize_mm=self.voxelsize_mm,
+            slab=self.slab,
+            background_label=background_label,
+            volume_blowup=self.volume_blowup,
+        )
         # import scipy.ndimage
-        sigma = float(sigma_mm) / np.array(self.voxelsize_mm)
 
-        # print sigma
-        # from PyQt4.QtCore import pyqtRemoveInputHook
-        # pyqtRemoveInputHook()
-        vol1 = np.sum(self.segmentation)
-        wvol = vol1 * self.volume_blowup
-        logger.debug('unique segm ' + str(np.unique(self.segmentation)))
-        segsmooth = scipy.ndimage.filters.gaussian_filter(
-            self.segmentation.astype(np.float32), sigma)
-        logger.debug('unique segsmooth ' + str(np.unique(segsmooth)))
-        # import ipdb; ipdb.set_trace()
-        # import pdb; pdb.set_trace()
-        # pyed = sed3.sed3(self.orig_scale_segmentation)
-        # pyed.show()
-        logger.debug('wanted volume ' + str(wvol))
-        logger.debug('sigma ' + str(sigma))
 
-        critf = lambda x: self.__volume_blowup_criterial_function(
-            x, wvol, segsmooth)
+    def select_label(self, labels):
+        """
 
-        thr = scipy.optimize.fmin(critf, x0=0.5, disp=False)[0]
-        logger.debug('optimal threshold ' + str(thr))
-        logger.debug('segsmooth ' + str(np.nonzero(segsmooth)))
-
-        self.segmentation = (1.0 *
-                             (segsmooth > thr)  # self.volume_blowup)
-                             ).astype(np.int8)
-        vol2 = np.sum(self.segmentation)
-        logger.debug("volume ratio " + str(vol2 / float(vol1)))
-        # import ipdb; ipdb.set_trace()
+        :param labels:
+        :return:
+        """
+        selected_segmentation = imma.select_labels(self.segmentation, labels=labels, slab=self.slab)
+        return selected_segmentation
 
     def import_segmentation_from_file(self, filepath):
         """
@@ -949,12 +929,18 @@ class OrganSegmentation():
         # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
         if self.segmentation_prev is None:
             # pokud neznáme žádnou předchozí segmentaci, tak se chováme jako dříve
-            self.segmentation[self.segmentation == 1] = self.output_label
+            self.segmentation[self.segmentation == 1] = self.nlabels(self.output_label)
         else:
             # remove old pixels for this label
-            self.segmentation_prev[self.segmentation_prev == self.output_label] = 0
+            self.segmentation_replacement(
+                segmentation_new=self.segmentation,
+                segmentation=self.segmentation_prev,
+                label=self.output_label,
+                label_new=1,
+            )
+            # self.segmentation_prev[self.segmentation_prev == self.output_label] = 0
             # set new labels
-            self.segmentation_prev[np.where(self.segmentation == 1)] = self.output_label
+            # self.segmentation_prev[np.where(self.segmentation == 1)] = self.output_label
 
             # clean up
 
@@ -969,6 +955,25 @@ class OrganSegmentation():
 
         logger.debug('processing_time = ' + str(self.processing_time))
 
+    def segmentation_replacement(
+            self,
+            segmentation_new,
+            label,
+            label_new=1,
+            segmentation=None,
+            **kwargs
+    ):
+        if segmentation is None:
+            segmentation == self.segmentation
+
+        segmentation_general.segmentation_replacement(
+            segmentation,
+            segmentation_new,
+            label_new=label_new,
+            label=label,
+            slab=self.slab,
+            **kwargs
+        )
     def _segmentation_postprocessing(self):
         """
         :segmentation_smoothing:
