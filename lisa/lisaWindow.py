@@ -190,6 +190,15 @@ class OrganSegmentationWindow(QMainWindow):
         mirrorZAxisAction.triggered.connect(self.oseg.mirror_z_axis)
         imageMenu.addAction(mirrorZAxisAction)
 
+        segmentation_by_convex_areas = QtGui.QAction(QtGui.QIcon('exit.png'), '&Draw convex segmentation', self)
+        segmentation_by_convex_areas.setStatusTip('Create segmentation by adding convex areas')
+        segmentation_by_convex_areas.triggered.connect(self.action_add_segmentation_by_convex_areas)
+        imageMenu.addAction(segmentation_by_convex_areas)
+
+        segmentation_relabel_action = QtGui.QAction(QtGui.QIcon('exit.png'), '&Relabel segmentation', self)
+        segmentation_relabel_action.setStatusTip('Change label of the segmentation')
+        segmentation_relabel_action.triggered.connect(self.action_segmentation_relabel)
+        imageMenu.addAction(segmentation_relabel_action)
 
         ###### OPTION MENU ######
         optionMenu = menubar.addMenu('&Option')
@@ -782,6 +791,68 @@ class OrganSegmentationWindow(QMainWindow):
         pyed.changeW(width)
         pyed.exec_()
 
+        self.statusBar().showMessage('Ready')
+
+    def action_add_segmentation_by_convex_areas(self):
+
+
+        # @todo add button for this functionality
+        nlabel, slabel = self.ui_select_label("Select label for segmentation")
+
+        if self.oseg.data3d is None:
+            self.statusBar().showMessage('No DICOM data!')
+            return
+
+        self.statusBar().showMessage('Draw segmentation by vonvex areas ...')
+
+        QApplication.processEvents()
+
+        target_segmentation = ((self.oseg.select_label(nlabel)).astype(np.int8)*2)
+        # ed = sed3.sed3(target_segmentation)
+        # ed.show()
+
+        pyed = QTSeedEditor(
+            self.oseg.data3d, mode='mask',
+            voxelSize=self.oseg.voxelsize_mm,
+            contours=target_segmentation
+        )
+
+        pyed.contours_old = pyed.contours.copy()
+        # initial mask set
+        # pyed.masked = np.ones(self.oseg.data3d.shape, np.int8)
+        # pyed.masked = (self.oseg.segmentation == 0).astype(np.int8)
+
+        mx = self.oseg.viewermax
+        mn = self.oseg.viewermin
+        width = mx - mn
+        # enter = (float(mx)-float(mn))
+        center = np.average([mx, mn])
+        logger.debug("window params max %f min %f width, %f center %f" %
+                     (mx, mn, width, center))
+        pyed.changeC(center)
+        pyed.changeW(width)
+        pyed.exec_()
+
+        contours = pyed.contours.copy()
+        logger.debug("output contours unique" +
+                     str(np.unique(contours)))
+        self.segmentation_temp = contours
+        # nlabel = self.oseg.nlabels(nlabel)
+        self.oseg.segmentation_replacement(
+            contours,
+            label=nlabel,
+            label_new=2,
+
+        )
+        # self.oseg.segmentation[contours == 2] = nlabel
+
+        self.statusBar().showMessage('Ready')
+
+    def action_segmentation_relabel(self):
+        self.statusBar().showMessage('Relabelling segmentation')
+        no, from_label = self.ui_select_label("Select from_label for renaming")
+        no, to_label = self.ui_select_label("Select to_label for renaming")
+        self.oseg.segmentation_relabel(from_label=from_label, to_label=to_label)
         self.statusBar().showMessage('Ready')
 
     def mask_segmentation(self):

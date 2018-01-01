@@ -964,7 +964,7 @@ class OrganSegmentation():
             **kwargs
     ):
         if segmentation is None:
-            segmentation == self.segmentation
+            segmentation = self.segmentation
 
         segmentation_general.segmentation_replacement(
             segmentation,
