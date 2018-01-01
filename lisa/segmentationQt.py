@@ -21,17 +21,24 @@ import virtual_resection
 
 
 class SegmentationWidget(QtGui.QWidget):
-    def __init__(self, oseg):
+    def __init__(self, oseg, lisa_window):
         super(SegmentationWidget, self).__init__()
         self.oseg = oseg
+        self.lisa_window = lisa_window
         self.initUI()
 
     def initUI(self):
         self.mainLayout = QGridLayout(self)
+        self.groupA = None
 
-        lblSegConfig = QLabel('Choose configure')
+        lblSegConfig = QLabel('Select label')
         self.mainLayout.addWidget(lblSegConfig, 1, 1, 1, 6)
         self.initLabels()
+
+        btnLabel = QPushButton("New label")
+        btnLabel.setCheckable(True)
+        btnLabel.clicked.connect(self.btnNewLabel)
+        self.mainLayout.addWidget(btnLabel, 4, 1, 1, 6)
 
         lblSegType = QLabel('Choose type of segmentation')
         self.mainLayout.addWidget(lblSegType, 5, 1, 1, 6)
@@ -46,11 +53,17 @@ class SegmentationWidget(QtGui.QWidget):
         self.lblSegError.setStyleSheet("color: red;");
         self.mainLayout.addWidget(self.lblSegError, 10, 1, 1, 6)
 
+    def btnNewLabel(self):
+        self.lisa_window.ui_select_label("Write new label")
+        self.reinitLabels()
+
     def initLabels(self):
         column = 1
         row = 2
-        self.groupA = QtGui.QButtonGroup()
+        if self.groupA is None:
+            self.groupA = QtGui.QButtonGroup()
         id = 0
+
         for key, value in self.oseg.slab.items():
             id += 1
             if key == "none":
@@ -120,7 +133,13 @@ class SegmentationWidget(QtGui.QWidget):
         # self.btnVirtualResectionPV_testing.clicked.connect(    )
         self.mainLayout.addWidget(self.btnVirtualResectionPV_testing, 8, 4)
 
-        self.disableSegType()
+        self.btnSegSmoo = QPushButton("Segmentation smoothing", self)
+        self.btnSegSmoo.clicked.connect(self.btn_segmentation_smoothing)
+        self.btnSegSmoo.setDisabled(False)
+        self.btnSegSmoo.setCheckable(True)
+        self.mainLayout.addWidget(self.btnSegSmoo, 10, 1)
+        # self.disableSegType()
+        self.enableSegType()
 
     def enableSegType(self):
         self.btnSegManual.setDisabled(False)
@@ -139,6 +158,13 @@ class SegmentationWidget(QtGui.QWidget):
         self.btnSegHV.setDisabled(True)
         self.btnVirtualResectionPV.setDisabled(True)
         self.btnVirtualResectionPlanar.setDisabled(True)
+
+    def btn_segmentation_smoothing(self):
+        self.lisa_window.statusBar().showMessage('Segmentation smoothing')
+        val = self.lisa_window.ui_get_double("Smoothing sigma in mm", value=1.)
+        self.oseg.segmentation_smooting(sigma_mm=val, labels=self.oseg.output_label)
+
+        self.lisa_window.statusBar().showMessage('Ready')
 
 def main():
     logger = logging.getLogger()

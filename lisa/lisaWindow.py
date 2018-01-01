@@ -319,7 +319,7 @@ class OrganSegmentationWindow(QMainWindow):
         infoBodyLayout.addWidget(info)
 
         #--- segmentation option ---
-        self.segBody = segmentationQt.SegmentationWidget(oseg=self.oseg)
+        self.segBody = segmentationQt.SegmentationWidget(oseg=self.oseg, lisa_window=self)
         # self.segBody.oseg = self.oseg
         bodyLayout.addWidget(self.segBody)
         self.ui_widgets["Segmentation"] = self.segBody
@@ -489,6 +489,7 @@ class OrganSegmentationWindow(QMainWindow):
         elif option == 'Segmentation':
             if self.btnSegmentation.isChecked() == True:
                 # self.infoBody.hide()
+                self.segBody.reinitLabels()
                 self.segBody.show()
                 # self.slabBody.hide()
             else:
@@ -941,6 +942,23 @@ class OrganSegmentationWindow(QMainWindow):
 
         numlab = self.oseg.nlabels(str(strlab))
         return numlab, str(strlab)
+
+    def ui_get_double(self, headline, value=0.0, **kwargs):
+        """
+
+        :param headline:
+        :return: double_value
+        """
+        val, ok = \
+            QInputDialog.getDouble(
+                self,
+                # self.qapp,
+                headline,
+                "insert number",
+                value=value,
+                **kwargs
+            )
+        return val
 
     def compareSegmentationWithFile(self):
         """

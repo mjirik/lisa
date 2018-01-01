@@ -299,13 +299,13 @@ def main():
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
 
     oseg = OrganSegmentation(args.dcmdir,
-            working_voxelsize_mm=args.voxelsize_mm,
-            manualroi=args.manualroi,
-            texture_analysis=args.textureanalysis,
-            edit_data=args.editdata,
-            smoothing=args.segmentation_smoothing,
-            iparams=args.iparams
-            )
+                             working_voxelsize_mm=args.voxelsize_mm,
+                             manualroi=args.manualroi,
+                             texture_analysis=args.textureanalysis,
+                             edit_data=args.editdata,
+                             smoothing=args.btn_segmentation_smoothing,
+                             iparams=args.iparams
+                             )
 
     oseg.interactivity()
 
