@@ -1232,8 +1232,8 @@ class OrganSegmentation():
         # self.add_slab_label_carefully(numeric_label=numeric_label, string_label=string_label)
 
         # if there is no liver segmentation, use whole image
-        if np.max(self.segmentation) == 0:
-            self.segmentation = self.segmentation + 1
+        # if np.max(self.segmentation) == 0:
+        #     self.segmentation = self.segmentation + 1
 
         # remove prev segmentation
         # TODO rozdělit na vnitřní a vnější část portální žíly
@@ -1543,6 +1543,19 @@ class OrganSegmentation():
             seed_label1=1,
             seed_label2=2,
             **kwargs):
+        """
+
+        :param output_label1:
+        :param output_label2:
+        :param organ_label:
+        :param seed_label1:
+        :param seed_label2:
+        :param kwargs:
+        :return:
+
+
+        :py:segmentation:
+        """
         import virtual_resection
         datap = self.export()
         segm, dist1, dist2 = virtual_resection.split_organ_by_two_vessels(
