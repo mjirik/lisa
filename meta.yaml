@@ -63,7 +63,7 @@ requirements:
     - pyyaml
     - matplotlib
     - skelet3d >=1.5.6
-    - imtools >=0.1.66
+    - imtools >=0.1.67
     - sed3 >=1.1.33
     - pysegbase >=1.2.18
     - io3d >=1.1.6
