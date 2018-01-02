@@ -1180,7 +1180,7 @@ class OrganSegmentation():
         self.segmentation = tumory.segmentation
 
 
-    def nlabels(self, label, label_meta=None):
+    def nlabels(self, label, label_meta=None, return_mode="num"):
 
         """
         Add one or more labels if it is necessery and return its numeric values.
@@ -1189,10 +1189,11 @@ class OrganSegmentation():
         If "new" keyword is used and additional numeric info is provided, the number is used also as a key.
         :param label: string, number or "new"
         :param label_meta: string, number or "new
+        :param return_mode: "num" or "str" or "both".
         :return:
         """
 
-        return imma.get_nlabels(self.slab, label, label_meta)
+        return imma.get_nlabels(self.slab, label, label_meta, return_mode=return_mode)
 
     def add_missing_labels(self):
         imma.add_missing_labels(self.segmentation, self.slab)
@@ -1264,9 +1265,9 @@ class OrganSegmentation():
             **params
         )
 
-        from PyQt4.QtCore import pyqtRemoveInputHook
-        pyqtRemoveInputHook()
-        import ipdb; ipdb.set_trace()
+        # from PyQt4.QtCore import pyqtRemoveInputHook
+        # pyqtRemoveInputHook()
+        # import ipdb; ipdb.set_trace()
         self.segmentation[(outputSegmentation==1) & (target_segmentation==1)] = self.nlabels(inner_vessel_label)
         self.segmentation[(outputSegmentation==1) & (target_segmentation==0)] = self.nlabels(outer_vessel_label)
 
@@ -1479,21 +1480,22 @@ class OrganSegmentation():
                 output_dicom_dir, overlays,
                 data['crinfo'], data['orig_shape'])
 
-    def fill_holes_in_segmentation(self, label):
+    def fill_holes_in_segmentation(self, label=None, background_label=0):
         """
         Fill holes in segmentation.
 
         Label could be set interactivelly.
 
-        :param label:
+        :param label: if none, the self.output_label is used
         :return:
         """
         import imtools.show_segmentation
-        zero_label = 0
+        if label is None:
+            label = self.oseg.output_label
         segm_to_fill = self.segmentation == self.nlabels(label)
-        self.segmentation[segm_to_fill] = zero_label
+        # self.segmentation[segm_to_fill] = background_label
         segm_to_fill = scipy.ndimage.morphology.binary_fill_holes(segm_to_fill)
-        self.segmentation[segm_to_fill] = label
+        self.segmentation[segm_to_fill] = self.nlabels(label)
 
         # segm = imtools.show_segmentation.select_labels(segmentation=self.segmentation, labels=labels)
         # self.

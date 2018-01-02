@@ -40,6 +40,7 @@ def segmentation_replacement(
     return segmentation
 
 
+
 def segmentation_smoothing(segmentation, sigma_mm, labels=1, background_label=0,
                    voxelsize_mm=None,
                    volume_blowup=1.,

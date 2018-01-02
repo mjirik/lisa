@@ -958,7 +958,7 @@ class OrganSegmentationWindow(QMainWindow):
                 value=value,
                 **kwargs
             )
-        return val
+        return val, ok
 
     def compareSegmentationWithFile(self):
         """

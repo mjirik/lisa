@@ -303,7 +303,7 @@ def main():
                              manualroi=args.manualroi,
                              texture_analysis=args.textureanalysis,
                              edit_data=args.editdata,
-                             smoothing=args.btn_segmentation_smoothing,
+                             smoothing=args.action_segmentation_smoothing,
                              iparams=args.iparams
                              )
 

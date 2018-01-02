@@ -38,20 +38,20 @@ class SegmentationWidget(QtGui.QWidget):
         btnLabel = QPushButton("New label")
         btnLabel.setCheckable(True)
         btnLabel.clicked.connect(self.btnNewLabel)
-        self.mainLayout.addWidget(btnLabel, 4, 1, 1, 6)
+        self.mainLayout.addWidget(btnLabel, 1, 3, 1, 2)
 
         lblSegType = QLabel('Choose type of segmentation')
-        self.mainLayout.addWidget(lblSegType, 5, 1, 1, 6)
+        self.mainLayout.addWidget(lblSegType, 4, 1, 1, 6)
         lblSegType = QLabel('Choose virtual resection')
-        self.mainLayout.addWidget(lblSegType, 7, 1, 1, 6)
+        self.mainLayout.addWidget(lblSegType, 6, 1, 1, 6)
         self.initConfigs()
 
         self.lblSegData = QLabel()
-        self.mainLayout.addWidget(self.lblSegData, 9, 1, 1, 6)
+        self.mainLayout.addWidget(self.lblSegData, 8, 1, 1, 6)
 
         self.lblSegError = QLabel()
         self.lblSegError.setStyleSheet("color: red;");
-        self.mainLayout.addWidget(self.lblSegError, 10, 1, 1, 6)
+        self.mainLayout.addWidget(self.lblSegError, 9, 1, 1, 6)
 
     def btnNewLabel(self):
         self.lisa_window.ui_select_label("Write new label")
@@ -100,46 +100,57 @@ class SegmentationWidget(QtGui.QWidget):
         self.enableSegType()
 
     def initConfigs(self):
+        baserow = 5
         self.btnSegManual = QPushButton("Manual", self)
         # btnSegManual.clicked.connect(self.btnManualSeg)
-        self.mainLayout.addWidget(self.btnSegManual, 6, 1)
+        self.mainLayout.addWidget(self.btnSegManual, baserow, 1)
 
         self.btnSegSemiAuto = QPushButton("Semi-automatic", self)
         # btnSegSemiAuto.clicked.connect(self.btnSemiautoSeg)
-        self.mainLayout.addWidget(self.btnSegSemiAuto, 6, 2)
+        self.mainLayout.addWidget(self.btnSegSemiAuto, baserow, 2)
 
         self.btnSegMask = QPushButton("Mask", self)
         # btnSegMask.clicked.connect(self.maskRegion)
-        self.mainLayout.addWidget(self.btnSegMask, 6, 3)
+        self.mainLayout.addWidget(self.btnSegMask, baserow, 3)
 
         self.btnSegPV = QPushButton("Portal Vein", self)
         # btnSegPV.clicked.connect(self.btnPortalVeinSegmentation)
-        self.mainLayout.addWidget(self.btnSegPV, 6, 4)
+        self.mainLayout.addWidget(self.btnSegPV, baserow, 4)
 
         self.btnSegHV = QPushButton("Hepatic Vein", self)
         # btnSegHV.clicked.connect(self.btnHepaticVeinsSegmentation)
-        self.mainLayout.addWidget(self.btnSegHV, 6, 5)
+        self.mainLayout.addWidget(self.btnSegHV, baserow, 5)
 
         #dalsi radek
         self.btnVirtualResectionPV = QPushButton("Portal Vein", self)
         # btnVirtualResectionPV.clicked.connect(self.btnVirtualResectionPV)
-        self.mainLayout.addWidget(self.btnVirtualResectionPV, 8, 1)
+        self.mainLayout.addWidget(self.btnVirtualResectionPV, baserow + 2, 1)
 
         self.btnVirtualResectionPlanar = QPushButton("Planar", self)
         # btnVirtualResectionPlanar.clicked.connect(self.btnVirtualResectionPlanar)
-        self.mainLayout.addWidget(self.btnVirtualResectionPlanar, 8, 2)
+        self.mainLayout.addWidget(self.btnVirtualResectionPlanar, baserow + 2, 2)
 
         self.btnVirtualResectionPV_testing = QPushButton("PV testing", self)
         # self.btnVirtualResectionPV_testing.clicked.connect(    )
-        self.mainLayout.addWidget(self.btnVirtualResectionPV_testing, 8, 4)
+        self.mainLayout.addWidget(self.btnVirtualResectionPV_testing, baserow + 2, 4)
+
+        self.btn_fill_segmentation = QPushButton("Fill holes", self)
+        self.btn_fill_segmentation.setEnabled(True)
+        self.btn_fill_segmentation.clicked.connect(self.action_fill_holes_in_segmentation)
+        self.mainLayout.addWidget(self.btn_fill_segmentation, baserow + 2 , 5)
 
         self.btnSegSmoo = QPushButton("Segmentation smoothing", self)
-        self.btnSegSmoo.clicked.connect(self.btn_segmentation_smoothing)
-        self.btnSegSmoo.setDisabled(False)
-        self.btnSegSmoo.setCheckable(True)
-        self.mainLayout.addWidget(self.btnSegSmoo, 10, 1)
+        self.btnSegSmoo.clicked.connect(self.action_segmentation_smoothing)
+        self.mainLayout.addWidget(self.btnSegSmoo, baserow + 2, 6)
+
+        self.btnSegSmoo = QPushButton("Segmentation relabel", self)
+        self.btnSegSmoo.clicked.connect(self.action_segmentation_relabel)
+        self.mainLayout.addWidget(self.btnSegSmoo, baserow + 2, 7)
         # self.disableSegType()
         self.enableSegType()
+
+    def action_fill_holes_in_segmentation(self):
+        self.oseg.fill_holes_in_segmentation()
 
     def enableSegType(self):
         self.btnSegManual.setDisabled(False)
@@ -159,12 +170,24 @@ class SegmentationWidget(QtGui.QWidget):
         self.btnVirtualResectionPV.setDisabled(True)
         self.btnVirtualResectionPlanar.setDisabled(True)
 
-    def btn_segmentation_smoothing(self):
+    def action_segmentation_smoothing(self):
         self.lisa_window.statusBar().showMessage('Segmentation smoothing')
-        val = self.lisa_window.ui_get_double("Smoothing sigma in mm", value=1.)
-        self.oseg.segmentation_smooting(sigma_mm=val, labels=self.oseg.output_label)
+
+        val, ok = self.lisa_window.ui_get_double("Smoothing sigma in mm", value=1.)
+        logger.debug(ok)
+        if ok is False:
+            return
+        self.oseg.segm_smoothing(sigma_mm=val, labels=self.oseg.output_label)
 
         self.lisa_window.statusBar().showMessage('Ready')
+
+    def action_segmentation_relabel(self):
+        self.lisa_window.statusBar().showMessage('Segmentation relabelling')
+        strlabel = self.oseg.nlabels(self.oseg.output_label, return_mode="str")
+        val = self.lisa_window.ui_select_label("Rename from " + strlabel + "to to fallowing label")
+        self.oseg.segmentation_relabel(from_label=self.oseg.output_label, to_label=val[0])
+        self.lisa_window.statusBar().showMessage('Ready')
+
 
 def main():
     logger = logging.getLogger()
