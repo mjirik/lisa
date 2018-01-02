@@ -102,6 +102,7 @@ def Rez_podle_roviny(plane, data, voxel):
 
 # ----------------------------------------------------------
 def cut_editor_old(data, label=None):
+    logger.debug("editor input label: " + str(label))
 
     if label is None:
         contour=data['segmentation']
@@ -165,10 +166,14 @@ def split_vessel(datap, seeds, vessel_volume_threshold=0.95, dilatation_iteratio
     lab[obj1 == 1] = 0
     obj2 = get_biggest_object(lab)
 
-    pixel = obj1[seeds == input_seeds_select_label][0]
-    from PyQt4.QtCore import pyqtRemoveInputHook
-    pyqtRemoveInputHook()
-    import ipdb; ipdb.set_trace() # BREAKPOINT
+    pixel = 0
+    pixels = obj1[seeds == input_seeds_select_label]
+    if len(pixels) > 0:
+        pixel = pixels[0]
+
+    # from PyQt4.QtCore import pyqtRemoveInputHook
+    # pyqtRemoveInputHook()
+    # import ipdb; ipdb.set_trace() # BREAKPOINT
 
     if pixel > 0:
         ol1 = output_label1
@@ -359,6 +364,7 @@ def resection_old(data, interactivity=True, seeds=None):
         logger.error('seeds is None and interactivity is False')
         return None
 
+    logger.debug("unique(seeds) " + str(np.unique(seeds)))
     # seeds[56][60][78] = 1
     lab, cut = split_vessel(data, seeds)
     segm, dist1, dist2 = split_organ_by_two_vessels(data, lab)

@@ -171,7 +171,7 @@ class SegmentationWidget(QtGui.QWidget):
         self.btnVirtualResectionPlanar.setDisabled(True)
 
     def action_segmentation_smoothing(self):
-        self.lisa_window.statusBar().showMessage('Segmentation smoothing')
+        self.lisa_window.statusBar().showMessage('Segmentation smoothing...')
 
         val, ok = self.lisa_window.ui_get_double("Smoothing sigma in mm", value=1.)
         logger.debug(ok)
@@ -182,7 +182,7 @@ class SegmentationWidget(QtGui.QWidget):
         self.lisa_window.statusBar().showMessage('Ready')
 
     def action_segmentation_relabel(self):
-        self.lisa_window.statusBar().showMessage('Segmentation relabelling')
+        self.lisa_window.statusBar().showMessage('Segmentation relabelling...')
         strlabel = self.oseg.nlabels(self.oseg.output_label, return_mode="str")
         val = self.lisa_window.ui_select_label("Rename from " + strlabel + "to to fallowing label")
         self.oseg.segmentation_relabel(from_label=self.oseg.output_label, to_label=val[0])
