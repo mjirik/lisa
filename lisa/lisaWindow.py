@@ -1274,19 +1274,19 @@ class OrganSegmentationWindow(QMainWindow):
         self.statusBar().showMessage('Ready')
 
     def __saveVesselTreeGui(self, textLabel):
-        fn_yaml = self.oseg.get_standard_ouptut_filename(filetype='yaml', suffix='-vt-' + textLabel)
-        fn_vtk = self.oseg.get_standard_ouptut_filename(filetype='vtk', suffix='-vt-' + textLabel)
+        fn_yaml = self.oseg.get_standard_ouptut_filename(filetype='yaml', suffix='-vt-' + textLabel+".yaml")
+        fn_vtk = self.oseg.get_standard_ouptut_filename(filetype='vtk', suffix='-vt-' + textLabel+".vtk")
 
         fn_yaml = str(QFileDialog.getSaveFileName(
             self,
-            "Save file",
+            "Save YAML file ",
             fn_yaml,
-            filter="*.*"))
+            filter="*.yaml"))
         fn_vtk = str(QFileDialog.getSaveFileName(
             self,
-            "Save file",
+            "Save VTK file",
             fn_vtk,
-            filter="*.*"))
+            filter="*.vtk"))
         self.oseg.saveVesselTree(textLabel, fn_yaml=fn_yaml, fn_vtk=fn_vtk)
         self.statusBar().showMessage('Ready')
 
