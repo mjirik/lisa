@@ -67,7 +67,6 @@ from . import misc
 from . import config
 from . import volumetry_evaluation
 from . import segmentation_general
-import imtools
 # import imtools.image_manipulation
 import imtools.image_manipulation as imma
 
@@ -162,7 +161,9 @@ class OrganSegmentation():
         after_load_processing={},
         segmentation_alternative_params={},
         sftp_username='lisa_default',
-        sftp_password=''
+        sftp_password='',
+        input_annotation_file=None,
+
 
 
         #           iparams=None,
@@ -190,6 +191,7 @@ class OrganSegmentation():
         parameters. For example
         :param segmentation_alternative_params: dict of alternative params f,e.
         {'vs5: {'voxelsize_mm':[5,5,5]}, 'vs3: {'voxelsize_mm':[3,3,3]}}
+        :param input_annotation_file: annotation input based on dwv json export (https://github.com/ivmartel/dwv)
         """
 
         from pysegbase import pycut
@@ -291,6 +293,8 @@ class OrganSegmentation():
         logger.debug("oseg_input_params")
         logger.debug(str(oseg_input_params))
         self.oseg_input_params = oseg_input_params
+
+        self.input_annotaion_file = input_annotation_file
 
         if data3d is None or metadata is None:
             # if 'datapath' in self.iparams:
@@ -676,6 +680,34 @@ class OrganSegmentation():
 # self.segmentation.shape,\
         #        ' d3d ', self.data3d.shape
 
+    def json_annotation_import(self, json_annotation_file=None):
+        """
+
+        :param json_annotation_file: json file from dwm (https://github.com/ivmartel/dwv)
+        :return:
+        """
+        # TODO implementovat Jiří Vyskočil
+        # načtení vstupní anotace
+        # zápis do self.seeds
+        # lisu pak lze volat:
+        # python -m lisa -iaf dwv_export.json -dd input_data.pklz -o output_data.pklz -ni
+        #
+        # -ni dělá automatické spuštění segmentace
+        # po načtení je spuštěn graph cut a výstup je uložen do output_data.pklz
+
+        # takhle lze volat tuhle funkci s argumentem i bez něj
+        if json_annotation_file is None:
+            json_annotation_file = self.input_annotaion_file
+
+
+
+        # inspirativní kód - vymazat
+        numeric_label = self.nlabels("liver")
+        numeric_label2 = self.nlabels("kidney")
+
+        self.seeds[0,0,0] = numeric_label
+        self.seeds[0,1,0] = numeric_label2
+
     def _interactivity_begin(self):
         from pysegbase import pycut
         logger.debug('_interactivity_begin()')
@@ -683,6 +715,7 @@ class OrganSegmentation():
         # TODO really make the copy and work with it
 
         data3d_tmp = self.data3d
+        self.json_annotation_import()
         if self.seg_preproc_pars['use_automatic_segmentation']:
             data3d_tmp = self.data3d.copy()
             data3d_tmp[(self.segmentation > 0) & (self.segmentation != self.output_label)] = -1000
@@ -1489,7 +1522,6 @@ class OrganSegmentation():
         :param label: if none, the self.output_label is used
         :return:
         """
-        import imtools.show_segmentation
         if label is None:
             label = self.oseg.output_label
         segm_to_fill = self.segmentation == self.nlabels(label)
@@ -1746,6 +1778,10 @@ config and user config.")
         '-ids', '--input_datapath_start', type=str,  # type=int,
         help='Start datapath for input dialog.',
         default=cfg["input_datapath_start"])
+    parser.add_argument(
+        '-iaf', '--input_annotation_file', type=str,  # type=int,
+        help='Set input json annotation file',
+        default=None)
     parser.add_argument(
         '-oi', '--lisa_operator_identifier', type=str,  # type=int,
         help='Identifier of Lisa operator.',
