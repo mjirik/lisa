@@ -128,9 +128,9 @@ class OrganSegmentationWindow(QMainWindow):
         savePVAction.triggered.connect(self.btnSavePortalVeinTree)
         saveSubmenu.addAction(savePVAction)     
         # save HV tree
-        saveHVAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&HV tree', self)
-        saveHVAction.setStatusTip('Save Hepatic Veins 1D model')
-        saveHVAction.triggered.connect(self.btnSaveHepaticVeinsTree)
+        saveHVAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Vessel Tree', self)
+        saveHVAction.setStatusTip('Save actual vessel tree 1D model')
+        saveHVAction.triggered.connect(self.btnSaveActualVesselTree)
         saveSubmenu.addAction(saveHVAction)     
 
         separator = fileMenu.addAction("")
@@ -419,8 +419,9 @@ class OrganSegmentationWindow(QMainWindow):
         savePVTreeAction = QtGui.QAction(QtGui.QIcon('exit.png'), "PV Tree", self)
         savePVTreeAction.triggered.connect(self.btnSavePortalVeinTree)
 
-        saveHVTreeAction = QtGui.QAction(QtGui.QIcon('exit.png'), "HV Tree", self)
-        saveHVTreeAction.triggered.connect(self.btnSaveHepaticVeinsTree)
+        saveHVTreeAction = QtGui.QAction(QtGui.QIcon('exit.png'), "Vessel Tree", self)
+        saveHVTreeAction.setStatusTip('Save actual vessel tree 1D model')
+        saveHVTreeAction.triggered.connect(self.btnSaveActualVesselTree)
 
         menu = QtGui.QMenu(self.btnSave)
         menu.addAction(saveFileAction)
@@ -1274,6 +1275,7 @@ class OrganSegmentationWindow(QMainWindow):
         self.statusBar().showMessage('Ready')
 
     def __saveVesselTreeGui(self, textLabel):
+        textLabel = self.oseg.nlabels(textLabel, return_mode="str")
         fn_yaml = self.oseg.get_standard_ouptut_filename(filetype='yaml', suffix='-vt-' + textLabel+".yaml")
         fn_vtk = self.oseg.get_standard_ouptut_filename(filetype='vtk', suffix='-vt-' + textLabel+".vtk")
 
@@ -1295,12 +1297,17 @@ class OrganSegmentationWindow(QMainWindow):
         QApplication.processEvents()
         textLabel = 'porta'
         self.__saveVesselTreeGui(textLabel)
+        self.statusBar().showMessage('Ready')
 
-    def btnSaveHepaticVeinsTree(self):
+    def btnSaveActualVesselTree(self):
         self.statusBar().showMessage('Saving vessel tree ...')
         QApplication.processEvents()
-        textLabel = "hepatic_veins"
+        textLabel = self.oseg.nlabels(self.oseg.output_label, return_mode="str")
+        msg = 'Saving "' + textLabel +'" vessel tree ...'
+        logger.debug(msg)
+        self.statusBar().showMessage(msg)
         self.__saveVesselTreeGui(textLabel)
+        self.statusBar().showMessage('Ready')
 
     def btnHepaticVeinsSegmentation(self):
         """

@@ -1209,7 +1209,8 @@ class OrganSegmentation():
         to_label = self.nlabels(to_label)
         self.segmentation[self.segmentation == from_label] = to_label
 
-    def portalVeinSegmentation(self, inner_vessel_label="porta", organ_label="liver", outer_vessel_label=None, **inparams):
+    def portalVeinSegmentation(self, inner_vessel_label="porta", organ_label="liver", outer_vessel_label=None,
+                               forbidden_label=None, **inparams):
         """
         Segmentation of vein in specified volume. It is given by label "liver".
         Usualy it is number 1. If there is no specified volume all image is
@@ -1221,10 +1222,11 @@ class OrganSegmentation():
 
         You can use additional parameters from vesselSegmentation()
         For example interactivity=False, biggestObjects=True, ...
+        :param forbidden_label: int or list of ints. Labels not included into segmentable area.
         """
 
 
-        from imtools import segmentation
+        from imtools import segmentation as imsegmentation
         logger.info('segmentation max label ' + str(np.max(self.segmentation)))
 
         if outer_vessel_label is None:
@@ -1256,11 +1258,12 @@ class OrganSegmentation():
         target_segmentation = imma.select_labels(
             self.segmentation, organ_label, self.slab
         )
-        outputSegmentation = segmentation.vesselSegmentation(
+        outputSegmentation = imsegmentation.vesselSegmentation(
             self.data3d,
             # target_segmentation,
             segmentation=self.segmentation,
             organ_label=organ_label,
+            forbidden_label=forbidden_label,
             slab=self.slab,
             **params
         )
@@ -1491,7 +1494,7 @@ class OrganSegmentation():
         """
         import imtools.show_segmentation
         if label is None:
-            label = self.oseg.output_label
+            label = self.output_label
         segm_to_fill = self.segmentation == self.nlabels(label)
         # self.segmentation[segm_to_fill] = background_label
         segm_to_fill = scipy.ndimage.morphology.binary_fill_holes(segm_to_fill)
