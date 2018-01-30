@@ -163,6 +163,7 @@ class OrganSegmentation():
         sftp_username='lisa_default',
         sftp_password='',
         input_annotation_file=None,
+        output_annotation_file=None,
 
 
 
@@ -295,6 +296,7 @@ class OrganSegmentation():
         self.oseg_input_params = oseg_input_params
 
         self.input_annotaion_file = input_annotation_file
+        self.output_annotaion_file = output_annotation_file
 
         if data3d is None or metadata is None:
             # if 'datapath' in self.iparams:
@@ -703,10 +705,10 @@ class OrganSegmentation():
 
         # inspirativní kód - vymazat
         numeric_label = self.nlabels("liver")
-        numeric_label2 = self.nlabels("kidney")
+        numeric_label2 = self.nlabels("background")
 
-        self.seeds[0,0,0] = numeric_label
-        self.seeds[0,1,0] = numeric_label2
+        self.seeds[0,0,0] = 1
+        self.seeds[0,1,0] = 2
 
     def _interactivity_begin(self):
         from pysegbase import pycut
@@ -1430,6 +1432,20 @@ class OrganSegmentation():
         logger.debug("save outputs to file %s" % (filepath))
         io3d.write(data, filepath)
 
+        if self.output_annotaion_file is not None:
+            self.json_annotation_export()
+
+    def json_annotation_export(self):
+        """
+
+        :return:
+        """
+        # TODO Jiri Vyskocil
+        self.output_annotaion_file
+
+        # savetojson(self.segmentatn
+
+
     def create_lisa_data_dir_tree(self):
         lisa_data.create_lisa_data_dir_tree(self)
 
@@ -1784,6 +1800,10 @@ config and user config.")
     parser.add_argument(
         '-iaf', '--input_annotation_file', type=str,  # type=int,
         help='Set input json annotation file',
+        default=None)
+    parser.add_argument(
+        '-oaf', '--output_annotation_file', type=str,  # type=int,
+        help='Set output json annotation file',
         default=None)
     parser.add_argument(
         '-oi', '--lisa_operator_identifier', type=str,  # type=int,
