@@ -639,10 +639,12 @@ class OrganSegmentationWindow(QMainWindow):
         QApplication.processEvents()
 
     def _after_read_callback(self, readerWidget):
+        logger.debug("after read callback started")
         self.statusBar().showMessage('Ready')
         QApplication.processEvents()
         self.oseg.datapath = readerWidget.datapath
-        self.importDataWithGui()
+        self.importDataWithGui(datap=readerWidget.datap)
+        logger.debug("after read callback finished")
         # print readerWidget.loaddir
         # print readerWidget.loadfiledir
         # import ipdb; ipdb.set_trace()
@@ -670,16 +672,14 @@ class OrganSegmentationWindow(QMainWindow):
 
         self.importDataWithGui()
 
-    def importDataWithGui(self):
+    def importDataWithGui(self, datap=None):
         oseg = self.oseg
 
-        reader = datareader.DataReader()
+        if datap is None:
+            reader = datareader.DataReader()
 
-        # seg.data3d, metadata =
-        datap = reader.Get3DData(oseg.datapath, dataplus_format=True)
-        # rint datap.keys()
-        # self.iparams['series_number'] = self.metadata['series_number']
-        # self.iparams['datapath'] = self.datapath
+            # seg.data3d, metadata =
+            datap = reader.Get3DData(oseg.datapath, dataplus_format=True, gui=True)
         oseg.import_dataplus(datap)
         self.statusBar().showMessage('Ready')
 
