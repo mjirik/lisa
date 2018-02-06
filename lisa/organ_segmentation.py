@@ -164,6 +164,10 @@ class OrganSegmentation():
         sftp_password='',
         input_annotation_file=None,
         output_annotation_file=None,
+        # run=False,
+        run_organ_segmentation=False,
+        run_vessel_segmentation=False,
+        run_vessel_segmentation_params={},
 
 
 
@@ -250,6 +254,7 @@ class OrganSegmentation():
         self.debug_mode = debug_mode
         self.gui_update = None
         self.segmentation_alternative_params = segmentation_alternative_params
+        # self._json_description
         # SegPostprocPars = namedtuple(
         #     'SegPostprocPars', [
         #         'smoothing_mm',
@@ -286,7 +291,10 @@ class OrganSegmentation():
         # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
         # self.seg_postproc_pars = SegPostprocPars(**seg_postproc_pars_default)
-
+        # self.run = run
+        self.run_organ_segmentation = run_organ_segmentation
+        self.run_vessel_segmentation = run_vessel_segmentation
+        self.run_vessel_segmentation_params = run_vessel_segmentation_params
 #
         oseg_input_params = locals()
         oseg_input_params = self.__clean_oseg_input_params(oseg_input_params)
@@ -710,6 +718,15 @@ class OrganSegmentation():
         self.seeds[0,0,0] = 1
         self.seeds[0,1,0] = 2
 
+        # self.run = True
+
+        self.run_organ_segmentation = True
+        self.run_vessel_segmentation = True
+        # see portalVeinSegmentation() for details
+        # for example ....
+        self.run_vessel_segmentation_params = dict(threshold=150, inner_vessel_label="porta", organ_label="liver" )
+
+
     def _interactivity_begin(self):
         from pysegbase import pycut
         logger.debug('_interactivity_begin()')
@@ -717,7 +734,6 @@ class OrganSegmentation():
         # TODO really make the copy and work with it
 
         data3d_tmp = self.data3d
-        self.json_annotation_import()
         if self.seg_preproc_pars['use_automatic_segmentation']:
             data3d_tmp = self.data3d.copy()
             data3d_tmp[(self.segmentation > 0) & (self.segmentation != self.output_label)] = -1000
@@ -1245,7 +1261,7 @@ class OrganSegmentation():
         self.segmentation[self.segmentation == from_label] = to_label
 
     def portalVeinSegmentation(self, inner_vessel_label="porta", organ_label="liver", outer_vessel_label=None,
-                               forbidden_label=None, **inparams):
+                               forbidden_label=None, threshold=-1, **inparams):
         """
         Segmentation of vein in specified volume. It is given by label "liver".
         Usualy it is number 1. If there is no specified volume all image is
@@ -1277,7 +1293,7 @@ class OrganSegmentation():
         # TODO rozdělit na vnitřní a vnější část portální žíly
 
         params = {
-            'threshold': -1,
+            'threshold': threshold,
             'inputSigma': 0.15,
             'dilationIterations': 10,
             'nObj': 1,
@@ -1442,6 +1458,7 @@ class OrganSegmentation():
         """
         # TODO Jiri Vyskocil
         self.output_annotaion_file
+        self.segmentation
 
         # savetojson(self.segmentatn
 
@@ -1550,6 +1567,19 @@ class OrganSegmentation():
 
         # segm = imtools.show_segmentation.select_labels(segmentation=self.segmentation, labels=labels)
         # self.
+
+    def make_run(self):
+        """ Non-interactive mode
+        :return:
+        """
+        self.json_annotation_import()
+        if self.run_organ_segmentation:
+            self.ninteractivity()
+        if self.run_vessel_segmentation:
+            self.portalVeinSegmentation(**self.run_vessel_segmentation_params)
+
+        self.save_outputs()
+
 
     def split_vessel(self, input_label=None, output_label1=1, output_label2=2, **kwargs):
         """
@@ -1884,8 +1914,9 @@ def main(app=None, splash=None):  # pragma: no cover
         oseg = OrganSegmentation(**params)
 
         if args["no_interactivity"]:
-            oseg.ninteractivity()
-            oseg.save_outputs()
+            oseg.make_run()
+            # oseg.ninteractivity()
+            # oseg.save_outputs()
         else:
             # mport_gui()
             from lisaWindow import OrganSegmentationWindow
