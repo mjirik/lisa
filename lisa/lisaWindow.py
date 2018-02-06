@@ -346,7 +346,8 @@ class OrganSegmentationWindow(QMainWindow):
         import io3d.datareaderqt
         self.read_widget = io3d.datareaderqt.DataReaderWidget(
             before_function=self._before_read_callback,
-            after_function=self._after_read_callback
+            after_function=self._after_read_callback,
+            qt_app=self.qapp
         )
         self.read_widget.cache = self.oseg.cache
         bodyLayout.addWidget(self.read_widget)
@@ -673,15 +674,17 @@ class OrganSegmentationWindow(QMainWindow):
         self.importDataWithGui()
 
     def importDataWithGui(self, datap=None):
+        logger.debug("import data with gui started")
         oseg = self.oseg
 
         if datap is None:
             reader = datareader.DataReader()
 
             # seg.data3d, metadata =
-            datap = reader.Get3DData(oseg.datapath, dataplus_format=True, gui=True)
+            datap = reader.Get3DData(oseg.datapath, dataplus_format=True, gui=True, qt_app=self.qapp)
         oseg.import_dataplus(datap)
         self.statusBar().showMessage('Ready')
+        logger.debug("import data with gui finished")
 
         #### SET BUTTONS/MENU ####
         #self.btnLoad.show()
