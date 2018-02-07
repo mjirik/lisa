@@ -21,6 +21,7 @@ import glob
 import os.path
 import os.path as op
 import re
+import io3d.datasets
 
 
 def join_sdp(path_to_join):
@@ -36,7 +37,8 @@ def join_sdp(path_to_join):
     return pth
 
 def sample_data_path():
-    return op.expanduser("~/lisa_data/sample_data/")
+    return io3d.datasets.join_path("sample_data")
+    # return op.expanduser("~/lisa_data/sample_data/")
 
 def get_sample_data():
     keys = imtools.sample_data.data_urls.keys()
