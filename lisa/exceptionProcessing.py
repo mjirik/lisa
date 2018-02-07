@@ -19,12 +19,12 @@ def reportException(exception):
     try:
         sendMail(excstr, 'Lisa exception: ' + str(exception))
     except Exception as e:
-        print("Problems with sending exception report")
-        print(traceback.format_exc())
-        print(str(e))
-        print("Original exception:")
-        print(str(exception))
-        print(excstr)
+        logger.debug("Problems with sending exception report")
+        logger.debug(traceback.format_exc())
+        # logger.debug(str(e))
+        # logger.debug("Original exception:")
+        # logger.debug(str(exception))
+        # logger.debug(excstr)
 
     logger.exception(excstr)
 
