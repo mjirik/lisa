@@ -16,6 +16,7 @@ from nose.plugins.attrib import attr
 from lisa import organ_segmentation
 import pysegbase.dcmreaddata as dcmr
 import lisa.dataset
+import io3d.datasets
 
 
 # nosetests tests/organ_segmentation_test.py:OrganSegmentationTest.test_create_iparams # noqa
@@ -73,8 +74,7 @@ class OrganSegmentationTest(unittest.TestCase):
         """
         Interactive test uses dicom data for segmentation
         """
-        dcmdir = os.path.join(
-            lisa.dataset.sample_data_path(),
+        dcmdir = io3d.datasets.join_path(
             'matlab/examples/sample_data/DICOM/digest_article/'
         )
             # path_to_script,
@@ -113,9 +113,7 @@ and background")
         """
         Interactivity is stored to file
         """
-        dcmdir = os.path.join(
-            lisa.dataset.sample_data_path(),
-            'jatra_5mm')
+        dcmdir = io3d.datasets.join_path('jatra_5mm')
 
         print "Interactive test: with left mouse button select liver, \
             with right mouse button select other tissues"
@@ -148,7 +146,7 @@ and background")
         if self.verbose:
             print("test_create_iparams")
         import misc
-        dcmdir = os.path.join(lisa.dataset.sample_data_path(), 'jatra_5mm')
+        dcmdir = io3d.datasets.join_path('jatra_5mm')
             # path_to_script, './../sample_data/jatra_5mm')
 
         segparams = {'pairwiseAlpha': 20,
@@ -406,8 +404,7 @@ and background")
         """
         Function uses organ_segmentation object for segmentation
         """
-        dcmdir = os.path.join(
-            lisa.dataset.sample_data_path(),
+        dcmdir = io3d.datasets.join_path(
             'matlab/examples/sample_data/DICOM/digest_article/'
             # path_to_script,
             # './../sample_data/matlab/examples/sample_data/DICOM/digest_article/'
