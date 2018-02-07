@@ -23,7 +23,8 @@ class GMMClassifier():
     def fit(self, X_train, y_train):
         X_train = np.asarray(X_train)
         y_train = np.asarray(y_train)
-        from sklearn.mixture import GMM
+        # from sklearn.mixture import GMM as GaussianMixture
+        from sklearn.mixture import GaussianMixture
 
         unlabels = range(0, np.max(y_train) + 1)
 
@@ -31,13 +32,13 @@ class GMMClassifier():
             if self.each_class_params is not None:
                 # print 'eacl'
                 # print self.each_class_params[lab]
-                model = GMM(**self.each_class_params[lab])
+                model = GaussianMixture(**self.each_class_params[lab])
                 # print 'po gmm ', model
             elif len(self.same_params) > 0:
-                model = GMM(**self.same_params)
+                model = GaussianMixture(**self.same_params)
                 # print 'ewe ', model
             else:
-                model = GMM()
+                model = GaussianMixture()
             X_train_lab = X_train[y_train == lab]
             # logger.debug('xtr lab shape ' + str(X_train_lab))
             model.fit(X_train_lab)
@@ -60,7 +61,7 @@ class GMMClassifier():
         for lab in range(0, len(self.models)):
 
             logger.debug('means shape' + str(self.models[lab].means_.shape))
-            sc = self.models[lab].score(X_test)
+            sc = self.models[lab].score_samples(X_test)
             scores[:, lab] = sc
 
         pred = np.argmax(scores, 1)

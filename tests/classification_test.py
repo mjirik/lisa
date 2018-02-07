@@ -20,7 +20,7 @@ class OrganSegmentationTest(unittest.TestCase):
         X_tr = np.array([1, 2, 0, 1, 1, 0, 7, 8, 9, 8, 6, 7]).reshape(-1, 1)
         y_tr = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]).reshape(-1)
 
-        X_te = np.array([2, 7, 8]).reshape(-1, 1)
+        X_te = np.array([1, 7, 8]).reshape(-1, 1)
         y_te = np.array([0, 1, 1]).reshape(-1)
 
         # cl = GMMClassifier(each_class_params=[{},{}])
@@ -29,7 +29,8 @@ class OrganSegmentationTest(unittest.TestCase):
             {'n_components': 2}])
         cl.fit(X_tr, y_tr)
 
-        self.assertTrue((cl.predict(X_te) == y_te).all())
+        y_te_pr = cl.predict(X_te)
+        self.assertTrue((y_te_pr == y_te).all())
 
 
 if __name__ == "__main__":
