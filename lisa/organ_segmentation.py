@@ -709,8 +709,6 @@ class OrganSegmentation():
         if json_annotation_file is None:
             json_annotation_file = self.input_annotaion_file
 
-
-
         # inspirativní kód - vymazat
         numeric_label = self.nlabels("liver")
         numeric_label2 = self.nlabels("background")
@@ -1572,7 +1570,9 @@ class OrganSegmentation():
         """ Non-interactive mode
         :return:
         """
-        self.json_annotation_import()
+
+        if self.input_annotaion_file is not None:
+            self.json_annotation_import()
         if self.run_organ_segmentation:
             self.ninteractivity()
         if self.run_vessel_segmentation:
