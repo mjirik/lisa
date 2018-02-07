@@ -65,8 +65,9 @@ install:
     - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
 #    - 'sudo ldconfig -v'
     - sudo ldconfig -v
-    - python -m lisa --get_sample_data
-    
+    # get sample data for lisa
+    - python -m io3d.datasets -l lisa
+
 # command to run tests
 script: nosetests --with-coverage --verbose --cover-package=lisa
 # script: nosetests --with-coverage --verbose --nocapture --nologcapture --cover-package=lisa

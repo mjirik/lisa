@@ -21,6 +21,7 @@ import pysegbase.dcmreaddata as dcmr
 
 class LesionsTest(unittest.TestCase):
 
+    @unittest.skip("Cekame, az to Tomas opravi")
     def test_import_lesion_editor(self):
         import lesioneditor
         import lesioneditor.Lession_editor_slim
@@ -49,8 +50,8 @@ class LesionsTest(unittest.TestCase):
         app = QtGui.QApplication(sys.argv)
         le = lesioneditor.Lession_editor_slim.LessionEditor(datap1=datap1)
     # @TODO znovu zprovoznit test
-    @unittest.skip("Cekame, az to Tomas opravi")
 
+    @unittest.skip("Cekame, az to Tomas opravi")
     def test_synthetic_data_lesions_automatic_localization(self):
         """
         Function uses lesions  automatic localization in synthetic data.

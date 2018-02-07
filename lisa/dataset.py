@@ -42,7 +42,7 @@ def sample_data_path():
 
 def get_sample_data():
     keys = io3d.datasets.data_urls.keys()
-    io3d.datasets.get(keys, sample_data_path())
+    io3d.datasets.download(keys, sample_data_path())
 
 
 class DataIteratorOutput:
