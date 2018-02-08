@@ -23,6 +23,7 @@ import lisa.volumetry_evaluation as ve
 import lisa
 import lisa.experiments
 import lisa.dataset
+from lisa.dataset import join_sdp
 
 
 # just test if everything is going ok
@@ -31,9 +32,6 @@ def speceval(vol1, vol2, vs):
     special_evaluation_function
     """
     return {'one': 1}
-
-def join_sdp(datapath):
-    return lisa.dataset.join_sdp(datapath)
 
 class ExperimentsTest(unittest.TestCase):
 
