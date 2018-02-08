@@ -31,12 +31,13 @@ def join_sdp(path_to_join):
     :return:
     """
     sdp = sample_data_path()
-    # pth = os.path.join(sdp, path_to_join)
+    pth = os.path.join(sdp, path_to_join)
     logger.debug('sample_data_path' + sdp)
-    return sdp
+    logger.debug('path ' + pth)
+    return pth
 
 def sample_data_path():
-    return io3d.datasets.join_path("sample_data")
+    return io3d.datasets.dataset_path()
     # return op.expanduser("~/lisa_data/sample_data/")
 
 def get_sample_data():
