@@ -745,7 +745,6 @@ class OrganSegmentation():
             mode='nearest',
             order=1
         ).astype(np.int16)
-        # data3d_res = data3d_res.astype(np.int16)
 
         logger.debug('pycut segparams ' + str(self.segparams) +
                      '\nmodelparams ' + str(self.segmodelparams)

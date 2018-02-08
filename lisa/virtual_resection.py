@@ -17,6 +17,8 @@ import numpy as np
 import scipy.ndimage
 # import vtk
 import argparse
+# @TODO remove logger debug message from the header
+logger.debug("before morphology import")
 from skimage import morphology
 
 # from PyQt4 import QtCore, QtGui

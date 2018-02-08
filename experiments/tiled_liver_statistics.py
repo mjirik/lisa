@@ -634,7 +634,7 @@ def experiment(training_yaml_path, testing_yaml_path,  featers_plus_classifs,
 def prepared_classifiers_by_string(names):
     from sklearn import svm
     from sklearn.naive_bayes import GaussianNB  # noqa
-    from sklearn.mixture import GMM  # noqa
+    # from sklearn.mixture import GMM  # noqa
     from sklearn import tree  # noqa
     from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier  # noqa
     from sklearn.lda import LDA  # noqa
