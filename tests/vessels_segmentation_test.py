@@ -55,7 +55,7 @@ class VesselsSegmentationTest(unittest.TestCase):
 
     def test_synthetic_data_segmentation(self):
         """
-        Function uses organ_segmentation  for synthetic box object
+        Function uses organ_segmentation for synthetic box object
         segmentation.
         """
 

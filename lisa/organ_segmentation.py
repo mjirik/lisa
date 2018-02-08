@@ -1674,8 +1674,9 @@ def logger_init():  # pragma: no cover
     logfile = "lisa.log"
     if op.exists(op.expanduser("~/lisa_data/")):
         logfile = op.expanduser("~/lisa_data/lisa.log")
-    fh = logging.handlers.RotatingFileHandler(logfile, maxBytes=100000, backupCount=9)
-    # fh = logging.FileHandler(logfile)
+    # problems on windows
+    # fh = logging.handlers.RotatingFileHandler(logfile, maxBytes=100000, backupCount=9)
+    fh = logging.FileHandler(logfile)
     fh.setFormatter(fformatter)
     fh.setLevel(logging.DEBUG)
     logger.addHandler(fh)

@@ -69,7 +69,7 @@ install:
     - python -m io3d.datasets -l lisa
 
 # command to run tests
-script: nosetests --with-coverage --verbose --cover-package=lisa
+script: nosetests --with-coverage --verbose -d --cover-package=lisa
 # script: nosetests --with-coverage --verbose --nocapture --nologcapture --cover-package=lisa
 # script: nosetests --with-coverage --cover-package=lisa
 after_success:
