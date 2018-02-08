@@ -50,7 +50,7 @@ class ExperimentsTest(unittest.TestCase):
 
         # experiment_dir = join_sdp("exp_small2/")
 
-        sliver_reference_dir = join_sdp("exp/seg")
+        sliver_reference_dir = join_sdp("exp_small/seg")
 
 # this is setup for visualization
         markers = ['ks',

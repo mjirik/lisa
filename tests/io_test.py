@@ -84,7 +84,7 @@ class InOutTest(unittest.TestCase):
 
     def test_lisa_read_mhd_save_pklz(self):
 
-        infn = io3d.datasets.join_path("sample_data/liver-orig001.mhd")
+        infn = io3d.datasets.join_path("liver-orig001.mhd")
 
         oseg = lisa.organ_segmentation.OrganSegmentation(infn)
         oseg.save_outputs("test_mhd.pklz")

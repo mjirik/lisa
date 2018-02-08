@@ -32,8 +32,8 @@ def join_sdp(path_to_join):
     """
     sdp = sample_data_path()
     pth = os.path.join(sdp, path_to_join)
-    logger.debug('sample_data_path' + sdp)
-    logger.debug('path ' + pth)
+    logger.debug('sample_data_path: ' + sdp)
+    logger.debug('path: ' + pth)
     return pth
 
 def sample_data_path():
