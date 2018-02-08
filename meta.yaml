@@ -77,7 +77,7 @@ requirements:
     - wget 
     # use wget instead of pywget because pywget for py36 doesnt exist
     # - pywget
-    - scikit-learn
+    - scikit-learn >=0.19.0
     - scikit-image
     - pyqtconfig
     - pip
