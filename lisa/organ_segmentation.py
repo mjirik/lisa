@@ -32,6 +32,8 @@ import numpy as np
 import datetime
 import argparse
 import copy
+import json
+import json_decoder as jd
 
 from . import exceptionProcessing
 # tady uz je logger
@@ -709,20 +711,22 @@ class OrganSegmentation():
         if json_annotation_file is None:
             json_annotation_file = self.input_annotaion_file
 
-        # inspirativní kód - vymazat
-        numeric_label = self.nlabels("liver")
-        numeric_label2 = self.nlabels("background")
+        # data = {}
+        # data['data3d'] = self.data3d
+        # data['segmentation'] = self.segmentation
+        # data['slab'] = self.nlabels
+        # data['voxelsize_mm'] = self.voxelsize_mm
 
-        self.seeds[0,0,0] = 1
-        self.seeds[0,1,0] = 2
-
+        jd.get_segdata(json.load(open(json_annotation_file)), data)
+        th = jd.description["porta"]["threshold"]
+        self.seeds = jd.get_seeds(data, self.nlabels("liver"))
         # self.run = True
 
         self.run_organ_segmentation = True
         self.run_vessel_segmentation = True
         # see portalVeinSegmentation() for details
         # for example ....
-        self.run_vessel_segmentation_params = dict(threshold=150, inner_vessel_label="porta", organ_label="liver" )
+        self.run_vessel_segmentation_params = dict(threshold=th, inner_vessel_label="porta", organ_label="liver")
 
 
     def _interactivity_begin(self):
@@ -1454,9 +1458,9 @@ class OrganSegmentation():
         :return:
         """
         # TODO Jiri Vyskocil
-        self.output_annotaion_file
-        self.segmentation
-
+        output_file = self.output_annotaion_file
+        # self.segmentation
+        jd.write_to_json(data, output_file)
         # savetojson(self.segmentatn
 
 
