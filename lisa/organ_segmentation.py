@@ -56,6 +56,7 @@ sys.path.append(os.path.join(path_to_script, "../../pysegbase/"))
 from io3d import datareader
 from io3d import datawriter
 import io3d.cachefile as cachef
+import io3d.misc
 from . import data_plus
 from . import support_structure_segmentation as sss
 from . import config_default
@@ -1047,11 +1048,11 @@ class OrganSegmentation():
                 sp['seeds'] = self.seeds
 
             logger.debug('snakes')
-            d3d = qmisc.resize_to_mm(
+            d3d = io3d.misc.resize_to_mm(
                     self.data3d, 
                     self.voxelsize_mm, 
                     self.seg_postproc_pars['postproc_working_voxelsize'])
-            segw = qmisc.resize_to_mm(
+            segw = io3d.misc.resize_to_mm(
                     self.segmentation, 
                     self.voxelsize_mm, 
                     self.seg_postproc_pars['postproc_working_voxelsize'])
@@ -1065,7 +1066,7 @@ class OrganSegmentation():
                 segw == self.slab['liver']
             ).astype(np.uint8)
             macwe.run(self.seg_postproc_pars['snakes_niter'])
-            seg = qmisc.resize_to_shape(macwe.levelset, self.data3d.shape)
+            seg = io3d.misc.resize_to_shape(macwe.levelset, self.data3d.shape)
 # for debug visualization preprocessing use fallowing line
             # self.segmentation[seg == 1] += 1
             self.segmentation[seg == 1] = self.slab['liver']

@@ -36,15 +36,11 @@ except:
 #     import pycut
 import argparse
 import io3d
+import io3d.misc
 import scipy.ndimage.filters as filters
 import numpy as np
 from scipy.ndimage.measurements import label
 from scipy.ndimage import morphology
-
-from .import qmisc
-
-
-
 
 
 class SupportStructureSegmentation():
@@ -79,10 +75,10 @@ class SupportStructureSegmentation():
 
 
         # data resize
-        self.data3d = qmisc.resize_to_mm(data3d, voxelsize_mm, working_voxelsize_mm)
+        self.data3d = io3d.misc.resize_to_mm(data3d, voxelsize_mm, working_voxelsize_mm)
         self.segmentation = np.zeros(self.data3d.shape , dtype=np.int8)
         self.resized = True
-        # self.data3d = qmisc.resize_to_mm(data3d, voxelsize_mm, working_voxelsize_mm)
+        # self.data3d = io3d.misc.resize_to_mm(data3d, voxelsize_mm, working_voxelsize_mm)
         self.voxelsize_mm = self.working_voxelsize_mm
 
         self.autocrop = autocrop
@@ -96,7 +92,7 @@ class SupportStructureSegmentation():
         Resize segmentation to original shape
         """
         if self.resized:
-            self.segmentation = qmisc.resize_to_shape(self.segmentation, 
+            self.segmentation = io3d.misc.resize_to_shape(self.segmentation,
                                                       self.orig_shape)
             self.resized = False
 

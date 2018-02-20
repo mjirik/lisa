@@ -153,7 +153,7 @@ class QmiscTest(unittest.TestCase):
 
         data = np.random.rand(3, 4, 5)
         new_shape = [5, 6, 6]
-        data_out = qmisc.resize_to_shape(data, new_shape)
+        data_out = io3d.misc.resize_to_shape(data, new_shape)
         # print data_out.shape
         # print data
         # print data_out
@@ -175,7 +175,7 @@ class QmiscTest(unittest.TestCase):
         voxelsize_mm = [2, 3, 1]
         new_voxelsize_mm = [1, 3, 2]
         expected_shape = [6, 4, 3]
-        data_out = qmisc.resize_to_mm(data, voxelsize_mm, new_voxelsize_mm)
+        data_out = io3d.misc.resize_to_mm(data, voxelsize_mm, new_voxelsize_mm)
         print(data_out.shape)
         # print data
         # print data_out

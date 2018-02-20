@@ -89,7 +89,8 @@ def segmentation_smoothing(segmentation, sigma_mm, labels=1, background_label=0,
                               (segsmooth > thr)  # self.volume_blowup)
                               ).astype(np.int8)
     vol2 = np.sum(segmentation_selection)
-    logger.debug("volume ratio " + str(vol2 / float(vol1)))
+    with np.errstate(divide="ignore", invalid="ignore"):
+        logger.debug("volume ratio " + str(vol2 / float(vol1)))
     # import ipdb; ipdb.set_trace()
     segmentation_replacement(
         segmentation,

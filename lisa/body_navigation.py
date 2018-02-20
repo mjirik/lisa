@@ -35,7 +35,7 @@ class BodyNavigation:
         if voxelsize_mm is None:
             self.data3dr = data3d
         else:
-            self.data3dr = qmisc.resize_to_mm(data3d, voxelsize_mm, self.working_vs)
+            self.data3dr = io3d.misc.resize_to_mm(data3d, voxelsize_mm, self.working_vs)
         self.lungs = None
         self.spine = None
         self.body = None
@@ -51,7 +51,7 @@ class BodyNavigation:
 
         self.spine_center = np.mean(np.nonzero(self.spine), 1)
         # self.center2 = np.mean(np.nonzero(self.spine), 2)
-        return qmisc.resize_to_shape(spine, self.orig_shape)
+        return io3d.misc.resize_to_shape(spine, self.orig_shape)
 
     def get_body(self):
         body = scipy.ndimage.filters.gaussian_filter(self.data3dr, sigma=2) > -150
@@ -59,7 +59,7 @@ class BodyNavigation:
         body[-1, :, :] = 1
 
         self.body = scipy.ndimage.morphology.binary_fill_holes(body)
-        return qmisc.resize_to_shape(self.body, self.orig_shape)
+        return io3d.misc.resize_to_shape(self.body, self.orig_shape)
 
     def get_lungs(self):
         lungs = scipy.ndimage.filters.gaussian_filter(self.data3dr, sigma=[4, 2, 2]) > -150
@@ -182,7 +182,7 @@ class BodyNavigation:
                scipy.ndimage.morphology.distance_transform_edt(
                 1 - self.diaphragm_mask)
               )
-        return qmisc.resize_to_shape(dst, self.orig_shape)
+        return io3d.misc.resize_to_shape(dst, self.orig_shape)
 
     def _get_ia_ib_ic(self, axis):
         """
