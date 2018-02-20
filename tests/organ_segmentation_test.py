@@ -350,8 +350,8 @@ and background")
 
         from PyQt4.QtGui import QApplication
         app = QApplication(sys.argv)
-        oseg.interactivity()
-        # oseg.ninteractivity()
+        # oseg.interactivity()
+        oseg.ninteractivity()
 
         volume = oseg.get_segmented_volume_size_mm3()
 
