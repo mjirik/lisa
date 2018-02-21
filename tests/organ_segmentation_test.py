@@ -7,6 +7,8 @@ import sys
 import os.path
 
 # path_to_script = os.path.dirname(os.path.abspath(__file__))
+# pysegbase_path =  os.path.join(path_to_script, "../../pysegbase/")
+# sys.path.insert(0, pysegbase_path)
 import unittest
 
 import numpy as np
@@ -311,17 +313,17 @@ and background")
         segmentation.
         """
         params = {'segmentation_smoothing': True}
-        self.box_segmentation_template(params)
+        self.box_segmentation_template(params, noise_sigma=4)
         # dcmdir = os.path.join(path_to_script,'./../sample_data/matlab/examples/sample_data/DICOM/digest_article/') # noqa
 
-    def box_segmentation_template(self, params):
+    def box_segmentation_template(self, params, noise_sigma=3):
         """
         Function uses organ_segmentation  for synthetic box object
         segmentation.
         """
         # dcmdir = os.path.join(path_to_script,'./../sample_data/matlab/examples/sample_data/DICOM/digest_article/') # noqa
 # data
-        img3d = np.random.rand(32, 64, 64) * 3
+        img3d = np.random.rand(32, 64, 64) * noise_sigma
         img3d[4:24, 12:32, 5:25] = img3d[4:24, 12:32, 5:25] + 30
 
 # seeds
@@ -346,8 +348,8 @@ and background")
         # oseg.make_gc()
 # manual seeds setting
 
-        # from PyQt4.QtGui import QApplication
-        # app = QApplication(sys.argv)
+        from PyQt4.QtGui import QApplication
+        app = QApplication(sys.argv)
         # oseg.interactivity()
         oseg.ninteractivity()
 

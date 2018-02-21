@@ -411,9 +411,9 @@ def save_labels(
 def norm_voxelsize(data3d_orig, data3d_seg, voxelsize_mm,
                    working_voxelsize_mm):
 
-    data3d_orig_res = qmisc.resize_to_mm(data3d_orig,
+    data3d_orig_res = io3d.misc.resize_to_mm(data3d_orig,
                                          voxelsize_mm, working_voxelsize_mm)
-    data3d_seg_res = qmisc.resize_to_mm(data3d_seg,
+    data3d_seg_res = io3d.misc.resize_to_mm(data3d_seg,
                                         voxelsize_mm, working_voxelsize_mm)
 
     return data3d_orig_res, data3d_seg_res
@@ -535,7 +535,7 @@ def one_exp_set_testing(
                                              labels_lin)
 
         if use_voxelsize_norm:
-            segmentation = qmisc.resize_to_shape(
+            segmentation = io3d.misc.resize_to_shape(
                 segmentation,
                 data3d_orig_orig.shape)
 # @TODO změnil jsem to. Už zde není ukazatel na klasifikátor, ale přímo

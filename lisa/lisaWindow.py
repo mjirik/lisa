@@ -506,7 +506,8 @@ class OrganSegmentationWindow(QMainWindow):
             widget = None
 
             # add new
-            widget = imtools.show_segmentation_qt.ShowSegmentationWidget(None, show_load_interface=True)
+            vtk_file = self.oseg.get_standard_ouptut_filename(suffix="_{}.vtk")
+            widget = imtools.show_segmentation_qt.ShowSegmentationWidget(None, show_load_interface=True, vtk_file=vtk_file )
             self.ui_widgets[option] = widget
             self.bodyLayout.addWidget(widget)
             widget.add_data(self.oseg.segmentation, self.oseg.voxelsize_mm, self.oseg.slab)
