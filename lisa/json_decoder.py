@@ -7,9 +7,10 @@ description = {}
 data_json = {}
 
 def get_segdata(json_data, data):
-    X = len(data["segmentation"])
+    ### rly????
+    Z = len(data["segmentation"])
     Y = len(data["segmentation"][0])
-    Z = len(data["segmentation"][0][0])
+    X = len(data["segmentation"][0][0])
     data_json = json_data
     for slice in range(0, Z):
         nbr_drawings = json_data['drawings'][slice][0]['length']
@@ -29,6 +30,7 @@ def get_segdata(json_data, data):
                 i += 2
 
             # vyplneni nakresleneho obrazce
+            print(points)
             hull = Delaunay(points)
             x, y = np.mgrid[0:X, 0:Y]
             grid = np.vstack([x.ravel(), y.ravel()]).T
@@ -38,18 +40,21 @@ def get_segdata(json_data, data):
             # vlozeni markeru do dat
             dict_description = json_data['drawingsDetails'][slice][0][draw]['longText'].replace("'", '"')
             dict_key = json_data['drawingsDetails'][slice][0][draw]['textExpr']
-            dict_value = 0
+            dict_value = 100
+            print(dict_description)
             if dict_description == '':
                 if dict_key == '':
                     print("Drawing is not defined at slice", slice)
-                    dict_value = 100
                     dict_key = "lbl_" + str(dict_value)
                     data["slab"][dict_key] = dict_value
                 else:
                     dict_value = data["slab"][dict_key]
             else:
                 dict_description = json.loads(dict_description)
-                dict_value = dict_description["value"]
+                if "value" in dict_description.keys():
+                    dict_value = dict_description["value"]
+                elif dict_key in data["slab"].keys():
+                    dict_value = data["slab"][dict_key]
                 if dict_key != '':
                     data["slab"][dict_key] = dict_value
                 else:

@@ -711,15 +711,15 @@ class OrganSegmentation():
         if json_annotation_file is None:
             json_annotation_file = self.input_annotaion_file
 
-        # data = {}
-        # data['data3d'] = self.data3d
-        # data['segmentation'] = self.segmentation
-        # data['slab'] = self.nlabels
-        # data['voxelsize_mm'] = self.voxelsize_mm
+        data = {}
+        data['data3d'] = self.data3d
+        data['segmentation'] = self.segmentation
+        data['slab'] = self.slab
+        data['voxelsize_mm'] = self.voxelsize_mm
 
         jd.get_segdata(json.load(open(json_annotation_file)), data)
         th = jd.description["porta"]["threshold"]
-        self.seeds = jd.get_seeds(data, self.nlabels("liver"))
+        self.seeds = jd.get_seeds(data, "liver")
         # self.run = True
 
         self.run_organ_segmentation = True
