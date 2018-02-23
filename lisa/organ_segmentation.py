@@ -719,7 +719,8 @@ class OrganSegmentation():
         data['voxelsize_mm'] = self.voxelsize_mm
 
         jd.get_segdata(json.load(open(json_annotation_file)), data)
-        th = jd.description["porta"]["threshold"]
+        #th = jd.description["porta"]["threshold"]
+        th = 120
         self.seeds = jd.get_seeds(data, "liver")
         # self.run = True
 
@@ -1461,7 +1462,13 @@ class OrganSegmentation():
         # TODO Jiri Vyskocil
         output_file = self.output_annotaion_file
         # self.segmentation
-        jd.write_to_json(data, output_file)
+        print(output_file)
+        data = {}
+        data['data3d'] = self.data3d
+        data['segmentation'] = self.segmentation
+        data['slab'] = self.slab
+        data['voxelsize_mm'] = self.voxelsize_mm
+        jd.write_to_json(data, json.load(open(self.input_annotaion_file)), output_file)
         # savetojson(self.segmentatn
 
 
@@ -1574,13 +1581,19 @@ class OrganSegmentation():
         """ Non-interactive mode
         :return:
         """
-
         if self.input_annotaion_file is not None:
+            print("iaf")
             self.json_annotation_import()
         if self.run_organ_segmentation:
+            print("ros")
             self.ninteractivity()
         if self.run_vessel_segmentation:
-            self.portalVeinSegmentation(**self.run_vessel_segmentation_params)
+            print("rvs")
+            self.json_annotation_export()
+            self.portalVeinSegmentation(**self.run_vessel_segmentation_params) # tu padne
+        if self.output_annotaion_file is not None:
+            print("oaf")
+            self.json_annotation_export()
 
         self.save_outputs()
 

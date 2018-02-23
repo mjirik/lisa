@@ -4,14 +4,11 @@ from scipy.spatial import Delaunay
 
 # data["slab"] = {"liver": 10, "hearth": 20, "left_kidney": 50, "right_kidney": 60, "none": 0}
 description = {}
-data_json = {}
 
 def get_segdata(json_data, data):
-    ### rly????
     Z = len(data["segmentation"])
-    Y = len(data["segmentation"][0])
-    X = len(data["segmentation"][0][0])
-    data_json = json_data
+    X = len(data["segmentation"][0])
+    Y = len(data["segmentation"][0][0])
     for slice in range(0, Z):
         nbr_drawings = json_data['drawings'][slice][0]['length']
         for draw in range(0, nbr_drawings):
@@ -26,7 +23,7 @@ def get_segdata(json_data, data):
             points = np.empty((len_array, 2))
             i = 0
             for j in range(0, len_array):
-                points[j] = [int(points_data[i]), int(points_data[i + 1])]
+                points[j] = [int(points_data[i + 1]), int(points_data[i])]
                 i += 2
 
             # vyplneni nakresleneho obrazce
@@ -48,7 +45,10 @@ def get_segdata(json_data, data):
                     dict_key = "lbl_" + str(dict_value)
                     data["slab"][dict_key] = dict_value
                 else:
-                    dict_value = data["slab"][dict_key]
+                    if dict_key in data["slab"].keys():
+                        dict_value = data["slab"][dict_key]
+                    else:
+                        data["slab"][dict_key] = dict_value
             else:
                 dict_description = json.loads(dict_description)
                 if "value" in dict_description.keys():
@@ -85,8 +85,12 @@ def get_seeds(data, label):
     return ((data["segmentation"] != 0).astype('int8') * 2 - 
            (data["segmentation"] == data["slab"][label]).astype('int8'))
 
-def write_to_json(data, output_name="json_data.json"):
-    for slice in range(0, len(data["segmentation"])):
+def write_to_json(data, data_json, output_name="json_data.json"):
+    Z = len(data["segmentation"])
+    Y = len(data["segmentation"][0])
+    X = len(data["segmentation"][0][0])
+    for slice in range(0, Z):
+        end = len(data["segmentation"][slice])
         label_array = np.unique(data["segmentation"][slice])[1:end]
         if len(label_array) > 0:
             for lbl in range(0, len(label_array)):
@@ -102,14 +106,12 @@ def write_to_json(data, output_name="json_data.json"):
                 rgba += "," + str(description[key]["g"]) + ","
                 rgba += str(description[key]["b"]) + ",0.5)"
                 data_json["drawings"][slice][0][str(lbl)] = get_str_drawings(key, str_points, rgba, [150, 10 + lbl * 12])
-                data_json["drawingsDetails"][slice][0][lbl]["id"] = key
-                data_json["drawingsDetails"][slice][0][lbl]["textExpr"] = key
-                data_json['drawingsDetails'][slice][0][lbl]['longText'] = "{\"value\":" + str(value) + "}"
+                data_json["drawingsDetails"][slice][0] = [{"id":key, "textExpr":key, "longText":"{\"value\":" + str(value) + "}", "quant":None}]
             data_json["drawings"][slice][0]["length"] = len(label_array)
         else:
             data_json['drawings'][slice][0]["length"] = 0
             data_json['drawingsDetails'][slice][0] = []
-    with open('segmentated.json', 'w') as file:
+    with open(output_name, 'w') as file:
         json.dump(data_json, file)
 
 def get_str_drawings(key, str_points, color, lbl_pos):
