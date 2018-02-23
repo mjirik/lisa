@@ -81,10 +81,10 @@ class OrganSegmentationWindow(QMainWindow):
         self._initUI()
         self._initMenu()
 
-        if oseg is not None:
-            if oseg.data3d is not None:
-                self.setLabelText(self.text_dcm_dir, self.oseg.datapath)
-                self.setLabelText(self.text_dcm_data, self.getDcmInfo())
+        # if oseg is not None:
+        #     if oseg.data3d is not None:
+        #         self.setLabelText(self.text_dcm_dir, self.oseg.datapath)
+        #         self.setLabelText(self.text_dcm_data, self.getDcmInfo())
 
         self.statusBar().showMessage('Ready')
 
