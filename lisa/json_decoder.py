@@ -87,8 +87,8 @@ def get_seeds(data, label):
 
 def write_to_json(data, data_json, output_name="json_data.json"):
     Z = len(data["segmentation"])
-    Y = len(data["segmentation"][0])
-    X = len(data["segmentation"][0][0])
+    X = len(data["segmentation"][0])
+    Y = len(data["segmentation"][0][0])
     for slice in range(0, Z):
         end = len(data["segmentation"][slice])
         label_array = np.unique(data["segmentation"][slice])[1:end]
@@ -100,7 +100,7 @@ def write_to_json(data, data_json, output_name="json_data.json"):
                         for x in range(0, X):
                             for y in range(0, Y):
                                 if data["segmentation"][slice][x][y] == value:
-                                    str_points += ("," if len(str_points) != 0 else "") + str(x) + "," + str(y)
+                                    str_points += ("," if len(str_points) != 0 else "") + str(X - 1 - x) + "," + str(Y - 1 - y)
                         break
                 rgba = "rgba(" + str(description[key]["r"])
                 rgba += "," + str(description[key]["g"]) + ","
