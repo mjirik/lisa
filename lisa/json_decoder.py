@@ -61,7 +61,7 @@ def get_segdata(json_data, data):
                     dict_key = "lbl_" + str(dict_value)
                     data["slab"][dict_key] = dict_value
             for i,j in fill:
-                data["segmentation"][slice][i][j] = dict_value
+                data["segmentation"][Z - 1 - slice][i][j] = dict_value
         
             # ziskani zbytku popisu
             if dict_key not in description.keys():
@@ -90,8 +90,8 @@ def write_to_json(data, data_json, output_name="json_data.json"):
     X = len(data["segmentation"][0])
     Y = len(data["segmentation"][0][0])
     for slice in range(0, Z):
-        end = len(data["segmentation"][slice])
-        label_array = np.unique(data["segmentation"][slice])[1:end]
+        end = len(data["segmentation"][Z - 1 - slice])
+        label_array = np.unique(data["segmentation"][Z - 1 - slice])[1:end]
         if len(label_array) > 0:
             for lbl in range(0, len(label_array)):
                 str_points = ""
@@ -99,14 +99,17 @@ def write_to_json(data, data_json, output_name="json_data.json"):
                     if value != 0 and value == label_array[lbl]:
                         for x in range(0, X):
                             for y in range(0, Y):
-                                if data["segmentation"][slice][x][y] == value:
-                                    str_points += ("," if len(str_points) != 0 else "") + str(X - 1 - x) + "," + str(Y - 1 - y)
+                                if data["segmentation"][Z - 1 - slice][x][y] == value:
+                                    str_points += ("," if len(str_points) != 0 else "") + str(y) + "," + str(x)
                         break
                 rgba = "rgba(" + str(description[key]["r"])
                 rgba += "," + str(description[key]["g"]) + ","
                 rgba += str(description[key]["b"]) + ",0.5)"
                 data_json["drawings"][slice][0][str(lbl)] = get_str_drawings(key, str_points, rgba, [150, 10 + lbl * 12])
-                data_json["drawingsDetails"][slice][0] = [{"id":key, "textExpr":key, "longText":"{\"value\":" + str(value) + "}", "quant":None}]
+                if lbl == 0:
+                    data_json["drawingsDetails"][slice][0] = [{"id":key, "textExpr":key, "longText":"{\"value\":" + str(value) + "}", "quant":None}]
+                else:
+                    data_json["drawingsDetails"][slice][0].append({"id":key, "textExpr":key, "longText":"{\"value\":" + str(value) + "}", "quant":None})
             data_json["drawings"][slice][0]["length"] = len(label_array)
         else:
             data_json['drawings'][slice][0]["length"] = 0
