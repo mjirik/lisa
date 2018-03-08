@@ -1468,7 +1468,7 @@ class OrganSegmentation():
         data['segmentation'] = (self.segmentation == 1).astype('int8')
         data['slab'] = self.slab
         data['voxelsize_mm'] = self.voxelsize_mm
-        jd.write_to_json(data, json.load(open(self.input_annotaion_file)), output_file)
+        jd.write_to_json(data, output_name=output_file)
         # savetojson(self.segmentatn
 
 

@@ -3,10 +3,11 @@ import numpy as np
 import random
 from scipy.spatial import Delaunay
 from skimage import morphology
+from collections import OrderedDict
 
 description = {}
 
-def get_segdata(json_data, data):
+def get_segdata(json_data, data, labels=None):
     Z = len(data["segmentation"])
     X = len(data["segmentation"][0])
     Y = len(data["segmentation"][0][0])
@@ -14,6 +15,11 @@ def get_segdata(json_data, data):
     for slice in range(0, Z):
         nbr_drawings = json_data['drawings'][slice][0]['length']
         for draw in range(0, nbr_drawings):
+            # zpracovavany label
+            dict_key = json_data['drawingsDetails'][slice][0][draw]['textExpr']
+            if labels != None and dict_key not in labels: # zpracovavani jen nekterych objektu
+                continue
+
             # riznuti jsonu u souradnic krajnich bodu
             draw_info = json_data['drawings'][slice][0][str(draw)]
             start = draw_info.find("points")
@@ -41,9 +47,8 @@ def get_segdata(json_data, data):
             # jestlize neobsahuje v popisu vlastni hodnotu
             # pokud neni uveden label, ale pouze hodnota, vytvori se label se strukturou "lbl_" + hodnota
             # jestlize neni uveden ani label, ani hodnota, nic se neprovede
-            dict_description = json_data['drawingsDetails'][slice][0][draw]['longText'].replace("'", '"')
-            dict_key = json_data['drawingsDetails'][slice][0][draw]['textExpr']
             dict_value = 0
+            dict_description = json_data['drawingsDetails'][slice][0][draw]['longText'].replace("'", '"')
             if dict_description == '':
                 if dict_key == '':
                     print("Drawing is not defined at slice", slice)
@@ -141,15 +146,15 @@ def write_to_json(data, json_data=None, output_name="json_data.json"):
     with open(output_name, 'w') as file:
         json.dump(json_data, file)
 
-def initJson(nbr_slices, window_center=0, window_width=0, y=0, x=0, z=0, scale=1):
-    json_data = {}
+def initJson(nbr_slices, window_center=50, window_width=350, y=0, x=0, z=0, scale=1):
+    json_data = OrderedDict()
     json_data["version"] = "0.2"
     json_data["window-center"] = window_center
     json_data["window-width"] = window_width
-    json_data["position"] = {"i":y, "j":x, "k":z}
+    json_data["position"] = OrderedDict([("i", y), ("j", x), ("k", z)])
     json_data["scale"] = scale
-    json_data["scaleCenter"] = {"x":0, "y":0}
-    json_data["translation"] = {"x":0, "y":0}
+    json_data["scaleCenter"] = OrderedDict([("x",0), ("y", 0)])
+    json_data["translation"] = OrderedDict([("x",0), ("y", 0)])
     json_data["drawings"] = []
     json_data["drawingsDetails"] = []
     for slice in range(0, nbr_slices):
