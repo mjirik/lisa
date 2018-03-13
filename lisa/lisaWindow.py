@@ -681,8 +681,14 @@ class OrganSegmentationWindow(QMainWindow):
         if datap is None:
             reader = datareader.DataReader()
 
+            # from PyQt4.QtCore import pyqtRemoveInputHook
+            # pyqtRemoveInputHook()
             # seg.data3d, metadata =
+            logger.debug("reading data")
             datap = reader.Get3DData(oseg.datapath, dataplus_format=True, gui=True, qt_app=self.qapp)
+            logger.debug("datap readed")
+
+        logger.debug("importing datap")
         oseg.import_dataplus(datap)
         self.statusBar().showMessage('Ready')
         logger.debug("import data with gui finished")
