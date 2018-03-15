@@ -35,6 +35,7 @@ def get_segdata(json_data, data, labels=None):
                 i += 2
 
             # vyplneni nakresleneho obrazce
+            # pri spatnem nakresleni krivky muze zde padnout
             hull = Delaunay(points)
             x, y = np.mgrid[0:X, 0:Y]
             grid = np.vstack([x.ravel(), y.ravel()]).T
@@ -110,12 +111,13 @@ def write_to_json(data, json_data=None, output_name="json_data.json"):
         json_data = initJson(Z) # prohazuje poradi => dwv nefunguje na 100 % (nelze pak stahnout json)
 
     for slice in range(0, Z):
-        label_array = np.unique(data["segmentation"][Z - 1 - slice])
-        label_array = label_array[1:len(label_array)] # pole vyskytovanych labelu bez 0
+        label_array = np.unique(data["segmentation"][Z - 1 - slice]).tolist()
+        label_array.remove(0) # pole vyskytovanych labelu bez 0
 
         divided = morphology.label(data["segmentation"][Z - 1 - slice], background=0) # rozdeleni objektu
-        nbr_divided = np.unique(divided) 
-        nbr_divided = nbr_divided[1:len(nbr_divided)] # pole rozdelenych objektu bez 0
+        nbr_divided = np.unique(divided).tolist() 
+        nbr_divided.remove(0) # pole rozdelenych objektu bez 0
+        print(slice, label_array, nbr_divided)
 
         if len(label_array) < len(nbr_divided): # nesedi pocet vyskytovanych labelu s poctem objektu
             new_array = []
@@ -130,13 +132,24 @@ def write_to_json(data, json_data=None, output_name="json_data.json"):
             nbr_drawings = json_data['drawings'][slice][0]['length']
             for lbl in range(0, len(label_array)):
                 str_points = ""
+                nbr_points = 0
+                last_y = 0
+                last_x = 0
                 for key, value in data["slab"].items(): # neni osetreno, kdyby se nenachazel label ve slovniku
                     if value != 0 and value == label_array[lbl]:
                         for x in range(0, X):
                             for y in range(0, Y):
                                 if divided[x][y] == lbl + 1:
                                     str_points += ("," if len(str_points) != 0 else "") + str(y) + "," + str(x)
+                                    last_y = y
+                                    last_x = x
+                                    nbr_points += 1
                         break
+                if nbr_points <= 1: # osetreni, aby DWV nezamrzl (nesmi byt predan 1 stejny bod)
+                    str_points += "," + str(last_y + 1) + "," + str(last_x)
+                if key not in description.keys():
+                    initDescription(key, b=0)
+
                 rgba = "rgba(" + str(description[key]["r"])
                 rgba += "," + str(description[key]["g"]) + ","
                 rgba += str(description[key]["b"]) + ",0.5)"
@@ -162,19 +175,15 @@ def initJson(nbr_slices, window_center=50, window_width=350, y=0, x=0, z=0, scal
         json_data["drawingsDetails"].append([[]])
     return json_data
 
-def initJson2(nbr_slices, window_center=0, window_width=0, y=0, x=0, z=0, scale=1):
-    drawings = "[{\"length\":0}]"
-    drawingsDetails = "[[]]"
-    drawings += ",[{\"length\":0}]" * (nbr_slices - 1)
-    drawingsDetails += ",[[]]" * (nbr_slices - 1)
-
-    json_data = "{\"version\":\"0.2\",\"window-center\":" + str(window_center) +","
-    json_data += "\"window-width\":" + str(window_width) + ",\"position\":"
-    json_data += "{\"i\":" + str(y) + ",\"j\":" + str(x) + ",\"k\":" + str(z) + "},"
-    json_data += "\"scale\":" + str(scale) + ",\"scaleCenter\":" + "{\"x\":0,\"y\":0},"
-    json_data += "\"scaleCenter\":{\"x\":0,\"y\":0},\"translation\":{\"x\":0,\"y\":0},"
-    json_data += "\"drawings\":[" + drawings + "],\"drawingsDetails\":[" + drawingsDetails + "]}"
-    return json.loads(json_data)
+def initDescription(label, value=None, r=150, g=150, b=150):
+    description[label] = {}
+    description[label]["r"] = r
+    description[label]["g"] = g
+    description[label]["b"] = b
+    if value==None:
+        value = 93
+    description[label]["value"] = value
+    
 
 def get_str_drawings(id, key, str_points, color, lbl_pos):
     string = "{\"attrs\":{\"name\":\"freeHand-group\",\"visible\":true,\"id\":\"" + id +"\"},"
