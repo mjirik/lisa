@@ -719,8 +719,9 @@ class OrganSegmentation():
         data['voxelsize_mm'] = self.voxelsize_mm
 
         jd.get_segdata(json.load(open(json_annotation_file)), data)
-        #th = jd.description["porta"]["threshold"]
-        th = 120
+        th = jd.description["porta"]["threshold"]
+        th = 145
+        print(th)
         self.seeds = jd.get_seeds(data, "liver")
         # self.run = True
 
@@ -728,7 +729,7 @@ class OrganSegmentation():
         self.run_vessel_segmentation = True
         # see portalVeinSegmentation() for details
         # for example ....
-        self.run_vessel_segmentation_params = dict(threshold=th, inner_vessel_label="porta", organ_label="liver")
+        self.run_vessel_segmentation_params = dict(threshold=th, inner_vessel_label="porta", organ_label="liver", outer_vessel_label="zbytecnost")
 
 
     def _interactivity_begin(self):
@@ -1302,7 +1303,7 @@ class OrganSegmentation():
             'nObj': 1,
             'biggestObjects': False,
             'useSeedsOfCompactObjects': True,
-            'interactivity': True,
+            'interactivity': False,
             'binaryClosingIterations': 2,
             'binaryOpeningIterations': 0
         }
@@ -1465,7 +1466,9 @@ class OrganSegmentation():
         print(output_file)
         data = {}
         data['data3d'] = self.data3d
-        data['segmentation'] = (self.segmentation == 1).astype('int8')
+        data['segmentation'] = ((self.segmentation == self.slab["porta"]).astype('int8') * self.slab["porta"] + 
+                                (self.segmentation == self.slab["liver"]).astype('int8') * self.slab["liver"])
+        # vykreslit se chce jen portalni zila a jatra (seedy nas nezajimaj)
         data['slab'] = self.slab
         data['voxelsize_mm'] = self.voxelsize_mm
         jd.write_to_json(data, output_name=output_file)
@@ -1587,15 +1590,25 @@ class OrganSegmentation():
         if self.run_organ_segmentation:
             print("ros")
             self.ninteractivity()
+            self.slab["liver"] = 7
+            self.segmentation = (self.segmentation == 1).astype('int8') * self.slab["liver"]
+        self.slab["porta"] = 1
         if self.run_vessel_segmentation:
             print("rvs")
-            self.json_annotation_export()
-            self.portalVeinSegmentation(**self.run_vessel_segmentation_params) # tu padne
-        if self.output_annotaion_file is not None:
-            print("oaf")
-            self.json_annotation_export()
+            data = {}
+            data['data3d'] = self.data3d
+            data['segmentation'] = self.segmentation
+            data['slab'] = self.slab
+            data['voxelsize_mm'] = self.voxelsize_mm
+            print(data["slab"])
 
-        self.save_outputs()
+            self.seeds = jd.get_seeds(data, "porta")
+            self.portalVeinSegmentation(**self.run_vessel_segmentation_params)
+            
+            ###
+            
+
+        #self.save_outputs()
 
 
     def split_vessel(self, input_label=None, output_label1=1, output_label2=2, **kwargs):
@@ -1931,6 +1944,7 @@ def main(app=None, splash=None):  # pragma: no cover
         logger.debug('params ' + str(params))
         oseg = OrganSegmentation(**params)
 
+        oseg.make_run()
         if args["no_interactivity"]:
             oseg.make_run()
             # oseg.ninteractivity()

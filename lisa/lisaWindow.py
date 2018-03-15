@@ -361,9 +361,6 @@ class OrganSegmentationWindow(QMainWindow):
         ##### OTHERS #####
         self.mainLayout.addStretch()
 
-        self.btnSave.setDisabled(True)
-        self.btnSegmentation.setDisabled(True)
-        self.btnCompare.setDisabled(True)
         self.changeWidget('Main')
         self.show()
 
@@ -690,10 +687,6 @@ class OrganSegmentationWindow(QMainWindow):
         #### SET BUTTONS/MENU ####
         #self.btnLoad.show()
         #self.btnBackLoad.hide()
-        self.btnSave.setDisabled(False)
-        #self.btnSeg.setDisabled(False)
-        self.btnSegmentation.setDisabled(False)
-        self.btnCompare.setDisabled(False)
 
         #self.loadMenu.hide()
 
@@ -1066,6 +1059,12 @@ class OrganSegmentationWindow(QMainWindow):
         self.oseg.processing_time = \
             datetime.datetime.now() - self.oseg.time_start
         self.checkSegData('manual seg., ')
+
+        import json_decoder as jd
+        data = {}
+        data["segmentation"] = oseg.segmentation
+        data["slab"] = oseg.slab
+        jd.write_to_json(data, output_name="..\manual.json")
 
     def checkSegData(self, msg):
         oseg = self.oseg
