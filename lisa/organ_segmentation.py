@@ -719,21 +719,22 @@ class OrganSegmentation():
         data['voxelsize_mm'] = self.voxelsize_mm
 
         jd.get_segdata(json.load(open(json_annotation_file)), data)
-        th = jd.description["porta"]["threshold"]
-        #th = 145
-        self.seeds = jd.get_seeds(data, "liver")
-        # self.run = True
+        if "porta" in jd.description.keys():
+            th = jd.description["porta"]["threshold"]
+            
+            self.run_vessel_segmentation = True
 
+            self.run_vessel_segmentation_params = dict(
+                threshold=th,
+                inner_vessel_label="porta",
+                organ_label="liver",
+                outer_vessel_label="zbytecnost",
+                interactivity=False)
+        else:
+            self.run_vessel_segmentation = False
+
+        self.seeds = jd.get_seeds(data, "liver")
         self.run_organ_segmentation = True
-        self.run_vessel_segmentation = True
-        # see portalVeinSegmentation() for details
-        # for example ....
-        self.run_vessel_segmentation_params = dict(
-            threshold=th,
-            inner_vessel_label="porta",
-            organ_label="liver",
-            outer_vessel_label="zbytecnost",
-            interactivity=False)
 
 
     def _interactivity_begin(self):
