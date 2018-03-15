@@ -728,7 +728,11 @@ class OrganSegmentation():
         self.run_vessel_segmentation = True
         # see portalVeinSegmentation() for details
         # for example ....
-        self.run_vessel_segmentation_params = dict(threshold=th, inner_vessel_label="porta", organ_label="liver")
+        self.run_vessel_segmentation_params = dict(
+            threshold=th,
+            inner_vessel_label="porta",
+            organ_label="liver",
+            interactivity=True)
 
 
     def _interactivity_begin(self):
