@@ -122,6 +122,11 @@ class OrganSegmentationWindow(QMainWindow):
         saveDicomOverlayAction.setStatusTip('Save overlay DICOM data')
         saveDicomOverlayAction.triggered.connect(self.btnSaveOutDcmOverlay)
         saveSubmenu.addAction(saveDicomOverlayAction)     
+        # save JSON
+        saveJSONAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&JSON file', self)
+        saveJSONAction.setStatusTip('Save JSON file')
+        saveJSONAction.triggered.connect(self.btnSaveJSON)
+        saveSubmenu.addAction(saveJSONAction)     
         # save PV tree
         savePVAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&PV tree', self)
         savePVAction.setStatusTip('Save Portal Vein 1D model')
@@ -222,6 +227,11 @@ class OrganSegmentationWindow(QMainWindow):
         syncAction.setStatusTip('Synchronize files from the server')
         syncAction.triggered.connect(self.sync_lisa_data)
         optionMenu.addAction(syncAction)
+
+        unlockAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Unlock all buttons', self)
+        unlockAction.setStatusTip('Unlock all locked buttons')
+        unlockAction.triggered.connect(self.unlockAllButtons)
+        optionMenu.addAction(unlockAction)
 
         updateAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Update', self)
         updateAction.setStatusTip('Check new update')
@@ -414,6 +424,9 @@ class OrganSegmentationWindow(QMainWindow):
         saveDicomOverlayAction = QtGui.QAction(QtGui.QIcon('exit.png'), "Export Dicom overlay", self)
         saveDicomOverlayAction.triggered.connect(self.btnSaveOutDcmOverlay)
 
+        saveJSONAction = QtGui.QAction(QtGui.QIcon('exit.png'), "JSON file", self)
+        saveJSONAction.triggered.connect(self.btnSaveJSON)
+
         saveImageStackAction = QtGui.QAction(QtGui.QIcon('exit.png'), "Image stack", self)
         saveImageStackAction.triggered.connect(self.saveOutImageStack)
 
@@ -429,6 +442,7 @@ class OrganSegmentationWindow(QMainWindow):
         menu.addAction(saveImageStackAction)
         menu.addAction(saveDicomAction)
         menu.addAction(saveDicomOverlayAction)
+        menu.addAction(saveJSONAction)
         menu.addAction(savePVTreeAction)
         menu.addAction(saveHVTreeAction)
         self.btnSave.setMenu(menu)
@@ -468,6 +482,11 @@ class OrganSegmentationWindow(QMainWindow):
         mainLayoutRight.addWidget(btnQuit)
 
         mainLayoutRight.addStretch()
+
+    def unlockAllButtons(self):
+        self.btnSave.setDisabled(False)
+        self.btnSegmentation.setDisabled(False)
+        self.btnCompare.setDisabled(False)
 
     def changeWidget(self, option):
         # widgets = [
@@ -694,14 +713,7 @@ class OrganSegmentationWindow(QMainWindow):
         logger.debug("import data with gui finished")
 
         #### SET BUTTONS/MENU ####
-        #self.btnLoad.show()
-        #self.btnBackLoad.hide()
-        self.btnSave.setDisabled(False)
-        #self.btnSeg.setDisabled(False)
-        self.btnSegmentation.setDisabled(False)
-        self.btnCompare.setDisabled(False)
-
-        #self.loadMenu.hide()
+        self.unlockAllButtons()
 
 
     def sync_lisa_data(self):
@@ -1193,6 +1205,24 @@ class OrganSegmentationWindow(QMainWindow):
             self.oseg.save_outputs_dcm_overlay()
             self.statusBar().showMessage('Ready')
 
+        else:
+            self.statusBar().showMessage('No segmentation data!')
+
+    def btnSaveJSON(self, event=None, filename=None):
+        if self.oseg.segmentation is not None:
+            self.statusBar().showMessage('Saving json data...')
+            QApplication.processEvents()
+            if filename==None:
+                ofilename = self.oseg.get_standard_ouptut_filename(filetype='json')
+                filename = str(QFileDialog.getSaveFileName(
+                    self,
+                    "Save file",
+                    ofilename,
+                    filter="*.*"))
+
+            self.oseg.output_annotaion_file = filename
+            self.oseg.json_annotation_export()
+            self.statusBar().showMessage('Ready')
         else:
             self.statusBar().showMessage('No segmentation data!')
 

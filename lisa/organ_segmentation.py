@@ -717,18 +717,18 @@ class OrganSegmentation():
         data['segmentation'] = self.segmentation
         data['slab'] = self.slab
         data['voxelsize_mm'] = self.voxelsize_mm
+        jsonfile = json.load(open(json_annotation_file))
 
-        jd.get_segdata(json.load(open(json_annotation_file)), data)
+        jd.get_segdata(jsonfile, data)
         if "porta" in jd.description.keys():
             th = jd.description["porta"]["threshold"]
-            
             self.run_vessel_segmentation = True
 
             self.run_vessel_segmentation_params = dict(
                 threshold=th,
                 inner_vessel_label="porta",
                 organ_label="liver",
-                outer_vessel_label="zbytecnost",
+                seeds=jd.get_vesselPoint(jsonfile, "porta"),
                 interactivity=False)
         else:
             self.run_vessel_segmentation = False
@@ -1311,7 +1311,7 @@ class OrganSegmentation():
             'interactivity': interactivity,
             'binaryClosingIterations': 2,
             'binaryOpeningIterations': 0,
-            "seeds": seeds,
+            'seeds': seeds,
         }
         params.update(inparams)
         # logger.debug("ogran_label ", organ_label)
@@ -1469,16 +1469,11 @@ class OrganSegmentation():
         # TODO Jiri Vyskocil
         output_file = self.output_annotaion_file
         # self.segmentation
-        print(output_file)
         data = {}
-        data['data3d'] = self.data3d
-        data['segmentation'] = ((self.segmentation == self.slab["porta"]).astype('int8') * self.slab["porta"] + 
-                                (self.segmentation == self.slab["liver"]).astype('int8') * self.slab["liver"])
-        # vykreslit se chce jen portalni zila a jatra (seedy nas nezajimaj)
+        data['segmentation'] = self.segmentation
         data['slab'] = self.slab
-        data['voxelsize_mm'] = self.voxelsize_mm
+
         jd.write_to_json(data, output_name=output_file)
-        # savetojson(self.segmentatn
 
 
     def create_lisa_data_dir_tree(self):
@@ -1604,11 +1599,7 @@ class OrganSegmentation():
             data = {}
             data['segmentation'] = self.segmentation
             data['slab'] = self.slab
-
-            self.seeds = jd.get_seeds(data, "porta")
             self.portalVeinSegmentation(**self.run_vessel_segmentation_params)
-            
-            ###
 
         #self.save_outputs()
 

@@ -98,6 +98,32 @@ def get_segdata(json_data, data, labels=None):
                 if "three" in dict_description.keys():
                     description[dict_key]["three"] = dict_description["three"]
 
+def get_vesselPoint(json_data, label=None):
+    Z = len(json_data['drawings'])
+
+    if label==None:
+        label = "porta"
+
+    for slice in range(0, Z):
+        nbr_drawings = json_data['drawings'][slice][0]['length']
+        for draw in range(0, nbr_drawings):
+            # zpracovavany label
+            dict_key = json_data['drawingsDetails'][slice][0][draw]['textExpr']
+            if dict_key != label:
+                continue
+
+            # riznuti jsonu u souradnic krajnich bodu
+            draw_info = json_data['drawings'][slice][0][str(draw)]
+            start = draw_info.find("points")
+            end = draw_info.find("stroke")
+            points_data = draw_info[start + 9: end - 3].split(',')     
+
+            # prepsani souradnic do pole
+            z = np.array([(Z - 1 - slice)], dtype=np.dtype('int64'))
+            x = np.array([int(points_data[1])], dtype=np.dtype('int64'))
+            y = np.array([int(points_data[0])], dtype=np.dtype('int64'))
+            return [z, x, y]
+
 def get_seeds(data, label):
     return ((data["segmentation"] != 0).astype('int8') * 2 - 
            (data["segmentation"] == data["slab"][label]).astype('int8'))
