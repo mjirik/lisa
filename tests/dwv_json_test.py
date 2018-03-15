@@ -14,11 +14,25 @@ path_to_script = op.dirname(op.abspath(__file__))
 class DicomWebViewJsonTest(unittest.TestCase):
     def test_json_ircad_import(self):
         input_annotation_file = op.join(path_to_script, "test_dwv_3Dircadb1.12.json")
-        input_data_path = io3d.datasets.join("3Dircadb1.12/PATIENT_DICOM/")
+        input_data_path = io3d.datasets.join_path("3Dircadb1.12/PATIENT_DICOM/")
 
-        lisa.organ_segmentation.OrganSegmentation(
+        oseg = lisa.organ_segmentation.OrganSegmentation(
             input_annotation_file=input_annotation_file,
-            datapath=input_data_path
+            datapath=input_data_path,
+            output_annotation_file="output.json",
+            autocrop=False,
         )
+        oseg.make_run()
 
-        pass
+    def test_json_jatra_5mm_import(self):
+        input_annotation_file = op.join(path_to_script, "test_dwv_jatra_5mm.json")
+        input_data_path = io3d.datasets.join_path("jatra_5mm/")
+
+        oseg = lisa.organ_segmentation.OrganSegmentation(
+            input_annotation_file=input_annotation_file,
+            datapath=input_data_path,
+            output_annotation_file="output.json",
+            autocrop=False,
+
+        )
+        oseg.make_run()

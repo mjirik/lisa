@@ -1302,9 +1302,10 @@ class OrganSegmentation():
             'nObj': 1,
             'biggestObjects': False,
             'useSeedsOfCompactObjects': True,
-            'interactivity': True,
+            'interactivity': interactivity,
             'binaryClosingIterations': 2,
-            'binaryOpeningIterations': 0
+            'binaryOpeningIterations': 0,
+            "seeds": seeds,
         }
         params.update(inparams)
         # logger.debug("ogran_label ", organ_label)
@@ -1590,6 +1591,7 @@ class OrganSegmentation():
         if self.run_vessel_segmentation:
             print("rvs")
             self.json_annotation_export()
+            print("rvs")
             self.portalVeinSegmentation(**self.run_vessel_segmentation_params) # tu padne
         if self.output_annotaion_file is not None:
             print("oaf")
