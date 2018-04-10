@@ -37,7 +37,7 @@ def resection(data):
     #segm = data['segmentation']
     #pyed = sed3.sed3(vessels)
     #pyed.show()
-    print ("Select cut")
+    print("Select cut")
     lab = virtual_resection.cut_editor_old(data)
     pyed = sed3.sed3(lab )#, contour=segm)
     pyed.show()
@@ -80,7 +80,7 @@ def resection(data):
 def get_biggest_object(data):
     """ Return biggest object """
     lab, num = scipy.ndimage.label(data)
-    #print ("bum = "+str(num))
+    #print("bum = "+str(num))
 
     maxlab = max_area_index(lab, num)
 

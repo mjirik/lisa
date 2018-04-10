@@ -84,7 +84,7 @@ if __name__ == "__main__":
         oseg.interactivity()
         # Uvolneni pameti
         garbage.collect()
-        print ( "Volume " + str(oseg.get_segmented_volume_size_mm3()/1000000.0) + ' [l]' )
+        print( "Volume " + str(oseg.get_segmented_volume_size_mm3()/1000000.0) + ' [l]' )
 # get data in list
         data = oseg.export()
     else:

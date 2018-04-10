@@ -25,14 +25,14 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 
 def submodule_update():
     # update submodules codes
-    print ('Updating submodules')
+    print('Updating submodules')
     try:
         # import pdb; pdb.set_trace()
         subprocess.call('git submodule update --init --recursive', shell=True)
         # subprocess.call('git submodule update --init --recursive')
 
     except:
-        print ('Probem with git submodules')
+        print('Probem with git submodules')
 
 
 def check_python_architecture(pythondir, target_arch_str):
@@ -99,19 +99,19 @@ def windows_install():
     # check correct python version
     if (sys.version_info[0:2] != pythonversion):
 
-        print ("Different python required \n installing python "
+        print("Different python required \n installing python "
                + str(pythonversion))
-        print (sys.version_info)
+        print(sys.version_info)
 
         local_file_name = 'tmp\python.msi'
         urllibr.urlretrieve(urlpython, local_file_name)
         a = "msiexec /i " + local_file_name
-        print (a)
+        print(a)
         subprocess.call(a)
 
         check_python_architecture(pythondir, target_arch_str)
 
-        print ("Please restart installer with new python")
+        print("Please restart installer with new python")
         subprocess.call(pythondir + "python.exe mysetup.py")
         return
     else:
@@ -131,7 +131,7 @@ def windows_install():
     subprocess.call(pythondir + "python.exe get-pip.py", cwd="./tmp/")
 
     # numpy, scipy, matplotlib, scikit-learn, cython
-    print ("numpy, scipy, matplotlib, scikit-learn, cython install")
+    print("numpy, scipy, matplotlib, scikit-learn, cython install")
     #import pdb; pdb.set_trace()
     try:
 
@@ -141,7 +141,7 @@ def windows_install():
             + " matplotlib cython nose",
             cwd="./tmp/")
     except:
-        print ("alternative installation ")
+        print("alternative installation ")
         download_and_run(urlnumpy, "./tmp/numpy.exe")
         download_and_run(urlscipy, "./tmp/scipy.exe")
         download_and_run(urlsklearn, "./tmp/sklearn.exe")
@@ -157,18 +157,18 @@ def windows_install():
 def windows_get_git():
 
     # instalace msys gitu
-    print ("MSYS Git install")
+    print("MSYS Git install")
     #import pdb; pdb.set_trace()
     download_and_run(url=urlmsysgit, local_file_name='./tmp/msysgit.exe')
 
 
 def windows_build_gco():
     # install MinGW
-    print ("MinGW install")
+    print("MinGW install")
     download_and_run(url=urlmingw, local_file_name='./tmp/mingw.exe')
 
     # install gco_python
-    print ("gco_python install")
+    print("gco_python install")
     # --- first we need gco_python source codes
     #try:
     #    os.mkdir("tmp/gco_python")
@@ -192,7 +192,7 @@ def windows_build_gco():
     datafile.extractall('./tmp/gco_python-master/gco_src')
 
     # --- now compile
-    print ("gco compilation")
+    print("gco compilation")
 
     # there is a bug in python mingw compiler with -mno-cygwin, so here is simple patch
 
@@ -212,9 +212,9 @@ def remove(local_file_name):
     try:
         os.remove(local_file_name)
     except Exception as e:
-        print ("Cannot remove file '" + local_file_name + "'. Please remove\
+        print("Cannot remove file '" + local_file_name + "'. Please remove\
         it manually.")
-        print (e)
+        print(e)
 
 
 def downzip(url, destination='./sample_data/'):

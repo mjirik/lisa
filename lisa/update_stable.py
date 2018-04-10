@@ -63,7 +63,7 @@ def make_update(dry_run=False):
     """
     import os.path as op
     conda_ok = True
-    print ('Updating conda modules')
+    print('Updating conda modules')
     logger.debug("Updating conda modules")
     try:
         cmd = ["conda", "install", "--yes",
@@ -83,7 +83,7 @@ def make_update(dry_run=False):
         # try:
         #     install_and_import('wget', '--user')
 
-    print ('Updating pip modules')
+    print('Updating pip modules')
     logger.debug("Updating pip modules")
     try:
 
@@ -130,7 +130,7 @@ def make_update_old(dry_run=False):
         except:
             logger.warning('Problem with git pull')
     conda_ok = True
-    print ('Updating conda root modules')
+    print('Updating conda root modules')
     try:
         cmd = ["conda", "install", "--yes", "--file",
                op.join(path_to_base, "requirements_conda_root.txt")]
@@ -142,7 +142,7 @@ def make_update_old(dry_run=False):
         traceback.print_exc()
         conda_ok = False
 
-    print ('Updating conda modules')
+    print('Updating conda modules')
     try:
         cmd = ["conda", "install", "--yes",
                # "-c", 'luispedro ',
@@ -158,7 +158,7 @@ def make_update_old(dry_run=False):
         # try:
         #     install_and_import('wget', '--user')
 
-    print ('Updating pip modules')
+    print('Updating pip modules')
     try:
 
         cmd = ["pip", "install", '-U', '--no-deps']
@@ -175,7 +175,7 @@ def make_update_old(dry_run=False):
     # branch_name = subprocess.check_output(['git', 'branch'])
     # # if we found stabel (find is not -1), we should use specific version
     # if branch_name.find('* stable') != -1 or release_type == 'stable':
-    #     print ('Stable version prerequisities')
+    #     print('Stable version prerequisities')
     #     use_specifed_version = 1
     # else:
     #     use_specifed_version = 0
@@ -203,8 +203,8 @@ def make_update_old(dry_run=False):
     #         # subprocess.call(
     #         #      'pip install -U --no-deps skelet3d --user', shell=True)
     #     except:
-    #         print ('Probem with git submodules')
-    #         print (traceback.format_exc())
+    #         print('Probem with git submodules')
+    #         print(traceback.format_exc())
 
 
 def install_and_import(package, pip_params=[]):

@@ -37,7 +37,7 @@ class QTSeedEditorTest(unittest.TestCase):
         from PyQt4.QtGui import QApplication
         import numpy as np
         im3d = np.random.rand(15,15,15)
-        print ("Select pixels for deletion (it will be setted to 0)")
+        print("Select pixels for deletion (it will be setted to 0)")
 #, QMainWindow
         app = QApplication(sys.argv)
         pyed = QTSeedEditor(im3d, mode='draw')
@@ -47,7 +47,7 @@ class QTSeedEditorTest(unittest.TestCase):
         deletemask = pyed.getSeeds()
 
 
-        print ("If it is ok, press 'Return'. If it is wrong, click into image and press 'Return'")
+        print("If it is ok, press 'Return'. If it is wrong, click into image and press 'Return'")
         # rewrite input data
         im3d [deletemask != 0] = 0
         pyed = QTSeedEditor(im3d)
@@ -68,8 +68,8 @@ class QTSeedEditorTest(unittest.TestCase):
     #    oseg = organ_segmentation.OrganSegmentation(dcmdir, working_voxelsize_mm = 4)
     #
 # ma#nual seeds setting
-    #    print ("with left mouse button select some pixels of the bottle content")
-    #    print ("with right mouse button select some pixels of background")
+    #    print("with left mouse button select some pixels of the bottle content")
+    #    print("with right mouse button select some pixels of background")
 
     #    oseg.interactivity()
 

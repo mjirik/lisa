@@ -648,7 +648,7 @@ def main():
         seg += bn.get_body()
 
 
-    #print ("Data size: " + str(data3d.nbytes) + ', shape: ' + str(data3d.shape) )
+    #print("Data size: " + str(data3d.nbytes) + ', shape: ' + str(data3d.shape) )
 
     #igc = pycut.ImageGraphCut(data3d, zoom = 0.5)
     #igc.interactivity()

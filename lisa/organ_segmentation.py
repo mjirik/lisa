@@ -676,7 +676,7 @@ class OrganSegmentation():
         tmpcrinfo: temporary crop information
 
         """
-        # print ('sedds ', str(self.seeds.shape), ' se ',
+        # print('sedds ', str(self.seeds.shape), ' se ',
         #       str(self.segmentation.shape), ' d3d ', str(self.data3d.shape))
         self.data3d = qmisc.crop(self.data3d, tmpcrinfo)
 # No, size of seeds should be same as data3d

@@ -438,7 +438,7 @@ class ModelTrainer():
         if len(orig_fnames) == 0:
             logger.warning("No file found in path:\n{}".format(reference_dir + orig_pattern))
 
-        print (ref_fnames)
+        print(ref_fnames)
 
         for oname, rname in zip(orig_fnames, ref_fnames):
             logger.debug(oname)

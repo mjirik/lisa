@@ -215,7 +215,7 @@ def getVersionString():
 def get_one_biggest_object(data):
     """ Return biggest object """
     lab, num = scipy.ndimage.label(data)
-    # print ("bum = "+str(num))
+    # print("bum = "+str(num))
 
     maxlab = max_area_index(lab, num)
 

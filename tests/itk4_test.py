@@ -25,7 +25,7 @@ import numpy as np
 # from pysegbase import pycut
 # from pysegbase import seed_editor_qt
 
-print sys.argv
+print(sys.argv)
 class PycutTest(unittest.TestCase):
     interactivetTest = False
     #interactivetTest = True

@@ -2111,7 +2111,7 @@ def metoda1(cesta, seznamSouboru):
 
         pomocny = pomocny + 1
         '''NASLEDUJICI RADEK LZE OMEZIT CISLEM PRO NETRENOVANI CELE MNOZINY'''
-        # print (pomocny+1 >= pocetOrig)
+        # print(pomocny+1 >= pocetOrig)
         if(pomocny + 1 >= pocetOrig):  # if(pomocny >= pocetOrig):
             print("trenovani ukonceno")
             break

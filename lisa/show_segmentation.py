@@ -82,7 +82,7 @@ def showSegmentation(
     if show:
         import viewer
         view = viewer.QVTKViewer(vtk_file)
-        print ('show viewer')
+        print('show viewer')
         view.exec_()
 
     return labels

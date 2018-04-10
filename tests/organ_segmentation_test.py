@@ -85,8 +85,8 @@ class OrganSegmentationTest(unittest.TestCase):
             dcmdir, working_voxelsize_mm=4, manualroi=False)
 
 # manual seeds setting
-        print ("with left mouse button select some pixels of the brain")
-        print ("with right mouse button select some pixels of other tissues\
+        print("with left mouse button select some pixels of the brain")
+        print("with right mouse button select some pixels of other tissues\
 and background")
 
         oseg.interactivity()
@@ -459,7 +459,7 @@ and background")
         dcmdir = os.path.join(path_to_script, './../sample_data/matlab/examples/sample_data/DICOM/digest_article/') #noqa
         data3d, metadata = dcmr.dcm_read_from_dir(dcmdir)
 
-        # print ("Data size: " + str(data3d.nbytes) + ', shape: ' + str(data3d.shape) ) #noqa
+        # print("Data size: " + str(data3d.nbytes) + ', shape: ' + str(data3d.shape) ) #noqa
 
         igc = pycut.ImageGraphCut(data3d, zoom=0.5)
         seeds = igc.seeds

@@ -46,4 +46,4 @@ import pdb; pdb.set_trace()
 params, pcov = curve_fit(func, t, yn)
 
 
-print (params)
+print(params)

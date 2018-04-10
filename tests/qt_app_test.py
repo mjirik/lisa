@@ -44,7 +44,7 @@ class QtAppTest(unittest.TestCase):
         app = QApplication(sys.argv)
         dcmdir = QFileDialog.getExistingDirectory(caption='Select DICOM Folder',
                                                   options=QFileDialog.ShowDirsOnly)
-        print ('ahoj')
+        print('ahoj')
         #app.exec_()
         #app.exit(0)
 

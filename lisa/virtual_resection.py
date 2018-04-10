@@ -321,7 +321,7 @@ def resection_portal_vein_new(data, interactivity=False, seeds=None, organ_label
 
     # @TODO zde nahradit střeve čímkoliv smysluplnějším
     if interactivity:
-        print ("Select cut")
+        print("Select cut")
         # seeds = cut_editor_old(data)
         seeds = cut_editor_old(data)
     elif seeds is None:
@@ -360,7 +360,7 @@ def resection_portal_vein_new(data, interactivity=False, seeds=None, organ_label
 
 def resection_old(data, interactivity=True, seeds=None):
     if interactivity:
-        print ("Select cut")
+        print("Select cut")
         seeds = cut_editor_old(data)
     elif seeds is None:
         logger.error('seeds is None and interactivity is False')
@@ -387,7 +387,7 @@ def resection_planar(data, interactivity, seeds=None):
     """
     if seeds is None:
         if interactivity:
-            print ("Select cut")
+            print("Select cut")
             seeds = cut_editor_old(data)
         else:
             logger.error('seeds is None and interactivity is False')

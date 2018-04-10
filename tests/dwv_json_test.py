@@ -25,14 +25,17 @@ class DicomWebViewJsonTest(unittest.TestCase):
         oseg.make_run()
 
     def test_json_jatra_5mm_import(self):
+
         input_annotation_file = op.join(path_to_script, "test_dwv_jatra_5mm.json")
         input_data_path = io3d.datasets.join_path("jatra_5mm/")
+        output_file = "output.json"
 
         oseg = lisa.organ_segmentation.OrganSegmentation(
             input_annotation_file=input_annotation_file,
             datapath=input_data_path,
-            output_annotation_file="output.json",
+            output_annotation_file=output_file,
             autocrop=False,
 
         )
         oseg.make_run()
+        self.assertTrue(op.exists(output_file))
