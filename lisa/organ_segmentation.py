@@ -957,6 +957,30 @@ class OrganSegmentation():
                 binaryOpeningIterations=0)
 
         self._segmentation_postprocessing()
+        # @TODO make faster
+        # spojení staré a nové segmentace
+        # from PyQt4.QtCore import pyqtRemoveInputHook; pyqtRemoveInputHook()
+        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+        if self.segmentation_prev is None:
+            # pokud neznáme žádnou předchozí segmentaci, tak se chováme jako dříve
+            self.segmentation[self.segmentation == 1] = self.nlabels(self.output_label)
+        else:
+            # remove old pixels for this label
+            self.segmentation_replacement(
+                segmentation_new=self.segmentation,
+                segmentation=self.segmentation_prev,
+                label=self.output_label,
+                label_new=1,
+            )
+            # self.segmentation_prev[self.segmentation_prev == self.output_label] = 0
+            # set new labels
+            # self.segmentation_prev[np.where(self.segmentation == 1)] = self.output_label
+
+            # clean up
+
+            self.segmentation = self.segmentation_prev
+            self.segmentation_prev = None
+
 
         # rint 'autocrop', self.autocrop
         if self.autocrop is True:
@@ -983,30 +1007,6 @@ class OrganSegmentation():
 
         # set label number
 # !! pomaly!!!
-# @TODO make faster
-        # spojení staré a nové segmentace
-        # from PyQt4.QtCore import pyqtRemoveInputHook; pyqtRemoveInputHook()
-        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
-        if self.segmentation_prev is None:
-            # pokud neznáme žádnou předchozí segmentaci, tak se chováme jako dříve
-            self.segmentation[self.segmentation == 1] = self.nlabels(self.output_label)
-        else:
-            # remove old pixels for this label
-            self.segmentation_replacement(
-                segmentation_new=self.segmentation,
-                segmentation=self.segmentation_prev,
-                label=self.output_label,
-                label_new=1,
-            )
-            # self.segmentation_prev[self.segmentation_prev == self.output_label] = 0
-            # set new labels
-            # self.segmentation_prev[np.where(self.segmentation == 1)] = self.output_label
-
-            # clean up
-
-            self.segmentation = self.segmentation_prev
-            self.segmentation_prev = None
-
 #
         logger.debug('self.slab')
         logger.debug(str(self.slab))
@@ -1034,6 +1034,7 @@ class OrganSegmentation():
             slab=self.slab,
             **kwargs
         )
+
     def _segmentation_postprocessing(self):
         """
         :segmentation_smoothing:
@@ -1601,7 +1602,7 @@ class OrganSegmentation():
             data['slab'] = self.slab
             self.portalVeinSegmentation(**self.run_vessel_segmentation_params)
 
-        #self.save_outputs()
+        self.save_outputs()
 
 
     def split_vessel(self, input_label=None, output_label1=1, output_label2=2, **kwargs):

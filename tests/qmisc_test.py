@@ -18,6 +18,7 @@ import os
 
 from lisa import qmisc
 from lisa import misc
+import io3d.misc
 
 
 #

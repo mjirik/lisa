@@ -72,7 +72,7 @@ def readData3d(dcmdir):
 #        dcmdir = dcmdir.encode("utf8")
         dcmdir = datareader.get_dcmdir_qt(qt_app)
     reader = datareader.DataReader()
-    data3d, metadata = reader.Get3DData(dcmdir, qt_app=None)
+    data3d, metadata = reader.Get3DData(dcmdir, qt_app=None, dataplus_format=False)
 
     return data3d, metadata, qt_app
 
@@ -106,7 +106,7 @@ def main():
     #print args["arg"]
 
     reader = datareader.DataReader()
-    data3d, metadata = reader.Get3DData(args['inputdatapath'], qt_app=None)
+    data3d, metadata = reader.Get3DData(args['inputdatapath'], qt_app=None, dataplus_format=False)
     overlays = reader.GetOverlay()
     overlay = np.zeros(data3d.shape, dtype=np.int8)
     print("overlays ", overlays.keys())

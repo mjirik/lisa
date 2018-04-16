@@ -161,7 +161,7 @@ def eval_all_from_dataset_metadata(inputdata, visualization=False,
         reader = datareader.DataReader()
         data3d_a_path = os.path.join(inputdata['basedir'],
                                      inputdata['data'][i]['sliverseg'])
-        data3d_a, metadata_a = reader.Get3DData(data3d_a_path)
+        data3d_a, metadata_a = reader.Get3DData(data3d_a_path, dataplus_format=False)
         print("inputdata ", inputdata['data'][i].values())
         try:
             # if there is defined overlay

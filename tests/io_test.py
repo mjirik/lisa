@@ -66,15 +66,15 @@ class InOutTest(unittest.TestCase):
         oseg.save_outputs_dcm(output_segpath)
 
         # check data
-        data3d_orig, metadata = io3d.datareader.read(data_path)
-        data3d_stored, metadata = io3d.datareader.read(output_datapath)
+        data3d_orig, metadata = io3d.datareader.read(data_path, dataplus_format=False)
+        data3d_stored, metadata = io3d.datareader.read(output_datapath, dataplus_format=False)
 
         err_data = np.sum(np.abs(data3d_orig - data3d_stored))
         self.assertLess(err_data, 500, "data error")
 
         # check segmentation
-        seg_orig, metadata = io3d.datareader.read(data_path)
-        seg_stored, metadata = io3d.datareader.read(output_datapath)
+        seg_orig, metadata = io3d.datareader.read(data_path, dataplus_format=False)
+        seg_stored, metadata = io3d.datareader.read(output_datapath, dataplus_format=False)
 
         err_data = np.sum(np.abs(seg_orig - seg_stored))
         self.assertLess(err_data, 500, "segmentation error")

@@ -540,7 +540,7 @@ def main():
     #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
     #data3d, metadata = dcmr.dcm_read_from_dir(args.dcmdir)
 
-    data3d , metadata = io3d.datareader.read(args.datadir)
+    data3d , metadata = io3d.datareader.read(args.datadir, dataplus_format=False)
 
     sseg = SupportStructureSegmentation(data3d = data3d,
             voxelsize_mm = metadata['voxelsize_mm'],

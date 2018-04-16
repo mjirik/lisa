@@ -45,7 +45,7 @@ class LiverSegmentationCervenyTest(unittest.TestCase):
         # path_to_script = os.path.dirname(os.path.abspath(__file__))
         # dpath = os.path.join(path_to_script, '../sample_data/jatra_5mm/')
         dpath = join_sdp('liver-orig001.mhd')
-        data3d, metadata = io3d.datareader.read(dpath)
+        data3d, metadata = io3d.datareader.read(dpath, dataplus_format=False)
         voxelsize_mm = metadata['voxelsize_mm']
 
         ls = liver_segmentation.LiverSegmentation(
@@ -71,7 +71,7 @@ class LiverSegmentationCervenyTest(unittest.TestCase):
         # path_to_script = os.path.dirname(os.path.abspath(__file__))
         # dpath = os.path.join(path_to_script, '../sample_data/jatra_5mm/')
         dpath = join_sdp('liver-orig001.mhd')
-        data3d, metadata = io3d.datareader.read(dpath)
+        data3d, metadata = io3d.datareader.read(dpath, dataplus_format=False)
         voxelsize_mm = metadata['voxelsize_mm']
 
         ls = liver_segmentation.LiverSegmentation(

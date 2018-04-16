@@ -125,7 +125,7 @@ class DicomReaderTest(unittest.TestCase):
         dcmdir = lisa.dataset.join_sdp('jatra_5mm')
         #dcmdir = '/home/mjirik/data/medical/data_orig/jatra-kma/jatra_5mm/'
         #self.data3d, self.metadata = dcmr.dcm_read_from_dir(self.dcmdir)
-        data3d, metadata = io3d.datareader.read(dcmdir)
+        data3d, metadata = io3d.datareader.read(dcmdir, dataplus_format=False)
 #slice size is 512x512
         self.assertEqual(data3d.shape[2],512)
 # voxelsize depth = 5 mm

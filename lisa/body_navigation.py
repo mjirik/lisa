@@ -633,7 +633,7 @@ def main():
     #data3d, metadata = dcmr.dcm_read_from_dir(args.dcmdir)
     import io3d
 
-    data3d , metadata = io3d.datareader.read(args.datadir)
+    data3d , metadata = io3d.datareader.read(args.datadir, dataplus_format=False)
 
     bn = BodyNavigation(data3d = data3d,
             voxelsize_mm = metadata['voxelsize_mm'],

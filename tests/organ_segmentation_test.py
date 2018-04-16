@@ -358,7 +358,7 @@ and background")
         # import pdb; pdb.set_trace()
 
         # mel by to být litr. tedy milion mm3
-        self.assertGreater(volume, 900000)
+        self.assertGreater(volume, 800000)
         self.assertLess(volume, 1100000)
 
     def test_volume_resize(self):

@@ -63,7 +63,7 @@ class LocalizationTests(unittest.TestCase):
         ol.load("left_kidney.ol.p")
 
         dr = io3d.DataReader()
-        data3d, metadata = dr.Get3DData(test_data)
+        data3d, metadata = dr.Get3DData(test_data, dataplus_format=False)
         out = ol.predict(data3d, metadata['voxelsize_mm'])
 
         seg = (metadata["segmentation"] == metadata['slab'][label]).astype(np.int8)

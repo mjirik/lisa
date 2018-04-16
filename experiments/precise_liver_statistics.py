@@ -139,11 +139,11 @@ def read_data_orig_and_seg(inputdata, i):
     reader = datareader.DataReader()
     data3d_a_path = os.path.join(inputdata['basedir'],
                                  inputdata['data'][i]['sliverseg'])
-    data3d_a, metadata_a = reader.Get3DData(data3d_a_path)
+    data3d_a, metadata_a = reader.Get3DData(data3d_a_path, dataplus_format=False)
 
     data3d_b_path = os.path.join(inputdata['basedir'],
                                  inputdata['data'][i]['sliverorig'])
-    data3d_b, metadata_b = reader.Get3DData(data3d_b_path)
+    data3d_b, metadata_b = reader.Get3DData(data3d_b_path, dataplus_format=False)
 
     #import pdb; pdb.set_trace()
     data3d_seg = (data3d_a > 0).astype(np.int8)

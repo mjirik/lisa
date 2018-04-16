@@ -45,7 +45,7 @@ class DicomWriterTest(unittest.TestCase):
         dw.Write3DData(data, filename, filetype='dcm', metadata=metadata)
 
         dr = dreader.DataReader()
-        newdata, newmetadata = dr.Get3DData(filename)
+        newdata, newmetadata = dr.Get3DData(filename, dataplus_format=False)
 
         # print  "meta ", metadata
         # print  "new meta ", newmetadata
@@ -87,7 +87,7 @@ class DicomWriterTest(unittest.TestCase):
             filename
         )
         dr = dreader.DataReader()
-        newdata, newmetadata = dr.Get3DData('tests_outputs')
+        newdata, newmetadata = dr.Get3DData('tests_outputs', dataplus_format=False)
         newoverlay = dr.GetOverlay()
         # print overlay
 
@@ -115,7 +115,7 @@ class DicomWriterTest(unittest.TestCase):
 # open copied data to obtain dcmfilefilelist
         dr = dreader.DataReader()
         data3d, metadata = dr.Get3DData(
-            lisa.dataset.sample_data_path() + '/jatra_5mm/'
+            lisa.dataset.sample_data_path() + '/jatra_5mm/', dataplus_format=False
             # 'sample_data/volumetrie/'
         )
 # for test we are working only with small number of files (n_files)
@@ -135,7 +135,7 @@ class DicomWriterTest(unittest.TestCase):
 
 # try read written data
         dr = dreader.DataReader()
-        newdata, newmetadata = dr.Get3DData(filedir)
+        newdata, newmetadata = dr.Get3DData(filedir, dataplus_format=False)
         newoverlay = dr.GetOverlay()
 
         self.assertTrue((newoverlay[i_overlay] == overlays[i_overlay]).all())

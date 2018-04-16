@@ -442,9 +442,9 @@ class ModelTrainer():
 
         for oname, rname in zip(orig_fnames, ref_fnames):
             logger.debug(oname)
-            data3d_orig, metadata = io3d.datareader.read(oname)
+            data3d_orig, metadata = io3d.datareader.read(oname, dataplus_format=False)
             vs_mm1 = metadata['voxelsize_mm']
-            data3d_seg, metadata = io3d.datareader.read(rname)
+            data3d_seg, metadata = io3d.datareader.read(rname, dataplus_format=False)
             vs_mm = metadata['voxelsize_mm']
             if segmentation_key is not None:
                 data3d_seg = metadata['segmentation']
@@ -550,9 +550,9 @@ def model_score_from_sliver_data(
 
     for oname, rname in zip(orig_fnames, ref_fnames):
         print(oname)
-        data3d_orig, metadata = io3d.datareader.read(oname)
+        data3d_orig, metadata = io3d.datareader.read(oname, dataplus_format=False)
         vs_mm1 = metadata['voxelsize_mm']
-        data3d_seg, metadata = io3d.datareader.read(rname)
+        data3d_seg, metadata = io3d.datareader.read(rname, dataplus_format=False)
         vs_mm = metadata['voxelsize_mm']
 
         mdl = pycut.Model(modelparams=modelparams)
