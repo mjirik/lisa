@@ -207,6 +207,7 @@ class ExperimentsTest(unittest.TestCase):
         conf_default = {
             'config_version': [1, 0, 0], 'working_voxelsize_mm': 2.0,
             'segmentation_smoothing': False,
+            "run_organ_segmentation": True,
             'segparams': {'pairwise_alpha_per_mm2': 50,
                           'return_only_object_with_seeds': True}
         }
