@@ -464,7 +464,7 @@ def sliver_overall_score_for_one_couple(score):
     """
     Computes overall score:
     """
-    score_list = score.values()
+    score_list = list(score.values())
     overall_score = np.average(np.array(score_list))
 
     return overall_score
