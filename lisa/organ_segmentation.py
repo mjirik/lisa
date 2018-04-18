@@ -355,7 +355,7 @@ class OrganSegmentation():
         self.output_datapath = os.path.expanduser(output_datapath)
 
     def update(self):
-        import update_stable
+        from . import update_stable
         update_stable.make_update()
         # import subprocess
         # print subprocess.call(['conda', 'update', '-y', '-c', 'mjirik', '-c', 'SimpleITK', 'lisa']) #, shell=True)
@@ -1087,11 +1087,7 @@ class OrganSegmentation():
 #    def interactivity(self, min_val=800, max_val=1300):
 # @TODO generovat QApplication
     def interactivity(self, min_val=None, max_val=None, layout=None):
-        try:
-            from pysegbase.seed_editor_qt import QTSeedEditor
-        except:
-            logger.warning("Deprecated of pyseg_base as submodule")
-            from seed_editor_qt import QTSeedEditor
+        from pysegbase.seed_editor_qt import QTSeedEditor
         import_gui()
         logger.debug('interactivity')
         # if self.edit_data:
@@ -1230,7 +1226,7 @@ class OrganSegmentation():
 
     def lesionsLocalization(self):
         """ Localization of lession """
-        import lesions
+        from . import lesions
         tumory = lesions.Lesions()
         # tumory.overlay_test()
         data = self.export()
@@ -1629,7 +1625,7 @@ class OrganSegmentation():
             import ipdb
             ipdb.set_trace()
 
-        import virtual_resection
+        from . import virtual_resection
         datap = self.export()
         seeds = virtual_resection.cut_editor_old(datap, label=input_label)
         lab, cut_by_user = virtual_resection.split_vessel(datap=datap, seeds=seeds, input_label=input_label, **kwargs)
@@ -1663,7 +1659,7 @@ class OrganSegmentation():
 
         :py:segmentation:
         """
-        import virtual_resection
+        from . import virtual_resection
         datap = self.export()
         segm, dist1, dist2 = virtual_resection.split_organ_by_two_vessels(
             datap, seeds=self.segmentation,
@@ -1944,7 +1940,7 @@ def main(app=None, splash=None):  # pragma: no cover
             # oseg.save_outputs()
         else:
             # mport_gui()
-            from lisaWindow import OrganSegmentationWindow
+            from .lisaWindow import OrganSegmentationWindow
             import PyQt4
             import PyQt4.QtGui
             from PyQt4.QtGui import QApplication
