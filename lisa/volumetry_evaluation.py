@@ -241,7 +241,7 @@ def eval_all_from_dataset_metadata(inputdata, visualization=False,
 
 
 def compare_volumes_boundingbox(vol1, vol2, voxelsize_mm):
-    import qmisc
+    from . import qmisc
 
     crinfo = qmisc.crinfo_from_specific_data(vol1, [20, 20, 20])
     vol1[
@@ -453,7 +453,7 @@ def write_csv(data, filename='20130812_liver_volumetry.csv'):
 
 def write_sum_to_csv(evaluation, writer):
     avg, var = make_sum(evaluation)
-    key = evaluation.keys()
+    key = list(evaluation.keys())
     writer.writerow([' - '] + key)
     writer.writerow(['var'] + var)
     writer.writerow(['avg'] + avg)
