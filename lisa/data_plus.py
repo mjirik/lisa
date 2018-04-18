@@ -31,7 +31,7 @@ def get_slab_value(slab, label, value=None):
         return slab[label]
     else:
         if value is None:
-            value = np.max(slab.values()) + 1
+            value = np.max(list(slab.values())) + 1
         slab[label] = value
 
 # class Slab(dict):
