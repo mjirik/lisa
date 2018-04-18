@@ -147,14 +147,14 @@ class ShapeModel():
         for x in range(dataShape[0]):
             for y in range(dataShape[1]):
                 for z in range(dataShape[2]):
-                    xStart = x*voxelySmer[0]
-                    xKonec = xStart+voxelySmer[0]
+                    xStart = x * voxelySmer[0]
+                    xKonec = xStart + voxelySmer[0]
                     
-                    yStart = y*voxelySmer[1]
-                    yKonec = yStart+voxelySmer[1]
+                    yStart = y * voxelySmer[1]
+                    yKonec = yStart + voxelySmer[1]
                     
-                    zStart = z*voxelySmer[2]
-                    zKonec = zStart+voxelySmer[2]
+                    zStart = z * voxelySmer[2]
+                    zKonec = zStart + voxelySmer[2]
                     objekt = crData[
                              int(xStart):int(xKonec),
                              int(yStart):int(yKonec),
