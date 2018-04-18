@@ -22,10 +22,10 @@ import sys
 import os.path
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../src/"))
-sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
-sys.path.append(os.path.join(path_to_script,
-                             "../extern/sed3/"))
+# sys.path.append(os.path.join(path_to_script, "../src/"))
+# sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
+# sys.path.append(os.path.join(path_to_script,
+#                              "../extern/sed3/"))
 # sys.path.append(os.path.join(path_to_script, "../extern/"))
 # import featurevector
 
@@ -49,8 +49,8 @@ import sed3
 import argparse
 
 # import segmentation
-import qmisc
-import misc
+from . import qmisc
+from . import misc
 # import organ_segmentation
 # import experiments
 from io3d import datareader

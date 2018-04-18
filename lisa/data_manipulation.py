@@ -16,7 +16,7 @@ import argparse
 import scipy
 import numpy as np
 
-import qmisc
+from . import qmisc
 
 
 def fill_holes_in_segmentation(segmentation, label):

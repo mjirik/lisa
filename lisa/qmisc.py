@@ -17,6 +17,8 @@ import subprocess
 import scipy
 import scipy.ndimage
 
+from imtools.image_manipulation import crinfo_from_specific_data, crop, uncrop, manualcrop, fix_crinfo, combinecrinfo
+
 
 class SparseMatrix():
     def __init__(self, ndarray):
@@ -41,138 +43,138 @@ def isSparseMatrix(obj):
 
 # import sed3
 
-def manualcrop(data):  # pragma: no cover
-
-    try:
-        from pysegbase import seed_editor_qt
-    except:
-        logger.warning("Deprecated of pyseg_base as submodule")
-        import seed_editor_qt
-
-    pyed = seed_editor_qt.QTSeedEditor(data, mode='crop')
-    pyed.exec_()
-    # pyed = sed3.sed3(data)
-    # pyed.show()
-    nzs = pyed.seeds.nonzero()
-    crinfo = [
-        [np.min(nzs[0]), np.max(nzs[0])],
-        [np.min(nzs[1]), np.max(nzs[1])],
-        [np.min(nzs[2]), np.max(nzs[2])],
-        ]
-    data = crop(data, crinfo)
-    return data, crinfo
-
-
-def crop(data, crinfo):
-    """
-    Crop the data.
-
-    crop(data, crinfo)
-
-    :param crinfo: min and max for each axis
-
-    """
-    crinfo = fix_crinfo(crinfo)
-    return data[
-        __int_or_none(crinfo[0][0]):__int_or_none(crinfo[0][1]),
-        __int_or_none(crinfo[1][0]):__int_or_none(crinfo[1][1]),
-        __int_or_none(crinfo[2][0]):__int_or_none(crinfo[2][1])
-        ]
-
-
-def __int_or_none(number):
-    if number is not None:
-        number = int(number)
-    return number
-
-
-def combinecrinfo(crinfo1, crinfo2):
-    """
-    Combine two crinfos. First used is crinfo1, second used is crinfo2.
-    """
-    crinfo1 = fix_crinfo(crinfo1)
-    crinfo2 = fix_crinfo(crinfo2)
-
-    crinfo = [
-        [crinfo1[0][0] + crinfo2[0][0], crinfo1[0][0] + crinfo2[0][1]],
-        [crinfo1[1][0] + crinfo2[1][0], crinfo1[1][0] + crinfo2[1][1]],
-        [crinfo1[2][0] + crinfo2[2][0], crinfo1[2][0] + crinfo2[2][1]]
-        ]
-
-    return crinfo
+# def manualcrop(data):  # pragma: no cover
+#
+#     try:
+#         from pysegbase import seed_editor_qt
+#     except:
+#         logger.warning("Deprecated of pyseg_base as submodule")
+#         import seed_editor_qt
+#
+#     pyed = seed_editor_qt.QTSeedEditor(data, mode='crop')
+#     pyed.exec_()
+#     # pyed = sed3.sed3(data)
+#     # pyed.show()
+#     nzs = pyed.seeds.nonzero()
+#     crinfo = [
+#         [np.min(nzs[0]), np.max(nzs[0])],
+#         [np.min(nzs[1]), np.max(nzs[1])],
+#         [np.min(nzs[2]), np.max(nzs[2])],
+#         ]
+#     data = crop(data, crinfo)
+#     return data, crinfo
+#
+#
+# def crop(data, crinfo):
+#     """
+#     Crop the data.
+#
+#     crop(data, crinfo)
+#
+#     :param crinfo: min and max for each axis
+#
+#     """
+#     crinfo = fix_crinfo(crinfo)
+#     return data[
+#         __int_or_none(crinfo[0][0]):__int_or_none(crinfo[0][1]),
+#         __int_or_none(crinfo[1][0]):__int_or_none(crinfo[1][1]),
+#         __int_or_none(crinfo[2][0]):__int_or_none(crinfo[2][1])
+#         ]
+#
+#
+# def __int_or_none(number):
+#     if number is not None:
+#         number = int(number)
+#     return number
 
 
-def crinfo_from_specific_data(data, margin):
-    # hledáme automatický ořez, nonzero dá indexy
-    logger.debug('crinfo')
-    logger.debug(str(margin))
-    nzi = np.nonzero(data)
-    logger.debug(str(nzi))
-
-    x1 = np.min(nzi[0]) - margin[0]
-    x2 = np.max(nzi[0]) + margin[0] + 1
-    y1 = np.min(nzi[1]) - margin[0]
-    y2 = np.max(nzi[1]) + margin[0] + 1
-    z1 = np.min(nzi[2]) - margin[0]
-    z2 = np.max(nzi[2]) + margin[0] + 1
-
-# ošetření mezí polí
-    if x1 < 0:
-        x1 = 0
-    if y1 < 0:
-        y1 = 0
-    if z1 < 0:
-        z1 = 0
-
-    if x2 > data.shape[0]:
-        x2 = data.shape[0] - 1
-    if y2 > data.shape[1]:
-        y2 = data.shape[1] - 1
-    if z2 > data.shape[2]:
-        z2 = data.shape[2] - 1
-
-# ořez
-    crinfo = [[x1, x2], [y1, y2], [z1, z2]]
-    return crinfo
-
-
-def uncrop(data, crinfo, orig_shape, resize=False):
-
-    crinfo = fix_crinfo(crinfo)
-    data_out = np.zeros(orig_shape, dtype=data.dtype)
-
-    # print 'uncrop ', crinfo
-    # print orig_shape
-    # print data.shape
-    if resize:
-        data = resize_to_shape(data, crinfo[:, 1] - crinfo[:, 0])
-
-    startx = np.round(crinfo[0][0]).astype(int)
-    starty = np.round(crinfo[1][0]).astype(int)
-    startz = np.round(crinfo[2][0]).astype(int)
-
-    data_out[
-        # np.round(crinfo[0][0]).astype(int):np.round(crinfo[0][1]).astype(int)+1,
-        # np.round(crinfo[1][0]).astype(int):np.round(crinfo[1][1]).astype(int)+1,
-        # np.round(crinfo[2][0]).astype(int):np.round(crinfo[2][1]).astype(int)+1
-        startx:startx + data.shape[0],
-        starty:starty + data.shape[1],
-        startz:startz + data.shape[2]
-        ] = data
-
-    return data_out
-
-
-def fix_crinfo(crinfo, to='axis'):
-    """
-    Function recognize order of crinfo and convert it to proper format.
-    """
-
-    crinfo = np.asarray(crinfo)
-    if crinfo.shape[0] == 2:
-        crinfo = crinfo.T
-
-    return crinfo
+# def combinecrinfo(crinfo1, crinfo2):
+#     """
+#     Combine two crinfos. First used is crinfo1, second used is crinfo2.
+#     """
+#     crinfo1 = fix_crinfo(crinfo1)
+#     crinfo2 = fix_crinfo(crinfo2)
+#
+#     crinfo = [
+#         [crinfo1[0][0] + crinfo2[0][0], crinfo1[0][0] + crinfo2[0][1]],
+#         [crinfo1[1][0] + crinfo2[1][0], crinfo1[1][0] + crinfo2[1][1]],
+#         [crinfo1[2][0] + crinfo2[2][0], crinfo1[2][0] + crinfo2[2][1]]
+#         ]
+#
+#     return crinfo
+#
+#
+# def crinfo_from_specific_data(data, margin):
+#     # hledáme automatický ořez, nonzero dá indexy
+#     logger.debug('crinfo')
+#     logger.debug(str(margin))
+#     nzi = np.nonzero(data)
+#     logger.debug(str(nzi))
+#
+#     x1 = np.min(nzi[0]) - margin[0]
+#     x2 = np.max(nzi[0]) + margin[0] + 1
+#     y1 = np.min(nzi[1]) - margin[0]
+#     y2 = np.max(nzi[1]) + margin[0] + 1
+#     z1 = np.min(nzi[2]) - margin[0]
+#     z2 = np.max(nzi[2]) + margin[0] + 1
+#
+# # ošetření mezí polí
+#     if x1 < 0:
+#         x1 = 0
+#     if y1 < 0:
+#         y1 = 0
+#     if z1 < 0:
+#         z1 = 0
+#
+#     if x2 > data.shape[0]:
+#         x2 = data.shape[0] - 1
+#     if y2 > data.shape[1]:
+#         y2 = data.shape[1] - 1
+#     if z2 > data.shape[2]:
+#         z2 = data.shape[2] - 1
+#
+# # ořez
+#     crinfo = [[x1, x2], [y1, y2], [z1, z2]]
+#     return crinfo
+#
+#
+# def uncrop(data, crinfo, orig_shape, resize=False):
+#
+#     crinfo = fix_crinfo(crinfo)
+#     data_out = np.zeros(orig_shape, dtype=data.dtype)
+#
+#     # print 'uncrop ', crinfo
+#     # print orig_shape
+#     # print data.shape
+#     if resize:
+#         data = resize_to_shape(data, crinfo[:, 1] - crinfo[:, 0])
+#
+#     startx = np.round(crinfo[0][0]).astype(int)
+#     starty = np.round(crinfo[1][0]).astype(int)
+#     startz = np.round(crinfo[2][0]).astype(int)
+#
+#     data_out[
+#         # np.round(crinfo[0][0]).astype(int):np.round(crinfo[0][1]).astype(int)+1,
+#         # np.round(crinfo[1][0]).astype(int):np.round(crinfo[1][1]).astype(int)+1,
+#         # np.round(crinfo[2][0]).astype(int):np.round(crinfo[2][1]).astype(int)+1
+#         startx:startx + data.shape[0],
+#         starty:starty + data.shape[1],
+#         startz:startz + data.shape[2]
+#         ] = data
+#
+#     return data_out
+#
+#
+# def fix_crinfo(crinfo, to='axis'):
+#     """
+#     Function recognize order of crinfo and convert it to proper format.
+#     """
+#
+#     crinfo = np.asarray(crinfo)
+#     if crinfo.shape[0] == 2:
+#         crinfo = crinfo.T
+#
+#     return crinfo
 
 
 def getVersionString():
@@ -184,6 +186,8 @@ def getVersionString():
     version_string = None
     try:
         version_string = subprocess.check_output(['git', 'describe'])
+        if sys.version_info.major == 3:
+            version_string = version_string.decode("utf8")
     except:
         logger.warning('Command "git describe" is not working')
 

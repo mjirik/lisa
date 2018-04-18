@@ -23,7 +23,7 @@ import yaml
 from scipy import ndimage
 import SimpleITK as sitk
 import os.path as op
-import volumetry_evaluation as ve
+from . import volumetry_evaluation as ve
 import sed3
 from sklearn import mixture
 import skimage.filters

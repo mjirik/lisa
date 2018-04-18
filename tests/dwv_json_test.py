@@ -12,6 +12,7 @@ import io3d.datasets
 path_to_script = op.dirname(op.abspath(__file__))
 
 class DicomWebViewJsonTest(unittest.TestCase):
+    @unittest.skip("waiting for finishing the import function")
     def test_json_ircad_import(self):
         input_annotation_file = op.join(path_to_script, "test_dwv_3Dircadb1.12.json")
         input_data_path = io3d.datasets.join_path("3Dircadb1.12/PATIENT_DICOM/")

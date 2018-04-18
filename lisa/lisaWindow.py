@@ -16,7 +16,6 @@ import functools
 
 from io3d import datareader
 # import segmentation
-import virtual_resection
 
 try:
     from viewer import QVTKViewer
@@ -43,9 +42,10 @@ except:
         from seed_editor_qt import QTSeedEditor
 
 import sed3
-import loginWindow
-import dictEditQt
-import segmentationQt
+from . import loginWindow
+from . import dictEditQt
+from . import segmentationQt
+from . import virtual_resection
 
 def find_logo():
     import wget

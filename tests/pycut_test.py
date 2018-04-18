@@ -31,7 +31,6 @@ except:
     import dcmreaddata as dcmr
 
 
-print sys.argv
 class PycutTest(unittest.TestCase):
     interactivetTest = False
     #interactivetTest = True

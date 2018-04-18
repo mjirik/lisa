@@ -150,16 +150,6 @@ class QmiscTest(unittest.TestCase):
 
         self.assertTrue(type(verstr) == str)
 
-    def test_resize_to_shape(self):
-
-        data = np.random.rand(3, 4, 5)
-        new_shape = [5, 6, 6]
-        data_out = io3d.misc.resize_to_shape(data, new_shape)
-        # print data_out.shape
-        # print data
-        # print data_out
-        self.assertItemsEqual(new_shape, data_out.shape)
-
     def test_fix_crinfo(self):
         crinfo = [[10, 15], [30, 40], [1, 50]]
         cri_fixed = qmisc.fix_crinfo(crinfo)
@@ -170,17 +160,6 @@ class QmiscTest(unittest.TestCase):
         self.assertTrue(cri_fixed[1, 1] == 40)
         self.assertTrue(cri_fixed[2, 1] == 50)
 
-    def test_resize_to_mm(self):
-
-        data = np.random.rand(3, 4, 5)
-        voxelsize_mm = [2, 3, 1]
-        new_voxelsize_mm = [1, 3, 2]
-        expected_shape = [6, 4, 3]
-        data_out = io3d.misc.resize_to_mm(data, voxelsize_mm, new_voxelsize_mm)
-        print(data_out.shape)
-        # print data
-        # print data_out
-        self.assertItemsEqual(expected_shape, data_out.shape)
 
 if __name__ == "__main__":
     unittest.main()

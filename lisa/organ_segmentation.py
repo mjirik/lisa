@@ -33,7 +33,7 @@ import datetime
 import argparse
 import copy
 import json
-import json_decoder as jd
+from . import json_decoder as jd
 
 from . import exceptionProcessing
 # tady uz je logger
@@ -762,7 +762,7 @@ class OrganSegmentation():
                      '\nmodelparams ' + str(self.segmodelparams)
                      )
         # insert feature function instead of string description
-        import organ_model
+        from . import organ_model
         self.segmodelparams = organ_model.add_fv_extern_into_modelparams(self.segmodelparams)
 
         if 'method' not in self.segparams.keys() or\
@@ -1587,16 +1587,16 @@ class OrganSegmentation():
         :return:
         """
         if self.input_annotaion_file is not None:
-            print("iaf")
+            # print("iaf")
             self.json_annotation_import()
         if self.run_organ_segmentation:
-            print("ros")
+            # print("ros")
             self.ninteractivity()
             self.slab["liver"] = 7
             self.segmentation = (self.segmentation == 1).astype('int8') * self.slab["liver"]
         self.slab["porta"] = 1
         if self.run_vessel_segmentation:
-            print("rvs")
+            # print("rvs")
             data = {}
             data['segmentation'] = self.segmentation
             data['slab'] = self.slab

@@ -409,8 +409,8 @@ def split_organ_by_plane(data, seeds):
     :param seeds:
     :return:
     """
-    import geometry3d
-    import data_manipulation
+    from . import geometry3d
+    from . import data_manipulation
     l1 = 1
     l2 = 2
 

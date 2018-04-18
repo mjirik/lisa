@@ -15,9 +15,8 @@ import logging
 logger = logging.getLogger(__name__)
 import argparse
 
-import qmisc
 from scipy import ndimage
-'''SMAZAT'''
+from . import qmisc
 
 class ShapeModel():
     """

@@ -21,11 +21,11 @@ import traceback
 import shutil
 
 # ----------------- my scripts --------
-import misc
-import volumetry_evaluation
 import io3d
 import io3d.misc
 # <codecell>
+from . import misc
+from . import volumetry_evaluation
 
 
 class RunAndMakeReport:
