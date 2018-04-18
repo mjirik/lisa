@@ -51,6 +51,7 @@ class DicomReaderTest(unittest.TestCase):
 
         self. assertEqual(overlay[1][0, 200, 200], 1)
         self. assertEqual(overlay[1][0, 100, 100], 0)
+
     def test_read_volumetry_overlay_with_dicom_module(self):
         """
         pydicom module is used for load dicom data. Dicom overlay
@@ -85,9 +86,15 @@ class DicomReaderTest(unittest.TestCase):
 
         # Decoding data. Each bit is stored as array element
         for i in range(1,len(overlay_raw)):
-            for k in range (0,n_bits):
-                byte_as_int = ord(overlay_raw[i])
-                decoded_linear[i*n_bits + k] = (byte_as_int >> k) & 0b1
+            for k in range (0, n_bits):
+                one_byte = overlay_raw[i]
+                # if len(one_str) > 1:
+                #     print(one_str)
+                if sys.version_info.major == 2:
+                    byte_as_int = ord(one_byte)
+                else:
+                    byte_as_int = one_byte
+                decoded_linear[i * n_bits + k] = (byte_as_int >> k) & 0b1
 
         #overlay = np.array(pol)
 
