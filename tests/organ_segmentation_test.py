@@ -117,8 +117,8 @@ and background")
         """
         dcmdir = io3d.datasets.join_path('jatra_5mm')
 
-        print "Interactive test: with left mouse button select liver, \
-            with right mouse button select other tissues"
+        print("Interactive test: with left mouse button select liver, \
+            with right mouse button select other tissues")
         # gcparams = {'pairwiseAlpha':10, 'use_boundary_penalties':True}
         segparams = {'pairwise_alpha_per': 3,
                      'use_boundary_penalties': True,

@@ -41,7 +41,7 @@ def check_python_architecture(pythondir, target_arch_str):
     """
     pyth_str = subprocess.check_output(
         [pythondir + 'python', '-c',
-         'import platform; print platform.architecture()[0]'])
+         'import platform; print(platform.architecture()[0])'])
     if pyth_str[:2] != target_arch_str:
         raise Exception(
             "Wrong architecture of target python. Expected arch is"
