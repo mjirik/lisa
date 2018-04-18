@@ -151,8 +151,8 @@ class LiverSegmentationTest(unittest.TestCase):
         path_to_data = lisa.dataset.sample_data_path()
         dcmdir = os.path.join(path_to_data, './liver-orig001.mhd')
 
-        print "Interactive test: with left mouse button select liver, \
-            with right mouse button select other tissues"
+        print("Interactive test: with left mouse button select liver, \
+            with right mouse button select other tissues")
         # gcparams = {'pairwiseAlpha':10, 'use_boundary_penalties':True}
         fn_mdl = os.path.expanduser("~/lisa_data/liver_intensity.Model.p")
         segparams = {}
