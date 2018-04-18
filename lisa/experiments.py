@@ -126,8 +126,10 @@ class RunAndMakeReport:
             ]
         # repeat markers to have requested length
         n = len(labels)
-        markers = np.asarray(([markers] * ((n / len(markers) + 1)))
-                             ).reshape(-1)[:n].tolist()
+        number_of_each_marker = int(np.ceil((n / len(markers) + 1)))
+        markers = np.asarray(
+            [markers] * number_of_each_marker
+        ).reshape(-1)[:n].tolist()
         self.markers = markers
         self.dataframe_all = None
 
