@@ -155,7 +155,11 @@ class ShapeModel():
                     
                     zStart = z*voxelySmer[2]
                     zKonec = zStart+voxelySmer[2]
-                    objekt = crData[xStart:xKonec,yStart:yKonec,zStart:zKonec]
+                    objekt = crData[
+                             int(xStart):int(xKonec),
+                             int(yStart):int(yKonec),
+                             int(zStart):int(zKonec)
+                             ]
                     vysledek[x,y,z] = self.objectThreshold(objekt,thresholds,values)
                     
                     
