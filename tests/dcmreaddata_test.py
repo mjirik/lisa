@@ -24,7 +24,7 @@ dicom.debug(False)
 
 #
 import io3d
-import pysegbase.dcmreaddata as dcmr
+import io3d.dcmreaddata as dcmr
 import lisa.dataset
 
 class DicomReaderTest(unittest.TestCase):
@@ -38,10 +38,14 @@ class DicomReaderTest(unittest.TestCase):
 #        self.metadata = reader.get_metaData()
 
     def test_DicomReader_overlay(self):
+        import os.path as op
+        sample_data_path = "~/data/medical/orig/sample_data/"
+        sample_data_path = op.expanduser(sample_data_path)
         #import matplotlib.pyplot as plt
 
         dcmdir = lisa.dataset.join_sdp('volumetrie/')
-        #dcmdir = '/home/mjirik/data/medical/data_orig/jatra-kma/jatra_5mm/'
+        dcmdir = os.path.join(sample_data_path, '../sample_data/volumetrie/')
+        # dcmdir = '/home/mjirik/data/medical/data_orig/jatra-kma/jatra_5mm/'
         #self.data3d, self.metadata = dcmr.dcm_read_from_dir(self.dcmdir)
         reader = dcmr.DicomReader(dcmdir)
         overlay = reader.get_overlay()
@@ -49,8 +53,8 @@ class DicomReaderTest(unittest.TestCase):
         #plt.imshow(overlay[1][:,:,0])
         #plt.show()
 
-        self. assertEqual(overlay[1][0, 200, 200], 1)
-        self. assertEqual(overlay[1][0, 100, 100], 0)
+        self.assertEqual(overlay[1][0, 200, 200], 1)
+        self.assertEqual(overlay[1][0, 100, 100], 0)
 
     def test_read_volumetry_overlay_with_dicom_module(self):
         """
@@ -76,11 +80,11 @@ class DicomReaderTest(unittest.TestCase):
         # and so on.
         dicom_tag1 = 0x6000 + 2*i_overlay
 
-        overlay_raw = data[dicom_tag1 ,0x3000].value
+        overlay_raw = data[dicom_tag1, 0x3000].value
 
         # On (60xx,0010) and (60xx,0011) is stored overlay size
-        rows = data[dicom_tag1,0x0010].value # rows = 512
-        cols = data[dicom_tag1,0x0011].value # cols = 512
+        rows = data[dicom_tag1, 0x0010].value # rows = 512
+        cols = data[dicom_tag1, 0x0011].value # cols = 512
 
         decoded_linear = np.zeros(len(overlay_raw)*n_bits)
 
@@ -88,8 +92,6 @@ class DicomReaderTest(unittest.TestCase):
         for i in range(1,len(overlay_raw)):
             for k in range (0, n_bits):
                 one_byte = overlay_raw[i]
-                # if len(one_str) > 1:
-                #     print(one_str)
                 if sys.version_info.major == 2:
                     byte_as_int = ord(one_byte)
                 else:
