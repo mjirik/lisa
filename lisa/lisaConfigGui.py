@@ -21,8 +21,13 @@ import PyQt4.QtGui
 from PyQt4.QtGui import QWidget, QGridLayout, QSpinBox, QLineEdit, QCheckBox,\
         QComboBox, QTextEdit, QDialog, QMainWindow, QDoubleSpinBox, QLabel, \
         QPushButton
+import sys
+if sys.version_info.major == 2:
+    from PyQt4.QtCore import QString
+else:
+    Qstring = str
 
-from pyqtconfig import ConfigManager
+from .pyqtconfig import ConfigManager
 
 class LisaConfigWindow(QDialog):
 # class LisaConfigWindow(QMainWindow):
@@ -139,7 +144,7 @@ class LisaConfigWindow(QDialog):
             from PyQt4.QtCore import pyqtRemoveInputHook
             pyqtRemoveInputHook()
             # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
-            if type(value) == PyQt4.QtCore.QString:
+            if type(value) == QString:
                 value = str(value)
             dictionary[key] = value
 

@@ -19,6 +19,12 @@ import sys
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
+import sys
+if sys.version_info.major == 2:
+    from PyQt4.Qt import QString
+else:
+    Qstring = str
+
 
 class LogEntryModel(QAbstractListModel):
     def __init__(self, logfile, parent=None):

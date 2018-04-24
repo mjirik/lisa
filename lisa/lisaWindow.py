@@ -30,7 +30,13 @@ sys.path.append(os.path.join(path_to_script, "../extern/pysegbase/src"))
 from PyQt4.QtGui import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame, \
     QFont, QPixmap, QFileDialog, QInputDialog
 from PyQt4 import QtGui
-from PyQt4.Qt import QString
+
+import sys
+if sys.version_info.major == 2:
+    from PyQt4.Qt import QString
+else:
+    Qstring = str
+
 try:
     from pysegbase.seed_editor_qt import QTSeedEditor
 except:
@@ -317,10 +323,14 @@ class OrganSegmentationWindow(QMainWindow):
         font_info.setItalic(True)
         font_info.setPixelSize(12)
         lisa_title = QLabel('Liver Surgery Analyser')
+        if sys.version_info.major ==2:
+            names = QString.fromUtf8('M. Jiřík, V. Lukeš - 2013')
+        else:
+            names = "M. Jiřík, V. Lukeš - 2013"
         info = QLabel('Developed by:\n' +
                       'University of West Bohemia\n' +
                       'Faculty of Applied Sciences\n' +
-                      QString.fromUtf8('M. Jiřík, V. Lukeš - 2013') +
+                      names +
                       '\n\nVersion: ' + self.oseg.version
                       )
         info.setFont(font_info)
