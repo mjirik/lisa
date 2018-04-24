@@ -28,7 +28,7 @@ def apply(root,d,pos, use_list=True):
     lbs= []
     saisies= dict()
     entries= dict()
-    for (n,(k,v)) in enumerate(d.iteritems()):
+    for (n,(k,v)) in enumerate(d.items()):
         assert (k not in saisies)
         l= tk.Label(root,text=str(k))
         l.grid(row=n+x,column=y)
@@ -54,7 +54,7 @@ def apply(root,d,pos, use_list=True):
 
 def get(strVarDict):
     d= {}
-    for (k,v) in strVarDict.iteritems():
+    for (k,v) in strVarDict.items():
         #try: v= float(v)
         #except: pass
         d[k]=v.get()
@@ -82,7 +82,7 @@ def main():
     root.mainloop()
     #print d
     print(s)
-    for (k,v) in s.iteritems():
+    for (k,v) in s.tems():
         print(str(k), '->',str(v.get()))
 
 def testindependance():
@@ -96,10 +96,10 @@ def testindependance():
     root.mainloop()
     #print d
     #print s
-    for (k,v) in s.iteritems():
+    for (k,v) in s.items():
         print(str(k), '->',str(v.get()))
     print("-"*10)
-    for (k,v) in ss.iteritems():
+    for (k,v) in ss.items():
         print(str(k), '->',str(v.get()))
     print("="*10)
     print(get(s))

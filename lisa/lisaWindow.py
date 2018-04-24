@@ -505,7 +505,7 @@ class OrganSegmentationWindow(QMainWindow):
         #     self.slabBody,
         #     self.read_widget
         # ]
-        for key, widget in self.ui_widgets.iteritems():
+        for key, widget in self.ui_widgets.items():
 
             widget.hide()
 
@@ -1176,7 +1176,7 @@ class OrganSegmentationWindow(QMainWindow):
         """
         import dictGUI
         slab_selection = {}
-        for label, value in  self.oseg.slab.iteritems():
+        for label, value in  self.oseg.slab.items():
             slab_selection[label] = True
 
         slab_selection = dictGUI.dictGui(slab_selection)

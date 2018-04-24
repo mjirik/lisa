@@ -67,7 +67,7 @@ class LisaConfigWindow(QDialog):
 
         gd = QGridLayout()
         gd_max_i = 0
-        for key, value in config_in.iteritems():
+        for key, value in config_in.items():
             if type(value) is int:
                 sb = QSpinBox()
                 sb.setRange(-100000, 100000)
@@ -140,7 +140,7 @@ class LisaConfigWindow(QDialog):
 
     def get_config_as_dict(self):
         dictionary = self.config.as_dict()
-        for key, value in dictionary.iteritems():
+        for key, value in dictionary.items():
             from PyQt4.QtCore import pyqtRemoveInputHook
             pyqtRemoveInputHook()
             # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
@@ -167,7 +167,7 @@ def configGui(cfg):
     import yaml
     # convert values to json
     isconverted = {}
-    for key, value in cfg.iteritems():
+    for key, value in cfg.items():
         if type(value) in (str, int, float, bool):
 
             isconverted[key] = False
@@ -184,7 +184,7 @@ def configGui(cfg):
         return None
     
     newcfg = w.get_config_as_dict()
-    for key, value in newcfg.iteritems():
+    for key, value in newcfg.items():
         if isconverted[key]:
             newcfg[key] = yaml.load(value)
 
