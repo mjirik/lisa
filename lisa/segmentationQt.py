@@ -17,7 +17,7 @@ import argparse
 from PyQt4.QtGui import QGridLayout, QLabel, QPushButton, QLineEdit
 from PyQt4 import QtGui
 import sys
-import virtual_resection
+from . import virtual_resection
 
 
 class SegmentationWidget(QtGui.QWidget):
