@@ -438,7 +438,12 @@ def write_csv(data, filename='20130812_liver_volumetry.csv'):
     logger.debug(filename)
     import csv
 
-    with open(filename, 'wb') as csvfile:
+    if sys.version_info.major == 2:
+        open_mode = "wb"
+    else:
+        open_mode = "w"
+    with open(filename, open_mode) as csvfile:
+    # with open(filename, 'wb') as csvfile:
         writer = csv.writer(
             csvfile,
             delimiter=';',
@@ -450,14 +455,28 @@ def write_csv(data, filename='20130812_liver_volumetry.csv'):
             writer.writerow([label] + data[label])
             # spamwriter.writerow(['Spam', 'Lovely Spam', 'Wonderful Spam'])
 
+def csv_example():
+    import csv
+    with open('eggs.csv', 'w', newline='') as csvfile:
+        spamwriter = csv.writer(csvfile, delimiter=' ',
+                                quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        spamwriter.writerow(['Spam'] * 5 + ['Baked Beans'])
+        spamwriter.writerow(['Spam', 'Lovely Spam', 'Wonderful Spam'])
 
 def write_sum_to_csv(evaluation, writer):
     avg, var = make_sum(evaluation)
     key = list(evaluation.keys())
-    writer.writerow([' - '] + key)
-    writer.writerow(['var'] + var)
-    writer.writerow(['avg'] + avg)
-    writer.writerow([])
+    _write_row([' - '] + key, writer)
+    _write_row(['var'] + var, writer)
+    _write_row(['avg'] + avg, writer)
+    _write_row([], writer)
+
+def _write_row(row_list, writer):
+    row_list_utf8 = prepare_row(row_list)
+    writer.writerow(row_list_utf8)
+
+def prepare_row(row_list):
+    return row_list
 
 
 def sliver_overall_score_for_one_couple(score):
