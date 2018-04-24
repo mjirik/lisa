@@ -808,7 +808,7 @@ def scoreTableEvaluation(scoreMetrics):
         tables.append(scm.T)
 
         # index and column
-        index = range(1, scm.shape[1])
+        index = list(range(1, scm.shape[1]))
         index.append('score')
         # print 'len index', len(index)
         indexes.append(index)
