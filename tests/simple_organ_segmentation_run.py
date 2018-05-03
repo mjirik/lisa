@@ -8,7 +8,7 @@ sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 import numpy as np
 
-import organ_segmentation
+from lisa import organ_segmentation
 import pysegbase.dcmreaddata as dcmr
 import os.path
 

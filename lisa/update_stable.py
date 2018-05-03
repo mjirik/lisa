@@ -27,7 +27,7 @@ def update_by_plan(filename="~/lisa_data/.update_plan.yaml", update_periode_days
     try:
         # this import is necessary here. This module requires scipy and it is 
         # not installed yet
-        import misc
+        from . import misc
         data = misc.obj_from_file(filename)
 
         string_date = data['update_datetime']
