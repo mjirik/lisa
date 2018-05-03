@@ -14,13 +14,13 @@ import logging
 
 logger = logging.getLogger(__name__)
 import argparse
-import lisa_data
 import PyQt4 #import QtGui, QtCore
 import PyQt4.QtCore
 import PyQt4.QtGui
 import sys
 import time
 
+from . import lisa_data
 
 def splash_screen(qapp):
     """

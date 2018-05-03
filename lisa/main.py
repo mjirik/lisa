@@ -41,9 +41,9 @@ def lisa_main():
         from PyQt4.QtGui import QApplication
         app = QApplication(sys.argv)
         # Create and display the splash screen
-        import splash_screen
+        from . import splash_screen
         splash = splash_screen.splash_screen(app)
-        import organ_segmentation
+        from . import organ_segmentation
         organ_segmentation.main(app, splash)
 
 if __name__ == "__main__":
