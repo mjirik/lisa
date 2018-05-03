@@ -50,6 +50,7 @@ class OrganSegmentationTest(unittest.TestCase):
 
         if os.path.exists(path_to_paul):
             remove_read_only_flag_on_win32(path_to_paul)
+            # handleRemoveReadonly je asi zbytečné
             shutil.rmtree(path_to_paul, onerror=handleRemoveReadonly, ignore_errors=False)
         oseg = organ_segmentation.OrganSegmentation(None)
         oseg.sync_lisa_data('paul','P4ul')
@@ -58,6 +59,7 @@ class OrganSegmentationTest(unittest.TestCase):
         file_path = lisa.lisa_data.path('sync','paul', 'from_server', 'test.txt')
         logger.debug('file_path %s', file_path)
         self.assertTrue(os.path.exists(file_path))
+
 import errno, os, stat, shutil
 
 def remove_read_only_flag_on_win32(path):
