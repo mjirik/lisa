@@ -9,11 +9,14 @@
 """
 
 """
-import unittest
+import logging
+logger = logging.getLogger(__name__)
 from nose.plugins.attrib import attr
 import numpy as np
 import scipy
 import lisa.data_manipulation as dama
+import unittest
+
 
 class DataManipulationTest(unittest.TestCase):
 
@@ -59,12 +62,12 @@ class DataManipulationTest(unittest.TestCase):
 
             outputdata = dama.unbiased_brick_filter(data, shi)
             imlab, num_features = scipy.ndimage.measurements.label(outputdata)
-            print(num_features)
+            logger.debug(num_features)
             suma += num_features
 
-        print("for is over")
+        logger.debug("for is over")
 
-        print(suma)
+        logger.debug("suma " + str(suma))
         # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
 
