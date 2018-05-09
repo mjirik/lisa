@@ -1,9 +1,9 @@
 package:
   name: lisa
-  version: "1.9.48"
+  version: "1.9.49"
 
 source:
-  git_rev: 1.9.48
+  git_rev: 1.9.49
   git_url: .
   # git_url: https://github.com/mjirik/quantan.git
 
