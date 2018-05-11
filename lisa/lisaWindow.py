@@ -52,9 +52,9 @@ from . import loginWindow
 from . import dictEditQt
 from . import segmentationQt
 from . import virtual_resection
+from io3d.network import download_file
 
 def find_logo():
-    import wget
     logopath = os.path.join(path_to_script, "./icons/LISA256.png")
     if os.path.exists(logopath):
         return logopath
@@ -62,9 +62,10 @@ def find_logo():
     logopath = os.path.expanduser("~/lisa_data/.lisa/LISA256.png")
     if not os.path.exists(logopath):
         try:
-            wget.download(
+            # wget.download(
+            download_file(
                 "https://raw.githubusercontent.com/mjirik/lisa/master/lisa/icons/LISA256.png",
-                out=logopath
+                filename=logopath
             )
         except:
             logger.warning('logo download failed')

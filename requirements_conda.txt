@@ -22,7 +22,7 @@ vtk=5.10.1
 ipython=3.1.0=py27_0
 SimpleITK=0.9.1
 h5py=2.5.0
-pywget=2.2
+# pywget=2.2
 opencv>=2.4.0
 libpng
 pandas

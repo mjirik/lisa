@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 import datetime
 import os
 import os.path as op
+from io3d.network import download_file
 
 
 # def write_update_info_in_file():
@@ -91,10 +92,10 @@ def make_update(dry_run=False):
         if op.exists(req_txt_path):
             os.remove(req_txt_path)
 
-        import wget
-        wget.download(
+        # wget.download(
+        download_file(
             "https://raw.githubusercontent.com/mjirik/lisa/master/requirements_pip.txt",
-            out=req_txt_path
+            filename=req_txt_path
         )
 
         cmd = ["pip", "install", '-U', '--no-deps']

@@ -17,6 +17,7 @@ import argparse
 import os
 import os.path as op
 import stat
+from io3d.network import download_file
 
 def rm_smart(filename):
     filename = op.expanduser(filename)
@@ -30,13 +31,16 @@ def create_lisa_data_dir_tree(oseg=None):
     if not op.exists(odp):
         os.makedirs(odp)
 
-    import wget
+    # import wget
     lisa_icon_path= path(".lisa/LISA256.png")
     if not op.exists(lisa_icon_path):
         try:
-            wget.download(
+            download_file(
                 "https://raw.githubusercontent.com/mjirik/lisa/master/lisa/icons/LISA256.png",
-                out=lisa_icon_path)
+                filename=lisa_icon_path)
+            # wget.download(
+            #     "https://raw.githubusercontent.com/mjirik/lisa/master/lisa/icons/LISA256.png",
+            #     out=lisa_icon_path)
         except:
             import traceback
             logger.warning('logo download failed')
@@ -144,14 +148,16 @@ lisa"
                  stat.S_IWUSR | stat.S_IWGRP
                  )
 
-    import wget
     lisa_icon_path= op.expanduser("~/lisa_data/.lisa/LISA256.icns")
     if not os.path.exists(lisa_icon_path):
         try:
-            wget.download(
+            download_file(
+            # wget.download(
                 "https://raw.githubusercontent.com/mjirik/lisa/master/applications/LISA256.icns",
-                out=lisa_icon_path
+                filename=lisa_icon_path
+                # out=lisa_icon_path
             )
+
         except:
             logger.warning('logo download failed')
             pass
@@ -166,7 +172,7 @@ lisa"
     # subprocess.call(['ln', '-s', in_path, dt_path])
 
 def __make_icon_linux():
-    import wget
+    # import wget
     in_path = op.expanduser("~/lisa_data/.lisa/lisa.desktop.in")
     rm_smart(in_path)
     lisa_icon_path= op.expanduser("~/lisa_data/.lisa/LISA256.png")
@@ -181,9 +187,11 @@ def __make_icon_linux():
     #         logger.warning(traceback.format_exc())
     if not op.exists(lisa_icon_path):
         try:
-            wget.download(
+            download_file(
+            # wget.download(
                 "https://raw.githubusercontent.com/mjirik/lisa/master/lisa/icons/LISA256.png",
-                out=lisa_icon_path)
+                filename=lisa_icon_path)
+            # out=lisa_icon_path)
         except:
             import traceback
             logger.warning('logo download failed')

@@ -113,7 +113,7 @@ class SegmentationWidget(QtGui.QWidget):
         # btnSegMask.clicked.connect(self.maskRegion)
         self.mainLayout.addWidget(self.btnSegMask, baserow, 3)
 
-        self.btnSegPV = QPushButton("Portal Vein", self)
+        self.btnSegPV = QPushButton("Vessel", self)
         # btnSegPV.clicked.connect(self.btnPortalVeinSegmentation)
         self.mainLayout.addWidget(self.btnSegPV, baserow, 4)
 
