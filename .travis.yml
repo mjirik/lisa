@@ -43,9 +43,10 @@ install:
     - conda config --add channels luispedro
     - conda config --add channels menpo
     # Install dependencies
-    - conda install --yes --file requirements_conda.txt
+    - conda install --yes --file requirements_conda.txt python=$CONDA_PYTHON_VERSION
 #    - pip install -r ci/requirements_ci.txt
-    - pip install coverage
+#    - pip install coverage
+    - conda install coveralls nose python=$CONDA_PYTHON_VERSION
       # - "easy_install SimpleITK mahotas"
     - pip install -r requirements_pip.txt
     # - if [ ${pack} == "old_mpl" ]; then conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy nose dateutil pandas statsmodels pil six; fi
@@ -64,7 +65,7 @@ install:
     # conda install openssl=1.0.2
     - conda list
     - apt-cache policy openssl
-    - conda install --yes paramiko=1.16.0
+    - conda install --yes paramiko=1.16.0 python=$CONDA_PYTHON_VERSION
 
     # - sudo apt-get install openssl=1.0.1
     # - apt-cache policy openssl
