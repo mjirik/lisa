@@ -6,14 +6,16 @@
 numpy>=1.9.3
 pip>=6.0.8
 scipy>=0.15
-setuptools=12.2=py27_0
-matplotlib=1.4.3
+# setuptools=12.2=py27_0
+# matplotlib=1.4.3
+matplotlib
 # scikit-image=0.11.0=np19py27_0
 scikit-image>=0.11.0,<0.13.1
 # scikit-learn=0.15.2=np19py27_0
 scikit-learn>=0.19
-cython=0.22=py27_0
-pyqt==4.11
+# cython=0.22=py27_0
+cython
+pyqt==4.11.*
 # yaml=0.1.6
 # pyyaml=3.11
 vtk=5.10.1
