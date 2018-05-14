@@ -18,7 +18,8 @@ cython
 pyqt==4.11.*
 # yaml=0.1.6
 # pyyaml=3.11
-vtk=5.10.1
+# vtk=5.10.1 # 5.10 require python 27
+vtk
 # pandas is installed with pip
 #ipython=3.1.0=py27_0
 ipython>=3.1.0
