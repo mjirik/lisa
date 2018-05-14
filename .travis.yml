@@ -97,6 +97,7 @@ before_script:
 # command to run tests
 #script: nosetests --with-coverage --verbose -d --cover-package=lisa
 # script: nosetests --with-coverage --verbose --nocapture --nologcapture --cover-package=lisa
-script: nosetests --with-coverage -v --cover-package=lisa
+# skip organ_segmentation_tests
+script: nosetests --with-coverage -v --cover-package=lisa -I organ_segmentation_test.py
 after_success:
     - coveralls
