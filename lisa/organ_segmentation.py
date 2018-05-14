@@ -1371,10 +1371,12 @@ class OrganSegmentation():
         logger.debug('save vessel tree to file - finished')
         # generate vtk file
         logger.debug('start to generate vtk file from vessel_tree')
-        import imtools.gen_vtk_tree
+        import fibrous.tb_vtk
+        # import imtools.gen_vtk_tree
         if fn_vtk is None:
             fn_vtk = self.get_standard_ouptut_filename(filetype='vtk', suffix='-vt-' + textLabel)
-        imtools.gen_vtk_tree.vt2vtk_file(self.vessel_tree, fn_vtk, text_label=textLabel)
+        # imtools.gen_vtk_tree.vt2vtk_file(self.vessel_tree, fn_vtk, text_label=textLabel)
+        fibrous.tb_vtk.vt2vtk_file(self.vessel_tree, fn_vtk, text_label=textLabel)
         logger.debug('generating vtk file from vessel_tree finished')
 
     def hepaticVeinsSegmentation(self):
