@@ -65,7 +65,8 @@ install:
     # conda install openssl=1.0.2
     - conda list
     - apt-cache policy openssl
-    - conda install --yes paramiko=1.16.0 python=$CONDA_PYTHON_VERSION
+    # - conda install --yes paramiko=1.16.0 python=$CONDA_PYTHON_VERSION
+    - conda install --yes paramiko>=2 python=$CONDA_PYTHON_VERSION
 
     # - sudo apt-get install openssl=1.0.1
     # - apt-cache policy openssl
@@ -96,6 +97,6 @@ before_script:
 # command to run tests
 #script: nosetests --with-coverage --verbose -d --cover-package=lisa
 # script: nosetests --with-coverage --verbose --nocapture --nologcapture --cover-package=lisa
- script: nosetests --with-coverage --cover-package=lisa
+script: nosetests --with-coverage -d --cover-package=lisa
 after_success:
     - coveralls
