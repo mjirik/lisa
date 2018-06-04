@@ -33,7 +33,7 @@ pandas
 # mahotas
 # -c mjirik
 pydicom>=0.9.9
-pysegbase>=1.0.39
+pysegbase>=1.2.41
 dicom2fem>=1.0.0
 sed3>=1.1.17
 io3d>=1.0.18
