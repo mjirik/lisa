@@ -767,22 +767,23 @@ class OrganSegmentation():
 
         if 'method' not in self.segparams.keys() or\
                 self.segparams['method'] in pycut.methods:
+            from .audiosupport import beep
             igc = pycut.ImageGraphCut(
                 # self.data3d,
                 data3d_res,
                 segparams=self.segparams,
                 voxelsize=self.working_voxelsize_mm,
                 modelparams=self.segmodelparams,
-                volume_unit='ml'
-                # oxelsize=self.voxelsize_mm
+                volume_unit='ml',
+                interactivity_loop_finish_fcn=beep
             )
         # elif self.segparams['method'] == '':
         else:
             import liver_segmentation
             igc = liver_segmentation.LiverSegmentation(
                 data3d_res,
-                voxelsize_mm=self.working_voxelsize_mm,
-                segparams=self.segparams
+                segparams=self.segparams,
+                voxelsize=self.working_voxelsize_mm,
             )
         if self.apriori is not None:
             apriori_res = misc.resize_to_shape(
@@ -1478,10 +1479,16 @@ class OrganSegmentation():
     def create_lisa_data_dir_tree(self):
         lisa_data.create_lisa_data_dir_tree(self)
 
-    def rotate(self, angle, axes):
-        self.data3d = scipy.ndimage.interpolation.rotate(self.data3d, angle, axes)
-        self.segmentation = scipy.ndimage.interpolation.rotate(self.segmentation, angle, axes)
-        self.seeds = scipy.ndimage.interpolation.rotate(self.seeds, angle, axes)
+    # old version
+    # def rotate(self, angle, axes):
+    #     self.data3d = scipy.ndimage.interpolation.rotate(self.data3d, angle, axes)
+    #     self.segmentation = scipy.ndimage.interpolation.rotate(self.segmentation, angle, axes)
+    #     self.seeds = scipy.ndimage.interpolation.rotate(self.seeds, angle, axes)
+
+    def rotate(self, phi_deg, theta_deg=None, phi_axes=(1, 2), theta_axes=(0, 1), **kwargs):
+        self.data3d = imma.rotate(self.data3d, phi_deg, theta_deg)
+        self.segmentation = imma.rotate(self.segmentation, phi_deg, theta_deg)
+        self.seeds = imma.rotate(self.seeds, phi_deg, theta_deg)
 
 
     def random_rotate(self):
@@ -1489,22 +1496,25 @@ class OrganSegmentation():
         Rotate data3d, segmentation and seeds with random rotation
         :return:
         """
-        xi1 = np.random.rand()
-        xi2 = np.random.rand()
-
-        # theta = np.arccos(np.sqrt(1.0-xi1))
-        theta = np.arccos(1.0 - (xi1 * 1))
-        phi = xi2 * 2 * np.pi
-
-        # xs = np.sin(theta) * np.cos(phi)
-        # ys = np.sin(theta) * np.sin(phi)
-        # zs = np.cos(theta)
-
-        phi_deg = np.degrees(phi)
-        self.rotate(phi_deg, (1, 2))
-        theta_deg = np.degrees(theta)
-        self.rotate(theta_deg, (0, 1))
         # TODO independent on voxlelsize (2016-techtest-rotate3d.ipynb)
+        phi_deg, theta_deg = imma.random_rotate_paramteres()
+        self.rotate(phi_deg, theta_deg)
+        # old version
+        # xi1 = np.random.rand()
+        # xi2 = np.random.rand()
+        #
+        # # theta = np.arccos(np.sqrt(1.0-xi1))
+        # theta = np.arccos(1.0 - (xi1 * 1))
+        # phi = xi2 * 2 * np.pi
+        #
+        # # xs = np.sin(theta) * np.cos(phi)
+        # # ys = np.sin(theta) * np.sin(phi)
+        # # zs = np.cos(theta)
+        #
+        # phi_deg = np.degrees(phi)
+        # self.rotate(phi_deg, (1, 2))
+        # theta_deg = np.degrees(theta)
+        # self.rotate(theta_deg, (0, 1))
 
 
     def mirror_z_axis(self):
