@@ -178,8 +178,14 @@ class OrganSegmentationWindow(QMainWindow):
         view3DAction.triggered.connect(self.view3D)
         fileMenu.addAction(view3DAction)
 
+        debugAction= QtGui.QAction(QtGui.QIcon('exit.png'), '& Debug terminal', self)
+        debugAction.setStatusTip('Run interactive terminal debug')
+        debugAction.triggered.connect(self.run_debug)
+        fileMenu.addAction(debugAction)
+
         separator = fileMenu.addAction("")
         separator.setSeparator(True)
+
 
         exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
         exitAction.setShortcut('Ctrl+Q')
