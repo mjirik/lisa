@@ -6,7 +6,6 @@
 import sys
 import os.path
 
-# path_to_script = os.path.dirname(os.path.abspath(__file__))
 # imcut_path =  os.path.join(path_to_script, "../../imcut/")
 # sys.path.insert(0, imcut_path)
 import unittest
@@ -450,12 +449,9 @@ and background")
         """
         Test dicomread module and graphcut module
         """
-        try:
-            from imcut import pycut
-        except:
-            print("Deprecated of pyseg_base as submodule")
-            import pycut
+        from imcut import pycut
 
+        path_to_script = os.path.dirname(os.path.abspath(__file__))
         dcmdir = os.path.join(path_to_script, './../sample_data/matlab/examples/sample_data/DICOM/digest_article/') #noqa
         data3d, metadata = dcmr.dcm_read_from_dir(dcmdir)
 
