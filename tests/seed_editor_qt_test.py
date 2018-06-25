@@ -16,7 +16,7 @@ import unittest
 # import numpy as np
 
 
-# import pysegbase.dcmreaddata as dcmr
+# import imcut.dcmreaddata as dcmr
 
 class QTSeedEditorTest(unittest.TestCase):
     interactive_tests = False
@@ -30,7 +30,7 @@ class QTSeedEditorTest(unittest.TestCase):
         #pyed.show()
 
         try:
-            from pysegbase.seed_editor_qt import QTSeedEditor
+            from imcut.seed_editor_qt import QTSeedEditor
         except:
             logger.warning("Deprecated of pyseg_base as submodule")
             from seed_editor_qt import QTSeedEditor

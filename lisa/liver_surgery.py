@@ -36,9 +36,9 @@ import sed3
 try:
     import dcmreaddata as dcmr
 except:
-    from pysegbase import dcmreaddata as dcmr
+    from imcut import dcmreaddata as dcmr
 try:
-    from pysegbase import pycut
+    from imcut import pycut
 except:
     logger.warning("Deprecated of pyseg_base as submodule")
     import pycut
@@ -50,7 +50,7 @@ import qmisc
 import misc
 import organ_segmentation
 try:
-    from pysegbase import seed_editor_qt
+    from imcut import seed_editor_qt
 except:
     logger.warning("Deprecated of pyseg_base as submodule")
     import seed_editor_qt

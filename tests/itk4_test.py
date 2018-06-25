@@ -22,8 +22,8 @@ import numpy as np
 #import SimpleITK as sitk
 
 
-# from pysegbase import pycut
-# from pysegbase import seed_editor_qt
+# from imcut import pycut
+# from imcut import seed_editor_qt
 
 print(sys.argv)
 class PycutTest(unittest.TestCase):

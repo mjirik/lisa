@@ -18,7 +18,7 @@ import sys
 import os
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../../pysegbase/src"))
+sys.path.append(os.path.join(path_to_script, "../../imcut/src"))
 
 from lisa import liver_segmentation_cerveny as liver_segmentation
 import os

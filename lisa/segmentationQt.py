@@ -89,7 +89,7 @@ class SegmentationWidget(QtGui.QWidget):
 
     def configEvent(self):
         id = self.groupA.checkedId()
-        selected_label = self.oseg.slab.keys()[id - 1]
+        selected_label = list(self.oseg.slab.keys())[id - 1]
         alt_seg_params = {
             "output_label": selected_label,
             'clean_seeds_after_update_parameters': True,

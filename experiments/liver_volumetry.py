@@ -32,7 +32,7 @@ import sed3
 # try:
 #    import dcmreaddata as dcmr
 # except:
-#    from pysegbase import dcmreaddata as dcmr
+#    from imcut import dcmreaddata as dcmr
 
 import argparse
 #import sed3

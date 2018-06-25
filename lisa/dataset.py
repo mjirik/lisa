@@ -41,7 +41,7 @@ def sample_data_path():
     # return op.expanduser("~/lisa_data/sample_data/")
 
 def get_sample_data():
-    keys = io3d.datasets.data_urls.keys()
+    keys = list(io3d.datasets.data_urls.keys())
     io3d.datasets.download(keys, sample_data_path())
 
 

@@ -186,7 +186,7 @@ def make_update_old(dry_run=False):
     # installed version can be checked with
     #     pip show sed3
     # pipshell = 'pip install -U --no-deps --user '
-    # pppysegbase = ['pysegbase', 'pysegbase==1.0.13']
+    # ppimcut = ['imcut', 'imcut==1.0.13']
     # ppio3d = ['io3d', 'io3d==1.0.5']
     # ppsed3 = ['sed3', 'sed3==1.0.4']
     # if not dry_run:
@@ -195,7 +195,7 @@ def make_update_old(dry_run=False):
     #         subprocess.call(
     #             'git submodule update --init --recursive', shell=True)
     #         subprocess.call(
-    #             pipshell + pppysegbase[use_specifed_version], shell=True)
+    #             pipshell + ppimcut[use_specifed_version], shell=True)
     #         subprocess.call(pipshell + ppio3d[use_specifed_version],
     #             shell=True)
     #         subprocess.call(pipshell + ppsed3[use_specifed_version],

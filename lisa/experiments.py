@@ -383,7 +383,7 @@ def create_data_frame(data, labels, pklz_dirs, experiment_name=''):
              score_data['vd'],
              score_data['rmsd']]
         dat['score_pts'] = np.mean(to_mean, axis=0)
-        df = pandas.DataFrame(dat, columns=dat.keys())
+        df = pandas.DataFrame(dat, columns=list(dat.keys()))
         df_pieces.append(df)
 
     df_all = pandas.concat(df_pieces)
@@ -584,7 +584,7 @@ def dataplot(data, keyword, ylabel, expn=None, markers=None, labels=None,
     Plot data. Function is prepared for our dataset (for example 5 measures).
 
     """
-    print(data[0].keys())
+    print(list(data[0].keys()))
     if expn is None:
         expn = range(0, len(data))
     if markers is None:

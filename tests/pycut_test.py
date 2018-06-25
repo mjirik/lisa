@@ -21,9 +21,9 @@ import numpy as np
 
 
 try:
-    from pysegbase import pycut
-    from pysegbase import seed_editor_qt
-    import pysegbase.dcmreaddata as dcmr
+    from imcut import pycut
+    from imcut import seed_editor_qt
+    import imcut.dcmreaddata as dcmr
 except:
     print("Deprecated of pyseg_base as submodule")
     import pycut

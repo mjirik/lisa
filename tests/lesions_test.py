@@ -17,7 +17,7 @@ import unittest
 import numpy as np
 
 
-import pysegbase.dcmreaddata as dcmr
+import imcut.dcmreaddata as dcmr
 
 class LesionsTest(unittest.TestCase):
 

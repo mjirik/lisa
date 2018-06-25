@@ -7,8 +7,8 @@ import sys
 import os.path
 
 # path_to_script = os.path.dirname(os.path.abspath(__file__))
-# pysegbase_path =  os.path.join(path_to_script, "../../pysegbase/")
-# sys.path.insert(0, pysegbase_path)
+# imcut_path =  os.path.join(path_to_script, "../../imcut/")
+# sys.path.insert(0, imcut_path)
 import unittest
 
 import numpy as np
@@ -16,7 +16,7 @@ from nose.plugins.attrib import attr
 
 
 from lisa import organ_segmentation
-import pysegbase.dcmreaddata as dcmr
+import imcut.dcmreaddata as dcmr
 import lisa.dataset
 import io3d.datasets
 
@@ -47,7 +47,7 @@ class OrganSegmentationTest(unittest.TestCase):
     def test_viewer_seeds(self):
 
         try:
-            from pysegbase.seed_editor_qt import QTSeedEditor
+            from imcut.seed_editor_qt import QTSeedEditor
         except:
             print("Deprecated of pyseg_base as submodule")
             from seed_editor_qt import QTSeedEditor
@@ -451,7 +451,7 @@ and background")
         Test dicomread module and graphcut module
         """
         try:
-            from pysegbase import pycut
+            from imcut import pycut
         except:
             print("Deprecated of pyseg_base as submodule")
             import pycut

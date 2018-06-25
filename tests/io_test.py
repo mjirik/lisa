@@ -16,7 +16,7 @@ import numpy as np
 
 
 from lisa import organ_segmentation
-import pysegbase.dcmreaddata as dcmr
+import imcut.dcmreaddata as dcmr
 import lisa.dataset
 import io3d
 

@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 import os
 import sys
 import os.path as op
-sys.path.append(op.join(op.dirname(os.path.abspath(__file__)), "../../pysegbase/"))
+sys.path.append(op.join(op.dirname(os.path.abspath(__file__)), "../../imcut/"))
 import argparse
 import glob
 import traceback
@@ -310,7 +310,7 @@ def intensity_localization_2steps_fv(data3dr, voxelsize_mm, seeds=None, unique_c
 
 class ModelTrainer():
     def __init__(self, feature_function=None, modelparams={}):
-        from pysegbase import pycut
+        from imcut import pycut
         self.working_voxelsize_mm = [1.5, 1.5, 1.5]
         self.data=None
         self.target=None
@@ -533,7 +533,7 @@ def model_score_from_sliver_data(
     :return:
     """
     import pandas as pd
-    from pysegbase import pycut
+    from imcut import pycut
     import sed3
     import matplotlib.pyplot as plt
 

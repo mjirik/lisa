@@ -25,7 +25,7 @@ except ImportError:
     viewer3D_available = False
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../extern/pysegbase/src"))
+sys.path.append(os.path.join(path_to_script, "../extern/imcut/src"))
 
 from PyQt4.QtGui import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame, \
     QFont, QPixmap, QFileDialog, QInputDialog
@@ -38,11 +38,11 @@ else:
     Qstring = str
 
 try:
-    from pysegbase.seed_editor_qt import QTSeedEditor
+    from imcut.seed_editor_qt import QTSeedEditor
 except:
     logger.warning("Deprecated of pyseg_base as submodule")
     try:
-        from pysegbase.seed_editor_qt import QTSeedEditor
+        from imcut.seed_editor_qt import QTSeedEditor
     except:
         logger.warning("Deprecated of pyseg_base as submodule")
         from seed_editor_qt import QTSeedEditor
@@ -977,7 +977,7 @@ class OrganSegmentationWindow(QMainWindow):
                                  # self.qapp,
                                  headline,
                                  "select from existing labels or write a new one",
-                                 self.oseg.slab.keys(),
+                                 list(self.oseg.slab.keys()),
                                  editable=True)
 
         numlab = self.oseg.nlabels(str(strlab))

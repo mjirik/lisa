@@ -11,7 +11,7 @@ import numpy as np
 
 
 #
-import pysegbase.dcmreaddata as dcmr
+import imcut.dcmreaddata as dcmr
 import lisa.support_structure_segmentation
 
 

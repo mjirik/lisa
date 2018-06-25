@@ -30,7 +30,7 @@ def automatic_liver_seeds(
         fn_mdl='~/lisa_data/liver_intensity.Model.p',
         return_likelihood_difference=True,
         gaussian_sigma_mm=[20,20,20]):
-    from pysegbase import pycut
+    from imcut import pycut
     # fn_mdl = op.expanduser(fn_mdl)
     mdl = pycut.Model({'mdl_stored_file':fn_mdl, 'fv_extern': organ_model.intensity_localization_fv})
     working_voxelsize_mm = np.asarray([1.5, 1.5, 1.5])

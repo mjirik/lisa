@@ -38,10 +38,10 @@ from . import json_decoder as jd
 from . import exceptionProcessing
 # tady uz je logger
 # import dcmreaddata as dcmreader
-# from pysegbase import pycut
+# from imcut import pycut
 # try:
-#     import pysegbase  # noqa
-#     from pysegbase import pycut
+#     import imcut  # noqa
+#     from imcut import pycut
 # except:
 #     path_to_script = os.path.dirname(os.path.abspath(__file__))
 #     sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
@@ -51,7 +51,7 @@ from . import exceptionProcessing
 #     import pycut
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../../pysegbase/"))
+sys.path.append(os.path.join(path_to_script, "../../imcut/"))
 
 # from seg2fem import gen_mesh_from_voxels, gen_mesh_from_voxels_mc
 # from viewer import QVTKViewer
@@ -202,7 +202,7 @@ class OrganSegmentation():
         :param input_annotation_file: annotation input based on dwv json export (https://github.com/ivmartel/dwv)
         """
 
-        from pysegbase import pycut
+        from imcut import pycut
         default_segparams = {
             'method': pycut.methods[0],
             'pairwise_alpha_per_mm2': 40,
@@ -738,7 +738,7 @@ class OrganSegmentation():
 
 
     def _interactivity_begin(self):
-        from pysegbase import pycut
+        from imcut import pycut
         logger.debug('_interactivity_begin()')
         # TODO make copy and work with it
         # TODO really make the copy and work with it
@@ -1088,7 +1088,7 @@ class OrganSegmentation():
 #    def interactivity(self, min_val=800, max_val=1300):
 # @TODO generovat QApplication
     def interactivity(self, min_val=None, max_val=None, layout=None):
-        from pysegbase.seed_editor_qt import QTSeedEditor
+        from imcut.seed_editor_qt import QTSeedEditor
         import_gui()
         logger.debug('interactivity')
         # if self.edit_data:
@@ -1106,7 +1106,7 @@ class OrganSegmentation():
                                 voxelSize=igc.voxelsize,
                                 volume_unit='ml')
         else:
-            from pysegbase import QTSeedEditorWidget
+            from imcut import QTSeedEditorWidget
             pyed = QTSeedEditorWidget(igc.img,
                                 seeds=igc.seeds,
                                 modeFun=igc.interactivity_loop,
@@ -1138,7 +1138,7 @@ class OrganSegmentation():
         self._interactivity_end(igc)
 
     def ninteractivity(self):
-        from pysegbase import pycut
+        from imcut import pycut
         """Function for automatic (noninteractiv) mode."""
         # mport pdb; pdb.set_trace()
         igc = self._interactivity_begin()

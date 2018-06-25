@@ -17,7 +17,7 @@ import numpy as np
 
 
 import organ_segmentation
-import pysegbase.dcmreaddata as dcmr
+import imcut.dcmreaddata as dcmr
 
 
 #  nosetests tests/organ_segmentation_test.py:OrganSegmentationTest.test_create_iparams
@@ -32,7 +32,7 @@ class TexturesTest(unittest.TestCase):
         Interactivity is stored to file
         """
         try:
-            from pysegbase.seed_editor_qt import QTSeedEditor
+            from imcut.seed_editor_qt import QTSeedEditor
         except:
             logger.warning("Deprecated of pyseg_base as submodule")
             from seed_editor_qt import QTSeedEditor

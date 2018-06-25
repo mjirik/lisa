@@ -46,7 +46,7 @@ def isSparseMatrix(obj):
 # def manualcrop(data):  # pragma: no cover
 #
 #     try:
-#         from pysegbase import seed_editor_qt
+#         from imcut import seed_editor_qt
 #     except:
 #         logger.warning("Deprecated of pyseg_base as submodule")
 #         import seed_editor_qt

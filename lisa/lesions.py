@@ -27,7 +27,7 @@ import sed3
 try:
     import dcmreaddata
 except:
-    from pysegbase import dcmreaddata
+    from imcut import dcmreaddata
 
 
 # import show3

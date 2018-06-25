@@ -37,7 +37,7 @@ Install Windows with PythonXY
         
 * Get requested modules
 
-        pip install pysegbase dicom2fem sed3
+        pip install imcut dicom2fem sed3
 
 Problems on Windows:
 

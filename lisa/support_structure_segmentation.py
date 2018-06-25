@@ -27,10 +27,10 @@ import scipy
 try:
     import dcmreaddata as dcmr
 except:
-    from pysegbase import dcmreaddata as dcmr
+    from imcut import dcmreaddata as dcmr
 
 # try:
-#     from pysegbase import pycut
+#     from imcut import pycut
 # except:
 #     logger.warning("Deprecated of pyseg_base as submodule")
 #     import pycut
@@ -461,7 +461,7 @@ class SupportStructureSegmentation():
         """
 
         try:
-            from pysegbase.seed_editor_qt import QTSeedEditor
+            from imcut.seed_editor_qt import QTSeedEditor
         except:
             logger.warning("Deprecated of pyseg_base as submodule")
             from seed_editor_qt import QTSeedEditor
