@@ -1321,8 +1321,10 @@ class OrganSegmentationWindow(QMainWindow):
         """
 
         self.statusBar().showMessage('Vessel segmentation ...')
-        self.oseg.nlabels(2, "porta")
-        self.oseg.nlabels(3, "hepatic_veins")
+        # self.oseg.nlabels(2, "porta")
+        # self.oseg.nlabels(3, "hepatic_veins")
+        self.oseg.nlabels("porta")
+        self.oseg.nlabels("hepatic_veins")
         organ_numeric_label, string_label = self.ui_select_label("Organ label")
         vessel_numeric_label, string_label = self.ui_select_label("Vessel label")
         # from PyQt4.QtCore import pyqtRemoveInputHook

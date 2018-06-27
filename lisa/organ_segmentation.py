@@ -1268,7 +1268,7 @@ class OrganSegmentation():
         self.segmentation[self.segmentation == from_label] = to_label
 
     def portalVeinSegmentation(self, inner_vessel_label="porta", organ_label="liver", outer_vessel_label=None,
-                               forbidden_label=None, threshold=-1, interactivity=True, seeds=None, **inparams):
+                               forbidden_label=None, threshold=None, interactivity=True, seeds=None, **inparams):
         """
         Segmentation of vein in specified volume. It is given by label "liver".
         Usualy it is number 1. If there is no specified volume all image is
@@ -1386,7 +1386,7 @@ class OrganSegmentation():
         outputSegmentation = segmentation.vesselSegmentation(
             self.data3d,
             self.segmentation,
-            threshold=-1,
+            threshold=None,
             inputSigma=0.15,
             dilationIterations=10,
             nObj=1,

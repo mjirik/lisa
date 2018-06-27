@@ -36,6 +36,14 @@ class LisaGUITest(unittest.TestCase):
         dcmdirw = self.oseg_w.uiw['dcmdir']
         QTest.mouseClick(dcmdirw, Qt.LeftButton)
 
+    @attr('interactive')
+    def test_lisa_run(self):
+        # i5 = self.oseg_w.grid.itemAt(5)
+        # dcmdirw = self.oseg_w.uiw['dcmdir']
+        # QTest.mouseClick(dcmdirw, Qt.LeftButton)
+        pass
+        self.app.exec_()
+
     def test_quit_gui(self):
         """
         Tests event of quit
