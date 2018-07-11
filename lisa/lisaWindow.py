@@ -218,6 +218,11 @@ class OrganSegmentationWindow(QMainWindow):
         segmentation_relabel_action.triggered.connect(self.action_segmentation_relabel)
         imageMenu.addAction(segmentation_relabel_action)
 
+        resize_to_mm_action = QtGui.QAction(QtGui.QIcon('exit.png'), "Resize to mm", self)
+        resize_to_mm_action.setStatusTip('Resize data3d and segemntation to mm')
+        resize_to_mm_action.triggered.connect(self.action_resize_mm)
+        imageMenu.addAction(resize_to_mm_action)
+
         ###### OPTION MENU ######
         optionMenu = menubar.addMenu('&Option')
         
@@ -453,6 +458,7 @@ class OrganSegmentationWindow(QMainWindow):
         saveHVTreeAction = QtGui.QAction(QtGui.QIcon('exit.png'), "Vessel Tree", self)
         saveHVTreeAction.setStatusTip('Save actual vessel tree 1D model')
         saveHVTreeAction.triggered.connect(self.btnSaveActualVesselTree)
+
 
         menu = QtGui.QMenu(self.btnSave)
         menu.addAction(saveFileAction)
@@ -1055,6 +1061,13 @@ class OrganSegmentationWindow(QMainWindow):
         head, teil = os.path.split(seg_path)
         self.oseg.cache.update('loadcompatext_seg_dataredir', head)
         self.setLabelText(self.segBody.lblSegData, text)
+        self.statusBar().showMessage('Ready')
+
+    def action_resize_mm(self):
+        self.statusBar().showMessage('Performing resize ...')
+        val, ok = self.ui_get_double(headline="Set new voxelsize [mm]", value=5.0)
+        self.oseg.resize_to_mm(val)
+
         self.statusBar().showMessage('Ready')
 
     def btnSemiautoSeg(self):

@@ -6,6 +6,7 @@ __version__ = "1.9.50"
 import sys
 import os.path as op
 sys.path.insert(0, op.expanduser(r"~/projects/imtools/"))
+sys.path.insert(0, op.expanduser(r"~/projects/seededitorqt/"))
 from . import organ_segmentation
 from .main import lisa_main
 # import qmisc
