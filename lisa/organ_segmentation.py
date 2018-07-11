@@ -742,6 +742,8 @@ class OrganSegmentation():
         logger.debug('_interactivity_begin()')
         # TODO make copy and work with it
         # TODO really make the copy and work with it
+        if self.segmentation is None:
+            self.segmentation = np.zeros_like(self.data3d, dtype=np.int8)
 
         data3d_tmp = self.data3d
         if self.seg_preproc_pars['use_automatic_segmentation']:
@@ -1484,6 +1486,32 @@ class OrganSegmentation():
     #     self.data3d = scipy.ndimage.interpolation.rotate(self.data3d, angle, axes)
     #     self.segmentation = scipy.ndimage.interpolation.rotate(self.segmentation, angle, axes)
     #     self.seeds = scipy.ndimage.interpolation.rotate(self.seeds, angle, axes)
+    def resize_to_mm(self, voxelsize_mm):
+        """
+        Resize voxelsize to defined milimeters.
+
+        :param voxelsize_mm:
+        :return:
+        """
+        if np.isscalar(voxelsize_mm):
+            voxelsize_mm = self.data3d.ndim * [voxelsize_mm]
+
+        orig_voxelsize_mm = self.voxelsize_mm
+        orig_shape = self.data3d.shape
+
+        self.data3d = io3d.misc.resize_to_mm(self.data3d, voxelsize_mm=orig_voxelsize_mm, new_voxelsize_mm=voxelsize_mm)
+        if self.segmentation is not None:
+            dtype = self.segmentation.dtype
+            self.segmentation = io3d.misc.resize_to_mm(
+                self.segmentation, voxelsize_mm=orig_voxelsize_mm, new_voxelsize_mm=voxelsize_mm).astype(dtype)
+
+        if not hasattr(self, "orig_voxelsize_mm"):
+            # It this is first resize
+            self.orig_voxelsize_mm = orig_voxelsize_mm
+            self.orig_shape = orig_shape
+
+        self.voxelsize_mm = voxelsize_mm
+
 
     def rotate(self, phi_deg, theta_deg=None, phi_axes=(1, 2), theta_axes=(0, 1), **kwargs):
         self.data3d = imma.rotate(self.data3d, phi_deg, theta_deg)

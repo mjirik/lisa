@@ -471,5 +471,39 @@ and background")
         self.assertTrue(np.sum(segmentation == 0) > 100)
         # igc.show_segmentation()
 
+    def test_resize_data_one_value(self):
+        datap = io3d.datasets.generate_abdominal()
+        target_voxelsize_mm = 3
+        oseg = organ_segmentation.OrganSegmentation(
+                                                    working_voxelsize_mm=4,
+                                                    manualroi=False)
+        oseg.import_dataplus(dataplus=datap)
+        orig_shape = oseg.data3d.shape
+
+        oseg.resize_to_mm(target_voxelsize_mm)
+        self.assertEqual(oseg.voxelsize_mm[0], target_voxelsize_mm)
+        self.assertEqual(oseg.voxelsize_mm[1], target_voxelsize_mm)
+        self.assertEqual(oseg.voxelsize_mm[2], target_voxelsize_mm)
+        self.assertNotEqual(orig_shape[0], oseg.data3d.shape[0])
+        self.assertNotEqual(orig_shape[1], oseg.data3d.shape[1])
+        self.assertNotEqual(orig_shape[2], oseg.data3d.shape[2])
+
+    def test_resize_data_three_values(self):
+        datap = io3d.datasets.generate_abdominal()
+        target_voxelsize_mm = [7.14, 4.1, 3]
+        oseg = organ_segmentation.OrganSegmentation(
+            working_voxelsize_mm=4,
+            manualroi=False)
+        oseg.import_dataplus(dataplus=datap)
+        orig_shape = oseg.data3d.shape
+
+        oseg.resize_to_mm(target_voxelsize_mm)
+        self.assertEqual(oseg.voxelsize_mm[0], target_voxelsize_mm[0])
+        self.assertEqual(oseg.voxelsize_mm[1], target_voxelsize_mm[1])
+        self.assertEqual(oseg.voxelsize_mm[2], target_voxelsize_mm[2])
+        self.assertNotEqual(orig_shape[0], oseg.data3d.shape[0])
+        self.assertNotEqual(orig_shape[1], oseg.data3d.shape[1])
+        self.assertNotEqual(orig_shape[2], oseg.data3d.shape[2])
+
 if __name__ == "__main__":
     unittest.main()
