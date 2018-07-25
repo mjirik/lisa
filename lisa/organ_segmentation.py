@@ -1304,7 +1304,7 @@ class OrganSegmentation():
         params = {
             'threshold': threshold,
             'inputSigma': 0.15,
-            'dilationIterations': 10,
+            'aoi_dilation_iterations': 10,
             'nObj': 1,
             'biggestObjects': False,
             'useSeedsOfCompactObjects': True,
@@ -1323,7 +1323,8 @@ class OrganSegmentation():
             self.data3d,
             # target_segmentation,
             segmentation=self.segmentation,
-            organ_label=organ_label,
+            # organ_label=organ_label,
+            aoi_label=organ_label,
             forbidden_label=forbidden_label,
             slab=self.slab,
             **params
