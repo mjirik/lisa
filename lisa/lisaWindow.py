@@ -173,6 +173,11 @@ class OrganSegmentationWindow(QMainWindow):
         segFromFile.triggered.connect(self.btnLoadSegmentationFromFile)
         fileMenu.addAction(segFromFile)
 
+        segFromOverlay = QtGui.QAction(QtGui.QIcon('exit.png'), '&Segmentation from Dicom overlay', self)
+        segFromOverlay.setStatusTip('Load segmentation from Dicom file stack')
+        segFromOverlay.triggered.connect(self.btnLoadSegmentationFromDicomOverlay)
+        fileMenu.addAction(segFromOverlay)
+
         view3DAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&View 3D', self)
         view3DAction.setStatusTip('View segmentation in 3D model')
         view3DAction.triggered.connect(self.view3D)
@@ -1177,6 +1182,12 @@ class OrganSegmentationWindow(QMainWindow):
         else:
             self.statusBar().showMessage('No segmentation data!')
 
+    def btnLoadSegmentationFromDicomOverlay(self, event=None):
+
+        self.statusBar().showMessage('Reading dicom overlay')
+        dirpath = self.oseg.load_segmentation_from_dicom_overlay(None)
+        self.statusBar().showMessage('Ready. Dicom overlay loaded from ' + str(dirpath))
+
     def btnUpdate(self, event=None):
 
         self.statusBar().showMessage('Checking for update ...')
@@ -1232,8 +1243,8 @@ class OrganSegmentationWindow(QMainWindow):
             self.statusBar().showMessage('Saving segmentation data...')
             QApplication.processEvents()
 
-            self.oseg.save_outputs_dcm_overlay()
-            self.statusBar().showMessage('Ready')
+            output_dicom_dir = self.oseg.save_outputs_dcm_overlay()
+            self.statusBar().showMessage('Ready. Data saved to ' + output_dicom_dir)
 
         else:
             self.statusBar().showMessage('No segmentation data!')

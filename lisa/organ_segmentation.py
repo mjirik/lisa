@@ -1599,6 +1599,27 @@ class OrganSegmentation():
                 self.dcmfilelist,
                 output_dicom_dir, overlays,
                 data['crinfo'], data['orig_shape'])
+        return output_dicom_dir
+
+    def load_segmentation_from_dicom_overlay(self, dirpath=None):
+        """
+        Get overlay from dicom file stack
+        :param dirpath:
+        :return:
+        """
+        if dirpath is None:
+            dirpath = self.datapath
+        reader = datareader.DataReader()
+        data3d, metadata = reader.Get3DData(dirpath, qt_app=None, dataplus_format=False)
+        overlays = reader.get_overlay()
+        overlay = np.zeros(data3d.shape, dtype=np.int8)
+        # print("overlays ", list(overlays.keys()))
+        for key in overlays:
+            overlay += overlays[key]
+        if not np.allclose(self.data3d.shape, overlay.shape):
+            logger.warning("Overlay shape does not fit the data shape")
+        self.segmentation = overlay
+        return dirpath
 
     def fill_holes_in_segmentation(self, label=None, background_label=0):
         """
