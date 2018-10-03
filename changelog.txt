@@ -1,3 +1,9 @@
+
+* More descriptive status messages
+* Read/write DICOM overlay
+
+1.9.51 2018-10-01
+
 New Save dialog
 Save 1D model
 Connected Threshod Segmentation is not dependent on prev organ segmentation
