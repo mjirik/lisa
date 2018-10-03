@@ -737,7 +737,7 @@ class OrganSegmentationWindow(QMainWindow):
 
         logger.debug("importing datap")
         oseg.import_dataplus(datap)
-        self.statusBar().showMessage('Ready')
+        self.statusBar().showMessage('Ready. Data loaded from ' + str(oseg.datapath))
         logger.debug("import data with gui finished")
 
         #### SET BUTTONS/MENU ####
@@ -905,7 +905,7 @@ class OrganSegmentationWindow(QMainWindow):
         no, from_label = self.ui_select_label("Select from_label for renaming")
         no, to_label = self.ui_select_label("Select to_label for renaming")
         self.oseg.segmentation_relabel(from_label=from_label, to_label=to_label)
-        self.statusBar().showMessage('Ready')
+        self.statusBar().showMessage('Ready. Relabeled from ' + str(from_label) + " to " + str(to_label))
 
     def mask_segmentation(self):
         # @todo add button for this functionality
@@ -963,7 +963,7 @@ class OrganSegmentationWindow(QMainWindow):
             return
         self.oseg.import_segmentation_from_file(seg_path)
         self.segBody.enableSegType()
-        self.statusBar().showMessage('Ready')
+        self.statusBar().showMessage('Ready. Segmentation loaded from ' + str(seg_path))
 
     def __evaluation_to_text(self, evaluation):
         overall_score = evaluation['sliver_overall_pts']
@@ -1177,7 +1177,7 @@ class OrganSegmentationWindow(QMainWindow):
             logger.info('Data saved to: ' + ofilename)
 
             self.oseg.save_outputs(filename)
-            self.statusBar().showMessage('Ready')
+            self.statusBar().showMessage('Ready. Data saved to ' + str(ofilename))
 
         else:
             self.statusBar().showMessage('No segmentation data!')
