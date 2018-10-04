@@ -120,7 +120,7 @@ def cut_editor_old(data, label=None):
 
 def split_vessel(datap, seeds, vessel_volume_threshold=0.95, dilatation_iterations=1, input_label="porta",
                  output_label1 = 1, output_label2 = 2, input_seeds_cut_label=1,
-                 input_seeds_label1=3,
+                 input_seeds_separate_label=3,
                  input_seeds_label2=None,
                  method="reach volume",
                  ):
@@ -135,7 +135,7 @@ def split_vessel(datap, seeds, vessel_volume_threshold=0.95, dilatation_iteratio
     :param output_label1: output label for vessel part marked with right button (if it is used)
     :param output_label2: ouput label for not-marked vessel part
     :param method: "separate labels" or "reach volume". The first method needs 3 input seeds and it is more stable.
-    :param input_seeds_label1: after the segmentation the object containing this label in seeds would be labeled with
+    :param input_seeds_separate_label: after the segmentation the object containing this label in seeds would be labeled with
     output_label1
     :param input_seeds_label2: This parameter is usedf the method is "separate labels". After the
     segmentation the object containing this label in seeds would be labeled with output_label1.
@@ -144,12 +144,19 @@ def split_vessel(datap, seeds, vessel_volume_threshold=0.95, dilatation_iteratio
     split_obj0 = (seeds == input_seeds_cut_label).astype(np.int8)
     split_obj = split_obj0.copy()
 
-    if type(input_label) is str:
-        numeric_label = datap['slab'][input_label]
-    else:
-        numeric_label = input_label
 
-    vessels = datap['segmentation'] == numeric_label
+    # numeric_label = imma.get_nlabel(datap["slab"], input_label)
+    if method == "separate labels":
+        input_label = np.max(datap["segmentation"][seeds == input_seeds_label2])
+
+    vessels = imma.select_labels(datap["segmentation"], input_label, slab=datap["slab"])
+
+    # if type(input_label) is str:
+    #     numeric_label = datap['slab'][input_label]
+    # else:
+    #     numeric_label = input_label
+    # vessels = datap['segmentation'] == numeric_label
+
     vesselstmp = vessels
     sumall = np.sum(vessels == 1)
 
@@ -166,8 +173,11 @@ def split_vessel(datap, seeds, vessel_volume_threshold=0.95, dilatation_iteratio
         if method == "reach volume":
             not_complete = np.sum(lab == qmisc.max_area_index(lab, n_obj)) > (vessel_volume_threshold * sumall)
         elif method == "separate labels":
-            seglab1 = np.max(lab[seeds==input_seeds_label1])
-            seglab2 = np.max(lab[seeds==input_seeds_label2])
+            # misc.
+            # imma.get_nlabel(datap["slab"], )
+            # imma.select_labels(seeds,input_seeds_separate_label)
+            seglab1 = np.max(lab[seeds == input_seeds_separate_label])
+            seglab2 = np.max(lab[seeds == input_seeds_label2])
             if (seglab1 > 0) and (seglab2 > 0) and (seglab1 != seglab2):
                 not_complete = False
         else:
@@ -189,7 +199,7 @@ def split_vessel(datap, seeds, vessel_volume_threshold=0.95, dilatation_iteratio
         obj2 = get_biggest_object(lab)
 
         pixel = 0
-        pixels = obj1[seeds == input_seeds_label1]
+        pixels = obj1[seeds == input_seeds_separate_label]
         if len(pixels) > 0:
             pixel = pixels[0]
 
