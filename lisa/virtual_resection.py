@@ -119,17 +119,26 @@ def cut_editor_old(data, label=None):
 
 
 def split_vessel(datap, seeds, vessel_volume_threshold=0.95, dilatation_iterations=1, input_label="porta",
-                 output_label1 = 1, output_label2 = 2, input_seeds_cut_label=1, input_seeds_select_label=3):
+                 output_label1 = 1, output_label2 = 2, input_seeds_cut_label=1,
+                 input_seeds_label1=3,
+                 input_seeds_label2=None,
+                 method="reach volume",
+                 ):
     """
 
     :param datap: data plus format with data3d, segmentation, slab ...
     :param seeds: 3d ndarray same size as data3d, label 1 is place where should be vessel cuted. Label 2 points to
     the vessel with output label 1 after the segmentation
-    :param vessel_volume_threshold:
+    :param vessel_volume_threshold: this parameter defines the iteration stop rule if method "reach volume is selected
     :param dilatation_iterations:
     :param input_label: which vessel should be splited
     :param output_label1: output label for vessel part marked with right button (if it is used)
     :param output_label2: ouput label for not-marked vessel part
+    :param method: "separate labels" or "reach volume". The first method needs 3 input seeds and it is more stable.
+    :param input_seeds_label1: after the segmentation the object containing this label in seeds would be labeled with
+    output_label1
+    :param input_seeds_label2: This parameter is usedf the method is "separate labels". After the
+    segmentation the object containing this label in seeds would be labeled with output_label1.
     :return:
     """
     split_obj0 = (seeds == input_seeds_cut_label).astype(np.int8)
@@ -152,40 +161,53 @@ def split_vessel(datap, seeds, vessel_volume_threshold=0.95, dilatation_iteratio
 
     # while n_obj < 2 :
 # dokud neni z celkoveho objektu ustipnuto alespon 80 procent
-    while np.sum(lab == qmisc.max_area_index(lab, n_obj)) > (vessel_volume_threshold * sumall):
+    not_complete = True
+    while not_complete:
+        if method == "reach volume":
+            not_complete = np.sum(lab == qmisc.max_area_index(lab, n_obj)) > (vessel_volume_threshold * sumall)
+        elif method == "separate labels":
+            seglab1 = np.max(lab[seeds==input_seeds_label1])
+            seglab2 = np.max(lab[seeds==input_seeds_label2])
+            if (seglab1 > 0) and (seglab2 > 0) and (seglab1 != seglab2):
+                not_complete = False
+        else:
+            IOError("Unknown method " + str(method))
 
         split_obj = scipy.ndimage.binary_dilation(split_obj, iterations=dilatation_iterations)
         vesselstmp = vessels * (1 - split_obj)
 
         lab, n_obj = scipy.ndimage.label(vesselstmp)
 
-    # všechny objekty, na které se to rozpadlo
-    # pyed = sed3.sed3(lab)
-    # pyed.show()
-    obj1 = get_biggest_object(lab)
+    if method == "reach volume":
+        # všechny objekty, na které se to rozpadlo
+        # pyed = sed3.sed3(lab)
+        # pyed.show()
+        obj1 = get_biggest_object(lab)
 
-# vymaz nejvetsiho
-    lab[obj1 == 1] = 0
-    obj2 = get_biggest_object(lab)
+    # vymaz nejvetsiho
+        lab[obj1 == 1] = 0
+        obj2 = get_biggest_object(lab)
 
-    pixel = 0
-    pixels = obj1[seeds == input_seeds_select_label]
-    if len(pixels) > 0:
-        pixel = pixels[0]
+        pixel = 0
+        pixels = obj1[seeds == input_seeds_label1]
+        if len(pixels) > 0:
+            pixel = pixels[0]
 
-    # from PyQt4.QtCore import pyqtRemoveInputHook
-    # pyqtRemoveInputHook()
-    # import ipdb; ipdb.set_trace() # BREAKPOINT
+        # from PyQt4.QtCore import pyqtRemoveInputHook
+        # pyqtRemoveInputHook()
+        # import ipdb; ipdb.set_trace() # BREAKPOINT
 
-    if pixel > 0:
-        ol1 = output_label1
-        ol2 = output_label2
-    else:
-        ol2 = output_label1
-        ol1 = output_label2
+        if pixel > 0:
+            ol1 = output_label1
+            ol2 = output_label2
+        else:
+            ol2 = output_label1
+            ol1 = output_label2
 
-    # first selected pixel with right button
-    lab = ol1 * obj1 + ol2 * obj2
+        # first selected pixel with right button
+        lab = ol1 * obj1 + ol2 * obj2
+    elif method == "separate labels":
+        lab = (lab == seglab1) * output_label1 + (lab == seglab2) * output_label2
     cut_by_user = split_obj0
     return lab, cut_by_user
 
