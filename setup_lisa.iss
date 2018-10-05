@@ -28,9 +28,9 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 ;default is into c:\Users\Public if not, use userpf
 ;DefaultDirName={%PUBLIC|{userpf}}\{#MyAppName}
-DefaultDirName={commonappdata}\{#MyAppName}
 ;DefaultDirName={%HOMEPATH}\{#MyAppName}
-;DefaultDirName={userpf}\{#MyAppName}
+;DefaultDirName={commonappdata}\{#MyAppName}
+DefaultDirName={userpf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 OutputBaseFilename=setup_lisa
 Compression=lzma
@@ -40,7 +40,7 @@ UsePreviousSetupType=False
 UsePreviousTasks=False
 UsePreviousLanguage=False
 ExtraDiskSpaceRequired=43
-SetupIconFile=C:\Users\mjirik\projects\lisa\applications\LISA.ico
+SetupIconFile=C:\Users\miros\projects\lisa\applications\LISA.ico
 UsePreviousAppDir=False
 
 [Languages]
@@ -55,17 +55,33 @@ Filename: "{cmd}"; Parameters: "/C ""{tmp}\installer.bat & pause"""; WorkingDir:
 ;Filename: "{cmd}"; Parameters: "/C ""conda install --yes -c SimpleITK -c mjirik lisa"""; WorkingDir: "{%HOMEPATH}\Miniconda2\Scripts"; Flags: runasoriginaluser
 ;Filename: "{cmd}"; Parameters: "/C ""pause"""
 ;Filename: "conda"; Parameters: "create -y --no-default-packages -c mjirik -c SimpleITK -n lisa lisa pywget pip"
-
+; idpAddFileSize('https://repo.continuum.io/miniconda/Miniconda2-latest-Windows-x86_64.exe', ExpandConstant('{tmp}\Miniconda2-latest-Windows-x86_64.exe'), 22743040);
 [Code]
-function IsCondaInstalled: boolean;
+function IsCondaNotInstalled: boolean;
+
 begin
-result := not (FileExists('c:\Miniconda2\Scripts\conda.exe') or FileExists('{%HOMEPATH}\Miniconda2\Scripts\conda.exe') or FileExists('c:\Anaconda2\Scripts\conda.exe') or FileExists('c:\Miniconda\Scripts\conda.exe') or FileExists('c:\Anaconda\Scripts\conda.exe') or FileExists('{%HOMEPATH}\Miniconda2\Scripts\conda.exe') or FileExists('{%HOMEPATH}\Miniconda\Scripts\conda.exe') or FileExists('{%HOMEPATH}\Anaconda2\Scripts\conda.exe') or FileExists('{%HOMEPATH}\Anaconda\Scripts\conda.exe'));
+  
+  result := not (
+    FileExists('c:\Miniconda\Scripts\conda.exe') or 
+    FileExists('c:\Miniconda2\Scripts\conda.exe') or  
+    FileExists('c:\Miniconda3\Scripts\conda.exe') or
+    FileExists('c:\Anaconda\Scripts\conda.exe')  or  
+    FileExists('c:\Anaconda2\Scripts\conda.exe') or
+    FileExists('c:\Anaconda3\Scripts\conda.exe') or 
+    FileExists('{%HOMEPATH}\Miniconda\Scripts\conda.exe') or 
+    FileExists('{%HOMEPATH}\Miniconda2\Scripts\conda.exe') or 
+    FileExists('{%HOMEPATH}\Miniconda3\Scripts\conda.exe') or 
+    FileExists('{%HOMEPATH}\Anaconda\Scripts\conda.exe') or
+    FileExists('{%HOMEPATH}\Anaconda2\Scripts\conda.exe') or 
+    FileExists('{%HOMEPATH}\Anaconda3\Scripts\conda.exe') 
+    );
 end;
 
 procedure InitializeWizard();
 begin
-  if IsCondaInstalled then
-    idpAddFileSize('https://repo.continuum.io/miniconda/Miniconda2-latest-Windows-x86_64.exe', ExpandConstant('{tmp}\Miniconda2-latest-Windows-x86_64.exe'), 22743040);
+  if IsCondaNotInstalled then
+
+    idpAddFileSize('https://repo.continuum.io/miniconda/Miniconda3-latest-Windows-x86_64.exe', ExpandConstant('{tmp}\Miniconda3-latest-Windows-x86_64.exe'), 22743040);
   idpAddFileSize('https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi', ExpandConstant('{tmp}\VCForPython27.msi'), 87891968);
   idpDownloadAfter(wpReady);
 end;
