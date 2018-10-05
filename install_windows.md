@@ -5,7 +5,24 @@ Install on Windows
 * install [Microsoft Visual C++ compiler for python 2.7.](https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi) or for python 3.6 [Build Tools for Visual Studio 2017](https://www.visualstudio.com/downloads/#build-tools-for-visual-studio-2017)
 * install Lisa using conda from cmd
 
+      conda create -n lisa36 python=3.6
+      activate lisa36
+      conda install pip
       conda install -c mjirik -c SimpleITK -c menpo -c conda-forge pip lisa pygco
+      
+### Problems on Windows
+
+* pygco install failed 
+    1) install with pip can help. Try:
+        
+            pip install pygco
+        
+    2) download [compiled `.pyd` file](http://home.zcu.cz/~mjirik/lisa/install/pygco.cp36-win_amd64_site-packages.zip) 
+and put it into conda's site-package directory: `Miniconda3\envs\lisa36\Lib\site-packages` 
+
+* Unable to install SimpleITK
+
+    * install version 1.0.1
 
 For developers
 =====

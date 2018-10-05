@@ -15,7 +15,9 @@ LIver Surgery Analyser.
 Install
 -------
 
-Use [windows installer](http://home.zcu.cz/~mjirik/lisa/install/setup_lisa.exe)
+See our [install notes](https://github.com/mjirik/lisa/blob/master/INSTALL.md) for Linux, Mac OS and Windows 
+
+or use [experimental windows installer](http://home.zcu.cz/~mjirik/lisa/install/setup_lisa.exe)
 
 
 Install stable branche on Linux or Mac OS with:
@@ -24,9 +26,8 @@ Install stable branche on Linux or Mac OS with:
     source installer.sh stable
 
 
-or see our [install notes](https://github.com/mjirik/lisa/blob/master/INSTALL.md) for Linux, Mac OS and Windows 
 
-or use [Lisa in Ubuntu for VirtualBox](http://147.228.240.61/queetech/install/lisa_ubuntu14.04.vdi)
+or use [Lisa in Ubuntu for VirtualBox (deprecated)](http://147.228.240.61/queetech/install/lisa_ubuntu14.04.vdi)
 
 
 

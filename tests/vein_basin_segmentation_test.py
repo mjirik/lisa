@@ -140,7 +140,6 @@ class CoinaudSegmentationTest(unittest.TestCase):
 # #        oseg.make_segmentation()
 #
 #
-# # @TODO doladit boundary penalties
 #     # @unittest.skipIf(not interactiveTest, "interactive test")
 #     @unittest.skip("interactivity params are obsolete")
 #     def test_organ_segmentation_with_boundary_penalties(self):
@@ -212,7 +211,6 @@ class CoinaudSegmentationTest(unittest.TestCase):
 #     def test_stored_interactivity(self):
 #         pass
 #
-# # TODO finish this test
 #     def test_synth_liver(self):
 #         params = {}
 #         self.synthetic_liver_template(params)
