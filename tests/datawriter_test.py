@@ -88,7 +88,7 @@ class DicomWriterTest(unittest.TestCase):
         )
         dr = dreader.DataReader()
         newdata, newmetadata = dr.Get3DData('tests_outputs', dataplus_format=False)
-        newoverlay = dr.GetOverlay()
+        newoverlay = dr.get_overlay()
         # print overlay
 
         # ed = pyed.sed3(newoverlay[6])
@@ -136,7 +136,7 @@ class DicomWriterTest(unittest.TestCase):
 # try read written data
         dr = dreader.DataReader()
         newdata, newmetadata = dr.Get3DData(filedir, dataplus_format=False)
-        newoverlay = dr.GetOverlay()
+        newoverlay = dr.get_overlay()
 
         self.assertTrue((newoverlay[i_overlay] == overlays[i_overlay]).all())
 

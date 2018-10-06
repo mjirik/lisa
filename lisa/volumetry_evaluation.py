@@ -165,7 +165,7 @@ def eval_all_from_dataset_metadata(inputdata, visualization=False,
         print("inputdata ", list(inputdata['data'][i].values()))
         try:
             # if there is defined overlay
-            data3d_a = reader.GetOverlay()[inputdata['data'][i][
+            data3d_a = reader.get_overlay()[inputdata['data'][i][
                 'overlay_number']]
             logger.info('overlay loaded')
             print('overlay loaded')

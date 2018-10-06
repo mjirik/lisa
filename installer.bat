@@ -3,7 +3,7 @@ set PATH=%HOMEPATH%\Miniconda3;%HOMEPATH%\Miniconda3\Scripts;C:\Miniconda3\Scrip
 
 
 rem : get requirements for pip using wget and then remove this package
-conda create -y -c mjirik -c SimpleITK -c menpo -c conda-forge --no-default-packages -n lisa pywget wget
+conda create -y -c mjirik -c SimpleITK -c menpo -c conda-forge -n lisa pywget wget
 call activate lisa
 python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_pip.txt
 conda uninstall -y pywget wget
