@@ -6,7 +6,7 @@ rem : get requirements for pip using wget and then remove this package
 conda create -y -c mjirik -c SimpleITK -c menpo -c conda-forge --no-default-packages -n lisa pywget wget
 call activate lisa
 python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_pip.txt
-conda uninstall pywget wget
+conda uninstall -y pywget wget
 
 rem :pygco is not compiled for osx now this is why it is not in meta.yaml
 conda install -y -c mjirik -c SimpleITK -c menpo -c conda-forge --no-default-packages pip lisa pygco
