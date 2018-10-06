@@ -55,16 +55,18 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/technical.html#install-requires-vs-requirements-files
-    install_requires=['numpy', 'scipy',  'matplotlib'],
+    install_requires=[
+        # 'numpy', 'scipy',  'matplotlib'
+    ],
     # 'SimpleITK'],  # Removed becaouse of errors when pip is installing
     dependency_links=[],
 
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these
     # have to be included in MANIFEST.in as well.
-    package_data={
-        'lisa': ['lisa/icons/LISA256.png'],
-    },
+    # package_data={
+    #     'lisa': ['lisa/icons/LISA256.png'],
+    # },
 
     # Although 'package_data' is the preferred approach, in some case you may
     # need to place data files outside of your packages.

@@ -31,7 +31,7 @@ import argparse
 #     QFont, QInputDialog, QComboBox, QRadioButton, QButtonGroup
 
 # ----------------- my scripts --------
-import misc
+from lisa import misc
 import sed3
 
 
@@ -41,28 +41,27 @@ class SimpleSegmentation:
     
     def simple_segmentation(self, data3d, voxelsize_mm):
         simple_seg = np.zeros(data3d.shape )
-	#definice konvoluční masky
-	KONV_MASK = np.ones([10,10,10], float)
-	KONV_MASK = KONV_MASK/9.0;	
-	
+        #definice konvoluční masky
+        KONV_MASK = np.ones([10,10,10], float)
+        KONV_MASK = KONV_MASK/9.0;
 
-	#definice konvoluční funkce - param a - matice m*n kterou budeme přenásobovat konvoluční maticí, b - Konvoluční maska m*n
-     
-	
-	# nalezení kostí
-	simple_seg = data3d > BONES 
-	#simple_seg[(simple_seg.shape[0]/5)*4:simple_seg.shape[0]] = 0
-	
-	#nalzení páteře
-	spine_finder = scipy.ndimage.filters.convolve((simple_seg).astype(np.int), KONV_MASK)
-	#pyed = sed3.sed3(simple_seg)
-	#
-				
-	simple_seg += ((spine_finder>25)*SPINE_ID)
-	pyed = sed3.sed3(simple_seg)
-	pyed.show()	
 
-	return simple_seg
+        #definice konvoluční funkce - param a - matice m*n kterou budeme přenásobovat konvoluční maticí, b - Konvoluční maska m*n
+
+
+        # nalezení kostí
+        simple_seg = data3d > BONES
+        #simple_seg[(simple_seg.shape[0]/5)*4:simple_seg.shape[0]] = 0
+
+        #nalzení páteře
+        spine_finder = scipy.ndimage.filters.convolve((simple_seg).astype(np.int), KONV_MASK)
+        #pyed = sed3.sed3(simple_seg)
+        #
+
+        simple_seg += ((spine_finder>25)*SPINE_ID)
+        pyed = sed3.sed3(simple_seg)
+        pyed.show()
+        return simple_seg
 
         
 def main():
