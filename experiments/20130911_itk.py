@@ -34,10 +34,10 @@ sitk.Show(im2)
 import pdb; pdb.set_trace()
 
 #--------------------------------------------
-print 'im3: 3D dicom image read and visualization with SimpleITK'
+print('im3: 3D dicom image read and visualization with SimpleITK')
 isr = sitk.ImageSeriesReader()
 seriesids = isr.GetGDCMSeriesIDs(data_path)
-print seriesids
+print(seriesids)
 #dcmnames = isr.GetGDCMSeriesFileNames(data_path )
 dcmnames = isr.GetGDCMSeriesFileNames(data_path, seriesids[0], True, True, True, True)
 isr.SetFileNames(dcmnames)
