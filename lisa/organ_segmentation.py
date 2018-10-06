@@ -753,6 +753,8 @@ class OrganSegmentation():
         # print 'zoom ', self.zoom
         # print 'svs_mm ', self.working_voxelsize_mm
         self.zoom = self.voxelsize_mm / (1.0 * self.working_voxelsize_mm)
+        import warnings
+        warnings.filterwarnings('ignore', '.*output shape of zoom.*')
         data3d_res = scipy.ndimage.zoom(
             self.data3d,
             self.zoom,
