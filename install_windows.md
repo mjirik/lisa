@@ -2,7 +2,8 @@ Install on Windows
 ====
 
 * install [conda](https://conda.io/miniconda.html)
-* install [Microsoft Visual C++ compiler for python 2.7.](https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi) or for python 3.6 [Build Tools for Visual Studio 2017](https://www.visualstudio.com/downloads/#build-tools-for-visual-studio-2017)
+* install [Microsoft Visual C++ compiler for python 2.7.](https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi) or
+ for python 3.6 [Build Tools for Visual Studio 2017](https://www.visualstudio.com/downloads/#build-tools-for-visual-studio-2017)
 * install Lisa using conda from cmd
 
       conda create -n lisa36 python=3.6

@@ -35,57 +35,119 @@ DefaultGroupName={#MyAppName}
 OutputBaseFilename=setup_lisa
 Compression=lzma
 SolidCompression=yes
-;PrivilegesRequired=lowest
+PrivilegesRequired=lowest
 UsePreviousSetupType=False
 UsePreviousTasks=False
 UsePreviousLanguage=False
 ExtraDiskSpaceRequired=43
 SetupIconFile=C:\Users\miros\projects\lisa\applications\LISA.ico
 UsePreviousAppDir=False
+RestartIfNeededByRun=False
+RestartApplications=False
+DisableWelcomePage=False
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
-Name: "czech"; MessagesFile: "compiler:Languages\Czech.isl"
 
 [Run]
-;Filename: "{tmp}\Miniconda-latest-Windows-x86_64.exe"; Parameters: "/AddToPath=1 /RegisterPython=1 /D={%PUBLIC}\Minicoconda2"; Flags: waituntilterminated runasoriginaluser
-Filename: "{tmp}\Miniconda2-latest-Windows-x86_64.exe"; Parameters: "/AddToPath=1 /RegisterPython=1 /InstallationType=AllUsers"; Flags: waituntilterminated runasoriginaluser
-Filename: "msiexec.exe"; Parameters: "/i ""{tmp}\VCForPython27.msi"""
+
+;Filename: "{tmp}\Miniconda3-latest-Windows-x86_64.exe"; Parameters: "/AddToPath=1 /RegisterPython=1 /InstallationType=JustMe"; Flags: waituntilterminated runasoriginaluser; Components: miniconda
+;Filename: "msiexec.exe"; Parameters: "/i ""{tmp}\VCForPython27.msi"""; Components: cppcompiler27
+;Filename: "{tmp}\vs_build_tool.exe"; Parameters: ""; Flags: waituntilterminated runasoriginaluser; Components: cppcompiler36
 Filename: "{cmd}"; Parameters: "/C ""{tmp}\installer.bat & pause"""; WorkingDir: "{tmp}"; Flags: runasoriginaluser
 ;Filename: "{cmd}"; Parameters: "/C ""conda install --yes -c SimpleITK -c mjirik lisa"""; WorkingDir: "{%HOMEPATH}\Miniconda2\Scripts"; Flags: runasoriginaluser
 ;Filename: "{cmd}"; Parameters: "/C ""pause"""
 ;Filename: "conda"; Parameters: "create -y --no-default-packages -c mjirik -c SimpleITK -n lisa lisa pywget pip"
 ; idpAddFileSize('https://repo.continuum.io/miniconda/Miniconda2-latest-Windows-x86_64.exe', ExpandConstant('{tmp}\Miniconda2-latest-Windows-x86_64.exe'), 22743040);
+; if IsCondaNotInstalled then
+;Filename: "{tmp}\Miniconda-latest-Windows-x86_64.exe"; Parameters: "/AddToPath=1 /RegisterPython=1 /D={%PUBLIC}\Minicoconda2"; Flags: waituntilterminated runasoriginaluser
+
+;[Components]
+;Name: "miniconda"; Description: "Install miniconda"; Types: full custom compact
+;Name: "cppcompiler27"; Description: "Microsoft Visual C++ Compiler for Python 2.7"; Types: full custom compact
+;Name: "cppcompiler36"; Description: "Microsoft Visual C++ 14.0 Compiler: Build Tools for Visual Studio 2017"; Types: full custom compact
+
+;[Messages]
+;SelectComponentsDesc=Check requirements which are not installed
+
+;[Code]
+;function IsCondaNotInstalled: boolean;
+
+;begin
+;  result := not (
+;    FileExists('c:\Miniconda\Scripts\conda.exe') or 
+;    FileExists('c:\Miniconda2\Scripts\conda.exe') or  
+;    FileExists('c:\Miniconda3\Scripts\conda.exe') or
+;    FileExists('c:\Anaconda\Scripts\conda.exe')  or  
+;    FileExists('c:\Anaconda2\Scripts\conda.exe') or
+;    FileExists('c:\Anaconda3\Scripts\conda.exe') or 
+;    FileExists('{%HOMEPATH}\Miniconda\Scripts\conda.exe') or 
+;    FileExists('{%HOMEPATH}\Miniconda2\Scripts\conda.exe') or 
+;    FileExists('{%HOMEPATH}\Miniconda3\Scripts\conda.exe') or 
+;    FileExists('{%HOMEPATH}\Anaconda\Scripts\conda.exe') or
+;    FileExists('{%HOMEPATH}\Anaconda2\Scripts\conda.exe') or 
+;    FileExists('{%HOMEPATH}\Anaconda3\Scripts\conda.exe') 
+;    );
+;end;
+;
+;
+;function NextButtonClick(CurPageID: Integer): Boolean;
+;var
+;  ResultCode: Integer;
+;begin
+;  case CurPageID of
+;    wpSelectComponents:
+;      begin
+;        
+;        if IsComponentSelected('miniconda') then
+;          idpAddFileSize('https://repo.continuum.io/miniconda/Miniconda3-latest-Windows-x86_64.exe', ExpandConstant('{tmp}\Miniconda3-latest-Windows-x86_64.exe'), 22743040);
+;        if IsComponentSelected('cppcompiler27') then
+;          idpAddFileSize('https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi', ExpandConstant('{tmp}\VCForPython27.msi'), 87891968);
+;        if IsComponentSelected('cppcompiler36') then
+;          idpAddFileSize('https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools&rel=15', ExpandConstant('{tmp}\vs_build_tool.exe'), 1281048);
+;        idpDownloadAfter(wpPreparing);
+;      end;
+;  end; 
+;  Result := True;
+;end;
+
 [Code]
-function IsCondaNotInstalled: boolean;
-
+procedure InitializeWizard;
+var
+  RichViewer: TRichEditViewer;
 begin
+  RichViewer := TRichEditViewer.Create(WizardForm);
+  RichViewer.Left := WizardForm.WelcomeLabel2.Left;
+  RichViewer.Top := WizardForm.WelcomeLabel2.Top;
+  RichViewer.Width := WizardForm.WelcomeLabel2.Width;
+  RichViewer.Height := WizardForm.WelcomeLabel2.Height;
+  RichViewer.Parent := WizardForm.WelcomeLabel2.Parent;
+  RichViewer.BorderStyle := bsNone;
+  RichViewer.TabStop := False;
+  RichViewer.ReadOnly := True;
+  WizardForm.WelcomeLabel2.Visible := False;
+
+  RichViewer.RTFText :=
+    '{\rtf1 Please check following reqirements are installed before continue:\line \line ' +
   
-  result := not (
-    FileExists('c:\Miniconda\Scripts\conda.exe') or 
-    FileExists('c:\Miniconda2\Scripts\conda.exe') or  
-    FileExists('c:\Miniconda3\Scripts\conda.exe') or
-    FileExists('c:\Anaconda\Scripts\conda.exe')  or  
-    FileExists('c:\Anaconda2\Scripts\conda.exe') or
-    FileExists('c:\Anaconda3\Scripts\conda.exe') or 
-    FileExists('{%HOMEPATH}\Miniconda\Scripts\conda.exe') or 
-    FileExists('{%HOMEPATH}\Miniconda2\Scripts\conda.exe') or 
-    FileExists('{%HOMEPATH}\Miniconda3\Scripts\conda.exe') or 
-    FileExists('{%HOMEPATH}\Anaconda\Scripts\conda.exe') or
-    FileExists('{%HOMEPATH}\Anaconda2\Scripts\conda.exe') or 
-    FileExists('{%HOMEPATH}\Anaconda3\Scripts\conda.exe') 
-    );
+    '{\b Conda} (with PATH added for cmd)  \line'+   
+    '{\b {\field{\*\fldinst{HYPERLINK "https://conda.io/miniconda.html" }}' + 
+    '{\fldrslt{}}}} \line \line' +
+
+    '{\b Microsoft Visual C++ Compiler for Python 2.7}\line'+   
+    '{\b {\field{\*\fldinst{HYPERLINK "https://www.microsoft.com/en-us/download/details.aspx?id=44266" }}' + 
+    '{\fldrslt{}}}} \line \line' +
+
+    '{\b Microsoft Visual C++ 14.0 Compiler} \line Build Tools for Visual Studio 2017\line  '+   
+    '{\b {\field{\*\fldinst{HYPERLINK "https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2017" }}' + 
+    '{\fldrslt{}}}} \line' +
+    '}'
+
+
+    ;
 end;
 
-procedure InitializeWizard();
-begin
-  if IsCondaNotInstalled then
-
-    idpAddFileSize('https://repo.continuum.io/miniconda/Miniconda3-latest-Windows-x86_64.exe', ExpandConstant('{tmp}\Miniconda3-latest-Windows-x86_64.exe'), 22743040);
-  idpAddFileSize('https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi', ExpandConstant('{tmp}\VCForPython27.msi'), 87891968);
-  idpDownloadAfter(wpReady);
-end;
 
 [Icons]
-Name: "{group}\Lisa"; Filename: "{cmd}"; WorkingDir: "{userdocs}"; Flags: runminimized; IconFilename: "{app}\LISA.ico"; IconIndex: 0; Parameters: "/C ""call activate lisa & python -m lisa"""
-Name: "{commondesktop}\Lisa"; Filename: "{cmd}"; WorkingDir: "{commondocs}"; Flags: runminimized; IconFilename: "{app}\LISA.ico"; IconIndex: 0; Parameters: "/C ""call activate lisa & python -m lisa"""
+Name: "{group}\Lisa"; Filename: "{cmd}"; WorkingDir: "{userdocs}"; Flags: runminimized; IconFilename: "{app}\LISA.ico"; IconIndex: 0; Parameters: "/C ""call activate lisa & python -m lisa36"""
+Name: "{commondesktop}\Lisa"; Filename: "{cmd}"; WorkingDir: "{commondocs}"; Flags: runminimized; IconFilename: "{app}\LISA.ico"; IconIndex: 0; Parameters: "/C ""call activate lisa & python -m lisa36"""
