@@ -14,8 +14,8 @@ import shutil
 import numpy as np
 from nose.plugins.attrib import attr
 
-import dicom
-dicom.debug(False)
+# import pydicom
+# pydicom.debug(False)
 
 #
 import io3d.datawriter as dwriter

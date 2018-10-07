@@ -5,7 +5,7 @@ import skimage.exposure as skexp
 from skimage.segmentation import mark_boundaries
 import os
 import glob
-import dicom
+import pydicom
 # import cv2
 # from skimage import measure
 import skimage.measure as skimea
@@ -167,7 +167,7 @@ def read_data(dcmdir, indices=None, wildcard='*.dcm', type=np.int16):
         ind = indices[i]
         onefile = dcmlist[ind]
         if wildcard == '*.dcm':
-            data = dicom.read_file(onefile)
+            data = pydicom.read_file(onefile)
             data2d = data.pixel_array
             try:
                 data2d = (np.float(data.RescaleSlope) * data2d) + np.float(data.RescaleIntercept)
