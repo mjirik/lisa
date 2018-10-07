@@ -810,8 +810,8 @@ class OrganSegmentationWindow(QMainWindow):
             # seg.data3d = qmisc.crop(oseg.data3d, oseg.crinfo)
             oseg.crop(tmpcrinfo)
 
-        self.setLabelText(self.text_dcm_data, self.getDcmInfo())
-        self.statusBar().showMessage('Ready')
+        # self.setLabelText(self.text_dcm_data, self.getDcmInfo())
+        self.statusBar().showMessage('Ready. Image cropped to ' + str(self.getDcmInfo()) )
 
     def maskRegion(self):
         if self.oseg.data3d is None:
