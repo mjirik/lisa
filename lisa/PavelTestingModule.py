@@ -38,7 +38,7 @@ def main1():
     ## Vratit 4 nejvetsi objekty - v debug modu.
     obj = 2
     print('>>> Nejvetsi objekty v matici (' + str(obj) + '):')
-    matrix2 = sg.getPriorityObjects(matrix, nObj = obj, seeds = None, debug = True)
+    matrix2 = sg.get_priority_objects(matrix, nObj = obj, seeds = None, debug = True)
 
     ## Vytvoreni seedu - uhlopricka "/".
     print('>>> Moje seeds:')
@@ -53,10 +53,10 @@ def main1():
 
     ## Uplatneni seedu na celou matici
     print('>>> Seeds na celou matici:')
-    matrix3 = sg.getPriorityObjects(matrix, nObj = obj, seeds = mySeeds, debug = True)
+    matrix3 = sg.get_priority_objects(matrix, nObj = obj, seeds = mySeeds, debug = True)
     print('>>> Seeds na matici po vraceni nejvetsich objektu:')
     ## Uplatneni seedu na matici po ziskani nejvetsich objektu
-    matrix4 = sg.getPriorityObjects(matrix2, nObj = obj, seeds = mySeeds, debug = True)
+    matrix4 = sg.get_priority_objects(matrix2, nObj = obj, seeds = mySeeds, debug = True)
 
 def main2():
 
