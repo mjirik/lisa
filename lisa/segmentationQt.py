@@ -14,17 +14,18 @@ import logging
 
 logger = logging.getLogger(__name__)
 import argparse
-from PyQt4.QtGui import QGridLayout, QLabel, QPushButton, QLineEdit
+from PyQt4.QtGui import QGridLayout, QLabel, QPushButton, QLineEdit, QComboBox
 from PyQt4 import QtGui
 import sys
 from . import virtual_resection
 
 
 class SegmentationWidget(QtGui.QWidget):
-    def __init__(self, oseg, lisa_window):
+    def __init__(self, oseg, lisa_window, use_ui_label_dropdown=True):
         super(SegmentationWidget, self).__init__()
         self.oseg = oseg
         self.lisa_window = lisa_window
+        self.use_ui_label_dropdown = use_ui_label_dropdown
         self.initUI()
 
     def initUI(self):
@@ -58,36 +59,65 @@ class SegmentationWidget(QtGui.QWidget):
         self.reinitLabels()
 
     def initLabels(self):
-        column = 1
-        row = 2
-        if self.groupA is None:
-            self.groupA = QtGui.QButtonGroup()
-        id = 0
+        if self.use_ui_label_dropdown:
+            self.ui_label_dropdown = QComboBox()
+            self.ui_label_dropdown.addItems(
+                list(self.oseg.slab.keys())
+            )
+            # self.label_combo_box.clicked.connect(self.configEvent)
+            self.ui_label_dropdown.activated[str].connect(self.action_select_label)
+            column = 1
+            row = 2
 
-        for key, value in self.oseg.slab.items():
-            id += 1
-            if key == "none":
-                continue
-            else:
-                btnLabel = QPushButton(key)
-                btnLabel.setCheckable(True)
-                btnLabel.clicked.connect(self.configEvent)
-                self.mainLayout.addWidget(btnLabel, row, column)
-                self.groupA.addButton(btnLabel)
-                self.groupA.setId(btnLabel, id)
-                column += 1
-                if column == 7:
-                    column = 1
-                    row += 1
+            self.mainLayout.addWidget(self.ui_label_dropdown, row, column)
+
+
+        else:
+            column = 1
+            row = 2
+            if self.groupA is None:
+                self.groupA = QtGui.QButtonGroup()
+            id = 0
+
+            for key, value in self.oseg.slab.items():
+                id += 1
+                if key == "none":
+                    continue
+                else:
+                    btnLabel = QPushButton(key)
+                    btnLabel.setCheckable(True)
+                    btnLabel.clicked.connect(self.configEvent)
+                    self.mainLayout.addWidget(btnLabel, row, column)
+                    self.groupA.addButton(btnLabel)
+                    self.groupA.setId(btnLabel, id)
+                    column += 1
+                    if column == 7:
+                        column = 1
+                        row += 1
 
     def reinitLabels(self):
-        for btn in self.groupA.buttons():
-            btn.deleteLater()
-            self.groupA.removeButton(btn)
+        if self.use_ui_label_dropdown:
+            self.mainLayout.removeWidget(self.ui_label_dropdown)
+            self.ui_label_dropdown.deleteLater()
+            self.ui_label_dropdown = None
+        else:
+            for btn in self.groupA.buttons():
+                btn.deleteLater()
+                self.groupA.removeButton(btn)
         self.initLabels()
 
+    def action_select_label(self, text):
+        selected_label = self.oseg.nlabels(text)
+        print("selected label", selected_label)
+        alt_seg_params = {
+            "output_label": selected_label,
+            'clean_seeds_after_update_parameters': True,
+        }
+        #alt_seg_params['output_label'] = selected_label
+        self.oseg.update_parameters(alt_seg_params)
 
     def configEvent(self):
+        logger.warning("Deprecated function configEvent. It will be removed in the future.")
         id = self.groupA.checkedId()
         selected_label = list(self.oseg.slab.keys())[id - 1]
         alt_seg_params = {

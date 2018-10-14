@@ -12,7 +12,7 @@ import scipy
 import scipy.ndimage
 import numpy as np
 
-import imtools.image_manipulation as imma
+import imma.image_manipulation as ima
 
 def segmentation_replacement(
         segmentation,
@@ -33,10 +33,10 @@ def segmentation_replacement(
     :param label_new:
     :return:
     """
-    segmentation_old = imma.select_labels(segmentation, labels=label, slab=slab)
-    segmentation[segmentation_old] = imma.get_nlabels(slab, background_label)
-    segmentation_new = imma.select_labels(segmentation_new, label_new)
-    segmentation[segmentation_new] = imma.get_nlabels(slab, label)
+    segmentation_old = ima.select_labels(segmentation, labels=label, slab=slab)
+    segmentation[segmentation_old] = ima.get_nlabels(slab, background_label)
+    segmentation_new = ima.select_labels(segmentation_new, label_new)
+    segmentation[segmentation_new] = ima.get_nlabels(slab, label)
     return segmentation
 
 
@@ -64,7 +64,7 @@ def segmentation_smoothing(segmentation, sigma_mm, labels=1, background_label=0,
     # print sigma
     # from PyQt4.QtCore import pyqtRemoveInputHook
     # pyqtRemoveInputHook()
-    segmentation_selection = imma.select_labels(segmentation, labels=labels, slab=slab)
+    segmentation_selection = ima.select_labels(segmentation, labels=labels, slab=slab)
     vol1 = np.sum(segmentation_selection)
     wvol = vol1 * volume_blowup
     logger.debug('unique segm ' + str(np.unique(segmentation)))

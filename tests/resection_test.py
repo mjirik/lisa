@@ -4,9 +4,12 @@
 import logging
 logger = logging.getLogger(__name__)
 import unittest
-
+import os.path as op
 from nose.plugins.attrib import attr
-# path_to_script = os.path.dirname(os.path.abspath(__file__))
+path_to_script = op.dirname(op.abspath(__file__))
+
+import sys
+sys.path.insert(0, op.abspath(op.join(path_to_script, "../../io3d")))
 import lisa.virtual_resection
 import numpy as np
 
@@ -112,6 +115,36 @@ class ResectionTest(unittest.TestCase):
         # import sed3
         # ed = sed3.sed3(datap['segmentation'])
         # ed.show()
+
+    def test_branch_labels_just_in_module(self):
+        import lisa.organ_segmentation
+        import io3d
+        # datap = io3d.datasets.generate_abdominal()
+        datap = io3d.datasets.generate_synthetic_liver(return_dataplus=True)
+        oseg = lisa.organ_segmentation.OrganSegmentation()
+        oseg.import_dataplus(datap)
+        bl = lisa.virtual_resection.branch_labels(oseg, "porta")
+
+        import sed3
+        ed = sed3.sed3(bl, contour=datap["segmentation"])
+        ed.show()
+
+        self.assertEqual(True, True)
+
+    def test_branch_labels_from_oseg(self):
+        import lisa.organ_segmentation
+        import io3d
+        # datap = io3d.datasets.generate_abdominal()
+        datap = io3d.datasets.generate_synthetic_liver(return_dataplus=True)
+        oseg = lisa.organ_segmentation.OrganSegmentation()
+        oseg.import_dataplus(datap)
+        oseg.branch_labels("porta")
+
+        import sed3
+        ed = sed3.sed3(oseg.segmentation)
+        ed.show()
+
+        self.assertEqual(True, True)
 
 if __name__ == "__main__":
     # logging.basicConfig(stream=sys.stderr)

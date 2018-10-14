@@ -71,7 +71,7 @@ from . import config
 from . import volumetry_evaluation
 from . import segmentation_general
 # import imtools.image_manipulation
-import imtools.image_manipulation as imma
+import imma.image_manipulation as ima
 
 # import audiosupport
 # import skimage
@@ -374,11 +374,11 @@ class OrganSegmentation():
             logger.debug('segmodelparams updated')
         if 'output_label' in params.keys():
             # logger.debug("output label " + str(params["output_label"]))
-            if type(params['output_label']) is str:
-                key = params["output_label"]
-                params["output_label"] = self.slab[key]
-            self.output_label = params['output_label']
-            logger.debug("'output_label' updated to " + str(self.slab[key]))
+            # if type(params['output_label']) is str:
+            #     key = params["output_label"]
+            #     params["output_label"] = self.slab[key]
+            self.output_label = self.nlabels(params['output_label'])
+            logger.debug("'output_label' updated to " + str(self.nlabels(self.output_label, return_mode="str")))
         if 'working_voxelsize_mm' in params.keys():
             self.input_wvx_size = copy.copy(params['working_voxelsize_mm'])
             self.working_voxelsize_mm = params['working_voxelsize_mm']
@@ -569,7 +569,7 @@ class OrganSegmentation():
         :param labels:
         :return:
         """
-        selected_segmentation = imma.select_labels(self.segmentation, labels=labels, slab=self.slab)
+        selected_segmentation = ima.select_labels(self.segmentation, labels=labels, slab=self.slab)
         return selected_segmentation
 
     def import_segmentation_from_file(self, filepath):
@@ -1255,10 +1255,10 @@ class OrganSegmentation():
         :return:
         """
 
-        return imma.get_nlabels(self.slab, label, label_meta, return_mode=return_mode)
+        return ima.get_nlabels(self.slab, label, label_meta, return_mode=return_mode)
 
     def add_missing_labels(self):
-        imma.add_missing_labels(self.segmentation, self.slab)
+        ima.add_missing_labels(self.segmentation, self.slab)
 
     def segmentation_relabel(self, from_label, to_label):
         """
@@ -1318,7 +1318,7 @@ class OrganSegmentation():
         params.update(inparams)
         # logger.debug("ogran_label ", organ_label)
         # target_segmentation = (self.segmentation == self.nlabels(organ_label)).astype(np.int8)
-        target_segmentation = imma.select_labels(
+        target_segmentation = ima.select_labels(
             self.segmentation, organ_label, self.slab
         )
         outputSegmentation = imsegmentation.vesselSegmentation(
@@ -1350,7 +1350,7 @@ class OrganSegmentation():
             fn_yaml=fn_yaml,
             fn_vtk=fn_vtk,
         )
-
+    
     def __vesselTree(self, binaryData3d, textLabel, fn_yaml=None, fn_vtk=None):
         import skelet3d
         from skelet3d import skeleton_analyser  # histology_analyser as skan
@@ -1411,11 +1411,11 @@ class OrganSegmentation():
 # skeletonizace
 #         self.__vesselTree(outputSegmentation, 'hepatic_veins')
 
-    def get_segmented_volume_size_mm3(self):
+    def get_segmented_volume_size_mm3(self, labels="liver"):
         """Compute segmented volume in mm3, based on subsampeled data."""
 
         voxelvolume_mm3 = np.prod(self.voxelsize_mm)
-        volume_mm3 = np.sum(self.segmentation > 0) * voxelvolume_mm3
+        volume_mm3 = np.sum(ima.select_labels(self.segmentation, labels, self.slab)) * voxelvolume_mm3
         return volume_mm3
 
     def get_standard_ouptut_filename(self, filetype=None, suffix=''):
@@ -1517,9 +1517,9 @@ class OrganSegmentation():
 
 
     def rotate(self, phi_deg, theta_deg=None, phi_axes=(1, 2), theta_axes=(0, 1), **kwargs):
-        self.data3d = imma.rotate(self.data3d, phi_deg, theta_deg)
-        self.segmentation = imma.rotate(self.segmentation, phi_deg, theta_deg)
-        self.seeds = imma.rotate(self.seeds, phi_deg, theta_deg)
+        self.data3d = ima.rotate(self.data3d, phi_deg, theta_deg)
+        self.segmentation = ima.rotate(self.segmentation, phi_deg, theta_deg)
+        self.seeds = ima.rotate(self.seeds, phi_deg, theta_deg)
 
 
     def random_rotate(self):
@@ -1528,7 +1528,7 @@ class OrganSegmentation():
         :return:
         """
         # TODO independent on voxlelsize (2016-techtest-rotate3d.ipynb)
-        phi_deg, theta_deg = imma.random_rotate_paramteres()
+        phi_deg, theta_deg = ima.random_rotate_paramteres()
         self.rotate(phi_deg, theta_deg)
         # old version
         # xi1 = np.random.rand()
@@ -1736,6 +1736,23 @@ class OrganSegmentation():
         # ed.show()
         self.segmentation[segm==1] = self.nlabels(output_label1)
         self.segmentation[segm==2] = self.nlabels(output_label2)
+
+    def branch_labels(self, vessel_label=None, write_to_oseg=True, new_label_str_format="{}{:03d}"):
+        """
+        Split vessel by branches and put it in segmentation and slab.
+
+        :param vessel_label: int or string label with vessel. Everything above zero is used if vessel_label is set None.
+        :param write_to_oseg: Store output into oseg.segmentation if True. The slab is also updated.
+        :param new_label_str_format: format of new slab
+        :return:
+        """
+        from . import virtual_resection
+        return virtual_resection.branch_labels(
+            self,
+            vessel_label=vessel_label,
+            write_to_oseg=write_to_oseg,
+            new_label_str_format=new_label_str_format
+        )
 
 
 def logger_init():  # pragma: no cover

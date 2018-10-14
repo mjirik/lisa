@@ -2,6 +2,8 @@
 
 ## Unreleased 
 
+* New feature - branch vessel
+* New select label dialog (require less space)
 * More descriptive status messages
 * Read/write DICOM overlay
 

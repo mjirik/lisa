@@ -223,6 +223,11 @@ class OrganSegmentationWindow(QMainWindow):
         segmentation_relabel_action.triggered.connect(self.action_segmentation_relabel)
         imageMenu.addAction(segmentation_relabel_action)
 
+        branch_label_action = QtGui.QAction(QtGui.QIcon('exit.png'), '&Branch labels', self)
+        branch_label_action.setStatusTip('Label vessel branches')
+        branch_label_action.triggered.connect(self.action_branch_labels)
+        imageMenu.addAction(branch_label_action)
+
         resize_to_mm_action = QtGui.QAction(QtGui.QIcon('exit.png'), "Resize to mm", self)
         resize_to_mm_action.setStatusTip('Resize data3d and segemntation to mm')
         resize_to_mm_action.triggered.connect(self.action_resize_mm)
@@ -1293,6 +1298,13 @@ class OrganSegmentationWindow(QMainWindow):
             self.statusBar().showMessage('Ready')
         else:
             self.statusBar().showMessage('No segmentation data!')
+
+    def action_branch_labels(self):
+        self.statusBar().showMessage('Performing branch label...')
+        nlabel, slabel = self.ui_select_label("Select label with vessel")
+        print("label", slabel)
+        self.oseg.branch_labels(vessel_label=slabel)
+        self.statusBar().showMessage('Ready. Vessel {} branches labeled. '.format(str(slabel)))
 
     def btnVirtualResectionPV(self):
         self._virtual_resection('PV', )

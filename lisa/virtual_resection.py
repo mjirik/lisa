@@ -35,7 +35,7 @@ import sed3
 # import show3
 from . import qmisc
 from . import data_manipulation
-import imtools.image_manipulation as imma
+import imma.image_manipulation as ima
 
 
 def resection(data, name=None, method='PV',
@@ -149,7 +149,7 @@ def split_vessel(datap, seeds, vessel_volume_threshold=0.95, dilatation_iteratio
     if method == "separate labels":
         input_label = np.max(datap["segmentation"][seeds == input_seeds_label2])
 
-    vessels = imma.select_labels(datap["segmentation"], input_label, slab=datap["slab"])
+    vessels = ima.select_labels(datap["segmentation"], input_label, slab=datap["slab"])
 
     # if type(input_label) is str:
     #     numeric_label = datap['slab'][input_label]
@@ -486,12 +486,12 @@ def split_organ_by_two_vessels(datap,
         seed_label2 = [seed_label2]
     # dist se tady počítá od nul jenom v jedničkách
     dist1 = scipy.ndimage.distance_transform_edt(
-        1 - imma.select_labels(seeds, seed_label1, slab),
+        1 - ima.select_labels(seeds, seed_label1, slab),
         # seeds != seed_label1,
         sampling=datap['voxelsize_mm']
     )
     dist2 = scipy.ndimage.distance_transform_edt(
-        1 - imma.select_labels(seeds, seed_label2, slab),
+        1 - ima.select_labels(seeds, seed_label2, slab),
         # seeds != seed_label2,
         sampling=datap['voxelsize_mm']
     )
@@ -513,7 +513,7 @@ def split_organ_by_two_vessels(datap,
     # import ipdb; ipdb.set_trace() # BREAKPOINT
 
     # segm = (dist1 < dist2) * (data['segmentation'] != data['slab']['none'])
-    target_organ_segmentation = imma.select_labels(segmentation, organ_label, slab)
+    target_organ_segmentation = ima.select_labels(segmentation, organ_label, slab)
     segm = ((target_organ_segmentation * ((dist1 / weight1) > (dist2 / weight2))).astype('int8') +
             target_organ_segmentation.astype('int8'))
 
@@ -608,6 +608,41 @@ def liver_spit_volume_mm3(segm, voxelsize_mm):
 def View(name):
     data = misc.obj_from_file("out", filetype='pickle')
     resection(data, name)
+
+
+def branch_labels(oseg, vessel_label=None, write_to_oseg=True, new_label_str_format="{}{:03d}"):
+    """
+    Split vessel by branches and put it in segmentation and slab.
+
+    :param oseg: OrganSegmentation object with segmentation, voxelsize_mm and slab
+    :param vessel_label: int or string label with vessel. Everything above zero is used if vessel_label is set None.
+    :param write_to_oseg: Store output into oseg.segmentation if True. The slab is also updated.
+    :param new_label_str_format: format of new slab
+    :return:
+    """
+    import skelet3d
+    if vessel_label is None:
+        vessel_volume = oseg.segmentation > 0
+    else:
+        vessel_volume = oseg.select_label(vessel_label)
+
+    print(np.unique(vessel_volume))
+    skel = skelet3d.skelet3d(vessel_volume)
+    skan = skelet3d.SkeletonAnalyser(skel, volume_data=vessel_volume)
+    skan.skeleton_analysis()
+    bl = skan.get_branch_label()
+    un = np.unique(bl)
+    if write_to_oseg:
+        for lb in un:
+            if lb != 0:
+                new_slabel = new_label_str_format.format(vessel_label, lb)
+                new_nlabel = oseg.nlabels(new_slabel)
+                oseg.segmentation[bl==lb] = new_nlabel
+
+    # ima.distance_segmentation(oseg.select_label(vessel_label))
+    return bl
+
+    pass
 
 
 if __name__ == "__main__":
