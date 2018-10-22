@@ -460,10 +460,10 @@ def split_tissue_on_bifurcation(labeled_branches,
                                 tissue_segmentation,
                                 ):
     """
-    Based on labeled vessel tree split surrounding tissue into two part.
+    Based on pre-labeled vessel tree split surrounding tissue into two part.
     The connected sub tree is computed and used internally.
 
-    :param labeled_branches: ndimage with labels of branches.
+    :param labeled_branches: ndimage with labeled volumetric vessel tree.
     :param trunk_label: int
     :param branch_label1: int
     :param branch_label2: int
