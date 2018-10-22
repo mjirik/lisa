@@ -18,6 +18,8 @@ import unittest
 
 # import imcut.dcmreaddata as dcmr
 
+from seededitorqt import QTSeedEditor
+
 class QTSeedEditorTest(unittest.TestCase):
     interactive_tests = False
 
@@ -29,11 +31,6 @@ class QTSeedEditorTest(unittest.TestCase):
         #pyed = sed3.sed3(self.data3d, contour = oseg.segmentation)
         #pyed.show()
 
-        try:
-            from imcut.seed_editor_qt import QTSeedEditor
-        except:
-            logger.warning("Deprecated of pyseg_base as submodule")
-            from seed_editor_qt import QTSeedEditor
         from PyQt4.QtGui import QApplication
         import numpy as np
         im3d = np.random.rand(15,15,15)
@@ -79,6 +76,24 @@ class QTSeedEditorTest(unittest.TestCase):
     #    self.assertGreater(volume,600000)
     #    self.assertLess(volume,850000)
 
+    def test_data_editor_tree(self):
+        """
+        Funkce provádí změnu vstupních dat - data3d
+        """
+        #pyed = sed3.sed3(self.data3d, contour = oseg.segmentation)
+        #pyed.show()
+
+        from PyQt4.QtGui import QApplication
+        import numpy as np
+        im3d = np.random.rand(15,15,15)
+        print("Select pixels for deletion (it will be setted to 0)")
+        #, QMainWindow
+        app = QApplication(sys.argv)
+        pyed = QTSeedEditor(im3d, mode='draw')
+        pyed.exec_()
+
+
+        deletemask = pyed.getSeeds()
 
 if __name__ == "__main__":
     unittest.main()

@@ -455,6 +455,54 @@ def split_organ_by_plane(data, seeds):
 
     return segm, dist1, dist2
 
+def split_tissue_on_bifurcation(labeled_branches,
+                                trunk_label, branch_label1, branch_label2,
+                                tissue_segmentation,
+                                ):
+    """
+    Based on labeled vessel tree split surrounding tissue into two part.
+    The connected sub tree is computed and used internally.
+
+    :param labeled_branches: ndimage with labels of branches.
+    :param trunk_label: int
+    :param branch_label1: int
+    :param branch_label2: int
+    :param tissue_segmentation: ndimage with bool type. Organ is True, the rest is False.
+    :return:
+    """
+    # bl = lisa.virtual_resection.branch_labels(oseg, "porta")
+
+    import imma.measure
+    import imma.image_manipulation
+    import imma.image_manipulation as ima
+
+    neighbors_list = imma.measure.neighbors_list(
+        labeled_branches,
+        None,
+        # [seglabel1, seglabel2, seglabel3],
+        exclude=[0])
+    #exclude=[imma.image_manipulation.get_nlabels(slab, ["liver"]), 0])
+    # ex
+    # print(neighbors_list)
+    # find whole branche
+
+    connected2 = imma.measure.get_connected_labels(neighbors_list, branch_label1, [trunk_label, branch_label2])
+    connected3 = imma.measure.get_connected_labels(neighbors_list, branch_label2, [trunk_label, branch_label1])
+
+    # seg = ima.select_labels(segmentation, organ_label, slab).astype(np.int8)
+    seg1 = ima.select_labels(labeled_branches, connected2).astype(np.int8)
+    seg2 = ima.select_labels(labeled_branches, connected3).astype(np.int8)
+    seg = seg1 + seg2 * 2
+    # seg[ima.select_labels(bl, connected2)] = 2
+    # seg[ima.select_labels(bl, connected3)] = 3
+
+    dseg = ima.distance_segmentation(seg)
+    # organseg = ima.select_labels(segmentation, organ_label, slab).astype(np.int8)
+    dseg[~tissue_segmentation.astype(np.bool)] = 0
+
+    return dseg
+
+
 def split_organ_by_two_vessels(datap,
                                seeds, organ_label=1,
                                seed_label1=1, seed_label2=2,
@@ -626,7 +674,7 @@ def branch_labels(oseg, vessel_label=None, write_to_oseg=True, new_label_str_for
     else:
         vessel_volume = oseg.select_label(vessel_label)
 
-    print(np.unique(vessel_volume))
+    # print(np.unique(vessel_volume))
     skel = skelet3d.skelet3d(vessel_volume)
     skan = skelet3d.SkeletonAnalyser(skel, volume_data=vessel_volume)
     skan.skeleton_analysis()
@@ -637,7 +685,7 @@ def branch_labels(oseg, vessel_label=None, write_to_oseg=True, new_label_str_for
             if lb != 0:
                 new_slabel = new_label_str_format.format(vessel_label, lb)
                 new_nlabel = oseg.nlabels(new_slabel)
-                oseg.segmentation[bl==lb] = new_nlabel
+                oseg.segmentation[bl == lb] = new_nlabel
 
     # ima.distance_segmentation(oseg.select_label(vessel_label))
     return bl
