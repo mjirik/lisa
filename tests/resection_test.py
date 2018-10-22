@@ -154,7 +154,7 @@ class ResectionTest(unittest.TestCase):
 
         self.assertEqual(True, True)
 
-    def test_branch_labels_with_gui_just_in_module_(self):
+    def test_branch_labels_with_gui_just_in_module(self):
         import lisa.organ_segmentation
         import io3d
         # datap = io3d.datasets.generate_abdominal()
