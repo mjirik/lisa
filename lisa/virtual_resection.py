@@ -457,7 +457,7 @@ def split_organ_by_plane(data, seeds):
 
 def split_tissue_on_bifurcation(labeled_branches,
                                 trunk_label, branch_label1, branch_label2,
-                                tissue_segmentation,
+                                tissue_segmentation, neighbors_list=None,
                                 ):
     """
     Based on pre-labeled vessel tree split surrounding tissue into two part.
@@ -476,11 +476,13 @@ def split_tissue_on_bifurcation(labeled_branches,
     import imma.image_manipulation
     import imma.image_manipulation as ima
 
-    neighbors_list = imma.measure.neighbors_list(
-        labeled_branches,
-        None,
-        # [seglabel1, seglabel2, seglabel3],
-        exclude=[0])
+    if neighbors_list is None:
+
+        neighbors_list = imma.measure.neighbors_list(
+            labeled_branches,
+            None,
+            # [seglabel1, seglabel2, seglabel3],
+            exclude=[0])
     #exclude=[imma.image_manipulation.get_nlabels(slab, ["liver"]), 0])
     # ex
     # print(neighbors_list)

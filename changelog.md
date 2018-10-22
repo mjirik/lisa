@@ -3,9 +3,11 @@
 ## Unreleased 
 
 * New feature - branch vessel
+* New feature - split tissue based on labeled vessels
 * New select label dialog (require less space)
 * More descriptive status messages
 * Read/write DICOM overlay
+* Cancel label selection
 
 ## 1.9.51 2018-07-21
 

@@ -223,15 +223,18 @@ class OrganSegmentationWindow(QMainWindow):
         segmentation_relabel_action.triggered.connect(self.action_segmentation_relabel)
         imageMenu.addAction(segmentation_relabel_action)
 
-        branch_label_action = QtGui.QAction(QtGui.QIcon('exit.png'), '&Branch labels', self)
+        branch_label_action = QtGui.QAction(QtGui.QIcon('exit.png'), '&Label branches', self)
         branch_label_action.setStatusTip('Label vessel branches')
-        branch_label_action.triggered.connect(self.action_branch_labels)
+        branch_label_action.triggered.connect(self.action_label_branches)
         imageMenu.addAction(branch_label_action)
 
         resize_to_mm_action = QtGui.QAction(QtGui.QIcon('exit.png'), "Resize to mm", self)
         resize_to_mm_action.setStatusTip('Resize data3d and segemntation to mm')
         resize_to_mm_action.triggered.connect(self.action_resize_mm)
         imageMenu.addAction(resize_to_mm_action)
+
+        self.__add_action_to_menu(imageMenu, "&Split tissue", self.action_split_on_bifurcation,
+                                  tip="Split tissue based on labeled vessel tree")
 
         ###### OPTION MENU ######
         optionMenu = menubar.addMenu('&Option')
@@ -280,6 +283,20 @@ class OrganSegmentationWindow(QMainWindow):
             configMenu.addAction(iAction)
         # combo.activated[str].connect(self.onAlternativeSegmentationParams)
         # grid.addWidget(combo, 4, 1)
+
+    def __add_action_to_menu(self, submenu, ampersand_name, triggered_connect, tip=''):
+        """
+
+        :param submenu:
+        :param ampersand_name: name with ampersand like '&Directory
+        :param triggered_connect:
+        :param tip:
+        :return:
+        """
+        this_action = QtGui.QAction(QtGui.QIcon('exit.png'), ampersand_name, self)
+        this_action.setStatusTip(tip)
+        this_action.triggered.connect(triggered_connect)
+        submenu.addAction(this_action)
 
     def _add_button(
             self,
@@ -970,6 +987,32 @@ class OrganSegmentationWindow(QMainWindow):
         self.segBody.enableSegType()
         self.statusBar().showMessage('Ready. Segmentation loaded from ' + str(seg_path))
 
+    def action_split_on_bifurcation(self):
+
+        self.statusBar().showMessage('Split on bifurcation...')
+        ed = sed3.sed3(self.segmentation)
+        ed.show()
+
+        seeds = ed.seeds
+        labeled_branches = self.oseg.segmentation
+
+        trunk_label = labeled_branches[seeds == 1][0]
+        branch_label1 = labeled_branches[seeds == 2][0]
+        branch_label2 = labeled_branches[seeds == 3][0]
+        organ_label = self.ui_select_label("Organ to split")
+        split_label1 = self.oseg.nlabels(organ_label, return_mode="str") + "1"
+        split_label1 = self.oseg.nlabels(split_label1)
+        split_label2 = self.oseg.nlabels(organ_label, return_mode="str") + "2"
+        split_label2 = self.oseg.nlabels(split_label2)
+
+        split_label = self.ui_select_label("Label for new split")
+
+        self.oseg.split_tissue_on_bifurcation(
+            trunk_label, branch_label1, branch_label2, organ_label,
+            split_label1=split_label1,
+            split_label2=split_label2
+        )
+
     def __evaluation_to_text(self, evaluation):
         overall_score = evaluation['sliver_overall_pts']
         # \
@@ -996,6 +1039,8 @@ class OrganSegmentationWindow(QMainWindow):
                                  list(self.oseg.slab.keys()),
                                  editable=True)
 
+        if not ok:
+            ValueError("Label selection canceled")
         numlab = self.oseg.nlabels(str(strlab))
         return numlab, str(strlab)
 
@@ -1299,7 +1344,7 @@ class OrganSegmentationWindow(QMainWindow):
         else:
             self.statusBar().showMessage('No segmentation data!')
 
-    def action_branch_labels(self):
+    def action_label_branches(self):
         self.statusBar().showMessage('Performing branch label...')
         nlabel, slabel = self.ui_select_label("Select label with vessel")
         print("label", slabel)

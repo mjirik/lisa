@@ -74,6 +74,7 @@ from . import volumetry_evaluation
 from . import segmentation_general
 # import imtools.image_manipulation
 import imma.image_manipulation as ima
+from . import virtual_resection
 
 # import audiosupport
 # import skimage
@@ -1480,6 +1481,16 @@ class OrganSegmentation():
 
     def create_lisa_data_dir_tree(self):
         lisa_data.create_lisa_data_dir_tree(self)
+
+    def split_tissue_on_bifurcation(self, trunk_label, branch_label1, branch_label2, organ_label,
+                                    split_label1, split_label2
+                                    ):
+        split = virtual_resection.split_tissue_on_bifurcation(
+            self.segmentation, trunk_label, branch_label1, branch_label2,
+            organ_label=self.select_label(organ_label)
+        )
+        self.segmentation[split == 1] = self.nlabels(split_label1)
+        self.segmentation[split == 2] = self.nlabels(split_label2)
 
     # old version
     # def rotate(self, angle, axes):
