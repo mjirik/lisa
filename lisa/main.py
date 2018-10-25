@@ -13,6 +13,14 @@
 import logging
 
 logger = logging.getLogger(__name__)
+import os.path
+import sys
+path_to_script = os.path.dirname(os.path.abspath(__file__))
+pth = os.path.join(path_to_script, "../../seededitorqt/")
+sys.path.insert(0, pth)
+pth = os.path.join(path_to_script, "../../imtools/")
+sys.path.insert(0, pth)
+
 import argparse
 
 def lisa_main():

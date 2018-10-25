@@ -200,6 +200,45 @@ class ResectionTest(unittest.TestCase):
         self.assertGreater(np.sum(organ_split == 2), 1000, "At least some object expected")
 
 
+    def test_branch_labels_organ_segmentation(self):
+        import lisa.organ_segmentation
+        import io3d
+        # datap = io3d.datasets.generate_abdominal()
+        datap = io3d.datasets.generate_synthetic_liver(return_dataplus=True)
+        slab = datap["slab"]
+        oseg = lisa.organ_segmentation.OrganSegmentation()
+        oseg.import_dataplus(datap)
+        oseg.branch_labels("porta")
+        labeled_branches = oseg.segmentation
+        seeds = np.zeros_like(oseg.data3d, dtype=np.int)
+        seeds[40, 125, 166] = 1
+        seeds[40, 143, 130] = 2
+        seeds[40, 125, 115] = 3
+
+        seglabel1 = labeled_branches[seeds == 1][0]
+        seglabel2 = labeled_branches[seeds == 2][0]
+        seglabel3 = labeled_branches[seeds == 3][0]
+        oseg.split_tissue_on_bifurcation("liver",
+                                         seglabel1, seglabel2, seglabel3,
+                                         split_label1="split1",
+                                         split_label2="split2"
+                                         )
+        # labeled_branches = lisa.virtual_resection.branch_labels(oseg, "porta")
+        data3d = datap["data3d"]
+        segmentation = datap["segmentation"]
+        organ_label = "liver"
+
+
+
+        # import sed3
+        # # ed = sed3.sed3(labeled_branches, contour=organ_split)
+        # ed = sed3.sed3(organ_split)
+        # ed.show()
+
+        self.assertGreater(np.sum(oseg.select_label("split1")), 1000)
+        self.assertGreater(np.sum(oseg.select_label("split2")), 1000)
+
+
 if __name__ == "__main__":
     # logging.basicConfig(stream=sys.stderr)
     logger.setLevel(logging.DEBUG)

@@ -50,6 +50,11 @@ class LisaGUITest(unittest.TestCase):
         """
         self.assertTrue(self.oseg_w.quit(event=None))
 
+    def test_split(self):
+        self.oseg_w.oseg.load_data(r"C:\Users\miros\lisa_data\P09_cropped_portal_tree_labeled.pklz")
+        self.app.exec_()
+        # self.oseg_w.loadDataFile()
+
 
 if __name__ == "__main__":
     unittest.main()

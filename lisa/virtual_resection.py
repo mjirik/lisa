@@ -458,6 +458,7 @@ def split_organ_by_plane(data, seeds):
 def split_tissue_on_bifurcation(labeled_branches,
                                 trunk_label, branch_label1, branch_label2,
                                 tissue_segmentation, neighbors_list=None,
+                                ignore_labels=None
                                 ):
     """
     Based on pre-labeled vessel tree split surrounding tissue into two part.
@@ -476,25 +477,37 @@ def split_tissue_on_bifurcation(labeled_branches,
     import imma.image_manipulation
     import imma.image_manipulation as ima
 
-    if neighbors_list is None:
+    if ignore_labels is None:
+        ignore_labels = []
 
+    if neighbors_list is None:
+        exclude = [0]
+        exclude.extend(ignore_labels)
         neighbors_list = imma.measure.neighbors_list(
             labeled_branches,
             None,
             # [seglabel1, seglabel2, seglabel3],
-            exclude=[0])
+            exclude=exclude)
     #exclude=[imma.image_manipulation.get_nlabels(slab, ["liver"]), 0])
     # ex
     # print(neighbors_list)
     # find whole branche
 
-    connected2 = imma.measure.get_connected_labels(neighbors_list, branch_label1, [trunk_label, branch_label2])
-    connected3 = imma.measure.get_connected_labels(neighbors_list, branch_label2, [trunk_label, branch_label1])
+    ignore_labels1 = [0, trunk_label, branch_label2]
+    ignore_labels1.extend(ignore_labels)
+    ignore_labels2 = [0, trunk_label, branch_label1]
+    ignore_labels2.extend(ignore_labels)
+    connected2 = imma.measure.get_connected_labels(
+        neighbors_list, branch_label1, ignore_labels1)
+    connected3 = imma.measure.get_connected_labels(
+        neighbors_list, branch_label2, ignore_labels2)
 
     # seg = ima.select_labels(segmentation, organ_label, slab).astype(np.int8)
     seg1 = ima.select_labels(labeled_branches, connected2).astype(np.int8)
     seg2 = ima.select_labels(labeled_branches, connected3).astype(np.int8)
     seg = seg1 + seg2 * 2
+    if np.max(seg) > 2:
+        ValueError("Missing one vessel")
     # seg[ima.select_labels(bl, connected2)] = 2
     # seg[ima.select_labels(bl, connected3)] = 3
 

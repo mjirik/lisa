@@ -75,6 +75,7 @@ def find_logo():
 
     pass
 
+
 # GUI
 class OrganSegmentationWindow(QMainWindow):
 
@@ -94,7 +95,6 @@ class OrganSegmentationWindow(QMainWindow):
         #         self.setLabelText(self.text_dcm_data, self.getDcmInfo())
 
         self.statusBar().showMessage('Ready')
-
 
     def _initMenu(self):
         menubar = self.menuBar()
@@ -424,6 +424,7 @@ class OrganSegmentationWindow(QMainWindow):
         self.btnSegmentation.setDisabled(True)
         self.btnCompare.setDisabled(True)
         self.changeWidget('Main')
+        self.unlockAllButtons()
         self.show()
 
     def gui_update(self):
@@ -990,28 +991,25 @@ class OrganSegmentationWindow(QMainWindow):
     def action_split_on_bifurcation(self):
 
         self.statusBar().showMessage('Split on bifurcation...')
-        ed = sed3.sed3(self.segmentation)
-        ed.show()
+        ed = QTSeedEditor(img=self.oseg.data3d, contours=self.oseg.segmentation,
+                          voxelSize=self.oseg.voxelsize_mm)
+        ed.exec_()
+        seeds = ed.getSeeds()
+        # ed.see
+        # ed = sed3.sed3(self.oseg.segmentation)
+        # ed.show()
 
         seeds = ed.seeds
         labeled_branches = self.oseg.segmentation
 
-        trunk_label = labeled_branches[seeds == 1][0]
-        branch_label1 = labeled_branches[seeds == 2][0]
-        branch_label2 = labeled_branches[seeds == 3][0]
-        organ_label = self.ui_select_label("Organ to split")
-        split_label1 = self.oseg.nlabels(organ_label, return_mode="str") + "1"
-        split_label1 = self.oseg.nlabels(split_label1)
-        split_label2 = self.oseg.nlabels(organ_label, return_mode="str") + "2"
-        split_label2 = self.oseg.nlabels(split_label2)
+        # trunk_label = labeled_branches[seeds == 1][0]
+        # branch_label1 = labeled_branches[seeds == 2][0]
+        # branch_label2 = labeled_branches[seeds == 3][0]
+        organ_label, textl = self.ui_select_label("Organ to split")
 
-        split_label = self.ui_select_label("Label for new split")
+        # split_label, textl = self.ui_select_label("Label for new split")
 
-        self.oseg.split_tissue_on_bifurcation(
-            trunk_label, branch_label1, branch_label2, organ_label,
-            split_label1=split_label1,
-            split_label2=split_label2
-        )
+        self.oseg.split_tissue_on_bifurcation(organ_label, seeds=seeds)  # trunk_label, branch_label1, branch_label2)
 
     def __evaluation_to_text(self, evaluation):
         overall_score = evaluation['sliver_overall_pts']

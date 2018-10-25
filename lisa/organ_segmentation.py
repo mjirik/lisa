@@ -1322,6 +1322,7 @@ class OrganSegmentation():
         )
         outputSegmentation = imsegmentation.vesselSegmentation(
             self.data3d,
+            voxelsize_mm=self.voxelsize_mm,
             # target_segmentation,
             segmentation=self.segmentation,
             # organ_label=organ_label,
@@ -1482,13 +1483,47 @@ class OrganSegmentation():
     def create_lisa_data_dir_tree(self):
         lisa_data.create_lisa_data_dir_tree(self)
 
-    def split_tissue_on_bifurcation(self, trunk_label, branch_label1, branch_label2, organ_label,
-                                    split_label1, split_label2
-                                    ):
+    def split_tissue_on_bifurcation(self, organ_label, trunk_label=None, branch_label1=None, branch_label2=None,
+                                    seeds=None, split_label1=None, split_label2=None):
+        """
+
+        :param organ_label:
+        :param trunk_label:
+        :param branch_label1:
+        :param branch_label2:
+        :param seeds:
+        :param split_label1:
+        :param split_label2:
+        :return:
+        """
+        try:
+            if trunk_label is None:
+                trunk_label = self.segmentation[seeds == 1][0]
+            if branch_label1 is None:
+                branch_label1 = self.segmentation[seeds == 2][0]
+            if branch_label2 is None:
+                branch_label2 = self.segmentation[seeds == 3][0]
+        except IndexError:
+            ValueError("Trunk and branches labels should be defined or seeds with values 1,2,3 are expected.")
+
+
+        trunk_label = self.nlabels(trunk_label)
+        branch_label1 = self.nlabels(branch_label1)
+        branch_label2 = self.nlabels(branch_label2)
         split = virtual_resection.split_tissue_on_bifurcation(
-            self.segmentation, trunk_label, branch_label1, branch_label2,
-            organ_label=self.select_label(organ_label)
+            self.segmentation,
+            trunk_label,
+            branch_label1,
+            branch_label2,
+            tissue_segmentation=self.select_label(organ_label),
+            ignore_labels=[self.nlabels(organ_label)]
         )
+        if split_label1 is None:
+            split_label1 = self.nlabels(organ_label, return_mode="str") + "1"
+            # split_label1 = self.nlabels(split_label1)
+        if split_label2 is None:
+            split_label2 = self.nlabels(organ_label, return_mode="str") + "2"
+            # split_label2 = self.nlabels(split_label2)
         self.segmentation[split == 1] = self.nlabels(split_label1)
         self.segmentation[split == 2] = self.nlabels(split_label2)
 
