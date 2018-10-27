@@ -185,13 +185,13 @@ class ResectionTest(unittest.TestCase):
         organseg = ima.select_labels(segmentation, organ_label, slab)
 
         organ_split = lisa.virtual_resection.split_tissue_on_bifurcation(
-            labeled_branches, seglabel1, seglabel2, seglabel3, organseg
+            labeled_branches, seglabel1, [seglabel2, seglabel3], organseg
         )
 
-        # import sed3
-        # # ed = sed3.sed3(labeled_branches, contour=organ_split)
-        # ed = sed3.sed3(organ_split)
-        # ed.show()
+        import sed3
+        # ed = sed3.sed3(labeled_branches, contour=organ_split)
+        ed = sed3.sed3(organ_split)
+        ed.show()
 
         self.assertTrue(np.array_equal(np.unique(organ_split), [0, 1, 2]))
 

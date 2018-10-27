@@ -456,9 +456,10 @@ def split_organ_by_plane(data, seeds):
     return segm, dist1, dist2
 
 def split_tissue_on_bifurcation(labeled_branches,
-                                trunk_label, branch_label1, branch_label2,
+                                trunk_label, branch_labels,
                                 tissue_segmentation, neighbors_list=None,
-                                ignore_labels=None
+                                ignore_labels=None,
+                                ignore_trunk=True,
                                 ):
     """
     Based on pre-labeled vessel tree split surrounding tissue into two part.
@@ -466,8 +467,7 @@ def split_tissue_on_bifurcation(labeled_branches,
 
     :param labeled_branches: ndimage with labeled volumetric vessel tree.
     :param trunk_label: int
-    :param branch_label1: int
-    :param branch_label2: int
+    :param branch_labels: list of ints
     :param tissue_segmentation: ndimage with bool type. Organ is True, the rest is False.
     :return:
     """
@@ -479,6 +479,10 @@ def split_tissue_on_bifurcation(labeled_branches,
 
     if ignore_labels is None:
         ignore_labels = []
+
+    ignore_labels = list(ignore_labels)
+    if ignore_trunk:
+        ignore_labels.append(trunk_label)
 
     if neighbors_list is None:
         exclude = [0]
@@ -492,24 +496,42 @@ def split_tissue_on_bifurcation(labeled_branches,
     # ex
     # print(neighbors_list)
     # find whole branche
+    segmentations = [None] * len(branch_labels)
 
-    ignore_labels1 = [0, trunk_label, branch_label2]
-    ignore_labels1.extend(ignore_labels)
-    ignore_labels2 = [0, trunk_label, branch_label1]
-    ignore_labels2.extend(ignore_labels)
-    connected2 = imma.measure.get_connected_labels(
-        neighbors_list, branch_label1, ignore_labels1)
-    connected3 = imma.measure.get_connected_labels(
-        neighbors_list, branch_label2, ignore_labels2)
+    for i, branch_label in enumerate(branch_labels):
+        import copy
 
-    # seg = ima.select_labels(segmentation, organ_label, slab).astype(np.int8)
-    seg1 = ima.select_labels(labeled_branches, connected2).astype(np.int8)
-    seg2 = ima.select_labels(labeled_branches, connected3).astype(np.int8)
-    seg = seg1 + seg2 * 2
-    if np.max(seg) > 2:
+        ignore_other_branches = copy.copy(branch_labels)
+        ignore_other_branches.pop(i)
+        ignore_labels_i = [0]
+        ignore_labels_i.extend(ignore_other_branches)
+        ignore_labels_i.extend(ignore_labels)
+        connected_i = imma.measure.get_connected_labels(
+            neighbors_list, branch_label, ignore_labels_i)
+        segmentations[i] = ima.select_labels(labeled_branches, connected_i).astype(np.int8)
+
+    if np.max(np.sum(segmentations, 0)) > 1:
         ValueError("Missing one vessel")
-    # seg[ima.select_labels(bl, connected2)] = 2
-    # seg[ima.select_labels(bl, connected3)] = 3
+
+    for i, branch_label in enumerate(branch_labels):
+        segmentations[i] = segmentations[i] * (i + 1)
+    seg = np.sum(segmentations, 0)
+
+    # ignore_labels1 = [0, trunk_label, branch_label2]
+    # ignore_labels1.extend(ignore_labels)
+    # ignore_labels2 = [0, trunk_label, branch_label]
+    # ignore_labels2.extend(ignore_labels)
+    # connected2 = imma.measure.get_connected_labels(
+    #     neighbors_list, branch_label, ignore_labels1)
+    # connected3 = imma.measure.get_connected_labels(
+    #     neighbors_list, branch_label2, ignore_labels2)
+    #
+    # # seg = ima.select_labels(segmentation, organ_label, slab).astype(np.int8)
+    # seg1 = ima.select_labels(labeled_branches, connected2).astype(np.int8)
+    # seg2 = ima.select_labels(labeled_branches, connected3).astype(np.int8)
+    # seg = seg1 + seg2 * 2
+    # if np.max(seg) > 2:
+    #     ValueError("Missing one vessel")
 
     dseg = ima.distance_segmentation(seg)
     # organseg = ima.select_labels(segmentation, organ_label, slab).astype(np.int8)
