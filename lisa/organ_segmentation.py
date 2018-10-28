@@ -74,6 +74,7 @@ from . import volumetry_evaluation
 from . import segmentation_general
 # import imtools.image_manipulation
 import imma.image_manipulation as ima
+import imma.labeled
 from . import virtual_resection
 
 # import audiosupport
@@ -1483,8 +1484,19 @@ class OrganSegmentation():
     def create_lisa_data_dir_tree(self):
         lisa_data.create_lisa_data_dir_tree(self)
 
-    def split_tissue_on_bifurcation(self, organ_label, trunk_label=None, branch_label1=None, branch_label2=None,
-                                    seeds=None, split_label1=None, split_label2=None):
+    def split_tissue_on_bifurcation_recursive(self, organ_label, seeds):
+        un_labels_dict = imma.labeled.unique_labels_by_seeds(self.segmentation, seeds)
+        # ještě mi chybí vědět, kdo je potomkem koho
+        split_labels = [[organ_label]]
+        for i in range(len(un_labels_dict) - 1):
+            for j in range(len(un_labels_dict[i])):
+                self.split_tissue_on_bifurcation(split_labels[i][j], un_labels_dict[i][j], branch_labels=un_labels_dict[i + 1]) # tady něco dodělat
+            pass
+
+
+
+
+    def split_tissue_on_bifurcation(self, organ_label, trunk_label, branch_labels, split_labels=None):
         """
 
         :param organ_label:
@@ -1496,36 +1508,47 @@ class OrganSegmentation():
         :param split_label2:
         :return:
         """
-        try:
-            if trunk_label is None:
-                trunk_label = self.segmentation[seeds == 1][0]
-            if branch_label1 is None:
-                branch_label1 = self.segmentation[seeds == 2][0]
-            if branch_label2 is None:
-                branch_label2 = self.segmentation[seeds == 3][0]
-        except IndexError:
-            ValueError("Trunk and branches labels should be defined or seeds with values 1,2,3 are expected.")
+        # try:
+        #     if trunk_label is None:
+        #         trunk_label = self.segmentation[seeds == 1][0]
+        #     if branch_labels is None:
+        #         branch
+        #         branch_label1 = self.segmentation[seeds == 2][0]
+        #     if branch_label2 is None:
+        #         branch_label2 = self.segmentation[seeds == 3][0]
+        # except IndexError:
+        #     ValueError("Trunk and branches labels should be defined or seeds with values 1,2,3 are expected.")
 
 
         trunk_label = self.nlabels(trunk_label)
-        branch_label1 = self.nlabels(branch_label1)
-        branch_label2 = self.nlabels(branch_label2)
-        split = virtual_resection.split_tissue_on_bifurcation(
+        branch_labels = self.nlabels(branch_labels)
+        split, connected = virtual_resection.split_tissue_on_bifurcation(
             self.segmentation,
             trunk_label,
-            branch_label1,
-            branch_label2,
+            branch_labels=branch_labels,
             tissue_segmentation=self.select_label(organ_label),
             ignore_labels=[self.nlabels(organ_label)]
         )
-        if split_label1 is None:
-            split_label1 = self.nlabels(organ_label, return_mode="str") + "1"
-            # split_label1 = self.nlabels(split_label1)
-        if split_label2 is None:
-            split_label2 = self.nlabels(organ_label, return_mode="str") + "2"
-            # split_label2 = self.nlabels(split_label2)
-        self.segmentation[split == 1] = self.nlabels(split_label1)
-        self.segmentation[split == 2] = self.nlabels(split_label2)
+
+        if split_labels is None:
+            split_labels = [None] * len(branch_labels)
+            for i in range(len(branch_labels)):
+                split_labels[i] = self.nlabels(organ_label, return_mode="str") + str(i + 1)
+
+
+
+        # if split_label1 is None:
+        #     split_label1 = self.nlabels(organ_label, return_mode="str") + "1"
+        #     # split_label1 = self.nlabels(split_label1)
+        # if split_label2 is None:
+        #     split_label2 = self.nlabels(organ_label, return_mode="str") + "2"
+        #     # split_label2 = self.nlabels(split_label2)
+        for i in range(len(split_labels)):
+            self.segmentation[split == (i + 1)] = self.nlabels(split_labels[i])
+        # self.segmentation[split == 1] = self.nlabels(split_label1)
+        # self.segmentation[split == 2] = self.nlabels(split_label2)
+
+        return split_labels, connected
 
     # old version
     # def rotate(self, angle, axes):

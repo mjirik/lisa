@@ -455,6 +455,7 @@ def split_organ_by_plane(data, seeds):
 
     return segm, dist1, dist2
 
+
 def split_tissue_on_bifurcation(labeled_branches,
                                 trunk_label, branch_labels,
                                 tissue_segmentation, neighbors_list=None,
@@ -469,6 +470,8 @@ def split_tissue_on_bifurcation(labeled_branches,
     :param trunk_label: int
     :param branch_labels: list of ints
     :param tissue_segmentation: ndimage with bool type. Organ is True, the rest is False.
+    :param ignore_trunk: True or False
+    :param ignore_labels: list of labels which will be ignored
     :return:
     """
     # bl = lisa.virtual_resection.branch_labels(oseg, "porta")
@@ -497,6 +500,7 @@ def split_tissue_on_bifurcation(labeled_branches,
     # print(neighbors_list)
     # find whole branche
     segmentations = [None] * len(branch_labels)
+    connected = [None] * len(branch_labels)
 
     for i, branch_label in enumerate(branch_labels):
         import copy
@@ -509,6 +513,7 @@ def split_tissue_on_bifurcation(labeled_branches,
         connected_i = imma.measure.get_connected_labels(
             neighbors_list, branch_label, ignore_labels_i)
         segmentations[i] = ima.select_labels(labeled_branches, connected_i).astype(np.int8)
+        connected[i] = connected_i
 
     if np.max(np.sum(segmentations, 0)) > 1:
         ValueError("Missing one vessel")
@@ -537,7 +542,7 @@ def split_tissue_on_bifurcation(labeled_branches,
     # organseg = ima.select_labels(segmentation, organ_label, slab).astype(np.int8)
     dseg[~tissue_segmentation.astype(np.bool)] = 0
 
-    return dseg
+    return dseg, connected
 
 
 def split_organ_by_two_vessels(datap,

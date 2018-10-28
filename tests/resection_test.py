@@ -184,7 +184,7 @@ class ResectionTest(unittest.TestCase):
         # ed.show()
         organseg = ima.select_labels(segmentation, organ_label, slab)
 
-        organ_split = lisa.virtual_resection.split_tissue_on_bifurcation(
+        organ_split, connected = lisa.virtual_resection.split_tissue_on_bifurcation(
             labeled_branches, seglabel1, [seglabel2, seglabel3], organseg
         )
 
@@ -218,10 +218,10 @@ class ResectionTest(unittest.TestCase):
         seglabel1 = labeled_branches[seeds == 1][0]
         seglabel2 = labeled_branches[seeds == 2][0]
         seglabel3 = labeled_branches[seeds == 3][0]
-        oseg.split_tissue_on_bifurcation("liver",
-                                         seglabel1, seglabel2, seglabel3,
-                                         split_label1="split1",
-                                         split_label2="split2"
+        split_labels_out, connected = oseg.split_tissue_on_bifurcation("liver",
+
+                                         seglabel1, [seglabel2, seglabel3],
+                                         split_labels=["split1", "split2"]
                                          )
         # labeled_branches = lisa.virtual_resection.branch_labels(oseg, "porta")
         data3d = datap["data3d"]
