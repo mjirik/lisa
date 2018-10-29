@@ -1010,10 +1010,10 @@ class OrganSegmentationWindow(QMainWindow):
         # split_label, textl = self.ui_select_label("Label for new split")
 
         un = np.unique(seeds)
-        import imma.labels
-        unlab = imma.labels.unique_labels_by_seeds(self.oseg.segmentation, seeds)
+        import imma.labeled
+        unlab = imma.labeled.unique_labels_by_seeds(self.oseg.segmentation, seeds)
 
-        self.oseg.split_tissue_on_bifurcation(organ_label, trunk_label=unlab[0][0], branch_labels=unlab[1])  # trunk_label, branch_label1, branch_label2)
+        self.oseg.split_tissue_with_labeled_volumetric_vessel_tree(organ_label, trunk_label=unlab[1][0], branch_labels=unlab[2])  # trunk_label, branch_label1, branch_label2)
 
     def __evaluation_to_text(self, evaluation):
         overall_score = evaluation['sliver_overall_pts']

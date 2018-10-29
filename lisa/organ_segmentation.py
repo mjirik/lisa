@@ -1484,20 +1484,35 @@ class OrganSegmentation():
     def create_lisa_data_dir_tree(self):
         lisa_data.create_lisa_data_dir_tree(self)
 
-    def split_tissue_on_bifurcation_recursive(self, organ_label, seeds):
+    def split_tissue_recusively_with_labeled_volumetric_vessel_tree(self, organ_label, seeds):
+        """
+
+        :param organ_label: label of organ to split
+        :param seeds: ndarray, 1 is trunk, 2 is first level branches, 3 is second level branches ...
+        :return:
+        """
         un_labels_dict = imma.labeled.unique_labels_by_seeds(self.segmentation, seeds)
         # ještě mi chybí vědět, kdo je potomkem koho
-        split_labels = [[organ_label]]
-        for i in range(len(un_labels_dict) - 1):
-            for j in range(len(un_labels_dict[i])):
-                split_labels_ij, connected_ij = self.split_tissue_on_bifurcation(split_labels[i][j], un_labels_dict[i][j], branch_labels=un_labels_dict[i + 1]) # tady něco dodělat
+        # (tissue_to_split, trunk, branches
+        split_parameters = {1: [(organ_label, un_labels_dict[1][0], un_labels_dict[2])]}
+        for i_seed in range(1, len(un_labels_dict)):
+            next_i_level_params = [None] * len(un_labels_dict[i_seed])
+            for j_label in range(len(un_labels_dict[i_seed])):
+                branch_labels_ij = split_parameters[i_seed][j_label][2]
+                split_labels_ij, connected_ij = self.split_tissue_with_labeled_volumetric_vessel_tree(
+                    organ_label=split_parameters[i_seed][j_label][0],
+                    trunk_label=split_parameters[i_seed][j_label][1],
+                    branch_labels=split_parameters[i_seed][j_label][2])
 
-            pass
+                next_i_level_params[j_label] = list(zip(split_labels_ij, branch_labels_ij, connected_ij))
+            # prepare data for next level
+            if (i_seed + 2) in un_labels_dict:
+                next_i_level_params
+
+        return None, None
 
 
-
-
-    def split_tissue_on_bifurcation(self, organ_label, trunk_label, branch_labels, split_labels=None):
+    def split_tissue_with_labeled_volumetric_vessel_tree(self, organ_label, trunk_label, branch_labels, split_labels=None):
         """
 
         :param organ_label:
