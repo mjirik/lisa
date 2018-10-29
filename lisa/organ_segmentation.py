@@ -75,6 +75,7 @@ from . import segmentation_general
 # import imtools.image_manipulation
 import imma.image_manipulation as ima
 import imma.labeled
+import imma.segmentation_labels as imsl
 from . import virtual_resection
 
 # import audiosupport
@@ -567,6 +568,9 @@ class OrganSegmentation():
             volume_blowup=self.volume_blowup,
         )
         # import scipy.ndimage
+
+    def minimize_slab(self):
+        imsl.minimize_slab(self.slab, self.segmentation)
 
     def select_label(self, labels):
         """

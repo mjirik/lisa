@@ -236,6 +236,9 @@ class OrganSegmentationWindow(QMainWindow):
         self.__add_action_to_menu(imageMenu, "&Split tissue", self.action_split_on_bifurcation,
                                   tip="Split tissue based on labeled vessel tree")
 
+        self.__add_action_to_menu(imageMenu, "&Minimize slab", self.oseg.minimize_slab,
+                                  tip="Remove unused or redundant labels from segmentation labeling list (slab)")
+
         ###### OPTION MENU ######
         optionMenu = menubar.addMenu('&Option')
         
@@ -990,9 +993,9 @@ class OrganSegmentationWindow(QMainWindow):
 
     def action_split_on_bifurcation(self):
 
-        self.statusBar().showMessage('Split on bifurcation...')
+        self.statusBar().showMessage('Split vessel tree...')
         ed = QTSeedEditor(img=self.oseg.data3d, contours=self.oseg.segmentation,
-                          voxelSize=self.oseg.voxelsize_mm)
+                          voxelSize=self.oseg.voxelsize_mm, init_brush_index=0)
         ed.exec_()
         seeds = ed.getSeeds()
         # ed.see
@@ -1014,6 +1017,7 @@ class OrganSegmentationWindow(QMainWindow):
         unlab = imma.labeled.unique_labels_by_seeds(self.oseg.segmentation, seeds)
 
         self.oseg.split_tissue_with_labeled_volumetric_vessel_tree(organ_label, trunk_label=unlab[1][0], branch_labels=unlab[2])  # trunk_label, branch_label1, branch_label2)
+        self.statusBar().showMessage('Ready.')
 
     def __evaluation_to_text(self, evaluation):
         overall_score = evaluation['sliver_overall_pts']
