@@ -131,7 +131,7 @@ class ResectionTest(unittest.TestCase):
         datap = io3d.datasets.generate_synthetic_liver(return_dataplus=True)
         oseg = lisa.organ_segmentation.OrganSegmentation()
         oseg.import_dataplus(datap)
-        bl = lisa.virtual_resection.branch_labels(oseg, "porta")
+        bl = lisa.virtual_resection.label_volumetric_vessel_tree(oseg, "porta")
 
         import sed3
         ed = sed3.sed3(bl, contour=datap["segmentation"])
@@ -146,7 +146,7 @@ class ResectionTest(unittest.TestCase):
         datap = io3d.datasets.generate_synthetic_liver(return_dataplus=True)
         oseg = lisa.organ_segmentation.OrganSegmentation()
         oseg.import_dataplus(datap)
-        oseg.branch_labels("porta")
+        oseg.label_volumetric_vessel_tree("porta")
 
         import sed3
         ed = sed3.sed3(oseg.segmentation)
@@ -161,7 +161,7 @@ class ResectionTest(unittest.TestCase):
         datap = io3d.datasets.generate_synthetic_liver(return_dataplus=True)
         oseg = lisa.organ_segmentation.OrganSegmentation()
         oseg.import_dataplus(datap)
-        labeled_branches = lisa.virtual_resection.branch_labels(oseg, "porta")
+        labeled_branches = lisa.virtual_resection.label_volumetric_vessel_tree(oseg, "porta")
         data3d = datap["data3d"]
         segmentation = datap["segmentation"]
         slab = datap["slab"]
@@ -200,7 +200,7 @@ class ResectionTest(unittest.TestCase):
         self.assertGreater(np.sum(organ_split == 2), 1000, "At least some object expected")
 
 
-    def test_branch_labels_organ_segmentation(self):
+    def test_split_organ_segmentation(self):
         import lisa.organ_segmentation
         import io3d
         # datap = io3d.datasets.generate_abdominal()
@@ -208,7 +208,7 @@ class ResectionTest(unittest.TestCase):
         slab = datap["slab"]
         oseg = lisa.organ_segmentation.OrganSegmentation()
         oseg.import_dataplus(datap)
-        oseg.branch_labels("porta")
+        oseg.label_volumetric_vessel_tree("porta")
         labeled_branches = oseg.segmentation
         seeds = np.zeros_like(oseg.data3d, dtype=np.int)
         seeds[40, 125, 166] = 1

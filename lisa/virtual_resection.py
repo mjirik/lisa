@@ -700,7 +700,7 @@ def View(name):
     resection(data, name)
 
 
-def branch_labels(oseg, vessel_label=None, write_to_oseg=True, new_label_str_format="{}{:03d}"):
+def label_volumetric_vessel_tree(oseg, vessel_label=None, write_to_oseg=True, new_label_str_format="{}{:03d}"):
     """
     Split vessel by branches and put it in segmentation and slab.
 
@@ -731,8 +731,6 @@ def branch_labels(oseg, vessel_label=None, write_to_oseg=True, new_label_str_for
 
     # ima.distance_segmentation(oseg.select_label(vessel_label))
     return bl
-
-    pass
 
 
 if __name__ == "__main__":

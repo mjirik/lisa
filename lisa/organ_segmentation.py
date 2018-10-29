@@ -1490,7 +1490,8 @@ class OrganSegmentation():
         split_labels = [[organ_label]]
         for i in range(len(un_labels_dict) - 1):
             for j in range(len(un_labels_dict[i])):
-                self.split_tissue_on_bifurcation(split_labels[i][j], un_labels_dict[i][j], branch_labels=un_labels_dict[i + 1]) # tady něco dodělat
+                split_labels_ij, connected_ij = self.split_tissue_on_bifurcation(split_labels[i][j], un_labels_dict[i][j], branch_labels=un_labels_dict[i + 1]) # tady něco dodělat
+
             pass
 
 
@@ -1797,9 +1798,9 @@ class OrganSegmentation():
         self.segmentation[segm == 1] = self.nlabels(output_label1)
         self.segmentation[segm == 2] = self.nlabels(output_label2)
 
-    def branch_labels(self, vessel_label=None, write_to_oseg=True, new_label_str_format="{}{:03d}"):
+    def label_volumetric_vessel_tree(self, vessel_label=None, write_to_oseg=True, new_label_str_format="{}{:03d}"):
         """
-        Split vessel by branches and put it in segmentation and slab.
+        Select one vessel tree, label it by branches and put it in segmentation and slab.
 
         :param vessel_label: int or string label with vessel. Everything above zero is used if vessel_label is set None.
         :param write_to_oseg: Store output into oseg.segmentation if True. The slab is also updated.
@@ -1807,7 +1808,7 @@ class OrganSegmentation():
         :return:
         """
         from . import virtual_resection
-        return virtual_resection.branch_labels(
+        return virtual_resection.label_volumetric_vessel_tree(
             self,
             vessel_label=vessel_label,
             write_to_oseg=write_to_oseg,
