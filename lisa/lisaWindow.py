@@ -1048,18 +1048,24 @@ class OrganSegmentationWindow(QMainWindow):
 
         # import copy
         # texts = copy.copy(self.oseg.slab.keys())
-        return self.ui_select_from_list(
+
+        strlab = self.ui_select_from_list(
             list(self.oseg.slab.keys()),
             headline,
             text_inside=text_inside,
-            return_i=return_i,
-            return_str=return_str
         )
+        numlab = self.oseg.nlabels(strlab)
+        if return_i and return_str:
+            return numlab, strlab
+        elif return_str:
+            return strlab
+        else:
+            return numlab
 
-    def ui_select_from_list(self,some_list, headline, text_inside="", return_i=False, return_str=True):
-        """ Get label with GUI.
+    def ui_select_from_list(self,some_list, headline, text_inside=""):
+        """ Select string from list with GUI.
 
-        :return: numeric_label, string_label
+        :return: selected string
         """
 
         # import copy
@@ -1074,15 +1080,8 @@ class OrganSegmentationWindow(QMainWindow):
 
         if not ok:
             ValueError("Selection canceled")
-        numlab = self.oseg.nlabels(str(strlab))
-        out = []
-        strlab = str(strlab)
-        if return_i and return_str:
-            return numlab, strlab
-        elif return_str:
-            return strlab
-        else:
-            return numlab
+
+        return str(strlab)
 
     def ui_get_double(self, headline, value=0.0, **kwargs):
         """
