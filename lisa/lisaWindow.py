@@ -239,6 +239,16 @@ class OrganSegmentationWindow(QMainWindow):
         self.__add_action_to_menu(imageMenu, "&Minimize slab", self.oseg.minimize_slab,
                                   tip="Remove unused or redundant labels from segmentation labeling list (slab)")
 
+        self.__add_action_to_menu(imageMenu, "&Save seeds",
+                                  lambda : self.oseg.save_seeds(self.ui_select_from_list(
+                                      self.oseg.get_list_of_saved_seeds(), "Save seeds as", return_str=True, return_i=False)),
+                                  tip="Save seeds for later use")
+
+        self.__add_action_to_menu(imageMenu, "&Load seeds",
+                                  lambda : self.oseg.load_seeds(self.ui_select_from_list(
+                                      self.oseg.get_list_of_saved_seeds(), "Save seeds as", return_str=True, return_i=False)),
+                                  tip="Save seeds for later use")
+
         ###### OPTION MENU ######
         optionMenu = menubar.addMenu('&Option')
         
@@ -1029,7 +1039,24 @@ class OrganSegmentationWindow(QMainWindow):
         logger.info('overall score: ' + str(overall_score))
         return "Sliver score: " + str(overall_score)
 
-    def ui_select_label(self, headline):
+    def ui_select_label(self, headline, text_inside="select from existing labels or write a new one",
+                        return_i=True, return_str=True):
+        """ Get label with GUI.
+
+        :return: numeric_label, string_label
+        """
+
+        # import copy
+        # texts = copy.copy(self.oseg.slab.keys())
+        return self.ui_select_from_list(
+            list(self.oseg.slab.keys()),
+            headline,
+            text_inside=text_inside,
+            return_i=return_i,
+            return_str=return_str
+        )
+
+    def ui_select_from_list(self,some_list, headline, text_inside="", return_i=False, return_str=True):
         """ Get label with GUI.
 
         :return: numeric_label, string_label
@@ -1041,14 +1068,21 @@ class OrganSegmentationWindow(QMainWindow):
             QInputDialog.getItem(self,
                                  # self.qapp,
                                  headline,
-                                 "select from existing labels or write a new one",
-                                 list(self.oseg.slab.keys()),
+                                 text_inside,
+                                 some_list,
                                  editable=True)
 
         if not ok:
-            ValueError("Label selection canceled")
+            ValueError("Selection canceled")
         numlab = self.oseg.nlabels(str(strlab))
-        return numlab, str(strlab)
+        out = []
+        strlab = str(strlab)
+        if return_i and return_str:
+            return numlab, strlab
+        elif return_str:
+            return strlab
+        else:
+            return numlab
 
     def ui_get_double(self, headline, value=0.0, **kwargs):
         """

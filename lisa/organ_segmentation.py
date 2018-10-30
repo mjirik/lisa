@@ -30,6 +30,7 @@ import os.path as op
 import scipy
 import scipy.ndimage
 import numpy as np
+import scipy.sparse
 import datetime
 import argparse
 import copy
@@ -264,6 +265,7 @@ class OrganSegmentation():
         self.debug_mode = debug_mode
         self.gui_update = None
         self.segmentation_alternative_params = segmentation_alternative_params
+        self.saved_seeds = {}
         # self._json_description
         # SegPostprocPars = namedtuple(
         #     'SegPostprocPars', [
@@ -630,6 +632,11 @@ class OrganSegmentation():
             self.apriori = datap['apriori']
         else:
             self.apriori = None
+
+        if 'saved_seeds' in dpkeys:
+            self.saved_seeds = datap['saved_seeds']
+        else:
+            self.saved_seeds = {}
 
         self.dcmfilelist = datap['dcmfilelist']
 
@@ -1182,6 +1189,7 @@ class OrganSegmentation():
         data['voxelsize_mm'] = self.voxelsize_mm
         data['orig_shape'] = self.orig_shape
         data['vessel_tree'] = self.vessel_tree
+        data["saved_seeds"] = self.saved_seeds
         processing_information = {
             'organ_segmentation': {
                 'processing_time': self.processing_time,
@@ -1488,35 +1496,82 @@ class OrganSegmentation():
     def create_lisa_data_dir_tree(self):
         lisa_data.create_lisa_data_dir_tree(self)
 
-    def split_tissue_recusively_with_labeled_volumetric_vessel_tree(self, organ_label, seeds):
+    def save_seeds(self, name):
+        """
+        Load stored seeds
+        :param name:
+        :return:
+        """
+        seeds = copy.copy(self.seeds)
+        # self.saved_seeds[name] = scipy.sparse.csr_matrix(seeds)
+        self.saved_seeds[name] = seeds
+
+    def load_seeds(self, name):
+        """
+        Store seeds for later use.
+        :param name:
+        :return:
+        """
+        seeds = self.saved_seeds[name]
+        # if scipy.sparse.issparse(seeds):
+        #     seeds = seeds.todense()
+        self.seeds = seeds
+
+    def get_list_of_saved_seeds(self):
+        return list(self.saved_seeds.keys())
+
+    def split_tissue_recusively_with_labeled_volumetric_vessel_tree(
+            self, organ_label, seeds,
+            organ_split_label_format_pattern="{label}{i}"
+    ):
         """
 
+        :param organ_split_label_format_pattern: Specify the patter for naming the split of tissue
         :param organ_label: label of organ to split
         :param seeds: ndarray, 1 is trunk, 2 is first level branches, 3 is second level branches ...
         :return:
         """
         un_labels_dict = imma.labeled.unique_labels_by_seeds(self.segmentation, seeds)
         # ještě mi chybí vědět, kdo je potomkem koho
-        # (tissue_to_split, trunk, branches
-        split_parameters = {1: [(organ_label, un_labels_dict[1][0], un_labels_dict[2])]}
-        for i_seed in range(1, len(un_labels_dict)):
-            next_i_level_params = [None] * len(un_labels_dict[i_seed])
-            for j_label in range(len(un_labels_dict[i_seed])):
-                branch_labels_ij = split_parameters[i_seed][j_label][2]
-                split_labels_ij, connected_ij = self.split_tissue_with_labeled_volumetric_vessel_tree(
-                    organ_label=split_parameters[i_seed][j_label][0],
-                    trunk_label=split_parameters[i_seed][j_label][1],
-                    branch_labels=split_parameters[i_seed][j_label][2])
+        # (level, tissue_to_split, trunk, branches
+        split_parameters = {1: []}
+        to_process = [(1, organ_label, un_labels_dict[1][0], un_labels_dict[2])]
+        while len(to_process) > 0:
+            actual = to_process.pop(0)
+            actual_level = actual[0]
+            actual_organ_label = actual[1]
+            actual_trunk_label = actual[2]
+            actual_branch_labels = actual[3]
+            split_labels_ij, connected_ij = self.split_tissue_with_labeled_volumetric_vessel_tree(
+                organ_label=actual_organ_label,
+                trunk_label=actual_trunk_label,
+                branch_labels=actual_branch_labels,
+                organ_split_label_format_pattern=organ_split_label_format_pattern
+            )
 
-                next_i_level_params[j_label] = list(zip(split_labels_ij, branch_labels_ij, connected_ij))
-            # prepare data for next level
-            if (i_seed + 2) in un_labels_dict:
-                next_i_level_params
+            # prepare next branche
+            # level of next trunk
+            next_level = actual_level + 1
+            next_level_of_branches = next_level + 1
+            if next_level_of_branches <= len(un_labels_dict):
+                for i in range(len(split_labels_ij)):
+                    import imma.dili as imdl
+                    next_trunk = actual_branch_labels[i]
+                    ind = imdl.find_in_list_of_lists(connected_ij, next_trunk)
+                    if ind is None:
+                        logger.error("There is strange error. This should be impossible.")
+                    next_organ_label = split_labels_ij[ind]
+                    next_branches = list(set(connected_ij[ind]).intersection(set(un_labels_dict[next_level_of_branches])))
+                    if len(next_branches) > 1:
+                        next = (next_level, next_organ_label, next_trunk, next_branches)
+                        to_process.append(next)
 
         return None, None
 
 
-    def split_tissue_with_labeled_volumetric_vessel_tree(self, organ_label, trunk_label, branch_labels, split_labels=None):
+    def split_tissue_with_labeled_volumetric_vessel_tree(
+            self, organ_label, trunk_label, branch_labels, split_labels=None,
+            organ_split_label_format_pattern="{label}{i}"):
         """
 
         :param organ_label:
@@ -1553,7 +1608,10 @@ class OrganSegmentation():
         if split_labels is None:
             split_labels = [None] * len(branch_labels)
             for i in range(len(branch_labels)):
-                split_labels[i] = self.nlabels(organ_label, return_mode="str") + str(i + 1)
+                split_labels[i] = organ_split_label_format_pattern.format(
+                    label=self.nlabels(organ_label, return_mode="str"),
+                    i=(i + 1)
+                )
 
 
 

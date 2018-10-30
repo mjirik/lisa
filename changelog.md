@@ -2,6 +2,8 @@
 
 ## Unreleased 
 
+* New save seeds for later use
+* Simple GUI for select from list
 * New feature - branch vessel
 * New feature - split tissue based on labeled vessels
 * New select label dialog (require less space)
