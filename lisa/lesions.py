@@ -217,7 +217,7 @@ class Lesions:
             features[lab-1, 0] = size
             features[lab-1, 1] = compactness
 
-            print('size = %i' % sizeú)
+            print('size = %i' % size)
             print('compactness = %.3f' % compactness)
             # sed3.sed3(self.data3d, contour=(labels==lab)).show() # noqa
         print(features[:, 1])
