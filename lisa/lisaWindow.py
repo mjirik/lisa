@@ -240,12 +240,12 @@ class OrganSegmentationWindow(QMainWindow):
                                   tip="Remove unused or redundant labels from segmentation labeling list (slab)")
 
         self.__add_action_to_menu(imageMenu, "&Save seeds",
-                                  lambda : self.oseg.save_seeds(self.ui_select_from_list(
+                                  lambda: self.oseg.save_seeds(self.ui_select_from_list(
                                       self.oseg.get_list_of_saved_seeds(), "Save seeds as", return_str=True, return_i=False)),
                                   tip="Save seeds for later use")
 
         self.__add_action_to_menu(imageMenu, "&Load seeds",
-                                  lambda : self.oseg.load_seeds(self.ui_select_from_list(
+                                  lambda: self.oseg.load_seeds(self.ui_select_from_list(
                                       self.oseg.get_list_of_saved_seeds(), "Save seeds as", return_str=True, return_i=False)),
                                   tip="Save seeds for later use")
 
@@ -1079,7 +1079,7 @@ class OrganSegmentationWindow(QMainWindow):
                                  editable=True)
 
         if not ok:
-            ValueError("Selection canceled")
+            raise ValueError("Selection canceled")
 
         return str(strlab)
 

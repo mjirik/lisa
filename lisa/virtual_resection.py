@@ -710,6 +710,7 @@ def label_volumetric_vessel_tree(oseg, vessel_label=None, write_to_oseg=True, ne
     :param new_label_str_format: format of new slab
     :return:
     """
+    logger.debug("vessel_label {}".format(vessel_label))
     import skelet3d
     if vessel_label is None:
         vessel_volume = oseg.segmentation > 0
