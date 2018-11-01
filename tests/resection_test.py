@@ -131,13 +131,18 @@ class ResectionTest(unittest.TestCase):
         datap = io3d.datasets.generate_synthetic_liver(return_dataplus=True)
         oseg = lisa.organ_segmentation.OrganSegmentation()
         oseg.import_dataplus(datap)
+        un0 = np.unique(oseg.segmentation)
+        keys0 = list(oseg.slab.keys())
         bl = lisa.virtual_resection.label_volumetric_vessel_tree(oseg, "porta")
+        un1 = np.unique(oseg.segmentation)
+        keys1 = list(oseg.slab.keys())
 
-        import sed3
-        ed = sed3.sed3(bl, contour=datap["segmentation"])
-        ed.show()
+        # import sed3
+        # ed = sed3.sed3(bl, contour=datap["segmentation"])
+        # ed.show()
 
-        self.assertEqual(True, True)
+        self.assertGreater(len(un1), len(un0))
+        self.assertGreater(len(keys1), len(keys0))
 
     def test_branch_labels_from_oseg(self):
         import lisa.organ_segmentation
@@ -146,13 +151,17 @@ class ResectionTest(unittest.TestCase):
         datap = io3d.datasets.generate_synthetic_liver(return_dataplus=True)
         oseg = lisa.organ_segmentation.OrganSegmentation()
         oseg.import_dataplus(datap)
+        un0 = np.unique(oseg.segmentation)
+        keys0 = list(oseg.slab.keys())
         oseg.label_volumetric_vessel_tree("porta")
+        un1 = np.unique(oseg.segmentation)
+        keys1 = list(oseg.slab.keys())
+        # import sed3
+        # ed = sed3.sed3(oseg.segmentation)
+        # ed.show()
 
-        import sed3
-        ed = sed3.sed3(oseg.segmentation)
-        ed.show()
-
-        self.assertEqual(True, True)
+        self.assertGreater(len(un1), len(un0))
+        self.assertGreater(len(keys1), len(keys0))
 
     def test_branch_labels_with_gui_just_in_module(self):
         import lisa.organ_segmentation
@@ -188,10 +197,10 @@ class ResectionTest(unittest.TestCase):
             labeled_branches, seglabel1, [seglabel2, seglabel3], organseg
         )
 
-        import sed3
-        # ed = sed3.sed3(labeled_branches, contour=organ_split)
-        ed = sed3.sed3(organ_split)
-        ed.show()
+        # import sed3
+        # # ed = sed3.sed3(labeled_branches, contour=organ_split)
+        # ed = sed3.sed3(organ_split)
+        # ed.show()
 
         self.assertTrue(np.array_equal(np.unique(organ_split), [0, 1, 2]))
 
@@ -273,6 +282,7 @@ class ResectionTest(unittest.TestCase):
 
         self.assertGreater(np.sum(oseg.select_label("split1")), 1000)
         self.assertGreater(np.sum(oseg.select_label("split2")), 1000)
+
 
 if __name__ == "__main__":
     # logging.basicConfig(stream=sys.stderr)

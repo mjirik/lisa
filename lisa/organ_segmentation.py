@@ -172,7 +172,7 @@ class OrganSegmentation():
             cache_filename='cache.yml',
             seg_preproc_pars={},
             after_load_processing={},
-            segmentation_alternative_params={},
+            segmentation_alternative_params=None,
             sftp_username='lisa_default',
             sftp_password='',
             input_annotation_file=None,
@@ -264,6 +264,12 @@ class OrganSegmentation():
         self.vessel_tree = {}
         self.debug_mode = debug_mode
         self.gui_update = None
+        if segmentation_alternative_params is None:
+            segmentation_alternative_params = {
+                "simple 1.5 mm": {
+                    "working_voxelsize_mm": 1.5
+                }
+            }
         self.segmentation_alternative_params = segmentation_alternative_params
         self.saved_seeds = {}
         # self._json_description
@@ -368,6 +374,28 @@ class OrganSegmentation():
         update_stable.make_update()
         # import subprocess
         # print subprocess.call(['conda', 'update', '-y', '-c', 'mjirik', '-c', 'SimpleITK', 'lisa']) #, shell=True)
+
+    def add_to_segmentation(self, source_segmentation, target_labels, source_labels=None):
+        """
+        Stores requested label from temp segmentation into slab segmentation.
+        Zero label is ignored.
+
+        :param source_segmentation: ndimage
+        :param target_labels: list of (string or numeric) labels for output segmentation. Labels are paired
+        with source_labels if possible.
+        :param source_labels: list of numeric labels for source segmentation
+        :return:
+        """
+        if source_labels is None:
+            source_labels = list(np.unique(source_segmentation))
+
+        # kick zero
+        if 0 in source_labels:
+            source_labels.pop(source_labels.index(0))
+
+        for labels in zip(source_labels, target_labels):
+            src, dst = labels
+            self.segmentation[source_segmentation==src] = self.nlabels(dst)
 
     def update_parameters_based_on_label(self, label):
         self.update_parameters(self.segmentation_alternative_params[label])

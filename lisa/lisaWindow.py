@@ -234,19 +234,22 @@ class OrganSegmentationWindow(QMainWindow):
         imageMenu.addAction(resize_to_mm_action)
 
         self.__add_action_to_menu(imageMenu, "&Split tissue", self.action_split_on_bifurcation,
-                                  tip="Split tissue based on labeled vessel tree")
+                                  tip="Split tissue based on labeled vessel tree",
+                                  init_msg="Split tissue...",
+                                  finish_msg="Ready. Tissue split finished."
+                                  )
 
         self.__add_action_to_menu(imageMenu, "&Minimize slab", self.oseg.minimize_slab,
                                   tip="Remove unused or redundant labels from segmentation labeling list (slab)")
 
         self.__add_action_to_menu(imageMenu, "&Save seeds",
                                   lambda: self.oseg.save_seeds(self.ui_select_from_list(
-                                      self.oseg.get_list_of_saved_seeds(), "Save seeds as", return_str=True, return_i=False)),
+                                      self.oseg.get_list_of_saved_seeds(), "Save seeds as")),
                                   tip="Save seeds for later use")
 
         self.__add_action_to_menu(imageMenu, "&Load seeds",
                                   lambda: self.oseg.load_seeds(self.ui_select_from_list(
-                                      self.oseg.get_list_of_saved_seeds(), "Save seeds as", return_str=True, return_i=False)),
+                                      self.oseg.get_list_of_saved_seeds(), "Save seeds as")),
                                   tip="Save seeds for later use")
 
         ###### OPTION MENU ######
@@ -297,7 +300,7 @@ class OrganSegmentationWindow(QMainWindow):
         # combo.activated[str].connect(self.onAlternativeSegmentationParams)
         # grid.addWidget(combo, 4, 1)
 
-    def __add_action_to_menu(self, submenu, ampersand_name, triggered_connect, tip=''):
+    def __add_action_to_menu(self, submenu, ampersand_name, triggered_connect, tip='', init_msg=None, finish_msg=None):
         """
 
         :param submenu:
@@ -308,7 +311,9 @@ class OrganSegmentationWindow(QMainWindow):
         """
         this_action = QtGui.QAction(QtGui.QIcon('exit.png'), ampersand_name, self)
         this_action.setStatusTip(tip)
-        this_action.triggered.connect(triggered_connect)
+        this_action.triggered.connect(lambda: self._ui_run_with(
+            triggered_connect, init_msg=init_msg, finish_msg=finish_msg
+        ))
         submenu.addAction(this_action)
 
     def _add_button(
@@ -935,6 +940,13 @@ class OrganSegmentationWindow(QMainWindow):
         # self.oseg.segmentation[contours == 2] = nlabel
 
         self.statusBar().showMessage('Ready')
+
+    def _ui_run_with(self, fcn, init_msg=None, finish_msg=None):
+        if init_msg is not None:
+            self.statusBar().showMessage(init_msg)
+        fcn()
+        if finish_msg is not None:
+            self.statusBar().showMessage(finish_msg)
 
     def action_segmentation_relabel(self):
         self.statusBar().showMessage('Relabelling segmentation')
