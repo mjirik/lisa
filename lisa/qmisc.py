@@ -17,7 +17,7 @@ import subprocess
 import scipy
 import scipy.ndimage
 
-from imtools.image_manipulation import crinfo_from_specific_data, crop, uncrop, manualcrop, fix_crinfo, combinecrinfo
+from imma.image_manipulation import crinfo_from_specific_data, crop, uncrop, manualcrop, fix_crinfo, combinecrinfo
 
 
 class SparseMatrix():
