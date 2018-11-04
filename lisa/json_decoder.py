@@ -7,10 +7,11 @@ from collections import OrderedDict
 
 description = {}
 
-def get_segdata(json_data, data, labels=None):
-    Z = len(data["segmentation"])
-    X = len(data["segmentation"][0])
-    Y = len(data["segmentation"][0][0])
+
+def get_segdata(json_data, datap, labels=None):
+    Z = len(datap["segmentation"])
+    X = len(datap["segmentation"][0])
+    Y = len(datap["segmentation"][0][0])
 
     for slice in range(0, Z):
         nbr_drawings = json_data['drawings'][slice][0]['length']
@@ -55,31 +56,31 @@ def get_segdata(json_data, data, labels=None):
                     print("Drawing is not defined at slice", slice)
                     continue
                 else:
-                    if dict_key in data["slab"].keys():
-                        dict_value = data["slab"][dict_key]
+                    if dict_key in datap["slab"].keys():
+                        dict_value = datap["slab"][dict_key]
                     else:
                         dict_value = random.randint(100, 254)
-                        data["slab"][dict_key] = dict_value
+                        datap["slab"][dict_key] = dict_value
             else:
                 dict_description = json.loads(dict_description)
-                if dict_key != '' and dict_key in data["slab"].keys():
-                    dict_value = data["slab"][dict_key]
+                if dict_key != '' and dict_key in datap["slab"].keys():
+                    dict_value = datap["slab"][dict_key]
                 elif "value" in dict_description.keys():
                     dict_value = dict_description["value"]
                     if dict_key != '':
-                        data["slab"][dict_key] = dict_value
+                        datap["slab"][dict_key] = dict_value
                     else:
                         dict_key = "lbl_" + str(dict_value)
-                        data["slab"][dict_key] = dict_value
+                        datap["slab"][dict_key] = dict_value
                 elif dict_key != '':
                     dict_value = random.randint(100, 254)
-                    data["slab"][dict_key] = dict_value
+                    datap["slab"][dict_key] = dict_value
                 else:
                     print("Drawing is not defined at slice", slice)
                     continue
 
-            for i,j in fill:
-                data["segmentation"][Z - 1 - slice][i][j] = dict_value
+            for i, j in fill:
+                datap["segmentation"][Z - 1 - slice][i][j] = dict_value
         
             # ziskani zbytku popisu
             if dict_key not in description.keys():
@@ -97,6 +98,14 @@ def get_segdata(json_data, data, labels=None):
                     description[dict_key]["two"] = dict_description["two"]
                 if "three" in dict_description.keys():
                     description[dict_key]["three"] = dict_description["three"]
+
+
+def get_vesselpoint_in_seeds(json_data, label, seeds_shape):
+    seeds = np.zeros(seeds_shape, dtype=int)
+    pts = get_vesselPoint(json_data, label)
+    seeds[pts] = 1
+    return seeds
+
 
 def get_vesselPoint(json_data, label=None):
     Z = len(json_data['drawings'])
@@ -124,9 +133,11 @@ def get_vesselPoint(json_data, label=None):
             y = np.array([int(points_data[0])], dtype=np.dtype('int64'))
             return [z, x, y]
 
+
 def get_seeds(data, label):
     return ((data["segmentation"] != 0).astype('int8') * 2 - 
            (data["segmentation"] == data["slab"][label]).astype('int8'))
+
 
 def write_to_json(data, json_data=None, output_name="json_data.json"):
     Z = len(data["segmentation"])

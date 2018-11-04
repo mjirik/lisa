@@ -756,14 +756,14 @@ class OrganSegmentation():
         if json_annotation_file is None:
             json_annotation_file = self.input_annotaion_file
 
-        data = {}
-        data['data3d'] = self.data3d
-        data['segmentation'] = self.segmentation
-        data['slab'] = self.slab
-        data['voxelsize_mm'] = self.voxelsize_mm
+        datap = {}
+        datap['data3d'] = self.data3d
+        datap['segmentation'] = self.segmentation
+        datap['slab'] = self.slab
+        datap['voxelsize_mm'] = self.voxelsize_mm
         jsonfile = json.load(open(json_annotation_file))
 
-        jd.get_segdata(jsonfile, data)
+        jd.get_segdata(jsonfile, datap)
         if "porta" in jd.description.keys():
             th = jd.description["porta"]["threshold"]
             self.run_vessel_segmentation = True
@@ -772,12 +772,12 @@ class OrganSegmentation():
                 threshold=th,
                 inner_vessel_label="porta",
                 organ_label="liver",
-                seeds=jd.get_vesselPoint(jsonfile, "porta"),
+                seeds=jd.get_vesselpoint_in_seeds(jsonfile, "porta", self.data3d.shape),
                 interactivity=False)
         else:
             self.run_vessel_segmentation = False
 
-        self.seeds = jd.get_seeds(data, "liver")
+        self.seeds = jd.get_seeds(datap, "liver")
         self.run_organ_segmentation = True
 
     def _interactivity_begin(self):
