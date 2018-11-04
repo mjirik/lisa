@@ -44,12 +44,13 @@ class LisaGUITest(unittest.TestCase):
         pass
         self.app.exec_()
 
-    def test_quit_gui(self):
+    def test_zz_quit_gui(self):
         """
         Tests event of quit
         """
         self.assertTrue(self.oseg_w.quit(event=None))
 
+    @attr('interactive')
     def test_split(self):
         self.oseg_w.oseg.load_data(r"C:\Users\miros\lisa_data\P09_cropped_portal_tree_labeled.pklz")
         self.app.exec_()

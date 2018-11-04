@@ -180,6 +180,7 @@ and background")
         pass
 
 # TODO finish this test
+    @attr("interactive")
     def test_synth_liver(self):
         params = {}
         self.synthetic_liver_template(params)
@@ -224,10 +225,10 @@ and background")
         volume_porta = oseg.get_segmented_volume_size_mm3("porta")
         self.assertGreater(volume_porta, 9000, "Liver volume should have proper size")
         self.assertLess(volume_porta, 11000, "Liver volume should have proper size")
-        import sed3
-        ed = sed3.sed3(data3d,
-                       contour=(oseg.segmentation))
-        ed.show()
+        # import sed3
+        # ed = sed3.sed3(data3d,
+        #                contour=(oseg.segmentation))
+        # ed.show()
         oseg.saveVesselTree('porta')
 
         # print '> 0 '
