@@ -86,7 +86,7 @@ install:
 #    - 'sudo ldconfig -v'
     - sudo ldconfig -v
     # get sample data for lisa
-    - python -m io3d.datasets -l lisa
+    - python -m io3d.datasets -l lisa -l volumetrie
 
 before_script:
     # GUI
