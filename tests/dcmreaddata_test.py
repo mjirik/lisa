@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 
+import logging
+logger = logging.getLogger(__name__)
 
 # import funkcí z jiného adresáře
 import sys
@@ -19,7 +21,11 @@ from PyQt4.QtGui import QFileDialog, QApplication, QMainWindow
 
 import numpy as np
 
-import pydicom
+try:
+    import pydicom
+except ImportError as e:
+    import dicom as pydicom
+    logger.warning("Used dicom instead of pydicom")
 pydicom.config.debug(False)
 
 #
