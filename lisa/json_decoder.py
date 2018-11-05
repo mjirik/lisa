@@ -160,7 +160,7 @@ def write_to_json(datap, json_data=None, output_name="json_data.json"):
         divided = morphology.label(datap["segmentation"][Z - 1 - slice], background=0) # rozdeleni objektu
         nbr_divided = np.unique(divided).tolist() 
         nbr_divided.remove(0) # pole rozdelenych objektu bez 0
-        logger.debug(slice, label_array, nbr_divided)
+        logger.debug("slice, label array, number divided: {} {} {}".format(slice, label_array, nbr_divided))
 
         if len(label_array) < len(nbr_divided): # nesedi pocet vyskytovanych labelu s poctem objektu
             new_array = []
