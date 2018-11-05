@@ -69,7 +69,7 @@ requirements:
     - io3d >=1.1.6
     - pyqt 4.11.*
     - pandas
-    - simpleitk
+    - simpleitk 1.*
 #    - simpleitk 0.9.1
     - libpng
     # - simpleitk 0.9.* # problem with dicom write
