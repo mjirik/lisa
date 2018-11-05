@@ -77,7 +77,7 @@ class VesselsSegmentationTest(unittest.TestCase):
             voxelsize_mm=voxelsize_mm,
             threshold=180,
             inputSigma=0.15,
-            dilationIterations=2,
+            aoi_dilation_iterations=2,
             nObj=1,
             interactivity=False,
             biggestObjects=True,
