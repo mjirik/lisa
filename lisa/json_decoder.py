@@ -139,19 +139,19 @@ def get_seeds(data, label):
            (data["segmentation"] == data["slab"][label]).astype('int8'))
 
 
-def write_to_json(data, json_data=None, output_name="json_data.json"):
-    Z = len(data["segmentation"])
-    X = len(data["segmentation"][0])
-    Y = len(data["segmentation"][0][0])
+def write_to_json(datap, json_data=None, output_name="json_data.json"):
+    Z = len(datap["segmentation"])
+    X = len(datap["segmentation"][0])
+    Y = len(datap["segmentation"][0][0])
 
     if json_data==None:
         json_data = initJson(Z) # prohazuje poradi => dwv nefunguje na 100 % (nelze pak stahnout json)
 
     for slice in range(0, Z):
-        label_array = np.unique(data["segmentation"][Z - 1 - slice]).tolist()
+        label_array = np.unique(datap["segmentation"][Z - 1 - slice]).tolist()
         label_array.remove(0) # pole vyskytovanych labelu bez 0
 
-        divided = morphology.label(data["segmentation"][Z - 1 - slice], background=0) # rozdeleni objektu
+        divided = morphology.label(datap["segmentation"][Z - 1 - slice], background=0) # rozdeleni objektu
         nbr_divided = np.unique(divided).tolist() 
         nbr_divided.remove(0) # pole rozdelenych objektu bez 0
         print(slice, label_array, nbr_divided)
@@ -160,7 +160,7 @@ def write_to_json(data, json_data=None, output_name="json_data.json"):
             new_array = []
             for i in range(0, max(nbr_divided)):
                 for j in range(0, len(label_array)):
-                    a = ((data["segmentation"] == label_array[j]) * (divided == i)).astype('int8')
+                    a = ((datap["segmentation"] == label_array[j]) * (divided == i)).astype('int8')
                     if 1 in a:
                         new_array.append(label_array[j])
                         break
@@ -172,7 +172,7 @@ def write_to_json(data, json_data=None, output_name="json_data.json"):
                 nbr_points = 0
                 last_y = 0
                 last_x = 0
-                for key, value in data["slab"].items(): # neni osetreno, kdyby se nenachazel label ve slovniku
+                for key, value in datap["slab"].items(): # neni osetreno, kdyby se nenachazel label ve slovniku
                     if value != 0 and value == label_array[lbl]:
                         for x in range(0, X):
                             for y in range(0, Y):
