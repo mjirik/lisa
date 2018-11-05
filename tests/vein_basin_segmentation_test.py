@@ -29,6 +29,7 @@ class CoinaudSegmentationTest(unittest.TestCase):
     verbose = False
 
 
+    @unittest.skip("Waiting for implementation")
     def test_devel_vein_basin_segmentation(self):
         pth = r"E:\data\medical\processed\mik2018 para\P09_paraall_cropped.pklz"
         datap = io3d.read(pth)
@@ -43,7 +44,7 @@ class CoinaudSegmentationTest(unittest.TestCase):
         from PyQt4.QtGui import QApplication, QPushButton
         app = QApplication(sys.argv)
         import seededitorqt
-        se = seededitorqt.QTSeedEditor(datap["data3d"], contours=datap["segmentation"], labels=labels)
+        se = seededitorqt.QTSeedEditor(datap["data3d"], contours=datap["segmentation"])
 
         def split(obj):
             import lisa.virtual_resection as vr
