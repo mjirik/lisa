@@ -23,7 +23,8 @@ vtk
 # pandas is installed with pip
 #ipython=3.1.0=py27_0
 ipython>=3.1.0
-# SimpleITK=0.9.1 # should be required by io3d
+# SimpleITK=0.9.1 # should be required by io3d, but later i removed it from io3d so now it should be here.
+SimpleITK
 h5py>=2.5.0
 # pywget=2.2
 opencv>=2.4.0
