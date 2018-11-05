@@ -1814,23 +1814,34 @@ class OrganSegmentation():
         """ Non-interactive mode
         :return:
         """
+        import time
+        t0 = time.time()
+        t1 = time.time()
         if self.input_annotaion_file is not None:
-            # print("iaf")
             self.json_annotation_import()
+            tt = time.time()
+            logger.debug("make run input af {}, {}".format(tt - t0 , tt - t1))
+            t1 = tt
         if self.run_organ_segmentation:
-            # print("ros")
             self.ninteractivity()
             self.slab["liver"] = 7
             self.segmentation = (self.segmentation == 1).astype('int8') * self.slab["liver"]
+            tt = time.time()
+            logger.debug("makerun organ seg {}, {}".format(tt - t0, tt - t1))
+            t1 = tt
         self.slab["porta"] = 1
         if self.run_vessel_segmentation:
-            # print("rvs")
             data = {}
             data['segmentation'] = self.segmentation
             data['slab'] = self.slab
             self.portalVeinSegmentation(**self.run_vessel_segmentation_params)
+            tt = time.time()
+            logger.debug("makerun pv seg{}, {}".format(tt - t0, tt - t1))
+            t1 = tt
 
         self.save_outputs()
+        tt = time.time()
+        logger.debug("make run end time {}, {}".format(tt - t0, tt - t1))
 
     def split_vessel(self, input_label=None, output_label1=1, output_label2=2, **kwargs):
         """
