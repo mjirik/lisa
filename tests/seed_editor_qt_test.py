@@ -80,7 +80,7 @@ class QTSeedEditorTest(unittest.TestCase):
     @attr("interactive")
     def test_data_editor_tree(self):
         """
-        Just for visual check of seed editor
+        Just for visual check of seed edito
         """
         #pyed = sed3.sed3(self.data3d, contour = oseg.segmentation)
         #pyed.show()
