@@ -13,6 +13,7 @@ sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
 
+from nose.plugins.attrib import attr
 # import numpy as np
 
 
@@ -76,9 +77,10 @@ class QTSeedEditorTest(unittest.TestCase):
     #    self.assertGreater(volume,600000)
     #    self.assertLess(volume,850000)
 
+    @attr("interactive")
     def test_data_editor_tree(self):
         """
-        Funkce provádí změnu vstupních dat - data3d
+        Just for visual check of seed editor
         """
         #pyed = sed3.sed3(self.data3d, contour = oseg.segmentation)
         #pyed.show()
