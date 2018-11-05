@@ -86,7 +86,12 @@ install:
 #    - 'sudo ldconfig -v'
     - sudo ldconfig -v
     # get sample data for lisa
+    - ls ~
     - python -m io3d.datasets -l lisa -l volumetrie
+    - ls ~
+    - ls ~/data/medical/orig
+    - ls ~/data/medical/orig/volumetrie
+    - ls ~/data/medical/orig/sample_data/volumetrie
 
 before_script:
     # GUI
