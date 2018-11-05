@@ -245,6 +245,7 @@ class ResectionTest(unittest.TestCase):
         self.assertGreater(np.sum(oseg.select_label("split1")), 1000)
         self.assertGreater(np.sum(oseg.select_label("split2")), 1000)
 
+    @unittest.skip("Waiting for implementation of recursive tissue segmentation")
     def test_split_organ_segmentation_recursive(self):
         import lisa.organ_segmentation
         import io3d
@@ -273,12 +274,10 @@ class ResectionTest(unittest.TestCase):
         segmentation = datap["segmentation"]
         organ_label = "liver"
 
-
-
-        # import sed3
-        # # ed = sed3.sed3(labeled_branches, contour=organ_split)
-        # ed = sed3.sed3(organ_split)
-        # ed.show()
+        import sed3
+        # ed = sed3.sed3(labeled_branches, contour=organ_split)
+        ed = sed3.sed3(split_labels_out)
+        ed.show()
 
         self.assertGreater(np.sum(oseg.select_label("split1")), 1000)
         self.assertGreater(np.sum(oseg.select_label("split2")), 1000)
