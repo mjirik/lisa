@@ -143,12 +143,12 @@ class QmiscTest(unittest.TestCase):
         new_filename = misc.suggest_filename(filename, exists=False)
         self.assertTrue(new_filename == "mujsoubor-a24.txt")
 
-    def test_getVersionString(self):
-        """
-        """
-        verstr = qmisc.getVersionString()
-
-        self.assertTrue(type(verstr) == str)
+    # def test_getVersionString(self):
+    #     """
+    #     """
+    #     verstr = qmisc.getVersionString()
+    #
+    #     self.assertTrue(type(verstr) == str)
 
     def test_fix_crinfo(self):
         crinfo = [[10, 15], [30, 40], [1, 50]]

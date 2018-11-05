@@ -177,43 +177,43 @@ def isSparseMatrix(obj):
 #     return crinfo
 
 
-def getVersionString():
-    """
-    Function return string with version information.
-    It is performed by use one of three procedures: git describe,
-    file in .git dir and file __VERSION__.
-    """
-    version_string = None
-    try:
-        version_string = subprocess.check_output(['git', 'describe'])
-        if sys.version_info.major == 3:
-            version_string = version_string.decode("utf8")
-    except:
-        logger.warning('Command "git describe" is not working')
-
-    if version_string == None:  # noqa
-        try:
-            path_to_version = os.path.join(path_to_script,
-                                           '../.git/refs/heads/master')
-            with file(path_to_version) as f:
-                version_string = f.read()
-        except:
-            logger.warning('Problem with reading file ".git/refs/heads/master"')
-
-    if version_string == None:  # noqa
-        try:
-            path_to_version = os.path.join(path_to_script, '../__VERSION__')
-            with file(path_to_version) as f:
-                version_string = f.read()
-            path_to_version = path_to_version + \
-                '  version number is created manually'
-
-        except:
-            logger.warning('Problem with reading file "__VERSION__"')
-
-    # if version_string is None:
-    #     version_string = ""
-    return version_string
+# def getVersionString():
+#     """
+#     Function return string with version information.
+#     It is performed by use one of three procedures: git describe,
+#     file in .git dir and file __VERSION__.
+#     """
+#     version_string = None
+#     try:
+#         version_string = subprocess.check_output(['git', 'describe'])
+#         if sys.version_info.major == 3:
+#             version_string = version_string.decode("utf8")
+#     except:
+#         logger.warning('Command "git describe" is not working')
+#
+#     if version_string == None:  # noqa
+#         try:
+#             path_to_version = os.path.join(path_to_script,
+#                                            '../.git/refs/heads/master')
+#             with file(path_to_version) as f:
+#                 version_string = f.read()
+#         except:
+#             logger.warning('Problem with reading file ".git/refs/heads/master"')
+#
+#     if version_string == None:  # noqa
+#         try:
+#             path_to_version = os.path.join(path_to_script, '../__VERSION__')
+#             with file(path_to_version) as f:
+#                 version_string = f.read()
+#             path_to_version = path_to_version + \
+#                 '  version number is created manually'
+#
+#         except:
+#             logger.warning('Problem with reading file "__VERSION__"')
+#
+#     # if version_string is None:
+#     #     version_string = ""
+#     return version_string
 
 
 def get_one_biggest_object(data):
