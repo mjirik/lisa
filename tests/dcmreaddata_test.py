@@ -41,7 +41,7 @@ class DicomReaderTest(unittest.TestCase):
         import os.path as op
         # sample_data_path = "~/data/medical/orig/sample_data/"
         # sample_data_path = op.expanduser(sample_data_path)
-        sample_data_path = io3d.datasets.join_path("sample_data/")
+        sample_data_path = io3d.datasets.join_path("medical/sample_data/", get_root=True)
         #import matplotlib.pyplot as plt
 
         # dcmdir = lisa.dataset.join_sdp('volumetrie/')
