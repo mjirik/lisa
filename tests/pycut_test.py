@@ -94,7 +94,7 @@ class PycutTest(unittest.TestCase):
         igc = pycut.ImageGraphCut(data)
         #igc.interactivity()
 
-        penalty_array = igc.boundary_penalties_array(axis=0)
+        penalty_array = igc.__boundary_penalties_array(axis=0)
         edge_area_pattern = np.mean(penalty_array[3:5,8:10,2])
         flat_area_pattern = np.mean(penalty_array[1:3,3:6,-4:-2])
         self.assertGreater(flat_area_pattern, edge_area_pattern)
@@ -294,5 +294,7 @@ class PycutTest(unittest.TestCase):
 #        reader = dcmr.DicomReader(dirpath)
 #        self.data3d = reader.get_3Ddata()
 #        self.metadata = reader.get_metaData()
+
+
 if __name__ == "__main__":
     unittest.main()
