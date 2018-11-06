@@ -50,13 +50,30 @@ install:
       # - "easy_install SimpleITK mahotas"
     - pip install -r requirements_pip.txt
     # - if [ ${pack} == "old_mpl" ]; then conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy nose dateutil pandas statsmodels pil six; fi
+#    - git clone https://github.com/mjirik/skelet3d.git
+#    - mkdir skelet3d/build
+#    - cd skelet3d/build
+#    - cmake ..
+#    - cmake --build .
+##    - sudo make install
+#    - sudo make install
+#    - cd ..
+#    - cd ..
+
+    - "echo $LD_LIBRARY_PATH"
     - git clone https://github.com/mjirik/skelet3d.git
     - mkdir skelet3d/build
-    - cd skelet3d/build
-    - cmake ..
-    - cmake --build .
-#    - sudo make install
-    - sudo make install
+    - "pip install -r requirements.txt"
+    - cd skelet3d
+    - 'mkdir build'
+    - "cd build"
+    - "cmake .."
+    - "cmake --build ."
+    - "sudo make install"
+    - pip install .
+    - "cd .."
+    - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
+    - 'sudo ldconfig -v'
     - cd ..
     - cd ..
 
