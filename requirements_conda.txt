@@ -48,4 +48,5 @@ morphsnakes
 # on osx install with pip
 # scikit-fmm
 # -c conda-forge
-skelet3d>=1.7.0
+
+# skelet3d>=1.7.0  # maybe the skelet3d have to be installed by `pip install .` on linux
