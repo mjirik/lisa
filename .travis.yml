@@ -43,29 +43,12 @@ install:
     - conda config --add channels luispedro
     - conda config --add channels menpo
     - conda list
-    # Install dependencies
-    - conda install --yes --file requirements_conda.txt python=$CONDA_PYTHON_VERSION
-#    - pip install -r ci/requirements_ci.txt
-#    - pip install coverage
-    - conda install coveralls nose python=$CONDA_PYTHON_VERSION
-      # - "easy_install SimpleITK mahotas"
-    - pip install -r requirements_pip.txt
-#    - pip install coveralls
-    # - if [ ${pack} == "old_mpl" ]; then conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy nose dateutil pandas statsmodels pil six; fi
-#    - git clone https://github.com/mjirik/skelet3d.git
-#    - mkdir skelet3d/build
-#    - cd skelet3d/build
-#    - cmake ..
-#    - cmake --build .
-##    - sudo make install
-#    - sudo make install
-#    - cd ..
-#    - cd ..
-
-    - cd ..
-    - conda list
+# install run, test and deploy tools
+    - conda install coveralls pip nose python=$CONDA_PYTHON_VERSION
 
 # install skelet3d
+    - cd .. # go out from lisa dir
+    - conda list
     - pwd
     - echo $LD_LIBRARY_PATH
     - git clone https://github.com/mjirik/skelet3d.git
@@ -83,9 +66,27 @@ install:
     - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
     - sudo ldconfig -v
     - cd ..
+    - cd lisa # Go back to lisa repo
 
-# Go back to lisa repo
-    - cd lisa
+# Install dependencies
+    - conda install --yes --file requirements_conda.txt python=$CONDA_PYTHON_VERSION
+#    - pip install -r ci/requirements_ci.txt
+#    - pip install coverage
+      # - "easy_install SimpleITK mahotas"
+    - pip install -r requirements_pip.txt
+#    - pip install coveralls
+    # - if [ ${pack} == "old_mpl" ]; then conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy nose dateutil pandas statsmodels pil six; fi
+#    - git clone https://github.com/mjirik/skelet3d.git
+#    - mkdir skelet3d/build
+#    - cd skelet3d/build
+#    - cmake ..
+#    - cmake --build .
+##    - sudo make install
+#    - sudo make install
+#    - cd ..
+#    - cd ..
+
+
 
     # fix openssl problem with
     # _openssl.so: undefined symbol: X509_VERIFY_PARAM_set1_ip_asc
@@ -109,10 +110,10 @@ install:
     # - cd ..
     # ubuntu installer is not working
     # - 'sudo ./ubuntu_installer.sh devel'
-#    - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
-#    - 'sudo ldconfig -v'
-#    - sudo ldconfig -v
-    # get sample data for lisa
+    #    - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
+    #    - 'sudo ldconfig -v'
+    #    - sudo ldconfig -v
+# get sample data for lisa
     - ls ~
     - python -m io3d.datasets -l lisa
      #-l volumetrie
