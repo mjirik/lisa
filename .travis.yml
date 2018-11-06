@@ -70,6 +70,7 @@ install:
     - 'sudo ldconfig -v'
     - pwd
     - ls
+    - conda install -c mjirik -conda-forge io3d
     - nosetests
     - cd ..
     # Go back to lisa repo
