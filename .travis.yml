@@ -62,7 +62,7 @@ install:
 #    - cd ..
 
 # install skelet3d
-
+    - pwd
     - echo $LD_LIBRARY_PATH
     - git clone https://github.com/mjirik/skelet3d.git
     - mkdir skelet3d/build
@@ -78,7 +78,6 @@ install:
     - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
     - sudo ldconfig -v
     - cd ..
-    - cd ..
 
     # fix openssl problem with
     # _openssl.so: undefined symbol: X509_VERIFY_PARAM_set1_ip_asc
@@ -93,7 +92,7 @@ install:
 
 
     # - sudo make install
-    # library is installed but not for anaconda
+    # library is installed by pip but not for anaconda
     # gco_python
     # - "git clone https://github.com/mjirik/gco_python.git"
     # - "cd gco_python"
