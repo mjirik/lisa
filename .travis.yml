@@ -61,6 +61,8 @@ install:
 #    - cd ..
 #    - cd ..
 
+# install skelet3d
+
     - echo $LD_LIBRARY_PATH
     - git clone https://github.com/mjirik/skelet3d.git
     - mkdir skelet3d/build
@@ -70,9 +72,8 @@ install:
     - cmake ..
     - cmake --build .
     - sudo make install
-
-# skelet3d package is installed by conda so there is no need to install it again
-#    - pip install .
+    # skelet3d package is installed by conda so there is no need to install it again
+    # - pip install .
     - cd ..
     - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
     - sudo ldconfig -v
