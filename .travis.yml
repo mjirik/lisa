@@ -68,8 +68,10 @@ install:
     - cd ..
     - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
     - 'sudo ldconfig -v'
-    - cd ..
+    - pwd
+    - ls
     - nosetests
+    - cd ..
     # Go back to lisa repo
     - cd lisa
 # Install Lisa dependencies
