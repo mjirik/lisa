@@ -46,10 +46,10 @@ install:
     - conda install --yes --file requirements_conda.txt python=$CONDA_PYTHON_VERSION
 #    - pip install -r ci/requirements_ci.txt
 #    - pip install coverage
-#    - conda install coveralls nose python=$CONDA_PYTHON_VERSION
+    - conda install coveralls nose python=$CONDA_PYTHON_VERSION
       # - "easy_install SimpleITK mahotas"
     - pip install -r requirements_pip.txt
-    - pip install coveralls
+#    - pip install coveralls
     # - if [ ${pack} == "old_mpl" ]; then conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy nose dateutil pandas statsmodels pil six; fi
 #    - git clone https://github.com/mjirik/skelet3d.git
 #    - mkdir skelet3d/build
@@ -60,6 +60,8 @@ install:
 #    - sudo make install
 #    - cd ..
 #    - cd ..
+
+    - cd ..
 
 # install skelet3d
     - pwd
@@ -78,6 +80,9 @@ install:
     - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
     - sudo ldconfig -v
     - cd ..
+
+# Go back to lisa repo
+    - cd lisa
 
     # fix openssl problem with
     # _openssl.so: undefined symbol: X509_VERIFY_PARAM_set1_ip_asc
