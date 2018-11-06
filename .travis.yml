@@ -31,11 +31,12 @@ before_install:
 
 # command to install dependencies
 install:
+# apt-get setup
     - sudo apt-get update -qq
     - sudo apt-get install -qq git g++ sox make curl cmake
     # - sudo apt-get install -qq python python-dev
     - sudo apt-get install -qq libinsighttoolkit3-dev libpng12-dev libgdcm2-dev
-
+# Conda setup
     - conda update --yes conda
     - conda config --add channels conda-forge
     - conda config --add channels SimpleITK
@@ -45,7 +46,6 @@ install:
     - conda list
 # install run, test and deploy tools
     - conda install coveralls pip nose python=$CONDA_PYTHON_VERSION
-
 # install skelet3d
     - cd .. # go out from lisa dir
     - conda list
@@ -66,9 +66,9 @@ install:
     - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
     - sudo ldconfig -v
     - cd ..
-    - cd lisa # Go back to lisa repo
-
-# Install dependencies
+    # Go back to lisa repo
+    - cd lisa
+# Install Lisa dependencies
     - conda install --yes --file requirements_conda.txt python=$CONDA_PYTHON_VERSION
 #    - pip install -r ci/requirements_ci.txt
 #    - pip install coverage
@@ -85,9 +85,6 @@ install:
 #    - sudo make install
 #    - cd ..
 #    - cd ..
-
-
-
     # fix openssl problem with
     # _openssl.so: undefined symbol: X509_VERIFY_PARAM_set1_ip_asc
     # conda install openssl=1.0.2
@@ -128,7 +125,8 @@ before_script:
     # GUI
     - "export DISPLAY=:99.0"
     - "sh -e /etc/init.d/xvfb start"
-    - sleep 3 # give xvfb sume time to start
+    # give xvfb sume time to start
+    - sleep 3
 
 # command to run tests
 #script: nosetests --with-coverage --verbose -d --cover-package=lisa
