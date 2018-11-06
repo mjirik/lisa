@@ -60,20 +60,19 @@ install:
 #    - cd ..
 #    - cd ..
 
-    - "echo $LD_LIBRARY_PATH"
+    - echo $LD_LIBRARY_PATH
     - git clone https://github.com/mjirik/skelet3d.git
     - mkdir skelet3d/build
-    - "pip install -r requirements.txt"
+    - pip install -r requirements.txt
     - cd skelet3d
-    - 'mkdir build'
-    - "cd build"
-    - "cmake .."
-    - "cmake --build ."
-    - "sudo make install"
+    - cd build
+    - cmake ..
+    - cmake --build .
+    - sudo make install
     - pip install .
-    - "cd .."
+    - cd ..
     - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
-    - 'sudo ldconfig -v'
+    - sudo ldconfig -v
     - cd ..
     - cd ..
 
@@ -99,9 +98,9 @@ install:
     # - cd ..
     # ubuntu installer is not working
     # - 'sudo ./ubuntu_installer.sh devel'
-    - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
+#    - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
 #    - 'sudo ldconfig -v'
-    - sudo ldconfig -v
+#    - sudo ldconfig -v
     # get sample data for lisa
     - ls ~
     - python -m io3d.datasets -l lisa
