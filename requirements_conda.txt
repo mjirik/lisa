@@ -48,4 +48,4 @@ morphsnakes
 # on osx install with pip
 # scikit-fmm
 # -c conda-forge
-skelet3d>=1.11.0
+skelet3d>=1.7.0
