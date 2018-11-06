@@ -68,8 +68,8 @@ install:
     - echo $LD_LIBRARY_PATH
     - git clone https://github.com/mjirik/skelet3d.git
     - mkdir skelet3d/build
-    - pip install -r requirements.txt
     - cd skelet3d
+    - pip install -r requirements.txt
     - cd build
     - cmake ..
     - cmake --build .
