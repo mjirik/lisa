@@ -30,22 +30,22 @@ h5py>=2.5.0
 opencv>=2.4.0
 libpng
 pandas
+ipdb>=0.8.1
 # -c luispedro but only for linux-64
 # mahotas
+joblib>=0.8.4
 # -c mjirik
+sftpsync>=1.0.2
 pydicom>=0.9.9
-imcut>=1.2.41
+imcut>=1.3.1
 dicom2fem>=1.0.0
 sed3>=1.1.17
 io3d>=1.0.18
 imtools>=0.1.78
 # pygco==0.0.5
-joblib>=0.8.4
 morphsnakes
-skelet3d
-sftpsync>=1.0.2
 # geodesic distance transform -c jmargeta -c jakirkham
 # on osx install with pip
 # scikit-fmm
 # -c conda-forge
-ipdb>=0.8.1
+skelet3d>=1.11.0

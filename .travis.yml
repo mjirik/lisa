@@ -69,7 +69,9 @@ install:
     - cmake ..
     - cmake --build .
     - sudo make install
-    - pip install .
+
+# skelet3d package is installed by conda so there is no need to install it again
+#    - pip install .
     - cd ..
     - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
     - sudo ldconfig -v
