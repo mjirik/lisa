@@ -90,8 +90,10 @@ install:
     - python -m io3d.datasets -l lisa
      #-l volumetrie
 #    - ls ~
+    - pwd
     - ls ~/data/medical/orig
-#    - ls ~/data/medical/orig/volumetrie
+    - ls ~/data/medical/orig/volumetrie
+
 #    - ls ~/data/medical/orig/sample_data/volumetrie
 
 before_script:

@@ -48,11 +48,11 @@ class DicomReaderTest(unittest.TestCase):
         # sample_data_path = "~/data/medical/orig/sample_data/"
         # sample_data_path = op.expanduser(sample_data_path)
         # sample_data_path = io3d.datasets.join_path("medical/orig/sample_data/", get_root=True)
-        sample_data_path = io3d.datasets.join_path("medical/orig/", get_root=True)
+        sample_data_path = io3d.datasets.join_path("medical", "orig", get_root=True)
         #import matplotlib.pyplot as plt
 
         # dcmdir = lisa.dataset.join_sdp('volumetrie/')
-        dcmdir = os.path.join(sample_data_path, 'volumetrie/')
+        dcmdir = os.path.join(sample_data_path, 'volumetrie')
         # dcmdir = '/home/mjirik/data/medical/data_orig/jatra-kma/jatra_5mm/'
         #self.data3d, self.metadata = dcmr.dcm_read_from_dir(self.dcmdir)
         reader = dcmr.DicomReader(dcmdir)
