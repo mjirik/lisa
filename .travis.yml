@@ -99,9 +99,9 @@ install:
     - cd ..
     - which pip
     - which python
-    - which nose
     - python --version
     - which cmake
+    - which nosetests
     - conda list
     - pwd
     - echo $LD_LIBRARY_PATH
@@ -128,9 +128,9 @@ install:
     - cd lisa
     - which pip
     - which python
-    - which nose
     - python --version
     - which cmake
+    - which nosetests
     - conda list
     - python -c "import skelet3d"
 
