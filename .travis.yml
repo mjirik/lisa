@@ -123,9 +123,10 @@ install:
     - 'sudo ldconfig -v'
     - pwd
     - ls
-    - conda install -c mjirik io3d skelet3d
     - nosetests
     - cd ..
+    - conda install -c mjirik io3d skelet3d
+    - nosetests skelet3d/tests/
     # Go back to lisa repo
     - cd lisa
     - which pip
