@@ -91,7 +91,7 @@ install:
 
 # install skelet3d
     # prevent to install dependencies by pip
-    - conda install numpy scipy
+    # - conda install numpy scipy
     # go out from lisa dir
     - cd ..
     - conda list
