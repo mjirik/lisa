@@ -46,35 +46,6 @@ install:
     - conda list
 # install run, test and deploy tools
     - conda install coveralls pip nose python=$CONDA_PYTHON_VERSION
-# install skelet3d
-    # prevent to install dependencies by pip
-    - conda install numpy scipy
-    # go out from lisa dir
-    - cd ..
-    - conda list
-    - pwd
-    - echo $LD_LIBRARY_PATH
-    - git clone https://github.com/mjirik/skelet3d.git
-    - mkdir skelet3d/build
-    - cd skelet3d
-    - pip install -r requirements.txt
-    - cd build
-    - cmake ..
-    - cmake --build .
-    - sudo make install
-    - conda list
-    # skelet3d package is installed by conda so there is no need to install it again
-    - pip install .
-    - cd ..
-    - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
-    - 'sudo ldconfig -v'
-    - pwd
-    - ls
-    - conda install -c mjirik io3d
-    - nosetests
-    - cd ..
-    # Go back to lisa repo
-    - cd lisa
 # Install Lisa dependencies
     - conda install --yes --file requirements_conda.txt python=$CONDA_PYTHON_VERSION
 #    - pip install -r ci/requirements_ci.txt
@@ -117,6 +88,37 @@ install:
     #    - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
     #    - 'sudo ldconfig -v'
     #    - sudo ldconfig -v
+
+# install skelet3d
+    # prevent to install dependencies by pip
+    - conda install numpy scipy
+    # go out from lisa dir
+    - cd ..
+    - conda list
+    - pwd
+    - echo $LD_LIBRARY_PATH
+    - git clone https://github.com/mjirik/skelet3d.git
+    - mkdir skelet3d/build
+    - cd skelet3d
+    - pip install -r requirements.txt
+    - cd build
+    - cmake ..
+    - cmake --build .
+    - sudo make install
+    - conda list
+    # skelet3d package is installed by conda so there is no need to install it again
+    - pip install .
+    - cd ..
+    - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
+    - 'sudo ldconfig -v'
+    - pwd
+    - ls
+    - conda install -c mjirik io3d
+    - nosetests
+    - cd ..
+    # Go back to lisa repo
+    - cd lisa
+
 # get sample data for lisa
     - ls ~
     - python -m io3d.datasets -l lisa
