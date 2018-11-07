@@ -114,6 +114,7 @@ install:
     - cmake --build .
     - sudo make install
     - conda list
+    - pip freeze
     # skelet3d package is installed by conda so there is no need to install it again
     - pip install .
     - cd ..
