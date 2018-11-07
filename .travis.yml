@@ -118,6 +118,10 @@ install:
     - cd ..
     # Go back to lisa repo
     - cd lisa
+    - which pip
+    - which python
+    - which cmake
+    - conda list
 
 # get sample data for lisa
     - ls ~
