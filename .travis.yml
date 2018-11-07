@@ -44,8 +44,11 @@ install:
     - conda config --add channels luispedro
     - conda config --add channels menpo
     - conda list
+# create
+    - conda create lisa
+    - activate lisa
 # install run, test and deploy tools
-    - conda install coveralls pip nose python=$CONDA_PYTHON_VERSION
+    - conda install coveralls pip nose cmake python=$CONDA_PYTHON_VERSION
 # Install Lisa dependencies
     - conda install --yes --file requirements_conda.txt python=$CONDA_PYTHON_VERSION
 #    - pip install -r ci/requirements_ci.txt
@@ -96,6 +99,7 @@ install:
     - cd ..
     - which pip
     - which python
+    - which nose
     - python --version
     - which cmake
     - conda list
@@ -124,6 +128,7 @@ install:
     - cd lisa
     - which pip
     - which python
+    - which nose
     - python --version
     - which cmake
     - conda list
