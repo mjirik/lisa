@@ -45,7 +45,7 @@ install:
     - conda config --add channels menpo
     - conda list
 # create
-    - conda create lisa
+    - conda create -n lisa
     - activate lisa
 # install run, test and deploy tools
     - conda install coveralls pip nose cmake python=$CONDA_PYTHON_VERSION
