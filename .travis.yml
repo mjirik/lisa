@@ -91,7 +91,7 @@ install:
 
 # install skelet3d
     # prevent to install dependencies by pip
-    # - conda install numpy scipy
+    # - conda install numpy scipy python=$CONDA_PYTHON_VERSION
     # go out from lisa dir
     - cd ..
     - conda list
@@ -122,6 +122,7 @@ install:
     - which python
     - which cmake
     - conda list
+    - python -c "import skelet3d"
 
 # get sample data for lisa
     - ls ~
