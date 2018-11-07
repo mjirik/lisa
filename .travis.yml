@@ -94,6 +94,10 @@ install:
     # - conda install numpy scipy python=$CONDA_PYTHON_VERSION
     # go out from lisa dir
     - cd ..
+    - which pip
+    - which python
+    - python --version
+    - which cmake
     - conda list
     - pwd
     - echo $LD_LIBRARY_PATH
@@ -120,6 +124,7 @@ install:
     - cd lisa
     - which pip
     - which python
+    - python --version
     - which cmake
     - conda list
     - python -c "import skelet3d"
