@@ -117,13 +117,13 @@ install:
     - pip freeze
     # skelet3d package is installed by conda so there is no need to install it again
 #    - pip install .
-    - python setup.py install
+#    - python setup.py install
     - cd ..
     - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
     - 'sudo ldconfig -v'
     - pwd
     - ls
-    - conda install -c mjirik io3d
+    - conda install -c mjirik io3d skelet3d
     - nosetests
     - cd ..
     # Go back to lisa repo
