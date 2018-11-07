@@ -46,7 +46,7 @@ install:
     - conda list
 # create
     - conda create -n lisa
-    - activate lisa
+    - source activate lisa
 # install run, test and deploy tools
     - conda install coveralls pip nose cmake python=$CONDA_PYTHON_VERSION
 # Install Lisa dependencies
