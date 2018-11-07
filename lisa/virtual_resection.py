@@ -711,6 +711,7 @@ def label_volumetric_vessel_tree(oseg, vessel_label=None, write_to_oseg=True, ne
     :return:
     """
     logger.debug("vessel_label {}".format(vessel_label))
+    logger.debug("python version {} {}".format(sys.version_info, sys.executable))
     import skelet3d
     if vessel_label is None:
         vessel_volume = oseg.segmentation > 0
