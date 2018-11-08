@@ -112,8 +112,6 @@ install:
     - cd build
     - cmake ..
     - cmake --build .
-    - ls
-    - cp libBinaryThinningCxxShared.so ~/miniconda/envs/lisa36/lib/
 #    - sudo make install
     - conda list
     - pip freeze
@@ -121,6 +119,10 @@ install:
 #    - pip install .
 #    - python setup.py install
     - cd ..
+    - ls
+    - ls build
+    - ls bin
+    - cp bin/libBinaryThinningCxxShared.so ~/miniconda/envs/lisa36/lib/
     - conda info -a
 #    - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
 #    - 'sudo ldconfig -v'
