@@ -112,15 +112,18 @@ install:
     - cd build
     - cmake ..
     - cmake --build .
-    - sudo make install
+    - ls
+    - cp libBinaryThinningCxxShared.so ~/miniconda/envs/lisa36/lib/
+#    - sudo make install
     - conda list
     - pip freeze
     # skelet3d package is installed by conda so there is no need to install it again
 #    - pip install .
 #    - python setup.py install
     - cd ..
-    - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
-    - 'sudo ldconfig -v'
+    - conda info -a
+#    - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
+#    - 'sudo ldconfig -v'
     - pwd
     - ls
     - nosetests
