@@ -1598,7 +1598,7 @@ class OrganSegmentation():
 
     def split_tissue_with_labeled_volumetric_vessel_tree(
             self, organ_label, trunk_label, branch_labels, split_labels=None,
-            organ_split_label_format_pattern="{label}{i}"):
+            organ_split_label_format_pattern="{label}{i}", on_missed_branch="split"):
         """
 
         :param organ_label:
@@ -1624,12 +1624,13 @@ class OrganSegmentation():
 
         trunk_label = self.nlabels(trunk_label)
         branch_labels = self.nlabels(branch_labels)
-        split, connected = virtual_resection.split_tissue_on_bifurcation(
+        split, connected = virtual_resection.split_tissue_on_labeled_tree(
             self.segmentation,
             trunk_label,
             branch_labels=branch_labels,
             tissue_segmentation=self.select_label(organ_label),
-            ignore_labels=[self.nlabels(organ_label)]
+            ignore_labels=[self.nlabels(organ_label)],
+            on_missed_branch=on_missed_branch
         )
 
         if split_labels is None:

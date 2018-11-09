@@ -19,6 +19,7 @@ from PyQt4.QtCore import Qt
 import lisa.lisaWindow
 import lisa.organ_segmentation
 from lisa.lisaWindow import OrganSegmentationWindow
+import io3d.datasets
 
 
 class LisaGUITest(unittest.TestCase):
@@ -53,6 +54,12 @@ class LisaGUITest(unittest.TestCase):
     @attr('interactive')
     def test_split(self):
         self.oseg_w.oseg.load_data(r"C:\Users\miros\lisa_data\P09_cropped_portal_tree_labeled.pklz")
+        self.app.exec_()
+        # self.oseg_w.loadDataFile()
+
+    @attr('interactive')
+    def test_split_on_ircad(self):
+        self.oseg_w.oseg.load_data(io3d.datasets.join_path("medical", "orig", "3Dircadb1.1", "PATIENT_DICOM", get_root=True))
         self.app.exec_()
         # self.oseg_w.loadDataFile()
 

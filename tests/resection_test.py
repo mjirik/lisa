@@ -193,7 +193,7 @@ class ResectionTest(unittest.TestCase):
         # ed.show()
         organseg = ima.select_labels(segmentation, organ_label, slab)
 
-        organ_split, connected = lisa.virtual_resection.split_tissue_on_bifurcation(
+        organ_split, connected = lisa.virtual_resection.split_tissue_on_labeled_tree(
             labeled_branches, seglabel1, [seglabel2, seglabel3], organseg
         )
 
@@ -244,6 +244,126 @@ class ResectionTest(unittest.TestCase):
 
         self.assertGreater(np.sum(oseg.select_label("split1")), 1000)
         self.assertGreater(np.sum(oseg.select_label("split2")), 1000)
+
+    def generate_trifurcation(self):
+        import io3d.datasets
+        datap = io3d.datasets.generate_synthetic_liver(return_dataplus=True)
+        slab = datap["slab"]
+        # third missed branch
+        third_branch_location = [slice(40, 44), slice(90, 120), slice(128, 133)]
+        datap["segmentation"][third_branch_location] = slab['porta']
+        datap["data3d"][third_branch_location] += 206
+        return datap
+
+    def test_split_organ_segmentation_missed_branch(self):
+        import lisa.organ_segmentation
+        datap = self.generate_trifurcation()
+        import io3d
+        # datap = io3d.datasets.generate_abdominal()
+        oseg = lisa.organ_segmentation.OrganSegmentation()
+        oseg.import_dataplus(datap)
+        # import sed3
+        # ed = sed3.sed3(oseg.data3d, contour=oseg.segmentation)
+        # ed.show()
+        oseg.label_volumetric_vessel_tree("porta")
+        labeled_branches = oseg.segmentation
+        seeds = np.zeros_like(oseg.data3d, dtype=np.int)
+        seeds[40, 125, 166] = 1
+        seeds[40, 143, 130] = 2
+        seeds[40, 125, 115] = 3
+
+        seglabel1 = labeled_branches[seeds == 1][0]
+        seglabel2 = labeled_branches[seeds == 2][0]
+        seglabel3 = labeled_branches[seeds == 3][0]
+        split_labels_out, connected = oseg.split_tissue_with_labeled_volumetric_vessel_tree("liver",
+                                                                                            seglabel1, [seglabel2, seglabel3],
+                                                                                            split_labels=["split1", "split2"],
+                                                                                            on_missed_branch="split"
+                                                                                            )
+
+        # import sed3
+        # ed = sed3.sed3(oseg.data3d, contour=oseg.select_label("split1"))
+        # ed.show()
+
+        self.assertGreater(np.sum(oseg.select_label("split1")), 1000)
+        self.assertGreater(np.sum(oseg.select_label("split2")), 1000)
+
+    def test_split_organ_segmentation_missed_branch_neighboor_to_branches_organ_label(self):
+        import lisa.organ_segmentation
+        datap = self.generate_trifurcation()
+        import io3d
+        # datap = io3d.datasets.generate_abdominal()
+        oseg = lisa.organ_segmentation.OrganSegmentation()
+        oseg.import_dataplus(datap)
+        # import sed3
+        # ed = sed3.sed3(oseg.data3d, contour=oseg.segmentation)
+        # ed.show()
+        oseg.label_volumetric_vessel_tree("porta")
+        labeled_branches = oseg.segmentation
+        # import sed3
+        # ed = sed3.sed3(oseg.segmentation, contour=oseg.segmentation)
+        # ed.show()
+        seeds = np.zeros_like(oseg.data3d, dtype=np.int)
+        seeds[40, 125, 166] = 1
+        seeds[40, 143, 130] = 2
+        seeds[42, 100, 130] = 3
+
+        seglabel1 = labeled_branches[seeds == 1][0]
+        seglabel2 = labeled_branches[seeds == 2][0]
+        seglabel3 = labeled_branches[seeds == 3][0]
+        split_labels_out, connected = oseg.split_tissue_with_labeled_volumetric_vessel_tree(
+            "liver", seglabel1, [seglabel2, seglabel3],
+            split_labels=["split1", "split2"],
+            on_missed_branch="orig"
+        )
+
+        # import sed3
+        # # ed = sed3.sed3(oseg.data3d, contour=oseg.select_label("split1"))
+        # ed = sed3.sed3(oseg.segmentation, contour=oseg.select_label("split1"))
+        # ed.show()
+
+        # self.assertEqual(len(split_labels_out), 3)
+        self.assertGreater(np.sum(oseg.select_label("split1")), 1000)
+        self.assertGreater(np.sum(oseg.select_label("split2")), 1000)
+        self.assertGreater(np.sum(oseg.select_label("liver")), 1000)
+
+    def test_split_organ_segmentation_missed_branch_neighboor_to_trunk_organ_label(self):
+        import lisa.organ_segmentation
+        datap = self.generate_trifurcation()
+        import io3d
+        # datap = io3d.datasets.generate_abdominal()
+        oseg = lisa.organ_segmentation.OrganSegmentation()
+        oseg.import_dataplus(datap)
+        # import sed3
+        # ed = sed3.sed3(oseg.data3d, contour=oseg.segmentation)
+        # ed.show()
+        oseg.label_volumetric_vessel_tree("porta")
+        labeled_branches = oseg.segmentation
+        # import sed3
+        # ed = sed3.sed3(oseg.segmentation, contour=oseg.segmentation)
+        # ed.show()
+        seeds = np.zeros_like(oseg.data3d, dtype=np.int)
+        seeds[40, 125, 166] = 1
+        seeds[40, 143, 130] = 2
+        seeds[40, 125, 115] = 3
+
+        seglabel1 = labeled_branches[seeds == 1][0]
+        seglabel2 = labeled_branches[seeds == 2][0]
+        seglabel3 = labeled_branches[seeds == 3][0]
+        split_labels_out, connected = oseg.split_tissue_with_labeled_volumetric_vessel_tree(
+            "liver", seglabel1, [seglabel2, seglabel3],
+            split_labels=["split1", "split2"],
+            on_missed_branch="orig"
+        )
+
+        # import sed3
+        # ed = sed3.sed3(oseg.data3d, contour=oseg.select_label("split1"))
+        # ed.show()
+
+        # self.assertEqual(len(split_labels_out), 3)
+        self.assertGreater(np.sum(oseg.select_label("split1")), 1000)
+        self.assertGreater(np.sum(oseg.select_label("split2")), 1000)
+        self.assertGreater(np.sum(oseg.select_label("liver")), 1000)
 
     @unittest.skip("Waiting for implementation of recursive tissue segmentation")
     def test_split_organ_segmentation_recursive(self):

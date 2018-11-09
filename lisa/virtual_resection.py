@@ -456,12 +456,14 @@ def split_organ_by_plane(data, seeds):
     return segm, dist1, dist2
 
 
-def split_tissue_on_bifurcation(labeled_branches,
-                                trunk_label, branch_labels,
-                                tissue_segmentation, neighbors_list=None,
-                                ignore_labels=None,
-                                ignore_trunk=True,
-                                ):
+def split_tissue_on_labeled_tree(labeled_branches,
+                                 trunk_label, branch_labels,
+                                 tissue_segmentation, neighbors_list=None,
+                                 ignore_labels=None,
+                                 ignore_trunk=True,
+                                 on_missed_branch="split",
+
+                                 ):
     """
     Based on pre-labeled vessel tree split surrounding tissue into two part.
     The connected sub tree is computed and used internally.
@@ -472,6 +474,11 @@ def split_tissue_on_bifurcation(labeled_branches,
     :param tissue_segmentation: ndimage with bool type. Organ is True, the rest is False.
     :param ignore_trunk: True or False
     :param ignore_labels: list of labels which will be ignored
+    :param on_missed_branch: str, ["split", "organ_label", exception]. Missed label is label directly connected
+    to trunk but with no branch label inside.
+    "split" will ignore mised label.
+    "orig" will leave the original area label.
+    "exception", will throw the exception.
     :return:
     """
     # bl = lisa.virtual_resection.branch_labels(oseg, "porta")
@@ -499,7 +506,9 @@ def split_tissue_on_bifurcation(labeled_branches,
     # ex
     # print(neighbors_list)
     # find whole branche
-    segmentations = [None] * len(branch_labels)
+    # segmentations = [None] * len(branch_labels)
+    segmentation = np.zeros_like(labeled_branches, dtype=int)
+    new_branches = []
     connected = [None] * len(branch_labels)
 
     for i, branch_label in enumerate(branch_labels):
@@ -512,15 +521,37 @@ def split_tissue_on_bifurcation(labeled_branches,
         ignore_labels_i.extend(ignore_labels)
         connected_i = imma.measure.get_connected_labels(
             neighbors_list, branch_label, ignore_labels_i)
-        segmentations[i] = ima.select_labels(labeled_branches, connected_i).astype(np.int8)
+        # segmentations[i] = ima.select_labels(labeled_branches, connected_i).astype(np.int8)
+        select = ima.select_labels(labeled_branches, connected_i).astype(np.int8)
+        select = select > 0
+        if np.max(segmentation[select]) > 0:
+            logger.debug("Missing branch connected to branch and other branch or trunk.")
+            union = (segmentation * select) > 0
+            segmentation[select] = i + 1
+            if on_missed_branch == "split":
+                segmentation[union] = 0
+            elif on_missed_branch == "orig":
+                new_branche_label = len(branch_labels) + len(new_branches) + 1
+                logger.debug("new branch label {}".format(new_branche_label))
+                segmentation[union] = new_branche_label
+                new_branches.append(new_branche_label)
+            elif on_missed_branch == "exception":
+                raise ValueError("Missing one vessel")
+            else:
+                raise ValueError("Unknown 'on_missed_label' parameter.")
+        else:
+            segmentation[select] = i + 1
+        # error
+        # else:
+        #   segmentation[select] = i + 1
         connected[i] = connected_i
-
-    if np.max(np.sum(segmentations, 0)) > 1:
-        ValueError("Missing one vessel")
-
-    for i, branch_label in enumerate(branch_labels):
-        segmentations[i] = segmentations[i] * (i + 1)
-    seg = np.sum(segmentations, 0)
+    seg = segmentation
+    # if np.max(np.sum(segmentations, 0)) > 1:
+    #     raise ValueError("Missing one vessel")
+    #
+    # for i, branch_label in enumerate(branch_labels):
+    #     segmentations[i] = segmentations[i] * (i + 1)
+    # seg = np.sum(segmentations, 0)
 
     # ignore_labels1 = [0, trunk_label, branch_label2]
     # ignore_labels1.extend(ignore_labels)
@@ -539,6 +570,7 @@ def split_tissue_on_bifurcation(labeled_branches,
     #     ValueError("Missing one vessel")
 
     dseg = ima.distance_segmentation(seg)
+    logger.debug("output unique labels {}".format(np.unique(dseg)))
     # organseg = ima.select_labels(segmentation, organ_label, slab).astype(np.int8)
     dseg[~tissue_segmentation.astype(np.bool)] = 0
 
