@@ -1309,7 +1309,8 @@ class OrganSegmentation():
         """
         from_label = self.nlabels(from_label)
         to_label = self.nlabels(to_label)
-        self.segmentation[self.segmentation == from_label] = to_label
+        select = self.select_label(from_label)
+        self.segmentation[select] = to_label
 
     def portalVeinSegmentation(self, inner_vessel_label="porta", organ_label="liver", outer_vessel_label=None,
                                forbidden_label=None, threshold=None, interactivity=True, seeds=None, **inparams):

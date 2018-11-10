@@ -11,6 +11,7 @@
 * Read/write DICOM overlay
 * Cancel label selection
 * Split tissue split tissue near to missed branche between selected branches
+* Relabel multiple labels to one
 
 ## 1.9.51 2018-07-21
 
