@@ -53,6 +53,7 @@ from . import dictEditQt
 from . import segmentationQt
 from . import virtual_resection
 from io3d.network import download_file
+from imtools.select_label_qt import SelectLabelWidget
 
 def find_logo():
     logopath = os.path.join(path_to_script, "./icons/LISA256.png")
@@ -950,7 +951,7 @@ class OrganSegmentationWindow(QMainWindow):
 
     def action_segmentation_relabel(self):
         self.statusBar().showMessage('Relabelling segmentation')
-        no, from_label = self.ui_select_label("Select from_label for renaming")
+        no, from_label = self.ui_select_label("Select from_label for renaming", multiple_choice=True)
         no, to_label = self.ui_select_label("Select to_label for renaming")
         self.oseg.segmentation_relabel(from_label=from_label, to_label=to_label)
         self.statusBar().showMessage('Ready. Relabeled from ' + str(from_label) + " to " + str(to_label))
@@ -1052,7 +1053,7 @@ class OrganSegmentationWindow(QMainWindow):
         return "Sliver score: " + str(overall_score)
 
     def ui_select_label(self, headline, text_inside="select from existing labels or write a new one",
-                        return_i=True, return_str=True):
+                        return_i=True, return_str=True, multiple_choice=False):
         """ Get label with GUI.
 
         :return: numeric_label, string_label
@@ -1065,6 +1066,7 @@ class OrganSegmentationWindow(QMainWindow):
             list(self.oseg.slab.keys()),
             headline,
             text_inside=text_inside,
+            multiple_choice=multiple_choice
         )
         numlab = self.oseg.nlabels(strlab)
         if return_i and return_str:
@@ -1074,26 +1076,45 @@ class OrganSegmentationWindow(QMainWindow):
         else:
             return numlab
 
-    def ui_select_from_list(self,some_list, headline, text_inside=""):
+    def ui_select_from_list(self,some_list, headline, text_inside="", multiple_choice=False):
         """ Select string from list with GUI.
 
         :return: selected string
         """
 
-        # import copy
-        # texts = copy.copy(self.oseg.slab.keys())
-        strlab, ok = \
-            QInputDialog.getItem(self,
-                                 # self.qapp,
-                                 headline,
-                                 text_inside,
-                                 some_list,
-                                 editable=True)
+        if multiple_choice:
+            slab_dialog = QtGui.QDialog(self)
+            layout = QtGui.QGridLayout()
+            slab_dialog.setLayout(layout)
+            slab_wg = SelectLabelWidget(show_ok_button=False)
+            slab_wg.init_slab(slab=self.oseg.slab, show_ok_button=False)
+            slab_wg.update_slab_ui()
 
-        if not ok:
-            raise ValueError("Selection canceled")
+            layout.addWidget(slab_wg)
+            ok = QPushButton("ok")
+            ok.clicked.connect(slab_dialog.close)
+            layout.addWidget(ok)
+            self._ok_button_to_click_for_testing = ok
+            slab_dialog.exec_()
 
-        return str(strlab)
+            labels = slab_wg.get_selected_labels()
+            labels = self.oseg.nlabels(labels, return_mode="str")
+            strlab = labels
+        else:
+            strlab, ok = \
+                QInputDialog.getItem(self,
+                                     # self.qapp,
+                                     headline,
+                                     text_inside,
+                                     some_list,
+                                     editable=True)
+
+            if not ok:
+                raise ValueError("Selection canceled")
+            strlab = str(strlab)
+
+        # print("strlab", strlab)
+        return strlab
 
     def ui_get_double(self, headline, value=0.0, **kwargs):
         """

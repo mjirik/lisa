@@ -1810,6 +1810,9 @@ class OrganSegmentation():
         # segm = imtools.show_segmentation.select_labels(segmentation=self.segmentation, labels=labels)
         # self.
 
+    def get_body_navigation_structures(self):
+        import bodynavigation
+
     def make_run(self):
         """ Non-interactive mode
         :return:

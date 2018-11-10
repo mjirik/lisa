@@ -63,6 +63,12 @@ class LisaGUITest(unittest.TestCase):
         self.app.exec_()
         # self.oseg_w.loadDataFile()
 
+    @attr('interactive')
+    def test_relabel(self):
+        self.oseg_w.oseg.load_data(io3d.datasets.join_path("medical", "orig", "3Dircadb1.1", "PATIENT_DICOM", get_root=True))
+        self.oseg_w.ui_select_label("hura")
+        self.app.exec_()
+
 
 if __name__ == "__main__":
     unittest.main()
