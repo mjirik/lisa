@@ -2,15 +2,18 @@
 
 ## Unreleased 
 
-* New save seeds for later use
-* Simple GUI for select from list
-* New feature - branch vessel
-* New feature - split tissue based on labeled vessels
-* New select label dialog (require less space)
-* More descriptive status messages
-* Read/write DICOM overlay
-* Cancel label selection
-* Split tissue split tissue near to missed branche between selected branches
+* [new] Save seeds for later use
+* [new] Turn convex area into seeds
+* [new] Dialog before delete all seeds 
+* [new] Label vessel tree
+* [new] Split tissue based on labeled vessel tree
+* [new] Simple GUI for select from list
+* [new] Select label dialog (require less space)
+* [improvement] More descriptive status messages
+* [improvement] Split tissue split tissue near to missed branche between selected branches
+* [improvement] Relabel multiple labels to one label
+* [fix] Read/write DICOM overlay
+* [fix] Cancel label selection
 
 ## 1.9.51 2018-07-21
 
