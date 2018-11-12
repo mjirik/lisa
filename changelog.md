@@ -3,6 +3,7 @@
 ## Unreleased 
 
 * [new] Body navigation structures
+
 * [new] Save seeds for later use
 * [new] Turn convex area into seeds
 * [new] Dialog before delete all seeds 
