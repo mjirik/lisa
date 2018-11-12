@@ -259,7 +259,7 @@ class OrganSegmentationWindow(QMainWindow):
                                   finish_msg="Ready. Body navigation structures are in segmentation now."
                                   )
 
-        self.__add_action_to_menu(imageMenu, "&Precise body navigation structures", self.oseg.get_body_navigation_structures,
+        self.__add_action_to_menu(imageMenu, "&Precise body navigation structures", self.oseg.get_body_navigation_structures_precise,
                                   tip="Put structures located by bodynavigation into segmentataion",
                                   init_msg="Get precise body navigation structures ...",
                                   finish_msg="Ready. Body navigation structures are in segmentation now."
