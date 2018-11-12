@@ -2,6 +2,8 @@
 
 ## Unreleased 
 
+* [new] Body navigation structures
+
 * New save seeds for later use
 * Simple GUI for select from list
 * New feature - branch vessel

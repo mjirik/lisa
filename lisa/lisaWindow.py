@@ -253,6 +253,18 @@ class OrganSegmentationWindow(QMainWindow):
                                       self.oseg.get_list_of_saved_seeds(), "Save seeds as")),
                                   tip="Save seeds for later use")
 
+        self.__add_action_to_menu(imageMenu, "&Body navigation structures", self.oseg.get_body_navigation_structures,
+                                  tip="Put structures located by bodynavigation into segmentataion",
+                                  init_msg="Get body navigation structures ...",
+                                  finish_msg="Ready. Body navigation structures are in segmentation now."
+                                  )
+
+        self.__add_action_to_menu(imageMenu, "&Precise body navigation structures", self.oseg.get_body_navigation_structures,
+                                  tip="Put structures located by bodynavigation into segmentataion",
+                                  init_msg="Get precise body navigation structures ...",
+                                  finish_msg="Ready. Body navigation structures are in segmentation now."
+                                  )
+
         ###### OPTION MENU ######
         optionMenu = menubar.addMenu('&Option')
         

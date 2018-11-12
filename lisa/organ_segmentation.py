@@ -1813,6 +1813,20 @@ class OrganSegmentation():
 
     def get_body_navigation_structures(self):
         import bodynavigation
+        self.bodynavigation = bodynavigation.BodyNavigation(self.data3d, self.voxelsize_mm)
+
+        bn = self.bodynavigation
+        bn.use_new_get_lungs_setup = True
+        self.segmentation[bn.get_lungs() > 0] = self.nlabels("lungs")
+        self.segmentation[bn.get_spine() > 0] = self.nlabels("spine")
+        # self.segmentation[bn.get_chest() > 0] = self.nlabels("chest")
+
+    def get_body_navigation_structures_precise(self):
+        import bodynavigation.organ_detection
+        self.bodynavigation = bodynavigation.organ_detection.OrganDetection(self.data3d, self.voxelsize_mm)
+        bn = self.bodynavigation
+        self.segmentation[bn.getLungs() > 0] = self.nlabels("lungs")
+        self.segmentation[bn.getBones() > 0] = self.nlabels("bones")
 
     def make_run(self):
         """ Non-interactive mode

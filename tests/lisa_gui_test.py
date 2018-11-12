@@ -69,6 +69,9 @@ class LisaGUITest(unittest.TestCase):
         self.oseg_w.ui_select_label("hura")
         self.app.exec_()
 
+    def test_bodynavigation(self):
+        self.oseg_w.oseg.load_data(io3d.datasets.join_path("medical", "orig", "3Dircadb1.1", "PATIENT_DICOM", get_root=True))
+        self.oseg_w.ui_select_label("hura")
 
 if __name__ == "__main__":
     unittest.main()
