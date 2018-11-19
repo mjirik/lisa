@@ -7,7 +7,9 @@ logger = logging.getLogger(__name__)
 import unittest
 import os.path as op
 from nose.plugins.attrib import attr
+import io3d.datasets
 from lisa import runner
+import lisa.autolisa
 
 
 class MyClass:
@@ -54,3 +56,21 @@ class RunnerTest(unittest.TestCase):
         rnr.run()
 
         self.assertEqual(mcls.retval, 3)
+
+
+
+    def test_lisa_auto(self):
+        """
+        Interactivity is stored to file
+        """
+        dcmdir = io3d.datasets.join_path("medical", "orig", '3Dircadb1.*1', "PATIENT_DICOM", get_root=True)
+        import glob
+        pths = glob.glob(dcmdir)
+        al = lisa.autolisa.AutoLisa()
+        al.run_in_paths(dcmdir)
+        output_paths = glob.glob(op.expanduser("~/lisa_data/"))
+
+        self.assertGreater(len(output_paths), 0)
+
+
+

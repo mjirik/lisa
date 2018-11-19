@@ -180,6 +180,8 @@ class OrganSegmentation():
             run_organ_segmentation=False,
             run_vessel_segmentation=False,
             run_vessel_segmentation_params={},
+            run_list = None,
+            get_series_number_callback=None
 
             #           iparams=None,
     ):
@@ -207,6 +209,8 @@ class OrganSegmentation():
         :param segmentation_alternative_params: dict of alternative params f,e.
         {'vs5: {'voxelsize_mm':[5,5,5]}, 'vs3: {'voxelsize_mm':[3,3,3]}}
         :param input_annotation_file: annotation input based on dwv json export (https://github.com/ivmartel/dwv)
+        :param run_list: List of functions which should be run on run() function. Default list
+        with segmentataion is used if is set None.
         """
 
         from imcut import pycut
@@ -323,13 +327,21 @@ class OrganSegmentation():
         self.input_annotaion_file = input_annotation_file
         self.output_annotaion_file = output_annotation_file
 
+        from . import runner
+        self.runner = runner.Runner(self)
+        self.init_run_list(run_list)
+        self.get_series_number_callback = get_series_number_callback
+
+
         if data3d is None or metadata is None:
             # if 'datapath' in self.iparams:
             #     datapath = self.iparams['datapath']
 
             if datapath is not None:
                 reader = datareader.DataReader()
-                datap = reader.Get3DData(datapath, dataplus_format=True)
+                datap = reader.Get3DData(
+                    datapath, dataplus_format=True,
+                    get_series_number_callback=get_series_number_callback)
                 # self.iparams['series_number'] = metadata['series_number']
                 # self.iparams['datapath'] = datapath
                 self.import_dataplus(datap)
@@ -1828,6 +1840,20 @@ class OrganSegmentation():
         self.segmentation[bn.getLungs() > 0] = self.nlabels("lungs")
         self.segmentation[bn.getBones() > 0] = self.nlabels("bones")
 
+    def init_run_list(self, run_list):
+        if run_list is not None:
+            self.runner.extend(run_list)
+        else:
+            # default run
+            if self.input_annotaion_file is not None:
+                self.runner.append(self.json_annotation_import)
+            if self.run_organ_segmentation:
+                self.runner.append(self.ninteractivity)
+            if self.run_vessel_segmentation:
+                self.runner.append(self.portalVeinSegmentation, **self.run_vessel_segmentation_params)
+            self.runner.append(self.save_outputs)
+        pass
+
     def make_run(self):
         """ Non-interactive mode
         :return:
@@ -1835,29 +1861,30 @@ class OrganSegmentation():
         import time
         t0 = time.time()
         t1 = time.time()
-        if self.input_annotaion_file is not None:
-            self.json_annotation_import()
-            tt = time.time()
-            logger.debug("make run input af {}, {}".format(tt - t0 , tt - t1))
-            t1 = tt
-        if self.run_organ_segmentation:
-            self.ninteractivity()
-            self.slab["liver"] = 7
-            self.segmentation = (self.segmentation == 1).astype('int8') * self.slab["liver"]
-            tt = time.time()
-            logger.debug("makerun organ seg {}, {}".format(tt - t0, tt - t1))
-            t1 = tt
-        self.slab["porta"] = 1
-        if self.run_vessel_segmentation:
-            data = {}
-            data['segmentation'] = self.segmentation
-            data['slab'] = self.slab
-            self.portalVeinSegmentation(**self.run_vessel_segmentation_params)
-            tt = time.time()
-            logger.debug("makerun pv seg{}, {}".format(tt - t0, tt - t1))
-            t1 = tt
-
-        self.save_outputs()
+        self.runner.run()
+        # if self.input_annotaion_file is not None:
+        #     self.json_annotation_import()
+        #     tt = time.time()
+        #     logger.debug("make run input af {}, {}".format(tt - t0 , tt - t1))
+        #     t1 = tt
+        # if self.run_organ_segmentation:
+        #     self.ninteractivity()
+        #     self.slab["liver"] = 7
+        #     self.segmentation = (self.segmentation == 1).astype('int8') * self.slab["liver"]
+        #     tt = time.time()
+        #     logger.debug("makerun organ seg {}, {}".format(tt - t0, tt - t1))
+        #     t1 = tt
+        # self.slab["porta"] = 1
+        # if self.run_vessel_segmentation:
+        #     data = {}
+        #     data['segmentation'] = self.segmentation
+        #     data['slab'] = self.slab
+        #     self.portalVeinSegmentation(**self.run_vessel_segmentation_params)
+        #     tt = time.time()
+        #     logger.debug("makerun pv seg{}, {}".format(tt - t0, tt - t1))
+        #     t1 = tt
+        #
+        # self.save_outputs()
         tt = time.time()
         logger.debug("make run end time {}, {}".format(tt - t0, tt - t1))
 
@@ -2156,6 +2183,12 @@ config and user config.")
         default=False
     )
     parser.add_argument(
+        '--autolisa',
+        action='store_true',
+        help='run autolisa in dir',
+        default=False
+    )
+    parser.add_argument(
         '--save_filetype', type=str,  # type=int,
         help='File type of saving data. It can be pklz(default), pkl or mat',
         default=cfg["save_filetype"])
@@ -2209,6 +2242,14 @@ def main(app=None, splash=None):  # pragma: no cover
             params = config.subdict(args, oseg_argspec_keys)
 
         logger.debug('params ' + str(params))
+        if args["autolisa"]:
+            if splash is not None:
+                splash.finish()
+            from . import autolisa
+            al = autolisa.AutoLisa()
+            al.run_in_paths(args["datapath"])
+            return
+
         oseg = OrganSegmentation(**params)
 
         if args["no_interactivity"]:

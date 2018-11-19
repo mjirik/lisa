@@ -54,5 +54,6 @@ def lisa_main():
         from . import organ_segmentation
         organ_segmentation.main(app, splash)
 
+
 if __name__ == "__main__":
     lisa_main()

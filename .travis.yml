@@ -147,7 +147,7 @@ install:
 
 # get sample data for lisa
     - ls ~
-    - python -m io3d.datasets -l lisa
+    - python -m io3d.datasets -l lisa 3Dircadb1.1 3Dircadb1.11
      #-l volumetrie
 #    - ls ~
     - pwd

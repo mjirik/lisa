@@ -30,7 +30,7 @@ class Runner:
 
                 pass
             else:
-                raise ValueError("Function '{}' not found in given object.")
+                raise ValueError("Function '{}' not found in given object.".format(fcn))
         return fcn
 
     def append(self, fcn, *args, **kwargs):

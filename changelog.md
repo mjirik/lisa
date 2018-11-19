@@ -2,6 +2,7 @@
 
 ## Unreleased 
 
+* [new] Automatic lisa processing for multiple files
 * [new] Body navigation structures
 
 * [new] Save seeds for later use
