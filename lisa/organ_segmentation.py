@@ -23,6 +23,8 @@ import logging.handlers
 import sys
 import os
 import os.path as op
+path_to_script = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(path_to_script, "../../imcut/"))
 # from collections import namedtuple
 
 # from scipy.io import loadmat, savemat
@@ -37,6 +39,7 @@ import json
 from . import json_decoder as jd
 
 from . import exceptionProcessing
+from . import config_default
 
 # tady uz je logger
 # import dcmreaddata as dcmreader
@@ -52,8 +55,6 @@ from . import exceptionProcessing
 #     traceback.print_exc()
 #     import pycut
 
-path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../../imcut/"))
 
 # from seg2fem import gen_mesh_from_voxels, gen_mesh_from_voxels_mc
 # from viewer import QVTKViewer
@@ -267,13 +268,10 @@ class OrganSegmentation():
         self.vessel_tree = {}
         self.debug_mode = debug_mode
         self.gui_update = None
-        if segmentation_alternative_params is None:
-            segmentation_alternative_params = {
-                "simple 1.5 mm": {
-                    "working_voxelsize_mm": 1.5
-                }
-            }
-        self.segmentation_alternative_params = segmentation_alternative_params
+        self.segmentation_alternative_params = config_default.default_segmentation_alternative_params
+        if segmentation_alternative_params is not None:
+            self.segmentation_alternative_params.update(segmentation_alternative_params)
+
         self.saved_seeds = {}
         # self._json_description
         # SegPostprocPars = namedtuple(
@@ -417,6 +415,9 @@ class OrganSegmentation():
         :param params:
         :return:
         """
+        if 'segparams' in params.keys():
+            self.segparams = params['segparams']
+            logger.debug('segparams updated')
         if 'segmodelparams' in params.keys():
             self.segmodelparams = params['segmodelparams']
             logger.debug('segmodelparams updated')
@@ -824,7 +825,7 @@ class OrganSegmentation():
         self.segmodelparams = organ_model.add_fv_extern_into_modelparams(self.segmodelparams)
 
         if 'method' not in self.segparams.keys() or \
-                self.segparams['method'] in pycut.methods:
+                self.segparams['method'] in pycut.accepted_methods:
             from .audiosupport import beep
             igc = pycut.ImageGraphCut(
                 # self.data3d,
