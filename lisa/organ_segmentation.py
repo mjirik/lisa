@@ -823,6 +823,9 @@ class OrganSegmentation():
         # insert feature function instead of string description
         from . import organ_model
         self.segmodelparams = organ_model.add_fv_extern_into_modelparams(self.segmodelparams)
+        self.segparams['pairwise_alpha'] = \
+            self.segparams['pairwise_alpha_per_mm2'] / \
+            np.mean(self.working_voxelsize_mm)
 
         if 'method' not in self.segparams.keys() or \
                 self.segparams['method'] in pycut.accepted_methods:
@@ -834,7 +837,8 @@ class OrganSegmentation():
                 voxelsize=self.working_voxelsize_mm,
                 modelparams=self.segmodelparams,
                 volume_unit='ml',
-                interactivity_loop_finish_fcn=beep
+                interactivity_loop_finish_fcn=beep,
+                debug_images=False
             )
         # elif self.segparams['method'] == '':
         else:
