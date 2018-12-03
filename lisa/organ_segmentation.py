@@ -60,6 +60,7 @@ from . import config_default
 # from viewer import QVTKViewer
 from io3d import datareader
 from io3d import datawriter
+from io3d import misc
 import io3d.cachefile as cachef
 import io3d.misc
 from . import data_plus
@@ -69,7 +70,6 @@ from . import organ_seeds
 from . import lisa_data
 from . import data_manipulation
 from . import qmisc
-from . import misc
 from . import config
 from . import volumetry_evaluation
 from . import segmentation_general
@@ -2248,8 +2248,8 @@ def main(app=None, splash=None):  # pragma: no cover
 
         logger.debug('params ' + str(params))
         if args["autolisa"]:
-            if splash is not None:
-                splash.finish()
+            # if splash is not None:
+            #     splash.finish()
             from . import autolisa
             al = autolisa.AutoLisa()
             al.run_in_paths(args["datapath"])
