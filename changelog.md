@@ -2,6 +2,7 @@
 
 ## Unreleased 
 
+* [new] Script for color visualization in ParaView
 * [new] Automatic lisa processing for multiple files
 * [new] Body navigation structures
 

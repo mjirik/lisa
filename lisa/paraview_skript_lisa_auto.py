@@ -1,10 +1,20 @@
+"""
+Script creates pvsm file with colors and video and screenshot.
+All is based on recentely created vtk file in ~/lisa_data. All vtk files with the same beginning of file name are
+concidered.
+
+Use:
+Paraview -> View -> Python Shell -> Run Script
+Paraview -> Tools -> Python Shell -> Run Script
+"""
+
 import sys
 import os.path as op
 import glob
 
 
 
-files = sorted(glob.glob(op.expanduser("~/lisa_data/*.pvsm")), key=op.getmtime)
+files = sorted(glob.glob(op.expanduser("~/lisa_data/*.vtk")), key=op.getmtime)
 print(files[0])
 print(files[-1])
 
@@ -53,7 +63,7 @@ a89502994_all_livervtk = None
 
 # get color transfer function/color map for 'node_groups'
 node_groupsLUT = GetColorTransferFunction('node_groups')
-node_groupsLUT = GetColorTransferFunction('Solid Color')
+# node_groupsLUT = GetColorTransferFunction('Solid Color')
 
 # get opacity transfer function/opacity map for 'node_groups'
 node_groupsPWF = GetOpacityTransferFunction('node_groups')
@@ -67,7 +77,7 @@ if liver_file is not None:
     # set active source
     SetActiveSource(a89502994_all_livervtk)
 
-
+    RenameSource('liver', a89502994_all_livervtk)
     # show data in view
     a89502994_all_livervtkDisplay = Show(a89502994_all_livervtk, renderView1)
     # trace defaults for the display properties.
@@ -93,7 +103,7 @@ if liver_file is not None:
     # node_groupsLUT = GetColorTransferFunction('node_groups')
 
     # show color bar/color legend
-    a89502994_all_livervtkDisplay.SetScalarBarVisibility(renderView1, True)
+    a89502994_all_livervtkDisplay.SetScalarBarVisibility(renderView1, False)
 
     # reset view to fit data
     renderView1.ResetCamera()
@@ -105,13 +115,14 @@ if liver_file is not None:
     a89502994_all_livervtkDisplay.DiffuseColor = [0.0, 0.0, 0.0]
 
     # set scalar coloring
-    ColorBy(a89502994_all_livervtkDisplay, ('POINTS', 'node_groups'))
+    # ColorBy(a89502994_all_livervtkDisplay, ('POINTS', 'node_groups'))
+    ColorBy(a89502994_all_livervtkDisplay, ('POINTS', 'Solid Color'))
 
     # rescale color and/or opacity maps used to include current data range
     a89502994_all_livervtkDisplay.RescaleTransferFunctionToDataRange(True, False)
 
     # show color bar/color legend
-    a89502994_all_livervtkDisplay.SetScalarBarVisibility(renderView1, True)
+    a89502994_all_livervtkDisplay.SetScalarBarVisibility(renderView1, False)
 
     # Hide the scalar bar for this color map if no visible data is colored by it.
     HideScalarBarIfNotNeeded(node_groupsLUT, renderView1)
@@ -137,6 +148,7 @@ if porta_file is not None:
     # set active source
     SetActiveSource(a89502994_all_portavtk)
 
+    RenameSource('porta', a89502994_all_portavtk)
     # show data in view
     a89502994_all_portavtkDisplay = Show(a89502994_all_portavtk, renderView1)
     # trace defaults for the display properties.
@@ -161,13 +173,14 @@ if porta_file is not None:
     a89502994_all_portavtkDisplay.OpacityTransferFunction = 'PiecewiseFunction'
 
     # show color bar/color legend
-    a89502994_all_portavtkDisplay.SetScalarBarVisibility(renderView1, True)
+    a89502994_all_portavtkDisplay.SetScalarBarVisibility(renderView1, False)
 
     # Hide the scalar bar for this color map if no visible data is colored by it.
     HideScalarBarIfNotNeeded(node_groupsLUT, renderView1)
 
     # change solid color
     a89502994_all_portavtkDisplay.DiffuseColor = [0.0, 0.0, 1.0]
+    ColorBy(a89502994_all_portavtkDisplay, ('POINTS', 'Solid Color'))
 
 hv_file = look_for_file_containing(vtk_files, "hepatic_veins")
 print("hepatic veins ", hv_file)
@@ -178,6 +191,7 @@ if hv_file is not None:
 
     # set active source
     SetActiveSource(a89502994_all_hepatic_veinsvtk)
+    RenameSource('hepatic_veins', a89502994_all_hepatic_veinsvtk)
 
     # show data in view
     a89502994_all_hepatic_veinsvtkDisplay = Show(a89502994_all_hepatic_veinsvtk, renderView1)
@@ -203,13 +217,14 @@ if hv_file is not None:
     a89502994_all_hepatic_veinsvtkDisplay.OpacityTransferFunction = 'PiecewiseFunction'
 
     # show color bar/color legend
-    a89502994_all_hepatic_veinsvtkDisplay.SetScalarBarVisibility(renderView1, True)
+    a89502994_all_hepatic_veinsvtkDisplay.SetScalarBarVisibility(renderView1, False)
 
     # Hide the scalar bar for this color map if no visible data is colored by it.
     HideScalarBarIfNotNeeded(node_groupsLUT, renderView1)
 
     # change solid color
     a89502994_all_hepatic_veinsvtkDisplay.DiffuseColor = [1.0, 0.0, 0.0]
+    ColorBy(a89502994_all_hepatic_veinsvtkDisplay, ('POINTS', 'Solid Color'))
 
 print(vtk_files)
 tumor_file = look_for_file_containing(vtk_files, "tumor")
@@ -219,6 +234,7 @@ if tumor_file is not None:
 
     # set active source
     SetActiveSource(a89502994_all_tumorvtk)
+    RenameSource('tumor', a89502994_all_tumorvtk)
 
     # show data in view
     a89502994_all_tumorvtkDisplay = Show(a89502994_all_tumorvtk, renderView1)
@@ -244,13 +260,22 @@ if tumor_file is not None:
     a89502994_all_tumorvtkDisplay.OpacityTransferFunction = 'PiecewiseFunction'
 
     # show color bar/color legend
-    a89502994_all_tumorvtkDisplay.SetScalarBarVisibility(renderView1, True)
+    # a89502994_all_tumorvtkDisplay.SetScalarBarVisibility(renderView1, True)
+    a89502994_all_tumorvtkDisplay.SetScalarBarVisibility(renderView1, False)
 
     # Hide the scalar bar for this color map if no visible data is colored by it.
     HideScalarBarIfNotNeeded(node_groupsLUT, renderView1)
 
     # change solid color
     a89502994_all_tumorvtkDisplay.DiffuseColor = [0.6666666666666666, 0.3333333333333333, 0.0]
+    ColorBy(a89502994_all_tumorvtkDisplay, ('POINTS', 'Solid Color'))
+
+# see all other
+
+for vtk_file in vtk_files:
+    rdr = LegacyVTKReader(FileNames=[vtk_file])
+    # a89502994_all_hepatic_veinsvtkDisplay.SetScalarBarVisibility(renderView1, False)
+
 
 
 if a89502994_all_livervtk is not None:
