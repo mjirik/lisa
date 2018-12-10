@@ -1306,7 +1306,7 @@ class OrganSegmentationWindow(QMainWindow):
                 self,
                 "Save file",
                 ofilename,
-                filter="*.pklz"))
+                filter="Former Lisa Format (*.pklz);;New Lisa format HDF5 (*.h5 *.hdf5);; Dicom (*.dcm)"))
 
             logger.info('Data saved to: ' + ofilename)
 

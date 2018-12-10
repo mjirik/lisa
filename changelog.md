@@ -2,6 +2,8 @@
 
 ## Unreleased 
 
+* [new] Export to hdf5 by io3d
+* [new] Patient info in load screen by io3d
 * [new] Script for color visualization in ParaView
 * [new] Automatic lisa processing for multiple files
 * [new] Body navigation structures
