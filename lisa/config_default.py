@@ -18,6 +18,19 @@ default_segmentation_alternative_params = {
             },
             'working_voxelsize_mm': 1
         },
+    "simple 1.3 mm":{
+        "segmodelparams": {
+            'mdl_stored_file': None,
+            'fv_type': 'intensity',
+            'fv_extern': None,
+            # 'mdl_stored_file': '~/lisa_data/liver_intensity.Model.p',
+            # "fv_type": 'fv_extern',
+            # 'fv_extern':'intensity_localization_fv',
+            # 'method': 'multiscale_graphcut',
+            "params": {"covariance_type": "full", "n_components": 3}
+        },
+        'working_voxelsize_mm': 1.3
+    },
         "simple 1.5 mm":{
             "segmodelparams": {
                 'mdl_stored_file': None,
