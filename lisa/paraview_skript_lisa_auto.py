@@ -270,6 +270,101 @@ if tumor_file is not None:
     a89502994_all_tumorvtkDisplay.DiffuseColor = [0.6666666666666666, 0.3333333333333333, 0.0]
     ColorBy(a89502994_all_tumorvtkDisplay, ('POINTS', 'Solid Color'))
 
+lungs_file = look_for_file_containing(vtk_files, "lungs")
+print("lungs", lungs_file)
+if lungs_file is not None:
+    # create a new 'Legacy VTK Reader'
+    a89502994_all_lungs_vtk = LegacyVTKReader(FileNames=[lungs_file])
+
+
+    # set active source
+    SetActiveSource(a89502994_all_lungs_vtk)
+    RenameSource('lungs', a89502994_all_lungs_vtk)
+
+    # show data in view
+    a89502994_all_lungs_vtkDisplay = Show(a89502994_all_lungs_vtk, renderView1)
+    # # trace defaults for the display properties.
+    # a89502994_all_lungs_vtkDisplay.Representation = 'Surface'
+    # a89502994_all_lungs_vtkDisplay.ColorArrayName = ['POINTS', 'node_groups']
+    # a89502994_all_lungs_vtkDisplay.LookupTable = node_groupsLUT
+    # a89502994_all_lungs_vtkDisplay.OSPRayScaleArray = 'node_groups'
+    # a89502994_all_lungs_vtkDisplay.OSPRayScaleFunction = 'PiecewiseFunction'
+    # a89502994_all_lungs_vtkDisplay.SelectOrientationVectors = 'None'
+    # a89502994_all_lungs_vtkDisplay.ScaleFactor = 11.108200454711914
+    # a89502994_all_lungs_vtkDisplay.SelectScaleArray = 'node_groups'
+    # a89502994_all_lungs_vtkDisplay.GlyphType = 'Arrow'
+    # a89502994_all_lungs_vtkDisplay.GlyphTableIndexArray = 'node_groups'
+    # a89502994_all_lungs_vtkDisplay.DataAxesGrid = 'GridAxesRepresentation'
+    # a89502994_all_lungs_vtkDisplay.PolarAxes = 'PolarAxesRepresentation'
+    # a89502994_all_lungs_vtkDisplay.ScalarOpacityFunction = node_groupsPWF
+    # a89502994_all_lungs_vtkDisplay.ScalarOpacityUnitDistance = 20.819237020536345
+    # a89502994_all_lungs_vtkDisplay.GaussianRadius = 5.554100227355957
+    # a89502994_all_lungs_vtkDisplay.SetScaleArray = ['POINTS', 'node_groups']
+    # a89502994_all_lungs_vtkDisplay.ScaleTransferFunction = 'PiecewiseFunction'
+    # a89502994_all_lungs_vtkDisplay.OpacityArray = ['POINTS', 'node_groups']
+    # a89502994_all_lungs_vtkDisplay.OpacityTransferFunction = 'PiecewiseFunction'
+    #
+    # show color bar/color legend
+    a89502994_all_lungs_vtkDisplay.SetScalarBarVisibility(renderView1, False)
+
+    # Properties modified on a89502994_all_livervtkDisplay
+    a89502994_all_lungs_vtkDisplay.Opacity = 0.05
+
+    # Hide the scalar bar for this color map if no visible data is colored by it.
+    HideScalarBarIfNotNeeded(node_groupsLUT, renderView1)
+
+    # change solid color
+    a89502994_all_lungs_vtkDisplay.DiffuseColor = [0.1, 0.1, 0.2]
+    ColorBy(a89502994_all_lungs_vtkDisplay, ('POINTS', 'Solid Color'))
+
+
+bones_file = look_for_file_containing(vtk_files, "bones")
+print("bones", bones_file)
+if bones_file is not None:
+    # create a new 'Legacy VTK Reader'
+    a89502994_all_bones_vtk = LegacyVTKReader(FileNames=[bones_file])
+
+
+    # set active source
+    SetActiveSource(a89502994_all_bones_vtk)
+    RenameSource('bones', a89502994_all_bones_vtk)
+
+    # show data in view
+    a89502994_all_bones_vtkDisplay = Show(a89502994_all_bones_vtk, renderView1)
+    # # trace defaults for the display properties.
+    # a89502994_all_bones_vtkDisplay.Representation = 'Surface'
+    # a89502994_all_bones_vtkDisplay.ColorArrayName = ['POINTS', 'node_groups']
+    # a89502994_all_bones_vtkDisplay.LookupTable = node_groupsLUT
+    # a89502994_all_bones_vtkDisplay.OSPRayScaleArray = 'node_groups'
+    # a89502994_all_bones_vtkDisplay.OSPRayScaleFunction = 'PiecewiseFunction'
+    # a89502994_all_bones_vtkDisplay.SelectOrientationVectors = 'None'
+    # a89502994_all_bones_vtkDisplay.ScaleFactor = 11.108200454711914
+    # a89502994_all_bones_vtkDisplay.SelectScaleArray = 'node_groups'
+    # a89502994_all_bones_vtkDisplay.GlyphType = 'Arrow'
+    # a89502994_all_bones_vtkDisplay.GlyphTableIndexArray = 'node_groups'
+    # a89502994_all_bones_vtkDisplay.DataAxesGrid = 'GridAxesRepresentation'
+    # a89502994_all_bones_vtkDisplay.PolarAxes = 'PolarAxesRepresentation'
+    # a89502994_all_bones_vtkDisplay.ScalarOpacityFunction = node_groupsPWF
+    # a89502994_all_bones_vtkDisplay.ScalarOpacityUnitDistance = 20.819237020536345
+    # a89502994_all_bones_vtkDisplay.GaussianRadius = 5.554100227355957
+    # a89502994_all_bones_vtkDisplay.SetScaleArray = ['POINTS', 'node_groups']
+    # a89502994_all_bones_vtkDisplay.ScaleTransferFunction = 'PiecewiseFunction'
+    # a89502994_all_bones_vtkDisplay.OpacityArray = ['POINTS', 'node_groups']
+    # a89502994_all_bones_vtkDisplay.OpacityTransferFunction = 'PiecewiseFunction'
+    #
+    # show color bar/color legend
+    a89502994_all_bones_vtkDisplay.SetScalarBarVisibility(renderView1, False)
+
+    # Properties modified on a89502994_all_livervtkDisplay
+    a89502994_all_bones_vtkDisplay.Opacity = 0.05
+
+    # Hide the scalar bar for this color map if no visible data is colored by it.
+    HideScalarBarIfNotNeeded(node_groupsLUT, renderView1)
+
+    # change solid color
+    a89502994_all_bones_vtkDisplay.DiffuseColor = [0.2, 0.2, 0.2]
+    ColorBy(a89502994_all_bones_vtkDisplay, ('POINTS', 'Solid Color'))
+
 # see all other
 
 for vtk_file in vtk_files:
