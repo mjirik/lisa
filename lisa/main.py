@@ -33,12 +33,18 @@ def lisa_main():
     parser.add_argument(
         '-ni', '--no_interactivity', action='store_true',
         help='run in no interactivity mode, seeds must be defined')
+    parser.add_argument(
+        '--autolisa',
+        action='store_true',
+        help='run autolisa in dir',
+        default=False
+    )
+    knownargs, unknownargs = parser.parse_known_args()
     # Read alternative config file. First is loaded default config. Then user
     # config in lisa_data directory. After that is readed config defined by
     # --configfile parameter
-    knownargs, unknownargs = parser.parse_known_args()
 
-    if knownargs.no_interactivity:
+    if knownargs.no_interactivity or knownargs.autolisa:
         import organ_segmentation
         organ_segmentation.main()
     else:

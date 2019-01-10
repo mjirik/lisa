@@ -17,7 +17,7 @@ class AutoLisa:
         self.config = None
         pass
 
-    def run_one(self, input_data_path):
+    def run_one(self, input_data_path, output_datapath=None):
         import os.path as op
         import io3d.datasets
 
@@ -30,7 +30,8 @@ class AutoLisa:
             get_series_number_callback="guess for liver",
             # output_annotation_file="output.json",
             autocrop=False,
-            run_list=["get_body_navigation_structures_precise", "save_outputs"]
+            run_list=["get_body_navigation_structures_precise", "save_outputs"],
+            output_datapath=output_datapath
 
         )
         oseg.make_run()
