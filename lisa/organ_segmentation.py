@@ -1387,7 +1387,7 @@ class OrganSegmentation():
             aoi_label=organ_label,
             forbidden_label=forbidden_label,
             slab=self.slab,
-            debug=self.debug
+            debug=self.debug_mode,
             **params
         )
 
