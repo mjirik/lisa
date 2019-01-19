@@ -1308,10 +1308,10 @@ class OrganSegmentationWindow(QMainWindow):
                 ofilename,
                 filter="Former Lisa Format (*.pklz);;New Lisa format HDF5 (*.h5 *.hdf5);; Dicom (*.dcm)"))
 
-            logger.info('Data saved to: ' + ofilename)
+            logger.info('Data saved to: ' + filename)
 
             self.oseg.save_outputs(filename)
-            self.statusBar().showMessage('Ready. Data saved to ' + str(ofilename))
+            self.statusBar().showMessage('Ready. Data saved to ' + str(filename))
 
         else:
             self.statusBar().showMessage('No segmentation data!')
