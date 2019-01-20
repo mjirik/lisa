@@ -20,6 +20,7 @@
 * [improvement] Relabel multiple labels to one label
 * [fix] Read/write DICOM overlay
 * [fix] Cancel label selection
+* [Added] Export and import seeds
 
 ## 1.9.51 2018-07-21
 

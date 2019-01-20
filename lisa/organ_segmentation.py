@@ -1206,9 +1206,7 @@ class OrganSegmentation():
         # gc.interactivity()
         # igc.make_gc()
         igc.run()
-        if 'method' not in self.segparams.keys() or \
- \
-                self.segparams['method'] in pycut.methods:
+        if ('method' not in self.segparams.keys()) or (self.segparams['method'] in pycut.methods):
             logger.debug('ninteractivity seg method GC')
             self.segmentation = (igc.segmentation == 0).astype(np.int8)
         else:
@@ -1321,7 +1319,7 @@ class OrganSegmentation():
         """
         Relabel segmentation
         :param from_label: int or string
-        :param to_label: int or string
+        :param to_label: int or `astring
         :return:
         """
         from_label = self.nlabels(from_label)
@@ -1409,6 +1407,38 @@ class OrganSegmentation():
             fn_yaml=fn_yaml,
             fn_vtk=fn_vtk,
         )
+
+    def export_seeds_as_data3d(self, fn_seeds):
+        """
+        Export actual seeds and saved seeds into file based on given file name. Data are stored as image data (data3d).
+        :param fn_seeds:
+        :return:
+        """
+        datap = self.export()
+        saved_seeds = datap.pop("saved_seeds")
+        seeds = datap.pop("seeds")
+        datap.pop("segmentation")
+        datap.pop('processing_information')
+        datap["data3d"] = seeds
+        io3d.write(datap, fn_seeds)
+        for key in saved_seeds:
+            datap = self.export()
+            datap.pop("saved_seeds")
+            datap.pop("seeds")
+            datap.pop("segmentation")
+            datap.pop('processing_information')
+            seeds = saved_seeds[key]
+            datap["data3d"] = seeds
+            basefn, ext = op.split_ext(fn_seeds)
+            fn_seeds_key = basefn + "_" + key + ext
+            io3d.write(datap, fn_seeds_key)
+
+    def import_seeds_from_file(self, fn_seeds):
+        datap = io3d.read(fn_seeds, dataplus_format=True)
+        if "seeds" in datap and datap["seeds"] is not None:
+            self.seeds = datap["seeds"]
+        else:
+            self.seeds = datap["data3d"]
 
     def __vesselTree(self, binaryData3d, textLabel, fn_yaml=None, fn_vtk=None):
         import skelet3d
