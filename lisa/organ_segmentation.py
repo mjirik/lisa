@@ -1408,30 +1408,38 @@ class OrganSegmentation():
             fn_vtk=fn_vtk,
         )
 
-    def export_seeds_as_data3d(self, fn_seeds):
+    def export_seeds_to_files(self, fn_seeds):
         """
         Export actual seeds and saved seeds into file based on given file name. Data are stored as image data (data3d).
         :param fn_seeds:
         :return:
         """
         datap = self.export()
-        saved_seeds = datap.pop("saved_seeds")
-        seeds = datap.pop("seeds")
-        datap.pop("segmentation")
-        datap.pop('processing_information')
-        datap["data3d"] = seeds
-        io3d.write(datap, fn_seeds)
-        for key in saved_seeds:
-            datap = self.export()
-            datap.pop("saved_seeds")
-            datap.pop("seeds")
-            datap.pop("segmentation")
-            datap.pop('processing_information')
-            seeds = saved_seeds[key]
+        if "saved_seeds" in datap:
+            saved_seeds = datap.pop("saved_seeds")
+            for key in saved_seeds:
+                datap = self.export()
+                if "saved_seeds" in datap:
+                    datap.pop("saved_seeds")
+                if "seeds" in datap:
+                    datap.pop("seeds")
+                if "segmentation" in datap:
+                    datap.pop("segmentation")
+                if "processing_information" in datap:
+                    datap.pop('processing_information')
+                seeds = saved_seeds[key]
+                datap["data3d"] = seeds
+                basefn, ext = op.splitext(fn_seeds)
+                fn_seeds_key = basefn + "_" + key + ext
+                io3d.write(datap, fn_seeds_key)
+        if "seeds" in datap:
+            seeds = datap.pop("seeds")
+            if "segmentation" in datap:
+                datap.pop("segmentation")
+            if "processing_information" in datap:
+                datap.pop('processing_information')
             datap["data3d"] = seeds
-            basefn, ext = op.split_ext(fn_seeds)
-            fn_seeds_key = basefn + "_" + key + ext
-            io3d.write(datap, fn_seeds_key)
+            io3d.write(datap, fn_seeds)
 
     def import_seeds_from_file(self, fn_seeds):
         datap = io3d.read(fn_seeds, dataplus_format=True)

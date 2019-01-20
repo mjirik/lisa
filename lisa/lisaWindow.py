@@ -243,7 +243,7 @@ class OrganSegmentationWindow(QMainWindow):
         self.__add_action_to_menu(imageMenu, "&Minimize slab", self.oseg.minimize_slab,
                                   tip="Remove unused or redundant labels from segmentation labeling list (slab)")
 
-        self.__add_action_to_menu(imageMenu, "&Save seeds",
+        self.__add_action_to_menu(imageMenu, "&Store seeds",
                                   lambda: self.oseg.save_seeds(self.ui_select_from_list(
                                       self.oseg.get_list_of_saved_seeds(), "Save seeds as")),
                                   tip="Save seeds for later use")
@@ -252,6 +252,22 @@ class OrganSegmentationWindow(QMainWindow):
                                   lambda: self.oseg.load_seeds(self.ui_select_from_list(
                                       self.oseg.get_list_of_saved_seeds(), "Save seeds as")),
                                   tip="Save seeds for later use")
+
+        self.__add_action_to_menu(imageMenu, "&Export seeds fo files",
+                                  lambda: self.oseg.export_seeds_to_files(self.ui_select_output_filename(
+                                      "mhd", window_title="Select pattern for seed files")),
+                                  tip="Export seeds and stored seeds to files",
+                                  finish_msg="Ready. Seeds exported."
+                                  )
+
+
+        self.__add_action_to_menu(imageMenu, "&Import seeds from file",
+                                  lambda: self.oseg.import_seeds_from_file(self.ui_select_output_filename(
+                                      "*", window_title="Select file with seeds")),
+                                  tip="Import seeds",
+                                  finish_msg="Ready. Seeds imported."
+                                  )
+
 
         self.__add_action_to_menu(imageMenu, "&Body navigation structures", self.oseg.get_body_navigation_structures,
                                   tip="Put structures located by bodynavigation into segmentataion",
@@ -1288,6 +1304,28 @@ class OrganSegmentationWindow(QMainWindow):
         :return:
         """
         self.saveOut(image_stack=True)
+
+    def ui_select_output_filename(self, filetype="pklz", suffix="_seeds", window_title="Save file", filter=None):
+        if filter is None:
+            if filetype is None:
+                filter = "Former Lisa Format (*.pklz);;New Lisa format HDF5 (*.h5 *.hdf5);; Dicom (*.dcm);; All files(*.*)"
+            elif filetype in ("pklz"):
+                filter = "Former Lisa Format (*.pklz);; All files (*.*)"
+            elif filetype in ("h5", "hdf5"):
+                filter = "New Lisa format HDF5 (*.h5 *.hdf5);; All files (*.*)"
+            elif filetype in ("dcm", "dicom"):
+                filter = "Dicom (*.dcm);; All files (*.*)"
+            else:
+                filter = "(*.{});; All files (*.*)".format(filetype)
+        ofilename = self.oseg.get_standard_ouptut_filename(filetype=filetype, suffix=suffix)
+        filename = str(QFileDialog.getSaveFileName(
+            self,
+            window_title,
+            ofilename,
+            filter=filter))
+
+        logger.info('Selected file: %s', filename)
+        return filename
 
     def saveOut(self, event=None, filename=None, image_stack=False):
         """
