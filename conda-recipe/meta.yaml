@@ -51,7 +51,7 @@ requirements:
     #- pywget
     - scikit-learn
     - scikit-image
-    - pyqtconfig
+#    - pyqtconfig # nemáme pro python 3.6
     - pip
     # just for pip install pygco
     - cython
@@ -84,7 +84,7 @@ requirements:
     # - pywget
     - scikit-learn >=0.19.0
     - scikit-image
-    - pyqtconfig
+#    - pyqtconfig # nemáme pro python 3.6
     - pip
     - sftpsync >=1.0.8
     # just for pip install pygco
