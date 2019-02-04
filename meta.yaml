@@ -1,0 +1,123 @@
+package:
+  name: lisa
+  version: "1.14.0"
+
+source:
+  git_rev: 1.14.0
+  git_url: .
+  # git_url: https://github.com/mjirik/quantan.git
+
+  # fn: quantan-0.0.6.tar.gz
+  # url: https://pypi.python.org/packages/source/q/quantan/quantan-0.0.6.tar.gz
+  # md5: 5d585fdea5cd12803a2e2b0db37d9d76
+#  patches:
+   # List any patch files here
+   # - fix.patch
+
+build:
+  # noarch_python: True
+  # preserve_egg_dir: True
+  entry_points:
+    # Put any entry points (scripts to be generated automatically) here. The
+    # syntax is module:function.  For example
+    #
+#    - lisa = lisa:main
+    - lisa = lisa:lisa_main
+    #
+    # Would create an entry point called quantan that calls quantan.main()
+
+
+  # If this is a new build for the same version, increment the build
+  # number. If you do not include this key, it defaults to 0.
+  # number: 1
+
+requirements:
+  build:
+    - python
+    - setuptools
+    - numpy
+    - scipy
+    - pyyaml
+    - matplotlib
+    - skelet3d
+    - imtools
+    - sed3
+    - imcut
+    - io3d
+    - pyqt 4.11.*
+    - pandas
+#    - wget
+    # use wget instead of pywget because pywget for py36 doesnt exist
+    #- pywget
+    - scikit-learn
+    - scikit-image
+    - pyqtconfig
+    - pip
+    # just for pip install pygco
+    - cython
+
+  run:
+    - python
+    - numpy
+    - scipy
+    - pyyaml
+    - matplotlib
+    - skelet3d >=1.5.6
+    - imtools >=0.1.67
+    - sed3 >=1.1.33
+    - imcut >=1.2.41
+    - io3d >=1.1.6
+    - pyqt 4.11.*
+    - pandas
+    - simpleitk 1.*
+#    - simpleitk 0.9.1
+    - libpng
+    # - simpleitk 0.9.* # problem with dicom write
+    # - libpng 1.5.13 # kvuli simpleik 0.9.
+#    - wget
+    # use wget instead of pywget because pywget for py36 doesnt exist
+    # - pywget
+    - scikit-learn >=0.19.0
+    - scikit-image
+    - pyqtconfig
+    - pip
+    - sftpsync >=1.0.8
+    # just for pip install pygco
+    - cython
+    - vtk
+    - dicom2fem >=1.0.36
+    # nomkl package does not exist on windows
+    # - nomkl
+    # bitarray and redis is required in experiments_test cerveny
+    # - bitarray
+    # redus from channel -c auto works
+    # - redis
+
+    # rem :pygco is not compiled for osx now this is why it is not in meta.yaml
+    # - pygco
+
+test:
+  # Python imports
+  imports:
+    - lisa
+
+  # commands:
+    # You can put test commands to be run here.  Use this to test that the
+    # entry points work.
+
+
+  # You can also put a file called run_test.py in the recipe that will be run
+  # at test time.
+
+  # requires:
+    # Put any additional test requirements here.  For example
+    # - nose
+
+about:
+  home: https://github.com/mjirik/lisa
+  license: BSD License
+  summary: 'Liver Surgery Analyser'
+
+# See
+# http://docs.continuum.io/conda/build.html for
+# more information about meta.yaml
