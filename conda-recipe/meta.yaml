@@ -62,11 +62,16 @@ requirements:
     - scipy
     - pyyaml
     - matplotlib
-    - skelet3d >=1.5.6
-    - imtools >=0.1.67
-    - sed3 >=1.1.33
-    - imcut >=1.2.41
-    - io3d >=1.1.6
+#    - skelet3d >=1.5.6
+#    - imtools >=0.1.67
+#    - sed3 >=1.1.33
+#    - imcut >=1.2.41
+#    - io3d >=1.1.6
+    - {{ pin_compatible('skele3d', max_pin='x') }}
+    - {{ pin_compatible('imtools', max_pin='x') }}
+    - {{ pin_compatible('sed3', max_pin='x') }}
+    - {{ pin_compatible('io3d', max_pin='x') }}
+    - {{ pin_compatible('imcut', max_pin='x') }}
     - pyqt 4.11.*
     - pandas
     - simpleitk 1.*
