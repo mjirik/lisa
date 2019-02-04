@@ -4,7 +4,7 @@ package:
 
 source:
   git_rev: 1.14.0
-  git_url: .
+  git_url: https://github.com/mjirik/lisa.git
   # git_url: https://github.com/mjirik/quantan.git
 
   # fn: quantan-0.0.6.tar.gz
