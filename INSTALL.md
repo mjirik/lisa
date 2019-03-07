@@ -51,7 +51,9 @@ or
     * Python 2.7: [MS Visual C++ compiler for Python 2.7](http://aka.ms/vcpython27)
     * Python 3.6: [Microsoft Build Tools for Visual Studio 2017](
     https://www.visualstudio.com/downloads/#build-tools-for-visual-studio-2017)
-    (Check Python development during install)
+    
+        Check "Python development" and "Desktop Application C++ development" during install. 
+        You may remove all submodules. Keep just VC++ 2017 tools.
     
 * Run command line and create conda-virtualenv
     ```bat
