@@ -6,9 +6,8 @@
 # import funkcí z jiného adresáře
 import sys
 import os.path
+import io3d
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
-sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
 #import featurevector
 import unittest
 
@@ -22,12 +21,22 @@ import numpy as np
 
 # ----------------- my scripts --------
 import argparse
+from . import segmentation_general
 
-import segmentation
-import misc
+class VesselSegmentation:
+    def __init__(self):
+        pass
 
-# Import garbage collector
-import gc as garbage
+    def set_params(self):
+        pass
+
+    def run(self):
+        pass
+
+    def get_output(self):
+        pass
+
+
 
 if __name__ == "__main__":
 
@@ -47,18 +56,8 @@ if __name__ == "__main__":
             help='path to data dir')
     parser.add_argument('-d', '--debug', action='store_true',
             help='run in debug mode')
-    parser.add_argument('-bg', '--biggest', action='store_true',
-            help='find biggest object')
-    parser.add_argument('-ed', '--exampledata', action='store_true',
-            help='run unittest')
     parser.add_argument('-i', '--inputfile',  default=None,
-            help='input file from organ_segmentation')
-    parser.add_argument('-ii', '--defaultinputfile',  action='store_true',
-            help='"organ.pkl" as input file from organ_segmentation')
-    parser.add_argument('-o', '--outputfile',  default=None,
-            help='output file')
-    parser.add_argument('-oo', '--defaultoutputfile',  action='store_true',
-            help='"vessels.pickle" as output file')
+            help='input file or directory with data')
     args = parser.parse_args()
 
 
@@ -69,26 +68,10 @@ if __name__ == "__main__":
     if args.defaultoutputfile:
         args.outputfile = defaultoutputfile
 
-    if args.exampledata:
-
-        args.dcmdir = '../sample_data/matlab/examples/sample_data/DICOM/digest_article/'
-
     #else:
     #dcm_read_from_dir('/home/mjirik/data/medical/data_orig/46328096/')
         #data3d, metadata = dcmreaddata.dcm_read_from_dir()
-    if args.defaultinputfile:
-        args.inputfile = "organ.pkl"
-
-    if args.inputfile == None:
-        oseg = organ_segmentation.OrganSegmentation(args.dcmdir, working_voxelsize_mm = 6, autocrop = True, autocrop_margin_mm = [10,10,10])
-        oseg.interactivity()
-        # Uvolneni pameti
-        garbage.collect()
-        print( "Volume " + str(oseg.get_segmented_volume_size_mm3()/1000000.0) + ' [l]' )
-# get data in list
-        data = oseg.export()
-    else:
-        data = misc.obj_from_file(args.inputfile, filetype = 'pickle')
+    datap = io3d.read(args.inputfile)
 
     import sed3
     # pyed = sed3.sed3(oseg.orig_scale_segmentation)
@@ -98,15 +81,15 @@ if __name__ == "__main__":
     #oseg.data3d = oseg.data3d[cri[0][0]:cri[0][1],cri[1][0]:cri[1][1],cri[2][0]:cri[2][1]]
     #pyed = sed3.sed3(oseg.data3d, contour = oseg.orig_scale_segmentation)
 
-    print('slab', data['slab'])
+    print('slab', datap['slab'])
     #import ipdb; ipdb.set_trace()  # BREAKPOINT
     #pyed = sed3.sed3(data['data3d'], contour = data['segmentation'])
     #pyed.show()
     #import pdb; pdb.set_trace()
 
-    outputTmp = segmentation.vesselSegmentation(
-        data['data3d'],
-        segmentation = data['segmentation'],
+    outputTmp = segmentation_general.vesselSegmentation(
+        datap['data3d'],
+        segmentation = datap['segmentation'],
         #segmentation = oseg.orig_scale_segmentation,
         threshold = -1,
         inputSigma = 0.15,
@@ -118,24 +101,10 @@ if __name__ == "__main__":
         binaryClosingIterations = 2,
         binaryOpeningIterations = 0)
 
-    # Uvolneni pameti
-    garbage.collect()
 
-    import inspector
-    inspect = inspector.inspector(outputTmp)
-    output = inspect.run()
-
-    # Uvolneni pameti
-    del(inspect)
-    garbage.collect()
-
-    #pyed = sed3.sed3(outputTmp)
-    #pyed.show()
-# segmentation labeling
-    #slab={}
-    data['slab']['none'] = 0
-    data['slab']['liver'] = 1
-    data['slab']['porta'] = 2
+    datap['slab']['none'] = 0
+    datap['slab']['liver'] = 1
+    datap['slab']['porta'] = 2
 
 
     #print np.max(output)
@@ -144,29 +113,19 @@ if __name__ == "__main__":
     #data['data3d'] = oseg.data3d
     #data['crinfo'] = oseg.crinfo
     #data['segmentation'] = oseg.segmentation
-    data['segmentation'][output] = data['slab']['porta']
+    datap['segmentation'][output] = datap['slab']['porta']
     #data['slab'] = slab
 
 
-    pyed = sed3.sed3(data['data3d'],  contour=data['segmentation']==data['slab']['porta'])
+    pyed = sed3.sed3(datap['data3d'], contour=datap['segmentation'] == datap['slab']['porta'])
     pyed.show()
 
     #pyed = sed3.sed3(data['segmentation'])
     #pyed.show()
     # Uvolneni pameti
-    garbage.collect()
 
 
     if args.outputfile == None:
+        io3d.write(datap, args.outpufile)
 
-        savestring = raw_input ('Save output data? (y/n): ')
-        #sn = int(snstring)
-        if savestring in ['Y','y']:
-            pth, filename = os.path.split(os.path.normpath(args.inputfile))
-
-            misc.obj_to_file(data,
-                             defaultoutputfile + '-' + filename,
-                             filetype = 'pickle')
-    else:
-        misc.obj_to_file(data, args.outputfile, filetype = 'pickle')
 
