@@ -756,7 +756,10 @@ def label_volumetric_vessel_tree(oseg, vessel_label=None, write_to_oseg=True, ne
     skan.skeleton_analysis()
     bl = skan.get_branch_label()
     un = np.unique(bl)
+    logger.debug("skelet3d branch label min: {}, max: {}, dtype: {}".format(np.min(bl), np.max(bl), bl.dtype))
     if write_to_oseg:
+        if 127 < np.max(bl) and ((oseg.segmentation.dtype == np.int8) or (oseg.segmentation.dtype == np.uint8)):
+            oseg.segmentation = oseg.segmentation.astype(np.int16)
         for lb in un:
             if lb != 0:
                 new_slabel = new_label_str_format.format(vessel_label, lb)

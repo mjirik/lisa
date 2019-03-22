@@ -1469,7 +1469,7 @@ class OrganSegmentationWindow(QMainWindow):
     def action_label_volumetric_vessel_tree(self):
         self.statusBar().showMessage('Performing branch label...')
         nlabel, slabel = self.ui_select_label("Select label with vessel")
-        print("label", slabel)
+        # print("label", slabel)
         self.oseg.label_volumetric_vessel_tree(vessel_label=slabel)
         self.statusBar().showMessage('Ready. Vessel {} branches labeled. '.format(str(slabel)))
 
