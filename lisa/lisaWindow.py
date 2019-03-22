@@ -376,7 +376,8 @@ class OrganSegmentationWindow(QMainWindow):
         self.window = window
         self.setCentralWidget(window)
         self.resize(800, 600)
-        self.setWindowTitle('LISA')
+        from . import __version__
+        self.setWindowTitle('LISA ' + __version__)
         self.statusBar().showMessage('Ready')
         self.mainLayout = QHBoxLayout(window)
         window.setLayout(self.mainLayout)

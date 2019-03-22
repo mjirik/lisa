@@ -2,6 +2,13 @@
 
 ## Unreleased 
 
+
+## 1.18.*
+
+* [added] Version in window title
+
+## 1.17.0
+
 * [fix] More than 127 segmentation labeles allowed from Vessel Label tool
 * [new] Export to hdf5 by io3d
 * [new] Patient info in load screen by io3d
