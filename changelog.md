@@ -8,6 +8,7 @@
 
 ## 1.17.0
 
+* [added] Select labels for relabel by mouse from the image data
 * [added] Version in window title
 
 * [fix] More than 127 segmentation labeles allowed from Vessel Label tool

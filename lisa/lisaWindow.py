@@ -219,10 +219,15 @@ class OrganSegmentationWindow(QMainWindow):
         segmentation_by_convex_areas.triggered.connect(self.action_add_segmentation_by_convex_areas)
         imageMenu.addAction(segmentation_by_convex_areas)
 
-        segmentation_relabel_action = QtGui.QAction(QtGui.QIcon('exit.png'), '&Relabel segmentation', self)
-        segmentation_relabel_action.setStatusTip('Change label of the segmentation')
-        segmentation_relabel_action.triggered.connect(self.action_segmentation_relabel)
-        imageMenu.addAction(segmentation_relabel_action)
+        self.__add_action_to_menu(imageMenu, "&Relabel segmentation",
+                                  self.action_segmentation_relabel,
+                                  tip="Change label of the segmentation",
+                                  finish_msg="Ready. Segmentation relabeled"
+                                  )
+        # segmentation_relabel_action = QtGui.QAction(QtGui.QIcon('exit.png'), '&Relabel segmentation1', self)
+        # segmentation_relabel_action.setStatusTip('Change label of the segmentation')
+        # segmentation_relabel_action.triggered.connect(self.action_segmentation_relabel)
+        # imageMenu.addAction(segmentation_relabel_action)
 
         branch_label_action = QtGui.QAction(QtGui.QIcon('exit.png'), '&Label vessel tree', self)
         branch_label_action.setStatusTip('Label volumetric vessel tree')
@@ -982,6 +987,7 @@ class OrganSegmentationWindow(QMainWindow):
         self.statusBar().showMessage('Relabelling segmentation')
         no, from_label = self.ui_select_label("Select from_label for renaming", multiple_choice=True)
         no, to_label = self.ui_select_label("Select to_label for renaming")
+        logger.debug("Relabeling from %s to %s", from_label, to_label)
         self.oseg.segmentation_relabel(from_label=from_label, to_label=to_label)
         self.statusBar().showMessage('Ready. Relabeled from ' + str(from_label) + " to " + str(to_label))
 
@@ -1091,11 +1097,24 @@ class OrganSegmentationWindow(QMainWindow):
         # import copy
         # texts = copy.copy(self.oseg.slab.keys())
 
+
+        if multiple_choice:
+            add_button2 = True
+            button2_label = "Select from image"
+            button2_fcn = self._ui_get_labels_with_gui
+        else:
+            add_button2 = False
+            button2_label = None
+            button2_fcn = None
+
         strlab = self.ui_select_from_list(
             list(self.oseg.slab.keys()),
             headline,
             text_inside=text_inside,
-            multiple_choice=multiple_choice
+            multiple_choice=multiple_choice,
+            add_button2=add_button2,
+            button2_label=button2_label,
+            button2_fcn=button2_fcn,
         )
         numlab = self.oseg.nlabels(strlab)
         if return_i and return_str:
@@ -1105,7 +1124,7 @@ class OrganSegmentationWindow(QMainWindow):
         else:
             return numlab
 
-    def ui_select_from_list(self,some_list, headline, text_inside="", multiple_choice=False):
+    def ui_select_from_list(self, some_list, headline, text_inside="", multiple_choice=False, add_button2=False, button2_label=None, button2_fcn=None):
         """ Select string from list with GUI.
 
         :return: selected string
@@ -1120,11 +1139,25 @@ class OrganSegmentationWindow(QMainWindow):
             slab_wg.update_slab_ui()
 
             layout.addWidget(slab_wg)
+
+
+            if add_button2:
+                def close_and_do(**kwargs):
+                    logger.debug("ui sel close")
+                    slab_dialog.close()
+                    logger.debug("ui sel closed")
+                    button2_ret_val = button2_fcn(**kwargs)
+                    slab_wg.overwrite_return_labeles(button2_ret_val)
+                ok2 = QPushButton(button2_label)
+                ok2.clicked.connect(close_and_do)
+                layout.addWidget(ok2)
+
             ok = QPushButton("ok")
             ok.clicked.connect(slab_dialog.close)
             layout.addWidget(ok)
             self._ok_button_to_click_for_testing = ok
             slab_dialog.exec_()
+            logger.debug("ui sel after exec")
 
             labels = slab_wg.get_selected_labels()
             labels = self.oseg.nlabels(labels, return_mode="str")
@@ -1249,6 +1282,32 @@ class OrganSegmentationWindow(QMainWindow):
 
         self.oseg.run_sss()
         self.statusBar().showMessage('Automatic segmentation finished')
+
+    def _ui_get_labels_with_gui(self):
+        oseg = self.oseg
+        sgm = oseg.segmentation.astype(np.uint8)
+        pyed = QTSeedEditor(oseg.data3d,
+                            appmenu_text="Select one or more labels",
+                            # seeds=sgm,
+                            # mode='draw',
+                            contours=sgm,
+                            voxelSize=oseg.voxelsize_mm, volume_unit='ml')
+        # self.qapp.exec_()
+        logger.debug("before ui get seeds exec")
+        pyed.show()
+        pyed.exec_()
+        logger.debug("after ui get seeds exec")
+        seeds = pyed.getSeeds()
+
+        from PyQt4.QtCore import pyqtRemoveInputHook
+        pyqtRemoveInputHook()
+        import ipdb; ipdb.set_trace()
+        unseeds = np.unique(self.oseg.segmentation[np.nonzero(seeds)])
+        # unseeds = list(np.unique(seeds))
+        # unseeds.pop[0]
+        logger.debug("unique seeds {}".format(unseeds))
+        return unseeds
+
 
     def btnManualSeg(self):
         oseg = self.oseg
