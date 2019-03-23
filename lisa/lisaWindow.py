@@ -1300,9 +1300,9 @@ class OrganSegmentationWindow(QMainWindow):
         logger.debug("after ui get seeds exec")
         seeds = pyed.getSeeds()
 
-        from PyQt4.QtCore import pyqtRemoveInputHook
-        pyqtRemoveInputHook()
-        import ipdb; ipdb.set_trace()
+        # from PyQt4.QtCore import pyqtRemoveInputHook
+        # pyqtRemoveInputHook()
+        # import ipdb; ipdb.set_trace()
         unseeds = np.unique(self.oseg.segmentation[np.nonzero(seeds)])
         # unseeds = list(np.unique(seeds))
         # unseeds.pop[0]
