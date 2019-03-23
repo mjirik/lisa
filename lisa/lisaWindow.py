@@ -1291,6 +1291,7 @@ class OrganSegmentationWindow(QMainWindow):
                             # seeds=sgm,
                             # mode='draw',
                             contours=sgm,
+                            init_brush_index=0,
                             voxelSize=oseg.voxelsize_mm, volume_unit='ml')
         # self.qapp.exec_()
         logger.debug("before ui get seeds exec")
