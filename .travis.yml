@@ -92,6 +92,15 @@ install:
     #    - 'sudo ldconfig -v'
     #    - sudo ldconfig -v
 
+# get sample data for lisa and skelet3d
+    - ls ~
+    - python -m io3d.datasets -l lisa 3Dircadb1.1 3Dircadb1.11
+    #-l volumetrie
+    #    - ls ~
+    - pwd
+    - ls ~/data/medical/orig
+    - ls ~/data/medical/orig/volumetrie
+
 # install skelet3d
     # prevent to install dependencies by pip
     # - conda install numpy scipy python=$CONDA_PYTHON_VERSION
@@ -145,14 +154,6 @@ install:
     - conda list
     - python -c "import skelet3d"
 
-# get sample data for lisa
-    - ls ~
-    - python -m io3d.datasets -l lisa 3Dircadb1.1 3Dircadb1.11
-     #-l volumetrie
-#    - ls ~
-    - pwd
-    - ls ~/data/medical/orig
-    - ls ~/data/medical/orig/volumetrie
 
 #    - ls ~/data/medical/orig/sample_data/volumetrie
 
