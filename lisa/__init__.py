@@ -2,7 +2,7 @@ from __future__ import absolute_import
 __all__ = ['organ_segmentation']
 #, 'qmisc', 'misc', 'experiments',
            #'support_structure_segmentation']
-__version__ = "1.18.1"
+__version__ = "1.18.2"
 
 import sys
 import os.path as op
