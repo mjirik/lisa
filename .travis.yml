@@ -136,8 +136,8 @@ install:
     - ls ~/miniconda/envs
     - cp bin/libBinaryThinningCxxShared.so ~/miniconda/envs/lisa/lib/
     - conda info -a
-#    - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
-#    - 'sudo ldconfig -v'
+    - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
+    - 'sudo ldconfig -v'
     - pwd
     - ls
     - nosetests -v -x
