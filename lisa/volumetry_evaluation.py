@@ -249,6 +249,8 @@ def compare_volumes_boundingbox(vol1, vol2, voxelsize_mm):
     crinfo[1][0]:crinfo[1][1],
     crinfo[2][0]:crinfo[2][1]
     ] = 1
+    vol1 = (vol1 > 0).astype(np.int8)
+    vol2 = (vol2 > 0).astype(np.int8)
 
     volume1 = np.sum(vol1 > 0)
     volume2 = np.sum(vol2 > 0)
@@ -302,6 +304,8 @@ def compare_volumes(vol1, vol2, voxelsize_mm, use_logger=False):
     vol1: reference
     vol2: segmentation
     """
+    vol1 = (vol1 > 0).astype(np.int8)
+    vol2 = (vol2 > 0).astype(np.int8)
     volume1 = np.sum(vol1 > 0)
     volume2 = np.sum(vol2 > 0)
     volume1_mm3 = volume1 * np.prod(voxelsize_mm)
