@@ -3,6 +3,15 @@ import appdirs
 import pathlib
 import urllib
 import urllib.request
+import os.path as op
+import sys
+import os
+
+# print(op.dirname(os.path.abspath(__file__)))
+# print(op.join(op.dirname(os.path.abspath(__file__)), "../../bodynavigation/"))
+# sys.path.append(op.join(op.dirname(os.path.abspath(__file__)), "../../bodynavigation/"))
+#
+# import bodynavigation
 
 appname = "LisaMreImport"
 appauthor = "mjirik"
@@ -50,25 +59,22 @@ if fn_data.exists():
     for filename in list(set(filenames) - set(filenames_local)):
         url_file = url + filename
         fn_local = lisa_data / filename
-        print("Downloading from {} to {}".format(url_file, fn_local))
-        fn_local2 = urllib.request.urlretrieve(url_file, filename=fn_local)
+        if not fn_local.exists():
+            print("Downloading from {} to {}".format(url_file, fn_local))
+            fn_local2, headers = urllib.request.urlretrieve(url_file, filename=fn_local)
         #fn_local and fn_local2 are probably the same
-        autolisa_paths.append(fn_local2)
+        autolisa_paths.append(fn_local)
 
     print("Running Auto-Lisa")
-    from lisa import autolisa
-    al = autolisa.AutoLisa()
-    al.run_in_paths(autolisa_paths)
+    try:
+        from lisa import autolisa
+        al = autolisa.AutoLisa()
+        al.run_in_paths(autolisa_paths)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
 
 print(fn_data)
-with open(fn_data, 'w') as outfile:
-    json.dump(filenames, outfile)
+# with open(fn_data, 'w') as outfile:
+#     json.dump(filenames, outfile)
 
-# print(text2)
-# content = requests.get(url)
-
-# response = urllib2.urlopen(url)
-# webContent = response.read()
-#
-# print(webContent[0:300])
-# print(html)

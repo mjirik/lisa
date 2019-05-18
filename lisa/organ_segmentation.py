@@ -2291,6 +2291,7 @@ def main(app=None, splash=None):  # pragma: no cover
             #     splash.finish()
             from . import autolisa
             al = autolisa.AutoLisa()
+            print("datapath: ", args["datapath"])
             al.run_in_paths(args["datapath"])
             return
 

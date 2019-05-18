@@ -45,7 +45,7 @@ def lisa_main():
     # --configfile parameter
 
     if knownargs.no_interactivity or knownargs.autolisa:
-        import organ_segmentation
+        from . import organ_segmentation
         organ_segmentation.main()
     else:
 

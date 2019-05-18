@@ -18,6 +18,7 @@ class AutoLisa:
         pass
 
     def run_one(self, input_data_path, output_datapath=None):
+        print("input data path: ", input_data_path)
         import os.path as op
         import io3d.datasets
 
@@ -41,7 +42,8 @@ class AutoLisa:
         if type(path) in (list, tuple):
             files = path
         else:
-            files = glob.glob(path)
+            files = glob.glob(op.expanduser(path))
+        print(files)
         for pth in files:
             self.run_one(pth)
 
