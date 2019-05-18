@@ -110,7 +110,7 @@ default_segmentation_alternative_params = {
                 "return_only_object_with_seeds": True
             },
         },
-        "msgc_lo2hi boundary dilatation paper": {
+        "msgc_hi2lo boundary dilatation paper": {
             "segparams": {
                 'method':'multiscale_graphcut_hi2lo',
                 'use_boundary_penalties': True,
