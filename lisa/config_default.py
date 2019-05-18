@@ -98,6 +98,30 @@ default_segmentation_alternative_params = {
                 "return_only_object_with_seeds": True
             }
         },
+        "msgc_lo2hi boundary dilatation paper": {
+            "segparams": {
+                'method':'multiscale_graphcut_lo2hi',
+                'use_boundary_penalties': True,
+                'boundary_dilatation_distance': 2,
+                'boundary_penalties_weight': 1,
+                'block_size': 10,
+                'tile_zoom_constant': 1,
+                "pairwise_alpha_per_mm2":45,
+                "return_only_object_with_seeds": True
+            },
+        },
+        "msgc_lo2hi boundary dilatation paper": {
+            "segparams": {
+                'method':'multiscale_graphcut_hi2lo',
+                'use_boundary_penalties': True,
+                'boundary_dilatation_distance': 2,
+                'boundary_penalties_weight': 1,
+                'block_size': 10,
+                'tile_zoom_constant': 1,
+                "pairwise_alpha_per_mm2":45,
+                "return_only_object_with_seeds": True
+            },
+        },
         "graphcut": {
             "segparams": {
                 'method':'graphcut',
