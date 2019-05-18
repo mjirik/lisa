@@ -5,6 +5,8 @@
 
 ## 1.18.*
 
+* [fix] sliver evaluation is robust to data type uint
+
 
 ## 1.17.0
 
