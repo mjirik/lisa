@@ -297,6 +297,7 @@ def compare_volumes_sliver(vol1, vol2, voxelsize_mm, use_logger=False):
     evaluation['sliver_overall_pts'] = overall
     return evaluation
 
+
 def compare_volumes(vol1, vol2, voxelsize_mm, use_logger=False):
     """
     computes metrics, no sliver computed here, see compare_volumes_sliver
@@ -326,9 +327,13 @@ def compare_volumes(vol1, vol2, voxelsize_mm, use_logger=False):
                      + str(df2 / volume_avg_mm3 * 100))
 
     # VOE[%]
-    intersection = np.sum(df != 0).astype(np.float)
-    union = (np.sum(vol1 > 0) + np.sum(vol2 > 0)).astype(float)
-    voe = 100 * (intersection / union)
+    # intersection = np.sum(df != 0).astype(np.float)
+    intersection = np.sum(vol1 * vol2 == 1).astype(np.float)
+    union_dice = (np.sum(vol1 > 0) + np.sum(vol2 > 0)).astype(float)
+    union_jaccard = np.sum(vol1 + vol2 > 0).astype(float)
+    jaccard = (intersection / union_jaccard)
+    dice = 1 - (2 * (intersection / union_dice))
+    voe = 100 * (1 - jaccard)
     if use_logger:
         logger.debug('VOE [%]' + str(voe))
 
@@ -358,7 +363,9 @@ def compare_volumes(vol1, vol2, voxelsize_mm, use_logger=False):
         'voe': voe,
         'avgd': avgd,
         'rmsd': rmsd,
-        'maxd': maxd
+        'maxd': maxd,
+        'dice': dice,
+        'jaccard': jaccard
     }
 
     return evaluation
