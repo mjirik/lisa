@@ -106,9 +106,12 @@ default_segmentation_alternative_params = {
                 'boundary_penalties_weight': 1,
                 'block_size': 10,
                 'tile_zoom_constant': 1,
-                "pairwise_alpha_per_mm2":45,
+                # "pairwise_alpha_per_mm2":45,
+                "pairwise_alpha_per_square_unit": 45,
                 "return_only_object_with_seeds": True
+                # "return_only_object_with_seeds
             },
+            'working_voxelsize_mm': 1.3
         },
         "msgc_hi2lo boundary dilatation paper": {
             "segparams": {
@@ -118,9 +121,23 @@ default_segmentation_alternative_params = {
                 'boundary_penalties_weight': 1,
                 'block_size': 10,
                 'tile_zoom_constant': 1,
-                "pairwise_alpha_per_mm2":45,
+                "pairwise_alpha_per_square_unit": 45,
                 "return_only_object_with_seeds": True
             },
+            'working_voxelsize_mm': 1.3
+        },
+        "ssgc boundary dilatation paper": {
+            "segparams": {
+                'method':'graphcut',
+                'use_boundary_penalties': True,
+                'boundary_dilatation_distance': 2,
+                'boundary_penalties_weight': 1,
+                'block_size': 10,
+                'tile_zoom_constant': 1,
+                "pairwise_alpha_per_square_unit": 45,
+                "return_only_object_with_seeds": True
+            },
+            'working_voxelsize_mm': 1.3
         },
         "graphcut": {
             "segparams": {
@@ -130,7 +147,8 @@ default_segmentation_alternative_params = {
                 'boundary_penalties_weight': 1,
                 'block_size': 10,
                 'tile_zoom_constant': 1,
-                "pairwise_alpha_per_mm2":45,
+                # "pairwise_alpha_per_mm2":45,
+                "pairwise_alpha_per_square_unit": 45,
                 "return_only_object_with_seeds": True
             }
         }

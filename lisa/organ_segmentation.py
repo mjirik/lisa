@@ -680,9 +680,10 @@ class OrganSegmentation():
 
         self.dcmfilelist = datap['dcmfilelist']
 
-        self.segparams['pairwise_alpha'] = \
-            self.segparams['pairwise_alpha_per_mm2'] / \
-            np.mean(self.working_voxelsize_mm)
+        if "pairwise_alpha_pep_mm2" in self.segparams:
+            self.segparams['pairwise_alpha'] = \
+                self.segparams['pairwise_alpha_per_mm2'] / \
+                np.mean(self.working_voxelsize_mm)
 
         self.__import_dataplus_seeds(datap)
 
@@ -823,9 +824,10 @@ class OrganSegmentation():
         # insert feature function instead of string description
         from . import organ_model
         self.segmodelparams = organ_model.add_fv_extern_into_modelparams(self.segmodelparams)
-        self.segparams['pairwise_alpha'] = \
-            self.segparams['pairwise_alpha_per_mm2'] / \
-            np.mean(self.working_voxelsize_mm)
+        if "pairwise_alpha_pep_mm2" in self.segparams:
+            self.segparams['pairwise_alpha'] = \
+                self.segparams['pairwise_alpha_per_mm2'] / \
+                np.mean(self.working_voxelsize_mm)
 
         if 'method' not in self.segparams.keys() or \
                 self.segparams['method'] in pycut.accepted_methods:
