@@ -996,6 +996,10 @@ class OrganSegmentation():
         This is called after processing step. All data are rescaled to original
         resolution.
         """
+        if self.debug_mode:
+            print("interactivity_end unique segmentation: {}".format(np.unique(self.segmentation)))
+            print("segparams:", igc.segparams)
+            print("modelparams:", igc.modelparams)
         logger.debug('_interactivity_end()')
 
         self.__resize_to_orig(igc.seeds)
