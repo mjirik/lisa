@@ -6,6 +6,7 @@
 ## 1.18.*
 
 * [fix] sliver evaluation is robust to data type uint
+* [added] Import segmentation from dir 
 
 
 ## 1.17.0

@@ -626,6 +626,7 @@ class OrganSegmentation():
     def import_segmentation_from_file(self, filepath):
         """
         Loads data from file. Expected are uncropped data.
+        The old label is set to 0 and then new label is loaded.
         """
         # logger.debug("import segmentation from file")
         # logger.debug(str(self.crinfo))
@@ -637,8 +638,18 @@ class OrganSegmentation():
         segmentation = qmisc.crop(segmentation, self.crinfo)
         logger.debug(str(segmentation.shape))
 
+        #
+        nzlabels = set(np.unique(segmentation)) - {0}
+        print("nzlabels: ", nzlabels)
+        for label in nzlabels:
 
-        self.segmentation = segmentation
+            self.segmentation_replacement(
+                segmentation_new=segmentation,
+                label_new=label,
+                label=label
+            )
+
+        # self.segmentation = segmentation
         self.add_missing_labels()
 
     def import_dataplus(self, dataplus):
@@ -1088,6 +1099,7 @@ class OrganSegmentation():
 
         logger.debug('processing_time = ' + str(self.processing_time))
 
+
     def segmentation_replacement(
             self,
             segmentation_new,
@@ -1096,6 +1108,15 @@ class OrganSegmentation():
             segmentation=None,
             **kwargs
     ):
+        """
+
+        :param segmentation_new:  input segmentation
+        :param label: output label
+        :param label_new:  input label
+        :param segmentation:
+        :param kwargs:
+        :return:
+        """
         if segmentation is None:
             segmentation = self.segmentation
 

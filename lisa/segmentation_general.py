@@ -30,7 +30,7 @@ def segmentation_replacement(
     :param label:
     :param background_label:
     :param slab:
-    :param label_new:
+    :param label_new: label on input
     :return:
     """
     segmentation_old = ima.select_labels(segmentation, labels=label, slab=slab)
