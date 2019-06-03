@@ -629,12 +629,17 @@ class OrganSegmentation():
         """
         # logger.debug("import segmentation from file")
         # logger.debug(str(self.crinfo))
-        reader = datareader.DataReader()
-        datap = reader.Get3DData(filepath, dataplus_format=True)
+        # reader = datareader.DataReader()
+        # datap = reader.Get3DData(filepath, dataplus_format=True)
+        datap = io3d.read(filepath, dataplus_format=True)
+
         segmentation = datap['data3d']
         segmentation = qmisc.crop(segmentation, self.crinfo)
         logger.debug(str(segmentation.shape))
+
+
         self.segmentation = segmentation
+        self.add_missing_labels()
 
     def import_dataplus(self, dataplus):
         datap = {

@@ -174,6 +174,13 @@ class OrganSegmentationWindow(QMainWindow):
         segFromFile.triggered.connect(self.btnLoadSegmentationFromFile)
         fileMenu.addAction(segFromFile)
 
+        self.__add_action_to_menu(fileMenu, "&Segmentation from dir",
+                                  lambda: self.oseg.import_segmentation_from_file(self.ui_get_datadir(
+                                      window_title="Select directory with seeds")),
+                                  tip="Import segmentation from dir",
+                                  finish_msg="Ready. Segmentation loaded."
+                                  )
+
         segFromOverlay = QtGui.QAction(QtGui.QIcon('exit.png'), '&Segmentation from Dicom overlay', self)
         segFromOverlay.setStatusTip('Load segmentation from Dicom file stack')
         segFromOverlay.triggered.connect(self.btnLoadSegmentationFromDicomOverlay)
@@ -707,35 +714,6 @@ class OrganSegmentationWindow(QMainWindow):
             dcmdir = None
         return dcmdir
 
-    def __get_datadir(self, app=False, directory=''):
-        """
-        Draw a dialog for directory selection.
-        """
-
-        from PyQt4.QtGui import QFileDialog
-        if app:
-            dcmdir = QFileDialog.getExistingDirectory(
-                caption='Select DICOM Folder',
-                options=QFileDialog.ShowDirsOnly,
-                directory=directory
-            )
-        else:
-            app = QApplication(sys.argv)
-            dcmdir = QFileDialog.getExistingDirectory(
-                caption='Select DICOM Folder',
-                options=QFileDialog.ShowDirsOnly,
-                directory=directory
-            )
-            # pp.exec_()
-            app.exit(0)
-        if len(dcmdir) > 0:
-
-            dcmdir = "%s" % (dcmdir)
-            dcmdir = dcmdir.encode("utf8")
-        else:
-            dcmdir = None
-        return dcmdir
-
     def loadDataFile(self):
         self.statusBar().showMessage('Reading data file...')
         QApplication.processEvents()
@@ -779,21 +757,14 @@ class OrganSegmentationWindow(QMainWindow):
         QApplication.processEvents()
 
         oseg = self.oseg
-        if 'loaddir' in self.oseg.cache.data.keys():
-            directory = self.oseg.cache.get('loaddir')
-        else:
-            directory = self.oseg.input_datapath_start
 
-        oseg.datapath = self.__get_datadir(
-            app=True,
-            directory=directory
+        oseg.datapath = self.ui_get_datadir(
         )
 
         if oseg.datapath is None:
             self.statusBar().showMessage('No DICOM directory specified!')
             return
         # head, teil = os.path.split(oseg.datapath)
-        self.oseg.cache.update('loaddir', oseg.datapath)
 
         self.importDataWithGui()
 
@@ -1387,6 +1358,62 @@ class OrganSegmentationWindow(QMainWindow):
 
         logger.info('Selected file: %s', filename)
         return filename
+    """
+    """
+    def ui_get_datadir(self, directory=None, window_title="Load from directory",
+                       directory_cache_name="loaddir"):
+
+        if directory is None:
+            if 'loaddir' in self.oseg.cache.data.keys():
+                directory = self.oseg.cache.get(directory_cache_name)
+            else:
+                directory = self.oseg.input_datapath_start
+
+        from PyQt4.QtGui import QFileDialog
+        if self.qapp is not None:
+            dcmdir = QFileDialog.getExistingDirectory(
+                self,
+                caption=window_title,
+                options=QFileDialog.ShowDirsOnly,
+                directory=directory,
+            )
+        else:
+            app = QApplication(sys.argv)
+            dcmdir = QFileDialog.getExistingDirectory(
+                self,
+                window_title,
+                caption=window_title,
+                options=QFileDialog.ShowDirsOnly,
+                directory=directory,
+            )
+            # pp.exec_()
+            app.exit(0)
+        dcmdir = get_str(dcmdir)
+
+        if len(dcmdir) == 0:
+            dcmdir = None
+        else:
+            self.oseg.cache.update('loaddir', dcmdir)
+        return dcmdir
+
+
+    def ui_select_input_dir(self, filetype="pklz", suffix="_seeds", window_title="Load dir", filter=None):
+        ofilename = self.oseg.get_standard_ouptut_filename(filetype=filetype, suffix=suffix)
+        ofilename = self.oseg.get_stan(filetype=filetype, suffix=suffix)
+
+        if 'loaddir' in self.oseg.cache.data.keys():
+            directory = self.oseg.cache.get('loaddir')
+        else:
+            directory = self.oseg.input_datapath_start
+
+        filename = str(QFileDialog.getO(
+            self,
+            window_title,
+            ofilename,
+            filter=filter))
+
+        logger.info('Selected file: %s', filename)
+        return filename
 
     def saveOut(self, event=None, filename=None, image_stack=False):
         """
@@ -1699,3 +1726,11 @@ class OrganSegmentationWindow(QMainWindow):
 
         else:
             self.statusBar().showMessage('No segmentation data!')
+
+def get_str(text):
+    if sys.version_info.major == 2:
+        import PyQt4.QtCore
+        if type(text) is PyQt4.QtCore.QString:
+            text = str(text)
+
+    return text
