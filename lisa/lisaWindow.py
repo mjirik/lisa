@@ -174,9 +174,10 @@ class OrganSegmentationWindow(QMainWindow):
         segFromFile.triggered.connect(self.btnLoadSegmentationFromFile)
         fileMenu.addAction(segFromFile)
 
+        # TODO use cache_name "segloaddir"
         self.__add_action_to_menu(fileMenu, "&Segmentation from dir",
                                   lambda: self.oseg.import_segmentation_from_file(self.ui_get_datadir(
-                                      window_title="Select directory with seeds")),
+                                      window_title="Select directory with seeds", cache_name="loaddir")),
                                   tip="Import segmentation from dir",
                                   finish_msg="Ready. Segmentation loaded."
                                   )
@@ -291,6 +292,13 @@ class OrganSegmentationWindow(QMainWindow):
                                   tip="Put structures located by bodynavigation into segmentataion",
                                   init_msg="Get precise body navigation structures ...",
                                   finish_msg="Ready. Body navigation structures are in segmentation now."
+                                  )
+        self.__add_action_to_menu(imageMenu, "&Segmentation to vessel tree",
+                                  lambda: self.__saveVesselTreeGui(self.ui_select_label(
+                                      "Select label", "selected segmentation will be turned into vessel tree"
+                                      )),
+                                  tip="Process segmentation with vessel tree algorithm",
+                                  finish_msg="Ready. Vessel tree saved."
                                   )
 
         ###### OPTION MENU ######
@@ -1337,7 +1345,9 @@ class OrganSegmentationWindow(QMainWindow):
         """
         self.saveOut(image_stack=True)
 
-    def ui_select_output_filename(self, filetype="pklz", suffix="_seeds", window_title="Save file", filter=None):
+    def ui_select_output_filename(self, filetype="pklz", suffix="_seeds", window_title="Save file", filter=None,
+                                  # cache_name="saveoutputfile"
+                                  ):
         if filter is None:
             if filetype is None:
                 filter = "Former Lisa Format (*.pklz);;New Lisa format HDF5 (*.h5 *.hdf5);; Dicom (*.dcm);; All files(*.*)"
@@ -1358,14 +1368,20 @@ class OrganSegmentationWindow(QMainWindow):
 
         logger.info('Selected file: %s', filename)
         return filename
-    """
-    """
+
     def ui_get_datadir(self, directory=None, window_title="Load from directory",
-                       directory_cache_name="loaddir"):
+                       cache_name="loaddir"):
+        """
+        Create window to select directory
+        :param directory:
+        :param window_title:
+        :param cache_name: name to store path for next use.
+        :return:
+        """
 
         if directory is None:
             if 'loaddir' in self.oseg.cache.data.keys():
-                directory = self.oseg.cache.get(directory_cache_name)
+                directory = self.oseg.cache.get(cache_name)
             else:
                 directory = self.oseg.input_datapath_start
 

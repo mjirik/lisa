@@ -614,9 +614,10 @@ class OrganSegmentation():
     def minimize_slab(self):
         imsl.minimize_slab(self.slab, self.segmentation)
 
+
     def select_label(self, labels):
         """
-
+        Return ndimage with selected segmentation
         :param labels:
         :return:
         """
@@ -1434,7 +1435,8 @@ class OrganSegmentation():
         textLabel: 'porta' or 'hepatic_veins'
         """
         self.__vesselTree(
-            self.segmentation == self.slab[textLabel],
+            self.select_label(textLabel),
+            # self.segmentation == self.slab[textLabel],
             textLabel,
             fn_yaml=fn_yaml,
             fn_vtk=fn_vtk,
@@ -1489,7 +1491,10 @@ class OrganSegmentation():
         skan = skeleton_analyser.SkeletonAnalyser(
             data3d_skel,
             volume_data=data3d_thr,
-            voxelsize_mm=self.voxelsize_mm)
+            voxelsize_mm=self.voxelsize_mm,
+            cut_wrong_skeleton=False,
+            aggregate_near_nodes_distance=0
+        )
         stats = skan.skeleton_analysis(guiUpdateFunction=None)
 
         if 'Graph' not in self.vessel_tree.keys():
