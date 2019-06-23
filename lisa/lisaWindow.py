@@ -430,14 +430,14 @@ class OrganSegmentationWindow(QMainWindow):
         font_info.setItalic(True)
         font_info.setPixelSize(12)
         lisa_title = QLabel('Liver Surgery Analyser')
-        if sys.version_info.major == 2:
-            names = QString.fromUtf8('M. Jiřík, V. Lukeš - 2013')
-        else:
-            names = "M. Jiřík, V. Lukeš - 2013"
+        # if sys.version_info.major == 2:
+        #     names = QString.fromUtf8('M. Jiřík, V. Lukeš - 2013')
+        # else:
+        #     names = "M. Jiřík, V. Lukeš - 2013"
         info = QLabel('Developed by:\n' +
                       'University of West Bohemia\n' +
                       'Faculty of Applied Sciences\n' +
-                      names +
+                      "Charles University\nFaculty of Medicine in Pilsen"
                       '\n\nVersion: ' + self.oseg.version
                       )
         info.setFont(font_info)
