@@ -94,7 +94,7 @@ default_segmentation_alternative_params = {
                 'boundary_penalties_weight': 1,
                 'block_size': 8,
                 'tile_zoom_constant': 1,
-                "pairwise_alpha_per_mm2":45,
+                "pairwise_alpha_per_mm2": 45,
                 "return_only_object_with_seeds": True
             }
         },
