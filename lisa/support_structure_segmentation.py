@@ -5,7 +5,9 @@
 
 # import funkcí z jiného adresáře
 import sys
+
 import os.path
+
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 # sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
@@ -14,6 +16,7 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 #import featurevector
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -21,13 +24,17 @@ logger = logging.getLogger(__name__)
 #  apdb.set_trace();\
 #import scipy.io
 import numpy as np
+
 import scipy
+
 
 # ----------------- my scripts --------
 try:
     import dcmreaddata as dcmr
+
 except:
     from imcut import dcmreaddata as dcmr
+
 
 # try:
 #     from imcut import pycut
@@ -35,12 +42,19 @@ except:
 #     logger.warning("Deprecated of pyseg_base as submodule")
 #     import pycut
 import argparse
+
 import io3d
+
 import io3d.misc
+
 import scipy.ndimage.filters as filters
+
 import numpy as np
+
 from scipy.ndimage.measurements import label
+
 from scipy.ndimage import morphology
+
 
 
 class SupportStructureSegmentation():
@@ -168,6 +182,7 @@ class SupportStructureSegmentation():
 
     def __above_diaphragm_calculation(self, seg_prub, internal_resize_shape=[20, 20, 20], data_degradation=4):
         import multipolyfit as mpf
+
         # print seg_prub.dtype
         # seg_prub_tmp = misc.resize_to_shape(seg_prub, internal_resize_shape)
         # print seg_prub_tmp.dtype
@@ -462,11 +477,14 @@ class SupportStructureSegmentation():
 
         try:
             from imcut.seed_editor_qt import QTSeedEditor
+
         except:
             logger.warning("Deprecated of pyseg_base as submodule")
             from seed_editor_qt import QTSeedEditor
-        from PyQt4.QtGui import QApplication
+
+        from PyQt5.QtWidgets import QApplication
         import numpy as np
+
 #, QMainWindow
         app = QApplication(sys.argv)
         #pyed = QTSeedEditor(self.data3d, contours=(self.segmentation>0))
@@ -582,6 +600,7 @@ def main():
     #sn = int(snstring)
     if args.output is not None: # savestring in ['Y','y']:
         import misc
+
 
         data = sseg.export()
 

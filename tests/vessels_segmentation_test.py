@@ -4,22 +4,30 @@
 
 # import funkcí z jiného adresáře
 import os.path
+
 
 import sys
+
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 # sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
 # sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
 # sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
+
 
 from nose.plugins.attrib import attr
+
 import numpy as np
+
 
-from PyQt4.QtGui import QApplication
+from PyQt5.QtWidgets import QApplication
 import sed3
+
 
 from lisa import organ_segmentation
+
 from imtools import segmentation
+
 
 
 class VesselsSegmentationTest(unittest.TestCase):
@@ -115,6 +123,7 @@ class VesselsSegmentationTest(unittest.TestCase):
         Make virtual resection on synthetic data
         """
         import lisa.virtual_resection as vr
+
         data3d, segm, voxelsize_mm, slab = self.synthetic_data()
         seeds = np.zeros([256, 256, 80], dtype=np.int16)
         seeds[125, 160, 44] = 1
@@ -140,6 +149,7 @@ class VesselsSegmentationTest(unittest.TestCase):
         Make virtual resection on synthetic data
         """
         import lisa.virtual_resection as vr
+
         data3d, segm, voxelsize_mm, slab = self.synthetic_data()
         seeds = np.zeros([256, 256, 80], dtype=np.int16)
         seeds[125, 160, 44] = 1
@@ -172,6 +182,7 @@ class VesselsSegmentationTest(unittest.TestCase):
     @attr('slow')
     def test_real_data_segmentation(self):
         import lisa.dataset
+
         app = QApplication(sys.argv)
 
         dcmdir = os.path.join(lisa.dataset.sample_data_path(), 'jatra_5mm')
@@ -224,7 +235,9 @@ class VesselsSegmentationTest(unittest.TestCase):
             'binaryOpeningIterations': 0
         }
         import imtools
+
         import imtools.sample_data
+
         datap = imtools.sample_data.generate()
         app = QApplication(sys.argv)
         outputTmp = segmentation.vesselSegmentation(

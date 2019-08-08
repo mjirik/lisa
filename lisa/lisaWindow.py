@@ -4,21 +4,35 @@
 Modul is used for GUI of Lisa
 """
 import logging
+
+try:
+    QString = unicode
+except NameError:
+    # Python 3
+    QString = str
+
 logger = logging.getLogger(__name__)
 # from lisa.logWindow import QVBoxLayout
 
 import sys
+
 import os
+
 import numpy as np
+
 
 import datetime
+
 import functools
+
 
 from io3d import datareader
+
 # import segmentation
 
 try:
     from viewer import QVTKViewer
+
     viewer3D_available = True
 
 except ImportError:
@@ -27,33 +41,45 @@ except ImportError:
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/imcut/src"))
 
-from PyQt4.QtGui import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame, \
-    QFont, QPixmap, QFileDialog, QInputDialog
-from PyQt4 import QtGui
+from PyQt5.QtGui import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
+                         QLabel, QPushButton, QFrame, 
+    QFont, QPixmap,
+                         QFileDialog, QInputDialog)
+from PyQt5 import QtGui, QtWidgets
 
 import sys
+
 if sys.version_info.major == 2:
-    from PyQt4.Qt import QString
 else:
     Qstring = str
 
 try:
     from imcut.seed_editor_qt import QTSeedEditor
+
 except:
     logger.warning("Deprecated of pyseg_base as submodule")
     try:
         from imcut.seed_editor_qt import QTSeedEditor
+
     except:
         logger.warning("Deprecated of pyseg_base as submodule")
         from seed_editor_qt import QTSeedEditor
+
 
 import sed3
+
 from . import loginWindow
+
 from . import dictEditQt
+
 from . import segmentationQt
+
 from . import virtual_resection
+
 from io3d.network import download_file
+
 from imtools.select_label_qt import SelectLabelWidget
+
 
 def find_logo():
     logopath = os.path.join(path_to_script, "./icons/LISA256.png")
@@ -104,44 +130,44 @@ class OrganSegmentationWindow(QMainWindow):
         fileMenu = menubar.addMenu('&File')
         loadSubmenu = fileMenu.addMenu('&Load')
         # load dir
-        loadDirAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Directory', self)
+        loadDirAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&Directory', self)
         loadDirAction.setStatusTip('Load data from directory (DICOM, jpg, png...)')
         loadDirAction.triggered.connect(self.loadDataDir)
         loadSubmenu.addAction(loadDirAction)
         # load file
-        loadFileAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&File', self)
+        loadFileAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&File', self)
         loadFileAction.setStatusTip('Load data from file (pkl, 3D Dicom, tiff...)')
         loadFileAction.triggered.connect(self.loadDataFile)
         loadSubmenu.addAction(loadFileAction) 
         
         saveSubmenu = fileMenu.addMenu('&Save')
         # save file
-        saveFileAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&File', self)
+        saveFileAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&File', self)
         saveFileAction.setStatusTip('Save data with segmentation')
         saveFileAction.triggered.connect(self.saveOut)
         saveSubmenu.addAction(saveFileAction)   
         # save dicom
-        saveDicomAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&DICOM', self)
+        saveDicomAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&DICOM', self)
         saveDicomAction.setStatusTip('Save DICOM data')
         saveDicomAction.triggered.connect(self.btnSaveOutDcm)
         saveSubmenu.addAction(saveDicomAction)
         # save dicom overlay
-        saveDicomOverlayAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&DICOM overlay', self)
+        saveDicomOverlayAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&DICOM overlay', self)
         saveDicomOverlayAction.setStatusTip('Save overlay DICOM data')
         saveDicomOverlayAction.triggered.connect(self.btnSaveOutDcmOverlay)
         saveSubmenu.addAction(saveDicomOverlayAction)     
         # save JSON
-        saveJSONAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&JSON file', self)
+        saveJSONAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&JSON file', self)
         saveJSONAction.setStatusTip('Save JSON file')
         saveJSONAction.triggered.connect(self.btnSaveJSON)
         saveSubmenu.addAction(saveJSONAction)     
         # save PV tree
-        savePVAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&PV tree', self)
+        savePVAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&PV tree', self)
         savePVAction.setStatusTip('Save Portal Vein 1D model')
         savePVAction.triggered.connect(self.btnSavePortalVeinTree)
         saveSubmenu.addAction(savePVAction)     
         # save HV tree
-        saveHVAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Vessel Tree', self)
+        saveHVAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&Vessel Tree', self)
         saveHVAction.setStatusTip('Save actual vessel tree 1D model')
         saveHVAction.triggered.connect(self.btnSaveActualVesselTree)
         saveSubmenu.addAction(saveHVAction)     
@@ -149,27 +175,27 @@ class OrganSegmentationWindow(QMainWindow):
         separator = fileMenu.addAction("")
         separator.setSeparator(True)
 
-        autoSeedsAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Automatic liver seeds', self)
+        autoSeedsAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&Automatic liver seeds', self)
         autoSeedsAction.setStatusTip('Automatic liver seeds')
         autoSeedsAction.triggered.connect(self.btnAutomaticLiverSeeds)
         fileMenu.addAction(autoSeedsAction)
 
-        autoSegAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Automatic segmentation', self)
+        autoSegAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&Automatic segmentation', self)
         autoSegAction.setStatusTip('Automatic segmentation')
         autoSegAction.triggered.connect(self.btnAutoSeg)
         fileMenu.addAction(autoSegAction)
 
-        cropAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Crop', self)
+        cropAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&Crop', self)
         cropAction.setStatusTip('')
         cropAction.triggered.connect(self.cropDcm)
         fileMenu.addAction(cropAction)
 
-        maskAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Mask region', self)
+        maskAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&Mask region', self)
         maskAction.setStatusTip('')
         maskAction.triggered.connect(self.maskRegion)
         fileMenu.addAction(maskAction)
 
-        segFromFile = QtGui.QAction(QtGui.QIcon('exit.png'), '&Segmentation from file', self)
+        segFromFile = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&Segmentation from file', self)
         segFromFile.setStatusTip('Load segmentation from pkl file, raw, ...')
         segFromFile.triggered.connect(self.btnLoadSegmentationFromFile)
         fileMenu.addAction(segFromFile)
@@ -182,17 +208,17 @@ class OrganSegmentationWindow(QMainWindow):
                                   finish_msg="Ready. Segmentation loaded."
                                   )
 
-        segFromOverlay = QtGui.QAction(QtGui.QIcon('exit.png'), '&Segmentation from Dicom overlay', self)
+        segFromOverlay = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&Segmentation from Dicom overlay', self)
         segFromOverlay.setStatusTip('Load segmentation from Dicom file stack')
         segFromOverlay.triggered.connect(self.btnLoadSegmentationFromDicomOverlay)
         fileMenu.addAction(segFromOverlay)
 
-        view3DAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&View 3D', self)
+        view3DAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&View 3D', self)
         view3DAction.setStatusTip('View segmentation in 3D model')
         view3DAction.triggered.connect(self.view3D)
         fileMenu.addAction(view3DAction)
 
-        debugAction= QtGui.QAction(QtGui.QIcon('exit.png'), '&Debug terminal', self)
+        debugAction= QtWidgets.QAction(QtGui.QIcon('exit.png'), '&Debug terminal', self)
         debugAction.setStatusTip('Run interactive terminal debug')
         debugAction.triggered.connect(self.run_debug)
         fileMenu.addAction(debugAction)
@@ -201,28 +227,28 @@ class OrganSegmentationWindow(QMainWindow):
         separator.setSeparator(True)
 
 
-        exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
+        exitAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
         exitAction.setShortcut('Ctrl+Q')
         exitAction.setStatusTip('Exit application')
-        exitAction.triggered.connect(QtGui.qApp.quit)
+        exitAction.triggered.connect(QtWidgets.QApplication.quit)
         fileMenu.addAction(exitAction)
 
 
         ###### IMAGE MENU ######
         imageMenu = menubar.addMenu('&Image')
 
-        randomRotateAction= QtGui.QAction(QtGui.QIcon('exit.png'), '&Random Rotate', self)
+        randomRotateAction= QtWidgets.QAction(QtGui.QIcon('exit.png'), '&Random Rotate', self)
         # autoSeedsAction.setShortcut('Ctrl+Q')
         randomRotateAction.setStatusTip('Random rotation')
         randomRotateAction.triggered.connect(self.btnRandomRotate)
         imageMenu.addAction(randomRotateAction)
 
-        mirrorZAxisAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Mirror Z-axis', self)
+        mirrorZAxisAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&Mirror Z-axis', self)
         mirrorZAxisAction.setStatusTip('Mirror Z-axis')
         mirrorZAxisAction.triggered.connect(self.oseg.mirror_z_axis)
         imageMenu.addAction(mirrorZAxisAction)
 
-        segmentation_by_convex_areas = QtGui.QAction(QtGui.QIcon('exit.png'), '&Draw convex segmentation', self)
+        segmentation_by_convex_areas = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&Draw convex segmentation', self)
         segmentation_by_convex_areas.setStatusTip('Create segmentation by adding convex areas')
         segmentation_by_convex_areas.triggered.connect(self.action_add_segmentation_by_convex_areas)
         imageMenu.addAction(segmentation_by_convex_areas)
@@ -237,12 +263,12 @@ class OrganSegmentationWindow(QMainWindow):
         # segmentation_relabel_action.triggered.connect(self.action_segmentation_relabel)
         # imageMenu.addAction(segmentation_relabel_action)
 
-        branch_label_action = QtGui.QAction(QtGui.QIcon('exit.png'), '&Label vessel tree', self)
+        branch_label_action = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&Label vessel tree', self)
         branch_label_action.setStatusTip('Label volumetric vessel tree')
         branch_label_action.triggered.connect(self.action_label_volumetric_vessel_tree)
         imageMenu.addAction(branch_label_action)
 
-        resize_to_mm_action = QtGui.QAction(QtGui.QIcon('exit.png'), "Resize to mm", self)
+        resize_to_mm_action = QtWidgets.QAction(QtGui.QIcon('exit.png'), "Resize to mm", self)
         resize_to_mm_action.setStatusTip('Resize data3d and segemntation to mm')
         resize_to_mm_action.triggered.connect(self.action_resize_mm)
         imageMenu.addAction(resize_to_mm_action)
@@ -304,32 +330,32 @@ class OrganSegmentationWindow(QMainWindow):
         ###### OPTION MENU ######
         optionMenu = menubar.addMenu('&Option')
         
-        configAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Configuration', self)
+        configAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&Configuration', self)
         configAction.setStatusTip('Config settings')
         configAction.triggered.connect(self.btnConfig)
         optionMenu.addAction(configAction)
 
-        editSlab = QtGui.QAction(QtGui.QIcon('exit.png'), '&Edit labels', self)
+        editSlab = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&Edit labels', self)
         editSlab.setStatusTip('Edit segmentation labels')
         editSlab.triggered.connect(self.btnEditSlab)
         optionMenu.addAction(editSlab)
 
-        logAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Log', self)
+        logAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&Log', self)
         logAction.setStatusTip('See log file')
         logAction.triggered.connect(self.btnLog)
         optionMenu.addAction(logAction)
 
-        syncAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Sync', self)
+        syncAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&Sync', self)
         syncAction.setStatusTip('Synchronize files from the server')
         syncAction.triggered.connect(self.sync_lisa_data)
         optionMenu.addAction(syncAction)
 
-        unlockAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Unlock all buttons', self)
+        unlockAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&Unlock all buttons', self)
         unlockAction.setStatusTip('Unlock all locked buttons')
         unlockAction.triggered.connect(self.unlockAllButtons)
         optionMenu.addAction(unlockAction)
 
-        updateAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Update', self)
+        updateAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&Update', self)
         updateAction.setStatusTip('Check new update')
         updateAction.triggered.connect(self.btnUpdate)
         optionMenu.addAction(updateAction)
@@ -339,7 +365,7 @@ class OrganSegmentationWindow(QMainWindow):
         configMenu = menubar.addMenu('&Config')
         # combo = QtGui.QComboBox(self)
         for text in self.oseg.segmentation_alternative_params.keys():
-            iAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&' + text, self)
+            iAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&' + text, self)
             iAction.setStatusTip('Use predefined config "%s"' % (text))
             # something like lambda
             fn = functools.partial(self.onAlternativeSegmentationParams, text)
@@ -358,7 +384,7 @@ class OrganSegmentationWindow(QMainWindow):
         :param tip:
         :return:
         """
-        this_action = QtGui.QAction(QtGui.QIcon('exit.png'), ampersand_name, self)
+        this_action = QtWidgets.QAction(QtGui.QIcon('exit.png'), ampersand_name, self)
         this_action.setStatusTip(tip)
         this_action.triggered.connect(lambda: self._ui_run_with(
             triggered_connect, init_msg=init_msg, finish_msg=finish_msg
@@ -392,11 +418,12 @@ class OrganSegmentationWindow(QMainWindow):
         self.currentWidget = widget
 
     def _initUI(self):
-        window = QtGui.QWidget()
+        window = QtWidgets.QWidget()
         self.window = window
         self.setCentralWidget(window)
         self.resize(800, 600)
         from . import __version__
+
         self.setWindowTitle('LISA ' + __version__)
         self.statusBar().showMessage('Ready')
         self.mainLayout = QHBoxLayout(window)
@@ -418,7 +445,7 @@ class OrganSegmentationWindow(QMainWindow):
         self.mainLayout.addLayout(bodyLayout)
 
         #--- title ---
-        self.infoBody = QtGui.QWidget()
+        self.infoBody = QtWidgets.QWidget()
         infoBodyLayout = QVBoxLayout()
         bodyLayout.addWidget(self.infoBody)
         self.infoBody.setLayout(infoBodyLayout)
@@ -471,6 +498,7 @@ class OrganSegmentationWindow(QMainWindow):
 
         # -- load widget
         import io3d.datareaderqt
+
         self.read_widget = io3d.datareaderqt.DataReaderWidget(
             before_function=self._before_read_callback,
             after_function=self._after_read_callback,
@@ -533,30 +561,30 @@ class OrganSegmentationWindow(QMainWindow):
         self.btnSave = QPushButton("Save/Export")
         mainLayoutRight.addWidget(self.btnSave)
 
-        saveFileAction = QtGui.QAction(QtGui.QIcon('exit.png'), "File", self)
+        saveFileAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), "File", self)
         saveFileAction.triggered.connect(self.saveOut)
 
-        saveDicomAction = QtGui.QAction(QtGui.QIcon('exit.png'), "Export Dicom", self)
+        saveDicomAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), "Export Dicom", self)
         saveDicomAction.triggered.connect(self.btnSaveOutDcm)
 
-        saveDicomOverlayAction = QtGui.QAction(QtGui.QIcon('exit.png'), "Export Dicom overlay", self)
+        saveDicomOverlayAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), "Export Dicom overlay", self)
         saveDicomOverlayAction.triggered.connect(self.btnSaveOutDcmOverlay)
 
-        saveJSONAction = QtGui.QAction(QtGui.QIcon('exit.png'), "JSON file", self)
+        saveJSONAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), "JSON file", self)
         saveJSONAction.triggered.connect(self.btnSaveJSON)
 
-        saveImageStackAction = QtGui.QAction(QtGui.QIcon('exit.png'), "Image stack", self)
+        saveImageStackAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), "Image stack", self)
         saveImageStackAction.triggered.connect(self.saveOutImageStack)
 
-        savePVTreeAction = QtGui.QAction(QtGui.QIcon('exit.png'), "PV Tree", self)
+        savePVTreeAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), "PV Tree", self)
         savePVTreeAction.triggered.connect(self.btnSavePortalVeinTree)
 
-        saveHVTreeAction = QtGui.QAction(QtGui.QIcon('exit.png'), "Vessel Tree", self)
+        saveHVTreeAction = QtWidgets.QAction(QtGui.QIcon('exit.png'), "Vessel Tree", self)
         saveHVTreeAction.setStatusTip('Save actual vessel tree 1D model')
         saveHVTreeAction.triggered.connect(self.btnSaveActualVesselTree)
 
 
-        menu = QtGui.QMenu(self.btnSave)
+        menu = QtWidgets.QMenu(self.btnSave)
         menu.addAction(saveFileAction)
         menu.addAction(saveImageStackAction)
         menu.addAction(saveDicomAction)
@@ -587,6 +615,7 @@ class OrganSegmentationWindow(QMainWindow):
         self.ui_buttons[keyword] = tmp
 
         import imtools.show_segmentation_qt
+
         self.ui_widgets[keyword] = imtools.show_segmentation_qt.ShowSegmentationWidget(None)
         # import imtools.show_segmentation_qt as itss
         # itss.ShowSegmentationWidget()
@@ -638,6 +667,7 @@ class OrganSegmentationWindow(QMainWindow):
         elif option == "3D Visualization":
             # remove old
             import imtools.show_segmentation_qt
+
             widget = self.ui_widgets[option]
             self.bodyLayout.removeWidget(widget)
             widget.deleteLater()
@@ -672,9 +702,11 @@ class OrganSegmentationWindow(QMainWindow):
         -d parameter.
         """
         logger.debug('== Starting debug mode, leave it with command "c" =')
-        from PyQt4.QtCore import pyqtRemoveInputHook
+        from PyQt5.QtCore import pyqtRemoveInputHook
+
         pyqtRemoveInputHook()
         import ipdb; ipdb.set_trace()  # noqa BREAKPOINT
+
 
     def changeVoxelSize(self, val):
         self.scaling_mode = str(val)
@@ -698,20 +730,20 @@ class OrganSegmentationWindow(QMainWindow):
         Draw a dialog for directory selection.
         """
 
-        from PyQt4.QtGui import QFileDialog
+        from PyQt5.QtWidgets import QFileDialog
         if app:
             dcmdir = QFileDialog.getOpenFileName(
                 caption='Select Data File',
                 directory=directory
                 # ptions=QFileDialog.ShowDirsOnly,
-            )
+            )[0]
         else:
             app = QApplication(sys.argv)
             dcmdir = QFileDialog.getOpenFileName(
                 caption='Select DICOM Folder',
                 # ptions=QFileDialog.ShowDirsOnly,
                 directory=directory
-            )
+            )[0]
             # pp.exec_()
             app.exit(0)
         if len(dcmdir) > 0:
@@ -812,10 +844,11 @@ class OrganSegmentationWindow(QMainWindow):
             self.oseg.sync_lisa_data(self.oseg.sftp_username, self.oseg.sftp_password, callback=self._print_sync_progress)
         except:
             import traceback
+
             traceback.print_exc()
             logger.error(traceback.format_exc())
 
-            QtGui.QMessageBox.warning(
+            QtWidgets.QMessageBox.warning(
                 self, 'Error', 'Sync error')
 
         self.oseg.sftp_username = ''
@@ -1051,6 +1084,7 @@ class OrganSegmentationWindow(QMainWindow):
 
         un = np.unique(seeds)
         import imma.labeled
+
         unlab = imma.labeled.unique_labels_by_seeds(self.oseg.segmentation, seeds)
 
         self.oseg.split_tissue_with_labeled_volumetric_vessel_tree(organ_label, trunk_label=unlab[1][0], branch_labels=unlab[2])  # trunk_label, branch_label1, branch_label2)
@@ -1110,8 +1144,8 @@ class OrganSegmentationWindow(QMainWindow):
         """
 
         if multiple_choice:
-            slab_dialog = QtGui.QDialog(self)
-            layout = QtGui.QGridLayout()
+            slab_dialog = QtWidgets.QDialog(self)
+            layout = QtWidgets.QGridLayout()
             slab_dialog.setLayout(layout)
             slab_wg = SelectLabelWidget(show_ok_button=False)
             slab_wg.init_slab(slab=self.oseg.slab, show_ok_button=False)
@@ -1364,7 +1398,7 @@ class OrganSegmentationWindow(QMainWindow):
             self,
             window_title,
             ofilename,
-            filter=filter))
+            filter=filter))[0]
 
         logger.info('Selected file: %s', filename)
         return filename
@@ -1385,7 +1419,7 @@ class OrganSegmentationWindow(QMainWindow):
             else:
                 directory = self.oseg.input_datapath_start
 
-        from PyQt4.QtGui import QFileDialog
+        from PyQt5.QtWidgets import QFileDialog
         if self.qapp is not None:
             dcmdir = QFileDialog.getExistingDirectory(
                 self,
@@ -1448,7 +1482,7 @@ class OrganSegmentationWindow(QMainWindow):
                 self,
                 "Save file",
                 ofilename,
-                filter="Former Lisa Format (*.pklz);;New Lisa format HDF5 (*.h5 *.hdf5);; Dicom (*.dcm)"))
+                filter="Former Lisa Format (*.pklz);;New Lisa format HDF5 (*.h5 *.hdf5);; Dicom (*.dcm)"))[0]
 
             logger.info('Data saved to: ' + filename)
 
@@ -1482,6 +1516,7 @@ class OrganSegmentationWindow(QMainWindow):
         :return:
         """
         import dictGUI
+
         slab_selection = {}
         for label, value in  self.oseg.slab.items():
             slab_selection[label] = True
@@ -1491,8 +1526,11 @@ class OrganSegmentationWindow(QMainWindow):
 
     def btnConfig(self, event=None):
         import config
+
         import organ_segmentation as los
+
         import lisaConfigGui as lcg
+
         d = los.lisa_config_init()
 
         newconf = lcg.configGui(d)
@@ -1535,7 +1573,7 @@ class OrganSegmentationWindow(QMainWindow):
                     self,
                     "Save file",
                     ofilename,
-                    filter="*.*"))
+                    filter="*.*"))[0]
 
             self.oseg.output_annotaion_file = filename
             self.oseg.json_annotation_export()
@@ -1552,7 +1590,7 @@ class OrganSegmentationWindow(QMainWindow):
             self,
             "Save file",
             ofilename,
-            filter="*.*"))
+            filter="*.*"))[0]
 
         self.oseg.save_input_dcm(filename)
         logger.info('Input data saved to: ' + filename)
@@ -1649,12 +1687,12 @@ class OrganSegmentationWindow(QMainWindow):
             self,
             "Save YAML file ",
             fn_yaml,
-            filter="*.yaml"))
+            filter="*.yaml"))[0]
         fn_vtk = str(QFileDialog.getSaveFileName(
             self,
             "Save VTK file",
             fn_vtk,
-            filter="*.vtk"))
+            filter="*.vtk"))[0]
         self.oseg.saveVesselTree(textLabel, fn_yaml=fn_yaml, fn_vtk=fn_vtk)
         self.statusBar().showMessage('Ready')
 
@@ -1702,7 +1740,9 @@ class OrganSegmentationWindow(QMainWindow):
 
     def btnLog(self):
         import logWindow
+
         import os.path as op
+
         fn = op.expanduser("~/lisa_data/lisa.log")
         form = logWindow.LogViewerForm(fn) #, qapp=self.app)
         form.show()
@@ -1724,6 +1764,7 @@ class OrganSegmentationWindow(QMainWindow):
         oseg = self.oseg
         if oseg.segmentation is not None:
             import show_segmentation
+
 
             show_segmentation.showSegmentation(
                 oseg.segmentation==1,
@@ -1745,8 +1786,9 @@ class OrganSegmentationWindow(QMainWindow):
 
 def get_str(text):
     if sys.version_info.major == 2:
-        import PyQt4.QtCore
-        if type(text) is PyQt4.QtCore.QString:
+        import PyQt5.QtCore
+
+        if type(text) is QString:
             text = str(text)
 
     return text

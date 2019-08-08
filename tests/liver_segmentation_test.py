@@ -10,23 +10,34 @@
 
 """
 import unittest
+
 from nose.plugins.attrib import attr
+
 import io3d
+
 import numpy as np
+
 import sys
+
 import os
+
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../../imcut/src"))
 
 import os
+
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 import logging
+
 logger = logging.getLogger(__name__)
 
 import lisa.dataset
+
 from lisa import organ_segmentation
+
 from lisa import organ_model
+
 
 class LiverSegmentationTest(unittest.TestCase):
 
@@ -128,7 +139,7 @@ class LiverSegmentationTest(unittest.TestCase):
         oseg.add_seeds_mm([200], [110, 150], [110, 100], label=1, radius=30, width=5)
         oseg.add_seeds_mm([200], [250, 230], [210, 260], label=2, radius=50, width=5)
 
-        from PyQt4.QtGui import QApplication
+        from PyQt5.QtWidgets import QApplication
         app = QApplication(sys.argv)
         oseg.interactivity()
         # oseg.ninteractivity()
@@ -171,7 +182,7 @@ class LiverSegmentationTest(unittest.TestCase):
         print(oseg.seeds)
         oseg.automatic_liver_seeds()
 
-        from PyQt4.QtGui import QApplication
+        from PyQt5.QtWidgets import QApplication
         app = QApplication(sys.argv)
         oseg.interactivity()
         # oseg.ninteractivity()

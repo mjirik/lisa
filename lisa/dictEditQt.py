@@ -11,15 +11,19 @@
 """
 
 import logging
+
 
 logger = logging.getLogger(__name__)
 import argparse
-from PyQt4.QtGui import QGridLayout, QLabel, QPushButton, QLineEdit
-from PyQt4 import QtGui
+
+from PyQt5.QtGui import QGridLayout, QLabel, QPushButton, QLineEdit
+from PyQt5 import QtGui, QtWidgets
 import sys
+
 import copy
+
 
-class DictEdit(QtGui.QWidget):
+class DictEdit(QtWidgets.QWidget):
     def __init__(self, dictionary):
         super(DictEdit, self).__init__()
 
@@ -202,7 +206,7 @@ def main():
     if args.debug:
         ch.setLevel(logging.DEBUG)
 
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
 
     # w = QtGui.QWidget()
     # w = DictEdit(dictionary={'jatra':2, 'ledviny':7})

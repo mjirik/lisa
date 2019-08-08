@@ -11,23 +11,39 @@
 """
 
 import logging
+
+from PyQt5.QtWidgets import *
+try:
+    QString = unicode
+except NameError:
+    # Python 3
+    QString = str
+
 logger = logging.getLogger(__name__)
 import argparse
+
 import os
+
 
-import PyQt4
-import PyQt4.QtCore
-import PyQt4.QtGui
-from PyQt4.QtGui import QWidget, QGridLayout, QSpinBox, QLineEdit, QCheckBox,\
-        QComboBox, QTextEdit, QDialog, QMainWindow, QDoubleSpinBox, QLabel, \
-        QPushButton
+import PyQt5
+
+import PyQt5.QtCore
+
+import PyQt5.QtGui
+
+from PyQt5.QtGui import (QWidget, QGridLayout, QSpinBox, QLineEdit, QCheckBox,
+                        
+        QComboBox, QTextEdit, QDialog, QMainWindow,
+                         QDoubleSpinBox, QLabel, 
+        QPushButton)
 import sys
+
 if sys.version_info.major == 2:
-    from PyQt4.QtCore import QString
 else:
     Qstring = str
 
 from .pyqtconfig import ConfigManager
+
 
 class LisaConfigWindow(QDialog):
 # class LisaConfigWindow(QMainWindow):
@@ -141,7 +157,8 @@ class LisaConfigWindow(QDialog):
     def get_config_as_dict(self):
         dictionary = self.config.as_dict()
         for key, value in dictionary.items():
-            from PyQt4.QtCore import pyqtRemoveInputHook
+            from PyQt5.QtCore import pyqtRemoveInputHook
+
             pyqtRemoveInputHook()
             # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
             if type(value) == QString:
@@ -165,6 +182,7 @@ class LisaConfigWindow(QDialog):
 
 def configGui(cfg):
     import yaml
+
     # convert values to json
     isconverted = {}
     for key, value in cfg.items():

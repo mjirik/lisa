@@ -8,11 +8,16 @@ Example:
 $ viewer.py -f head.vtk
 """
 from optparse import OptionParser
+
+from PyQt5.QtWidgets import *
 import sys
+
 
-from PyQt4.QtGui import QApplication, QDialog, QGridLayout, QPushButton
+from PyQt5.QtGui import QApplication, QDialog, QGridLayout, QPushButton
 import vtk
+
 from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+
 
 
 class QVTKViewer(QDialog):

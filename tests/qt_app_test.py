@@ -4,27 +4,35 @@
 
 # import funkcí z jiného adresáře
 import sys
+
+from PyQt5.QtWidgets import *
 import os.path
+
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
 sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
+
 
-from PyQt4.QtGui import QFileDialog, QApplication
+from PyQt5.QtGui import QFileDialog, QApplication
 try:
     from imcut.seed_editor_qt import QTSeedEditor
+
 except:
     logger.warning("Deprecated of pyseg_base as submodule")
     try:
         from imcut.seed_editor_qt import QTSeedEditor
+
     except:
         logger.warning("Deprecated of pyseg_base as submodule")
         from seed_editor_qt import QTSeedEditor
+
 
 
 import numpy as np
+
 
 
 # import imcut.dcmreaddata as dcmr

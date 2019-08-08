@@ -11,16 +11,25 @@
 """
 
 import logging
+
+from PyQt5.QtWidgets import *
 
 logger = logging.getLogger(__name__)
 import argparse
-import PyQt4 #import QtGui, QtCore
-import PyQt4.QtCore
-import PyQt4.QtGui
+
+import PyQt5 #import QtGui, QtCore
+
+import PyQt5.QtCore
+
+import PyQt5.QtGui
+
 import sys
+
 import time
+
 
 from . import lisa_data
+
 
 def splash_screen(qapp):
     """
@@ -30,8 +39,8 @@ def splash_screen(qapp):
     """
    # Create and display the splash screen
     lisa_data.create_lisa_data_dir_tree()
-    splash_pix = PyQt4.QtGui.QPixmap(lisa_data.path('.lisa/LISA256.png'))
-    splash = PyQt4.QtGui.QSplashScreen(splash_pix, PyQt4.QtCore.Qt.WindowStaysOnTopHint)
+    splash_pix = PyQt5.QtGui.QPixmap(lisa_data.path('.lisa/LISA256.png'))
+    splash = PyQt5.QtWidgets.QSplashScreen(splash_pix, PyQt5.QtCore.Qt.WindowStaysOnTopHint)
     splash.setMask(splash_pix.mask())
     splash.show()
     qapp.processEvents()
@@ -73,11 +82,11 @@ def main():
         ch.setLevel(logging.DEBUG)
  # Simulate something that takes time
 
-    app = PyQt4.QtGui.QApplication(sys.argv)
+    app = PyQt5.QtWidgets.QApplication(sys.argv)
     splash = splash_screen(app)
     time.sleep(2)
-    w = PyQt4.QtGui.QWidget()
-    b = PyQt4.QtGui.QLabel(w)
+    w = PyQt5.QtWidgets.QWidget()
+    b = PyQt5.QtWidgets.QLabel(w)
     b.setText("Hello World!")
     w.setGeometry(100,100,200,50)
     b.move(50,20)

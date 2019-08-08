@@ -11,17 +11,28 @@
 """
 
 import logging
+
+from PyQt5.QtWidgets import *
+
+try:
+    QString = unicode
+except NameError:
+    # Python 3
+    QString = str
 
 logger = logging.getLogger(__name__)
 import argparse
+
 
 import sys
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+
+from PyQt5.QtCore import *
+
+from PyQt5.QtGui import *
 
 import sys
+
 if sys.version_info.major == 2:
-    from PyQt4.Qt import QString
 else:
     Qstring = str
 
@@ -71,7 +82,7 @@ class LogViewerForm(QDialog):
         super(LogViewerForm, self).__init__(parent)
 
         self.watcher = QFileSystemWatcher([logfile], parent=None)
-        self.connect(self.watcher, SIGNAL('fileChanged(const QString&)'), self.update_log)
+        self.watcher.fileChanged['QString'].connect(self.update_log)
         self.qapp = qapp
 
         # build the list widget
@@ -101,7 +112,7 @@ class LogViewerForm(QDialog):
         self.qapp.processEvents()
         # from PyQt4.QtCore import pyqtRemoveInputHook; pyqtRemoveInputHook()
         # import ipdb; ipdb.set_trace()
-        from PyQt4 import QtCore
+        from PyQt5 import QtCore
         # QTCore
 
 def main():
@@ -152,7 +163,7 @@ def main():
     list.setModel(model)
     watcher = QFileSystemWatcher([args.inputfile], parent=None)
 
-    list.connect(watcher, SIGNAL('fileChanged(const QString&)'), model.slurp)
+    watcher.fileChanged['QString'].connect(model.slurp)
 
     list.show()
     app.exec_()

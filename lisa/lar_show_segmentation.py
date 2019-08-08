@@ -5,21 +5,29 @@ Module is used for visualization of segmentation stored in pkl file.
 """
 
 import sys
+
 import os.path
+
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
 import logging
+
 logger = logging.getLogger(__name__)
 
 # from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QApplication
+from PyQt5.QtWidgets import QApplication
 import argparse
+
 
 
 import numpy as np
+
 import seg2fem
+
 import misc
+
 import viewer
+
 
 
 def export_to_lar(segmentation, degrad):

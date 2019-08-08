@@ -11,10 +11,13 @@
 """
 
 import logging
+
 
 logger = logging.getLogger(__name__)
 import os.path
+
 import sys
+
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 pth = os.path.join(path_to_script, "../../seededitorqt/")
 sys.path.insert(0, pth)
@@ -22,9 +25,11 @@ pth = os.path.join(path_to_script, "../../imtools/")
 sys.path.insert(0, pth)
 
 import argparse
+
 
 def lisa_main():
     import argparse
+
 
     parser = argparse.ArgumentParser(
         # Turn off help, so we print all options in response to -h
@@ -46,18 +51,24 @@ def lisa_main():
 
     if knownargs.no_interactivity or knownargs.autolisa:
         from . import organ_segmentation
+
         organ_segmentation.main()
     else:
 
-        import PyQt4
-        import PyQt4.QtGui
+        import PyQt5
+
+        import PyQt5.QtGui
+
         import sys
-        from PyQt4.QtGui import QApplication
+
+        from PyQt5.QtWidgets import QApplication
         app = QApplication(sys.argv)
         # Create and display the splash screen
         from . import splash_screen
+
         splash = splash_screen.splash_screen(app)
         from . import organ_segmentation
+
         organ_segmentation.main(app, splash)
 
 

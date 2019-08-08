@@ -5,25 +5,36 @@ Module is used for visualization of segmentation stored in pkl file.
 """
 
 import sys
+
 import os.path
+
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
 import logging
+
 logger = logging.getLogger(__name__)
 
 # from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QApplication
+from PyQt5.QtWidgets import QApplication
 import argparse
+
 
 import vtk
+
 
 import numpy as np
+
 from dicom2fem import seg2fem
+
 # import misc
 import viewer
+
 import io3d
+
 import dicom2fem
+
 from imtools.image_manipulation import select_labels
+
 
 
 def seg2stl(
@@ -114,6 +125,7 @@ if __name__ == "__main__":
     if args.show:
         dsel = select_labels(ds, args.labels)
         import sed3
+
         ed = sed3.sed3(dsel.astype(np.double))
         ed.show()
 

@@ -11,16 +11,20 @@
 """
 
 import logging
+
 
 logger = logging.getLogger(__name__)
 import argparse
-from PyQt4.QtGui import QGridLayout, QLabel, QPushButton, QLineEdit, QComboBox
-from PyQt4 import QtGui
+
+from PyQt5.QtGui import QGridLayout, QLabel, QPushButton, QLineEdit, QComboBox
+from PyQt5 import QtGui, QtWidgets
 import sys
+
 from . import virtual_resection
+
 
 
-class SegmentationWidget(QtGui.QWidget):
+class SegmentationWidget(QtWidgets.QWidget):
     def __init__(self, oseg, lisa_window, use_ui_label_dropdown=True):
         super(SegmentationWidget, self).__init__()
         self.oseg = oseg
@@ -76,7 +80,7 @@ class SegmentationWidget(QtGui.QWidget):
             column = 1
             row = 2
             if self.groupA is None:
-                self.groupA = QtGui.QButtonGroup()
+                self.groupA = QtWidgets.QButtonGroup()
             id = 0
 
             for key, value in self.oseg.slab.items():
@@ -259,7 +263,7 @@ def main():
     if args.debug:
         ch.setLevel(logging.DEBUG)
 
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
 
     # w = QtGui.QWidget()
     # w = DictEdit(dictionary={'jatra':2, 'ledviny':7})

@@ -5,19 +5,25 @@
 
 # import funkcí z jiného adresáře
 import sys
+
 import os.path
+
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
 sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
+
 
 import numpy as np
+
 
 
 import organ_segmentation
+
 import imcut.dcmreaddata as dcmr
+
 
 
 #  nosetests tests/organ_segmentation_test.py:OrganSegmentationTest.test_create_iparams
@@ -33,12 +39,16 @@ class TexturesTest(unittest.TestCase):
         """
         try:
             from imcut.seed_editor_qt import QTSeedEditor
+
         except:
             logger.warning("Deprecated of pyseg_base as submodule")
             from seed_editor_qt import QTSeedEditor
-        from PyQt4.QtGui import QApplication
+
+        from PyQt5.QtWidgets import QApplication
         from skimage.feature import greycomatrix, greycoprops
+
         import misc
+
         dcmdir = os.path.join(path_to_script,'./../sample_data/jatra_5mm')
         
         #gcparams = {'pairwiseAlpha':10, 'use_boundary_penalties':True}
@@ -71,6 +81,7 @@ class TexturesTest(unittest.TestCase):
 
         
         import pdb; pdb.set_trace()
+
 
         feat = np.zeros(vx.shape)
         feat2 = np.zeros(vx.shape)

@@ -5,26 +5,34 @@
 
 # import funkcí z jiného adresáře
 import sys
+
 import os.path
+
 import copy
+
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
 sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
+
 
 import numpy as np
+
 
 
 import imcut.dcmreaddata as dcmr
+
 
 class LesionsTest(unittest.TestCase):
 
     @unittest.skip("Cekame, az to Tomas opravi")
     def test_import_lesion_editor(self):
         import lesioneditor
+
         import lesioneditor.Lession_editor_slim
+
 
     @unittest.skip("Cekame, az to Tomas opravi")
     def test_lesion_editor(self):
@@ -33,9 +41,11 @@ class LesionsTest(unittest.TestCase):
         function
 
         """
-        from PyQt4 import QtGui
+        from PyQt5 import QtGui, QtWidgets
         import lesioneditor
+
         import lesioneditor.Lession_editor_slim
+
         data3d = np.zeros([10, 11, 12], dtype=np.int16)
         segmentation = np.zeros(data3d.shape, dtype=np.int16)
         slab = {"liver": 1, "porta": 2}
@@ -47,7 +57,7 @@ class LesionsTest(unittest.TestCase):
             'slab': slab,
             'voxelsize_mm': voxelsize_mm
         }
-        app = QtGui.QApplication(sys.argv)
+        app = QtWidgets.QApplication(sys.argv)
         le = lesioneditor.Lession_editor_slim.LessionEditor(datap1=datap1)
     # @TODO znovu zprovoznit test
 
@@ -57,6 +67,7 @@ class LesionsTest(unittest.TestCase):
         Function uses lesions  automatic localization in synthetic data.
         """
         import lesions
+
         #dcmdir = os.path.join(path_to_script,'./../sample_data/matlab/examples/sample_data/DICOM/digest_article/')
 # data
         slab = {'none':0, 'liver':1, 'porta':2, 'lesions':6}

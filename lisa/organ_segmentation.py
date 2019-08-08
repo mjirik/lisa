@@ -17,29 +17,45 @@ Email: miroslav.jirik@gmail.com
 """
 
 import logging
+
 logger = logging.getLogger(__name__)
 import logging.handlers
+
 
 import sys
+
 import os
+
 import os.path as op
+
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(path_to_script, "../../imcut/"))
 # from collections import namedtuple
 
 # from scipy.io import loadmat, savemat
 import scipy
+
 import scipy.ndimage
+
 import numpy as np
+
 import scipy.sparse
+
 import datetime
+
 import argparse
+
 import copy
+
 import json
+
 from . import json_decoder as jd
+
 
 from . import exceptionProcessing
+
 from . import config_default
+
 
 # tady uz je logger
 # import dcmreaddata as dcmreader
@@ -59,25 +75,44 @@ from . import config_default
 # from seg2fem import gen_mesh_from_voxels, gen_mesh_from_voxels_mc
 # from viewer import QVTKViewer
 from io3d import datareader
+
 from io3d import datawriter
+
 from io3d import misc
+
 import io3d.cachefile as cachef
+
 import io3d.misc
+
 from . import data_plus
+
 from . import support_structure_segmentation as sss
+
 from . import config_default
+
 from . import organ_seeds
+
 from . import lisa_data
+
 from . import data_manipulation
+
 from . import qmisc
+
 from . import config
+
 from . import volumetry_evaluation
+
 from . import segmentation_general
+
 # import imtools.image_manipulation
 import imma.image_manipulation as ima
+
 import imma.labeled
+
 import imma.segmentation_labels as imsl
+
 from . import virtual_resection
+
 
 # import audiosupport
 # import skimage
@@ -93,7 +128,9 @@ scaling_modes = {
 
 # version comparison
 from pkg_resources import parse_version
+
 import sklearn
+
 
 if parse_version(sklearn.__version__) > parse_version('0.10'):
     # new versions
@@ -215,6 +252,7 @@ class OrganSegmentation():
         """
 
         from imcut import pycut
+
         default_segparams = {
             'method': pycut.methods[0],
             'pairwise_alpha_per_mm2': 40,
@@ -326,6 +364,7 @@ class OrganSegmentation():
         self.output_annotaion_file = output_annotation_file
 
         from . import runner
+
         self.runner = runner.Runner(self)
         self.init_run_list(run_list)
         self.get_series_number_callback = get_series_number_callback
@@ -380,6 +419,7 @@ class OrganSegmentation():
 
     def update(self):
         from . import update_stable
+
         update_stable.make_update()
         # import subprocess
         # print subprocess.call(['conda', 'update', '-y', '-c', 'mjirik', '-c', 'SimpleITK', 'lisa']) #, shell=True)
@@ -573,13 +613,15 @@ class OrganSegmentation():
         label1 = 1
         label2 = 1
         # TODO make GUI in Qt
-        from PyQt4.QtCore import pyqtRemoveInputHook
+        from PyQt5.QtCore import pyqtRemoveInputHook
+
         pyqtRemoveInputHook()
         print('unique data1 ', np.unique(data3d_segmentation_actual))
         print('unique data2 ', np.unique(data3d_segmentation))
         print("set label1 and label2")
         print("then press 'c' and 'Enter'")
         import ipdb;
+
         ipdb.set_trace()  # noqa BREAKPOINT
 
         evaluation = volumetry_evaluation.compare_volumes_sliver(
@@ -812,6 +854,7 @@ class OrganSegmentation():
 
     def _interactivity_begin(self):
         from imcut import pycut
+
         logger.debug('_interactivity_begin()')
         # TODO make copy and work with it
         # TODO really make the copy and work with it
@@ -827,6 +870,7 @@ class OrganSegmentation():
         # print 'svs_mm ', self.working_voxelsize_mm
         self.zoom = self.voxelsize_mm / (1.0 * self.working_voxelsize_mm)
         import warnings
+
         warnings.filterwarnings('ignore', '.*output shape of zoom.*')
         data3d_res = scipy.ndimage.zoom(
             self.data3d,
@@ -840,6 +884,7 @@ class OrganSegmentation():
                      )
         # insert feature function instead of string description
         from . import organ_model
+
         self.segmodelparams = organ_model.add_fv_extern_into_modelparams(self.segmodelparams)
         if "pairwise_alpha_pep_mm2" in self.segparams:
             self.segparams['pairwise_alpha'] = \
@@ -849,6 +894,7 @@ class OrganSegmentation():
         if 'method' not in self.segparams.keys() or \
                 self.segparams['method'] in pycut.accepted_methods:
             from .audiosupport import beep
+
             igc = pycut.ImageGraphCut(
                 # self.data3d,
                 data3d_res,
@@ -862,6 +908,7 @@ class OrganSegmentation():
         # elif self.segparams['method'] == '':
         else:
             import liver_segmentation
+
             igc = liver_segmentation.LiverSegmentation(
                 data3d_res,
                 segparams=self.segparams,
@@ -907,7 +954,9 @@ class OrganSegmentation():
         self.create_lisa_data_dir_tree()
 
         import sftpsync
+
         import paramiko
+
 
         paramiko_log = os.path.join(self.output_datapath, 'paramiko.log')
         paramiko.util.log_to_file(paramiko_log)
@@ -1028,6 +1077,7 @@ class OrganSegmentation():
         if False:
             # TODO dodělat postprocessing PV
             import segmentation
+
             outputSegmentation = segmentation.vesselSegmentation(  # noqa
                 self.data3d,
                 self.segmentation,
@@ -1080,6 +1130,7 @@ class OrganSegmentation():
 
         if self.texture_analysis not in (None, False):
             import texture_analysis
+
             # doplnit nějaký kód, parametry atd
             # elf.orig_scale_segmentation =
             # texture_analysis.segmentation(self.data3d,
@@ -1141,6 +1192,7 @@ class OrganSegmentation():
 
         if self.seg_postproc_pars['snakes']:
             import morphsnakes as ms
+
             logger.debug('Making snakes')
             if self.seg_postproc_pars['snakes_method'] is 'ACWE':
                 method = ms.MorphACWE
@@ -1183,6 +1235,7 @@ class OrganSegmentation():
     # @TODO generovat QApplication
     def interactivity(self, min_val=None, max_val=None, layout=None):
         from imcut.seed_editor_qt import QTSeedEditor
+
         import_gui()
         logger.debug('interactivity')
         # if self.edit_data:
@@ -1201,6 +1254,7 @@ class OrganSegmentation():
                                 volume_unit='ml')
         else:
             from imcut import QTSeedEditorWidget
+
             pyed = QTSeedEditorWidget(igc.img,
                                       seeds=igc.seeds,
                                       modeFun=igc.interactivity_loop,
@@ -1222,7 +1276,7 @@ class OrganSegmentation():
         pyed.changeW(window_w)
 
         pyed.exec_()
-        from PyQt4 import QtCore
+        from PyQt5 import QtCore
         QtCore.pyqtRemoveInputHook()
         # import ipdb; ipdb.set_trace()
         # @TODO někde v igc.interactivity() dochází k přehození nul za jedničy,
@@ -1233,6 +1287,7 @@ class OrganSegmentation():
 
     def ninteractivity(self):
         from imcut import pycut
+
         """Function for automatic (noninteractiv) mode."""
         # mport pdb; pdb.set_trace()
         igc = self._interactivity_begin()
@@ -1321,6 +1376,7 @@ class OrganSegmentation():
     def lesionsLocalization(self):
         """ Localization of lession """
         from . import lesions
+
         tumory = lesions.Lesions()
         # tumory.overlay_test()
         data = self.export()
@@ -1377,6 +1433,7 @@ class OrganSegmentation():
         """
 
         from imtools import segmentation as imsegmentation
+
         logger.info('segmentation max label ' + str(np.max(self.segmentation)))
 
         if outer_vessel_label is None:
@@ -1484,7 +1541,9 @@ class OrganSegmentation():
 
     def __vesselTree(self, binaryData3d, textLabel, fn_yaml=None, fn_vtk=None):
         import skelet3d
+
         from skelet3d import skeleton_analyser  # histology_analyser as skan
+
         data3d_thr = (binaryData3d > 0).astype(np.int8)
         data3d_skel = skelet3d.skelet3d(data3d_thr)
 
@@ -1512,6 +1571,7 @@ class OrganSegmentation():
         # generate vtk file
         logger.debug('start to generate vtk file from vessel_tree')
         import fibrous.tb_vtk
+
         # import imtools.gen_vtk_tree
         if fn_vtk is None:
             fn_vtk = self.get_standard_ouptut_filename(filetype='vtk', suffix='-vt-' + textLabel)
@@ -1522,6 +1582,7 @@ class OrganSegmentation():
     def hepaticVeinsSegmentation(self):
 
         from imtools import segmentation
+
         outputSegmentation = segmentation.vesselSegmentation(
             self.data3d,
             self.segmentation,
@@ -1594,6 +1655,7 @@ class OrganSegmentation():
             filepath = self.get_standard_ouptut_filename()
         # import ipdb; ipdb.set_trace()
         import io3d
+
         logger.debug("save outputs to file %s" % (filepath))
         io3d.write(data, filepath)
 
@@ -1677,6 +1739,7 @@ class OrganSegmentation():
             if next_level_of_branches <= len(un_labels_dict):
                 for i in range(len(split_labels_ij)):
                     import imma.dili as imdl
+
                     next_trunk = actual_branch_labels[i]
                     ind = imdl.find_in_list_of_lists(connected_ij, next_trunk)
                     if ind is None:
@@ -1840,7 +1903,8 @@ class OrganSegmentation():
     def save_outputs_dcm_overlay(self):
         # TODO add
         logger.debug('save dcm')
-        from PyQt4.QtCore import pyqtRemoveInputHook
+        from PyQt5.QtCore import pyqtRemoveInputHook
+
         pyqtRemoveInputHook()
         # mport ipdb; ipdb.set_trace() # BREAKPOINT
         odp = self.output_datapath
@@ -1906,6 +1970,7 @@ class OrganSegmentation():
 
     def get_body_navigation_structures(self):
         import bodynavigation
+
         self.bodynavigation = bodynavigation.BodyNavigation(self.data3d, self.voxelsize_mm)
 
         bn = self.bodynavigation
@@ -1916,6 +1981,7 @@ class OrganSegmentation():
 
     def get_body_navigation_structures_precise(self):
         import bodynavigation.organ_detection
+
         self.bodynavigation = bodynavigation.organ_detection.OrganDetection(self.data3d, self.voxelsize_mm)
         bn = self.bodynavigation
         self.segmentation[bn.getLungs() > 0] = self.nlabels("lungs")
@@ -1940,6 +2006,7 @@ class OrganSegmentation():
         :return:
         """
         import time
+
         t0 = time.time()
         t1 = time.time()
         self.runner.run()
@@ -1983,7 +2050,8 @@ class OrganSegmentation():
         :return:
         """
         if input_label is None:
-            from PyQt4.QtCore import pyqtRemoveInputHook
+            from PyQt5.QtCore import pyqtRemoveInputHook
+
             pyqtRemoveInputHook()
             # mport ipdb; ipdb.set_trace() # BREAKPOINT
             print("label of vessel to split")
@@ -1991,9 +2059,11 @@ class OrganSegmentation():
             print("for example >> input_label = 2 ")
             input_label = "porta"
             import ipdb
+
             ipdb.set_trace()
 
         from . import virtual_resection
+
         datap = self.export()
         seeds = virtual_resection.cut_editor_old(datap, label=input_label)
         lab, cut_by_user = virtual_resection.split_vessel(datap=datap, seeds=seeds, input_label=input_label, **kwargs)
@@ -2027,6 +2097,7 @@ class OrganSegmentation():
         :py:segmentation:
         """
         from . import virtual_resection
+
         datap = self.export()
         segm, dist1, dist2 = virtual_resection.split_organ_by_two_vessels(
             datap, seeds=self.segmentation,
@@ -2050,6 +2121,7 @@ class OrganSegmentation():
         :return:
         """
         from . import virtual_resection
+
         return virtual_resection.label_volumetric_vessel_tree(
             self,
             vessel_label=vessel_label,
@@ -2301,10 +2373,12 @@ def main(app=None, splash=None):  # pragma: no cover
 
         if cfg['make_icon'] is True:
             import lisa_data
+
             lisa_data.make_icon()
             return
         if cfg['get_sample_data'] is True:
             import dataset
+
             dataset.get_sample_data()
             return
 
@@ -2327,6 +2401,7 @@ def main(app=None, splash=None):  # pragma: no cover
             # if splash is not None:
             #     splash.finish()
             from . import autolisa
+
             al = autolisa.AutoLisa()
             print("datapath: ", args["datapath"])
             al.run_in_paths(args["datapath"])
@@ -2341,9 +2416,12 @@ def main(app=None, splash=None):  # pragma: no cover
         else:
             # mport_gui()
             from .lisaWindow import OrganSegmentationWindow
-            import PyQt4
-            import PyQt4.QtGui
-            from PyQt4.QtGui import QApplication
+
+            import PyQt5
+
+            import PyQt5.QtGui
+
+            from PyQt5.QtWidgets import QApplication
             if app is None:
                 app = QApplication(sys.argv)
             # Create and display the splash screen
@@ -2355,6 +2433,7 @@ def main(app=None, splash=None):  # pragma: no cover
 
     except Exception as e:
         import traceback
+
         # mport exceptionProcessing
         exceptionProcessing.reportException(e)
         print(traceback.format_exc())

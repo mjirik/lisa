@@ -31,30 +31,42 @@ Spusti prohlizec slouzici pouze pro vizualizaci jater
 Importování potřebných knihoven a skriptů
 '''
 import sys
+
 import virtual_resection
+
 import numpy as np
+
 import numpy as nm
+
 import scipy.ndimage
+
 import argparse
+
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 # from PyQt4.QtCore import pyqtSignal, QObject, QRunnable, QThreadPool, Qt
-from PyQt4.QtGui import QMainWindow, QGridLayout, QApplication
+from PyQt5.QtGui import QMainWindow, QGridLayout, QApplication
 # from PyQt4 import *
 # from PyQt4.QtGui import *
 # from PyQt4.QtCore import *
 
 import vtk
+
 from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+
 from Tkinter import *
+
 try:
     from dicom2fem import seg2fem
+
 except:
     print("deprecated import of seg2fem")
 
     import seg2fem
+
 
 import misc
+
 
 '''
 Používané globální proměnné
@@ -65,7 +77,7 @@ coordinates = None
 iren = vtk.vtkRenderWindowInteractor()
 surface = vtk.vtkDataSetSurfaceFilter()
 app = QApplication(sys.argv)
-label = QtGui.QLabel()
+label = QtWidgets.QLabel()
 myLayout = QGridLayout()
 widget = vtk.vtkSphereSource()
 planeWidget = vtk.vtkImplicitPlaneWidget()
@@ -76,79 +88,73 @@ Kód grafického editoru resekční linie. Tento kód byl automaticky vygenerov�
 '''
 ##------------------------------------------------------------------------------------------
 try:
-    _fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    def _fromUtf8(s):
-        return s
-
-try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
+    _encoding = QtWidgets.QApplication.UnicodeUTF8
     def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+        return QtCore.QCoreApplication.translate(context, text, disambig, _encoding)
 except AttributeError:
     def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+        return QtCore.QCoreApplication.translate(context, text, disambig)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         '''
         Zde se vytvoří hlavní okno editoru. Nastaví se jeho velikost a název
         '''
-        MainWindow.setObjectName(_fromUtf8("MainWindow"))
+        MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1000, 800)
-        self.centralwidget = QtGui.QWidget(MainWindow)
-        self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
-        self.widget = QtGui.QWidget(self.centralwidget)
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setObjectName("centralwidget")
+        self.widget = QtWidgets.QWidget(self.centralwidget)
         self.widget.setGeometry(QtCore.QRect(370, 49, 401, 411))
-        self.widget.setObjectName(_fromUtf8("widget"))
+        self.widget.setObjectName("widget")
         '''
         Vytvoření tlačítka CUT, které při stisku spouští metodu liver_cut (zvolený resekční algoritmus)
         '''
-        self.toolButton = QtGui.QPushButton(self.centralwidget)
+        self.toolButton = QtWidgets.QPushButton(self.centralwidget)
         self.toolButton.setGeometry(QtCore.QRect(140, 140, 71, 41))
-        self.toolButton.setObjectName(_fromUtf8("toolButton"))
-        QtCore.QObject.connect(self.toolButton, QtCore.SIGNAL("clicked()"), MainWindow.liver_cut )
+        self.toolButton.setObjectName("toolButton")
+        self.toolButton.clicked.connect(MainWindow.liver_cut)
         '''
         Vytvoření tlačítka PLANE, které při stisku volá metodu Plane
         '''
-        self.toolButton_2 = QtGui.QPushButton(self.centralwidget)
+        self.toolButton_2 = QtWidgets.QPushButton(self.centralwidget)
         self.toolButton_2.setGeometry(QtCore.QRect(140, 280, 71, 41))
-        self.toolButton_2.setObjectName(_fromUtf8("toolButton_2"))
-        QtCore.QObject.connect(self.toolButton_2, QtCore.SIGNAL("clicked()"), MainWindow.Plane )
+        self.toolButton_2.setObjectName("toolButton_2")
+        self.toolButton_2.clicked.connect(MainWindow.Plane)
         '''
         Vytvoření tlačítka POINT, které při stisku volá metodu Point
         '''
-        self.toolButton_3 = QtGui.QPushButton(self.centralwidget)
+        self.toolButton_3 = QtWidgets.QPushButton(self.centralwidget)
         self.toolButton_3.setGeometry(QtCore.QRect(140, 210, 71, 41))
-        self.toolButton_3.setObjectName(_fromUtf8("toolButton_3"))
-        QtCore.QObject.connect(self.toolButton_3, QtCore.SIGNAL("clicked()"), MainWindow.Point )
+        self.toolButton_3.setObjectName("toolButton_3")
+        self.toolButton_3.clicked.connect(MainWindow.Point)
         '''
         Vytvoření textového pole pro uživatelské výpisy
         '''
-        self.info_text = QtGui.QPlainTextEdit(self.centralwidget)
+        self.info_text = QtWidgets.QPlainTextEdit(self.centralwidget)
         self.info_text.setGeometry(QtCore.QRect(20, 350, 280, 100))
-        self.info_text.setObjectName(_fromUtf8("lineEdit"))
+        self.info_text.setObjectName("lineEdit")
         self.info_text.setReadOnly(True)
         '''
         Vytvoření textového pole pro výpisy informací o velikosti odstraněné části jater
         '''
-        self.liver_text = QtGui.QPlainTextEdit(self.centralwidget)
+        self.liver_text = QtWidgets.QPlainTextEdit(self.centralwidget)
         self.liver_text.setGeometry(QtCore.QRect(380, 490, 380, 50))
-        self.liver_text.setObjectName(_fromUtf8("lineEdit"))
+        self.liver_text.setObjectName("lineEdit")
         self.liver_text.setReadOnly(True)
 
         '''
         Vytvoření vizualizačního okna
         '''
         MainWindow.setCentralWidget(self.centralwidget)
-        self.menubar = QtGui.QMenuBar(MainWindow)
+        self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
-        self.menubar.setObjectName(_fromUtf8("menubar"))
+        self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
-        self.statusbar = QtGui.QStatusBar(MainWindow)
-        self.statusbar.setObjectName(_fromUtf8("statusbar"))
+        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
-        self.gridlayout = QtGui.QGridLayout(self.widget)
+        self.gridlayout = QtWidgets.QGridLayout(self.widget)
         self.vtkWidget = QVTKRenderWindowInteractor(self.widget)
 
         self.gridlayout.addWidget(self.vtkWidget, 0, 0, 1, 1)
@@ -174,7 +180,7 @@ class Viewer(QMainWindow):
     def __init__(self, inputfile,mode,parent = None):
         self.ren = vtk.vtkRenderer()
         if mode == 'Cut':
-            QtGui.QMainWindow.__init__(self, parent)
+            QtWidgets.QMainWindow.__init__(self, parent)
             self.vtk_filename = inputfile
             self.ui = Ui_MainWindow()
             self.ui.setupUi(self)
@@ -228,7 +234,7 @@ class Viewer(QMainWindow):
     '''
     def Plane(self):
         if(self.planew != None):
-            self.info_text.appendPlainText (_fromUtf8("Nelze použít více rovin najednou. Nejdříve proveďte řez"))
+            self.info_text.appendPlainText ("Nelze použít více rovin najednou. Nejdříve proveďte řez")
         else:
             planeWidget = vtk.vtkImplicitPlaneWidget()
             # předaní interaktoru objektu roviny
@@ -278,13 +284,13 @@ class Viewer(QMainWindow):
         Pokud není zvolené kriterium pro provádění resekční linie, program zahlásí chybu
         '''
         if (self.planew == None) & (self.cut_point == None):
-            self.info_text.appendPlainText (_fromUtf8("Neexistuje rovina řezu"))
-            self.info_text.appendPlainText (_fromUtf8('Nejdříve vytvořte rovinu(Plane), nebo bod(Point)'))
+            self.info_text.appendPlainText ("Neexistuje rovina řezu")
+            self.info_text.appendPlainText ('Nejdříve vytvořte rovinu(Plane), nebo bod(Point)')
         '''
         Pokud je zvoleno jako resekční kritérium rovina spustí se metoda Rez_podle_roviny ze skriptu virtual_resection
         '''
         if self.planew != None:
-            self.info_text.appendPlainText (_fromUtf8("Provádění řezu. Prosím čekejte"))
+            self.info_text.appendPlainText ("Provádění řezu. Prosím čekejte")
             data_z_resekce,odstraneni_procenta = virtual_resection.Rez_podle_roviny(self.planew,self.segment,self.new_vox)
             '''
             Zde se provádí výpis velikosti (v procentech) odříznuté části jater do editoru pro uživatele
@@ -292,9 +298,9 @@ class Viewer(QMainWindow):
             je to zde ošetřeno podmínkou
             '''
             if (odstraneni_procenta > 100):
-                self.liver_text.appendPlainText(_fromUtf8("Odstraněno příliš mnoho. Nelze spočítat"))
+                self.liver_text.appendPlainText("Odstraněno příliš mnoho. Nelze spočítat")
             else:
-                self.liver_text.appendPlainText(_fromUtf8("Bylo ostraněno cca "+str(odstraneni_procenta)+" % jater"))
+                self.liver_text.appendPlainText("Bylo ostraněno cca "+str(odstraneni_procenta)+" % jater")
             '''
             Zde je vypnuta vytvořená rovina, což je provedeno z toho důvodu, aby mohlo být prováděno více řezů za sebou
             '''
@@ -305,7 +311,7 @@ class Viewer(QMainWindow):
         původních dat předána resekčnímu algoritmu podle bodu ze skriptu virtual_resection
         '''
         if self.cut_point != None:
-            self.info_text.appendPlainText (_fromUtf8("Provádění řezu. Prosím čekejte"))
+            self.info_text.appendPlainText ("Provádění řezu. Prosím čekejte")
             pozice = self.cut_point.GetPosition()
             self.data['data3d'] = self.data['data3d'][::self.degrad,::self.degrad,::self.degrad]
             seeds = np.zeros((self.data['segmentation'].shape[0],(self.data['segmentation'].shape[1]),(self.data['segmentation'].shape[2])))
@@ -491,8 +497,8 @@ def main():
             try:
                 print('Data bohuzel neobsahuji zadany slab:', args.slab)
                 print('Zobrazena budou pouze dostupna data')
-                viewer.info_text.appendPlainText (_fromUtf8('Data bohužel neobsahují zadanou část jater'))
-                viewer.info_text.appendPlainText (_fromUtf8('Zobrazena budou pouze dostupná data'))
+                viewer.info_text.appendPlainText ('Data bohužel neobsahují zadanou část jater')
+                viewer.info_text.appendPlainText ('Zobrazena budou pouze dostupná data')
                 mesh = viewer.generate_mesh(viewer.data['segmentation'] == viewer.data['slab']['liver'],viewer.data['voxelsize_mm'])
                 '''
                 Pokud data navíc neobsahují parametr rozměr voxelu (velmi vyjímečná záležitost) jsou programu předány jednotkové

@@ -5,21 +5,26 @@
 
 # import funkcí z jiného adresáře
 import sys
+
 import os.path
+
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
 sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
+
 
 from nose.plugins.attrib import attr
+
 # import numpy as np
 
 
 # import imcut.dcmreaddata as dcmr
 
 from seededitorqt import QTSeedEditor
+
 
 class QTSeedEditorTest(unittest.TestCase):
     interactive_tests = False
@@ -32,8 +37,9 @@ class QTSeedEditorTest(unittest.TestCase):
         #pyed = sed3.sed3(self.data3d, contour = oseg.segmentation)
         #pyed.show()
 
-        from PyQt4.QtGui import QApplication
+        from PyQt5.QtWidgets import QApplication
         import numpy as np
+
         im3d = np.random.rand(15,15,15)
         print("Select pixels for deletion (it will be setted to 0)")
 #, QMainWindow
@@ -85,8 +91,9 @@ class QTSeedEditorTest(unittest.TestCase):
         #pyed = sed3.sed3(self.data3d, contour = oseg.segmentation)
         #pyed.show()
 
-        from PyQt4.QtGui import QApplication
+        from PyQt5.QtWidgets import QApplication
         import numpy as np
+
         im3d = np.random.rand(15,15,15)
         print("Select pixels for deletion (it will be setted to 0)")
         #, QMainWindow

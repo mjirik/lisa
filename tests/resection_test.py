@@ -2,15 +2,20 @@
 # -*- coding: utf-8 -*-
 
 import logging
+
 
 logger = logging.getLogger(__name__)
 import unittest
+
 import os.path as op
+
 from nose.plugins.attrib import attr
+
 
 path_to_script = op.dirname(op.abspath(__file__))
 
 import sys
+
 
 sys.path.insert(0, op.abspath(op.join(path_to_script, "../../io3d")))
 sys.path.insert(0, op.abspath(op.join(path_to_script, "../../imma")))
@@ -20,7 +25,9 @@ sys.path.insert(0, op.abspath(op.join(path_to_script, "../../imma")))
 # imcut_path =  os.path.join(path_to_script, "../../imcut/")
 # sys.path.insert(0, imcut_path)
 import lisa.virtual_resection
+
 import numpy as np
+
 
 
 class ResectionTest(unittest.TestCase):
@@ -39,9 +46,11 @@ class ResectionTest(unittest.TestCase):
         """
         shape = [40, 41, 42]
         from lisa.dataset import generate_sample_data
+
         datap = generate_sample_data()
         import sys
-        from PyQt4.QtGui import QApplication
+
+        from PyQt5.QtWidgets import QApplication
         app = QApplication(sys.argv)
         print("Select points for planar virtual resection")
         datap = lisa.virtual_resection.resection_planar(datap, interactivity=True, seeds=None)
@@ -53,6 +62,7 @@ class ResectionTest(unittest.TestCase):
         """
         shape = [40, 41, 42]
         from lisa.dataset import generate_sample_data
+
         datap = generate_sample_data(shape=shape)
         seeds = np.zeros(shape)
         inds = np.asarray([[10, 5, 20, 22], [20, 8, 10, 12], [5, 10, 20, 19]])
@@ -75,6 +85,7 @@ class ResectionTest(unittest.TestCase):
         """
         shape = [40, 41, 42]
         from lisa.dataset import generate_sample_data
+
         datap = generate_sample_data(shape=shape)
         seeds = np.zeros(shape)
         # points in portal vein where cut will be performed
@@ -102,6 +113,7 @@ class ResectionTest(unittest.TestCase):
         """
         shape = [40, 41, 42]
         from lisa.dataset import generate_sample_data
+
         datap = generate_sample_data(shape=shape)
         seeds = np.zeros(shape)
         # points in portal vein where cut will be performed
@@ -126,7 +138,9 @@ class ResectionTest(unittest.TestCase):
 
     def test_branch_labels_just_in_module(self):
         import lisa.organ_segmentation
+
         import io3d
+
         # datap = io3d.datasets.generate_abdominal()
         datap = io3d.datasets.generate_synthetic_liver(return_dataplus=True)
         oseg = lisa.organ_segmentation.OrganSegmentation()
@@ -146,7 +160,9 @@ class ResectionTest(unittest.TestCase):
 
     def test_branch_labels_from_oseg(self):
         import lisa.organ_segmentation
+
         import io3d
+
         # datap = io3d.datasets.generate_abdominal()
         datap = io3d.datasets.generate_synthetic_liver(return_dataplus=True)
         oseg = lisa.organ_segmentation.OrganSegmentation()
@@ -165,7 +181,9 @@ class ResectionTest(unittest.TestCase):
 
     def test_branch_labels_with_gui_just_in_module(self):
         import lisa.organ_segmentation
+
         import io3d
+
         # datap = io3d.datasets.generate_abdominal()
         datap = io3d.datasets.generate_synthetic_liver(return_dataplus=True)
         oseg = lisa.organ_segmentation.OrganSegmentation()
@@ -185,8 +203,11 @@ class ResectionTest(unittest.TestCase):
         seglabel2 = labeled_branches[seeds == 2][0]
         seglabel3 = labeled_branches[seeds == 3][0]
         import imma.measure
+
         import imma.image_manipulation
+
         import imma.image_manipulation as ima
+
 
         # import sed3
         # ed = sed3.sed3(labeled_branches)  # , contour=datap["segmentation"])
@@ -210,7 +231,9 @@ class ResectionTest(unittest.TestCase):
 
     def test_split_organ_segmentation(self):
         import lisa.organ_segmentation
+
         import io3d
+
         # datap = io3d.datasets.generate_abdominal()
         datap = io3d.datasets.generate_synthetic_liver(return_dataplus=True)
         slab = datap["slab"]
@@ -247,6 +270,7 @@ class ResectionTest(unittest.TestCase):
 
     def generate_trifurcation(self):
         import io3d.datasets
+
         datap = io3d.datasets.generate_synthetic_liver(return_dataplus=True)
         slab = datap["slab"]
         # third missed branch
@@ -257,8 +281,10 @@ class ResectionTest(unittest.TestCase):
 
     def test_split_organ_segmentation_missed_branch(self):
         import lisa.organ_segmentation
+
         datap = self.generate_trifurcation()
         import io3d
+
         # datap = io3d.datasets.generate_abdominal()
         oseg = lisa.organ_segmentation.OrganSegmentation()
         oseg.import_dataplus(datap)
@@ -290,8 +316,10 @@ class ResectionTest(unittest.TestCase):
 
     def test_split_organ_segmentation_missed_branch_neighboor_to_branches_organ_label(self):
         import lisa.organ_segmentation
+
         datap = self.generate_trifurcation()
         import io3d
+
         # datap = io3d.datasets.generate_abdominal()
         oseg = lisa.organ_segmentation.OrganSegmentation()
         oseg.import_dataplus(datap)
@@ -329,8 +357,10 @@ class ResectionTest(unittest.TestCase):
 
     def test_split_organ_segmentation_missed_branch_neighboor_to_trunk_organ_label(self):
         import lisa.organ_segmentation
+
         datap = self.generate_trifurcation()
         import io3d
+
         # datap = io3d.datasets.generate_abdominal()
         oseg = lisa.organ_segmentation.OrganSegmentation()
         oseg.import_dataplus(datap)
@@ -368,7 +398,9 @@ class ResectionTest(unittest.TestCase):
     @unittest.skip("Waiting for implementation of recursive tissue segmentation")
     def test_split_organ_segmentation_recursive(self):
         import lisa.organ_segmentation
+
         import io3d
+
         # datap = io3d.datasets.generate_abdominal()
         datap = io3d.datasets.generate_synthetic_liver(return_dataplus=True)
         slab = datap["slab"]
@@ -395,6 +427,7 @@ class ResectionTest(unittest.TestCase):
         organ_label = "liver"
 
         import sed3
+
         # ed = sed3.sed3(labeled_branches, contour=organ_split)
         ed = sed3.sed3(split_labels_out)
         ed.show()

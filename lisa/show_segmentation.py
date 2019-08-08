@@ -5,29 +5,38 @@ Module is used for visualization of segmentation stored in pkl file.
 """
 
 import sys
+
 import os.path
+
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
 import logging
+
 logger = logging.getLogger(__name__)
 
 # from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QApplication
+from PyQt5.QtWidgets import QApplication
 import argparse
+
 
 
 import numpy as np
+
 try:
     import dicom2fem
+
     import dicom2fem.seg2fem
+
     # from dicom2fem import seg2fem
     from dicom2fem.seg2fem import gen_mesh_from_voxels_mc, smooth_mesh
+
 except:
 
     print('dicom2fem not found')
     # logger.warning('dicom2fem not found')
     from seg2mesh import gen_mesh_from_voxels, smooth_mesh
+
 
 
 def showSegmentation(
@@ -61,6 +70,7 @@ def showSegmentation(
         print("resize")
         new_voxelsize_mm = np.asarray([resize_mm, resize_mm, resize_mm])
         import imtools
+
         segmentation = imtools.misc.resize_to_mm(segmentation, voxelsize_mm=voxelsize_mm, new_voxelsize_mm=new_voxelsize_mm)
         voxelsize_mm = new_voxelsize_mm
         logger.debug("resize begin")
@@ -81,6 +91,7 @@ def showSegmentation(
         logger.debug("qapp constructed")
     if show:
         import viewer
+
         view = viewer.QVTKViewer(vtk_file)
         print('show viewer')
         view.exec_()
@@ -132,6 +143,7 @@ def main():
 
     # data = misc.obj_from_file(args.inputfile, filetype='pickle')
     import io3d
+
     data = io3d.read(args.inputfile, dataplus_format=True)
     # args.label = np.array(eval(args.label))
     # print args.label

@@ -6,7 +6,9 @@ Show dicom data with overlay
 
 # import funkcí z jiného adresáře
 import sys
+
 import os.path
+
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
@@ -16,6 +18,7 @@ sys.path.append(os.path.join(path_to_script,
 #import featurevector
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -23,6 +26,7 @@ logger = logging.getLogger(__name__)
 #  apdb.set_trace();
 #import scipy.io
 import numpy as np
+
 #import scipy
 #from scipy import sparse
 #import traceback
@@ -31,12 +35,17 @@ import numpy as np
 
 # ----------------- my scripts --------
 import argparse
+
 import sed3
+
 
 #import segmentation
 import qmisc
+
 import misc
+
 from io3d import datareader
+
 #import config
 #import numbers
 
@@ -45,6 +54,7 @@ def saveOverlayToDicomCopy(input_dcmfilelist, output_dicom_dir, overlays,
                            crinfo, orig_shape):
     """ Save overlay to dicom. """
     import datawriter as dwriter
+
 
     if not os.path.exists(output_dicom_dir):
         os.mkdir(output_dicom_dir)
@@ -60,9 +70,9 @@ def saveOverlayToDicomCopy(input_dcmfilelist, output_dicom_dir, overlays,
 def readData3d(dcmdir):
     qt_app = None
     if dcmdir is None:
-        from PyQt4 import QtGui
+        from PyQt5 import QtGui, QtWidgets
 #QApplication
-        qt_app = QtGui.QApplication(sys.argv)
+        qt_app = QtWidgets.QApplication(sys.argv)
 # same as  data_reader_get_dcmdir_qt
 #        from PyQt4.QtGui import QFileDialog, QApplication
 #        dcmdir = QFileDialog.getExistingDirectory(

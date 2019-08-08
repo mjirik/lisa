@@ -10,16 +10,25 @@
 
 """
 import unittest
+
 from nose.plugins.attrib import attr
+
 import sys
+
 
-from PyQt4.QtGui import QApplication
-from PyQt4.QtTest import QTest
-from PyQt4.QtCore import Qt
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtTest import QTest
+
+from PyQt5.QtCore import Qt
+
 import lisa.lisaWindow
+
 import lisa.organ_segmentation
+
 from lisa.lisaWindow import OrganSegmentationWindow
+
 import io3d.datasets
+
 
 
 class LisaGUITest(unittest.TestCase):
