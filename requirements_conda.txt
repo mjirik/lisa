@@ -27,9 +27,9 @@ vtk
 SimpleITK
 # h5py>=2.5.0
 # pywget=2.2
-opencv>=2.4.0
-libpng
-pandas
+# opencv>=2.4.0
+# libpng
+# pandas
 # ipdb>=0.8.1
 # -c luispedro but only for linux-64
 # mahotas
