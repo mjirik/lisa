@@ -4,35 +4,25 @@
 Modul is used for GUI of Lisa
 """
 import logging
-
-try:
-    QString = unicode
-except NameError:
-    # Python 3
-    QString = str
+
+
 
 logger = logging.getLogger(__name__)
 # from lisa.logWindow import QVBoxLayout
-
 import sys
-
 import os
-
 import numpy as np
-
-
 import datetime
-
 import functools
-
 
 from io3d import datareader
-
-# import segmentation
 
+# Python 3
+QString = str
+
+# import segmentation
 try:
     from viewer import QVTKViewer
-
     viewer3D_available = True
 
 except ImportError:
@@ -41,45 +31,28 @@ except ImportError:
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/imcut/src"))
 
-from PyQt5.QtGui import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
+from PyQt5.QtGui import QFont, QPixmap
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
                          QLabel, QPushButton, QFrame, 
-    QFont, QPixmap,
+    # QFont, QPixmap,
                          QFileDialog, QInputDialog)
 from PyQt5 import QtGui, QtWidgets
 
 import sys
-
-if sys.version_info.major == 2:
-else:
-    Qstring = str
 
-try:
-    from imcut.seed_editor_qt import QTSeedEditor
-
-except:
-    logger.warning("Deprecated of pyseg_base as submodule")
-    try:
-        from imcut.seed_editor_qt import QTSeedEditor
-
-    except:
-        logger.warning("Deprecated of pyseg_base as submodule")
-        from seed_editor_qt import QTSeedEditor
-
 
+Qstring = str
+
+from seededitorqt import QTSeedEditor
 import sed3
-
 from . import loginWindow
-
 from . import dictEditQt
-
 from . import segmentationQt
-
 from . import virtual_resection
-
 from io3d.network import download_file
-
 from imtools.select_label_qt import SelectLabelWidget
-
+
+
 
 def find_logo():
     logopath = os.path.join(path_to_script, "./icons/LISA256.png")
@@ -423,7 +396,8 @@ class OrganSegmentationWindow(QMainWindow):
         self.setCentralWidget(window)
         self.resize(800, 600)
         from . import __version__
-
+
+
         self.setWindowTitle('LISA ' + __version__)
         self.statusBar().showMessage('Ready')
         self.mainLayout = QHBoxLayout(window)
@@ -498,7 +472,8 @@ class OrganSegmentationWindow(QMainWindow):
 
         # -- load widget
         import io3d.datareaderqt
-
+
+
         self.read_widget = io3d.datareaderqt.DataReaderWidget(
             before_function=self._before_read_callback,
             after_function=self._after_read_callback,
@@ -615,7 +590,8 @@ class OrganSegmentationWindow(QMainWindow):
         self.ui_buttons[keyword] = tmp
 
         import imtools.show_segmentation_qt
-
+
+
         self.ui_widgets[keyword] = imtools.show_segmentation_qt.ShowSegmentationWidget(None)
         # import imtools.show_segmentation_qt as itss
         # itss.ShowSegmentationWidget()
@@ -667,7 +643,8 @@ class OrganSegmentationWindow(QMainWindow):
         elif option == "3D Visualization":
             # remove old
             import imtools.show_segmentation_qt
-
+
+
             widget = self.ui_widgets[option]
             self.bodyLayout.removeWidget(widget)
             widget.deleteLater()
@@ -703,10 +680,14 @@ class OrganSegmentationWindow(QMainWindow):
         """
         logger.debug('== Starting debug mode, leave it with command "c" =')
         from PyQt5.QtCore import pyqtRemoveInputHook
-
         pyqtRemoveInputHook()
-        import ipdb; ipdb.set_trace()  # noqa BREAKPOINT
-
+        try:
+            import ipdb; ipdb.set_trace()  # noqa BREAKPOINT
+        except:
+            import pdb; pdb.set_trace()  # noqa BREAKPOINT
+
+
+
 
     def changeVoxelSize(self, val):
         self.scaling_mode = str(val)
@@ -844,7 +825,8 @@ class OrganSegmentationWindow(QMainWindow):
             self.oseg.sync_lisa_data(self.oseg.sftp_username, self.oseg.sftp_password, callback=self._print_sync_progress)
         except:
             import traceback
-
+
+
             traceback.print_exc()
             logger.error(traceback.format_exc())
 
@@ -1084,7 +1066,8 @@ class OrganSegmentationWindow(QMainWindow):
 
         un = np.unique(seeds)
         import imma.labeled
-
+
+
         unlab = imma.labeled.unique_labels_by_seeds(self.oseg.segmentation, seeds)
 
         self.oseg.split_tissue_with_labeled_volumetric_vessel_tree(organ_label, trunk_label=unlab[1][0], branch_labels=unlab[2])  # trunk_label, branch_label1, branch_label2)
@@ -1470,6 +1453,7 @@ class OrganSegmentationWindow(QMainWindow):
         Open dialog for selecting file output filename. Uniqe name is as
         suggested.
         """
+        logger.debug(f"saveOut, filename: {filename}")
         if self.oseg.segmentation is not None:
             self.statusBar().showMessage('Saving segmentation data...')
             QApplication.processEvents()
@@ -1478,11 +1462,16 @@ class OrganSegmentationWindow(QMainWindow):
                 ofilename = self.oseg.get_standard_ouptut_filename(filetype="dcm", suffix=suffix)
             else:
                 ofilename = self.oseg.get_standard_ouptut_filename()
-            filename = str(QFileDialog.getSaveFileName(
+            qf_dialog = QFileDialog.getSaveFileName(
                 self,
                 "Save file",
                 ofilename,
-                filter="Former Lisa Format (*.pklz);;New Lisa format HDF5 (*.h5 *.hdf5);; Dicom (*.dcm)"))[0]
+                filter="Former Lisa Format (*.pklz);;New Lisa format HDF5 (*.h5 *.hdf5);; Dicom (*.dcm)")
+
+            # from PyQt5.QtCore import pyqtRemoveInputHook
+            # pyqtRemoveInputHook()
+            # import pdb; pdb.set_trace()
+            filename = str(qf_dialog[0])
 
             logger.info('Data saved to: ' + filename)
 
@@ -1516,7 +1505,8 @@ class OrganSegmentationWindow(QMainWindow):
         :return:
         """
         import dictGUI
-
+
+
         slab_selection = {}
         for label, value in  self.oseg.slab.items():
             slab_selection[label] = True
@@ -1526,11 +1516,14 @@ class OrganSegmentationWindow(QMainWindow):
 
     def btnConfig(self, event=None):
         import config
-
+
+
         import organ_segmentation as los
-
+
+
         import lisaConfigGui as lcg
-
+
+
         d = los.lisa_config_init()
 
         newconf = lcg.configGui(d)
@@ -1573,7 +1566,7 @@ class OrganSegmentationWindow(QMainWindow):
                     self,
                     "Save file",
                     ofilename,
-                    filter="*.*"))[0]
+                    filter="*.*")[0])
 
             self.oseg.output_annotaion_file = filename
             self.oseg.json_annotation_export()
@@ -1590,7 +1583,7 @@ class OrganSegmentationWindow(QMainWindow):
             self,
             "Save file",
             ofilename,
-            filter="*.*"))[0]
+            filter="*.*")[0])
 
         self.oseg.save_input_dcm(filename)
         logger.info('Input data saved to: ' + filename)
@@ -1740,9 +1733,11 @@ class OrganSegmentationWindow(QMainWindow):
 
     def btnLog(self):
         import logWindow
-
+
+
         import os.path as op
-
+
+
         fn = op.expanduser("~/lisa_data/lisa.log")
         form = logWindow.LogViewerForm(fn) #, qapp=self.app)
         form.show()
@@ -1764,7 +1759,8 @@ class OrganSegmentationWindow(QMainWindow):
         oseg = self.oseg
         if oseg.segmentation is not None:
             import show_segmentation
-
+
+
 
             show_segmentation.showSegmentation(
                 oseg.segmentation==1,
@@ -1787,7 +1783,8 @@ class OrganSegmentationWindow(QMainWindow):
 def get_str(text):
     if sys.version_info.major == 2:
         import PyQt5.QtCore
-
+
+
         if type(text) is QString:
             text = str(text)
 

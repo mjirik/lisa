@@ -2,6 +2,10 @@
 
 ## Unreleased 
 
+## 2.0
+
+* [Changed] Upgrade to Qt5
+* [Changed] Dropped python 2 support
 
 ## 1.18.*
 

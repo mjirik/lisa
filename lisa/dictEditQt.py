@@ -11,17 +11,21 @@
 """
 
 import logging
-
+
+
 
 logger = logging.getLogger(__name__)
 import argparse
-
-from PyQt5.QtGui import QGridLayout, QLabel, QPushButton, QLineEdit
-from PyQt5 import QtGui, QtWidgets
+
+
+from PyQt5.QtWidgets import QGridLayout, QLabel, QPushButton, QLineEdit
+from PyQt5 import QtWidgets
 import sys
-
+
+
 import copy
-
+
+
 
 class DictEdit(QtWidgets.QWidget):
     def __init__(self, dictionary):
