@@ -37,7 +37,7 @@ requirements:
     - setuptools
     - numpy
     - scipy
-    - pyyaml
+#    - pyyaml
     - matplotlib
     - skelet3d
     - imtools
@@ -52,17 +52,18 @@ requirements:
     - scikit-learn
     - scikit-image
 #    - pyqtconfig # nemáme pro python 3.6
-    - pip
+#    - pip
     # just for pip install pygco
-    - cython
+#    - cython
 
   run:
     - python
     - numpy
     - scipy
-    - pyyaml
+#    - pyyaml
     - matplotlib
     - skelet3d >=1.5.6
+#    - {{ pin_compatible('skelet3d', max_pin='x') }}
 #    - imtools >=0.1.67
 #    - sed3 >=1.1.33
 #    - imcut >=1.2.41
@@ -86,11 +87,11 @@ requirements:
     - scikit-learn >=0.19.0
     - scikit-image
 #    - pyqtconfig # nemáme pro python 3.6
-    - pip
+#    - pip
     - sftpsync >=1.0.8
     # just for pip install pygco
-    - cython
-    - vtk
+#    - cython
+#    - vtk
     # nomkl package does not exist on windows
     # - nomkl
     # bitarray and redis is required in experiments_test cerveny
