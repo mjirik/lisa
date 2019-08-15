@@ -44,7 +44,7 @@ requirements:
     - sed3
     - imcut
     - io3d
-    - pyqt 4.11.*
+    - pyqt 5
     - pandas
 #    - wget
     # use wget instead of pywget because pywget for py36 doesnt exist
@@ -72,9 +72,10 @@ requirements:
     - {{ pin_compatible('sed3', max_pin='x') }}
     - {{ pin_compatible('io3d', max_pin='x') }}
     - {{ pin_compatible('imcut', max_pin='x') }}
-    - pyqt 4.11.*
+    - dicom2fem >=1.1.12
+    - pyqt =5
     - pandas
-    - simpleitk 1.*
+    - simpleitk =1
 #    - simpleitk 0.9.1
     - libpng
     # - simpleitk 0.9.* # problem with dicom write
@@ -90,7 +91,6 @@ requirements:
     # just for pip install pygco
     - cython
     - vtk
-    - dicom2fem >=1.0.36
     # nomkl package does not exist on windows
     # - nomkl
     # bitarray and redis is required in experiments_test cerveny
