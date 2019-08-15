@@ -45,7 +45,7 @@ requirements:
     - imcut
     - io3d
     - pyqt 5
-    - pandas
+#    - pandas
 #    - wget
     # use wget instead of pywget because pywget for py36 doesnt exist
     #- pywget
@@ -74,7 +74,7 @@ requirements:
     - {{ pin_compatible('imcut', max_pin='x') }}
     - dicom2fem >=1.1.12
     - pyqt =5
-    - pandas
+#    - pandas
     - simpleitk =1
 #    - simpleitk 0.9.1
     - libpng
