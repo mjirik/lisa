@@ -51,6 +51,7 @@ from . import segmentationQt
 from . import virtual_resection
 from io3d.network import download_file
 from imtools.select_label_qt import SelectLabelWidget
+from . import authors
 
 
 
@@ -439,7 +440,7 @@ class OrganSegmentationWindow(QMainWindow):
                       'University of West Bohemia\n' +
                       'Faculty of Applied Sciences\n' +
                       "Charles University\nFaculty of Medicine in Pilsen"
-                      '\n\nVersion: ' + self.oseg.version
+                      '\n\nVersion: ' + self.oseg.version + "\n\nAuthors:\n" + str(authors.authors)
                       )
         info.setFont(font_info)
         lisa_title.setFont(font_label)
