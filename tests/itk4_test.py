@@ -5,25 +5,13 @@
 
 # import funkcí z jiného adresáře
 import sys
-
-from PyQt5.QtWidgets import *
-import os.path
-
-import copy
-
 
-path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
-#sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
-#sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
-
 
-
-from PyQt5.QtGui import QFileDialog, QApplication, QMainWindow
 
 import numpy as np
-
+
+
 # import itk
 #import SimpleITK as sitk
 
@@ -52,7 +40,8 @@ class PycutTest(unittest.TestCase):
     @unittest.skip("ITK has only 2D skeleton")
     def test_simple_itk(self):
         import SimpleITK as sitk
-
+
+
         data = self.generate_data()
         data_itk = sitk.GetImageFromArray(data)
         output = sitk.BinaryThinning(data_itk)
@@ -65,7 +54,8 @@ class PycutTest(unittest.TestCase):
         This is not working. ITK has 2D thinning algorithm only. :-(
         """
         import SimpleITK as sitk
-
+
+
         data = self.generate_data()
 
 
@@ -80,7 +70,8 @@ class PycutTest(unittest.TestCase):
         im.Allocate()
 
         import pdb; pdb.set_trace()
-
+
+
         for i in range(0,shape[0]):
             for j in range(0,shape[1]):
                 for k in range(0,shape[2]):
@@ -105,7 +96,8 @@ class PycutTest(unittest.TestCase):
 
 
         import pdb; pdb.set_trace()
-
+
+
 
         dataout = np.zeros(shape, dtype=np.int8)
         for i in range(0,shape[0]):
@@ -116,11 +108,13 @@ class PycutTest(unittest.TestCase):
 
 
         import pdb; pdb.set_trace()
-
+
+
         data_itk = sitk.GetImageFromArray(dataout)
 
         import pdb; pdb.set_trace()
-
+
+
         writerType = itk.ImageFileWriter[imageType, imageType]
 
         reader = readerType.New()

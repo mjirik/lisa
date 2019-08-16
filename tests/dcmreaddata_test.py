@@ -3,47 +3,45 @@
 
 
 import logging
-
+
+
 from PyQt5.QtWidgets import *
 logger = logging.getLogger(__name__)
 
 # import funkcí z jiného adresáře
 import sys
-
+
+
 import os.path
-
-import copy
-
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
-sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
-sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
-
-
-
-from PyQt5.QtGui import QFileDialog, QApplication, QMainWindow
 
 import numpy as np
-
+
+
 
 try:
     import pydicom
-
+
+
 except ImportError as e:
     import dicom as pydicom
-
+
+
     logger.warning("Used dicom instead of pydicom")
 pydicom.config.debug(False)
 
 #
 import io3d
-
+
+
 import io3d.dcmreaddata as dcmr
-
+
+
 import lisa.dataset
-
+
+
 
 class DicomReaderTest(unittest.TestCase):
     interactivetTest = False
@@ -57,7 +55,8 @@ class DicomReaderTest(unittest.TestCase):
 
     def test_DicomReader_overlay(self):
         import os.path as op
-
+
+
         # sample_data_path = "~/data/medical/orig/sample_data/"
         # sample_data_path = op.expanduser(sample_data_path)
         # sample_data_path = io3d.datasets.join_path("medical/orig/sample_data/", get_root=True)
