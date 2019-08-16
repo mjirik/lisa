@@ -10,44 +10,42 @@
 
 """
 import unittest
-
-
 import pytest
-
-
 import sys
-
-
-
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtTest import QTest
-
-
 from PyQt5.QtCore import Qt
-
-
 import lisa.lisaWindow
-
-
 import lisa.organ_segmentation
-
-
 from lisa.lisaWindow import OrganSegmentationWindow
-
-
 import io3d.datasets
 
+@pytest.fixture()
+def resource():
+    print("setup")
+    yield "resource"
+    print("teardown")
 
+class LisaGUITest(object):
 
-
-class LisaGUITest(unittest.TestCase):
-
-    def setUp(self):
+    # def setUp(self):
+    @classmethod
+    def setup_class(self):
+        """ setup any state specific to the execution of the given class (which
+        usually contains tests).
+        """
         '''Create the GUI'''
         self.app = QApplication(sys.argv)
         oseg = lisa.organ_segmentation.OrganSegmentation()
         self.oseg_w = OrganSegmentationWindow(oseg) # noqa
         # self.form = MargaritaMixer.MargaritaMixer()
+
+    @classmethod
+    def teardown_class(cls):
+        """ teardown any state that was previously setup with a call to
+        setup_class.
+        """
+
 
     @pytest.mark.interactive
     def test_click(self):
@@ -63,11 +61,6 @@ class LisaGUITest(unittest.TestCase):
         pass
         self.app.exec_()
 
-    def test_zz_quit_gui(self):
-        """
-        Tests event of quit
-        """
-        self.assertTrue(self.oseg_w.quit(event=None))
 
     @pytest.mark.interactive
     def test_split(self):
@@ -87,9 +80,16 @@ class LisaGUITest(unittest.TestCase):
         self.oseg_w.ui_select_label("hura")
         self.app.exec_()
 
+    @pytest.mark.interactive
     def test_bodynavigation(self):
         self.oseg_w.oseg.load_data(io3d.datasets.join_path("medical", "orig", "3Dircadb1.1", "PATIENT_DICOM", get_root=True))
         self.oseg_w.ui_select_label("hura")
+
+    def test_zz_quit_gui(self):
+        """
+        Tests event of quit
+        """
+        self.assertTrue(self.oseg_w.quit(event=None))
 
 if __name__ == "__main__":
     unittest.main()
