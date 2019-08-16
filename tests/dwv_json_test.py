@@ -4,7 +4,7 @@
 import logging
 logger = logging.getLogger(__name__)
 import unittest
-from nose.plugins.attrib import attr
+import pytest
 import os.path as op
 
 import lisa
@@ -26,7 +26,7 @@ class DicomWebViewJsonTest(unittest.TestCase):
         )
         oseg.make_run()
 
-    @attr("slow")
+    @pytest.mark.slow
     def test_json_jatra_5mm_import(self):
 
         input_annotation_file = op.join(path_to_script, "test_dwv_jatra_5mm.json")

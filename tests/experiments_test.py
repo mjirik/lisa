@@ -9,7 +9,7 @@ import unittest
 
 logger = logging.getLogger(__name__)
 
-from nose.plugins.attrib import attr
+import pytest
 import numpy as np
 import shutil
 
@@ -96,7 +96,7 @@ class ExperimentsTest(unittest.TestCase):
         ramr.report()
         # shutil.rmtree(dire)
 
-    @attr("slow")
+    @pytest.mark.slow
     def test_experiment_set(self):
         import lisa.experiments
 
@@ -133,8 +133,8 @@ class ExperimentsTest(unittest.TestCase):
 
     # not sure why is this test failing on travis. On local there are no
     # problems.  Maybe it is not called.
-    @attr("incomplete")
-    @attr("slow")
+    @pytest.mark.incomplete
+    @pytest.mark.slow
     def test_experiment_set_small(self):
         import lisa.experiments
 
@@ -186,7 +186,7 @@ class ExperimentsTest(unittest.TestCase):
         self.assertGreater(len(obj['data']), 0)
         # self.assertTrue(False)
 
-    @attr("actual")
+    @pytest.mark.actual
     # @unittest.skip("this test is little rebel under travis-ci")
     def test_experiment_set_small_per_partes(self):
         plt.ioff()
@@ -376,7 +376,7 @@ class ExperimentsTest(unittest.TestCase):
         eval1 = ve.distance_matrics(vol1, vol2, [0.5, 0.5, 0.5])
         self.assertAlmostEquals(eval1[2], np.sqrt(2))
 
-    @attr("incomplete")
+    @pytest.mark.incomplete
     def test_compare_eval_sliver_distance(self):
         """
         comparison of two methods for surface distance computation
@@ -399,7 +399,7 @@ class ExperimentsTest(unittest.TestCase):
         # self.assertLess(eval1[0], 1.1 * eval2[0])
         # self.assertGreater(eval1[0], 0.9 * eval2[0])
 
-    # @attr("incomplete")
+    # @pytest.mark.incomplete
     # def test_compare_eval_sliver_distance_bigger(self):
     #     """
     #     comparison of two methods for surface distance computation on bigger

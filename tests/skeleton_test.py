@@ -13,15 +13,15 @@ import logging
 logger = logging.getLogger(__name__)
 import numpy as np
 import unittest
-from nose.plugins.attrib import attr
+import pytest
 import skelet3d.skeleton_analyser as sk
 import copy
 
 
 class TemplateTest(unittest.TestCase):
 
-    @attr('actual')
-    @attr('slow')
+    @pytest.mark.actual
+    @pytest.mark.slow
     def test_nodes_aggregation_big_data(self):
 
         data = np.zeros([1000, 1000, 100], dtype=np.int8)

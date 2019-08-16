@@ -12,7 +12,7 @@ import os.path as op
 import unittest
 
 import numpy as np
-# from nose.plugins.attrib import attr
+# import pytest
 
 
 from lisa import organ_segmentation

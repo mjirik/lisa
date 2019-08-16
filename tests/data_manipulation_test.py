@@ -11,7 +11,7 @@
 """
 import logging
 logger = logging.getLogger(__name__)
-from nose.plugins.attrib import attr
+import pytest
 import numpy as np
 import scipy
 import lisa.data_manipulation as dama
@@ -20,7 +20,7 @@ import unittest
 
 class DataManipulationTest(unittest.TestCase):
 
-    @attr('actual')
+    @pytest.mark.actual
     def test_unbiased_brick(self):
         """
         Test unbiased brick. There sould be correct number of object in

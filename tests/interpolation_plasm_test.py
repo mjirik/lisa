@@ -7,7 +7,7 @@ import os.path
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../../lar-cc/lib/py/"))
 import unittest
-from nose.plugins.attrib import attr
+import pytest
 
 # import numpy as np
 
@@ -16,7 +16,7 @@ class InterpolationPlasmTest(unittest.TestCase):
     interactiveTests = False
     # interactiveTest = True
 
-    @attr("LAR")
+    @pytest.mark.LAR
     def test_store_to_SparseMatrix_and_back(self):
         """
         Test has not strong assert part.
@@ -30,7 +30,7 @@ class InterpolationPlasmTest(unittest.TestCase):
         self.assertIsInstance(dom2D[0], pyplasm.xgepy.Hpc)
 
     # @unittest.skipIf(not interactiveTests, "test is with visualization")
-    @attr("LAR")
+    @pytest.mark.LAR
     def test_complex_sample(self):
         from larcc import INTERVALS, BEZIER, S2, S1, MAP, STRUCT, SKELETON, VIEW
         from lisa.extern.interpolation_pyplasm import TRIANGLE_DOMAIN,\

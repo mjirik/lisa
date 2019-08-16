@@ -6,7 +6,7 @@ import logging
 logger = logging.getLogger(__name__)
 import unittest
 import os.path as op
-from nose.plugins.attrib import attr
+import pytest
 import io3d.datasets
 from lisa import runner
 import lisa.autolisa

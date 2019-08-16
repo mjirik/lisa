@@ -10,7 +10,7 @@
 
 """
 import unittest
-# from nose.plugins.attrib import attr
+# import pytest
 
 
 class TemplateTest(unittest.TestCase):

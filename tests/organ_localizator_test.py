@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from nose.plugins.attrib import attr
+import pytest
 import numpy as np
 
 import os.path as op
@@ -13,7 +13,7 @@ import io3d.datareader
 
 
 class LocalizationTests(unittest.TestCase):
-    @attr('slow')
+    @pytest.mark.slow
     def test_training(self):
         sample_data_path = lisa.dataset.sample_data_path()
         organ_localizator.train_liver_localizator_from_sliver_data(
@@ -41,8 +41,8 @@ class LocalizationTests(unittest.TestCase):
         # less then 10% error expected
         self.assertGreater(np.prod(seg.shape)*0.1, err)
 
-    @attr('slow')
-    @attr('actual')
+    @pytest.mark.slow
+    @pytest.mark.actual
     def test_trainin_kidney_from_pklz(self):
 
         sample_data_path = lisa.dataset.join_sdp("kidney_training/")

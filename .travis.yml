@@ -11,6 +11,8 @@ env:
     - CONDA_PYTHON_VERSION=3.7
 #virtualenv:
 #    system_site_packages: true
+services:
+    - xvfb
 before_install:
     # We do this conditionally because it saves us some downloading if the
     # version is the same.
@@ -50,7 +52,7 @@ install:
     - conda create -n lisa
     - source activate lisa
 # install run, test and deploy tools
-    - conda install coveralls pip nose cmake python=$CONDA_PYTHON_VERSION
+    - conda install pip pytest-cov cmake python=$CONDA_PYTHON_VERSION
 # Install Lisa dependencies
     - conda install --yes --file requirements_conda.txt python=$CONDA_PYTHON_VERSION
 #    - pip install -r ci/requirements_ci.txt
@@ -161,17 +163,18 @@ install:
 
 #    - ls ~/data/medical/orig/sample_data/volumetrie
 
-before_script:
-    # GUI
-    - "export DISPLAY=:99.0"
-    - "sh -e /etc/init.d/xvfb start"
-    # give xvfb sume time to start
-    - sleep 3
+#before_script:
+#    # GUI
+#    - "export DISPLAY=:99.0"
+#    - "sh -e /etc/init.d/xvfb start"
+#    # give xvfb sume time to start
+#    - sleep 3
 
 # command to run tests
 #script: nosetests --with-coverage --verbose -d --cover-package=lisa
 # script: nosetests --with-coverage --verbose --nocapture --nologcapture --cover-package=lisa
 # skip organ_segmentation_tests
 #script: nosetests --with-coverage -v -s -x --cover-package=lisa -I organ_segmentation_test.py
-script: nosetests --with-coverage -v -s -x -d --cover-package=lisa
+#script: nosetests --with-coverage -v -s -x -d --cover-package=lisa
+script: python -m pytest --cov=lisa/
 after_success: coveralls

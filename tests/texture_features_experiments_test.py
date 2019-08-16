@@ -11,7 +11,7 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 # sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
 # sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
-from nose.plugins.attrib import attr
+import pytest
 
 import experiments.tiled_liver_statistics as tls
 
@@ -20,7 +20,7 @@ class TextureFeaturesExperimentTest(unittest.TestCase):
 
     # @unittest.skip("comment after implementation")
 
-    @attr('slow')
+    @pytest.mark.slow
     def test_run_experiments(self):
         """
         """

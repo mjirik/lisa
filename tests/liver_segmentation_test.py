@@ -10,46 +10,57 @@
 
 """
 import unittest
-
-from nose.plugins.attrib import attr
-
+
+
+import pytest
+
+
 import io3d
-
+
+
 import numpy as np
-
+
+
 import sys
-
+
+
 import os
-
+
+
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../../imcut/src"))
 
 import os
-
+
+
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 import logging
-
+
+
 logger = logging.getLogger(__name__)
 
 import lisa.dataset
-
+
+
 from lisa import organ_segmentation
-
+
+
 from lisa import organ_model
-
+
+
 
 class LiverSegmentationTest(unittest.TestCase):
 
     # test se pouští ze složky lisa
     # nosetests tests/liver_segmentation_test.py -a actual
 
-    @attr('interactive')
-    @attr('slow')
+    @pytest.mark.interactive
+    @pytest.mark.slow
     def test_automatic(self):
         pass
 
-    @attr('slow')
+    @pytest.mark.slow
     def test_train_liver_model(self):
         fn_mdl = "test_liver_intensity.Model.p"
         organ_model.train_liver_model_from_sliver_data(
@@ -60,7 +71,7 @@ class LiverSegmentationTest(unittest.TestCase):
         )
 
 
-    @attr('slow')
+    @pytest.mark.slow
     def test_train_liver_model_and_liver_segmentation(self):
         """
         combination of test_train_liver_model and test_organ_model_with_pretrained_classifier
@@ -110,8 +121,8 @@ class LiverSegmentationTest(unittest.TestCase):
     # @unittest.skipIf(not interactiveTest, "interactive test")
     # @unittest.skip("interactivity params are obsolete")
 
-    @attr('interactive')
-    @attr('slow')
+    @pytest.mark.interactive
+    @pytest.mark.slow
     def test_organ_segmentation_with_pretrained_classifier(self):
         """
         Interactivity is stored to file
@@ -151,8 +162,8 @@ class LiverSegmentationTest(unittest.TestCase):
         self.assertGreater(volume, 1000000)
         self.assertLess(volume, 2000000)
 
-    @attr('interactive')
-    @attr('slow')
+    @pytest.mark.interactive
+    @pytest.mark.slow
     def test_automatic_liver_seeds(self):
         """
         Interactivity is stored to file

@@ -3,14 +3,14 @@
 
 import unittest
 import numpy as np
-from nose.plugins.attrib import attr
+import pytest
 import lisa.convert
 import os.path as op
 import os
 
 
 class MyTestCase(unittest.TestCase):
-    @attr('interactive')
+    @pytest.mark.interactive
     def test_something(self):
         seg = np.zeros([20,21,22], dtype=np.uint8)
         seg [4:11, 3:15, 11:17] = 1

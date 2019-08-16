@@ -5,26 +5,31 @@
 
 # import funkcí z jiného adresáře
 import sys
-
+
+
 import os.path
-
+
+
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
 sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
 sys.path.append(os.path.join(path_to_script, "../src/"))
 import unittest
-
 
-from nose.plugins.attrib import attr
-
+
+
+import pytest
+
+
 # import numpy as np
 
 
 # import imcut.dcmreaddata as dcmr
 
 from seededitorqt import QTSeedEditor
-
+
+
 
 class QTSeedEditorTest(unittest.TestCase):
     interactive_tests = False
@@ -39,7 +44,8 @@ class QTSeedEditorTest(unittest.TestCase):
 
         from PyQt5.QtWidgets import QApplication
         import numpy as np
-
+
+
         im3d = np.random.rand(15,15,15)
         print("Select pixels for deletion (it will be setted to 0)")
 #, QMainWindow
@@ -83,7 +89,7 @@ class QTSeedEditorTest(unittest.TestCase):
     #    self.assertGreater(volume,600000)
     #    self.assertLess(volume,850000)
 
-    @attr("interactive")
+    @pytest.mark.interactive
     def test_data_editor_tree(self):
         """
         Just for visual check of seed edito
@@ -93,7 +99,8 @@ class QTSeedEditorTest(unittest.TestCase):
 
         from PyQt5.QtWidgets import QApplication
         import numpy as np
-
+
+
         im3d = np.random.rand(15,15,15)
         print("Select pixels for deletion (it will be setted to 0)")
         #, QMainWindow

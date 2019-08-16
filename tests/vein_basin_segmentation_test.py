@@ -4,30 +4,39 @@
 
 # import funkcí z jiného adresáře
 import sys
-
+
+
 from PyQt5.QtWidgets import *
 import os.path
-
+
+
 
 # imcut_path =  os.path.join(path_to_script, "../../imcut/")
 # sys.path.insert(0, imcut_path)
 import unittest
-
+
+
 
 import numpy as np
-
-from nose.plugins.attrib import attr
-
+
+
+import pytest
+
+
 
 
 from lisa import organ_segmentation
-
+
+
 import imcut.dcmreaddata as dcmr
-
+
+
 import lisa.dataset
-
+
+
 import io3d.datasets
-
+
+
 
 
 # nosetests tests/organ_segmentation_test.py:OrganSegmentationTest.test_create_iparams # noqa
@@ -54,12 +63,14 @@ class CoinaudSegmentationTest(unittest.TestCase):
         from PyQt5.QtGui import QApplication, QPushButton
         app = QApplication(sys.argv)
         import seededitorqt
-
+
+
         se = seededitorqt.QTSeedEditor(datap["data3d"], contours=datap["segmentation"])
 
         def split(obj):
             import lisa.virtual_resection as vr
-
+
+
             print(np.max(datap["data3d"]))
             print(np.unique(se.seeds))
             out, sepobj = vr.split_vessel(datap, se.seeds, method="separate labels", input_seeds_label2=2)
@@ -88,7 +99,7 @@ class CoinaudSegmentationTest(unittest.TestCase):
 #         return img3d, metadata, seeds, segmentation
 #
 #     # @unittest.skipIf(not interactiveTest, "interactive test")
-#     @attr("interactive")
+#     @pytest.mark.interactive
 #     def test_viewer_seeds(self):
 #
 #         try:
@@ -116,7 +127,7 @@ class CoinaudSegmentationTest(unittest.TestCase):
 #         app.exit()
 #     # @unittest.skip("demonstrating skipping")
 #
-#     @attr("interactive")
+#     @pytest.mark.interactive
 #     def test_whole_organ_segmentation_interactive(self):
 #         """
 #         Interactive test uses dicom data for segmentation
@@ -220,7 +231,7 @@ class CoinaudSegmentationTest(unittest.TestCase):
 #         self.assertGreater(volume, 1000000)
 #
 #     # @unittest.skipIf(not interactiveTest, "interactive test")
-#     @attr("interactive")
+#     @pytest.mark.interactive
 #     def test_stored_interactivity(self):
 #         pass
 #
@@ -411,7 +422,7 @@ class CoinaudSegmentationTest(unittest.TestCase):
 #
 #     # @unittest.skipIf(True, "interactive test")
 #     # @unittest.skipIf(not interactiveTest, "interactive test")
-#     @attr("interactive")
+#     @pytest.mark.interactive
 #     def test_vincentka_06_slice_thickness_interactive(self):
 #         """
 #         Interactive test. SliceThickness is not voxel depth. If it is, this

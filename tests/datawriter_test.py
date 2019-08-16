@@ -12,7 +12,7 @@ import shutil
 
 
 import numpy as np
-from nose.plugins.attrib import attr
+import pytest
 
 # import pydicom
 # pydicom.debug(False)
@@ -98,7 +98,7 @@ class DicomWriterTest(unittest.TestCase):
         # os.remove(filename)
         shutil.rmtree(filedir)
 
-    @attr("slow")
+    @pytest.mark.slow
     def test_add_overlay_to_copied_dir(self):
         """
         writes 3d label to copied dicom files

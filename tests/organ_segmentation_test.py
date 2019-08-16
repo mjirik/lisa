@@ -4,29 +4,38 @@
 
 # import funkcí z jiného adresáře
 import sys
-
+
+
 import os.path
-
+
+
 
 # imcut_path =  os.path.join(path_to_script, "../../imcut/")
 # sys.path.insert(0, imcut_path)
 import unittest
-
+
+
 
 import numpy as np
-
-from nose.plugins.attrib import attr
-
+
+
+import pytest
+
+
 
 
 from lisa import organ_segmentation
-
+
+
 import imcut.dcmreaddata as dcmr
-
+
+
 import lisa.dataset
-
+
+
 import io3d.datasets
-
+
+
 
 
 # nosetests tests/organ_segmentation_test.py:OrganSegmentationTest.test_create_iparams # noqa
@@ -51,19 +60,22 @@ class OrganSegmentationTest(unittest.TestCase):
         return img3d, metadata, seeds, segmentation
 
     # @unittest.skipIf(not interactiveTest, "interactive test")
-    @attr("interactive")
+    @pytest.mark.interactive
     def test_viewer_seeds(self):
 
         try:
             from imcut.seed_editor_qt import QTSeedEditor
-
+
+
         except:
             print("Deprecated of pyseg_base as submodule")
             from seed_editor_qt import QTSeedEditor
-
+
+
         from PyQt5.QtWidgets import QApplication
         import numpy as np
-
+
+
         img3d = (np.random.rand(30, 30, 30)*10).astype(np.int16)
         seeds = (np.zeros(img3d.shape)).astype(np.int8)
         seeds[3:6, 12:18, 9:16] = 1
@@ -82,7 +94,7 @@ class OrganSegmentationTest(unittest.TestCase):
         app.exit()
     # @unittest.skip("demonstrating skipping")
 
-    @attr("interactive")
+    @pytest.mark.interactive
     def test_whole_organ_segmentation_interactive(self):
         """
         Interactive test uses dicom data for segmentation
@@ -159,7 +171,8 @@ and background")
         if self.verbose:
             print("test_create_iparams")
         import misc
-
+
+
         dcmdir = io3d.datasets.join_path('jatra_5mm')
             # path_to_script, './../sample_data/jatra_5mm')
 
@@ -188,12 +201,12 @@ and background")
         self.assertGreater(volume, 1000000)
 
     # @unittest.skipIf(not interactiveTest, "interactive test")
-    @attr("interactive")
+    @pytest.mark.interactive
     def test_stored_interactivity(self):
         pass
 
 # TODO finish this test
-    @attr("interactive")
+    @pytest.mark.interactive
     def test_synth_liver(self):
         params = {}
         self.synthetic_liver_template(params)
@@ -362,7 +375,7 @@ and background")
 
     # @unittest.skipIf(True, "interactive test")
     # @unittest.skipIf(not interactiveTest, "interactive test")
-    @attr("interactive")
+    @pytest.mark.interactive
     def test_vincentka_06_slice_thickness_interactive(self):
         """
         Interactive test. SliceThickness is not voxel depth. If it is, this
@@ -445,7 +458,8 @@ and background")
         Test dicomread module and graphcut module
         """
         from imcut import pycut
-
+
+
 
         path_to_script = os.path.dirname(os.path.abspath(__file__))
         dcmdir = os.path.join(path_to_script, './../sample_data/matlab/examples/sample_data/DICOM/digest_article/') #noqa

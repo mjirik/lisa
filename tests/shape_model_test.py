@@ -10,14 +10,14 @@
 
 """
 import unittest
-# from nose.plugins.attrib import attr
+# import pytest
 import lisa.shape_model as shm
 import numpy as np
 
 
 class ShapeModelTest(unittest.TestCase):
 
-    # @attr('interactive')
+    # @pytest.mark.interactive
     def test_shape_model(self):
         """
         Run shape model
