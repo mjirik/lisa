@@ -1,6 +1,22 @@
 Install (L)Ubuntu 14.04
 =======================
 
+### Install with conda
+
+    conda install -c mjirik -c conda-forge -c simpleitk -c menpo -c luispedro lisa
+    pip install imcut pygco
+
+### Install with conda for development
+
+Working with `requirements_conda.txt` file.
+
+    conda install -c mjirik -c conda-forge -c simpleitk -c menpo -c luispedro --file requirements_conda.txt
+    pip install imcut pygco
+
+There is imcut and pygco package for conda on windows and linux. 
+It should be possible to install both of theme just with conda.
+
+
 ### Script installer
 
     wget https://raw.githubusercontent.com/mjirik/lisa/master/installer.sh -O installer.sh

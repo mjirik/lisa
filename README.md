@@ -27,10 +27,6 @@ Install stable branche on Linux or Mac OS with:
 
 
 
-or use [Lisa in Ubuntu for VirtualBox (deprecated)](http://147.228.240.61/queetech/install/lisa_ubuntu14.04.vdi)
-
-
-
 Get sample data
 ---------------
 
