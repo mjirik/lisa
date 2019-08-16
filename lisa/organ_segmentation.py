@@ -1286,7 +1286,7 @@ class OrganSegmentation():
     #    def interactivity(self, min_val=800, max_val=1300):
     # @TODO generovat QApplication
     def interactivity(self, min_val=None, max_val=None, layout=None):
-        from imcut.seed_editor_qt import QTSeedEditor
+        from seededitorqt.seed_editor_qt import QTSeedEditor
 
 
         import_gui()
@@ -1329,9 +1329,11 @@ class OrganSegmentation():
         pyed.changeC(window_c)
         pyed.changeW(window_w)
 
-        pyed.exec_()
         from PyQt5 import QtCore
         QtCore.pyqtRemoveInputHook()
+        pdb.set_trace()
+        pyed.exec_()
+        pdb.set_trace()
         # import ipdb; ipdb.set_trace()
         # @TODO někde v igc.interactivity() dochází k přehození nul za jedničy,
         # tady se to řeší hackem

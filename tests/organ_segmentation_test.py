@@ -4,35 +4,15 @@
 
 # import funkcí z jiného adresáře
 import sys
-
-
 import os.path
-
-
-
 # imcut_path =  os.path.join(path_to_script, "../../imcut/")
 # sys.path.insert(0, imcut_path)
 import unittest
-
-
-
 import numpy as np
-
-
 import pytest
-
-
-
-
 from lisa import organ_segmentation
-
-
 import imcut.dcmreaddata as dcmr
-
-
-import lisa.dataset
-
-
+# import lisa.dataset
 import io3d.datasets
 
 
@@ -403,9 +383,6 @@ and background")
         self.assertGreater(volume, 550000)
         self.assertLess(volume, 850000)
 
-    def setUp(self):
-        """ Nastavení společných proměnných pro testy  """
-        self.assertTrue(True)
 
     # @TODO dodělat přidávání uzlů pomocí mm
     # @unittest.skipIf(not interactiveTest, "interactive test")
@@ -424,13 +401,16 @@ and background")
 
         oseg.add_seeds_mm([80], [120], [120], 1, 25)
         oseg.add_seeds_mm([80], [40], [130], 2, 25)
+        # import sed3
+        # ed = sed3.sed3(oseg.data3d, seeds=oseg.seeds)
+        # ed.show()
 
         # pro kontrolu lze odkomentovat
-        # from PyQt4.QtGui import QApplication
-        # app = QApplication(sys.argv)
-        # oseg.interactivity()
+        from PyQt5.QtWidgets import QApplication
+        app = QApplication(sys.argv)
+        oseg.interactivity()
 
-        oseg.ninteractivity()
+        # oseg.ninteractivity()
 
         volume = oseg.get_segmented_volume_size_mm3()
 

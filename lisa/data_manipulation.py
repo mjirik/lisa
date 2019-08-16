@@ -169,6 +169,7 @@ def add_seeds_mm(data_seeds, voxelsize_mm, z_mm, x_mm, y_mm, label, radius, widt
             data_seeds = _add_seeds_mm_in_one_slice(data_seeds, voxelsize_mm, z_mm_j + i, x_mm, y_mm, label, radius)
     return data_seeds
 
+
 def _add_seeds_mm_in_one_slice(data_seeds, voxelsize_mm, z_mm, x_mm, y_mm, label, radius):
     x_mm = np.asarray(x_mm)
     y_mm = np.asarray(y_mm)

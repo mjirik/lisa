@@ -20,11 +20,6 @@ import lisa.organ_segmentation
 from lisa.lisaWindow import OrganSegmentationWindow
 import io3d.datasets
 
-@pytest.fixture()
-def resource():
-    print("setup")
-    yield "resource"
-    print("teardown")
 
 class LisaGUITest(object):
 
