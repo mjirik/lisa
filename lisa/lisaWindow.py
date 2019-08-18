@@ -3,11 +3,11 @@
 """
 Modul is used for GUI of Lisa
 """
-import logging
+from loguru import logger
 
 
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger()
 # from lisa.logWindow import QVBoxLayout
 import sys
 import os

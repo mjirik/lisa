@@ -10,9 +10,9 @@
 
 """
 
-import logging
+from loguru import logger
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger()
 import argparse
 
 import imtools
@@ -156,7 +156,7 @@ def generate_sample_data(shape=[30, 30, 30], dataplus=True):
         return img3d, metadata, seeds, segmentation
 
 def main():
-    logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()

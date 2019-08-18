@@ -4,8 +4,8 @@
 # import sys
 import os
 
-import logging
-logger = logging.getLogger(__name__)
+from loguru import logger
+# logger = logging.getLogger()
 
 import sys
 import os.path

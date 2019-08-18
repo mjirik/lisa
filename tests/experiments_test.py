@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 
 # import funkcí z jiného adresáře
-import logging
+from loguru import logger
 import os.path
 import sys
 import unittest
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger()
 
 import pytest
 import numpy as np

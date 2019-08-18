@@ -10,26 +10,34 @@
 %HERE%
 """
 
-import logging
-
+from loguru import logger
+
+
 from PyQt5.QtWidgets import *
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger()
 import argparse
-
+
+
 import PyQt5 #import QtGui, QtCore
-
+
+
 import PyQt5.QtCore
-
+
+
 import PyQt5.QtGui
-
+
+
 import sys
-
+
+
 import time
-
+
+
 
 from . import lisa_data
-
+
+
 
 def splash_screen(qapp):
     """
@@ -48,7 +56,7 @@ def splash_screen(qapp):
 
 
 def main():
-    logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()

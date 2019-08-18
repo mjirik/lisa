@@ -10,9 +10,9 @@
 
 """
 
-import logging
+from loguru import logger
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger()
 import numpy as np
 import argparse
 import scipy
@@ -161,7 +161,7 @@ def add_negative_train_seeds_blobs(
         dll[seed1z_px_mask, seed2xy[0], seed2xy[1]] = 0
 
 def main():
-    logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()

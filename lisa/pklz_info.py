@@ -13,15 +13,15 @@ sys.path.append(os.path.join(path_to_script,
 #import featurevector
 import argparse
 
-import logging
-logger = logging.getLogger(__name__)
+from loguru import logger
+# logger = logging.getLogger()
 
 import misc
 import sed3
 
 def main():
 
-    logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.WARNING)
     ch = logging.StreamHandler()

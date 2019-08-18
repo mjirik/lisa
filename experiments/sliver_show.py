@@ -17,8 +17,8 @@ sys.path.append(os.path.join(path_to_script,
 import argparse
 import numpy as np
 
-import logging
-logger = logging.getLogger(__name__)
+from loguru import logger
+# logger = logging.getLogger()
 
 
 import datareader
@@ -100,7 +100,7 @@ def show(data3d_a_path, sliver_seg_path, ourSegmentation):
 
 def main():
 
-    logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.WARNING)
     ch = logging.StreamHandler()

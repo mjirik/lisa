@@ -3,10 +3,12 @@
 
 # import funkcí z jiného adresáře
 import sys
-
+
+
 from PyQt5.QtWidgets import *
 import os.path
-
+
+
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
@@ -15,15 +17,18 @@ sys.path.append(os.path.join(path_to_script,
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
 import unittest
-
 
-import logging
-
-logger = logging.getLogger(__name__)
+
+
+from loguru import logger
+
+
+# logger = logging.getLogger()
 
 
 from PyQt5.QtCore import Qt
-
+
+
 from PyQt5.QtGui import (QApplication, QMainWindow, QWidget,
                         
         QGridLayout, QLabel, QPushButton, QFrame,
@@ -35,49 +40,64 @@ from PyQt5.QtGui import (QApplication, QMainWindow, QWidget,
 #  apdb.set_trace();
 #import scipy.io
 import numpy as np
-
+
+
 import scipy
-
+
+
 #from scipy import sparse
 import traceback
-
+
+
 
 # ----------------- my scripts --------
 import sed3
-
+
+
 #
 try:
     import dcmreaddata as dcmr
-
+
+
 except:
     from imcut import dcmreaddata as dcmr
-
+
+
 try:
     from imcut import pycut
-
+
+
 except:
     logger.warning("Deprecated of pyseg_base as submodule")
     import pycut
-
+
+
 import argparse
-
+
+
 #import sed3
 
 import segmentation
-
+
+
 import qmisc
-
+
+
 import misc
-
+
+
 import organ_segmentation
-
+
+
 try:
     from imcut import seed_editor_qt
-
+
+
 except:
     logger.warning("Deprecated of pyseg_base as submodule")
     import seed_editor_qt
-
+
+
 
 
 
@@ -251,8 +271,8 @@ class MainWindow(QMainWindow):
 
 def main():
 
-    #logger = logging.getLogger(__name__)
-    logger = logging.getLogger()
+    ## logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.WARNING)
     ch = logging.StreamHandler()

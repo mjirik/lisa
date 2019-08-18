@@ -10,8 +10,8 @@ sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
 # from ..extern.sed3 import sed3
 # import featurevector
 
-import logging
-logger = logging.getLogger(__name__)
+from loguru import logger
+# logger = logging.getLogger()
 
 import numpy as np
 import scipy.ndimage
@@ -771,8 +771,8 @@ def label_volumetric_vessel_tree(oseg, vessel_label=None, write_to_oseg=True, ne
 
 
 if __name__ == "__main__":
-    # logger = logging.getLogger(__name__)
-    logger = logging.getLogger()
+    # # logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.WARNING)
     ch = logging.StreamHandler()

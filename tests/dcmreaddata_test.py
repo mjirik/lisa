@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 
-import logging
+from loguru import logger
 
 
 from PyQt5.QtWidgets import *
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger()
 
 # import funkcí z jiného adresáře
 import sys

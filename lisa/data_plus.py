@@ -11,8 +11,8 @@ Module for work with dataplus format
 
 """
 
-import logging
-logger = logging.getLogger(__name__)
+from loguru import logger
+# logger = logging.getLogger()
 import argparse
 import numpy as np
 
@@ -37,7 +37,7 @@ def get_slab_value(slab, label, value=None):
 # class Slab(dict):
 
 def main():
-    logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()

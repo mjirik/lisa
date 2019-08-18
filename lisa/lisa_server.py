@@ -10,8 +10,8 @@
 
 """
 
-import logging
-logger = logging.getLogger(__name__)
+from loguru import logger
+# logger = logging.getLogger()
 import argparse
 
 import web
@@ -58,7 +58,7 @@ class hello:
 
 
 def main():
-    logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()

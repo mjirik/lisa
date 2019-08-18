@@ -1,9 +1,9 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
 
-import logging
+from loguru import logger
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger()
 import unittest
 import os.path as op
 import pytest

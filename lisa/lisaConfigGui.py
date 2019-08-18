@@ -10,8 +10,9 @@
 
 """
 
-import logging
-
+from loguru import logger
+
+
 from PyQt5.QtWidgets import *
 try:
     QString = unicode
@@ -19,31 +20,38 @@ except NameError:
     # Python 3
     QString = str
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger()
 import argparse
-
+
+
 import os
-
+
+
 
 import PyQt5
-
+
+
 import PyQt5.QtCore
-
+
+
 import PyQt5.QtGui
-
+
+
 from PyQt5.QtGui import (QWidget, QGridLayout, QSpinBox, QLineEdit, QCheckBox,
                         
         QComboBox, QTextEdit, QDialog, QMainWindow,
                          QDoubleSpinBox, QLabel, 
         QPushButton)
 import sys
-
+
+
 if sys.version_info.major == 2:
 else:
     Qstring = str
 
 from .pyqtconfig import ConfigManager
-
+
+
 
 class LisaConfigWindow(QDialog):
 # class LisaConfigWindow(QMainWindow):
@@ -158,7 +166,8 @@ class LisaConfigWindow(QDialog):
         dictionary = self.config.as_dict()
         for key, value in dictionary.items():
             from PyQt5.QtCore import pyqtRemoveInputHook
-
+
+
             pyqtRemoveInputHook()
             # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
             if type(value) == QString:
@@ -182,7 +191,8 @@ class LisaConfigWindow(QDialog):
 
 def configGui(cfg):
     import yaml
-
+
+
     # convert values to json
     isconverted = {}
     for key, value in cfg.items():
@@ -210,7 +220,7 @@ def configGui(cfg):
     return newcfg
 
 def main():
-    logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()

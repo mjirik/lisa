@@ -29,9 +29,9 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 # sys.path.append(os.path.join(path_to_script, "../extern/"))
 # import featurevector
 
-import logging
+from loguru import logger
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger()
 
 
 # import apdb
@@ -619,8 +619,8 @@ def make_sum(evaluation):
 
 
 def main():
-    # logger = logging.getLogger(__name__)
-    logger = logging.getLogger()
+    # # logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.WARNING)
     ch = logging.StreamHandler()

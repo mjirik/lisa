@@ -11,8 +11,8 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 #import featurevector
 import unittest
 
-import logging
-logger = logging.getLogger(__name__)
+from loguru import logger
+# logger = logging.getLogger()
 
 # import apdb
 # apdb.set_trace();
@@ -40,8 +40,8 @@ class VesselSegmentation:
 
 if __name__ == "__main__":
 
-    #logger = logging.getLogger(__name__)
-    logger = logging.getLogger()
+    ## logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.WARNING)
     ch = logging.StreamHandler()

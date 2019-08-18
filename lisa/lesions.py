@@ -14,8 +14,8 @@ sys.path.append(os.path.join(path_to_script, "../extern/sed3/"))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src/"))
 # import featurevector
 
-import logging
-logger = logging.getLogger(__name__)
+from loguru import logger
+# logger = logging.getLogger()
 import argparse
 
 import scipy
@@ -489,7 +489,7 @@ class Lesions:
 # ---------------------------------------------------------------------------
 def main():
 
-    logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.WARNING)
     ch = logging.StreamHandler()

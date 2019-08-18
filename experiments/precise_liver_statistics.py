@@ -26,8 +26,8 @@ sys.path.append(os.path.join(path_to_script,
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
 
-import logging
-logger = logging.getLogger(__name__)
+from loguru import logger
+# logger = logging.getLogger()
 
 
 #import apdb
@@ -216,8 +216,8 @@ def experiment(path_to_yaml, featrs_plus_classifs,
 
 def main():
 
-    #logger = logging.getLogger(__name__)
-    logger = logging.getLogger()
+    ## logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.WARNING)
     ch = logging.StreamHandler()

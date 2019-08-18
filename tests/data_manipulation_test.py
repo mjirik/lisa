@@ -9,8 +9,8 @@
 """
 
 """
-import logging
-logger = logging.getLogger(__name__)
+from loguru import logger
+# logger = logging.getLogger()
 import pytest
 import numpy as np
 import scipy

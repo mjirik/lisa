@@ -16,11 +16,10 @@ Email: miroslav.jirik@gmail.com
 
 """
 
-import logging
-
-
-logger = logging.getLogger(__name__)
-import logging.handlers
+# from loguru import logger
+# # logger = logging.getLogger()
+# from loguru import logger.handlers
+from loguru import logger
 
 
 
@@ -1001,11 +1000,7 @@ class OrganSegmentation():
         self.create_lisa_data_dir_tree()
 
         import sftpsync
-
-
         import paramiko
-
-
 
         paramiko_log = os.path.join(self.output_datapath, 'paramiko.log')
         paramiko.util.log_to_file(paramiko_log)
@@ -1299,6 +1294,8 @@ class OrganSegmentation():
         # pyqtRemoveInputHook()
         # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
+        logger.opt(lazy=True).debug("seeds min: {min}, max: {max}, ",
+                                    max=lambda: np.max(igc.seeds), min=lambda: np.min(igc.seeds))
         if layout is None:
             pyed = QTSeedEditor(igc.img,
                                 seeds=igc.seeds,
@@ -1331,9 +1328,9 @@ class OrganSegmentation():
 
         from PyQt5 import QtCore
         QtCore.pyqtRemoveInputHook()
-        pdb.set_trace()
+        import ipdb; ipdb.set_trace()
         pyed.exec_()
-        pdb.set_trace()
+        import ipdb; ipdb.set_trace()
         # import ipdb; ipdb.set_trace()
         # @TODO někde v igc.interactivity() dochází k přehození nul za jedničy,
         # tady se to řeší hackem
@@ -2206,37 +2203,54 @@ class OrganSegmentation():
             new_label_str_format=new_label_str_format
         )
 
+# def logger_init():  # pragma: no cover
+#     # from loguru import logger
+#     # logger = logging.getLogger()
+#     logger.setLevel(logging.DEBUG)
+#
+#     ch = logging.StreamHandler()
+#     ch.setLevel(logging.ERROR)
+#     formatter = logging.Formatter(
+#         '%(name)s - %(levelname)s - %(message)s'
+#     )
+#     ch.setFormatter(formatter)
+#     logger.addHandler(ch)
+#
+#     # fformatter = logging.Formatter(
+#     # '%(asctime)s - %(name)s - %(funcName)s - %(lineno)d - %(levelname)s - %(message)s'
+#     # )
+#     fformatter = logging.Formatter('%(asctime)s %(levelname)-8s %(name)-18s %(lineno)-5d %(funcName)-12s %(message)s')
+#     logfile = "lisa.log"
+#     if op.exists(op.expanduser("~/lisa_data/")):
+#         logfile = op.expanduser("~/lisa_data/lisa.log")
+#     # problems on windows
+#     # fh = logging.handlers.RotatingFileHandler(logfile, maxBytes=100000, backupCount=9)
+#     fh = logging.FileHandler(logfile)
+#     fh.setFormatter(fformatter)
+#     fh.setLevel(logging.DEBUG)
+#     logger.addHandler(fh)
+#
+#     logger.debug('logger started')
+#
+#     return ch, fh
 
-def logger_init():  # pragma: no cover
-    # import logging
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
 
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.ERROR)
-    formatter = logging.Formatter(
-        '%(name)s - %(levelname)s - %(message)s'
-    )
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
+def logger_init():
+    logger.add(sys.stderr,
+               format="{time} {level} {message}",
+               # filter="my_module",
+               level="INFO"
+               )
 
-    # fformatter = logging.Formatter(
-    # '%(asctime)s - %(name)s - %(funcName)s - %(lineno)d - %(levelname)s - %(message)s'
-    # )
-    fformatter = logging.Formatter('%(asctime)s %(levelname)-8s %(name)-18s %(lineno)-5d %(funcName)-12s %(message)s')
-    logfile = "lisa.log"
     if op.exists(op.expanduser("~/lisa_data/")):
         logfile = op.expanduser("~/lisa_data/lisa.log")
-    # problems on windows
-    # fh = logging.handlers.RotatingFileHandler(logfile, maxBytes=100000, backupCount=9)
-    fh = logging.FileHandler(logfile)
-    fh.setFormatter(fformatter)
-    fh.setLevel(logging.DEBUG)
-    logger.addHandler(fh)
+    logger.add(logfile,
+               format="{time} {level} {message}",
+               level="INFO",
+               # rotation="10MB",
+               rotation="1 week"
+               )  # Once the file is too old, it's rotated
 
-    logger.debug('logger started')
-
-    return ch, fh
 
 
 def lisa_config_init():
@@ -2444,7 +2458,8 @@ def main(app=None, splash=None):  # pragma: no cover
 
     #    import ipdb; ipdb.set_trace() # BREAKPOINT
     try:
-        ch, fh = logger_init()
+        # ch, fh = \
+        logger_init()
         cfg = lisa_config_init()
         args = parser_init(cfg)
 
@@ -2466,7 +2481,10 @@ def main(app=None, splash=None):  # pragma: no cover
             OrganSegmentation.__init__)
 
         if args["debug"]:
-            ch.setLevel(logging.DEBUG)
+            import loguru
+            logger.remove(0)
+            logger.add(sys.stderr, level=logger.level("DEBUG"))
+            # ch.setLevel(logging.DEBUG)
             args["debug_mode"] = True
 
         if args["iparams"] is not None:
@@ -2496,14 +2514,8 @@ def main(app=None, splash=None):  # pragma: no cover
         else:
             # mport_gui()
             from .lisaWindow import OrganSegmentationWindow
-
-
             import PyQt5
-
-
             import PyQt5.QtGui
-
-
             from PyQt5.QtWidgets import QApplication
             if app is None:
                 app = QApplication(sys.argv)

@@ -10,12 +10,14 @@
 %HERE%
 """
 
-import logging
-
+from loguru import logger
 
-logger = logging.getLogger(__name__)
+
+
+# logger = logging.getLogger()
 import argparse
-
+
+
 
 from PyQt5 import QtGui, QtWidgets
 # from mainwindow import Ui_MainWindow
@@ -60,7 +62,7 @@ class Window(QtWidgets.QMainWindow):
 
 
 def main():
-    logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()
@@ -94,7 +96,8 @@ def main():
         ch.setLevel(logging.DEBUG)
 
     import sys
-
+
+
     app = QtWidgets.QApplication(sys.argv)
     login = Login()
 

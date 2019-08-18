@@ -35,10 +35,10 @@ import os
 
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
-import logging
+from loguru import logger
 
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger()
 
 import lisa.dataset
 

@@ -10,8 +10,9 @@
 %HERE%
 """
 
-import logging
-
+from loguru import logger
+
+
 from PyQt5.QtWidgets import *
 
 try:
@@ -20,18 +21,22 @@ except NameError:
     # Python 3
     QString = str
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger()
 import argparse
-
+
+
 
 import sys
-
+
+
 from PyQt5.QtCore import *
-
+
+
 from PyQt5.QtGui import *
 
 import sys
-
+
+
 if sys.version_info.major == 2:
 else:
     Qstring = str
@@ -116,7 +121,7 @@ class LogViewerForm(QDialog):
         # QTCore
 
 def main():
-    logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()

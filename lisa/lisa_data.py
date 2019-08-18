@@ -10,9 +10,9 @@
 %HERE%
 """
 
-import logging
+from loguru import logger
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger()
 import argparse
 import os
 import os.path as op
@@ -251,7 +251,7 @@ StartupNotify=false\n"
 
 
 def main():
-    logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()

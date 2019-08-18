@@ -11,8 +11,8 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 #import featurevector
 import unittest
 
-import logging
-logger = logging.getLogger(__name__)
+from loguru import logger
+# logger = logging.getLogger()
 
 # import apdb
 # apdb.set_trace();

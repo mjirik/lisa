@@ -6,9 +6,11 @@ Show dicom data with overlay
 
 # import funkcí z jiného adresáře
 import sys
-
+
+
 import os.path
-
+
+
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(path_to_script, "../extern/pyseg_base/src"))
@@ -17,16 +19,18 @@ sys.path.append(os.path.join(path_to_script,
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
 
-import logging
-
-logger = logging.getLogger(__name__)
+from loguru import logger
+
+
+# logger = logging.getLogger()
 
 
 #import apdb
 #  apdb.set_trace();
 #import scipy.io
 import numpy as np
-
+
+
 #import scipy
 #from scipy import sparse
 #import traceback
@@ -35,17 +39,22 @@ import numpy as np
 
 # ----------------- my scripts --------
 import argparse
-
+
+
 import sed3
-
+
+
 
 #import segmentation
 import qmisc
-
+
+
 import misc
-
+
+
 from io3d import datareader
-
+
+
 #import config
 #import numbers
 
@@ -54,7 +63,8 @@ def saveOverlayToDicomCopy(input_dcmfilelist, output_dicom_dir, overlays,
                            crinfo, orig_shape):
     """ Save overlay to dicom. """
     import datawriter as dwriter
-
+
+
 
     if not os.path.exists(output_dicom_dir):
         os.mkdir(output_dicom_dir)
@@ -94,8 +104,8 @@ def save_config(cfg, filename):
 
 def main():
 
-    #logger = logging.getLogger(__name__)
-    logger = logging.getLogger()
+    ## logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.WARNING)
     ch = logging.StreamHandler()

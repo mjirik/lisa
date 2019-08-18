@@ -20,8 +20,8 @@ path_to_script = os.path.dirname(os.path.abspath(__file__))
 #sys.path.append(os.path.join(path_to_script, "../extern/"))
 #import featurevector
 
-import logging
-logger = logging.getLogger(__name__)
+from loguru import logger
+# logger = logging.getLogger()
 
 import inspect
 

@@ -6,8 +6,8 @@ import subprocess
 import sys
 # import traceback
 
-import logging
-logger = logging.getLogger(__name__)
+from loguru import logger
+# # logger = logging.getLogger()
 
 import argparse
 
@@ -439,7 +439,7 @@ def __make_icon_linux():
 
 
 def main():
-    logger = logging.getLogger()
+    # # logger = logging.getLogger()
 
     logger.setLevel(logging.WARNING)
     ch = logging.StreamHandler()

@@ -5,8 +5,8 @@ import subprocess
 import traceback
 
 
-import logging
-logger = logging.getLogger(__name__)
+from loguru import logger
+# logger = logging.getLogger()
 import datetime
 import os
 import os.path as op
@@ -221,7 +221,7 @@ def install_and_import(package, pip_params=[]):
 
 
 def main():
-    logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.WARNING)
     ch = logging.StreamHandler()

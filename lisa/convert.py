@@ -4,8 +4,8 @@
 Module is used for visualization of segmentation stored in pkl file.
 """
 
-import logging
-logger = logging.getLogger(__name__)
+from loguru import logger
+# logger = logging.getLogger()
 
 # from PyQt4.QtCore import Qt
 import argparse
@@ -56,7 +56,7 @@ def seg2stl(
 
 
 if __name__ == "__main__":
-    logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.WARNING)
     ch = logging.StreamHandler()

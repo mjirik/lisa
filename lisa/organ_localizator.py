@@ -11,9 +11,9 @@ Module is used to train liver localizator based on body_navigation module.
 Output file is placed into ~/lisa_data/liver.ol.p
 """
 
-import logging
+from loguru import logger
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger()
 import numpy as np
 import argparse
 import glob
@@ -139,7 +139,7 @@ def train_liver_localizator_from_sliver_data(
     sf.save(op.expanduser(output_file))
 
 def main():
-    logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()

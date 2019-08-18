@@ -18,8 +18,8 @@ sys.path.append(os.path.join(path_to_script, "../extern/pycat/extern/sed3/"))
 sys.path.append(os.path.join(path_to_script, "../extern/dicom2fem/src"))
 #import featurevector
 
-import logging
-logger = logging.getLogger(__name__)
+from loguru import logger
+# logger = logging.getLogger()
 
 import numpy as np
 import scipy.ndimage
@@ -66,7 +66,7 @@ class SimpleSegmentation:
         
 def main():
 
-    logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.WARNING)
     ch = logging.StreamHandler()

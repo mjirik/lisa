@@ -10,11 +10,11 @@
 
 """
 
-import logging
+from loguru import logger
 
 
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger()
 import argparse
 
 
@@ -171,7 +171,7 @@ class DictEdit(QtWidgets.QWidget):
 
 
 def main():
-    logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()

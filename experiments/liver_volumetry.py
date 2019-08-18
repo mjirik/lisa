@@ -14,8 +14,8 @@ sys.path.append(os.path.join(path_to_script,
 #import featurevector
 import unittest
 
-import logging
-logger = logging.getLogger(__name__)
+from loguru import logger
+# logger = logging.getLogger()
 
 
 #import apdb
@@ -44,8 +44,8 @@ from .. import experiments
 
 def main():
 
-    #logger = logging.getLogger(__name__)
-    logger = logging.getLogger()
+    ## logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.WARNING)
     ch = logging.StreamHandler()

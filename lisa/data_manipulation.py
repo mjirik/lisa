@@ -10,8 +10,8 @@
 Crop, resize, reshape
 """
 
-import logging
-logger = logging.getLogger(__name__)
+from loguru import logger
+# logger = logging.getLogger()
 import argparse
 import scipy
 import numpy as np
@@ -207,7 +207,7 @@ def _add_seeds_mm_in_one_slice(data_seeds, voxelsize_mm, z_mm, x_mm, y_mm, label
 
 
 def main():
-    logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()

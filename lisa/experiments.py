@@ -5,10 +5,10 @@ Module for experiment support
 """
 
 import argparse
-import logging
+from loguru import logger
 import os
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger()
 
 import matplotlib.pyplot as plt
 import subprocess
@@ -982,7 +982,7 @@ def setArea(data, sp, area, value):
     return data
 
 if __name__ == "__main__":
-    logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.WARNING)
     ch = logging.StreamHandler()

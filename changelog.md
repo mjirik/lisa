@@ -6,6 +6,7 @@
 
 * [Changed] Upgrade to Qt5
 * [Changed] Dropped python 2 support
+* [Changed] Using `loguru` package instead of `logging`
 
 ## 1.18.*
 

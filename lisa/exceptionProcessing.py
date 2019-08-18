@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 """ Processing of exceptions with lisa. """
 
-import logging
-logger = logging.getLogger(__name__)
+from loguru import logger
+# logger = logging.getLogger()
 
 
 import traceback

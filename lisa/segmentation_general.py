@@ -1,6 +1,4 @@
-import logging
-logger = logging.getLogger(__name__)
-import logging.handlers
+from loguru import logger
 
 import sys
 import os

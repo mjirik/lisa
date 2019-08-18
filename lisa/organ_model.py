@@ -11,9 +11,9 @@ This module is used to train liver model with intensity.
 First use organ_localizator module to train intensity independent model.
 """
 
-import logging
+from loguru import logger
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger()
 
 import os
 import sys
@@ -609,7 +609,7 @@ def model_score_from_sliver_data(
     return ev
 
 def main():
-    logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()

@@ -11,8 +11,8 @@
 """
 import numpy as np
 
-import logging
-logger = logging.getLogger(__name__)
+from loguru import logger
+# logger = logging.getLogger()
 import argparse
 
 from scipy import ndimage
@@ -224,7 +224,7 @@ class ShapeModel():
         return vysledek
 
 def main():
-    logger = logging.getLogger()
+    # logger = logging.getLogger()
 
     logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()
