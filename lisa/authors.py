@@ -4,4 +4,5 @@ authors=[
     "Pavel Volkovinsky",
     "Martin Cerveny",
     "Tomas Kolar",
+    "Jiri Vyskocil",
 ]

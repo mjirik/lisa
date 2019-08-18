@@ -129,19 +129,20 @@ class QmiscTest(unittest.TestCase):
         filename = "mujsoubor"
         # import ipdb; ipdb.set_trace() # BREAKPOINT
         new_filename = misc.suggest_filename(filename, exists=True)
-        self.assertTrue(new_filename == "mujsoubor2")
+        assert new_filename == "mujsoubor_2"
+        # self.assertTrue(new_filename == "mujsoubor2")
 
-        filename = "mujsoubor112"
+        filename = "mujsoubor_112"
         new_filename = misc.suggest_filename(filename, exists=True)
-        self.assertTrue(new_filename == "mujsoubor113")
+        assert new_filename == "mujsoubor_113"
 
-        filename = "mujsoubor-2.txt"
+        filename = "mujsoubor_2.txt"
         new_filename = misc.suggest_filename(filename, exists=True)
-        self.assertTrue(new_filename == "mujsoubor-3.txt")
+        assert new_filename == "mujsoubor_3.txt"
 
-        filename = "mujsoubor-a24.txt"
+        filename = "mujsoubor_a24.txt"
         new_filename = misc.suggest_filename(filename, exists=False)
-        self.assertTrue(new_filename == "mujsoubor-a24.txt")
+        assert new_filename == "mujsoubor_a24.txt"
 
     # def test_getVersionString(self):
     #     """
