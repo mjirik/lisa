@@ -43,9 +43,10 @@ class DicomWebViewJsonTest(unittest.TestCase):
         oseg.make_run()
         self.assertTrue(op.exists(output_file))
 
+    @pytest.mark.skip(reason="prepared for future implementation")
     def test_json_jatra_5mm_import_fast(self):
         """
-        Workaround to skkip slowest part of test which is export.
+        Workaround to skip slowest part of test which is export.
         :return:
         """
 
