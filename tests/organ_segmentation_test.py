@@ -399,18 +399,21 @@ and background")
                                                     working_voxelsize_mm=4,
                                                     manualroi=False)
 
-        oseg.add_seeds_mm([80], [120], [120], 1, 25)
-        oseg.add_seeds_mm([80], [40], [130], 2, 25)
+        oseg.add_seeds_mm([80], [120], [120], 1, 25, width=2)
+        oseg.add_seeds_mm([80], [40], [130], 2, 25, width=2)
+        # just for testing resize
+        # oseg.seeds[:,:32,:32] = 2
+        # import ipdb; ipdb.set_trace()
         # import sed3
         # ed = sed3.sed3(oseg.data3d, seeds=oseg.seeds)
         # ed.show()
 
         # pro kontrolu lze odkomentovat
-        from PyQt5.QtWidgets import QApplication
-        app = QApplication(sys.argv)
-        oseg.interactivity()
+        # from PyQt5.QtWidgets import QApplication
+        # app = QApplication(sys.argv)
+        # oseg.interactivity()
 
-        # oseg.ninteractivity()
+        oseg.ninteractivity()
 
         volume = oseg.get_segmented_volume_size_mm3()
 

@@ -20,17 +20,9 @@ Email: miroslav.jirik@gmail.com
 # # logger = logging.getLogger()
 # from loguru import logger.handlers
 from loguru import logger
-
-
-
 import sys
-
-
 import os
-
-
 import os.path as op
-
 
 path_to_script = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(path_to_script, "../../imcut/"))
@@ -38,39 +30,16 @@ sys.path.insert(0, os.path.join(path_to_script, "../../imcut/"))
 
 # from scipy.io import loadmat, savemat
 import scipy
-
-
 import scipy.ndimage
-
-
 import numpy as np
-
-
 import scipy.sparse
-
-
 import datetime
-
-
 import argparse
-
-
 import copy
-
-
 import json
-
-
 from . import json_decoder as jd
-
-
-
 from . import exceptionProcessing
-
-
-from . import config_default
-
-
+# from . import config_default
 
 # tady uz je logger
 # import dcmreaddata as dcmreader
@@ -90,63 +59,25 @@ from . import config_default
 # from seg2fem import gen_mesh_from_voxels, gen_mesh_from_voxels_mc
 # from viewer import QVTKViewer
 from io3d import datareader
-
-
 from io3d import datawriter
-
-
 from io3d import misc
-
-
 import io3d.cachefile as cachef
-
-
 import io3d.misc
-
-
 from . import data_plus
-
-
 from . import support_structure_segmentation as sss
-
-
 from . import config_default
-
-
 from . import organ_seeds
-
-
 from . import lisa_data
-
-
 from . import data_manipulation
-
-
 from . import qmisc
-
-
 from . import config
-
-
 from . import volumetry_evaluation
-
-
 from . import segmentation_general
-
-
 # import imtools.image_manipulation
 import imma.image_manipulation as ima
-
-
 import imma.labeled
-
-
 import imma.segmentation_labels as imsl
-
-
 from . import virtual_resection
-
-
 
 # import audiosupport
 # import skimage
@@ -162,11 +93,7 @@ scaling_modes = {
 
 # version comparison
 from pkg_resources import parse_version
-
-
 import sklearn
-
-
 
 if parse_version(sklearn.__version__) > parse_version('0.10'):
     # new versions
@@ -976,15 +903,34 @@ class OrganSegmentation():
         #        }
         # if self.iparams['seeds'] is not None:
         if self.seeds is not None:
+            logger.debug("adding seeds to interactive graph_cut")
+            logger.opt(lazy=True).debug("seeds unique {un}", un=lambda:np.unique(self.seeds, return_counts=True))
+            # logger.debug(f"seeds dtype: {self.seeds.dtype}")
+            logger.debug(f"resize: input size: {self.seeds.shape}, output size: {data3d_res.shape}")
+
             seeds_res = misc.resize_to_shape(
                 # seeds_res = scipy.ndimage.zoom(
                 self.seeds,
                 data3d_res.shape,
-                mode='nearest',
+                # mode='nearest',
+                mode='constant',
                 order=0
             )
+            # import skimage.transform
+            # segm_orig_scale = skimage.transform.resize(
+            #     self.seeds, data3d_res.shape, order=0, preserve_range=True, mode="constant"
+            # )
+
+            # import ipdb;ipdb.set_trace()
+            # logger.debug(f"compare unique {np.unique(self.seeds) == np.unique(data3d_res)}")
+
+            logger.opt(lazy=True).debug("resized seeds unique {un}", un=lambda:np.unique(seeds_res))
+            # logger.debug(f"seeds res dtype: {seeds_res.dtype}")
             seeds_res = seeds_res.astype(np.int8)
+            logger.opt(lazy=True).debug("resized seeds unique {un}", un=lambda:np.unique(seeds_res))
+            logger.debug(f"seeds res dtype: {seeds_res.dtype}")
             igc.set_seeds(seeds_res)
+            logger.opt(lazy=True).debug("igc seeds unique {un}", un=lambda:np.unique(igc.seeds))
 
         # tohle je tu pro to, aby bylo možné přidávat nově objevené segmentace k těm starým
         # jinak jsou stará data přepsána
@@ -1326,11 +1272,11 @@ class OrganSegmentation():
         pyed.changeC(window_c)
         pyed.changeW(window_w)
 
-        from PyQt5 import QtCore
-        QtCore.pyqtRemoveInputHook()
-        import ipdb; ipdb.set_trace()
+        # from PyQt5 import QtCore
+        # QtCore.pyqtRemoveInputHook()
+        # import ipdb; ipdb.set_trace()
         pyed.exec_()
-        import ipdb; ipdb.set_trace()
+        # import ipdb; ipdb.set_trace()
         # import ipdb; ipdb.set_trace()
         # @TODO někde v igc.interactivity() dochází k přehození nul za jedničy,
         # tady se to řeší hackem
@@ -2129,12 +2075,9 @@ class OrganSegmentation():
             print("for example >> input_label = 2 ")
             input_label = "porta"
             import ipdb
-
-
             ipdb.set_trace()
 
         from . import virtual_resection
-
 
         datap = self.export()
         seeds = virtual_resection.cut_editor_old(datap, label=input_label)

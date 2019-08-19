@@ -19,6 +19,7 @@ import scipy.ndimage
 
 from imma.image_manipulation import crinfo_from_specific_data, crop, uncrop, manualcrop, fix_crinfo, combinecrinfo
 
+from imma.image import resize_to_shape, resize_to_mm
 
 class SparseMatrix():
     def __init__(self, ndarray):
@@ -240,8 +241,6 @@ def max_area_index(labels, num):
             mxi = l
 
     return mxi
-
-from io3d.misc import resize_to_mm, resize_to_shape
 
 
 # def resize_to_shape(*pars, **params):
