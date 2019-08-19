@@ -364,21 +364,21 @@ class ModelTrainer():
         self.cl.fit(self.data, self.target)
 
     def predict(self, data3d, voxelsize_mm):
-        data3dr = io3d.misc.resize_to_mm(data3d, voxelsize_mm, self.working_voxelsize_mm)
+        data3dr = imma.image.resize_to_mm(data3d, voxelsize_mm, self.working_voxelsize_mm)
         fv = self._fv(data3dr)
 #         print "shape predict ", fv.shape,
         pred = self.cl.predict(fv)
 #         print "predict ", pred.shape,
-        return io3d.misc.resize_to_shape(pred.reshape(data3dr.shape), data3d.shape)
+        return imma.image.resize_to_shape(pred.reshape(data3dr.shape), data3d.shape)
 
     def scores(self, data3d, voxelsize_mm):
-        data3dr = io3d.misc.resize_to_mm(data3d, voxelsize_mm, self.working_voxelsize_mm)
+        data3dr = imma.image.resize_to_mm(data3d, voxelsize_mm, self.working_voxelsize_mm)
         fv = self._fv(data3dr)
 #         print "shape predict ", fv.shape,
         scoreslin = self.cl.scores(fv)
         scores = {}
         for key in scoreslin:
-            scores[key] = io3d.misc.resize_to_shape(scoreslin[key].reshape(data3dr.shape), data3d.shape)
+            scores[key] = imma.image.resize_to_shape(scoreslin[key].reshape(data3dr.shape), data3d.shape)
 
         return scores
 
@@ -387,8 +387,8 @@ class ModelTrainer():
         pass
 
     def add_train_data(self, data3d, segmentation, voxelsize_mm):
-        data3dr = io3d.misc.resize_to_mm(data3d, voxelsize_mm, self.working_voxelsize_mm)
-        segmentationr = io3d.misc.resize_to_shape(segmentation, data3dr.shape)
+        data3dr = imma.image.resize_to_mm(data3d, voxelsize_mm, self.working_voxelsize_mm)
+        segmentationr = imma.image.resize_to_shape(segmentation, data3dr.shape)
 
         logger.debug(str(np.unique(segmentationr)))
         logger.debug(str(data3dr.shape) + str(segmentationr.shape))
@@ -561,7 +561,7 @@ def model_score_from_sliver_data(
 
 
         vs_mmr = [1.5, 1.5, 1.5]
-        data3dr = io3d.misc.resize_to_mm(data3d_orig, vs_mm1, vs_mmr)
+        data3dr = imma.image.resize_to_mm(data3d_orig, vs_mm1, vs_mmr)
         lik1 = mdl.likelihood_from_image(data3dr, vs_mmr, 0)
         lik2 = mdl.likelihood_from_image(data3dr, vs_mmr, 1)
 
@@ -576,12 +576,12 @@ def model_score_from_sliver_data(
         #     seg = (lik1).astype(np.uint8)
 
 
-            seg_orig = io3d.misc.resize_to_shape(seg, data3d_orig.shape)
-        #       seg_orig = io3d.misc.resize_to_shape(seg, data3d_orig.shape)
+            seg_orig = imma.image.resize_to_shape(seg, data3d_orig.shape)
+        #       seg_orig = imma.image.resize_to_shape(seg, data3d_orig.shape)
             if show:
                 plt.figure(figsize = (15,15))
                 sed3.show_slices(data3d_orig , seg_orig, show=False, slice_step=20)
-                # likres = io3d.misc.resize_to_shape(lik1, data3d_orig.shape)
+                # likres = imma.image.resize_to_shape(lik1, data3d_orig.shape)
                 # sed3.show_slices(likres , seg_orig, show=False, slice_step=20)
 
             import re

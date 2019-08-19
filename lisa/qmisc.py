@@ -245,4 +245,4 @@ def max_area_index(labels, num):
 
 # def resize_to_shape(*pars, **params):
 #     import io3d.misc
-#     return io3d.misc.resize_to_shape(*pars, **params)
+#     return imma.image.resize_to_shape(*pars, **params)

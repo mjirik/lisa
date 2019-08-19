@@ -1200,11 +1200,11 @@ class OrganSegmentation():
                 sp['seeds'] = self.seeds
 
             logger.debug('snakes')
-            d3d = io3d.misc.resize_to_mm(
+            d3d = imma.image.resize_to_mm(
                 self.data3d,
                 self.voxelsize_mm,
                 self.seg_postproc_pars['postproc_working_voxelsize'])
-            segw = io3d.misc.resize_to_mm(
+            segw = imma.image.resize_to_mm(
                 self.segmentation,
                 self.voxelsize_mm,
                 self.seg_postproc_pars['postproc_working_voxelsize'])
@@ -1218,7 +1218,7 @@ class OrganSegmentation():
                     segw == self.slab['liver']
             ).astype(np.uint8)
             macwe.run(self.seg_postproc_pars['snakes_niter'])
-            seg = io3d.misc.resize_to_shape(macwe.levelset, self.data3d.shape)
+            seg = imma.image.resize_to_shape(macwe.levelset, self.data3d.shape)
             # for debug visualization preprocessing use fallowing line
             # self.segmentation[seg == 1] += 1
             self.segmentation[seg == 1] = self.slab['liver']
@@ -1842,10 +1842,10 @@ class OrganSegmentation():
         orig_voxelsize_mm = self.voxelsize_mm
         orig_shape = self.data3d.shape
 
-        self.data3d = io3d.misc.resize_to_mm(self.data3d, voxelsize_mm=orig_voxelsize_mm, new_voxelsize_mm=voxelsize_mm)
+        self.data3d = imma.image.resize_to_mm(self.data3d, voxelsize_mm=orig_voxelsize_mm, new_voxelsize_mm=voxelsize_mm)
         if self.segmentation is not None:
             dtype = self.segmentation.dtype
-            self.segmentation = io3d.misc.resize_to_mm(
+            self.segmentation = imma.image.resize_to_mm(
                 self.segmentation, voxelsize_mm=orig_voxelsize_mm, new_voxelsize_mm=voxelsize_mm).astype(dtype)
 
         if not hasattr(self, "orig_voxelsize_mm"):

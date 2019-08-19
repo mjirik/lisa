@@ -53,7 +53,7 @@ class ShapeModel():
         mdl = self.model / self.data_number
         print(mdl.shape)
         print(crinfo)
-        # mdl_res = io3d.misc.resize_to_shape(mdl, crinfo[0][]
+        # mdl_res = imma.image.resize_to_shape(mdl, crinfo[0][]
         uncr = qmisc.uncrop(mdl, crinfo, image_shape, resize=True)
         return uncr
 
