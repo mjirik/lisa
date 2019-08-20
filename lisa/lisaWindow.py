@@ -37,10 +37,9 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout
     # QFont, QPixmap,
                          QFileDialog, QInputDialog)
 from PyQt5 import QtGui, QtWidgets
+import os.path as op
 
 import sys
-
-
 Qstring = str
 
 from seededitorqt import QTSeedEditor
@@ -55,26 +54,29 @@ from . import authors
 
 
 
-def find_logo():
-    logopath = os.path.join(path_to_script, "./icons/LISA256.png")
-    if os.path.exists(logopath):
-        return logopath
-    # lisa runtime directory
-    logopath = os.path.expanduser("~/lisa_data/.lisa/LISA256.png")
-    if not os.path.exists(logopath):
-        try:
-            # wget.download(
-            download_file(
-                "https://raw.githubusercontent.com/mjirik/lisa/master/lisa/icons/LISA256.png",
-                filename=logopath
-            )
-        except:
-            logger.warning('logo download failed')
-            pass
-    if os.path.exists(logopath):
-        return logopath
 
-    pass
+def find_logo():
+    # logopath = os.path.join(path_to_script, "./icons/LISA256.png")
+    logopath = op.join(op.dirname(__file__), "LISA256.png")
+    return logopath
+    # if os.path.exists(logopath):
+    #     return logopath
+    # # lisa runtime directory
+    # logopath = os.path.expanduser("~/lisa_data/.lisa/LISA256.png")
+    # if not os.path.exists(logopath):
+    #     try:
+    #         # wget.download(
+    #         download_file(
+    #             "https://raw.githubusercontent.com/mjirik/lisa/master/lisa/icons/LISA256.png",
+    #             filename=logopath
+    #         )
+    #     except:
+    #         logger.warning('logo download failed')
+    #         pass
+    # if os.path.exists(logopath):
+    #     return logopath
+    #
+    # pass
 
 
 # GUI

@@ -60,13 +60,8 @@ def lisa_main():
 
         organ_segmentation.main()
     else:
-
         import PyQt5
-
-
         import PyQt5.QtGui
-
-
         import sys
 
 

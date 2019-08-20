@@ -63,6 +63,11 @@ setup(
     # package_data={
     #     'lisa': ['lisa/icons/LISA256.png'],
     # },
+    package_data={
+        # "sample1": ["scaffan_icon256.png"],
+        "": ["*.png", "*.ico"],
+        "sample2": ["lisa/LISA256.png"],
+    },
 
     # Although 'package_data' is the preferred approach, in some case you may
     # need to place data files outside of your packages.

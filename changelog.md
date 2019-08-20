@@ -7,6 +7,7 @@
 * [Changed] Upgrade to Qt5
 * [Changed] Dropped python 2 support
 * [Changed] Using `loguru` package instead of `logging`
+* [Changed] Logo is distributed with Lisa
 
 ## 1.18.*
 

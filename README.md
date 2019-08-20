@@ -7,7 +7,7 @@ LISA
 
 LIver Surgery Analyser.
 
-![lisa logo](https://raw.githubusercontent.com/mjirik/lisa/master/applications/LISA256.png)
+![lisa logo](https://raw.githubusercontent.com/mjirik/lisa/master/lisa/LISA256.png)
 
 
 

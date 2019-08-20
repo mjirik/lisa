@@ -7,7 +7,7 @@ Comment=LISA - Histology Analyser
 Exec=bash -c 'export PATH=@{CONDA_PATH}:$PATH ; @{LISA_PATH}/applications/ha.sh'
 Terminal=false
 Type=Application
-Icon=@{LISA_PATH}/applications/LISA256.png
+Icon=@{LISA_PATH}/lisa/LISA256.png
 Categories=Application;Science;MedicalSoftware;
 StartupNotify=false
 
