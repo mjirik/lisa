@@ -128,9 +128,11 @@ install:
     - sudo make install
     - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
     - 'sudo ldconfig -v'
+    - cd ..
+    - pip install .
     - conda list
     - pip freeze
-    - cd ../../../
+    - cd ../..
     - python -c "import skelet3d"
 #    - cd ..
     # skelet3d package is installed by conda so there is no need to install it again
