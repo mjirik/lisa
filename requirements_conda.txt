@@ -19,6 +19,7 @@ sed3>=1.4.0
 io3d>=1.20.2
 imtools>=2.0
 pandas
+sftpsync>=1.0.2
 ########
 # pandas is installed with pip
 #ipython=3.1.0=py27_0
@@ -34,7 +35,6 @@ pandas
 # mahotas
 # joblib>=0.8.4
 # -c mjirik
-# sftpsync>=1.0.2
 # pydicom>=0.9.9
 # scikit-learn=0.15.2=np19py27_0
 # scikit-image=0.11.0=np19py27_0
