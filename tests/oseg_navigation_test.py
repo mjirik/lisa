@@ -3,7 +3,6 @@
 
 from loguru import logger
 
-# logger = logging.getLogger()
 import unittest
 import os.path as op
 import pytest
@@ -71,7 +70,3 @@ class OrganSegmentationNavigation(unittest.TestCase):
         oseg.get_body_navigation_structures_precise()
         self.assertGreater(np.sum(oseg.select_label("bones")), 100)
 
-if __name__ == "__main__":
-    # logging.basicConfig(stream=sys.stderr)
-    logger.setLevel(logging.DEBUG)
-    unittest.main()
