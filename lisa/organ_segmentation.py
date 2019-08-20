@@ -2187,13 +2187,13 @@ def logger_init():
 
     if op.exists(op.expanduser("~/lisa_data/")):
         logfile = op.expanduser("~/lisa_data/lisa.log")
-    logger.add(logfile,
-               format="{time} {level} {message}",
-               level="INFO",
-               # rotation="10MB",
-               rotation="1 week"
-               )  # Once the file is too old, it's rotated
-
+        logger.add(
+            logfile,
+           format="{time} {level} {message}",
+           level="INFO",
+           # rotation="10MB",
+           rotation="1 week"
+        )  # Once the file is too old, it's rotated
 
 
 def lisa_config_init():
