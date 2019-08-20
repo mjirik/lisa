@@ -148,5 +148,5 @@ install:
 # skip organ_segmentation_tests
 #script: nosetests --with-coverage -v -s -x --cover-package=lisa -I organ_segmentation_test.py
 #script: nosetests --with-coverage -v -s -x -d --cover-package=lisa
-script: python -m pytest --cov=lisa/
+script: travis_wait 180 python -m pytest --cov=lisa/
 after_success: coveralls
