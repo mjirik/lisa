@@ -41,6 +41,8 @@ class OrganSegmentationTest(unittest.TestCase):
         return img3d, metadata, seeds, segmentation
 
     # @unittest.skip("in progress")
+    skip_on_local = False
+    @unittest.skipIf(os.environ.get("TRAVIS", skip_on_local), "Skip on Travis-CI")
     def test_sync_paul(self):
         """
         sync with paul account
