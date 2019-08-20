@@ -23,9 +23,8 @@ import argparse
 import glob
 import traceback
 import numpy as np
-
+import imma
 import io3d
-from imtools import qmisc
 
 def add_fv_extern_into_modelparams(modelparams):
     """
@@ -54,6 +53,7 @@ def add_fv_extern_into_modelparams(modelparams):
             else:
                 logger.error("problem in modelparam fv_extern descritprion")
     return modelparams
+
 
 def with_ribs_fv(data3dr, voxelsize_mm, seeds=None, unique_cls=None):        # scale
     """
@@ -585,7 +585,7 @@ def model_score_from_sliver_data(
                 # sed3.show_slices(likres , seg_orig, show=False, slice_step=20)
 
             import re
-            numeric_label = re.search(".*g(\d+)", oname).group(1)
+            numeric_label = re.search(r".*g(\d+)", oname).group(1)
 
         #     plt.figure(figsize = (5,5))
             if savefig:
