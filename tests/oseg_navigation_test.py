@@ -63,6 +63,7 @@ class OrganSegmentationNavigation(unittest.TestCase):
         oseg.get_body_navigation_structures()
         self.assertGreater(np.sum(oseg.select_label("spine")), 100)
 
+    @pytest.mark.slow
     def test_bodynavigation_precise(self):
 
         oseg = lisa.organ_segmentation.OrganSegmentation()
