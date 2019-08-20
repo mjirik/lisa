@@ -20,6 +20,7 @@ io3d>=1.20.2
 imtools>=2.0
 pandas
 sftpsync>=1.0.2
+win32-setctime  # used for loguru
 ########
 # pandas is installed with pip
 #ipython=3.1.0=py27_0

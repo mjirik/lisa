@@ -89,6 +89,7 @@ requirements:
 #    - pyqtconfig # nemáme pro python 3.6
 #    - pip
     - sftpsync >=1.0.8
+    - win32-setctime  # loguru deps for windows
     # just for pip install pygco
 #    - cython
 #    - vtk
