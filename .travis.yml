@@ -1,7 +1,7 @@
 language: python
-#python:
+python: 2.7
 #  #  - "2.6"
-#  - "2.7"
+#  - 2.7
 #  # - "3.2"
 #  # - "3.3"
 #  # - "3.4"
@@ -52,9 +52,9 @@ install:
     - conda create -n lisa
     - source activate lisa
 # install run, test and deploy tools
-    - conda install pip pytest-cov cmake python=$CONDA_PYTHON_VERSION
+#    - conda install pip pytest-cov cmake python=$CONDA_PYTHON_VERSION
 # Install Lisa dependencies
-    - conda install --yes --file requirements_conda.txt python=$CONDA_PYTHON_VERSION
+    - conda install --yes --file requirements_conda.txt python=$CONDA_PYTHON_VERSION pip pytest-cov cmake
 #    - pip install -r ci/requirements_ci.txt
 #    - pip install coverage
       # - "easy_install SimpleITK mahotas"
@@ -109,7 +109,7 @@ install:
     # prevent to install dependencies by pip
     # - conda install numpy scipy python=$CONDA_PYTHON_VERSION
     # go out from lisa dir
-    - cd ..
+    - mkdir sk && cd sk
     - which pip
     - which python
     - python --version
@@ -126,39 +126,40 @@ install:
     - cmake ..
     - cmake --build .
     - sudo make install
-    - cd ..
-    - conda list
-    - pip freeze
-    # skelet3d package is installed by conda so there is no need to install it again
-#    - pip install .
-    - python setup.py install
-    - cd ..
-
-    - ls
-    - ls build
-    - ls bin
-    - ls ~
-    - ls ~/miniconda
-    - ls ~/miniconda/envs
-    - cp bin/libBinaryThinningCxxShared.so ~/miniconda/envs/lisa/lib/
-    - conda info -a
     - 'echo "include /usr/local/lib" | sudo tee -a /etc/ld.so.conf'
     - 'sudo ldconfig -v'
+    - conda list
+    - pip freeze
+    - cd ../../../
+    - python -c "import skelet3d"
+#    - cd ..
+    # skelet3d package is installed by conda so there is no need to install it again
+#    - pip install .
+#    - python setup.py install
+#    - cd ..
+#
+#    - ls
+#    - ls build
+#    - ls bin
+#    - ls ~
+#    - ls ~/miniconda
+#    - ls ~/miniconda/envs
+#    - cp bin/libBinaryThinningCxxShared.so ~/miniconda/envs/lisa/lib/
+#    - conda info -a
     - pwd
     - ls
 #    - nosetests -v -x
-    - python -m pytest tests/
-    - cd ..
-    - conda install -c mjirik io3d skelet3d
-    - python -m pytest skelet3d/tests/
+#    - python -m pytest tests/
+#    - cd ..
+#    - conda install -c mjirik io3d skelet3d
+#    - python -m pytest skelet3d/tests/
     # Go back to lisa repo
-    - cd lisa
-    - which pip
-    - which python
-    - python --version
-    - which cmake
-    - conda list
-    - python -c "import skelet3d"
+#    - cd lisa
+#    - which pip
+#    - which python
+#    - python --version
+#    - which cmake
+#    - conda list
 
 
 #    - ls ~/data/medical/orig/sample_data/volumetrie
