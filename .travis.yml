@@ -1,10 +1,5 @@
 language: python
 python: 2.7
-#  #  - "2.6"
-#  - 2.7
-#  # - "3.2"
-#  # - "3.3"
-#  # - "3.4"
 env:
 #    - CONDA_PYTHON_VERSION=2.7
     - CONDA_PYTHON_VERSION=3.6
@@ -13,20 +8,15 @@ env:
 #    system_site_packages: true
 services:
     - xvfb
+matrix:
+    allow_failures:
+#        - env: CONDA_PYTHON_VERSION=2.7
+        - env: CONDA_PYTHON_VERSION=3.7
+#        - name: "osx python37"
 before_install:
     # We do this conditionally because it saves us some downloading if the
     # version is the same.
     - wget http://home.zcu.cz/~mjirik/lisa/install/install_conda.sh && source install_conda.sh
-#    - if [[ "$CONDA_PYTHON_VERSION" == "2.7" ]]; then
-#        wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
-#      else
-#        wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-#      fi
-#    - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
-#    - chmod +x miniconda.sh
-#    - ./miniconda.sh -b
-#    - bash miniconda.sh -b -p $HOME/miniconda
-#    - export PATH="$HOME/miniconda/bin:$PATH"
     - hash -r
     - conda config --set always_yes yes --set changeps1 no
     - conda update -q conda
@@ -103,50 +93,9 @@ install:
     - pip freeze
     - cd ../..
     - python -c "import skelet3d"
-#    - cd ..
-    # skelet3d package is installed by conda so there is no need to install it again
-#    - pip install .
-#    - python setup.py install
-#    - cd ..
-#
-#    - ls
-#    - ls build
-#    - ls bin
-#    - ls ~
-#    - ls ~/miniconda
-#    - ls ~/miniconda/envs
-#    - cp bin/libBinaryThinningCxxShared.so ~/miniconda/envs/lisa/lib/
-#    - conda info -a
     - pwd
     - ls
-#    - nosetests -v -x
-#    - python -m pytest tests/
-#    - cd ..
-#    - conda install -c mjirik io3d skelet3d
-#    - python -m pytest skelet3d/tests/
-    # Go back to lisa repo
-#    - cd lisa
-#    - which pip
-#    - which python
-#    - python --version
-#    - which cmake
-#    - conda list
-
-
-#    - ls ~/data/medical/orig/sample_data/volumetrie
-
-#before_script:
-#    # GUI
-#    - "export DISPLAY=:99.0"
-#    - "sh -e /etc/init.d/xvfb start"
-#    # give xvfb sume time to start
-#    - sleep 3
 
 # command to run tests
-#script: nosetests --with-coverage --verbose -d --cover-package=lisa
-# script: nosetests --with-coverage --verbose --nocapture --nologcapture --cover-package=lisa
-# skip organ_segmentation_tests
-#script: nosetests --with-coverage -v -s -x --cover-package=lisa -I organ_segmentation_test.py
-#script: nosetests --with-coverage -v -s -x -d --cover-package=lisa
-script: travis_wait 180 python -m pytest --cov=lisa/
+script: travis_wait 180 python -m pytest --cov=lisa/ -v
 after_success: coveralls
