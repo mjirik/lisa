@@ -1,14 +1,15 @@
-# pydicom>=0.9.9
-# ipdb>=0.8.1
 nearpy>=0.2
-# git+https://github.com/mjirik/morphsnakes.git
-# from pypi/mjirik
 morphsnakes
-# git+https://github.com/mjirik/pyqtconfig.git
 multipolyfit>=0.0.1
-# pandas>=0.16.2
 lesioneditor==0.0.13
 pygco
 # geodesic distance transform -c jmargeta -c jakirkham
 # on osx install with pip
 scikit-fmm
+
+# pydicom>=0.9.9
+# ipdb>=0.8.1
+# pandas>=0.16.2
+# git+https://github.com/mjirik/pyqtconfig.git
+# git+https://github.com/mjirik/morphsnakes.git
+# from pypi/mjirik
