@@ -58,6 +58,7 @@ Mikrovaskulatura jater. Segmentace provedena aplikací Lisa, vizualizace pomocí
 [![liver, kidneys, spleen, meta](https://img.youtube.com/vi/ZEnbYr4SxT0/0.jpg)](https://www.youtube.com/watch?v=ZEnbYr4SxT0)
 
 
+Virtuální resekce pomocí aplikace Lisa
 
 [![Video webcam tracking](https://img.youtube.com/vi/O408OKV5LhQ/0.jpg)](https://www.youtube.com/watch?v=O408OKV5LhQ)
 
