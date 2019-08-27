@@ -10,6 +10,7 @@ LIver Surgery Analyser.
 ![lisa logo](https://raw.githubusercontent.com/mjirik/lisa/master/lisa/LISA256.png)
 
 
+[czech description](docs/lisa_cs.md)
 
 
 Install
