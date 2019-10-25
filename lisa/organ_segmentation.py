@@ -2426,7 +2426,7 @@ def main(app=None, splash=None):  # pragma: no cover
         if args["debug"]:
             import loguru
             logger.remove(0)
-            logger.add(sys.stderr, level=logger.level("DEBUG"))
+            logger.add(sys.stderr, level="DEBUG")
             # ch.setLevel(logging.DEBUG)
             args["debug_mode"] = True
 
