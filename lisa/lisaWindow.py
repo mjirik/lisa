@@ -297,9 +297,9 @@ class OrganSegmentationWindow(QMainWindow):
                                   )
         self.__add_action_to_menu(imageMenu, "&Segmentation to vessel tree",
                                   lambda: self.__saveVesselTreeGui(self.ui_select_label(
-                                      "Select label", "selected segmentation will be turned into vessel tree"
-                                      )),
-                                  tip="Process segmentation with vessel tree algorithm",
+                                      "Select label", "selected segmentation will be turned into 1D vessel tree"
+                                      )[0]),
+                                  tip="Process segmentation with vessel tree algorithm and save 1D vessel tree",
                                   finish_msg="Ready. Vessel tree saved."
                                   )
 
@@ -397,7 +397,7 @@ class OrganSegmentationWindow(QMainWindow):
         window = QtWidgets.QWidget()
         self.window = window
         self.setCentralWidget(window)
-        self.resize(800, 600)
+        self.resize(1024, 768)
         from . import __version__
 
 
@@ -448,6 +448,7 @@ class OrganSegmentationWindow(QMainWindow):
         lisa_title.setFont(font_label)
         infoBodyLayout.addWidget(lisa_title)
         infoBodyLayout.addWidget(info)
+        # self.init_uni_logo_large(infoBodyLayout)
 
         #--- segmentation option ---
         self.segBody = segmentationQt.SegmentationWidget(oseg=self.oseg, lisa_window=self)
@@ -520,6 +521,36 @@ class OrganSegmentationWindow(QMainWindow):
         lisa_logo.mousePressEvent = lambda event: self.changeWidget('Main')
         layout.addWidget(lisa_logo)
         return layout
+
+    def init_uni_logo_large(self, layout):
+        logo_fav = QLabel()
+        logo_fav_path = op.join(op.dirname(__file__), "fav_en.png")
+        logo_fav_im = QPixmap(logo_fav_path)
+        logo_fav_im = logo_fav_im.scaledToWidth(300)
+        logo_fav.setPixmap(logo_fav_im)  # scaledToWidth(128))
+        layout.addWidget(logo_fav)
+
+        logo_lfp = QLabel()
+        logo_lfp_path = op.join(op.dirname(__file__), "logo_lf_uk_2.png")
+        logo_lfp_im = QPixmap(logo_lfp_path)
+        logo_lfp_im = logo_lfp_im.scaledToWidth(300)
+        logo_lfp.setPixmap(logo_lfp_im)  # scaledToWidth(128))
+        layout.addWidget(logo_lfp)
+
+    def init_uni_logo_small(self, layout):
+        logo_fav = QLabel()
+        logo_fav_path = op.join(op.dirname(__file__), "logo_fav.png")
+        logo_fav_im = QPixmap(logo_fav_path)
+        logo_fav_im = logo_fav_im.scaledToWidth(130)
+        logo_fav.setPixmap(logo_fav_im)  # scaledToWidth(128))
+        layout.addWidget(logo_fav)
+
+        logo_lfp = QLabel()
+        logo_lfp_path = op.join(op.dirname(__file__), "logo_lfp.png")
+        logo_lfp_im = QPixmap(logo_lfp_path)
+        logo_lfp_im = logo_lfp_im.scaledToWidth(130)
+        logo_lfp.setPixmap(logo_lfp_im)  # scaledToWidth(128))
+        layout.addWidget(logo_lfp)
 
     def initUIMenu(self):
         ###### MAIN MENU ######
@@ -594,7 +625,6 @@ class OrganSegmentationWindow(QMainWindow):
 
         import imtools.show_segmentation_qt
 
-
         self.ui_widgets[keyword] = imtools.show_segmentation_qt.ShowSegmentationWidget(None)
         # import imtools.show_segmentation_qt as itss
         # itss.ShowSegmentationWidget()
@@ -609,6 +639,7 @@ class OrganSegmentationWindow(QMainWindow):
         mainLayoutRight.addWidget(btnQuit)
 
         mainLayoutRight.addStretch()
+        self.init_uni_logo_small(mainLayoutRight)
 
     def unlockAllButtons(self):
         self.btnSave.setDisabled(False)
@@ -658,6 +689,7 @@ class OrganSegmentationWindow(QMainWindow):
             widget = imtools.show_segmentation_qt.ShowSegmentationWidget(None, show_load_interface=True, vtk_file=vtk_file )
             self.ui_widgets[option] = widget
             self.bodyLayout.addWidget(widget)
+            logger.debug("adding actual data to visualization widget")
             widget.add_data(self.oseg.segmentation, self.oseg.voxelsize_mm, self.oseg.slab)
             widget.show()
 
@@ -1675,6 +1707,8 @@ class OrganSegmentationWindow(QMainWindow):
         self.statusBar().showMessage('Ready')
 
     def __saveVesselTreeGui(self, textLabel):
+        # TODO fix names in output files
+
         textLabel = self.oseg.nlabels(textLabel, return_mode="str")
         fn_yaml = self.oseg.get_standard_ouptut_filename(filetype='yaml', suffix='-vt-' + textLabel+".yaml")
         fn_vtk = self.oseg.get_standard_ouptut_filename(filetype='vtk', suffix='-vt-' + textLabel+".vtk")

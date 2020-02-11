@@ -15,17 +15,17 @@ from loguru import logger
 
 
 # logger = logging.getLogger()
-import os.path
-
-
+import os.path as op
 import sys
-
-
-path_to_script = os.path.dirname(os.path.abspath(__file__))
-pth = os.path.join(path_to_script, "../../seededitorqt/")
+path_to_script = op.dirname(op.abspath(__file__))
+pth = op.join(path_to_script, "../../seededitorqt/")
 sys.path.insert(0, pth)
-pth = os.path.join(path_to_script, "../../imtools/")
+pth = op.join(path_to_script, "../../imtools/")
 sys.path.insert(0, pth)
+sys.path.insert(0, op.expanduser(r"~/projects/imtools/"))
+sys.path.insert(0, op.expanduser(r"~/projects/seededitorqt/"))
+sys.path.insert(0, op.expanduser(r"~/projects/skelet3d/"))
+sys.path.insert(0, op.expanduser(r"~/projects/fibrous/"))
 
 import argparse
 
