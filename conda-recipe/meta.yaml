@@ -73,6 +73,7 @@ requirements:
     - {{ pin_compatible('sed3', max_pin='x') }}
     - {{ pin_compatible('io3d', max_pin='x') }}
     - {{ pin_compatible('imcut', max_pin='x') }}
+    - {{ pin_compatible('seededitorqt', max_pin='x') }}
     - dicom2fem >=1.1.12
     - pyqt =5
 #    - pandas
