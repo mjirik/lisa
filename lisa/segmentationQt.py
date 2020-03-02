@@ -21,15 +21,17 @@ import argparse
 from PyQt5.QtWidgets import QGridLayout, QLabel, QPushButton, QLineEdit, QComboBox
 from PyQt5 import QtWidgets
 import sys
-
-
 from . import virtual_resection
-
-
-
+from . import lisaWindow
+from . import organ_segmentation
 
 class SegmentationWidget(QtWidgets.QWidget):
-    def __init__(self, oseg, lisa_window, use_ui_label_dropdown=True):
+    def __init__(
+            self,
+            oseg:organ_segmentation.OrganSegmentation,
+            lisa_window,
+            use_ui_label_dropdown=True
+    ):
         super(SegmentationWidget, self).__init__()
         self.oseg = oseg
         self.lisa_window = lisa_window
@@ -220,11 +222,12 @@ class SegmentationWidget(QtWidgets.QWidget):
         self.lisa_window.statusBar().showMessage('Ready')
 
     def action_segmentation_relabel(self):
-        self.lisa_window.statusBar().showMessage('Segmentation relabelling...')
-        strlabel = self.oseg.nlabels(self.oseg.output_label, return_mode="str")
-        val = self.lisa_window.ui_select_label("Rename from " + strlabel + "to to fallowing label")
-        self.oseg.segmentation_relabel(from_label=self.oseg.output_label, to_label=val[0])
-        self.lisa_window.statusBar().showMessage('Ready')
+        self.lisa_window.action_segmentation_relabel()
+        # self.lisa_window.statusBar().showMessage('Segmentation relabelling...')
+        # strlabel = self.oseg.nlabels(self.oseg.output_label, return_mode="str")
+        # val = self.lisa_window.ui_select_label("Rename from " + strlabel + "to to fallowing label")
+        # self.oseg.segmentation_relabel(from_label=self.oseg.output_label, to_label=val[0])
+        # self.lisa_window.statusBar().showMessage('Ready')
 
 
 def main():

@@ -92,14 +92,14 @@ scaling_modes = {
 #  Defaultparameters for segmentation
 
 # version comparison
-from pkg_resources import parse_version
+# from pkg_resources import parse_version
 import sklearn
 
-if parse_version(sklearn.__version__) > parse_version('0.10'):
-    # new versions
-    cvtype_name = 'covariance_type'
-else:
-    cvtype_name = 'cvtype'
+# if parse_version(sklearn.__version__) > parse_version('0.10'):
+#     # new versions
+# else:
+#     cvtype_name = 'cvtype'
+cvtype_name = 'covariance_type'
 
 default_segmodelparams = {
     'type': 'gmmsame',
