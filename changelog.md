@@ -2,6 +2,8 @@
 
 ## Unreleased 
 
+# [Added] export segmentation to file
+
 ## 2.0
 
 * [Changed] Upgrade to Qt5

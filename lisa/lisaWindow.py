@@ -48,6 +48,7 @@ from . import loginWindow
 from . import dictEditQt
 from . import segmentationQt
 from . import virtual_resection
+from . import organ_segmentation
 from io3d.network import download_file
 from imtools.select_label_qt import SelectLabelWidget
 from . import authors
@@ -84,7 +85,7 @@ class OrganSegmentationWindow(QMainWindow):
 
     def __init__(self, oseg=None, qapp=None):
 
-        self.oseg = oseg
+        self.oseg:organ_segmentation.OrganSegmentation = oseg
         self.qapp = qapp
 
 
@@ -274,7 +275,20 @@ class OrganSegmentationWindow(QMainWindow):
                                   tip="Export seeds and stored seeds to files",
                                   finish_msg="Ready. Seeds exported."
                                   )
+        self.__add_action_to_menu(imageMenu, "&Export segmentations fo files",
+                                  lambda: self.oseg.export_segmentations_to_files(self.ui_select_output_filename(
+                                      "mhd", suffix="_seg", window_title="Select pattern for segmentation files",
+                                      filter="all")),
+                                  tip="Export segmentation to files. Each label is stored in single file",
+                                  finish_msg="Ready. Segmentions exported."
+                                  )
 
+        self.__add_action_to_menu(imageMenu, "&Export segmentation fo file",
+                                  lambda: self.oseg.export_segmentation_to_file(self.ui_select_output_filename(
+                                      "mhd", suffix="_seg", window_title="Select segmentation file", filter="all")),
+                                  tip="Export segmentation to files. All segmentation is stored in one file.",
+                                  finish_msg="Ready. Segmention exported."
+                                  )
 
         self.__add_action_to_menu(imageMenu, "&Import seeds from file",
                                   lambda: self.oseg.import_seeds_from_file(self.ui_select_output_filename(
@@ -1409,6 +1423,14 @@ class OrganSegmentationWindow(QMainWindow):
     def ui_select_output_filename(self, filetype="pklz", suffix="_seeds", window_title="Save file", filter=None,
                                   # cache_name="saveoutputfile"
                                   ):
+        """
+
+        :param filetype: extension without dot
+        :param suffix: what is the last part of filename before extension
+        :param window_title:
+        :param filter: string in format 'Dicom (*.dcm);;' or one of predefined: pklz, h5, dicom, all
+        :return:
+        """
         if filter is None:
             if filetype is None:
                 filter = "Former Lisa Format (*.pklz);;New Lisa format HDF5 (*.h5 *.hdf5);; Dicom (*.dcm);; All files(*.*)"
@@ -1418,6 +1440,8 @@ class OrganSegmentationWindow(QMainWindow):
                 filter = "New Lisa format HDF5 (*.h5 *.hdf5);; All files (*.*)"
             elif filetype in ("dcm", "dicom"):
                 filter = "Dicom (*.dcm);; All files (*.*)"
+            elif filetype in ("*", "all"):
+                filter = "All files (*.*);;Dicom (*.dcm);;Former Lisa Format (*.pklz);;New Lisa format HDF5 (*.h5 *.hdf5)"
             else:
                 filter = "(*.{});; All files (*.*)".format(filetype)
         ofilename = self.oseg.get_standard_ouptut_filename(filetype=filetype, suffix=suffix)
@@ -1425,9 +1449,9 @@ class OrganSegmentationWindow(QMainWindow):
             self,
             window_title,
             ofilename,
-            filter=filter))[0]
+            filter=filter)[0])
 
-        logger.info('Selected file: %s', filename)
+        logger.info(f'Selected file: {filename}')
         return filename
 
     def ui_get_datadir(self, directory=None, window_title="Load from directory",

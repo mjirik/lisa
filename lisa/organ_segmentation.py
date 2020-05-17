@@ -1531,6 +1531,36 @@ class OrganSegmentation():
             datap["data3d"] = seeds
             io3d.write(datap, fn_seeds)
 
+    def export_segmentations_to_files(self, fn_segmentation):
+        # datap = self.export()
+        if self.segmentation is not None:
+            for lab in np.unique(self.segmentation):
+                if lab == 0:
+                    continue
+                strlabel = ima.get_nlabel(slab=self.slab, label=lab, return_mode="str")
+
+                datap = {
+                    "data3d": (self.segmentation == lab).np.astype(np.uint8) * 255,
+                    "voxelsize_mm": self.voxelsize_mm
+                }
+
+                basefn, ext = op.splitext(fn_segmentation)
+                fn_seeds_key = basefn + "_" + strlabel + ext
+                io3d.write(datap, fn_seeds_key)
+
+    def export_segmentation_to_file(self, fn_segmentation):
+        # datap = self.export()
+        logger.debug(f"export segmentation to file: {fn_segmentation}")
+        if self.segmentation is not None:
+            # basefn, ext = op.splitext(fn_segmentation)
+            # strlabel = ima.get_nlabel(slab=self.slab, label=lab, return_mode="str")
+            datap = {
+                "data3d": self.segmentation,
+                "voxelsize_mm": self.voxelsize_mm
+            }
+            io3d.write(datap, fn_segmentation)
+
+
     def import_seeds_from_file(self, fn_seeds):
         datap = io3d.read(fn_seeds, dataplus_format=True)
         if "seeds" in datap and datap["seeds"] is not None:

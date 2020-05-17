@@ -15,6 +15,7 @@ import imcut.dcmreaddata as dcmr
 # import lisa.dataset
 import io3d.datasets
 
+from pathlib import Path
 
 
 
@@ -190,6 +191,7 @@ and background")
     def test_synth_liver(self):
         params = {}
         self.synthetic_liver_template(params)
+
 
     def synthetic_liver_template(self, params):
         """
@@ -497,6 +499,29 @@ and background")
         self.assertNotEqual(orig_shape[0], oseg.data3d.shape[0])
         self.assertNotEqual(orig_shape[1], oseg.data3d.shape[1])
         self.assertNotEqual(orig_shape[2], oseg.data3d.shape[2])
+
+
+def export_seg_to_file():
+    fnout = Path(__file__).parent / "test_export_segmentation.mhd"
+
+    if fnout.exists():
+        os.remove(fnout)
+
+    data3d, segm, voxelsize_mm, slab, seeds_liver, seeds_porta = io3d.datasets.generate_synthetic_liver()
+    metadata = {'voxelsize_mm': voxelsize_mm}
+
+    oseg = organ_segmentation.OrganSegmentation(
+        None,
+        data3d=data3d,
+        metadata=metadata,
+        seeds=seeds_liver,
+        working_voxelsize_mm=5,
+        manualroi=False,
+        autocrop=False,
+    )
+
+    oseg.export_segmentation_to_file(fnout)
+    assert fnout.exists()
 
 if __name__ == "__main__":
     unittest.main()
