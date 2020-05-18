@@ -23,6 +23,7 @@ sftpsync>=1.0.2
 win32-setctime  # used for loguru
 bodynavigation
 seededitorqt
+exsu
 pip # because of fallowing pygco install
 ########
 # pandas is installed with pip
