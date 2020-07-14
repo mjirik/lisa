@@ -180,7 +180,7 @@ class OrganSegmentationWindow(QMainWindow):
         # TODO use cache_name "segloaddir"
         self.__add_action_to_menu(fileMenu, "&Segmentation from dir",
                                   lambda: self.oseg.import_segmentation_from_file(self.ui_get_datadir(
-                                      window_title="Select directory with seeds", cache_name="loaddir")),
+                                      window_title="Select directory with seeds", cache_name="loaddir"), new_label_selection_method=self.ui_select_label),
                                   tip="Import segmentation from dir",
                                   finish_msg="Ready. Segmentation loaded."
                                   )
@@ -275,7 +275,7 @@ class OrganSegmentationWindow(QMainWindow):
                                   tip="Export seeds and stored seeds to files",
                                   finish_msg="Ready. Seeds exported."
                                   )
-        self.__add_action_to_menu(imageMenu, "&Export segmentations fo files",
+        self.__add_action_to_menu(imageMenu, "&Export segmentations to files",
                                   lambda: self.oseg.export_segmentations_to_files(self.ui_select_output_filename(
                                       "mhd", suffix="_seg", window_title="Select pattern for segmentation files",
                                       filter="all")),
@@ -283,7 +283,7 @@ class OrganSegmentationWindow(QMainWindow):
                                   finish_msg="Ready. Segmentions exported."
                                   )
 
-        self.__add_action_to_menu(imageMenu, "&Export segmentation fo file",
+        self.__add_action_to_menu(imageMenu, "&Export segmentation to file",
                                   lambda: self.oseg.export_segmentation_to_file(self.ui_select_output_filename(
                                       "mhd", suffix="_seg", window_title="Select segmentation file", filter="all")),
                                   tip="Export segmentation to files. All segmentation is stored in one file.",
@@ -1090,7 +1090,7 @@ class OrganSegmentationWindow(QMainWindow):
         if seg_path is None:
             self.statusBar().showMessage('No data path specified!')
             return
-        self.oseg.import_segmentation_from_file(seg_path)
+        self.oseg.import_segmentation_from_file(seg_path, new_label_selection_method=self.ui_select_label)
         self.segBody.enableSegType()
         self.statusBar().showMessage('Ready. Segmentation loaded from ' + str(seg_path))
 
@@ -1677,6 +1677,7 @@ class OrganSegmentationWindow(QMainWindow):
         self.statusBar().showMessage('Ready. Vessel {} branches labeled. '.format(str(slabel)))
 
     def btnVirtualResectionPV(self):
+        # self.statusBar().showMessage('Performing Portal Vein Virtual Resection')
         self._virtual_resection('PV', )
 
     def btnVirtualResectionPV_new(self):

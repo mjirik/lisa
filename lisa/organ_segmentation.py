@@ -631,10 +631,14 @@ class OrganSegmentation():
         selected_segmentation = ima.select_labels(self.segmentation, labels=labels, slab=self.slab)
         return selected_segmentation
 
-    def import_segmentation_from_file(self, filepath):
+    def import_segmentation_from_file(self, filepath, new_label_selection_method=None):
         """
         Loads data from file. Expected are uncropped data.
         The old label is set to 0 and then new label is loaded.
+
+        :param new_label_selection_method: should be compatible with lisa_window.ui_select_label()
+            ui_select_label(headline, text_inside="select from existing labels or write a new one",
+                        return_i=True, return_str=True, multiple_choice=False):
         """
         # logger.debug("import segmentation from file")
         # logger.debug(str(self.crinfo))
@@ -650,11 +654,17 @@ class OrganSegmentation():
         nzlabels = set(np.unique(segmentation)) - {0}
         print("nzlabels: ", nzlabels)
         for label in nzlabels:
+            if new_label_selection_method:
+                headline = f"Select new label for input label {label}"
+                text_inside = f"Actual segmentation labels: {self.slab} \nImported labels: {nzlabels}\n"
+                label_out = new_label_selection_method(headline, text_inside=text_inside, return_i=True, return_str=False)
+            else:
+                label_out = label
 
             self.segmentation_replacement(
                 segmentation_new=segmentation,
                 label_new=label,
-                label=label
+                label=label_out
             )
 
         # self.segmentation = segmentation
@@ -1150,6 +1160,8 @@ class OrganSegmentation():
             **kwargs
     ):
         """
+        Remove old segmentation with label and put in new data from segmentation_new with label_new
+        (and ignore other labels)
 
         :param segmentation_new:  input segmentation
         :param label: output label
