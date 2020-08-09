@@ -151,6 +151,19 @@ default_segmentation_alternative_params = {
                 "pairwise_alpha_per_square_unit": 45,
                 "return_only_object_with_seeds": True
             }
+        },
+        "graphcut non-connected": {
+            "segparams": {
+                'method':'graphcut',
+                'use_boundary_penalties': True,
+                'boundary_dilatation_distance': 2,
+                'boundary_penalties_weight': 1,
+                'block_size': 10,
+                'tile_zoom_constant': 1,
+                # "pairwise_alpha_per_mm2":45,
+                "pairwise_alpha_per_square_unit": 45,
+                "return_only_object_with_seeds": False
+            }
         }
 
     }

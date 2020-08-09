@@ -539,13 +539,11 @@ class OrganSegmentation():
 
         return value
 
-    def sliver_compare_with_other_volume_from_file(self, filepath):
-        reader = datareader.DataReader()
-        segmentation_datap = reader.Get3DData(filepath, dataplus_format=True)
-        evaluation = self.sliver_compare_with_other_volume(segmentation_datap)
-        return evaluation
+    # def sliver_compare_with_other_volume_from_path(self, filepath, label1=1, label2=2):
+    #     evaluation = self.sliver_compare_with_other_volume(segmentation_datap, label1=label1, label2=label2)
+    #     return evaluation
 
-    def sliver_compare_with_other_volume(self, segmentation_datap):
+    def sliver_compare_with_other_volume(self, segmentation2_datap, label1=1, label2=1):
         """
         Compares actual Lisa data with other which are given by
         segmentation_datap. That means
@@ -557,17 +555,17 @@ class OrganSegmentation():
         """
         # if there is no segmentation, data can be stored in data3d. It is the
         # way how are data stored in sliver.
-        if 'segmentation' in segmentation_datap.keys():
+        if 'segmentation' in segmentation2_datap.keys():
             segm_key = 'segmentation'
         else:
             segm_key = 'data3d'
-        if 'crinfo' in segmentation_datap.keys():
+        if 'crinfo' in segmentation2_datap.keys():
             data3d_segmentation = qmisc.uncrop(
-                segmentation_datap[segm_key],
-                segmentation_datap['crinfo'],
+                segmentation2_datap[segm_key],
+                segmentation2_datap['crinfo'],
                 self.orig_shape)
         else:
-            data3d_segmentation = segmentation_datap[segm_key]
+            data3d_segmentation = segmentation2_datap[segm_key]
         pass
 
         # now we can uncrop actual Lisa data
@@ -576,22 +574,25 @@ class OrganSegmentation():
             self.crinfo,
             self.orig_shape)
 
-        label1 = 1
-        label2 = 1
-        # TODO make GUI in Qt
-        from PyQt5.QtCore import pyqtRemoveInputHook
+        # label1 = 1
+        # label2 = segmentation_label
+        # from PyQt5.QtCore import pyqtRemoveInputHook
 
 
-        pyqtRemoveInputHook()
-        print('unique data1 ', np.unique(data3d_segmentation_actual))
-        print('unique data2 ', np.unique(data3d_segmentation))
-        print("set label1 and label2")
-        print("then press 'c' and 'Enter'")
-        import pdb; pdb.set_trace()  # noqa BREAKPOINT
+        # pyqtRemoveInputHook()
+        # print('unique data1 ', np.unique(data3d_segmentation_actual))
+        # print('unique data2 ', np.unique(data3d_segmentation))
+        # print("set label1 and label2")
+        # print("then press 'c' and 'Enter'")
+        # import pdb; pdb.set_trace()  # noqa BREAKPOINT
+
 
         evaluation = volumetry_evaluation.compare_volumes_sliver(
-            data3d_segmentation_actual == label1,
-            data3d_segmentation == label2,
+            # imma.segmentation_labels.se
+            ima.select_labels(data3d_segmentation_actual, label1),
+            ima.select_labels(data3d_segmentation, label2),
+            # data3d_segmentation_actual == label1,
+            # data3d_segmentation == label2,
             self.voxelsize_mm
         )
         # score = volumetry_evaluation.sliver_score_one_couple(evaluation)

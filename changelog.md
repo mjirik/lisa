@@ -2,7 +2,9 @@
 
 ## Unreleased 
 
-# [Added] export segmentation to file
+* [Added] export segmentation to file
+* [Added] select label on compare
+
 
 ## 2.0
 

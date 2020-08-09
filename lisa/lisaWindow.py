@@ -33,10 +33,10 @@ sys.path.append(os.path.join(path_to_script, "../extern/imcut/src"))
 
 from PyQt5.QtGui import QFont, QPixmap
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
-                         QLabel, QPushButton, QFrame, 
+                         QLabel, QPushButton, QFrame, QDialog,
     # QFont, QPixmap,
                          QFileDialog, QInputDialog)
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtGui, QtWidgets, Qt
 import os.path as op
 
 import sys
@@ -316,6 +316,15 @@ class OrganSegmentationWindow(QMainWindow):
                                   tip="Process segmentation with vessel tree algorithm and save 1D vessel tree",
                                   finish_msg="Ready. Vessel tree saved."
                                   )
+        self.__add_action_to_menu(imageMenu, "&Compare with file",
+                                  self.compareSegmentationWithFile,
+                                  # self.compareSegmentationWithFile,
+                                  # lambda: self.__saveVesselTreeGui(self.ui_select_label(
+                                  #     "Select label", "selected segmentation will be turned into 1D vessel tree"
+                                  # )[0]),
+                                  tip="Process segmentation with vessel tree algorithm and save 1D vessel tree",
+                                  finish_msg="Ready. Vessel tree saved."
+                                  )
 
         ###### OPTION MENU ######
         optionMenu = menubar.addMenu('&Option')
@@ -455,7 +464,7 @@ class OrganSegmentationWindow(QMainWindow):
                       'University of West Bohemia\n' +
                       'Faculty of Applied Sciences\n' +
                       "Charles University\nFaculty of Medicine in Pilsen"
-                      '\n\nVersion: ' + self.oseg.version + "\n\nAuthors:\n" + str(authors.authors)
+                      '\n\nVersion: ' + self.oseg.version # + "\n\nAuthors:\n" + str(authors.authors)
                       )
         info.setFont(font_info)
         lisa_title.setFont(font_label)
@@ -754,27 +763,32 @@ class OrganSegmentationWindow(QMainWindow):
     # def setVoxelVolume(self, vxs):
     #     self.voxel_volume = np.prod(vxs)
 
-    def __get_datafile(self, app=False, directory=''):
+    def __get_datafile(self, directory='', window_title=None, app=None):
         """
         Draw a dialog for directory selection.
         """
 
+        if app is None:
+            app=self.qapp
+        if window_title is None:
+            window_title = "Select Data File"
         from PyQt5.QtWidgets import QFileDialog
-        if app:
-            dcmdir = QFileDialog.getOpenFileName(
-                caption='Select Data File',
-                directory=directory
-                # ptions=QFileDialog.ShowDirsOnly,
-            )[0]
-        else:
-            app = QApplication(sys.argv)
-            dcmdir = QFileDialog.getOpenFileName(
-                caption='Select DICOM Folder',
-                # ptions=QFileDialog.ShowDirsOnly,
-                directory=directory
-            )[0]
+        # if app:
+        dcmdir = QFileDialog.getOpenFileName(
+            caption=window_title,
+            directory=directory
+            # ptions=QFileDialog.ShowDirsOnly,
+        )[0]
+        # else:
+        #     app = QApplication(sys.argv)
+        #     dcmdir = QFileDialog.getOpenFileName(
+        #         caption=window_title,
+        #         # caption='Select DICOM Folder',
+        #         # ptions=QFileDialog.ShowDirsOnly,
+        #         directory=directory
+        #     )[0]
             # pp.exec_()
-            app.exit(0)
+            # app.exit(0)
         if len(dcmdir) > 0:
 
             dcmdir = "%s" % (dcmdir)
@@ -1084,7 +1098,7 @@ class OrganSegmentationWindow(QMainWindow):
         if path is None:
             path = self.oseg.input_datapath_start
         seg_path = self.__get_datafile(
-            app=True,
+            # app=True,
             directory=path
         )
         if seg_path is None:
@@ -1135,28 +1149,40 @@ class OrganSegmentationWindow(QMainWindow):
         return "Sliver score: " + str(overall_score)
 
     def ui_select_label(self, headline, text_inside="select from existing labels or write a new one",
-                        return_i=True, return_str=True, multiple_choice=False):
+                        return_i=True, return_str=True, multiple_choice=False, datap=None):
         """ Get label with GUI.
 
         :return: numeric_label, string_label
+        :param datap: if no datap is selected then the actual data are used and extracted by self.oseg.export()
         """
 
         # import copy
         # texts = copy.copy(self.oseg.slab.keys())
 
+        if datap is None:
+            datap = self.oseg.export()
+
+        data3d = datap["data3d"]
+        segmentation = datap["segmentation"]
+        voxelsize_mm = datap["voxelsize_mm"]
+
+        slab = datap["slab"] if "slab" in datap else {}
+        import imma.segmentation_labels
+        imma.segmentation_labels.add_missing_labels(segmentation, slab=slab)
+
         new_label_selected_from_viewer = None
 
         def _ui_get_labels_with_gui():
             nonlocal new_label_selected_from_viewer
-            oseg = self.oseg
-            sgm = oseg.segmentation.astype(np.uint8)
-            pyed = QTSeedEditor(oseg.data3d,
+            # oseg = self.oseg
+            sgm = segmentation.astype(np.uint8)
+            pyed = QTSeedEditor(data3d,
                                 appmenu_text="Select one or more labels",
                                 # seeds=sgm,
                                 # mode='draw',
                                 contours=sgm,
                                 init_brush_index=0,
-                                voxelSize=oseg.voxelsize_mm, volume_unit='ml')
+                                voxelSize=voxelsize_mm, volume_unit='ml')
             # self.qapp.exec_()
             logger.debug("before ui get seeds exec")
             pyed.show()
@@ -1167,7 +1193,7 @@ class OrganSegmentationWindow(QMainWindow):
             # from PyQt4.QtCore import pyqtRemoveInputHook
             # pyqtRemoveInputHook()
             # import ipdb; ipdb.set_trace()
-            unseeds = np.unique(self.oseg.segmentation[np.nonzero(seeds)])
+            unseeds = np.unique(segmentation[np.nonzero(seeds)])
             # unseeds = list(np.unique(seeds))
             # unseeds.pop[0]
             logger.debug("unique seeds {}".format(unseeds))
@@ -1184,7 +1210,7 @@ class OrganSegmentationWindow(QMainWindow):
             button2_fcn = None
 
         strlab = self.ui_select_from_list(
-            list(self.oseg.slab.keys()),
+            list(slab.keys()),
             headline,
             text_inside=text_inside,
             multiple_choice=multiple_choice,
@@ -1290,16 +1316,26 @@ class OrganSegmentationWindow(QMainWindow):
             directory = self.oseg.cache.get('loadcomparedir')
         else:
             directory = self.oseg.input_datapath_start
-        #
-        seg_path = self.__get_datafile(
-            app=True,
+
+        label1,_ = self.ui_select_label("Select label comparison", multiple_choice=True)
+        seg_path = self.ui_get_path_file_or_dir(
             directory=directory
         )
+        # seg_path = self.__get_datafile(
+        #     directory=directory
+        # )
         if seg_path is None:
             self.statusBar().showMessage('No data path specified!')
             return
+        reader = datareader.DataReader()
+        segmentation_datap = reader.Get3DData(seg_path, dataplus_format=True)
+        if "segmentation" in segmentation_datap:
+            pass
+        else:
+            segmentation_datap["segmentation"] = segmentation_datap["data3d"]
+        label2,_ = self.ui_select_label("Select label from loaded data", datap=segmentation_datap, multiple_choice=True)
         evaluation, segdiff = \
-            self.oseg.sliver_compare_with_other_volume_from_file(seg_path)
+            self.oseg.sliver_compare_with_other_volume(segmentation_datap, label1=label1, label2=label2)
         print('Evaluation: ', evaluation)
         # print 'Score: ', score
 
@@ -1454,6 +1490,35 @@ class OrganSegmentationWindow(QMainWindow):
         logger.info(f'Selected file: {filename}')
         return filename
 
+    def ui_get_path_file_or_dir(self, directory=None, window_title=None):
+        d = QDialog()
+        file_dialog = True
+
+        def click_file():
+            nonlocal file_dialog
+            file_dialog = True
+            d.close()
+
+        def clicked_dir():
+            nonlocal file_dialog
+            file_dialog = False
+            d.close()
+
+        b1 = QPushButton("File", d)
+        b1.clicked.connect(click_file)
+        b1.move(10, 10)
+        b2 = QPushButton("Directory", d)
+        b2.clicked.connect(clicked_dir)
+        b2.move(10, 50)
+        d.setWindowTitle("File or Directory")
+        # d.setWindowModality(Qt.ApplicationModal)
+        d.exec_()
+        if file_dialog:
+            return self.__get_datafile(directory=directory, window_title=window_title)
+        else:
+            return self.ui_get_datadir(directory=directory, window_title=window_title)
+
+
     def ui_get_datadir(self, directory=None, window_title="Load from directory",
                        cache_name="loaddir"):
         """
@@ -1496,7 +1561,6 @@ class OrganSegmentationWindow(QMainWindow):
         else:
             self.oseg.cache.update('loaddir', dcmdir)
         return dcmdir
-
 
     def ui_select_input_dir(self, filetype="pklz", suffix="_seeds", window_title="Load dir", filter=None):
         ofilename = self.oseg.get_standard_ouptut_filename(filetype=filetype, suffix=suffix)
