@@ -587,17 +587,19 @@ class OrganSegmentation():
         # import pdb; pdb.set_trace()  # noqa BREAKPOINT
 
 
-        evaluation = volumetry_evaluation.compare_volumes_sliver(
+        evaluation, diff = volumetry_evaluation.compare_volumes_sliver(
             # imma.segmentation_labels.se
-            ima.select_labels(data3d_segmentation_actual, label1),
-            ima.select_labels(data3d_segmentation, label2),
+            ima.select_labels(data3d_segmentation_actual, label1).astype(np.int8),
+            ima.select_labels(data3d_segmentation, label2).astype(np.int8),
             # data3d_segmentation_actual == label1,
             # data3d_segmentation == label2,
-            self.voxelsize_mm
+            self.voxelsize_mm,
+            return_diff=True
+
         )
         # score = volumetry_evaluation.sliver_score_one_couple(evaluation)
         segdiff = qmisc.crop(
-            ((data3d_segmentation) - data3d_segmentation_actual),
+            (diff),
             self.crinfo)
         return evaluation, segdiff
 

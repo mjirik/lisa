@@ -763,10 +763,15 @@ class OrganSegmentationWindow(QMainWindow):
     # def setVoxelVolume(self, vxs):
     #     self.voxel_volume = np.prod(vxs)
 
-    def __get_datafile(self, directory='', window_title=None, app=None):
+    def __get_datafile(self, directory=None, window_title=None, app=None, cache_name="loadfiledir"):
         """
         Draw a dialog for directory selection.
         """
+        if directory is None:
+            if 'loaddir' in self.oseg.cache.data.keys():
+                directory = self.oseg.cache.get(cache_name)
+            else:
+                directory = self.oseg.input_datapath_start
 
         if app is None:
             app=self.qapp
@@ -1165,10 +1170,13 @@ class OrganSegmentationWindow(QMainWindow):
         data3d = datap["data3d"]
         segmentation = datap["segmentation"]
         voxelsize_mm = datap["voxelsize_mm"]
+        logger.debug(datap.keys())
 
         slab = datap["slab"] if "slab" in datap else {}
+        logger.debug(f"slab={slab}")
         import imma.segmentation_labels
         imma.segmentation_labels.add_missing_labels(segmentation, slab=slab)
+        logger.debug(f"slab={slab}")
 
         new_label_selected_from_viewer = None
 
@@ -1190,9 +1198,6 @@ class OrganSegmentationWindow(QMainWindow):
             logger.debug("after ui get seeds exec")
             seeds = pyed.getSeeds()
 
-            # from PyQt4.QtCore import pyqtRemoveInputHook
-            # pyqtRemoveInputHook()
-            # import ipdb; ipdb.set_trace()
             unseeds = np.unique(segmentation[np.nonzero(seeds)])
             # unseeds = list(np.unique(seeds))
             # unseeds.pop[0]
@@ -1210,7 +1215,8 @@ class OrganSegmentationWindow(QMainWindow):
             button2_fcn = None
 
         strlab = self.ui_select_from_list(
-            list(slab.keys()),
+            slab,
+            # list(slab.keys()),
             headline,
             text_inside=text_inside,
             multiple_choice=multiple_choice,
@@ -1236,11 +1242,15 @@ class OrganSegmentationWindow(QMainWindow):
         """
 
         if multiple_choice:
+            if type(some_list) == list:
+                slab = {str(aa):aa for aa in list}
+            else:
+                slab = some_list
             slab_dialog = QtWidgets.QDialog(self)
             layout = QtWidgets.QGridLayout()
             slab_dialog.setLayout(layout)
             slab_wg = SelectLabelWidget(show_ok_button=False)
-            slab_wg.init_slab(slab=self.oseg.slab, show_ok_button=False)
+            slab_wg.init_slab(slab=slab, show_ok_button=False)
             slab_wg.update_slab_ui()
 
             layout.addWidget(slab_wg)
@@ -1268,6 +1278,9 @@ class OrganSegmentationWindow(QMainWindow):
             labels = self.oseg.nlabels(labels, return_mode="str")
             strlab = labels
         else:
+            if type(some_list) == dict:
+                some_list = list(some_list.keys()),
+
             strlab, ok = \
                 QInputDialog.getItem(self,
                                      # self.qapp,
@@ -1312,15 +1325,16 @@ class OrganSegmentationWindow(QMainWindow):
         logger.debug(str(self.oseg.crinfo))
         logger.debug(str(self.oseg.data3d.shape))
         logger.debug(str(self.oseg.segmentation.shape))
-        if 'loadcomparedir' in self.oseg.cache.data.keys():
-            directory = self.oseg.cache.get('loadcomparedir')
-        else:
+        cache_key = "loadcomparedir"
+        directory = self.oseg.cache.get_or_none(cache_key)
+        if directory is None:
             directory = self.oseg.input_datapath_start
 
         label1,_ = self.ui_select_label("Select label comparison", multiple_choice=True)
         seg_path = self.ui_get_path_file_or_dir(
             directory=directory
         )
+        logger.debug(f"seg_path={seg_path}")
         # seg_path = self.__get_datafile(
         #     directory=directory
         # )
@@ -1345,26 +1359,45 @@ class OrganSegmentationWindow(QMainWindow):
         logger.debug('segdif unique ' + str(np.unique(segdiff)))
 
         QApplication.processEvents()
-        try:
-
-            ed = sed3.sed3qt(
-                self.oseg.data3d,
-                seeds=segdiff,
-                # contour=(self.oseg.segmentation == self.oseg.slab['liver'])
-                contour=self.oseg.segmentation
-            )
-            ed.exec_()
-        except:
-            ed = sed3.sed3(
-                self.oseg.data3d,
-                seeds=segdiff,
-                contour=(self.oseg.segmentation == self.oseg.slab['liver'])
-            )
-            ed.show()
+        import seededitorqt.seed_editor_qt
+        seeds_colortable = seededitorqt.seed_editor_qt.SEEDS_COLORTABLE.copy()
+        # seeds_colortable[0] = [255, 0, 64, 128]
+        # seeds_colortable[1] = [255, 64, 0, 128]
+        # seeds_colortable[2] = [255, 64, 0, 128]
+        seeds_colortable[0] = [0, 64, 255, 64]
+        seeds_colortable[1] = [64, 0, 255, 64]
+        seeds_colortable[2] = [0, 0, 255, 64]
+        seeds_colortable[3] = [0, 255, 255, 64]
+        seeds_colortable[4] = [255, 0, 255, 64]
+        seeds_colortable[5] = [255, 255, 0, 64]
+        se = seededitorqt.QTSeedEditor(
+            self.oseg.data3d,
+            seeds=segdiff.astype(np.uint8),
+            contours=self.oseg.segmentation.astype(np.uint8),
+            seeds_colortable=seeds_colortable,
+            appmenu_text=f"VoE={evaluation['voe']:.2f}[%]",
+        )
+        se.exec_()
+        # try:
+        #
+        #     ed = sed3.sed3qt(
+        #         self.oseg.data3d,
+        #         seeds=segdiff,
+        #         # contour=(self.oseg.segmentation == self.oseg.slab['liver'])
+        #         contour=self.oseg.segmentation
+        #     )
+        #     ed.exec_()
+        # except:
+        #     ed = sed3.sed3(
+        #         self.oseg.data3d,
+        #         seeds=segdiff,
+        #         contour=(self.oseg.segmentation == self.oseg.slab['liver'])
+        #     )
+        #     ed.show()
 
         head, teil = os.path.split(seg_path)
-        self.oseg.cache.update('loadcompatext_seg_dataredir', head)
-        self.setLabelText(self.segBody.lblSegData, text)
+        self.oseg.cache.update(cache_key, head)
+        self.setLabelText(self.segBody.lblSegData, text=text)
         self.statusBar().showMessage('Ready')
 
     def action_resize_mm(self):

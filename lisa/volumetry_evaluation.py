@@ -270,7 +270,7 @@ def compare_volumes_boundingbox(vol1, vol2, voxelsize_mm):
     }
     return evaluation
 
-def compare_volumes_sliver(vol1, vol2, voxelsize_mm, use_logger=False):
+def compare_volumes_sliver(vol1, vol2, voxelsize_mm, use_logger=False, return_diff=False):
     """
     Computes statistics from similarity of vol1 and vol2. Return the same as
     compare_volumes with additional information with sliver score
@@ -281,7 +281,7 @@ def compare_volumes_sliver(vol1, vol2, voxelsize_mm, use_logger=False):
     :return:
     """
 
-    evaluation = compare_volumes(vol1, vol2, voxelsize_mm, use_logger)
+    evaluation, diff = compare_volumes(vol1, vol2, voxelsize_mm, use_logger, return_diff=True)
     sliver_evaluation = sliver_score_one_couple(
         evaluation,
         keys=[
@@ -295,10 +295,13 @@ def compare_volumes_sliver(vol1, vol2, voxelsize_mm, use_logger=False):
 
     evaluation.update(sliver_evaluation)
     evaluation['sliver_overall_pts'] = overall
-    return evaluation
+    if return_diff:
+        return evaluation, diff
+    else:
+        return evaluation
 
 
-def compare_volumes(vol1, vol2, voxelsize_mm, use_logger=False):
+def compare_volumes(vol1, vol2, voxelsize_mm, use_logger=False, return_diff=False):
     """
     computes metrics, no sliver computed here, see compare_volumes_sliver
 
@@ -368,6 +371,8 @@ def compare_volumes(vol1, vol2, voxelsize_mm, use_logger=False):
         'jaccard': jaccard
     }
 
+    if return_diff:
+        return evaluation, df
     return evaluation
 
 
