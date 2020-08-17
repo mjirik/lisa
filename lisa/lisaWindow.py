@@ -14,6 +14,7 @@ import os
 import numpy as np
 import datetime
 import functools
+from pathlib import Path
 
 from io3d import datareader
 
@@ -1279,8 +1280,9 @@ class OrganSegmentationWindow(QMainWindow):
             strlab = labels
         else:
             if type(some_list) == dict:
-                some_list = list(some_list.keys()),
+                some_list = list(some_list.keys())
 
+            logger.debug(f"some_list [{type(some_list)}={some_list}")
             strlab, ok = \
                 QInputDialog.getItem(self,
                                      # self.qapp,
@@ -1334,7 +1336,8 @@ class OrganSegmentationWindow(QMainWindow):
         seg_path = self.ui_get_path_file_or_dir(
             directory=directory
         )
-        logger.debug(f"seg_path={seg_path}")
+        logger.debug(f"seg_path[{type(seg_path)}]={seg_path}")
+        logger.debug(f"exist={Path(seg_path).exists()}")
         # seg_path = self.__get_datafile(
         #     directory=directory
         # )
@@ -1375,7 +1378,7 @@ class OrganSegmentationWindow(QMainWindow):
             seeds=segdiff.astype(np.uint8),
             contours=self.oseg.segmentation.astype(np.uint8),
             seeds_colortable=seeds_colortable,
-            appmenu_text=f"VoE={evaluation['voe']:.2f}[%]",
+            appmenu_text=f"Error={evaluation['voe']:.2f}[%]",
         )
         se.exec_()
         # try:
@@ -1546,8 +1549,15 @@ class OrganSegmentationWindow(QMainWindow):
         d.setWindowTitle("File or Directory")
         # d.setWindowModality(Qt.ApplicationModal)
         d.exec_()
+
         if file_dialog:
-            return self.__get_datafile(directory=directory, window_title=window_title)
+            # datafile is for some strange reason bytes not str
+            pth = self.__get_datafile(directory=directory, window_title=window_title)
+            # from PyQt5.QtCore import pyqtRemoveInputHook
+            # pyqtRemoveInputHook()
+            # import pdb;
+            # pdb.set_trace()
+            return pth.decode()
         else:
             return self.ui_get_datadir(directory=directory, window_title=window_title)
 
