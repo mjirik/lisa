@@ -627,9 +627,9 @@ def main():
     # # logger = logging.getLogger()
     # logger = logging.getLogger()
 
-    logger.setLevel(logging.WARNING)
-    ch = logging.StreamHandler()
-    logger.addHandler(ch)
+    # logger.setLevel(logging.WARNING)
+    # ch = logging.StreamHandler()
+    # logger.addHandler(ch)
 
     # logger.debug('input params')
 
@@ -660,11 +660,14 @@ def main():
     args = parser.parse_args()
 
     if args.debug:
-        logger.setLevel(logging.DEBUG)
-        logger.debug('debug mode logging')
+        logger.remove()
+        logger.add(sys.stderr, level=logger.DEBUG)
+
+    #     logger.setLevel(logging.DEBUG)
+    #     logger.debug('debug mode logging')
 
     if args.sampleInput:
-        sample_input_data()
+        _sample_input_data()
 
     evaluate_and_write_to_file(
         args.inputYamlFile,
@@ -744,7 +747,7 @@ def generate_input_yaml(sliver_dir, pklz_dir,
         return retval[0]
 
 
-def sample_input_data():
+def _sample_input_data():
     inputdata = {'basedir': '/home/mjirik/data/medical/',  # noqa
                  'data': [
                      {'sliverseg': 'data_orig/sliver07/training-part1/liver-seg001.mhd',
