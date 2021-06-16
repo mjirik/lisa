@@ -62,40 +62,44 @@ Use [windows installer](http://147.228.240.61/queetech/install/setup_lisa.exe)
 
 or
 
-* Download and install [miniconda](http://conda.pydata.org/miniconda.html)
-* Download and install [C++ Compiler](https://wiki.python.org/moin/WindowsCompilers) 
+1) Download and install [miniconda](http://conda.pydata.org/miniconda.html)
+2) Download and install [C++ Compiler](https://wiki.python.org/moin/WindowsCompilers) 
     * Python 2.7: [MS Visual C++ compiler for Python 2.7](http://aka.ms/vcpython27)
-    * Python 3.6: [Microsoft Build Tools for Visual Studio 2017](
-    https://www.visualstudio.com/downloads/#build-tools-for-visual-studio-2017)
+    * Python 3.6-3.8: [Visual C++ 14.X](https://wiki.python.org/moin/WindowsCompilers#Microsoft_Visual_C.2B-.2B-_14.2_standalone:_Build_Tools_for_Visual_Studio_2019_.28x86.2C_x64.2C_ARM.2C_ARM64.29)
     
         Check "Python development" and "Desktop Application C++ development" during install. 
         You may remove all submodules. Keep just VC++ 2017 tools.
-    
-* Run command line and create conda-virtualenv
-    ```bat
-    conda create --no-default-packages -y -c mjirik -c SimpleITK -n lisa pip lisa
-    activate lisa
-    ```
-    
-* In activated lisa virtualenv run following lines to satisfy some requirements
-    ```bash
-    python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_pip.txt
-    pip install -r requirements_pip.txt
-    ```
-
-* You can have Lisa from sources 
-    ```bash
-    conda install -y -c mjirik -c SimpleITK --file requirements_conda.txt
-    git clone https://github.com/mjirik/lisa.git
-    ```   
         
-    or from conda package
-    ```bash
-    conda install -y -c mjirik -c SimpleITK lisa
-    ```
+3) Install python packages. You have two options
+    * Install environment with GitHub clone
+        ```bash
+        git clone https://github.com/mjirik/lisa.git
+        cd lisa
+        conda create -n lisa --yes -c conda-forge -c mjirik -c SimpleITK -c menpo -c luispedro --file requirements_conda.txt
+        ```   
+            
+    * Install conda package
+        ```bash
+        conda create -n lisa --yes -c conda-forge -c mjirik -c SimpleITK -c menpo -c luispedro lisa
+        ```
+        and then download [`requirements_pip.txt`](https://raw.githubusercontent.com/mjirik/lisa/master/requirements_pip.txt)
         
+        You can use commandlind utility:
+        ```bash
+        python -m wget https://raw.githubusercontent.com/mjirik/lisa/master/requirements_pip.txt
+        ```
+      
+4) Run command line and create conda-virtualenv
+        ```bat
+        activate lisa
+        ```
+        
+5) In activated lisa virtualenv run following lines to satisfy some requirements
+        ```bash
+        pip install -r requirements_pip.txt
+        ```
 
-* Run Lisa
+6) Run Lisa
     
     ```bash
     activate lisa
