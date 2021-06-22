@@ -41,7 +41,7 @@ from typing import Optional
 from numbers import Number
 import datetime
 
-from unet_keras_tools import window, create_train_data, load_test_data, load_train_data, UNetTrainer, save_segmentations
+from unet_keras_tools import window, create_train_data, load_test_data, load_train_data, UNetTrainer, save_segmentations, get_dataset_loaders
 
 # %%
 
@@ -86,9 +86,6 @@ reporti += 1
 # %%
 
 
-
-
-
 data3dw = window(data3d, center=40, width=400)
 # fix, axs = plt.subplots(1,2)
 # axs[]
@@ -130,31 +127,30 @@ a.shape
 
 
 # %%
+skip_if_exists = True
 
-if True:
-    create_train_data(
-        "train",
-        datasets={
-#             "3Dircadb1": {"start":1, "stop":3},
-            "3Dircadb1": {"start":1, "stop":16},
+create_train_data(
+    "train",
+    datasets={
+        # "3Dircadb1": {"start":1, "stop":5},
+        "3Dircadb1": {"start":1, "stop":16},
 #             "sliver07": {"start":1, "stop":16}
-        },
-        experiment_label=experiment_label,
-        organ_label=organ_label
-
-    )
-    create_train_data(
-        "test",
-        datasets={
-            "3Dircadb1": {"start":16, "stop":21},
+    },
+    dataset_label=experiment_label,
+    organ_label=organ_label,
+    skip_if_exists=skip_if_exists
+)
+create_train_data(
+    "test",
+    datasets={
+        "3Dircadb1": {"start":16, "stop":21},
 #             "sliver07": {"start":16, "stop":20}
-        },
-        experiment_label = experiment_label,
-        organ_label = organ_label
+    },
+    dataset_label= experiment_label,
+    organ_label = organ_label,
+    skip_if_exists=skip_if_exists
+)
 
-    )
-
-    # %%
 
 
 # %%
@@ -224,9 +220,9 @@ f"__{10:04}.png"
 # %%
 
 nb_channels=2
-unt = UNetTrainer(nb_channels, img_rows, img_cols, experiment_label)
+unt = UNetTrainer(nb_channels, img_rows, img_cols, experiment_label, organ_label=organ_label)
 
-history = unt.train_and_predict(epochs=1)
+history = unt.train_and_predict(epochs=1, step=1)
 # history = train_and_predict(continue_training=True, epochs=10)
 
 # %%
@@ -248,7 +244,7 @@ unt.predict_test_data(history)
 
 # %%
 
-imgs_train, imgs_mask_train = load_test_data(experiment_label)
+imgs_train, imgs_mask_train = get_dataset_loaders("train", organ_label)
 
 imgs_train = unt.preprocess(imgs_train)
 imgs_mask_train = unt.preprocess(imgs_mask_train)
@@ -316,7 +312,7 @@ logger.debug(tf.keras.losses.binary_crossentropy(imgs_mask_train.flatten(), imgs
 
 # %%
 
-save_segmentations(imgs_train[:, :, :, 0, 0], imgs_mask_train_pred[..., 0], f"preds_test/{experiment_label}")
+save_segmentations(imgs_train[:, :, :,  0], imgs_mask_train_pred[..., 0], f"preds_test/{experiment_label}")
 
 # %%
 

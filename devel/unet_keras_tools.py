@@ -72,6 +72,29 @@ def window(
 
     return data3d_out.astype(dtype)
 
+import h5py
+import tensorflow as tf
+
+class generator:
+    def __init__(self, label, organ_label, is_mask=False):
+        self.label = label
+        self.organ_label = organ_label
+        self.is_mask=is_mask
+
+    def __call__(self):
+        fnimgs = Path(f'mask_{self.label}_{self.organ_label}') if self.is_mask else Path(f'img_{self.label}')
+
+        for indx in range(len(fnimgs.glob("*.npy"))):
+            fnimg = fnimgs / f"{indx:06d}.npy"
+            img = np.load(fnimg)
+            yield img
+
+        # with h5py.File(self.file, 'r') as hf:
+        #     for im in hf["train_img"]:
+        #         imgs_train = np.load(f'imgs_train_{experiment_label}.npy')
+        #         yield im
+
+
 def load_train_data(experiment_label):
     imgs_train = np.load(f'imgs_train_{experiment_label}.npy')
     masks_train = np.load(f'masks_train_{experiment_label}.npy')
@@ -83,22 +106,42 @@ def load_test_data(experiment_label):
     masks_test = np.load(f'masks_test_{experiment_label}.npy')
     return imgs_test, masks_test
 
-def create_train_data(label="train", datasets=None, experiment_label="", organ_label="rightkidney"):
-    fnimgs = f'imgs_{label}_{experiment_label}.npy'
-    fnmasks =f'masks_{label}_{experiment_label}.npy'
+def get_dataset_loaders(label, organ_label):
+    imgs = tf.data.Dataset.from_generator(
+        generator(label, organ_label, is_mask=False),
+        tf.uint8,
+        tf.TensorShape([512, 512, 3]))
 
-    if Path(fnimgs).exists() and Path(fnmasks).exists():
+    masks = tf.data.Dataset.from_generator(
+        generator(label, organ_label, is_mask=True),
+        tf.uint8,
+        tf.TensorShape([512, 512, 3]))
+    return imgs, masks
+
+def create_train_data(label="train", datasets=None, dataset_label="", organ_label="rightkidney", skip_if_exists=True):
+    fnimgs = f'imgs_{label}_{dataset_label}.npy'
+    fnmasks =f'masks_{label}_{dataset_label}.npy'
+
+    fnimgs = Path(f'img_{label}_{dataset_label}')
+    fnmasks =Path(f'mask_{label}_{dataset_label}_{organ_label}')
+
+    p_imgs = fnimgs
+    p_masks =fnmasks
+
+    if p_imgs.exists() and p_imgs.is_dir() and p_masks.exists() and p_masks.is_dir() and skip_if_exists:
         logger.info("Files exists. Skipping creation and loading instead.")
-        imgs_train = np.load(fnimgs)
-        masks_train = np.load(fnmasks)
+        # imgs_train = np.load(fnimgs)
+        # masks_train = np.load(fnmasks)
     else:
-        imgs_train = []
-        masks_train = []
+        # imgs_train = []
+        # masks_train = []
         if not datasets:
             datasets = {
                 "3Dircadb1": {"start": 1, "stop": 2},
                 #             "sliver07": {"start":0, "stop":0}
             }
+
+        indx = 0
         for dataset in datasets:
 
             for i in range(
@@ -116,18 +159,35 @@ def create_train_data(label="train", datasets=None, experiment_label="", organ_l
                 segm3d = segm3dp["data3d"]
 
                 bn = bodynavigation.body_navigation.BodyNavigation(data3dp["data3d"], voxelsize_mm=data3dp["voxelsize_mm"])
-                dst = bn.dist_to_sagittal()
-                # print(f"shapes: data3d={data3d.shape}, dst={dst.shape}")
-                for j in range(0, data3d.shape[0]):
-                    imgs_train.append(np.stack([data3d[j, :, :], dst[j, :, :]], axis=2))
-                    masks_train.append(segm3d[j, :, :])
 
-        imgs_train = np.array(imgs_train, dtype=np.uint8)
-        masks_train = np.array(masks_train, dtype=np.uint8)
-        np.save(fnimgs, imgs_train)
-        np.save(fnmasks, masks_train)
-        print(f'Saving to .npy files done. imgs.shape={imgs_train.shape}, masks.shape={masks_train.shape}')
-    return imgs_train, masks_train
+                feature_list = [
+                    bn.dist_to_sagittal(),
+                    bn.dist_coronal(),
+                    bn.dist_to_diaphragm_axial(),
+                    bn.dist_to_surface(),
+                ]
+                # print(f"shapes: data3d={data3d.shape}, dst={dst.shape}")
+                # for j in range(0, data3d.shape[0]):
+                #     imgs_train.append(np.stack([data3d[j, :, :], feature_list[0][j, :, :]], axis=2))
+                #     masks_train.append(segm3d[j, :, :])
+
+                all_features = expand_dims_and_concat(feature_list, 3)
+                for k in range(all_features.shape[0]):
+                    fnimgs.mkdir(parents=True, exist_ok=True)
+                    fnmasks.mkdir(parents=True, exist_ok=True)
+                    np.save(fnimgs / f"{indx:06d}.npy", all_features[k])
+                    np.save(fnmasks / f"{indx:06d}.npy", segm3d[k])
+                    indx += 1
+                logger.debug(all_features.shape)
+
+
+
+        # imgs_train = np.array(imgs_train, dtype=np.int16)
+        # masks_train = np.array(masks_train, dtype=np.uint8)
+        # np.save(fnimgs, imgs_train)
+        # np.save(fnmasks, masks_train)
+        # print(f'Saving to .npy files done. imgs.shape={imgs_train.shape}, masks.shape={masks_train.shape}')
+    # return imgs_train, masks_train
 
 
 def dice_coef(y_true, y_pred):
@@ -175,11 +235,12 @@ def save_segmentations(imgs_test, imgs_mask_test, pred_dir='preds'):
 # nb_channels = 2
 
 class UNetTrainer():
-    def __init__(self, nb_channels, img_rows, img_cols, experiment_label):
+    def __init__(self, nb_channels, img_rows, img_cols, experiment_label, organ_label):
         self.nb_channels = nb_channels
         self.img_rows = img_rows
         self.img_cols = img_cols
         self.experiment_label = experiment_label
+        self.organ_label = organ_label
         pass
 
     def get_unet(self, weights=None):
@@ -269,13 +330,17 @@ class UNetTrainer():
 
     # %%
 
-    def train_and_predict(self, continue_training=False, epochs=50):
+    def train_and_predict(self, continue_training=False, epochs=50, step=1):
         # if True:
         print('-' * 30)
         print('Loading and preprocessing train data...')
         print('-' * 30)
         experiment_label = self.experiment_label
-        imgs_train, imgs_mask_train = load_train_data(self.experiment_label)
+        # imgs_train, imgs_mask_train = load_train_data(self.experiment_label)
+        imgs_train, imgs_mask_train = get_dataset_loaders("train", self.organ_label)
+        imgs_train = imgs_train[::step]
+        imgs_mask_train = imgs_mask_train[::step]
+
         logger.debug(f"imgs_train.shape={imgs_train.shape}")
         logger.debug(f"imgs_mask_train.shape={imgs_mask_train.shape}")
 
@@ -341,7 +406,8 @@ class UNetTrainer():
         print('-' * 30)
         print('Loading and preprocessing test data...')
         print('-' * 30)
-        imgs_test, imgs_maskt = load_test_data(self.experiment_label)
+        # imgs_test, imgs_maskt = load_test_data(self.experiment_label)
+        imgs_test, imgs_maskt = get_dataset_loaders("test", self.organ_label)
         imgs_test = self.preprocess(imgs_test)
         imgs_maskt = self.preprocess(imgs_maskt, is_mask=True)
 
@@ -384,7 +450,10 @@ class UNetTrainer():
         pred_dir = f"preds/{self.experiment_label}"
         Path(pred_dir).mkdir(parents=True, exist_ok=True)
         # Saving our predictions in the directory 'preds'
-        save_segmentations(imgs_test[:, :, :, 0, 0], imgs_mask_test[:, :, :, 0], pred_dir=pred_dir)
+        logger.debug(f"imgs_test.shape={imgs_test.shape}")
+        logger.debug(f"imgs_mask_test.shape={imgs_mask_test.shape}")
+        # save_segmentations(imgs_test[:, :, :, 0, 0], imgs_mask_test[:, :, :, 0], pred_dir=pred_dir)
+        save_segmentations(imgs_test[:, :, :, 0], imgs_mask_test[:, :, :, 0], pred_dir=pred_dir)
 
         plt.plot(history.history['dice_coef'])
         plt.plot(history.history['val_dice_coef'])
@@ -394,3 +463,9 @@ class UNetTrainer():
         plt.legend(['Train', 'Test'], loc='upper left')
         plt.show()
         # plotting our dice coeff results in function of the number of epochs
+
+
+def expand_dims_and_concat(larr:np.ndarray, axis:int):
+    larr = list(map(lambda x: np.expand_dims(x,axis), larr))
+    arr = np.concatenate(larr, axis=axis)
+    return arr
