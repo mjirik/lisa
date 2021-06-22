@@ -119,20 +119,21 @@ def get_dataset_loaders(label, organ_label):
     return imgs, masks
 
 def create_train_data(label="train", datasets=None, dataset_label="", organ_label="rightkidney", skip_if_exists=True):
-    fnimgs = f'imgs_{label}_{dataset_label}.npy'
-    fnmasks =f'masks_{label}_{dataset_label}.npy'
+    # fnimgs = f'imgs_{label}_{dataset_label}.npy'
+    # fnmasks =f'masks_{label}_{dataset_label}.npy'
 
     fnimgs = Path(f'img_{label}_{dataset_label}')
     fnmasks =Path(f'mask_{label}_{dataset_label}_{organ_label}')
+    fnpattern = "{dataset}_{i:02d}_{k:05d}.npy"
 
     p_imgs = fnimgs
     p_masks =fnmasks
 
-    if p_imgs.exists() and p_imgs.is_dir() and p_masks.exists() and p_masks.is_dir() and skip_if_exists:
-        logger.info("Files exists. Skipping creation and loading instead.")
-        # imgs_train = np.load(fnimgs)
-        # masks_train = np.load(fnmasks)
-    else:
+    # if p_imgs.exists() and p_imgs.is_dir() and p_masks.exists() and p_masks.is_dir() and skip_if_exists:
+    #     logger.info("Files exists. Skipping creation and loading instead.")
+    #     # imgs_train = np.load(fnimgs)
+    #     # masks_train = np.load(fnmasks)
+    if True:
         # imgs_train = []
         # masks_train = []
         if not datasets:
@@ -148,37 +149,47 @@ def create_train_data(label="train", datasets=None, dataset_label="", organ_labe
                     datasets[dataset]["start"],
                     datasets[dataset]["stop"]
             ):
-                print(f"{dataset} {i}")
-                data3dp = io3d.datasets.read_dataset(dataset, "data3d", i)
-                segm3dp = io3d.datasets.read_dataset(dataset, organ_label, i)
-                if segm3dp is None:
-                    print(f"      Organ label '{organ_label}' does not exist. Skipping.")
-                    continue
+                logger.debug(f"{dataset} {i}")
+                fn0 = fnpattern.format(dataset=dataset, i=i, k=0)
 
-                data3d = window(data3dp["data3d"], center=40, width=400, vmin_out=0, vmax_out=255, dtype=np.uint8)
-                segm3d = segm3dp["data3d"]
+                if not (fnmasks / fn0).exists():
+                    # logger.info(f"File {fn0} exists. Skipping")
+                    # continue
+                    segm3dp = io3d.datasets.read_dataset(dataset, organ_label, i)
+                    if segm3dp is None:
+                        print(f"      Organ label '{organ_label}' does not exist. Skipping.")
+                        continue
 
-                bn = bodynavigation.body_navigation.BodyNavigation(data3dp["data3d"], voxelsize_mm=data3dp["voxelsize_mm"])
+                    for k in range(segm3dp.data3d.shape[0]):
+                        np.save(fnmasks / fnpattern.format(dataset=dataset, i=i, k=k) , segm3d[k])
 
-                feature_list = [
-                    bn.dist_to_sagittal(),
-                    bn.dist_coronal(),
-                    bn.dist_to_diaphragm_axial(),
-                    bn.dist_to_surface(),
-                ]
-                # print(f"shapes: data3d={data3d.shape}, dst={dst.shape}")
-                # for j in range(0, data3d.shape[0]):
-                #     imgs_train.append(np.stack([data3d[j, :, :], feature_list[0][j, :, :]], axis=2))
-                #     masks_train.append(segm3d[j, :, :])
+                if not (fnimgs / fn0).exists():
+                    data3dp = io3d.datasets.read_dataset(dataset, "data3d", i)
 
-                all_features = expand_dims_and_concat(feature_list, 3)
-                for k in range(all_features.shape[0]):
-                    fnimgs.mkdir(parents=True, exist_ok=True)
-                    fnmasks.mkdir(parents=True, exist_ok=True)
-                    np.save(fnimgs / f"{indx:06d}.npy", all_features[k])
-                    np.save(fnmasks / f"{indx:06d}.npy", segm3d[k])
-                    indx += 1
-                logger.debug(all_features.shape)
+                    data3d = window(data3dp["data3d"], center=40, width=400, vmin_out=0, vmax_out=255, dtype=np.uint8)
+                    segm3d = segm3dp["data3d"]
+
+                    bn = bodynavigation.body_navigation.BodyNavigation(data3dp["data3d"], voxelsize_mm=data3dp["voxelsize_mm"])
+
+                    feature_list = [
+                        data3d,
+                        bn.dist_to_sagittal(),
+                        bn.dist_coronal(),
+                        bn.dist_to_diaphragm_axial(),
+                        bn.dist_to_surface(),
+                    ]
+                    # print(f"shapes: data3d={data3d.shape}, dst={dst.shape}")
+                    # for j in range(0, data3d.shape[0]):
+                    #     imgs_train.append(np.stack([data3d[j, :, :], feature_list[0][j, :, :]], axis=2))
+                    #     masks_train.append(segm3d[j, :, :])
+
+                    all_features = expand_dims_and_concat(feature_list, 3)
+                    for k in range(all_features.shape[0]):
+                        fnimgs.mkdir(parents=True, exist_ok=True)
+                        fnmasks.mkdir(parents=True, exist_ok=True)
+                        np.save(fnimgs / fnpattern.format(dataset=dataset, i=i, k=k), all_features[k])
+                        indx += 1
+                    logger.debug(f"i={i}, {all_features.shape}")
 
 
 
@@ -388,6 +399,7 @@ class UNetTrainer():
         print('-' * 30)
         log_dir = f'logs\\{experiment_label}\\'
         # Path(log_dir).mkdir(parents=True, exist_ok=True)
+        model.fit_generator()
         history = model.fit(
             imgs_train, imgs_mask_train, batch_size=10, epochs=epochs, verbose=1, shuffle=True,
             validation_split=0.2,
@@ -463,6 +475,8 @@ class UNetTrainer():
         plt.legend(['Train', 'Test'], loc='upper left')
         plt.show()
         # plotting our dice coeff results in function of the number of epochs
+    def load_batch():
+        pass
 
 
 def expand_dims_and_concat(larr:np.ndarray, axis:int):

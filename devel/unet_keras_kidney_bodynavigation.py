@@ -27,6 +27,7 @@ from skimage.transform import resize
 from skimage.io import imsave
 import numpy as np
 from skimage.segmentation import mark_boundaries
+import tensorflow.keras
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Conv2DTranspose
 from tensorflow.keras.optimizers import Adam, SGD
