@@ -157,9 +157,11 @@ def create_train_data(label="train", datasets=None, dataset_label="", organ_labe
                     # continue
                     segm3dp = io3d.datasets.read_dataset(dataset, organ_label, i)
                     if segm3dp is None:
-                        print(f"      Organ label '{organ_label}' does not exist. Skipping.")
+                        logger.info(f"      Organ label '{organ_label}' does not exist. Skipping.")
                         continue
 
+                    segm3d = segm3dp["data3d"]
+                    fnmasks.mkdir(parents=True, exist_ok=True)
                     for k in range(segm3dp.data3d.shape[0]):
                         np.save(fnmasks / fnpattern.format(dataset=dataset, i=i, k=k) , segm3d[k])
 
@@ -167,7 +169,6 @@ def create_train_data(label="train", datasets=None, dataset_label="", organ_labe
                     data3dp = io3d.datasets.read_dataset(dataset, "data3d", i)
 
                     data3d = window(data3dp["data3d"], center=40, width=400, vmin_out=0, vmax_out=255, dtype=np.uint8)
-                    segm3d = segm3dp["data3d"]
 
                     bn = bodynavigation.body_navigation.BodyNavigation(data3dp["data3d"], voxelsize_mm=data3dp["voxelsize_mm"])
 
@@ -184,9 +185,8 @@ def create_train_data(label="train", datasets=None, dataset_label="", organ_labe
                     #     masks_train.append(segm3d[j, :, :])
 
                     all_features = expand_dims_and_concat(feature_list, 3)
+                    fnimgs.mkdir(parents=True, exist_ok=True)
                     for k in range(all_features.shape[0]):
-                        fnimgs.mkdir(parents=True, exist_ok=True)
-                        fnmasks.mkdir(parents=True, exist_ok=True)
                         np.save(fnimgs / fnpattern.format(dataset=dataset, i=i, k=k), all_features[k])
                         indx += 1
                     logger.debug(f"i={i}, {all_features.shape}")
