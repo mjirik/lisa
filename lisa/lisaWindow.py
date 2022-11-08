@@ -713,6 +713,8 @@ class OrganSegmentationWindow(QMainWindow):
             self.ui_widgets[option] = widget
             self.bodyLayout.addWidget(widget)
             logger.debug("adding actual data to visualization widget")
+            logger.debug(f"voxelsize_mm={self.oseg.voxelsize_mm}")
+            logger.debug(f"segmentation.shape={self.oseg.segmentation.shape}")
             widget.add_data(self.oseg.segmentation, self.oseg.voxelsize_mm, self.oseg.slab)
             widget.show()
 
@@ -1953,7 +1955,7 @@ class OrganSegmentationWindow(QMainWindow):
             #                   n_iter=10)
             # vtkdata = mesh2vtk(pts, els, et)
             # view = QVTKViewer(vtk_data=vtkdata)
-            view.exec_()
+            # view.exec_()
 
         else:
             self.statusBar().showMessage('No segmentation data!')

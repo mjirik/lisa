@@ -58,9 +58,9 @@ def seg2stl(
 if __name__ == "__main__":
     # logger = logging.getLogger()
 
-    logger.setLevel(logging.WARNING)
-    ch = logging.StreamHandler()
-    logger.addHandler(ch)
+    # logger.setLevel(logging.WARNING)
+    # ch = logging.StreamHandler()
+    # logger.addHandler(ch)
 
     # logger.debug('input params')
 

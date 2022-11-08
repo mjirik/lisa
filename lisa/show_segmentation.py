@@ -8,6 +8,7 @@ import sys
 
 
 import os.path
+from pathlib import Path
 
 
 
@@ -57,12 +58,18 @@ def showSegmentation(
         vtk_file=None,
         qt_app=None,
         show=True,
-        resize_mm=None
+        resize_mm=None,
         ):
     """
     Funkce vrací trojrozměrné porobné jako data['segmentation']
     v data['slab'] je popsáno, co která hodnota znamená
     """
+    fn = Path(vtk_file)
+    if fn.suffix.lower() == ".stl":
+        stl_file = str(fn)
+        vtk_file = str(fn.with_suffix(".vtk"))
+    else:
+        stl_file = None
 
     if vtk_file is None:
         vtk_file = "mesh_geom.vtk"
@@ -70,6 +77,8 @@ def showSegmentation(
 
     labels = []
 
+    logger.debug(f"voxelsize_mm={voxelsize_mm}")
+    logger.debug(f"segmentation.shape={segmentation.shape}")
     segmentation = segmentation[::degrad, ::degrad, ::degrad]
     voxelsize_mm = voxelsize_mm * degrad
 
@@ -96,6 +105,9 @@ def showSegmentation(
         mesh_data = gen_mesh_from_voxels_mc(segmentation, voxelsize_mm * 1.0e-2)
         # mesh_data.coors +=
     mesh_data.write(vtk_file)
+
+    if stl_file:
+        dicom2fem.vtk2stl.vtk2stl(vtk_file, stl_file)
     if qt_app is None:
         qt_app = QApplication(sys.argv)
         logger.debug("qapp constructed")
